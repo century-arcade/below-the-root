@@ -7,6 +7,8 @@ Config (JSON): entries [addr], data [[start,end]], labels {addr: name},
 inline {addr: "addr+hstring"} (data following a JSR to addr),
 comments {addr: text}, jumptables [[start,end]] (runs of 3-byte JMPs),
 regions [[start,end,name]] (one output file per region).
+Extra {labels, comments} files in disasm/labels/*.json are merged in
+(one file per topic, so parallel work doesn't collide).
 Addresses in the config are hex strings ("8400").
 Coverage files (from `btr cov NAME`, columns io/rom/ram) supply exact
 instruction starts; only the RAM column counts.
@@ -251,6 +253,10 @@ def main():
     if len(mem) == 65538:
         mem = mem[2:]
     cfg = json.load(open(a.config))
+    for path in sorted(glob.glob(os.path.join(os.path.dirname(a.config), 'labels', '*.json'))):
+        extra = json.load(open(path))
+        cfg.setdefault('labels', {}).update(extra.get('labels', {}))
+        cfg.setdefault('comments', {}).update(extra.get('comments', {}))
     d = Disasm(mem, cfg, load_cov(a.cov))
     d.run()
     d.emit(a.outdir)
