@@ -1,0 +1,6 @@
+boot
+sleep 2
+joy f 0.5
+sleep 4
+joy f 0.5
+sleep 4

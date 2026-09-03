@@ -39,8 +39,8 @@ class Emu:
         subprocess.run(['pkill', '-x', 'x64sc'], capture_output=True)
         ensure_xvfb(display)
         self.env = dict(os.environ, SDL_AUDIODRIVER='dummy', DISPLAY=display)
-        args = ['x64sc', '-default', '-sounddev', 'dummy', '-remotemonitor',
-                '-joydev1', '0', '-joydev2', '1']
+        args = ['x64sc', '-default', '-sounddev', 'wav', '-soundarg', '/dev/null', '-remotemonitor',
+                '-joydev1', '0', '-joydev2', '1', '-soundwarpmode', '1']
         if warp:
             args.append('-warp')
         args += list(extra)
