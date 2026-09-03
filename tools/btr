@@ -108,9 +108,10 @@ def main():
     ap.add_argument('--no-warp', action='store_true')
     ap.add_argument('--keep', action='store_true', help='leave the emulator running')
     ap.add_argument('--vice-args', default='', help='extra x64sc arguments')
+    ap.add_argument('--kill', action='store_true', help='replace a running x64sc instead of refusing')
     a = ap.parse_args()
     script = open(a.file).read() if a.file else a.script
-    e = Emu(warp=not a.no_warp, extra=a.vice_args.split())
+    e = Emu(warp=not a.no_warp, extra=a.vice_args.split(), kill=a.kill)
     try:
         run(e, script)
     finally:

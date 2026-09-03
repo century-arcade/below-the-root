@@ -35,8 +35,12 @@ def ensure_xvfb(display):
 
 
 class Emu:
-    def __init__(self, disk=DISK1, warp=True, extra=(), log='build/vice-run.log', display=':99'):
-        subprocess.run(['pkill', '-x', 'x64sc'], capture_output=True)
+    def __init__(self, disk=DISK1, warp=True, extra=(), log='build/vice-run.log', display=':99', kill=False):
+        if subprocess.run(['pgrep', '-x', 'x64sc'], capture_output=True).returncode == 0:
+            if not kill:
+                raise RuntimeError('an x64sc is already running (another agent?); pass kill=True / --kill to replace it')
+            subprocess.run(['pkill', '-x', 'x64sc'], capture_output=True)
+            time.sleep(1)
         ensure_xvfb(display)
         self.env = dict(os.environ, SDL_AUDIODRIVER='dummy', DISPLAY=display)
         args = ['x64sc', '-default', '-sounddev', 'wav', '-soundarg', '/dev/null', '-remotemonitor',

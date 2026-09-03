@@ -33,6 +33,12 @@ hard way:
   an extra prompt on entry, which otherwise shifts every later response by
   one command.
 - `-warp` with `-limitcycles` runs ~300M cycles in ~12 s wall clock.
+  Without `-warp` the emulator still free-runs (~1.5x) because the wav
+  sound device doesn't throttle, so wall-clock timing is not C64 time --
+  measure with the monitor's cycle counter or frame counters instead.
+- Only one x64sc can run at a time (one display, one monitor port).
+  `Emu()`/`btr` refuse to start while one is running; `--kill` replaces
+  it.  Sound effects are `$AA40` (X = 0-13); `$8012` is a plain delay loop.
 - Monitor `screen` prints the text screen at whatever `$D018`/`$DD00`
   select (the game's screen is at `$C000`); `screenshot "f" 2` writes PNG;
   `bank ram` before `save` reads RAM under the ROMs (extras and playerN
