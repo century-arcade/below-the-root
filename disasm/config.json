@@ -1,24 +1,155 @@
 {
-  "entries": ["3403", "8400"],
-  "jumptables": [["8000", "803f"], ["8400", "840c"], ["8800", "880b"], ["9500", "9512"], ["9c00", "9c17"], ["3400", "3402"]],
-  "regions": [
-    ["2800", "2bff", "musiclow"],
-    ["2c00", "331f", "demolow"],
-    ["3400", "55ff", "gamelow"],
-    ["8000", "b6ff", "game"],
-    ["e000", "f0ff", "extras"],
-    ["f100", "fcff", "player0"]
+ "entries": [
+  "3403",
+  "8400"
+ ],
+ "jumptables": [
+  [
+   "8000",
+   "803f"
   ],
-  "data": [["f100", "fcff"], ["b700", "bfff"], ["c400", "cfff"]],
-  "labels": {
-    "3403": "gamelow_entry",
-    "8400": "game_entry",
-    "8039": "rnd",
-    "82d0": "rnd_impl",
-    "8185": "read_joystick",
-    "d400": "SID", "d41b": "SID_OSC3", "d012": "VIC_RASTER", "d016": "VIC_CTRL2", "d018": "VIC_MEM",
-    "d020": "VIC_BORDER", "d021": "VIC_BG0", "dc00": "CIA1_PRA", "dc01": "CIA1_PRB", "dc0e": "CIA1_CRA",
-    "dd00": "CIA2_PRA", "dd02": "CIA2_DDRA"
-  },
-  "comments": {}
+  [
+   "8400",
+   "840c"
+  ],
+  [
+   "8800",
+   "880b"
+  ],
+  [
+   "9500",
+   "9512"
+  ],
+  [
+   "9c00",
+   "9c17"
+  ],
+  [
+   "3400",
+   "3402"
+  ]
+ ],
+ "regions": [
+  [
+   "2800",
+   "2bff",
+   "musiclow"
+  ],
+  [
+   "2c00",
+   "331f",
+   "demolow"
+  ],
+  [
+   "3400",
+   "55ff",
+   "gamelow"
+  ],
+  [
+   "8000",
+   "b6ff",
+   "game"
+  ],
+  [
+   "e000",
+   "f0ff",
+   "extras"
+  ],
+  [
+   "f100",
+   "fcff",
+   "player0"
+  ]
+ ],
+ "data": [
+  [
+   "f100",
+   "fcff"
+  ],
+  [
+   "b700",
+   "bfff"
+  ],
+  [
+   "c400",
+   "cfff"
+  ]
+ ],
+ "labels": {
+  "3403": "gamelow_entry",
+  "8400": "game_entry",
+  "8039": "rnd",
+  "82d0": "rnd_impl",
+  "8185": "read_joystick",
+  "d400": "SID",
+  "d41b": "SID_OSC3",
+  "d012": "VIC_RASTER",
+  "d016": "VIC_CTRL2",
+  "d018": "VIC_MEM",
+  "d020": "VIC_BORDER",
+  "d021": "VIC_BG0",
+  "dc00": "CIA1_PRA",
+  "dc01": "CIA1_PRB",
+  "dc0e": "CIA1_CRA",
+  "dd00": "CIA2_PRA",
+  "dd02": "CIA2_DDRA",
+  "8009": "print_inline",
+  "828b": "print_inline_impl",
+  "8006": "jt_zp_swap",
+  "800f": "jt_get_input",
+  "8027": "jt_wait_input",
+  "8126": "zp_swap",
+  "8172": "get_input",
+  "81f2": "wait_input",
+  "0a92": "demo_flag",
+  "3000": "demo_input",
+  "0880": "zp_shadow",
+  "8000": "jt_disk_write_block",
+  "8003": "jt_disk_read_block",
+  "803f": "disk_write_block",
+  "8084": "disk_read_block",
+  "0900": "blk_buf",
+  "0a00": "blk_track",
+  "0a01": "blk_sector",
+  "80ce": "disk_open_cmd",
+  "80df": "disk_open_data",
+  "80fb": "disk_fmt_ts",
+  "80ed": "disk_cmd_str",
+  "3799": "protection_check",
+  "37c9": "protection_scan_track",
+  "3736": "disk_open15",
+  "375c": "disk_close15",
+  "378f": "str_scratch_quest",
+  "3833": "prot_cmd_str",
+  "ffb4": "LISTEN",
+  "ff96": "SECOND",
+  "ffa5": "ACPTR",
+  "ffab": "UNTALK",
+  "ffba": "SETLFS",
+  "ffbd": "SETNAM",
+  "ffc0": "OPEN",
+  "ffc3": "CLOSE",
+  "ffc6": "CHKIN",
+  "ffc9": "CHKOUT",
+  "ffcc": "CLRCHN",
+  "ffcf": "CHRIN",
+  "ffd2": "CHROUT",
+  "ffe7": "CLALL",
+  "8bac": "load_room",
+  "8b82": "room_to_ts",
+  "8b72": "clear_textline",
+  "8bd8": "clear_textline_color",
+  "8a9c": "decode_room?",
+  "8b53": "vic_clear_loop",
+  "0086": "room_lo",
+  "0087": "room_hi",
+  "c320": "textline",
+  "db20": "textline_color",
+  "c000": "screen",
+  "d800": "colorram"
+ },
+ "comments": {},
+ "inline": {
+  "8009": "addr+hstring"
+ }
 }
