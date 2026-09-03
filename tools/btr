@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Drive the game in VICE from a tiny scenario language.
+
+    tools/btr 'boot; joy f; shot menu.png; peek dc00 2'
+    tools/btr -f tools/scenarios/menu.txt
+
+Commands (';' or newline separated, '#' comments):
+  boot                 disk 1 -> side-2 swap -> game
+  wait TEXT            wait until TEXT appears on the text screen
+  sleep SECS
+  key NAME [HOLD]      X key by xdotool name (KP_0, space, Return ...)
+  keybuf TEXT          feed the KERNAL keyboard buffer
+  joy DIR [HOLD]       u d l r ul ur dl dr f  (tap)
+  joydown DIR / joyup DIR
+  shot NAME            screenshot to build/shots/NAME
+  screen               print the text screen
+  peek ADDR [LEN]      hex dump (hex addresses)
+  poke ADDR BYTES..    write bytes
+  pc
+  mon CMD...           raw monitor command
+  snap NAME            VICE snapshot to build/dumps/NAME.vsf
+  ram NAME [START END] save memory to build/dumps/NAME.bin
+  attach 1|2|PATH
+  quit
+"""
+import argparse
+import os
+import sys
+import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from emu import Emu, DISK1, DISK2, JOYKEYS  # noqa: E402
+
+
+def hexdump(base, data):
+    for i in range(0, len(data), 16):
+        chunk = data[i:i + 16]
+        asc = ''.join(chr(b) if 32 <= b < 127 else '.' for b in chunk)
+        print(f'{base + i:04x}  {chunk.hex(" "):<48}  {asc}')
+
+
+def run(e, script):
+    for raw in script.replace(';', '\n').splitlines():
+        line = raw.split('#', 1)[0].strip()
+        if not line:
+            continue
+        op, *args = line.split()
+        if op == 'boot':
+            e.boot_game()
+        elif op == 'wait':
+            e.wait_text(' '.join(args))
+        elif op == 'sleep':
+            time.sleep(float(args[0]))
+        elif op == 'key':
+            e.key(args[0], float(args[1]) if len(args) > 1 else 0.25)
+        elif op == 'keybuf':
+            e.keybuf(' '.join(args))
+        elif op == 'joy':
+            e.joy(args[0], float(args[1]) if len(args) > 1 else 0.25)
+        elif op == 'joydown':
+            for k in JOYKEYS[args[0]]:
+                e._xdo('keydown', k)
+        elif op == 'joyup':
+            for k in JOYKEYS[args[0]]:
+                e._xdo('keyup', k)
+        elif op == 'shot':
+            print(e.shot(args[0]))
+        elif op == 'screen':
+            print(e.screen_text())
+        elif op == 'peek':
+            addr = int(args[0], 16)
+            n = int(args[1], 16) if len(args) > 1 else 1
+            hexdump(addr, e.peek(addr, n))
+        elif op == 'poke':
+            e.poke(int(args[0], 16), bytes(int(b, 16) for b in args[1:]))
+        elif op == 'pc':
+            print(f'{e.pc():04x}')
+        elif op == 'mon':
+            print(e.cmd(' '.join(args)))
+        elif op == 'snap':
+            print(e.snapshot(args[0]))
+        elif op == 'ram':
+            start = int(args[1], 16) if len(args) > 1 else 0
+            end = int(args[2], 16) if len(args) > 2 else 0xffff
+            print(e.save_ram(args[0], start, end))
+        elif op == 'attach':
+            path = {'1': DISK1, '2': DISK2}.get(args[0], args[0])
+            e.attach(path)
+        elif op == 'quit':
+            break
+        else:
+            raise SystemExit(f'unknown command: {line}')
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('script', nargs='?', default='')
+    ap.add_argument('-f', '--file')
+    ap.add_argument('--no-warp', action='store_true')
+    ap.add_argument('--keep', action='store_true', help='leave the emulator running')
+    a = ap.parse_args()
+    script = open(a.file).read() if a.file else a.script
+    e = Emu(warp=not a.no_warp)
+    try:
+        run(e, script)
+    finally:
+        if not a.keep:
+            e.close()
+
+
+if __name__ == '__main__':
+    main()
