@@ -24,8 +24,9 @@ class Mon:
                 time.sleep(0.2)
         else:
             raise RuntimeError('cannot connect to VICE monitor')
+        self.timeout = timeout
         self.s.settimeout(timeout)
-        self._read_until_prompt()
+        self.stop()
 
     def _read_until_prompt(self):
         buf = b''
@@ -63,6 +64,15 @@ class Mon:
     def save(self, path, start, end):
         return self.cmd(f'save "{path}" 0 {start:04x} {end:04x}')
 
+    def screen(self):
+        return self.cmd('screen')
+
+    def screenshot(self, path):
+        return self.cmd(f'screenshot "{path}" 2')
+
+    def attach(self, path, unit=8):
+        return self.cmd(f'attach "{path}" {unit}')
+
     def keybuf(self, text):
         return self.cmd(f'keybuf "{text}"')
 
@@ -70,9 +80,24 @@ class Mon:
         self.s.sendall(b'x\n')
 
     def stop(self):
-        # any byte wakes the monitor while the emulator runs
-        self.s.sendall(b'\n')
-        return self._read_until_prompt()
+        # any command wakes the monitor while the emulator runs
+        self.s.sendall(b'r\n')
+        out = self._read_until_prompt()
+        return out + self._drain()
+
+    def _drain(self, quiet=0.3):
+        self.s.settimeout(quiet)
+        buf = b''
+        try:
+            while True:
+                chunk = self.s.recv(65536)
+                if not chunk:
+                    break
+                buf += chunk
+        except OSError:
+            pass
+        self.s.settimeout(self.timeout)
+        return buf.decode('latin-1')
 
     def quit(self):
         try:
