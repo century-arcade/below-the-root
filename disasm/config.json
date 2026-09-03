@@ -1,0 +1,24 @@
+{
+  "entries": ["3403", "8400"],
+  "jumptables": [["8000", "803f"], ["8400", "840c"], ["8800", "880b"], ["9500", "9512"], ["9c00", "9c17"], ["3400", "3402"]],
+  "regions": [
+    ["2800", "2bff", "musiclow"],
+    ["2c00", "331f", "demolow"],
+    ["3400", "55ff", "gamelow"],
+    ["8000", "b6ff", "game"],
+    ["e000", "f0ff", "extras"],
+    ["f100", "fcff", "player0"]
+  ],
+  "data": [["f100", "fcff"], ["b700", "bfff"], ["c400", "cfff"]],
+  "labels": {
+    "3403": "gamelow_entry",
+    "8400": "game_entry",
+    "8039": "rnd",
+    "82d0": "rnd_impl",
+    "8185": "read_joystick",
+    "d400": "SID", "d41b": "SID_OSC3", "d012": "VIC_RASTER", "d016": "VIC_CTRL2", "d018": "VIC_MEM",
+    "d020": "VIC_BORDER", "d021": "VIC_BG0", "dc00": "CIA1_PRA", "dc01": "CIA1_PRB", "dc0e": "CIA1_CRA",
+    "dd00": "CIA2_PRA", "dd02": "CIA2_DDRA"
+  },
+  "comments": {}
+}
