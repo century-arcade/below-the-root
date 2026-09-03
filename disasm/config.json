@@ -139,7 +139,7 @@
   "8b82": "room_to_ts",
   "8b72": "clear_textline",
   "8bd8": "clear_textline_color",
-  "8a9c": "decode_room?",
+  "8a9c": "raster_irq_setup",
   "8b53": "vic_clear_loop",
   "0086": "room_lo",
   "0087": "room_hi",

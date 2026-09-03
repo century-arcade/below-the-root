@@ -6,7 +6,7 @@
 2. BASIC prints "insert side 2 and press spacebar", waits for space via
    GET (KERNAL keyboard buffer -- the monitor `keybuf` command works
    here), then `SYS 33792` ($8400 in game).
-3. $8400 initialises CIA/VIC (screen at $C000, charset per $D018=$02),
+3. $8400 initialises CIA/VIC (screen at $C000, charset at $C800 per $D018=$02),
    then runs the attract sequence: a room from disk 2 with the "PROGRAM BY
    DALE DISHAROON" banner, then the "BELOW THE ROOT / STORY BY ZILPHA
    KEATLEY SNYDER" title with "CHOOSE YOUR PLAYER: NERIC ..." underneath.

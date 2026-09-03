@@ -37,10 +37,10 @@ table, so the entries are the module's public API.
 - `load_room` ($8BAC): `room_to_ts` ($8B82) converts room number
   $86/$87 to track/sector (see disk-layout.md), clears the text line
   colour, disables sprites and the raster IRQ, sets $D018=$02, reads the
-  block into $0900, then calls $8A9C (room decoder), $950C, $8C03, and
+  block into $0900, then calls `raster_irq_setup` ($8A9C), $950C (tile-set select), $8C03 -> $8D34 (room decoder, see room-format.md), and
   `clear_textline` ($8B72: $C320-$C347 <- 0, colour $DB20 <- 1).
-- Screen at $C000-$C3E7, charset at $C800, multicolour text mode
-  ($D016=$C8); the bottom line $C320 is the message line; sprite
+- Screen at $C000-$C3E7, charset at $C800, hires text mode ($D016=$C8,
+  MCM clear); the bottom line $C320 is the message line; sprite
   pointers at $C3F8.
 
 ## Program flow
