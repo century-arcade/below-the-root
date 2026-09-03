@@ -93,6 +93,16 @@ class Emu:
         self.paused(lambda: self.mon.save(path, start, end))
         return path
 
+    def coverage(self):
+        """{addr: (io, rom, ram)} r/w/x flags since the last `mmzap`."""
+        out = self.cmd('mmsh 7 0000 ffff')
+        cov = {}
+        for line in out.splitlines():
+            m = re.match(r'([0-9a-f]{4}): (\S{3}) (\S{3}) (\S{3})', line)
+            if m:
+                cov[int(m.group(1), 16)] = tuple(g.replace('-', '') or '.' for g in m.groups()[1:])
+        return cov
+
     def attach(self, path, unit=8):
         return self.paused(lambda: self.mon.attach(path, unit))
 

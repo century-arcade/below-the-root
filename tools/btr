@@ -20,6 +20,7 @@ Commands (';' or newline separated, '#' comments):
   mon CMD...           raw monitor command
   snap NAME            VICE snapshot to build/dumps/NAME.vsf
   ram NAME [START END] save memory to build/dumps/NAME.bin
+  cov NAME             save memmap coverage to build/cov/NAME.txt
   attach 1|2|PATH
   quit
 """
@@ -29,7 +30,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from emu import Emu, DISK1, DISK2, JOYKEYS  # noqa: E402
+from emu import Emu, DISK1, DISK2, JOYKEYS, ROOT  # noqa: E402
 
 
 def hexdump(base, data):
@@ -83,6 +84,14 @@ def run(e, script):
             start = int(args[1], 16) if len(args) > 1 else 0
             end = int(args[2], 16) if len(args) > 2 else 0xffff
             print(e.save_ram(args[0], start, end))
+        elif op == 'cov':
+            cov = e.coverage()
+            os.makedirs(os.path.join(ROOT, 'build/cov'), exist_ok=True)
+            path = os.path.join(ROOT, 'build/cov', args[0] + '.txt')
+            with open(path, 'w') as f:
+                for addr in sorted(cov):
+                    f.write(f'{addr:04x} {" ".join(cov[addr])}\n')
+            print(path, len(cov), 'addresses')
         elif op == 'attach':
             path = {'1': DISK1, '2': DISK2}.get(args[0], args[0])
             e.attach(path)

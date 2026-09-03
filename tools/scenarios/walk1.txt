@@ -1,0 +1,26 @@
+boot
+sleep 2
+joy f 0.5
+sleep 4
+joy f 0.5
+sleep 4
+mon mmzap
+joy l 2
+joy r 2
+shot walk_r.png
+joydown f
+joy r 0.5
+joyup f
+sleep 2
+joy d 1
+joy u 1
+joydown f
+joy d 0.5
+joyup f
+sleep 2
+shot menu_open.png
+screen
+joy f 0.3
+sleep 2
+shot menu_pick.png
+cov walk1

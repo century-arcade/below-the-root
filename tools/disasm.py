@@ -4,10 +4,12 @@
     disasm.py IMAGE.bin --config disasm/config.json [--cov build/cov/*.txt] -o disasm/
 
 Config (JSON): entries [addr], data [[start,end]], labels {addr: name},
+inline {addr: "addr+hstring"} (data following a JSR to addr),
 comments {addr: text}, jumptables [[start,end]] (runs of 3-byte JMPs),
 regions [[start,end,name]] (one output file per region).
 Addresses in the config are hex strings ("8400").
-Coverage files (from `btr cov NAME`) supply exact instruction starts.
+Coverage files (from `btr cov NAME`, columns io/rom/ram) supply exact
+instruction starts; only the RAM column counts.
 Output is ca65 syntax; `make verify` reassembles and compares.
 """
 import argparse
@@ -76,7 +78,7 @@ class Disasm:
         self.data = [(h(s), h(e)) for s, e in cfg.get('data', [])]
         self.regions = [(h(s), h(e), n) for s, e, n in cfg.get('regions', [])]
         self.cov = cov
-        self.hits = defaultdict(int)
+        self.inline = {h(k): v for k, v in cfg.get('inline', {}).items()}
         for s, e in self.data:
             for a in range(s, e + 1):
                 self.kind[a] = 'd'
@@ -115,6 +117,22 @@ class Disasm:
                 if mn in FLOW_END:
                     break
                 a += size
+                if mn == 'jsr' and target in self.inline:
+                    a = self.skip_inline(a, self.inline[target])
+
+    def skip_inline(self, a, spec):
+        """Mark inline data after a call: 'addr' = 2 bytes, 'hstring' = bytes until bit 7 set."""
+        start = a
+        for part in spec.split('+'):
+            if part == 'addr':
+                a += 2
+            elif part == 'hstring':
+                while self.mem[a] < 0x80:
+                    a += 1
+                a += 1
+        for x in range(start, a):
+            self.kind[x] = 'd'
+        return a
 
     def operand(self, a, mode):
         size = MODES[mode]
@@ -162,7 +180,7 @@ class Disasm:
             return self.label(self.target(a, mn, mode))
         assert v is not None
         sym = self.label(v) if self.wants_label(v) else (f'${v:02X}' if MODES[mode] == 1 else f'${v:04X}')
-        if MODES[mode] == 2 and v < 0x100:
+        if MODES[mode] == 2 and v < 0x100 and mode != 'ind':
             sym = 'a:' + sym
         return {'zp': sym, 'abs': sym, 'zpx': f'{sym},x', 'abx': f'{sym},x', 'zpy': f'{sym},y',
                 'aby': f'{sym},y', 'ind': f'({sym})', 'izx': f'({sym},x)', 'izy': f'({sym}),y'}[mode]
@@ -217,8 +235,8 @@ def load_cov(patterns):
     for pat in patterns:
         for path in glob.glob(pat):
             for line in open(path):
-                a, flags = line.split()
-                cov[int(a, 16)] = cov.get(int(a, 16), '') + flags
+                a, _io, _rom, ram = line.split()
+                cov[int(a, 16)] = cov.get(int(a, 16), '') + ram.replace('.', '')
     return cov
 
 

@@ -1,0 +1,25 @@
+mon mmzap
+boot
+sleep 2
+joy f 0.5
+sleep 4
+joy f 0.5
+sleep 4
+joy l 2
+joy r 2
+joydown f
+joy r 0.5
+joyup f
+sleep 2
+joy d 1
+joy u 1
+joydown f
+joy d 0.5
+joyup f
+sleep 2
+joy r 0.3
+joy r 0.3
+joy f 0.3
+sleep 3
+shot bootcov_end.png
+cov boot
