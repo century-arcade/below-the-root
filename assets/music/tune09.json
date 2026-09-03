@@ -1,0 +1,123 @@
+{
+ "addr": "$2AE5",
+ "bytes": 33,
+ "frames": 361,
+ "voices": [
+  [
+   {
+    "t": 0,
+    "dur": 36,
+    "index": 14,
+    "midi": 74,
+    "name": "D5"
+   },
+   {
+    "t": 36,
+    "dur": 36,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 72,
+    "dur": 36,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 108,
+    "dur": 36,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 144,
+    "dur": 36,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 180,
+    "dur": 36,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 216,
+    "dur": 36,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 252,
+    "dur": 36,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 288,
+    "dur": 72,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 360,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ],
+  [
+   {
+    "t": 0,
+    "dur": 72,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 72,
+    "dur": 72,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 144,
+    "dur": 72,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 216,
+    "dur": 72,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 288,
+    "dur": 72,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 360,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ]
+ ],
+ "tune": 9,
+ "fps": 59.826
+}

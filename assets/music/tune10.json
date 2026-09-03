@@ -1,0 +1,179 @@
+{
+ "addr": "$2B06",
+ "bytes": 49,
+ "frames": 217,
+ "voices": [
+  [
+   {
+    "t": 0,
+    "dur": 27,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 27,
+    "dur": 9,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 36,
+    "dur": 12,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 48,
+    "dur": 12,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 60,
+    "dur": 12,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 72,
+    "dur": 27,
+    "index": 18,
+    "midi": 70,
+    "name": "A#4"
+   },
+   {
+    "t": 99,
+    "dur": 9,
+    "index": 18,
+    "midi": 70,
+    "name": "A#4"
+   },
+   {
+    "t": 108,
+    "dur": 12,
+    "index": 18,
+    "midi": 70,
+    "name": "A#4"
+   },
+   {
+    "t": 120,
+    "dur": 12,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 132,
+    "dur": 12,
+    "index": 14,
+    "midi": 74,
+    "name": "D5"
+   },
+   {
+    "t": 144,
+    "dur": 72,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 216,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ],
+  [
+   {
+    "t": 0,
+    "dur": 27,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 27,
+    "dur": 9,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 36,
+    "dur": 12,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 48,
+    "dur": 12,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 60,
+    "dur": 12,
+    "index": 28,
+    "midi": 60,
+    "name": "C4"
+   },
+   {
+    "t": 72,
+    "dur": 27,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 99,
+    "dur": 9,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 108,
+    "dur": 12,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 120,
+    "dur": 12,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 132,
+    "dur": 12,
+    "index": 30,
+    "midi": 58,
+    "name": "A#3"
+   },
+   {
+    "t": 144,
+    "dur": 72,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 216,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ]
+ ],
+ "tune": 10,
+ "fps": 59.826
+}

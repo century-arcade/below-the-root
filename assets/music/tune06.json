@@ -1,0 +1,165 @@
+{
+ "addr": "$2A52",
+ "bytes": 45,
+ "frames": 542,
+ "voices": [
+  [
+   {
+    "t": 0,
+    "dur": 54,
+    "index": 14,
+    "midi": 74,
+    "name": "D5"
+   },
+   {
+    "t": 54,
+    "dur": 9,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 63,
+    "dur": 9,
+    "index": 18,
+    "midi": 70,
+    "name": "A#4"
+   },
+   {
+    "t": 72,
+    "dur": 36,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 108,
+    "dur": 72,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 180,
+    "dur": 72,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 252,
+    "dur": 36,
+    "index": 28,
+    "midi": 60,
+    "name": "C4"
+   },
+   {
+    "t": 288,
+    "dur": 36,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 324,
+    "dur": 36,
+    "index": 33,
+    "midi": 55,
+    "name": "G3"
+   },
+   {
+    "t": 360,
+    "dur": 72,
+    "index": 30,
+    "midi": 58,
+    "name": "A#3"
+   },
+   {
+    "t": 432,
+    "dur": 144,
+    "index": 31,
+    "midi": 57,
+    "name": "A3"
+   }
+  ],
+  [
+   {
+    "t": 0,
+    "dur": 72,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 72,
+    "dur": 72,
+    "index": 24,
+    "midi": 64,
+    "name": "E4"
+   },
+   {
+    "t": 144,
+    "dur": 36,
+    "index": 18,
+    "midi": 70,
+    "name": "A#4"
+   },
+   {
+    "t": 180,
+    "dur": 36,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 216,
+    "dur": 36,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 252,
+    "dur": 72,
+    "index": 18,
+    "midi": 70,
+    "name": "A#4"
+   },
+   {
+    "t": 324,
+    "dur": 36,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 360,
+    "dur": 36,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 396,
+    "dur": 144,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 540,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   },
+   {
+    "t": 541,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ]
+ ],
+ "tune": 6,
+ "fps": 59.826
+}

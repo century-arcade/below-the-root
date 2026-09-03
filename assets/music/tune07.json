@@ -1,0 +1,256 @@
+{
+ "addr": "$2A7F",
+ "bytes": 71,
+ "frames": 697,
+ "voices": [
+  [
+   {
+    "t": 0,
+    "dur": 24,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 24,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 48,
+    "dur": 24,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 72,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 96,
+    "dur": 24,
+    "index": 14,
+    "midi": 74,
+    "name": "D5"
+   },
+   {
+    "t": 120,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 144,
+    "dur": 24,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 168,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 192,
+    "dur": 24,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 216,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 240,
+    "dur": 24,
+    "index": 11,
+    "midi": 77,
+    "name": "F5"
+   },
+   {
+    "t": 264,
+    "dur": 24,
+    "index": 14,
+    "midi": 74,
+    "name": "D5"
+   },
+   {
+    "t": 288,
+    "dur": 24,
+    "index": 12,
+    "midi": 76,
+    "name": "E5"
+   },
+   {
+    "t": 312,
+    "dur": 24,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 336,
+    "dur": 24,
+    "index": 14,
+    "midi": 74,
+    "name": "D5"
+   },
+   {
+    "t": 360,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 384,
+    "dur": 24,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 408,
+    "dur": 24,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 432,
+    "dur": 72,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 504,
+    "dur": 24,
+    "index": 19,
+    "midi": 69,
+    "name": "A4"
+   },
+   {
+    "t": 528,
+    "dur": 24,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 552,
+    "dur": 24,
+    "index": 16,
+    "midi": 72,
+    "name": "C5"
+   },
+   {
+    "t": 576,
+    "dur": 120,
+    "index": 17,
+    "midi": 71,
+    "name": "B4"
+   },
+   {
+    "t": 696,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ],
+  [
+   {
+    "t": 0,
+    "dur": 72,
+    "index": 24,
+    "midi": 64,
+    "name": "E4"
+   },
+   {
+    "t": 72,
+    "dur": 72,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 144,
+    "dur": 72,
+    "index": 24,
+    "midi": 64,
+    "name": "E4"
+   },
+   {
+    "t": 216,
+    "dur": 72,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 288,
+    "dur": 48,
+    "index": 21,
+    "midi": 67,
+    "name": "G4"
+   },
+   {
+    "t": 336,
+    "dur": 48,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 384,
+    "dur": 48,
+    "index": 24,
+    "midi": 64,
+    "name": "E4"
+   },
+   {
+    "t": 432,
+    "dur": 72,
+    "index": 26,
+    "midi": 62,
+    "name": "D4"
+   },
+   {
+    "t": 504,
+    "dur": 72,
+    "index": 23,
+    "midi": 65,
+    "name": "F4"
+   },
+   {
+    "t": 576,
+    "dur": 120,
+    "index": 24,
+    "midi": 64,
+    "name": "E4"
+   },
+   {
+    "t": 696,
+    "dur": 1,
+    "index": 39,
+    "name": "R"
+   }
+  ]
+ ],
+ "tune": 7,
+ "fps": 59.826
+}
