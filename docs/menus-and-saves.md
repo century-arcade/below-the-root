@@ -75,8 +75,8 @@ bytes backwards from `$9CA9+Y` into `$0A63..$0A70`.  It then sets `$0A61` =
 | var | meaning | Neric 0 | Genaa 1 | Herd 2 | Pomma 3 | Charn 4 | demo 5 |
 |-----|---------|---|---|---|---|---|---|
 | $0A63 | level of spirit (energy) | 5 | 0 | 5 | 10 | 5 | 10 |
-| $0A64 | level of rest | 10 | 10 | 10 | 5 | 7 | 10 |
-| $0A65 | level of food | 10 | 10 | 10 | 5 | 7 | 10 |
+| $0A64 | level of food | 10 | 10 | 10 | 5 | 7 | 10 |
+| $0A65 | level of rest | 10 | 10 | 10 | 5 | 7 | 10 |
 | $0A66 | stamina | 20 | 20 | 20 | 10 | 15 | 20 |
 | $0A67 | spirit limit | 5 | 0 | 5 | 10 | 5 | 10 |
 | $0A68 | standing with Kindar | 3 | 4 | 0 | 5 | 2 | 0 |

@@ -56,4 +56,5 @@ hard way:
   (see the docstring).  `tools/scenarios/ingame.txt` reaches the first
   playable room as Neric.  `--vice-args` passes extra x64sc options.
 - Outputs go to `build/shots/` (PNG) and `build/dumps/` (RAM `.bin`,
-  VICE `.vsf`); `build/` is gitignored.
+  VICE `.vsf`); `build/` is gitignored.  RAM dumps from `ram NAME` carry
+  a 2-byte load-address header: byte for address A is at file offset A+2.
