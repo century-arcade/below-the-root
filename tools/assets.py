@@ -86,7 +86,7 @@ def sprite_rows_mc(data, mc0, mc1, fg):
 def save(idx, path, scale=4):
     rgb = np.array(PALETTE, dtype=np.uint8)[idx]
     im = Image.fromarray(rgb, 'RGB')
-    im = im.resize((im.width * scale, im.height * scale), Image.NEAREST)
+    im = im.resize((im.width * scale, im.height * scale), Image.Resampling.NEAREST)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     im.save(path)
     print('wrote', os.path.relpath(path, ROOT), im.size)
