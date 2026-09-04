@@ -75,7 +75,7 @@ two-byte form possible.
 | `$C2` | n | n such waits, then one idle step |
 | `$C3` | room | `$0A96` = room, `$0A04` = 0, one idle step; ends the script |
 | `$C4` | page | `$0A97` = page, `$0A04` = 0, one idle step |
-| `$C5` | -- | `$84` = `$85` = 1, one idle step |
+| `$C5` | -- | `$84` = `$85` = 1, one idle step -- ends the running REST bell delay, see below |
 | `$FF` | -- | `demo_flag` = 0, return `$FF` |
 
 The held form is what the scripts use for movement: `$97 05` is "right for
@@ -123,6 +123,22 @@ with `C4 01`, `C4 05`, `C4 02`, `C4 05`, `C4 03`, `C4 05`, `C4 04`, `C4 05`
 room 157.  The quest script is pure gameplay: it walks, climbs, opens the
 tool menu (`$0D` = down+fire) and picks entries with `$17`/`$0F`, and near the
 end runs `C1 C5` eight times in a row.
+
+`$C5` is not dead code: `$84`/`$85` are the two counters of
+`rest_delay_or_wake` ($AD13), the delay between the spirit-bell chimes,
+which calls `get_input` once per iteration and would otherwise spin
+`$15` x 256 times.  Writing 1 into both makes it finish on its next
+iteration.  One pass of the REST loop calls it exactly eight times (two
+at `$ACED`/`$ACF0`, then two per chime for three chimes), and the eight
+`C1 C5` pairs come straight after the menu navigation that selects REST
+(`$32D6`: down+fire, right, right, down, down, down, fire -- column 2,
+row 3).  `C1` is the visible pause, `C5` releases the delay, and the
+`9E 02` (up) that follows is what wakes the sleeper.
+
+Confirmed in VICE: jumping into SAMPLE QUEST (`$3A2D`) and polling the
+text screen shows the tool menu at t=51.6 s and the status panel -- which
+only REST and STATUS draw, and the script never selects STATUS --
+immediately after, in room `$014A`.
 
 `assets/demo.json` has every step decoded: `at`, `op`, the raw `bytes`, the
 decoded `joy` name and the step count.

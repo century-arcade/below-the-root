@@ -146,7 +146,7 @@ is visibly wrong.
 
 ### Picking an item -- the shared cycle UI
 
-USE, EAT, DROP, SELL and OFFER all use the same loop:
+USE, EAT, DROP, SELL, OFFER and INVENTORY all use the same loop:
 
 ```
 $0A54 = $0A55 = $D2 = $FF        ; index, last class shown, "first pass"
@@ -155,15 +155,18 @@ loop: $0A54 += 1
       $0A54 == $FF -> print "NOTHING" and fall through
       $0F00[$0A54] bit 5 clear -> next
       class = lookup($0A54); rejected by this verb -> next
-      class == $0A55 (already offered) -> next        ; one entry per class
+      class == $0A55 (already offered) -> next  ; USE/EAT/SELL/OFFER only
       $0A55 = class ; print the 16-char name
       $A818 ($AA2D): if $D2 >= 0 sfx 0; delay $A0; $D2 = 0
       get_input: fire -> select; $99 < 0 (up) -> loop
 ```
 
-So the joystick **up** pages through one entry per *class* you are
-carrying, and fire takes the one on screen; selecting the "NOTHING"
-entry (`$0A54` == `$FF`) cancels.  The name is written by `$AC0F` ->
+So the joystick **up** pages forward and fire takes the entry on screen;
+selecting the "NOTHING" entry (`$0A54` == `$FF`) cancels.  Only USE, EAT,
+SELL and OFFER run the `$0A55` class comparison, so only they show one
+entry per *class*; **DROP and INVENTORY show one entry per carried
+object** (`$AF30` and `$8360` have no such compare, and INVENTORY reuses
+`$0A55` as a plain "found something" flag, `$FF` until the first hit).  The name is written by `$AC0F` ->
 `$AFD4` to the screen address in `$80/$81`: `$C352` INVENTORY and TAKE,
 `$C354` USE, `$C356` OFFER, `$C357` EXAMINE, `$C35D` EAT, `$C35E` DROP
 and SELL.  `$AFD4` also ORs `$80` into every char when `$A8` is set,
@@ -179,10 +182,11 @@ wait for any new input, clear the text panel, return.
 
 ### INVENTORY -- `$8403` -> `$8321`
 
-Prints "YOU HAVE" at `$C349` then cycles the carried items at `$C352`,
-one per class, on joystick up; fire is ignored.  When the scan wraps
-with nothing found it prints "NOTHING" and exits through `$AC12`;
-otherwise the wrap just clears the panel and returns.
+Prints "YOU HAVE" at `$C349` then cycles the carried objects at `$C352`,
+one entry per object, on joystick up; fire is ignored, so cycling off the
+end is the only way out.  When the scan wraps with nothing found it
+prints "NOTHING" and exits through `$AC12`; otherwise the wrap just
+clears the panel and returns.
 
 ### TAKE -- `$AC03` -> `$AD52`
 
@@ -215,7 +219,8 @@ FIND " + name, `$8C03` redraws the room without the object, and
 
 ### DROP -- `$AC06` -> `$AE41`
 
-Works out a destination cell first, then cycles the inventory.
+Works out a destination cell first, then cycles the inventory (one entry
+per carried object, not per class).
 
 - Indoors in your own nid-place with `$0A26` (one row up) in `$57`-`$58`
   and the cells above clear of objects: the item goes to
@@ -248,10 +253,10 @@ Cycles only the classes with a 1 in `$9077` (2, 3, 9, 11, 12, 13).
 | 12 temple key | anywhere except room `$004A`: `$92FB` removes tile `$08`; success plays a random tune, failure "THE KEY IS USELESS HERE" |
 | 13 D'ol Falla's key | only in room `$004A`: `$92FB` removes tile `$08`; then, facing right, "ENTER THE CHAMBER OF THE FORGOTTEN" and a tune |
 
-`$92FB` is the cutter: it walks 5 cells upward from `player_row` in the
-column in front (`col + $0A37`) and then in the player's own column,
-zeroing every cell whose code equals `$84` and counting the hits in
-`$0A57`.
+`$92FB` is the cutter: its argument is a tile code in `$84`, and it walks
+5 cells upward from `player_row` in the column in front (`col + $0A37`) and
+then in the player's own column, zeroing every cell whose code equals that
+argument and counting the hits in `$0A57`.
 
 Tile `$E0` is the vine rope, which is why `tile_props` (`$9D90`) only
 calls it solid while `$0A3D` (crawling) is set -- the manual's "CRAWL
@@ -381,10 +386,16 @@ loops: draw the status display (`$B10C` -> `$B125`), ring the bell
 capped at `$0A6B - 1`, and repeat.  `$AD13` is the delay between
 chimes and it aborts the whole verb (`pla`/`pla`) the moment the
 joystick moves, which is how you wake up.  Because food drops one per
-time slot (`$B2AA`), oversleeping starves you.
+time slot (`$B2AA`), oversleeping starves you -- silently, because
+`$0A04` is clear for the whole verb, so `$B2AA`'s underflow clamps food
+to 0 without setting `$C4`.  The collapse is only charged on the next
+clock tick or ladder rung after you wake.
 
-If the room's NPC has not been used yet (`$2300,$09F0` == 0), the type
-byte `$09F1` triggers a one-off event instead of a plain nap:
+Unless the room's NPC has been banished with the wand of Befal
+(`$2300,$09F0` != 0 -- `$937B` is the array's only writer), the type byte
+`$09F1` triggers an event instead of a plain nap.  Nothing here stamps
+`$2300,x`, so the two theft events fire on *every* hour of sleep, not
+once; the two kidnaps end the verb, so they only fire once:
 
 | `$09F1` | routine | what |
 |---|---|---|

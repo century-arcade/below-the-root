@@ -155,9 +155,11 @@ class Room:
 
 
 def is_outdoor(room, game):
-    """$9420 + $A694: a 64-byte bitmap at $A6BB, plus hardcoded indoor rooms."""
-    if room >= 0x180 or room in (0x7D, 0x7E, 0x9D, 0x9E):
+    """$9420 + $A694: a 64-byte bitmap at $A6BB, plus hardcoded outdoor rooms."""
+    if room >= 0x180:
         return False
+    if room & 0xFF in (0x7D, 0x7E, 0x9D, 0x9E):
+        return True
     return bool(game[0xA6BB + (room >> 3)] & (0x80 >> (room & 7)))
 
 
@@ -170,6 +172,7 @@ def render(room, table, chars, path):
     from PIL import Image
     img = Image.new('RGB', (COLS * 8, ROWS * 8))
     px = img.load()
+    assert px is not None
     colors = room.color_map(table)
     for r in range(ROWS):
         for c in range(COLS):

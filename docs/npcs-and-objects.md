@@ -87,7 +87,9 @@ Runs on every room entry, through `$9803` from `$963F`, `$967A` and `$9737`:
 4. Ambushers (`$09F1` high nibble `$E0`) appear only when
    `$2380[$09F0] & $1F` already equals the current time slot `$0A61`;
    otherwise there is a 1-in-4 chance per entry of recording the slot and
-   appearing, and a 3-in-4 chance of not appearing at all.
+   appearing, and a 3-in-4 chance of not appearing at all.  The array
+   starts at 0 and slot 0 is EARLY MORNING, so an ambusher that has never
+   been seen appears with certainty in early morning.
 5. `$D029`/`$D02A` = `$09E0` low nibble; copy the sprites; **re-read the
    room block** ($8809), because the copy ran with the KERNAL banked out.
 6. `$0A80`/`$0A81` = `$09E3`/`$09E4`; `$0A83` = `$09E2` low nibble; add
@@ -139,8 +141,9 @@ then, in order:
 - If `$0A8D` is clear and the column equals `$09E5` or `$09E6`, reverse
   `$0A85`, set `$0A87` from `turn_pause` ($9A68 = `$0C` for gait 0, `$08`
   for gait 1), set `$0A8D`, and return.
-- One time in eight -- never for species 8/9 -- idle for `rnd() & $7F`
-  frames.
+- One time in eight, do not step: species 8/9 simply lose the step and
+  wait out `$0A87` again, everything else sets `$0A87` to `rnd() & $7F`
+  instead (0 reads as a 256-frame pause, since `$0A86` has to wrap).
 - Otherwise one time in sixteen turn around anyway; else take the
   half-step.
 
@@ -201,8 +204,11 @@ and `$23` traps.
 | `$F0` | 1 | none (Raamo, room `$1D0`) |
 
 `$30`, `$90` and `$F0` reach no handler at all.  They differ from `$00` only
-in being non-zero, which suppresses the SPEAK offer at `$3C73` -- 31 of the
-121 characters talk and give nothing.
+in being non-zero, which fails both gift tests: `$3C73` skips
+`find_gift_item` and the once-a-day limit, and `$3CEE` never sets `$CC`.
+Those 31 of the 121 characters talk (all 31 have a speech line and an
+emotion, 27 also a pense message), give nothing, and can be spoken to as
+often as you like.
 
 The `$20`-`$23` rest events and the `$D0` key unlock additionally require
 `$2300[$09F0]` to be zero.
@@ -223,13 +229,15 @@ real character".
 Bit 7 is the only bit used.  `banish_creature` ($933A), reached from USE on
 a wand of Befal, sets it for the adjacent creature; the creature never
 spawns again ($9822), and its REST event and key unlock go dead ($ACB1).
+The cost is `$0A67` minus 5 (1 for species 6-9), floored at 0, and `$0A63`
+set to 0 outright ($93A8).
 
 `$2334` and `$2335` are this array's entries for ids `$34` and `$35`, the
 two gatekeepers -- room `$160` ("MAY I SEE YOUR PASS?") and room `$020`
 ("WAIT A MINUTE.  I WANT TOKENS.").  `$96C0` and `$96F5` read them as "this
 door is unlocked".  `$44BA` sets `$2334` to `$80` after the second
-wissenberry offered to id `$34`; nothing anywhere writes `$2335`, so gate
-`$C1` is otherwise opened one passage at a time by `$CD`.
+wissenberry offered to id `$34`; no OFFER path writes `$2335` at all, so
+gate `$C1` is otherwise opened one passage at a time by `$CD`.
 
 Since the wand sets the same bit, zapping either gatekeeper opens the door
 behind her permanently.

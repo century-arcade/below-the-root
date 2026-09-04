@@ -89,12 +89,20 @@ black, so one colour per 8x8 cell.
 `$C700-$CFFF` holds 256 bytes of colour table followed by the 2 KB charset.
 Disk 1 loads `outdoor` there and `indoor` at `$B700`; `$9C1C` swaps the nine
 pages when the room type changes.  `$9420` picks the type from the room
-number alone -- rooms `>= $180` and rooms `$7D $7E $9D $9E` are indoor, all
-others follow a 64-byte bitmap at `$A6BB` (bit `$80 >> (room & 7)` of byte
-`room >> 3`; set = outdoor).  Nothing in the block says which set to use.
+number alone, in this order: rooms `>= $180` are indoor; then a room whose
+*low byte* is `$7D`, `$7E`, `$9D` or `$9E` is forced **outdoor** (those are
+the title and demo rooms); everything else follows a 64-byte bitmap at
+`$A6BB` (bit `$80 >> (room & 7)` of byte `room >> 3`; set = outdoor).
+`$0A48`/`$0A0F` hold the result, 0 = outdoor and 1 = indoor, and `$9C1C`
+only swaps when it changes -- outdoor is the initial state because disk 1
+loads `outdoor` at `$C700`.  Nothing in the block says which set to use.
 
-`$9C60` animates char `$20` of the active set (8 bytes at `$C900`) from a
-strip at `$CDE8`.
+`$9C60` animates char `$20` of the active set (8 bytes at `$C900`) from the
+strip at `$CDE8`, which is chars `$BD`-`$BF`: every 8 frames it copies one
+of the three over char `$20`, cycling `$BF` -> `$BE` -> `$BD`.  Chars
+`$BD`-`$BF` are byte-identical in both banks; `outdoor` ships with `$20`
+already equal to `$BD` and `indoor` with `$20` equal to `$BE`, which is why
+the two files disagree about char `$20` and a RAM dump matches neither.
 
 ## Doors (`$F2`-`$FA`)
 

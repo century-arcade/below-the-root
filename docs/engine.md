@@ -84,7 +84,7 @@ only when set), `$0A06` frame period and `$0A08` frame counter,
 
 `$8A9C` enables a raster IRQ at line $D2; the handler `$8AAF` splits the
 screen: line $D2 -> `$D018`=$04 (text font in RAM under I/O at `$D000`),
-line $DA -> `$D018`=`$0A4B`, line $DE -> `$D018`=$02 and `JSR $A000`, the
+line $DA -> `$D018`=`$0A4B`, line $FA -> `$D018`=$02 and `JSR $A000`, the
 per-frame tick (music at `$2803` if `$0A95`, then the player/game state
 machine every `$0A06` frames).
 

@@ -294,8 +294,9 @@ that abort and for the `$10` shortcut.
 What actually transfers the object is TAKE (`$AD52`): with `$CC` set it
 requires the class of the object under the player to equal `$09EF`
 (`$AD91`), otherwise `IT WAS NOT OFFERED TO YOU` (`$AD99`).  `$CC` is
-cleared once the take succeeds.  REST (`$AC15`) is the mirror for the nid
-case: away from home it needs `$CC` set and `$09EF` = `$10`, else
+cleared by a successful take **and by every `load_room`** (`$8BB7`), so an
+offer has to be spoken for and used before leaving the room.  REST
+(`$AC15`) is the mirror for the nid case: away from home it needs `$CC` set and `$09EF` = `$10`, else
 `NO ONE OFFERED YOU A NID` (`$AC53`).
 
 `$EF` is only ever consulted for creatures whose `$F1` can set `$CC`
@@ -312,7 +313,7 @@ what is said or given are listed; the rest is creature AI.
 | `$00` | 22 | gift-giver: `find_gift_item`, once-a-day `COME BACK TOMORROW`, sets `$CC` |
 | `$01` | 10 | animal: PENSE MESSAGES raises `$0A67` by 1, once |
 | `$02` | 24 | silent -- all eight message slots are 0 |
-| `$20`-`$23` | 6 | offers a nid; resting there runs an event (`$ACAE`): `$20` kidnap by D'ol Salaat's followers, `$22` kidnap by the Nekom, `$21`/`$23` the same via `$A80F`/`$A812` |
+| `$20`-`$23` | 6 | offers a nid; resting there runs an event (`$ACAE`): `$20` steals every carried token (`$AAAB`), `$22` every carried shuba (`$AAC3`), `$21` kidnaps to room `$1C` (`$AADB`), `$23` to room `$3B` (`$AB45`) |
 | `$30` | 2 | plain talker |
 | `$40` | 5 | blesser: first SPEAK raises `$0A67` by 5 |
 | `$80` | 8 | merchant: BUY and SELL work only here (`$4338`), `$EF` is the stock |
@@ -339,8 +340,10 @@ Anything else -> `THAT WON'T HELP` (`$4487`); any other creature ->
 (`$8BB9`), so it only opens the door for this visit; `$2334` is in the
 saved block and is permanent.  `$96B9` reads them: `$F1` = `$C0` opens on
 `$2334` or `$CD`, `$F1` = `$C1` on `$2335` or `$CD`, else
-`THE DOOR IS LOCKED` (`$96D1`).  Nothing ever writes `$2335`, so the
-`$C1` gate in room 32 has to be paid for on every visit.
+`THE DOOR IS LOCKED` (`$96D1`).  No dialogue path ever writes `$2335`, so
+the `$C1` gate in room 32 has to be paid for on every visit -- the one
+exception being the wand of Befal, whose `sta $2300,x` (`$937B`) writes
+the same array, so zapping that guard opens her door for good.
 
 ## BUY and SELL
 

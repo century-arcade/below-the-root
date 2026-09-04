@@ -70,7 +70,7 @@ def decode(mem, addr):
                           'page_name': TEXT_PAGE.get(n), 'joy': 'idle', 'steps': 1})
             p += 2
         elif b == 0xC5:
-            steps.append({'at': at, 'op': 'set_84_85', 'bytes': [b],
+            steps.append({'at': at, 'op': 'end_rest_delay', 'bytes': [b],
                           'joy': 'idle', 'steps': 1})
             p += 1
         else:

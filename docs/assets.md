@@ -31,8 +31,12 @@ player moves between indoors and outdoors.  In `charselect.bin` (title /
 character-select screen, outdoors) `$C700` is byte-identical to `outdoor`
 and `$B700` to `indoor`; in `ingame.bin` (Neric's home, indoors) it is the
 other way round.  In both dumps the only bytes that differ from the files
-are rows 0, 2, 4 and 6 of character `$20`, and there each bank holds the
-*other* file's values -- character `$20` is animated in place.
+are rows 0, 2, 4 and 6 of character `$20` -- character `$20` is animated in
+place from characters `$BD`, `$BE` and `$BF`, which are byte-identical in the
+two banks (`$9C43`: every 8 frames it copies one of the three over `$20`,
+cycling `$BF` -> `$BE` -> `$BD`).  `outdoor` ships with `$20` already equal
+to `$BD` and `indoor` with `$20` equal to `$BE`, which is why the two files
+disagree there and why a dump matches neither.
 
 Characters `$7F`-`$B3` (the alphabet A-Z is `$80`-`$99`) and `$BD`-`$FF`
 (objects and furniture) are byte-identical in the two files, apart from
@@ -120,6 +124,17 @@ docs/npcs-and-objects.md, three frames of two records each, and records
 other four files are the other playable characters (Genaa, Herd, Pomma,
 Charn) and were not individually identified.
 
+Records `0`/`1` of `extras` are sprite 7, the KINIPORT and room-editor
+pointer: `$8473` sets pointer `$C3FF` = `$80` and `$846B` colour 7.
+
+Peeked from the running game in the first room, the sprite registers are
+`$D015` = `$03` (only the two player sprites on), `$D027` = `$D028` = 1
+(white, for every character -- `$9763` and `$371D` both write 1), and
+`$D01B` = `$D01C` = `$D017` = `$D01D` = 0: sprites are hi-res,
+unexpanded, and all eight have priority over the characters.  At most
+five are ever enabled (0/1 player, 2/3 creature, 7 pointer), so nothing
+is multiplexed.
+
 ## `tooltab` ($C400) -- not graphics
 
 768 bytes loaded into the gap between the video matrix (`$C000`-`$C3FF`)
@@ -128,11 +143,17 @@ tables at `$C400`, `$C500` and `$C600`, not character or sprite bitmaps
 -- `assets/tooltab_chars.png` and `assets/tooltab_sprites.png` show the
 noise those interpretations produce.  All three are zero at the same 24
 indices (`$3E`, `$57`, `$AA`-`$B6`, `$CC`-`$CF`, `$F4`-`$F7`, `$FF`), so
-they are parallel fields of one 256-entry record set.  `$C500` values are
-`$00`-`$26`; `$C600` values are `$46`-`$50` or `$C5`-`$D0`.  The opcode
-scan that found the four `LDA $C700,X` sites in `game` finds no absolute
-reference to `$C400`, `$C500` or `$C600` in any disk 1 file, so the
-reader was not located.
+they are parallel fields of one 256-entry record set.
+
+It is the **initial object table**: `$950F` -> `$97BB` copies all three
+pages to `$0D00`-`$0FFF` when a quest starts (`memcpy_pages` with A =
+`$C4`, Y = `$0D`, X = 3), which is why nothing indexes `$C400`/`$C500`/
+`$C600` directly.  `$C400` is the object's room low byte, `$C500` its
+screen column (hence the `$00`-`$26` range, columns 0-38) and `$C600`
+its row plus flags -- bit 6 exists, bit 7 room high byte, so the
+`$46`-`$50` and `$C5`-`$D0` clusters are rows 5-16 above and below
+ground.  The 24 all-zero indices are the free slots SELL mints tokens
+into.  See docs/npcs-and-objects.md and docs/verbs-and-inventory.md.
 
 ## Regenerating
 

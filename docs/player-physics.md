@@ -12,7 +12,7 @@ steps.  The sprite is placed from the cell each time the cell changes.
 
 ## Clock
 
-`$A000` is called once per frame (50 Hz PAL) from the raster IRQ at line
+`$A000` is called once per frame (60 Hz NTSC) from the raster IRQ at line
 `$DE`.  Every frame it animates character `$20` (`$9C12`), ticks the
 music, and -- only when `$0A04` (game active) is set -- calls `$B106`
 (creatures) and `$9806`, then increments `$0A08`.  When

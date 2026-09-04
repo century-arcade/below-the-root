@@ -113,6 +113,31 @@ player-physics.md) costs 64 fatigue and a chance of "YOUR SHUBA HAS TORN"
 
 RENEW is disabled while `$C8` is set ($A91A goes back to the menu instead).
 
+## `$C8`: the cloud world
+
+`$C8` is the walkthrough's "GIVER OF THE SPIRIT BELL" sequence, and it is
+the only place the clock and the fatigue drain stop while the game loop
+runs.  REST in room `$0009` -- the highest nid place in the Sky Grund,
+reached with a vine rope -- sets `$C8` = 1; `$9681` then turns the *next*
+doorway, whichever it is and whether or not it is locked, into a
+teleport to room `$00BE` at (18,14) with `$C8` := `$FF`, and the next
+doorway after that back to room `$0009` at (24,13) with `$C8` := 0.
+Both legs also clear `$0A0E`, so you arrive outdoors.
+
+Room `$00BE` is the clouds.  Room `$00BF`, one to the right, holds D'ol
+Neshom (`$09F1` = `$40`, so a first SPEAK grants +5 spirit limit and a
+vision) whose `$09EF` offers class 0 -- and object `$00`, the only spirit
+bell in the world, is in room `$00BF`.  That is the walkthrough's "walk
+safely up the clouds to the old lady ... you will then be allowed to
+take the SPIRIT BELL", and "to return to Green-Sky, you must enter and
+exit the nid place".
+
+The bell's payoff is `check_spirit_bell` ($9FB3): standing on tile `$BB`
+in an underground room (`$87` != 0 and `$86` >= `$80`) while carrying
+object `$00` plays sfx 12, stops the game loop and sets `$DF`, which
+`$95AC` turns into "THE SPIRIT BELL RINGS." -- a doorway detector for
+below the root.
+
 ## The status screen
 
 The STATUS menu item ($B100 -> `$B10F`) draws the panel with `$B125` (also

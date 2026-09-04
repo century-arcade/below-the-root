@@ -58,3 +58,6 @@ hard way:
 - Outputs go to `build/shots/` (PNG) and `build/dumps/` (RAM `.bin`,
   VICE `.vsf`); `build/` is gitignored.  RAM dumps from `ram NAME` carry
   a 2-byte load-address header: byte for address A is at file offset A+2.
+- `spec_world.py` / `spec_creatures.py` / `spec_player.py` / `spec_time.py`
+  / `spec_assets.py` -- regenerate `docs/spec/data/*.json`;
+  `spec_check.py` cross-checks them.  See `docs/spec/README.md`.
