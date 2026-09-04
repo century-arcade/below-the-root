@@ -1,0 +1,64 @@
+{
+ "generated_by": null,
+ "spec": "docs/spec/shell.md",
+ "hand_curated": [
+  "screens.main_menu",
+  "screens.character_select",
+  "screens.disk_storage",
+  "screens.slots",
+  "screens.storage_prompt"
+ ],
+ "hand_curated_source": "docs/menus-and-saves.md \"Main menu\", \"Character select\", \"DISK STORAGE\"",
+ "notes": [
+  "Panel rows are 21-24 of the 25-row screen and columns are 0-39; see assets.md, The screen.  Rows and columns here are zero-based and absolute.",
+  "Every string is stored with its padding spaces, because the highlight covers the padding: the selected item is that many cells of reverse video, leading and trailing space included.",
+  "The character names, descriptions and trait lines are in characters.json as `name`, `description` and `traits`; only their positions are here."
+ ],
+ "screens": {
+  "main_menu": {
+   "items": [
+    {"index": 0, "text": "  START GAME  ", "row": 21, "col": 13},
+    {"index": 1, "text": "   CONTINUE   ", "row": 22, "col": 13},
+    {"index": 2, "text": " DISK STORAGE ", "row": 23, "col": 13},
+    {"index": 3, "text": " SAMPLE QUEST ", "row": 24, "col": 13}
+   ],
+   "highlight_width": 14,
+   "cursor": "up and down, clamped at both ends, no wrap"
+  },
+  "character_select": {
+   "prompt": {"text": "CHOOSE YOUR PLAYER:", "row": 21, "col": 7},
+   "name": {"row": 21, "col": 28},
+   "description": {"row": 23, "col": 1},
+   "traits": {"row": 24, "col": 1},
+   "return_item": {"text": "RETURN TO MENU", "row": 21, "col": 12},
+   "highlight": null,
+   "cursor": "up only, cycling Neric, Genaa, Herd, Pomma, Charn, RETURN TO MENU, and back to Neric"
+  },
+  "disk_storage": {
+   "line": {"text": " SAVE GAME  LOAD GAME  RETURN TO MENU ", "row": 21, "col": 1},
+   "items": [
+    {"index": 0, "name": "SAVE GAME", "col": 1, "width": 11},
+    {"index": 1, "name": "LOAD GAME", "col": 12, "width": 11},
+    {"index": 2, "name": "RETURN TO MENU", "col": 23, "width": 16}
+   ],
+   "cursor": "left and right, clamped at both ends, no wrap"
+  },
+  "slots": {
+   "line": {"text": "QUEST   1  2  3  4  5 ", "row": 23, "col": 9},
+   "items": [
+    {"index": 0, "label": "1", "col": 16, "width": 3},
+    {"index": 1, "label": "2", "col": 19, "width": 3},
+    {"index": 2, "label": "3", "col": 22, "width": 3},
+    {"index": 3, "label": "4", "col": 25, "width": 3},
+    {"index": 4, "label": "5", "col": 28, "width": 3}
+   ],
+   "cursor": "left and right, clamped at both ends, no wrap"
+  },
+  "storage_prompt": {
+   "text": "INSERT STORAGE DISK - PRESS TRIGGER",
+   "row": 21,
+   "col": 1,
+   "note": "the confirmation step: the button here commits the save or the load, and there is no way back to the slot line"
+  }
+ }
+}

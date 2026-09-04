@@ -598,7 +598,7 @@ def save():
             'save_name': '0:QUESTn', 'load_name': 'QUESTn',
             'scratch_before_save': 'S0:QUESTn on the command channel, wrapped '
                                    'in I0 initialise commands',
-            'slots': 5, 'slot_digit': 'n = 1..5, the selected slot + 1',
+            'slots': 5, 'slot_digit': 'n = 0..4, the selected slot; the screen labels them 1-5',
             'load_address': 0x2000,
             'payload_bytes': 0x580,
             'file_bytes': 0x582,

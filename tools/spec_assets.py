@@ -612,8 +612,8 @@ def screens():
                       'items': [
                           {'row': 21, 'col': 7, 'text': 'CHOOSE YOUR PLAYER:'},
                           {'row': 21, 'col': 28, 'text': '<name>'},
-                          {'row': 22, 'col': 1, 'text': '<description>'},
-                          {'row': 23, 'col': 1, 'text': '<trait line>'},
+                          {'row': 23, 'col': 1, 'text': '<description>'},
+                          {'row': 24, 'col': 1, 'text': '<trait line>'},
                       ]},
             'src': '$3497, $34A3',
         },

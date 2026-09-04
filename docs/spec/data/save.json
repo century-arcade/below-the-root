@@ -7,7 +7,7 @@
   "load_name": "QUESTn",
   "scratch_before_save": "S0:QUESTn on the command channel, wrapped in I0 initialise commands",
   "slots": 5,
-  "slot_digit": "n = 1..5, the selected slot + 1",
+  "slot_digit": "n = 0..4, the selected slot; the screen labels them 1-5",
   "load_address": 8192,
   "payload_bytes": 1408,
   "file_bytes": 1410,

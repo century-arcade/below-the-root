@@ -286,7 +286,8 @@ one of five slots; a save holds the whole world (where every object is,
 who you have spoken to and when, whom you have banished) plus your
 stats and position.  SAMPLE QUEST plays a scripted demonstration until
 you press the button, as the game also does on its own before the menu
-first appears.
+first appears.  The menus, the save slots and what happens between
+rooms are `shell.md`.
 
 ## Look and sound
 

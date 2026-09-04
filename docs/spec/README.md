@@ -17,6 +17,7 @@ implementation, with the state of the work at the end.
 | `creatures.md` -- species, spawn, movement AI, contact, ambush, the whole dialog tree, door guards, per-creature state | `creatures.json` `messages.json` | `tools/spec_creatures.py` |
 | `player.md` -- the per-tick movement state machine, room edges, inventory, every verb, spirit skills, deaths | `characters.json` `items.json` `skills.json` | `tools/spec_player.py` |
 | `time.md` -- the clock, food/rest, the cloud world, economy, quest state, endings, attract demo, save file | `economy.json` `quest.json` `demo.json` `save.json` | `tools/spec_time.py` |
+| `shell.md` -- the main menu, character select, the save slots, and what the shell does each time the room loop stops | `shell.json` | hand-written |
 | `assets.md` -- palette, screen layout, which asset each state draws, sprites and animations, music/sfx | `assets.json` `music.json` | `tools/spec_assets.py` |
 
 `tools/spec_check.py` cross-checks the data files against each other
@@ -89,6 +90,11 @@ per item whether to keep it.
   every hour.  (`time.md`, REST and sleeping)
 - Creature positions are never clamped, and creatures share the player's
   crawl flag for one tile's solidity.  (`creatures.md`, Open questions)
+- Nothing in the save or load path checks anything: loading a slot never
+  written copies the stale save buffer into the quest, and past the
+  SAVE/LOAD line there is no cancel.  SAMPLE QUEST and START GAME wipe
+  the quest in progress without asking; CONTINUE with no quest does
+  nothing at all.  (`shell.md`)
 - Convenience that costs no fidelity: no disk-2 swap, save anywhere (the
   save file is fully specified in `save.json`), a real map screen
   (`map.json`), any C64 palette (`assets.md`, The palette), a steady

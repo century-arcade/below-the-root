@@ -62,8 +62,8 @@ Rows and columns are zero-based; column 0 is the left edge.
   column 13 of rows 21, 22, 23, 24.  The selected one is 14 cells of
   reverse video.
 - **Character select**: `CHOOSE YOUR PLAYER:` at row 21 column 7, the
-  character's name at row 21 column 28, their description on row 22 and
-  their trait line on row 23, both from column 1.
+  character's name at row 21 column 28, row 22 blank, their description
+  on row 23 and their trait line on row 24, both from column 1.
 - **Command menu**: four rows of five verbs, columns starting at 0, 7,
   13, 19 and 31.  The selected cell is reverse video across its whole
   width (7, 6, 6, 12 and 8 cells by column).

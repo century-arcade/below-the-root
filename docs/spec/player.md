@@ -425,7 +425,7 @@ clamped at the edges with no wrap; the button selects.
 | OFFER | EAT | REST | KINIPORT | *(blank)* |
 
 The blank cell does nothing and returns you to the cursor.  PAUSE
-closes the menu.  MENU abandons the quest and goes back to the title
+closes the menu.  MENU leaves the quest where it is and goes back to the main
 menu.
 
 **Picking an item.**  Five verbs share one paging interface: push up to
@@ -589,7 +589,8 @@ nids give you a dream, or a robbery, instead of a nap is
 direction you face, within one row, facing back at you, else "NO
 RESPONSE"; the prices and the quest ending are `time.md`'s.
 
-**MENU** abandons the quest and returns to the title menu.
+**MENU** returns to the main menu; CONTINUE picks the quest up where
+you left it (`shell.md`).
 
 ## Spirit skills
 
