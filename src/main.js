@@ -36,7 +36,7 @@ loadData((path) => fetch(path).then((r) => {
   const state = {
     data,
     room: pickRoom(data, params.get('room')),
-    tick: null,
+    tick: 0,
     figures: [],
     message: '',
     panel: [],

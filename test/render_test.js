@@ -73,7 +73,7 @@ function indexOfRGB(palette) {
 
 function testIngame(data) {
   const room = data.roomByCode.get('T1');
-  const got = toIndexed(render({ data, room, tick: null }), data.palette);
+  const got = toIndexed(render({ data, room }), data.palette);
   const png = readPNG(join(ROOT, 'assets', 'screen_ingame.png'));
   const rgb = rgbWindow(png, 0, 0, WIDTH, HEIGHT);
   const lookup = indexOfRGB(data.palette);
@@ -106,7 +106,7 @@ function testWorld(data) {
   let bad = 0;
   const badRooms = [];
   for (const room of data.rooms) {
-    const got = renderIndexed({ data, room, tick: null });
+    const got = renderIndexed({ data, room });
     const x0 = room.x * RW, y0 = room.y * RH;
     let n = 0;
     for (let y = 0; y < RH; y++) {
@@ -152,7 +152,7 @@ function testSprite(data) {
     && colMid[y0 * 3 + 2] === border[2]) y0++;
 
   const rgb = rgbWindow(png, x0, y0, WIDTH, HEIGHT);
-  const got = renderIndexed({ data, room, tick: null, figures: [fig] });
+  const got = renderIndexed({ data, room, figures: [fig] });
   // the capture is in the emulator's palette, so compare index-for-index
   const sample = data.assets.palette.emulator_sample.hex;
   const key = new Map();

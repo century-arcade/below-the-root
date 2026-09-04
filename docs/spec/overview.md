@@ -324,7 +324,7 @@ REST traps, the outer gate, and that a blank grid slot hangs the game.
 **Read from the code but never watched happen:** creature movement and
 all of the dialogue tree, both endings, the save layout, the cloud world.
 
-**Twenty-four open questions** remain, listed at the end of each area
+**Twenty-three open questions** remain, listed at the end of each area
 file.  None blocks building the world, movement, creatures or the
 economy.
 

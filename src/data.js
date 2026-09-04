@@ -72,17 +72,24 @@ function makeCharset(meta, bits) {
   const fixed = Uint8Array.from(meta.default_colors || new Array(256).fill(1));
   const slot = Int8Array.from(
     (meta.char_color_slot || new Array(256).fill(null)).map((s) => (s === null ? -1 : s)));
-  const water = meta.animated_chars && meta.animated_chars[0];
   return {
     id: meta.id,
     glyphs,
     fixed,
     slot,
-    water: water ? { char: water.char, cycle: water.cycle, period: water.period_frames } : null,
+    water: waterCycle(meta.animated_chars && meta.animated_chars[0], bits.chars),
   };
 }
 
 // frame: two stacked 21-row sprite records, 42 rows of 3 bytes
+// phase: the cycle starts on the frame the dumped tile set holds, as the goldens do
+function waterCycle(anim, chars) {
+  if (!anim) return null;
+  const same = (a, b) => a.every((v, i) => v === b[i]);
+  const phase = Math.max(0, anim.cycle.findIndex((c) => same(chars[c], chars[anim.char])));
+  return { char: anim.char, cycle: anim.cycle, period: anim.period_frames, phase };
+}
+
 function makeSheet(meta, bits) {
   const frames = meta.frame_table.map((f) => {
     const px = new Uint8Array(24 * 42);

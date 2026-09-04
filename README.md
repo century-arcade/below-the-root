@@ -33,11 +33,10 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.4 polish -- title, character select, attract demo, music, map screen | |
 | M6.5 ship -- port-note decisions applied, walkthrough played through, deployed | |
 
-The spec has 24 open questions, listed at the end of each area file;
+The spec has 23 open questions, listed at the end of each area file;
 none blocks M6.1 or M6.2.  Still read from the code but never watched
 in the emulator: creature movement, the dialog tree, both endings, the
-save layout, the cloud world.  Settle first for M6.1: which water frame
-shows when a room loads (`docs/spec/assets.md`, Open questions).
+save layout, the cloud world.
 
 ## Running it
 

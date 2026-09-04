@@ -5,7 +5,6 @@ export const HEIGHT = 200;
 export const PLAYFIELD_ROWS = 20;
 export const MESSAGE_ROW = 20;
 
-// tick null: water holds the glyph the tile set loads with, as the goldens do
 
 export function renderIndexed(state) {
   const px = new Uint8Array(WIDTH * HEIGHT);
@@ -48,14 +47,12 @@ function drawRoom(px, state) {
   const cs = state.data.charsets[room.tileset];
   const screen = room.screen;
   const water = cs.water;
-  let waterGlyph = -1;
-  if (water && state.tick != null) {
-    waterGlyph = water.cycle[Math.floor(state.tick / water.period) % water.cycle.length];
-  }
+  const step = Math.floor((state.tick || 0) / (water ? water.period : 1));
+  const waterGlyph = water ? water.cycle[(water.phase + step) % water.cycle.length] : -1;
   for (let row = 0; row < PLAYFIELD_ROWS; row++) {
     for (let col = 0; col < 40; col++) {
       const code = screen[row * 40 + col];
-      const glyph = (water && code === water.char && waterGlyph >= 0) ? waterGlyph : code;
+      const glyph = (water && code === water.char) ? waterGlyph : code;
       blitCell(px, col, row, cs.glyphs, glyph, colorOf(cs, code, room.colors));
     }
   }
