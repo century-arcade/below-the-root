@@ -189,9 +189,9 @@ def video():
                 'note': 'Both the player and a creature are one 24x42 figure '
                         'made of two stacked hardware sprites, positioned '
                         'from a whole cell.',
-                'top_left_px': ['8 * col - 8', '8 * row - 34'],
-                'feet_row_boundary': 'the bottom pixel row of the figure is '
-                                     'the top edge of row + 1',
+                'top_left_px': ['8 * col - 8', '8 * row - 33'],
+                'feet_row_boundary': 'the last pixel row of the figure is '
+                                     'the first pixel row of row + 1',
                 'columns_spanned': ['col - 1', 'col + 1'],
                 'src': '$9D36 player, $9B37 creature, tables $0B40/$0B70',
             },
@@ -360,7 +360,7 @@ def sheet_frames(data, count):
         if bb:
             e['ink_bbox'] = bb
             e['ink_offset_from_cell_px'] = {
-                'x': bb['x'] - 8, 'y': bb['y'] - 34,
+                'x': bb['x'] - 8, 'y': bb['y'] - 33,
                 'note': 'add to (8 * col, 8 * row) for the ink corner',
             }
         else:

@@ -27,7 +27,9 @@ own nid, fully fed and rested, one day later.
 | Pomma | Kindar | delicate, greatly spirit gifted | 10 | 10 | 5 | 5 / 3 | pense emotions and messages | 50, off 16 |
 | Charn | Erdling | sturdy, alert, moderate spirit gift | 15 | 5 | 7 | 2 / 5 | pense emotions | L1, off I5 |
 
-Stamina sets the leap (4 cells under 20, 5 at 20) and the carrying limit
+Stamina sets the leap -- 4 cells below 20, 5 from 20, 6 from 30, and
+since nobody starts above 20 the 6-cell leap takes two strange elixers
+-- and the carrying limit
 (stamina + 26: nine full-weight items for the three strong ones, eight
 for Charn, seven for Pomma).  Spirit energy starts equal to the limit.
 Food and rest start full; their maximum is half the stamina.  Standing
@@ -73,8 +75,8 @@ moves by cells.  Joystick and one button.
   Bumping a wall cancels gliding until you next stand up.
 - **Crawl**: pull down to stoop, push up to stand.  Crawling gets you
   under low things and is the only way across a laid vine rope.
-- **Fall** six rows or more and you are knocked down: three seconds on
-  the floor, a big chunk of fatigue, and a one-in-sixteen chance your
+- **Fall** six rows or more and you are knocked down: just under three
+  seconds on the floor, a big chunk of fatigue, and a one-in-sixteen chance your
   shuba tears.  Five rows or fewer is free.
 - **Water** is fatal-ish: step in and you are found near the water a day
   later.
@@ -98,7 +100,7 @@ time.  Using the wand of Befal on a guard also opens the door
 permanently.
 
 Doorways are two-way; every door you go through has a door back.  A few
-doorways in the shipped game are broken and would dump you in room 0
+doorways in the shipped game are broken and would dump you in `00`
 (the spec flags them; a port should just not paint them).
 
 One special place: sleep in the highest nid of the Sky Grund and the next
@@ -159,7 +161,8 @@ at the start; nothing is ever created, so what you see is all there is.
 - **EAT**: roast lapan, pan bread and fruit & nuts each give 5 food
   (lapan also drains 15 spirit energy unless you are an Erdling);
   wissenberries pass two hours and cost 15 spirit energy; the strange
-  elixer permanently adds 5 stamina (so a longer leap and more carrying)
+  elixer permanently adds 5 stamina (more carrying, and a longer leap
+  once you pass 20 or 30)
   and refills food and rest.
 - **EXAMINE** and **INVENTORY** tell you what is there and what you have.
 
@@ -190,7 +193,8 @@ Each has a role:
   Mother, D'ol Neshom, Vatar) who raise your spirit limit by 5 the first
   time you speak to them.
 - **Animals** -- ten lapans and simas that raise your spirit limit by 1
-  the first time you pense their emotion.
+  the first time you read their message (which takes the second pense
+  skill, and standing next to them).
 - **The two gate guards.**
 - **D'ol Falla**, who must be spoken to before her key can be taken.
 - **Nid-offerers** -- twelve people who let you sleep in their nid.  Six
@@ -321,10 +325,9 @@ the cloud world, the kidnaps.
 **Not yet specified:** the shell -- menu flow, character select, the disk
 storage screens and the loop that ties room exits, doors, menus and lost
 days together.  The C64-level notes exist; it needs writing up in these
-terms.  Also one pixel of disagreement on where a figure is drawn
-relative to its cell.
+terms.
 
-**Twenty-nine open questions** remain, listed at the end of each area
+**Twenty-two open questions** remain, listed at the end of each area
 file.  None blocks building the world, movement, creatures or the
 economy.  Two need a decision before the endgame: there are six ways to
 earn a vision and only five visions; and losing a day on day 50 can
