@@ -45,7 +45,7 @@ function drawRoom(px, state) {
   const room = state.room;
   if (!room) return;
   const cs = state.data.charsets[room.tileset];
-  const screen = room.screen;
+  const screen = state.screen || room.screen;
   const water = cs.water;
   const step = Math.floor((state.tick || 0) / (water ? water.period : 1));
   const waterGlyph = water ? water.cycle[(water.phase + step) % water.cycle.length] : -1;

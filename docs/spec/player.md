@@ -121,8 +121,9 @@ First match wins.
    so you keep falling.
 3. Pushed the way you face, supported: leap.
 4. Pushed the other way, supported: turn in place, one step.  But if a
-   climbing pose is showing, you leap off the ladder or vine instead --
-   the manual's "push the button and press the joystick sideways".
+   climbing pose is showing, you turn and leap off the ladder or vine
+   that way instead -- the manual's "push the button and press the
+   joystick sideways".
 5. Pulled back while standing on support: the command menu opens.
 6. No direction, standing on a doorway: go through the door.
 7. Anything else: the button-free rules.
@@ -146,6 +147,9 @@ First match wins.
    if standing, stoop into a crawl (the 5-tick pose).  Otherwise
    nothing.
 7. Centred: stand still at 8 ticks a step, and running is cleared.
+   The figure is not redrawn, so whatever pose was showing stays --
+   which is how a climbing pose can still be showing when rule 4 of
+   the button-held rules looks for one.
 
 **Ladders snap to the middle.**  Ladders and vines are three cells
 wide.  Climbing into the left column moves you one column right, into
@@ -431,10 +435,17 @@ menu.
 
 **Picking an item.**  Five verbs share one paging interface: push up to
 page forward through what you carry, press the button to choose what is
-showing, and paging past the end shows "NOTHING", which cancels.  USE,
-EAT, SELL and OFFER show one entry per class; DROP and INVENTORY show
-one entry per object.  USE, EAT and SELL also skip the classes they
-cannot act on.
+showing.  Past the last entry comes "NOTHING", and past that the first
+entry again; choosing "NOTHING" cancels.  USE, EAT, SELL and OFFER show
+one entry per class; DROP and INVENTORY show one entry per object.
+USE, EAT and SELL also skip the classes they cannot act on.
+
+**How often the stick is read.**  This matters only to the attract demo,
+which feeds one script entry per read (`time.md`).  The menu reads until
+the button is up, then once per cursor move or choice.  A verb that pages
+reads until the button is up, then once per page or choice.  Every verb
+but DROP and PAUSE then reads until the button is up and once more before
+the room loop resumes.  Watched in VICE; `tools/trace_demo.py`.
 
 ## The verbs
 

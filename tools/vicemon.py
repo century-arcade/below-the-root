@@ -105,3 +105,19 @@ class Mon:
         except OSError:
             pass
         self.s.close()
+
+    def wait_break(self, timeout=900):
+        """Block until the running emulator hits a breakpoint and the prompt returns."""
+        self.s.settimeout(timeout)
+        try:
+            return self._read_until_prompt()
+        finally:
+            self.s.settimeout(self.timeout)
+
+    def regs(self):
+        out = self.cmd('r')
+        m = re.search(r'\.;([0-9a-f]{4})\s+([0-9a-f]{2})\s+([0-9a-f]{2})\s+([0-9a-f]{2})\s+([0-9a-f]{2})', out)
+        if not m:
+            return None
+        pc, a, x, y, sp = (int(g, 16) for g in m.groups())
+        return {'pc': pc, 'a': a, 'x': x, 'y': y, 'sp': sp}

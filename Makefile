@@ -15,6 +15,8 @@ serve: build
 
 test:
 	node test/render_test.js
+	node test/replay_test.js intro
+	node test/replay_test.js quest
 
 clean:
 	rm -rf $(BUILD)

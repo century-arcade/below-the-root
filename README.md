@@ -27,8 +27,8 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M4 the code -- room format, physics, verbs, NPCs, dialog, clock, demo, menus and saves, all in `docs/*.md` | done |
 | M5 the spec -- `docs/spec/`: overview + six area files + 15 JSON tables, generators, cross-checks; rewritten as plain-English functional prose | done |
 | M6.0 render -- `src/` draws any room; three pixel-exact golden tests against the original | done |
-| M6.1 move -- the player state machine, edges, doors, drowning; demo-script replay matches VICE for position and room | **next** |
-| M6.2 talk -- creatures, dialog, verbs, inventory, skills | |
+| M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (position, facing, state, step period) up to REST | done |
+| M6.2 talk -- creatures, dialog, verbs, inventory, skills | **next** |
 | M6.3 time -- clock, food/rest, cloud world, quest flags, endings, save/load | |
 | M6.4 polish -- title, character select, attract demo, music, map screen | |
 | M6.5 ship -- port-note decisions applied, walkthrough played through, deployed | |
@@ -42,7 +42,8 @@ save layout, the cloud world.
 
 ```
 make build && make serve      # the port at http://localhost:8000/?room=T1
-make test                     # golden tests, node only, ~0.2 s
+make test                     # golden tests + demo replay vs build/traces, node only, ~0.3 s
+tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
 python3 tools/spec_check.py   # cross-check the spec tables
 tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room
 ```

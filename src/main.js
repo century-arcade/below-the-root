@@ -1,11 +1,13 @@
 import { loadData } from './data.js';
 import { render, WIDTH, HEIGHT } from './video.js';
+import { newState, startQuest, startDemo, tick, figures } from './game.js';
+import { Keyboard } from './input.js';
+import { enterRoom } from './world.js';
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
-
 const image = ctx.createImageData(WIDTH, HEIGHT);
 
 function fit() {
@@ -16,16 +18,20 @@ function fit() {
 }
 
 function pickRoom(data, want) {
-  if (want == null || want === '') return data.roomById.get(61) || data.rooms[0];
+  if (want == null || want === '') return null;
   if (/^\d+$/.test(want)) return data.roomById.get(Number(want));
   return data.roomByCode.get(want.toUpperCase());
 }
 
 function label(state) {
   const r = state.room;
-  const c = r.colors;
-  return `${r.code} (${r.room})  ${r.tileset}  sign ${c.sign} wall ${c.wall} `
-    + `structure ${c.structure} ground ${c.ground}  -- arrow keys move`;
+  const p = state.player;
+  return `${r.code} (${r.room}) ${r.tileset}  cell ${p.col},${p.row} ${p.facing > 0 ? 'R' : 'L'}`
+    + `  frame ${p.frame} period ${p.period}`
+    + (p.crawling ? ' crawl' : '') + (p.running ? ' run' : '') + (p.leaping ? ' leap' : '')
+    + (p.gliding ? ' glide' : '') + (p.knockdown ? ` down ${p.knockdown}` : '')
+    + (p.fallen ? ` fallen ${p.fallen}` : '') + `  tick ${state.tick}`
+    + (state.message ? `  "${state.message}"` : '');
 }
 
 loadData((path) => fetch(path).then((r) => {
@@ -33,47 +39,43 @@ loadData((path) => fetch(path).then((r) => {
   return r.json();
 })).then((data) => {
   const params = new URLSearchParams(location.search);
-  const state = {
-    data,
-    room: pickRoom(data, params.get('room')),
-    tick: 0,
-    figures: [],
-    message: '',
-    panel: [],
-  };
-  if (!state.room) state.room = data.rooms[0];
-  if (params.has('player')) {
-    state.figures.push({ sheet: 'player0', frame: 3, col: 22, row: 9, color: 1 });
+  const state = newState(data, new Keyboard());
+  const demo = params.get('demo');
+  if (demo !== null) {
+    startDemo(state, demo || 'quest');
+  } else {
+    const who = Number(params.get('player') || 0);
+    startQuest(state, data.characters[who] || data.characters[0]);
+    const room = pickRoom(data, params.get('room'));
+    if (room && room !== state.room) enterRoom(state, room, state.player.col, state.player.row);
   }
 
   const status = document.getElementById('status');
   function draw() {
+    state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
     status.textContent = label(state);
-    history.replaceState(null, '', `?room=${state.room.code}`);
   }
 
-  function step(dx, dy) {
-    const g = data.grid;
-    const x = (state.room.x + dx + g.width) % g.width;
-    const y = state.room.y + dy;
-    if (y < 0 || y >= g.height) return;
-    const next = data.roomById.get(y * g.width + x);
-    if (next) state.room = next;
+  const STEP_MS = 1000 / 60;
+  let last = performance.now();
+  let acc = 0;
+  function frame(now) {
+    acc += Math.min(now - last, 250);
+    last = now;
+    while (acc >= STEP_MS) {
+      tick(state);
+      acc -= STEP_MS;
+    }
     draw();
+    requestAnimationFrame(frame);
   }
-
-  addEventListener('keydown', (e) => {
-    const moves = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
-    const m = moves[e.key];
-    if (!m) return;
-    e.preventDefault();
-    step(m[0], m[1]);
-  });
   addEventListener('resize', fit);
   fit();
   draw();
+  requestAnimationFrame(frame);
 }).catch((err) => {
   document.getElementById('status').textContent = String(err);
+  console.error(err);
 });

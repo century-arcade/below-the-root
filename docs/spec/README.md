@@ -77,8 +77,9 @@ per item whether to keep it.
   the ground outside the outer gate.  Rooms 148 and 251 hold a valid door
   pair that no tile lets you reach.  (`world.md`, Doorways)
 - 178 edge exits point at an empty grid slot, and the top/bottom world
-  edges are unguarded; crossing into a blank slot hangs the original.
-  (`world.md`, Open questions)
+  edges are unguarded.  A blank slot loads as open air (the demo relies
+  on it), except once when it hung.  Decided: the port always gives open
+  air and refuses the top and bottom edges.  (`world.md`, Open questions)
 - A breaking trencher beak subtracts the vine rope's weight (both 5, so
   invisible unless the weights change).  BUY reserves 4 units of carry
   capacity when every non-token item weighs 5, so a merchant can sell a

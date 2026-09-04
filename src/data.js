@@ -1,11 +1,14 @@
 const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 
 export async function loadData(read) {
-  const [assets, roomsFile, tilesFile, map] = await Promise.all([
+  const [assets, roomsFile, tilesFile, map, itemsFile, charactersFile, demo] = await Promise.all([
     read('data/assets.json'),
     read('data/rooms.json'),
     read('data/tiles.json'),
     read('data/map.json'),
+    read('data/items.json'),
+    read('data/characters.json'),
+    read('data/demo.json'),
   ]);
 
   const palette = new Uint8Array(16 * 3);
@@ -39,11 +42,23 @@ export async function loadData(read) {
   const tileByCode = new Array(256).fill(null);
   for (const t of tilesFile.tiles) tileByCode[t.code] = t;
 
+  const objects = [];
+  for (const r of rooms) {
+    for (const o of r.objects) {
+      objects.push({ object: o.object, class: o.class, name: o.name, room: r.room, col: o.x, row: o.y, chars: o.chars });
+    }
+  }
+  objects.sort((a, b) => a.object - b.object);
+
+  const items = [];
+  for (const c of itemsFile.classes) items[c.class] = c;
+
   return {
     assets, palette, charsets, sheets, map,
     rooms, roomById, roomByCode, tiles: tileByCode,
     grid: roomsFile.grid,
     animations: assets.player_animations,
+    objects, items, characters: charactersFile.characters, demo,
   };
 }
 

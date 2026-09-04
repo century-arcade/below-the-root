@@ -46,9 +46,11 @@ East and west wrap around inside the row: walk east from column `V` and
 you come out at column `0` of the same row.  North and south do not wrap;
 they simply run off the world.  `rooms.json` gives each room's four
 neighbours as `exits`, and `exits_missing` names the directions whose
-neighbour is a blank slot.  Nothing stops you crossing into one, and the
-shape of the map is the only thing that keeps you out: there is no room
-there to load, and the original locks up on a black screen.
+neighbour is a blank slot.  Nothing stops you crossing into one: a blank
+slot loads as open air, forty by twenty empty cells, and you fall or
+glide straight through it to the slot beyond.  The sample quest does
+exactly that, gliding south from `49` through the blank `4A` to the
+ground at `4B`.
 
 ## Doorways
 
@@ -251,12 +253,13 @@ there is no room, plus the per-row summary and every sign.
 
 ## Open questions
 
-- **Whether any blank slot can actually be reached.**  46 exits north,
-  62 south, 35 west and 35 east point at one (`rooms.json`
-  `exits_missing` says 78 north and 78 south because it also counts the
-  top and bottom of the world), and crossing into one hangs the game, so
-  the map had better be drawn so you cannot -- but that has not been
-  checked room by room.
+- **Blank slots that hang.**  46 exits north, 62 south, 35 west and 35
+  east point at a blank slot (`rooms.json` `exits_missing` says 78 north
+  and 78 south because it also counts the top and bottom of the world).
+  The demo crosses `4A` and gets open air; a forced crossing east from
+  `34` into `44` once hung the emulator on a black screen, and the two
+  disk blocks are identical, so what decides between the two is not
+  known.  The port always gives open air.
 - **What happens if you leave the world vertically.**  North from row `0`
   (32 rooms) and south from row `F` (16 rooms) are unguarded and lead
   nowhere at all.  Never reproduced.
