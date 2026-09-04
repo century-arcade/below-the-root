@@ -25,8 +25,9 @@ after entering the game as Neric: `$0A60-$0A70`, `$D0-$DF`, `$86/$87`, PC).
 `$D8` also picks the attract room in the demo path (`$953F`): >= 0 ->
 `$9789` (room 157, the title screen), < 0 -> `$97C4` (room 228).
 
-Menu setup ($3420): `$02` = 0, `demo_flag` = 0, clear text ($9506), music
-on ($A803 with A=1), `$0A4B` = 4, **save the in-game room `$86/$87` into
+Menu setup ($3420): `$02` = 0, `demo_flag` = 0, clear text ($9506),
+`set_panel_color` ($A803 with A=1: fill colour RAM `$DB48-$DBE7`, the four
+menu lines, with white), `$0A4B` = 4, **save the in-game room `$86/$87` into
 `$D3/$D4`**, set room 157 and load it ($8803).  The menu is drawn over
 that room.
 
@@ -81,8 +82,8 @@ bytes backwards from `$9CA9+Y` into `$0A63..$0A70`.  It then sets `$0A61` =
 | $0A67 | spirit limit | 5 | 0 | 5 | 10 | 5 | 10 |
 | $0A68 | standing with Kindar | 3 | 4 | 0 | 5 | 2 | 0 |
 | $0A69 | standing with Erdlings | 0 | 2 | 3 | 3 | 5 | 3 |
-| $0A6A | rest cap + 1 | 11 | 11 | 11 | 6 | 8 | 11 |
-| $0A6B | food cap + 1 | 11 | 11 | 11 | 6 | 8 | 11 |
+| $0A6A | food cap + 1 | 11 | 11 | 11 | 6 | 8 | 11 |
+| $0A6B | rest cap + 1 | 11 | 11 | 11 | 6 | 8 | 11 |
 | $0A6C | carry limit | 46 | 46 | 46 | 36 | 41 | 46 |
 | $0A6D/$0A6E | nid-place room | 61 | 44 | 31 | 5 | 53 | 31 |
 | $0A6F | nid column | 22 | 29 | 27 | 22 | 29 | 27 |
@@ -90,8 +91,11 @@ bytes backwards from `$9CA9+Y` into `$0A63..$0A70`.  It then sets `$0A61` =
 
 Menu order is Neric, Genaa, Herd, Pomma, Charn, matching `PLAYER0..4`.
 Stamina and spirit limit match the manual; rest and food start at
-stamina/2, capped at `$0A6A`/`$0A6B` - 1 (`$84E0`, `$84F3`); carry limit is
-stamina + 26 and moves with it (`$B5BE`: stamina +5 -> `$0A6C` +5).
+stamina/2, capped at `$0A6A`/`$0A6B` - 1 (`$84E0`, `$84F3`); every read of
+`$0A6A` caps food and every read of `$0A6B` caps rest, but
+`init_character` gives them the same value, so nothing tells them apart at
+run time.  Carry limit is stamina + 26 and moves with it (`$B5BE`: the
+strange elixer raises stamina by 5 and `$0A6C` with it).
 `$0A68/$0A69` gate NPC reactions: `npc_gate` ($43C2) does
 `ldx $0A8F / lda $0A68,x / cmp $0A8E`, where the room block byte `$09E1`
 supplies the low nibble (`$0A8F`, which standing to test) and the high
@@ -215,7 +219,12 @@ A second jump table at `$3C00`:
 | $3C09 | $4194 `verb_buy` | "YOU NEED MORE TOKENS" ($41B2) |
 | $3C0C | $4234 `verb_sell` | "WHAT WILL YOU SELL?" ($4245) |
 | $3C0F | $43CC `verb_offer` | "OFFER TO WHOM?" ($43D7) |
-| $3C12 | $3D38 `pause_jingle` | -- |
+| $3C12 | $3D38 `play_random_tune` | -- |
+
+BUY, SELL and OFFER are finished in `docs/verbs-and-inventory.md` along
+with the rest of the command menu; in short, everything trades for
+exactly one token in both directions and OFFER is accepted by only three
+NPCs.
 
 `print_message` ($3C15): X/Y = screen address, A = 1-based message number;
 it walks the table at `$4500` skipping A-1 strings (each terminated by a
@@ -233,10 +242,11 @@ and `$09EB/C` for SPEAK, `$09E9`/`$09ED` for PENSE.
 otherwise it prints the NPC's one or two lines, stamps the current day
 into `$2380,x`, and for NPC type `$09F1` = $40 whose `$2380,x` bit 7 is
 still clear it grants a spirit gift ($3D24): bit 7 set, `$0A67` += 5,
-`$0A63` = `$0A67`, `pause_jingle`, `gain_spirit_power`.
+`$0A63` = `$0A67`, `play_random_tune`, `gain_spirit_power`.
 
-`pause_jingle` ($3D38): delay $A0, then `$2800` (musiclow) with a random
-tune 2..9, spinning until `$0A95` clears.
+`play_random_tune` ($3D38): delay $A0, then `$2800` (musiclow) with a
+random tune 2..9, spinning until `$0A95` clears.  Also used by the spirit
+gift, the visions and the two keys in USE.
 
 ## Spirit gift and visions ($3DA9)
 

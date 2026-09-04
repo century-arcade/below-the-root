@@ -127,7 +127,7 @@ Takes the tile code in A, clears `$0A2C`-`$0A2E`, and sets:
 | `$75` | 1 | 1 | |
 | `$B4`-`$B9` | 1 | | 1 |
 | `$DF` | 1 | 1 | |
-| `$E0` | 1 | 1 | *only while `$0A3D` (crawling) is set* |
+| `$E0` | 1 | 1 | *only while `$0A3D` (crawling) is set* -- the vine rope |
 | everything else | | | |
 
 `$0A2C` = "you do not fall through this", the union of solid and
@@ -146,6 +146,10 @@ Three ranges are special-cased outside the table:
   impassable, handled as a post-move revert -- see collisions.
 - **`$20`** is the animated water character (`$9C43` re-blits it into
   `$C900` from `$CDE1` every 8 frames).  Stepping onto it drowns you.
+- **`$E0`** is the vine rope laid down by USE, which is why it is solid
+  only while crawling.  **`$E1` and up** are the two-char object tiles
+  the object table paints; TAKE, EXAMINE and KINIPORT all test against
+  that boundary.
 
 ## Dispatch -- `$A02D`
 
@@ -169,9 +173,11 @@ gravity: `$0A2C` only matters on the paths that reach `$A0E7`.
 ## `$A07E` -- fire held
 
 1. `$0A09 >= 2` and airborne and `$0A4C == 0` -> **glide attempt**
-   (`$A370`): scan the 20 carried-item bytes `$0F58`-`$0F6B` for one
-   with bit 5 set (`$0AA5` = `$20`).  That bit means "shuba" -- the same
-   test at `$8F20` prints "YOUR SHUBA HAS TORN".  On a hit: `$0A35 = 1`,
+   (`$A370`): scan `$0F58`-`$0F6B` for one entry with bit 5 set (`$0AA5`
+   = `$20`).  Bit 5 of `$0F00,i` is the object table's "carried" flag and
+   `$58`-`$6B` is the shuba class (see docs/verbs-and-inventory.md), so
+   this is "am I carrying a shuba" -- the same test at `$8F20` prints
+   "YOUR SHUBA HAS TORN".  On a hit: `$0A35 = 1`,
    glide sprite, `$0A09 = 0`, `$0A3D = 0`, `$0A06 = 8`, sfx 8, and fall
    straight into the glide handler.  No shuba -> `$A0E7`.
 2. `$98 != 0` and airborne -> `$A0E7` (keep falling).
@@ -182,7 +188,8 @@ gravity: `$0A2C` only matters on the paths that reach `$A0E7`.
    manual's "to jump from a ladder or vine: push the button and press
    the joystick sideways".
 5. `$98 == 0`, `$99 > 0` (down), on the ground -> **menu**: `$0A04 = 0`,
-   `$0A4A = 1`.  The outer loop at `$9573` opens the command menu.
+   `$0A4A = 1`.  The outer loop at `$9573` opens the command menu
+   (`$A800`, docs/verbs-and-inventory.md).
 6. `$98 == 0`, `$99 == 0` (fire only), `$0A20` in `$BA`-`$BC` ->
    **door** `$A594`.
 7. anything else -> `$A0E7`.
@@ -236,8 +243,9 @@ solid tile at body height climbs onto it; walking into a wall tile
 by the post-move check and knocks you down.
 
 `$9FB3`: walking onto tile `$BB` in an underground room (`$0180` and up,
-i.e. `room_hi != 0 && room_lo >= $80`) while carrying the item at
-`$0F00` with bit 5 set sets `$DF = 1` -> "THE SPIRIT BELL RINGS."
+i.e. `room_hi != 0 && room_lo >= $80`) while carrying object 0 -- the
+spirit bell, which is the whole of class 0 -- sets `$DF = 1` -> "THE
+SPIRIT BELL RINGS."
 
 ## Running
 
@@ -259,9 +267,11 @@ $9F80(5)                       5 units of fatigue
 $C9 = 3 if $0A66 >= $1E, 2 if >= $14, else 1
 ```
 
-`$0A66` is per character (`$9CA9` record byte 3): `$14` for characters
-0,1,2,5 and `$0A`/`$0F` for 3,4 -- so most characters leap with `$C9`=2
-and two of them with `$C9`=1.
+`$0A66` is **stamina**, per character (`$9CA9` record byte 3): `$14` for
+characters 0,1,2,5 and `$0A`/`$0F` for 3,4 -- so most characters leap
+with `$C9`=2 and two of them with `$C9`=1.  Eating a strange elixer
+raises it by 5 at `$B5BE`, which is the one way to leap further (and it
+raises the food/rest caps and the carry limit with it).
 
 Each step (`$0A06` = 4, sprite `$DC`/`$E0`):
 
@@ -450,6 +460,8 @@ Muted while `$0A95` (music) is on.
 
 | X | used by |
 |---|---------|
+| 0 | menu cursor, inventory cycle, kiniport pointer (see docs/verbs-and-inventory.md) |
+| 1 | menu selection, wand of befal |
 | 2 | footstep A, landing, glide end, stop climbing |
 | 3 | footstep B |
 | 4,5 | climb up, climb down |
@@ -460,6 +472,7 @@ Muted while `$0A95` (music) is on.
 | `$0A` | entering a door |
 | `$0B` | turning in mid-glide |
 | `$0C` | the spirit bell |
+| `$0D` | the chime while you REST |
 
 ## Fatigue -- `$9F80`
 
