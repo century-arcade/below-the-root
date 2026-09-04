@@ -14,7 +14,7 @@
   "09ed": "blk_emotion_fail",
   "09ee": "blk_message_fail",
   "09ef": "blk_gift_class",
-  "09f0": "blk_npc_state",
+  "09f0": "blk_npc_id",
   "09f1": "blk_npc_kind",
   "940e": "clear_text_area",
   "439a": "msg_no_response_speak",

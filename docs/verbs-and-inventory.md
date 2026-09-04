@@ -99,7 +99,7 @@ carried bit and `$0AA6` = the exists bit.  Clearing a whole `$0F00`
 entry to 0 (EAT, SELL, breaking a beak, using a rope, a lamp burning
 out) destroys the object permanently.
 
-The **object number is the class**: `tile_range_lookup` (`$AC09` ->
+The **object number is the class**: `object_class_of` (`$AC09` ->
 `$A790`) walks the boundary table at `$A7A0` and returns Y = class for
 an object number.
 
@@ -401,8 +401,8 @@ doorway (`$9681`) teleport you: 1 -> room `$00BE` at (18,14) and `$C8` :=
 
 ### RENEW -- `$A609` -> `$A64C`
 
-Refused while `$C8` is set.  Otherwise `return_home` (`$A6FB`) and
-"YOU WERE FOUND UNCONSCIOUS." / "TIME HAS PASSED.".  `return_home` puts
+Refused while `$C8` is set.  Otherwise `return_to_nid` (`$A6FB`) and
+"YOU WERE FOUND UNCONSCIOUS." / "TIME HAS PASSED.".  `return_to_nid` puts
 you in room `$0A6D/$0A6E` at (`$0A6F`,`$0A70`) with `$0A0E = 1`, sprite
 `$F2`, **`$0A62` (day) += 1**, `$0A63 = $0A67` (energy refilled to the
 limit) and `$0A64 = $0A65 = $0A6A - 1` (food and rest refilled).  The
@@ -441,7 +441,7 @@ OF INTEREST HERE", otherwise "IT LOOKS LIKE" + the class name at
 | addr | meaning | verbs that change it |
 |------|---------|----------------------|
 | `$0A61` | time of day 0-7 | REST, EAT (wissenberries), via `advance_time` `$B287` |
-| `$0A62` | day, 1-based | `advance_time` on the wrap; RENEW / drowning / attack via `return_home` |
+| `$0A62` | day, 1-based | `advance_time` on the wrap; RENEW / drowning / attack via `return_to_nid` |
 | `$0A63` | spirit energy | HEAL -5, GRUNSPREKE -2, KINIPORT -5 / -10, EAT (lapan, wissenberries) -15, USE wand := 0, SPEAK gift := `$0A67`, `advance_time` +5 (capped at `$0A67`) |
 | `$0A64` | level of food | EAT +5, HEAL +2 (cap `$0A6A - 1`), `advance_time` -1, `spend_fatigue` -1 per borrow |
 | `$0A65` | level of rest | REST +4 (cap `$0A6B - 1`), HEAL +2, `advance_time` -1, `spend_fatigue` -1 |

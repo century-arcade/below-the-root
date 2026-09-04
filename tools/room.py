@@ -130,11 +130,11 @@ class Room:
         b = self.blk[OFF_NPC:OFF_NPC + 18]
         if not b[0]:
             return None
-        return dict(kind=b[0] >> 4, color=b[0] & 0x0F, anim=b[1],
+        return dict(species=b[0] >> 4, color=b[0] & 0x0F, gate=b[1],
                     spread=b[2] >> 4, mode=b[2] & 0x0F, x=b[3], y=b[4],
                     turn=(b[5], b[6]), speak=(b[7], b[8]), emotion=b[9],
                     message=b[10], speak_alt=(b[11], b[12]), emotion_alt=b[13],
-                    message_alt=b[14], gift=b[15], who=b[16], flags=b[17])
+                    message_alt=b[14], take_class=b[15], npc_id=b[16], kind=b[17])
 
     def color_map(self, table):
         """$8CED: char code -> colour, four ranges taken from the block footer."""

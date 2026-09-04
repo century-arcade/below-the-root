@@ -263,7 +263,7 @@ docs/menus-and-saves.md.
 
 ## Gifts -- `$09EF` and `find_gift_item` `$3D4E`
 
-`$EF` is an **object class**, the same 0-14 index `tile_range_lookup`
+`$EF` is an **object class**, the same 0-14 index `object_class_of`
 (`$A790`) produces from an object table index and `$AFD4` turns into a
 name at `$AFF7`:
 
