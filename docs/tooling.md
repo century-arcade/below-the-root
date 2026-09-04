@@ -38,7 +38,9 @@ hard way:
   measure with the monitor's cycle counter or frame counters instead.
 - Only one x64sc can run at a time (one display, one monitor port).
   `Emu()`/`btr` refuse to start while one is running; `--kill` replaces
-  it.  Sound effects are `$AA40` (X = 0-13); `$8012` is a plain delay loop.
+  it.  The emulator exits when its monitor socket closes, so a
+  multi-step run must be one process holding the socket for the whole
+  session.  Sound effects are `$AA40` (X = 0-13); `$8012` is a plain delay loop.
 - Monitor `screen` prints the text screen at whatever `$D018`/`$DD00`
   select (the game's screen is at `$C000`); `screenshot "f" 2` writes PNG;
   `bank ram` before `save` reads RAM under the ROMs (extras and playerN
@@ -61,3 +63,6 @@ hard way:
 - `spec_world.py` / `spec_creatures.py` / `spec_player.py` / `spec_time.py`
   / `spec_assets.py` -- regenerate `docs/spec/data/*.json`;
   `spec_check.py` cross-checks them.  See `docs/spec/README.md`.
+  `spec_world.py --sheet PNG` writes all 438 rooms at full size as a
+  palette-mode PNG whose pixel values are colour indices; `make test`
+  compares the port's renderer against it.
