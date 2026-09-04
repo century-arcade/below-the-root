@@ -1,0 +1,1130 @@
+{
+ "table": "4500",
+ "count": 187,
+ "terminator": "ff",
+ "encoding": "ascii uppercase, mapped to screen codes by $C800",
+ "messages": [
+  {
+   "n": 1,
+   "addr": "4500",
+   "text": "SYMPATHY",
+   "group": "emotion"
+  },
+  {
+   "n": 2,
+   "addr": "4509",
+   "text": "SUSPICION",
+   "group": "emotion"
+  },
+  {
+   "n": 3,
+   "addr": "4513",
+   "text": "GOODWILL",
+   "group": "emotion"
+  },
+  {
+   "n": 4,
+   "addr": "451c",
+   "text": "INTEREST",
+   "group": "emotion"
+  },
+  {
+   "n": 5,
+   "addr": "4525",
+   "text": "RESENTMENT",
+   "group": "emotion"
+  },
+  {
+   "n": 6,
+   "addr": "4530",
+   "text": "RESERVE",
+   "group": "emotion"
+  },
+  {
+   "n": 7,
+   "addr": "4538",
+   "text": "AVARICE",
+   "group": "emotion"
+  },
+  {
+   "n": 8,
+   "addr": "4540",
+   "text": "COMPASSION",
+   "group": "emotion"
+  },
+  {
+   "n": 9,
+   "addr": "454b",
+   "text": "DECEIT",
+   "group": "emotion"
+  },
+  {
+   "n": 10,
+   "addr": "4552",
+   "text": "A LISTLESS CALM",
+   "group": "emotion"
+  },
+  {
+   "n": 11,
+   "addr": "4562",
+   "text": "GREED",
+   "group": "emotion"
+  },
+  {
+   "n": 12,
+   "addr": "4568",
+   "text": "FURTIVENESS",
+   "group": "emotion"
+  },
+  {
+   "n": 13,
+   "addr": "4574",
+   "text": "APPROVAL",
+   "group": "emotion"
+  },
+  {
+   "n": 14,
+   "addr": "457d",
+   "text": "GRUDGING INTEREST",
+   "group": "emotion"
+  },
+  {
+   "n": 15,
+   "addr": "458f",
+   "text": "ANTAGONISM",
+   "group": "emotion"
+  },
+  {
+   "n": 16,
+   "addr": "459a",
+   "text": "ACCEPTANCE",
+   "group": "emotion"
+  },
+  {
+   "n": 17,
+   "addr": "45a5",
+   "text": "GUILE",
+   "group": "emotion"
+  },
+  {
+   "n": 18,
+   "addr": "45ab",
+   "text": "BENEVOLENCE",
+   "group": "emotion"
+  },
+  {
+   "n": 19,
+   "addr": "45b7",
+   "text": "LOVE AND SUPPORT",
+   "group": "emotion"
+  },
+  {
+   "n": 20,
+   "addr": "45c8",
+   "text": "LOVE AND TRUST",
+   "group": "emotion"
+  },
+  {
+   "n": 21,
+   "addr": "45d7",
+   "text": "HOPE AND JOY",
+   "group": "emotion"
+  },
+  {
+   "n": 22,
+   "addr": "45e4",
+   "text": "INDIFFERENCE",
+   "group": "emotion"
+  },
+  {
+   "n": 23,
+   "addr": "45f1",
+   "text": "APATHY",
+   "group": "emotion"
+  },
+  {
+   "n": 24,
+   "addr": "45f8",
+   "text": "BOREDOM",
+   "group": "emotion"
+  },
+  {
+   "n": 25,
+   "addr": "4600",
+   "text": "CONCERN",
+   "group": "emotion"
+  },
+  {
+   "n": 26,
+   "addr": "4608",
+   "text": "PRIDE",
+   "group": "emotion"
+  },
+  {
+   "n": 27,
+   "addr": "460e",
+   "text": "FRIENDLY INTEREST",
+   "group": "emotion"
+  },
+  {
+   "n": 28,
+   "addr": "4620",
+   "text": "KINDLY WARMTH",
+   "group": "emotion"
+  },
+  {
+   "n": 29,
+   "addr": "462e",
+   "text": "AMITY",
+   "group": "emotion"
+  },
+  {
+   "n": 30,
+   "addr": "4634",
+   "text": "HOSTILITY",
+   "group": "emotion"
+  },
+  {
+   "n": 31,
+   "addr": "463e",
+   "text": "DEVIOUSNESS",
+   "group": "emotion"
+  },
+  {
+   "n": 32,
+   "addr": "464a",
+   "text": "RAGE",
+   "group": "emotion"
+  },
+  {
+   "n": 33,
+   "addr": "464f",
+   "text": "INSANE FANATICISM",
+   "group": "emotion"
+  },
+  {
+   "n": 34,
+   "addr": "4661",
+   "text": "NOTHING",
+   "group": "unused"
+  },
+  {
+   "n": 35,
+   "addr": "4669",
+   "text": "DO YOU NEED REST?",
+   "group": "speech"
+  },
+  {
+   "n": 36,
+   "addr": "467b",
+   "text": "DO YOU NEED FOOD?",
+   "group": "speech"
+  },
+  {
+   "n": 37,
+   "addr": "468d",
+   "text": "DO YOU NEED A TOKEN?",
+   "group": "speech"
+  },
+  {
+   "n": 38,
+   "addr": "46a2",
+   "text": "DO YOU WISH TO EAT?",
+   "group": "speech"
+  },
+  {
+   "n": 39,
+   "addr": "46b6",
+   "text": "WOULD YOU LIKE TO REST?",
+   "group": "speech"
+  },
+  {
+   "n": 40,
+   "addr": "46ce",
+   "text": "DO YOU WANT TO BUY BERRIES?",
+   "group": "speech"
+  },
+  {
+   "n": 41,
+   "addr": "46ea",
+   "text": "MAY I OFFER A TOKEN?",
+   "group": "speech"
+  },
+  {
+   "n": 42,
+   "addr": "46ff",
+   "text": "I SUPPOSE YOU NEED A TOKEN?",
+   "group": "speech"
+  },
+  {
+   "n": 43,
+   "addr": "471b",
+   "text": "WOULD YOU LIKE A ROASTED LAPAN?",
+   "group": "speech"
+  },
+  {
+   "n": 44,
+   "addr": "473b",
+   "text": "WOULD YOU LIKE TO BUY A TRENCHER BEAK?",
+   "group": "speech"
+  },
+  {
+   "n": 45,
+   "addr": "4762",
+   "text": "WOULD YOU LIKE TO BUY FRUIT AND NUTS?",
+   "group": "speech"
+  },
+  {
+   "n": 46,
+   "addr": "4788",
+   "text": "HAVE A NICE HONEY LAMP?",
+   "group": "speech"
+  },
+  {
+   "n": 47,
+   "addr": "47a0",
+   "text": "YOU NEED A SHUBA?",
+   "group": "speech"
+  },
+  {
+   "n": 48,
+   "addr": "47b2",
+   "text": "I'VE FRESH PAN BREAD",
+   "group": "speech"
+  },
+  {
+   "n": 49,
+   "addr": "47c7",
+   "text": "VINE ROPE IS VERY USEFUL",
+   "group": "speech"
+  },
+  {
+   "n": 50,
+   "addr": "47e0",
+   "text": "D'OL FALLA AWAITS YOU IN THE PALACE",
+   "group": "speech"
+  },
+  {
+   "n": 51,
+   "addr": "4804",
+   "text": "THE CHAMBER LIES BEYOND THESE GATES",
+   "group": "pense"
+  },
+  {
+   "n": 52,
+   "addr": "4828",
+   "text": "PEACE AND JOY TO YOU, QUESTER",
+   "group": "speech"
+  },
+  {
+   "n": 53,
+   "addr": "4846",
+   "text": "GREETINGS QUESTER",
+   "group": "speech"
+  },
+  {
+   "n": 54,
+   "addr": "4858",
+   "text": "GREETINGS!",
+   "group": "speech"
+  },
+  {
+   "n": 55,
+   "addr": "4863",
+   "text": "PEACE AND JOY TO ALL KINDAR",
+   "group": "speech"
+  },
+  {
+   "n": 56,
+   "addr": "487f",
+   "text": "PEACE AND JOY TO ALL QUESTERS",
+   "group": "speech"
+  },
+  {
+   "n": 57,
+   "addr": "489d",
+   "text": "RAAMO'S MOTHER: SEEK THE SPIRIT",
+   "group": "speech"
+  },
+  {
+   "n": 58,
+   "addr": "48bd",
+   "text": "ENTER QUESTER",
+   "group": "speech"
+  },
+  {
+   "n": 59,
+   "addr": "48cb",
+   "text": "WELCOME TO MY HUMBLE ABODE",
+   "group": "speech"
+  },
+  {
+   "n": 60,
+   "addr": "48e6",
+   "text": "I HAVE NOTHING TO OFFER YOU",
+   "group": "speech"
+  },
+  {
+   "n": 61,
+   "addr": "4902",
+   "text": "ARE THERE NO ERDLING QUESTERS?",
+   "group": "speech"
+  },
+  {
+   "n": 62,
+   "addr": "4921",
+   "text": "I HAVE NOTHING TO GIVE",
+   "group": "speech"
+  },
+  {
+   "n": 63,
+   "addr": "4938",
+   "text": "YOU HAVE MY BLESSING",
+   "group": "speech"
+  },
+  {
+   "n": 64,
+   "addr": "494d",
+   "text": "WE WOULD NEED NO QUEST IF PEOPLE",
+   "group": "speech"
+  },
+  {
+   "n": 65,
+   "addr": "496e",
+   "text": "STAYED WHERE THEY BELONG",
+   "group": "speech"
+  },
+  {
+   "n": 66,
+   "addr": "4987",
+   "text": "THERE MUST BE SOME MISTAKE",
+   "group": "speech"
+  },
+  {
+   "n": 67,
+   "addr": "49a2",
+   "text": "THIS IS A KINDAR HOME",
+   "group": "speech"
+  },
+  {
+   "n": 68,
+   "addr": "49b8",
+   "text": "I GAVE AT THE TEMPLE",
+   "group": "speech"
+  },
+  {
+   "n": 69,
+   "addr": "49cd",
+   "text": "I HAVE NO TOKENS FOR KINDAR",
+   "group": "speech"
+  },
+  {
+   "n": 70,
+   "addr": "49e9",
+   "text": "SORRY, WE HAVE JUST EATEN",
+   "group": "speech"
+  },
+  {
+   "n": 71,
+   "addr": "4a03",
+   "text": "SEEK THE FORGOTTEN CHAMBER ON TEMPLE",
+   "group": "pense"
+  },
+  {
+   "n": 72,
+   "addr": "4a28",
+   "text": "LAMP. IT SHINES WITHOUT END",
+   "group": "speech"
+  },
+  {
+   "n": 73,
+   "addr": "4a44",
+   "text": "SEEK HIGH AND LOW",
+   "group": "pense"
+  },
+  {
+   "n": 74,
+   "addr": "4a56",
+   "text": "YOU WILL HEAR NOTHING FROM ME",
+   "group": "pense"
+  },
+  {
+   "n": 75,
+   "addr": "4a74",
+   "text": "THE ELIXER WILL STRENGTHEN YOU",
+   "group": "pense"
+  },
+  {
+   "n": 76,
+   "addr": "4a93",
+   "text": "I DON'T TRUST KINDAR",
+   "group": "pense"
+  },
+  {
+   "n": 77,
+   "addr": "4aa8",
+   "text": "ROPES WILL TAKE YOU TO SKY GRUND TOP",
+   "group": "pense"
+  },
+  {
+   "n": 78,
+   "addr": "4acd",
+   "text": "BE OFF, KINDAR",
+   "group": "pense"
+  },
+  {
+   "n": 79,
+   "addr": "4adc",
+   "text": "THE QUEST IS HOPELESS",
+   "group": "pense"
+  },
+  {
+   "n": 80,
+   "addr": "4af2",
+   "text": "THE OLD WAYS WERE BETTER",
+   "group": "pense"
+  },
+  {
+   "n": 81,
+   "addr": "4b0b",
+   "text": "MY NEIGHBORS ARE UNTRUSTWORTHY",
+   "group": "pense"
+  },
+  {
+   "n": 82,
+   "addr": "4b2a",
+   "text": "GO AWAY",
+   "group": "pense"
+  },
+  {
+   "n": 83,
+   "addr": "4b32",
+   "text": "SLEEP WELL, FOOL",
+   "group": "pense"
+  },
+  {
+   "n": 84,
+   "addr": "4b43",
+   "text": "FIND THE WISE CHILD OF THE GARDEN",
+   "group": "speech+pense"
+  },
+  {
+   "n": 85,
+   "addr": "4b65",
+   "text": "MAY NESHOM BLESS YOU",
+   "group": "pense"
+  },
+  {
+   "n": 86,
+   "addr": "4b7a",
+   "text": "I HAVE NO FAITH IN YOUR QUEST",
+   "group": "pense"
+  },
+  {
+   "n": 87,
+   "addr": "4b98",
+   "text": "YOU WILL GET NO HELP FROM ME",
+   "group": "pense"
+  },
+  {
+   "n": 88,
+   "addr": "4bb5",
+   "text": "D'OL SOLAAT'S MEN ARE WAITING",
+   "group": "pense"
+  },
+  {
+   "n": 89,
+   "addr": "4bd3",
+   "text": "BEWARE OF MY NEIGHBORS",
+   "group": "pense"
+  },
+  {
+   "n": 90,
+   "addr": "4bea",
+   "text": "BEWARE OF SNAKES",
+   "group": "pense"
+  },
+  {
+   "n": 91,
+   "addr": "4bfb",
+   "text": "CAN AN ERDLING BE TRUSTED?",
+   "group": "pense"
+  },
+  {
+   "n": 92,
+   "addr": "4c16",
+   "text": "DON'T WORRY.  HAVE A BERRY",
+   "group": "pense"
+  },
+  {
+   "n": 93,
+   "addr": "4c31",
+   "text": "I NEED A SHUBA",
+   "group": "pense"
+  },
+  {
+   "n": 94,
+   "addr": "4c40",
+   "text": "THE HERMIT BESTOWS SPIRIT",
+   "group": "pense"
+  },
+  {
+   "n": 95,
+   "addr": "4c5a",
+   "text": "SEEKERS NEED A HONEY LAMP",
+   "group": "pense"
+  },
+  {
+   "n": 96,
+   "addr": "4c74",
+   "text": "THE NEKOM WILL REWARD ME",
+   "group": "pense"
+  },
+  {
+   "n": 97,
+   "addr": "4c8d",
+   "text": "A TOKEN BUYS ENTRY",
+   "group": "pense"
+  },
+  {
+   "n": 98,
+   "addr": "4ca0",
+   "text": "MIND BLOCKING",
+   "group": "pense"
+  },
+  {
+   "n": 99,
+   "addr": "4cae",
+   "text": "LET YOUR OWN KIND FEED YOU",
+   "group": "pense"
+  },
+  {
+   "n": 100,
+   "addr": "4cc9",
+   "text": "DREAM IN THE SKY",
+   "group": "pense"
+  },
+  {
+   "n": 101,
+   "addr": "4cda",
+   "text": "SEEK ELSEWHERE",
+   "group": "pense"
+  },
+  {
+   "n": 102,
+   "addr": "4ce9",
+   "text": "VISIT THE TEMPLE GRUNDS",
+   "group": "pense"
+  },
+  {
+   "n": 103,
+   "addr": "4d01",
+   "text": "TOKENS ARE ERDLING COIN",
+   "group": "pense"
+  },
+  {
+   "n": 104,
+   "addr": "4d19",
+   "text": "THE GUARD EATS TOO MANY BERRIES",
+   "group": "pense"
+  },
+  {
+   "n": 105,
+   "addr": "4d39",
+   "text": "THE NEKOM WILL PAY ME WELL",
+   "group": "pense"
+  },
+  {
+   "n": 106,
+   "addr": "4d54",
+   "text": "LOOK BELOW",
+   "group": "pense"
+  },
+  {
+   "n": 107,
+   "addr": "4d5f",
+   "text": "THE HERMIT: EARN D'OL NESHOM'S BLESSING",
+   "group": "speech"
+  },
+  {
+   "n": 108,
+   "addr": "4d87",
+   "text": "SEEK A SKY-NID AND A DREAM",
+   "group": "pense"
+  },
+  {
+   "n": 109,
+   "addr": "4da2",
+   "text": "D'OL NESHOM: MY BLESSING QUESTER",
+   "group": "speech"
+  },
+  {
+   "n": 110,
+   "addr": "4dc3",
+   "text": "I GRANT YOU THE SPIRIT BELL",
+   "group": "speech"
+  },
+  {
+   "n": 111,
+   "addr": "4ddf",
+   "text": "YOU CAN RAISE THE FALLEN SPIRIT LEADER",
+   "group": "pense"
+  },
+  {
+   "n": 112,
+   "addr": "4e06",
+   "text": "VATAR: MAY THE SPIRIT SUSTAIN YOU",
+   "group": "speech"
+  },
+  {
+   "n": 113,
+   "addr": "4e28",
+   "text": "ONLY THE SPIRIT BELL CAN GUIDE YOU",
+   "group": "pense"
+  },
+  {
+   "n": 114,
+   "addr": "4e4b",
+   "text": "WANT TO PLAY?",
+   "group": "speech"
+  },
+  {
+   "n": 115,
+   "addr": "4e59",
+   "text": "HELLO, QUESTER",
+   "group": "speech"
+  },
+  {
+   "n": 116,
+   "addr": "4e68",
+   "text": "I LOST MY TOKEN",
+   "group": "speech"
+  },
+  {
+   "n": 117,
+   "addr": "4e78",
+   "text": "I HAD PAN FOR LUNCH",
+   "group": "speech"
+  },
+  {
+   "n": 118,
+   "addr": "4e8c",
+   "text": "FIND THE WISE ONE",
+   "group": "speech"
+  },
+  {
+   "n": 119,
+   "addr": "4e9e",
+   "text": "RAAMO'S MOTHER CAN HELP YOU",
+   "group": "pense"
+  },
+  {
+   "n": 120,
+   "addr": "4eba",
+   "text": "D'FALLA AWAITS YOU",
+   "group": "speech"
+  },
+  {
+   "n": 121,
+   "addr": "4ecd",
+   "text": "D'OL FALLA: SEEK THE FORGOTTEN KEY",
+   "group": "speech"
+  },
+  {
+   "n": 122,
+   "addr": "4ef0",
+   "text": "IT NOW BELONGS TO YOU",
+   "group": "speech"
+  },
+  {
+   "n": 123,
+   "addr": "4f06",
+   "text": "THE FORGOTTEN CHAMBER IS NEAR",
+   "group": "pense"
+  },
+  {
+   "n": 124,
+   "addr": "4f24",
+   "text": "RAAMO: MAY THE SPIRIT BLESS YOU",
+   "group": "speech"
+  },
+  {
+   "n": 125,
+   "addr": "4f44",
+   "text": "I NEED A ROPE OR A SHUBA",
+   "group": "pense"
+  },
+  {
+   "n": 126,
+   "addr": "4f5d",
+   "text": "I'M AFRAID OF FALLING",
+   "group": "speech"
+  },
+  {
+   "n": 127,
+   "addr": "4f73",
+   "text": "ONLY A TOKEN",
+   "group": "speech"
+  },
+  {
+   "n": 128,
+   "addr": "4f80",
+   "text": "THE QUESTER ADMIRES MY VOICE",
+   "group": "pense"
+  },
+  {
+   "n": 129,
+   "addr": "4f9d",
+   "text": "RAISE YOUR SPIRIT IN THE GARDEN",
+   "group": "speech"
+  },
+  {
+   "n": 130,
+   "addr": "4fbd",
+   "text": "SEARCH THE HEIGHTS OF GRAND GRUND",
+   "group": "speech"
+  },
+  {
+   "n": 131,
+   "addr": "4fdf",
+   "text": "I HEARD A VOICE CALLING FROM BELOW",
+   "group": "speech"
+  },
+  {
+   "n": 132,
+   "addr": "5002",
+   "text": "FEAR",
+   "group": "emotion"
+  },
+  {
+   "n": 133,
+   "addr": "5007",
+   "text": "SOMEONE MUST BE LOST DOWN THERE",
+   "group": "pense"
+  },
+  {
+   "n": 134,
+   "addr": "5027",
+   "text": "ENTER WITH THE TEMPLE KEY",
+   "group": "pense"
+  },
+  {
+   "n": 135,
+   "addr": "5041",
+   "text": "*",
+   "group": "unused"
+  },
+  {
+   "n": 136,
+   "addr": "5043",
+   "text": "YOU SHOULD CARRY A ROPE AND A BEAK",
+   "group": "pense"
+  },
+  {
+   "n": 137,
+   "addr": "5066",
+   "text": "SEEK THE HERMIT OF GRAND GRUND",
+   "group": "speech+pense"
+  },
+  {
+   "n": 138,
+   "addr": "5085",
+   "text": "PEACE TO YOU PILGRIM",
+   "group": "speech"
+  },
+  {
+   "n": 139,
+   "addr": "509a",
+   "text": "MAY I SEE YOUR PASS?",
+   "group": "speech"
+  },
+  {
+   "n": 140,
+   "addr": "50af",
+   "text": "I'D SETTLE FOR SOME GOOD BERRY",
+   "group": "pense"
+  },
+  {
+   "n": 141,
+   "addr": "50ce",
+   "text": "PITY",
+   "group": "emotion"
+  },
+  {
+   "n": 142,
+   "addr": "50d3",
+   "text": "WAIT A MINUTE.  I WANT TOKENS.",
+   "group": "speech"
+  },
+  {
+   "n": 143,
+   "addr": "50f2",
+   "text": "I HOPE YOUR STAMINA IS HIGH",
+   "group": "pense"
+  },
+  {
+   "n": 144,
+   "addr": "510e",
+   "text": "GATHER BERRIES ON BRANCH ENDS",
+   "group": "pense"
+  },
+  {
+   "n": 145,
+   "addr": "512c",
+   "text": "THE SPIRIT FADES, IN DARKNESS LYING",
+   "group": "speech"
+  },
+  {
+   "n": 146,
+   "addr": "5150",
+   "text": "A QUEST PROCLAIM!  THE LIGHT IS DYING",
+   "group": "speech"
+  },
+  {
+   "n": 147,
+   "addr": "5176",
+   "text": "CLIMB AT THE BASE OF THE CENTER TRUNK",
+   "group": "pense"
+  },
+  {
+   "n": 148,
+   "addr": "519c",
+   "text": "SEEK THE LOST KEY ABOVE",
+   "group": "pense"
+  },
+  {
+   "n": 149,
+   "addr": "51b4",
+   "text": "MY SON LIVES. YOU MUST SAVE HIM",
+   "group": "pense"
+  },
+  {
+   "n": 150,
+   "addr": "51d4",
+   "text": "THE WISE CHILD: THE BLESSED ONE LIVES",
+   "group": "speech"
+  },
+  {
+   "n": 151,
+   "addr": "51fa",
+   "text": "THE SPIRIT RISES WITHIN",
+   "group": "pense"
+  },
+  {
+   "n": 152,
+   "addr": "5212",
+   "text": "WARMTH",
+   "group": "emotion"
+  },
+  {
+   "n": 153,
+   "addr": "5219",
+   "text": "PASS THE TWO GATES OF THE FORGOTTEN",
+   "group": "speech"
+  },
+  {
+   "n": 154,
+   "addr": "523d",
+   "text": "D'OL FALLA'S KEY IS WELL HIDDEN",
+   "group": "pense"
+  },
+  {
+   "n": 155,
+   "addr": "525d",
+   "text": "FIND THOSE WHO WILL RAISE YOUR SPIRIT",
+   "group": "pense"
+  },
+  {
+   "n": 156,
+   "addr": "5283",
+   "text": "PENSE THE ANIMALS IF YOU HAVE THE POWER",
+   "group": "pense"
+  },
+  {
+   "n": 157,
+   "addr": "52ab",
+   "text": "PENSE DEEPLY IF YOU FIND THE ANIMALS",
+   "group": "pense"
+  },
+  {
+   "n": 158,
+   "addr": "52d0",
+   "text": "THE HERMIT HELPS IN MANY WAYS",
+   "group": "pense"
+  },
+  {
+   "n": 159,
+   "addr": "52ee",
+   "text": "THE TEMPLE KEY OPENS MANY GATES",
+   "group": "pense"
+  },
+  {
+   "n": 160,
+   "addr": "530e",
+   "text": "GIVE UP THIS FOOLISH QUEST",
+   "group": "pense"
+  },
+  {
+   "n": 161,
+   "addr": "5329",
+   "text": "THE WISE CHILD KNOWS MORE THAN I DO",
+   "group": "pense"
+  },
+  {
+   "n": 162,
+   "addr": "534d",
+   "text": "THE WISE ONE LIVES NEAR",
+   "group": "pense"
+  },
+  {
+   "n": 163,
+   "addr": "5365",
+   "text": "LEARN TO USE THE SPIRIT POWERS",
+   "group": "pense"
+  },
+  {
+   "n": 164,
+   "addr": "5384",
+   "text": "PERHAPS THE HERMIT WILL HELP YOU",
+   "group": "pense"
+  },
+  {
+   "n": 165,
+   "addr": "53a5",
+   "text": "PENSE STRANGERS FROM A DISTANCE",
+   "group": "pense"
+  },
+  {
+   "n": 166,
+   "addr": "53c5",
+   "text": "WELCOME QUESTER",
+   "group": "speech"
+  },
+  {
+   "n": 167,
+   "addr": "53d5",
+   "text": "DO YOU NEED AN EXTRA SHUBA?",
+   "group": "speech"
+  },
+  {
+   "n": 168,
+   "addr": "53f1",
+   "text": "GLIDE FROM STAR TO TEMPLE",
+   "group": "pense"
+  },
+  {
+   "n": 169,
+   "addr": "540b",
+   "text": "VATAR BELIEVES IN YOUR QUEST",
+   "group": "speech"
+  },
+  {
+   "n": 170,
+   "addr": "5428",
+   "text": "VATAR LIVES BELOW THE ROOT",
+   "group": "pense"
+  },
+  {
+   "n": 171,
+   "addr": "5443",
+   "text": "*",
+   "group": "unused"
+  },
+  {
+   "n": 172,
+   "addr": "5445",
+   "text": "RAAMO WOULD HAVE UNITED OUR PEOPLE",
+   "group": "pense"
+  },
+  {
+   "n": 173,
+   "addr": "5468",
+   "text": "AT LAST!  A QUESTER COMES",
+   "group": "speech"
+  },
+  {
+   "n": 174,
+   "addr": "5482",
+   "text": "SADNESS",
+   "group": "emotion"
+  },
+  {
+   "n": 175,
+   "addr": "548a",
+   "text": "I'VE BEEN OVER THE TEMPLE GATE",
+   "group": "speech"
+  },
+  {
+   "n": 176,
+   "addr": "54a9",
+   "text": "GRUNDSPREKE AND GLIDE OVER",
+   "group": "pense"
+  },
+  {
+   "n": 177,
+   "addr": "54c4",
+   "text": "I LOVE TO GLIDE",
+   "group": "speech"
+  },
+  {
+   "n": 178,
+   "addr": "54d4",
+   "text": "EXCITEMENT",
+   "group": "emotion"
+  },
+  {
+   "n": 179,
+   "addr": "54df",
+   "text": "THE QUEST IS WOVEN LIKE A TAPESTRY",
+   "group": "speech"
+  },
+  {
+   "n": 180,
+   "addr": "5502",
+   "text": "SEEK EVERYWHERE",
+   "group": "pense"
+  },
+  {
+   "n": 181,
+   "addr": "5512",
+   "text": "LEARN THE SPIRIT SKILLS",
+   "group": "speech"
+  },
+  {
+   "n": 182,
+   "addr": "552a",
+   "text": "CARRY BOTH SPIRIT TOOLS BELOW",
+   "group": "pense"
+  },
+  {
+   "n": 183,
+   "addr": "5548",
+   "text": "SPEAK WITH STAR IF YOU HAVE THE POWER",
+   "group": "speech"
+  },
+  {
+   "n": 184,
+   "addr": "556e",
+   "text": "GLIDE FROM ABOVE",
+   "group": "pense"
+  },
+  {
+   "n": 185,
+   "addr": "557f",
+   "text": "THE TEMPLE KEY OPENS THE GATES",
+   "group": "speech"
+  },
+  {
+   "n": 186,
+   "addr": "559e",
+   "text": "THE KEY IS LOST",
+   "group": "pense"
+  },
+  {
+   "n": 187,
+   "addr": "55ae",
+   "text": "THE MOTHER MOURNS HER SON",
+   "group": "speech"
+  }
+ ]
+}

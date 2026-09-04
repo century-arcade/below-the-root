@@ -1,0 +1,42 @@
+{
+ "labels": {
+  "00a8": "reverse_video",
+  "00c4": "fatigue_cause",
+  "00de": "quest_time_up",
+  "00df": "spirit_bell_rang",
+  "09e1": "blk_npc_gate",
+  "09e7": "blk_speak_pass1",
+  "09e8": "blk_speak_pass2",
+  "09e9": "blk_emotion_pass",
+  "09ea": "blk_message_pass",
+  "09eb": "blk_speak_fail1",
+  "09ec": "blk_speak_fail2",
+  "09ed": "blk_emotion_fail",
+  "09ee": "blk_message_fail",
+  "09ef": "blk_gift_class",
+  "09f0": "blk_npc_state",
+  "09f1": "blk_npc_kind",
+  "940e": "clear_text_area",
+  "439a": "msg_no_response_speak",
+  "43ae": "msg_no_response_message",
+  "44c3": "gate_grant_entry",
+  "8e76": "quest_time_over",
+  "9492": "recover_day_msg",
+  "96b9": "door_lock_check"
+ },
+ "comments": {
+  "3c15": "A = 1-based message number; skips A-1 $FF-terminated strings from $4500",
+  "3c73": "the gift/come-back-tomorrow path is only for $F1 = 0 creatures",
+  "3c7e": "$2380,x low 7 bits = the day this creature was last spoken to",
+  "3cdb": "stamp today into $2380,x, keeping bit 7 (the once-per-quest reward flag)",
+  "3d0c": "$F1 = $40: first SPEAK raises the spirit limit by 5, bit 7 marks it spent",
+  "3d51": "$EF = $10 is not an object class: the creature offers a nid, not a thing",
+  "40f6": "emotions need no adjacency; only the MESSAGE half calls npc_adjacent",
+  "4118": "PENSE MESSAGES needs spirit limit 10; a full pense costs 2 energy",
+  "4129": "$F1 = 1 animals give their message once per quest",
+  "43c2": "carry set = the player's standing with that people meets the block's threshold",
+  "9940": "$09E1 low nibble picks $0A68 (Kindar) or $0A69 (Erdling), high nibble is the level",
+  "b29c": "day $33 = 51 ends the quest",
+  "9f05": "quest rating: >= 30 days gifted, 15-29 highly gifted, under 15 master"
+ }
+}

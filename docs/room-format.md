@@ -135,12 +135,13 @@ touches this block checks that first.
 | `$EB`, `$EC` | the two SPEAK messages when the gate fails |
 | `$ED` | EMOTION message when the gate fails |
 | `$EE` | MESSAGE message when the gate fails |
-| `$EF` | gift behaviour; `$10` means "gives nothing" (`$3D4E`) |
+| `$EF` | what the creature gives: an object class 0-14 (`$AFF7` names), or `$10` = a nid to rest in (`$3D4E`) |
 | `$F0` | index into the per-character state arrays at `$2300`/`$2380` |
-| `$F1` | room/NPC flags: `$C0`/`$C1` = door locked unless flag `$2334`/`$2335` is set, `$40`, `$D0`, `$01`, `$02`, `$90` also occur |
+| `$F1` | creature kind: `$00` gift-giver, `$01` animal, `$02` silent, `$20`-`$23` nid + event, `$40` blesser, `$80` merchant, `$C0`/`$C1` door locked unless `$2334`/`$2335` or `$CD`, `$D0` D'ol Falla, `$E0`-`$E3` hostile; `$30`, `$90`, `$F0` are plain talkers (see docs/messages-and-dialog.md) |
 
 Message numbers are 1-based indices into a `$FF`-terminated string table at
-`$4500`; `$3C15` prints entry A at a given screen address.
+`$4500`; `$3C15` prints entry A at a given screen address.  Which slot is
+read when, and what every number says, is in docs/messages-and-dialog.md.
 
 ## Objects
 

@@ -232,17 +232,19 @@ byte with bit 7 set) and copies the A'th to the screen.  `$4500-$55FF`
 holds 187 such strings -- emotions ("SYMPATHY", "SUSPICION", "AVARICE",
 ...) first, then NPC lines ("SPEAK WITH STAR IF YOU HAVE THE POWER" is
 #183 at `$5548`).  The room block supplies the message numbers: `$09E7/8`
-and `$09EB/C` for SPEAK, `$09E9`/`$09ED` for PENSE.
+and `$09EB/C` for SPEAK, `$09E9`/`$09EA` and `$09ED`/`$09EE` for PENSE.
+Full table, groups and cross-reference: docs/messages-and-dialog.md.
 
 `verb_speak` ($3C48) prints "SPEAK WITH WHOM?" when there is no creature
 (`$09E0` = 0) or none adjacent (`npc_adjacent` $4364 compares the player's
-`$0A10/$0A18` against `$0A80/$0A81`).  If the NPC has a gift to give
-(`find_gift_item` $3D4E) but was already spoken to today
-(`$2380,x & $7F` == `$0A62`), it prints "COME BACK TOMORROW, MY FRIEND";
-otherwise it prints the NPC's one or two lines, stamps the current day
-into `$2380,x`, and for NPC type `$09F1` = $40 whose `$2380,x` bit 7 is
-still clear it grants a spirit gift ($3D24): bit 7 set, `$0A67` += 5,
-`$0A63` = `$0A67`, `play_random_tune`, `gain_spirit_power`.
+`$0A10/$0A18` against `$0A80/$0A81`).  For a gift-giver (`$09F1` = 0)
+whose standing gate passes it runs `find_gift_item` ($3D4E) and, if
+`$2380,x & $7F` already equals today (`$0A62`), prints "COME BACK
+TOMORROW, MY FRIEND"; otherwise it prints the NPC's one or two lines,
+stamps the current day into `$2380,x`, and for NPC type `$09F1` = $40
+whose `$2380,x` bit 7 is still clear it grants a spirit gift ($3D24):
+bit 7 set, `$0A67` += 5, `$0A63` = `$0A67`, `play_random_tune`,
+`gain_spirit_power`.
 
 `play_random_tune` ($3D38): delay $A0, then `$2800` (musiclow) with a
 random tune 2..9, spinning until `$0A95` clears.  Also used by the spirit

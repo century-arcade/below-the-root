@@ -1,3 +1,4 @@
 .meta
 build/
 disasm/out/
+__pycache__/

@@ -1,0 +1,4594 @@
+{
+ "slots": [
+  "speak_pass1",
+  "speak_pass2",
+  "emotion_pass",
+  "message_pass",
+  "speak_fail1",
+  "speak_fail2",
+  "emotion_fail",
+  "message_fail"
+ ],
+ "npcs": [
+  {
+   "room": 2,
+   "species": 8,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 95,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 4,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 3,
+   "state_index": 2,
+   "flags": "00",
+   "gift": "05",
+   "gift_means": "PAN BREAD",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 36,
+    "emotion_pass": 3,
+    "message_pass": 73,
+    "speak_fail1": 52,
+    "speak_fail2": 0,
+    "emotion_fail": 2,
+    "message_fail": 74
+   }
+  },
+  {
+   "room": 6,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 3,
+   "state_index": 4,
+   "flags": "00",
+   "gift": "08",
+   "gift_means": "A TOKEN",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 37,
+    "emotion_pass": 4,
+    "message_pass": 77,
+    "speak_fail1": 54,
+    "speak_fail2": 61,
+    "emotion_fail": 5,
+    "message_fail": 78
+   }
+  },
+  {
+   "room": 7,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 2,
+   "state_index": 1,
+   "flags": "00",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 35,
+    "emotion_pass": 1,
+    "message_pass": 71,
+    "speak_fail1": 52,
+    "speak_fail2": 0,
+    "emotion_fail": 2,
+    "message_fail": 74
+   }
+  },
+  {
+   "room": 8,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 1,
+   "state_index": 3,
+   "flags": "00",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 35,
+    "emotion_pass": 1,
+    "message_pass": 75,
+    "speak_fail1": 53,
+    "speak_fail2": 60,
+    "emotion_fail": 2,
+    "message_fail": 76
+   }
+  },
+  {
+   "room": 10,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 28,
+   "flags": "00",
+   "gift": "04",
+   "gift_means": "A ROAST LAPAN",
+   "slots": {
+    "speak_pass1": 58,
+    "speak_pass2": 36,
+    "emotion_pass": 16,
+    "message_pass": 104,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 11,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 4,
+   "state_index": 6,
+   "flags": "00",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 35,
+    "emotion_pass": 6,
+    "message_pass": 79,
+    "speak_fail1": 55,
+    "speak_fail2": 0,
+    "emotion_fail": 5,
+    "message_fail": 80
+   }
+  },
+  {
+   "room": 12,
+   "species": 5,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 57,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 116,
+    "speak_pass2": 0,
+    "emotion_pass": 25,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 13,
+   "species": 5,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 58,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 117,
+    "speak_pass2": 0,
+    "emotion_pass": 3,
+    "message_pass": 162,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 14,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 3,
+   "state_index": 7,
+   "flags": "00",
+   "gift": "06",
+   "gift_means": "FRUIT & NUTS",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 38,
+    "emotion_pass": 1,
+    "message_pass": 81,
+    "speak_fail1": 53,
+    "speak_fail2": 62,
+    "emotion_fail": 2,
+    "message_fail": 82
+   }
+  },
+  {
+   "room": 17,
+   "species": 4,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 56,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 114,
+    "speak_pass2": 0,
+    "emotion_pass": 24,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 18,
+   "species": 4,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 59,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 118,
+    "speak_pass2": 0,
+    "emotion_pass": 8,
+    "message_pass": 163,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 19,
+   "species": 4,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 60,
+   "flags": "40",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 150,
+    "speak_pass2": 0,
+    "emotion_pass": 21,
+    "message_pass": 119,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 20,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 8,
+   "flags": "20",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 39,
+    "emotion_pass": 7,
+    "message_pass": 83,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 21,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 9,
+   "flags": "00",
+   "gift": "05",
+   "gift_means": "PAN BREAD",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 36,
+    "emotion_pass": 8,
+    "message_pass": 84,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 22,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 10,
+   "flags": "00",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 35,
+    "emotion_pass": 3,
+    "message_pass": 85,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 23,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 36,
+   "flags": "00",
+   "gift": "07",
+   "gift_means": "A SHUBA",
+   "slots": {
+    "speak_pass1": 166,
+    "speak_pass2": 167,
+    "emotion_pass": 19,
+    "message_pass": 168,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 24,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 37,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 169,
+    "speak_pass2": 0,
+    "emotion_pass": 27,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 25,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 3,
+   "state_index": 29,
+   "flags": "00",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 54,
+    "speak_pass2": 35,
+    "emotion_pass": 13,
+    "message_pass": 0,
+    "speak_fail1": 60,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 26,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 40,
+   "flags": "80",
+   "gift": "04",
+   "gift_means": "A ROAST LAPAN",
+   "slots": {
+    "speak_pass1": 43,
+    "speak_pass2": 127,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 27,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 38,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 56,
+    "speak_pass2": 0,
+    "emotion_pass": 1,
+    "message_pass": 170,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 29,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 13,
+   "flags": "21",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 35,
+    "emotion_pass": 9,
+    "message_pass": 88,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 30,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 14,
+   "flags": "00",
+   "gift": "04",
+   "gift_means": "A ROAST LAPAN",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 36,
+    "emotion_pass": 8,
+    "message_pass": 89,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 32,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 53,
+   "flags": "c1",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 142,
+    "speak_pass2": 0,
+    "emotion_pass": 11,
+    "message_pass": 143,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 34,
+   "species": 9,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 93,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 36,
+   "species": 10,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 50,
+   "flags": "30",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 153,
+    "speak_pass2": 0,
+    "emotion_pass": 6,
+    "message_pass": 154,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 37,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 41,
+   "flags": "80",
+   "gift": "06",
+   "gift_means": "FRUIT & NUTS",
+   "slots": {
+    "speak_pass1": 45,
+    "speak_pass2": 127,
+    "emotion_pass": 23,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 38,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 42,
+   "flags": "80",
+   "gift": "09",
+   "gift_means": "A TRENCHER BEAK",
+   "slots": {
+    "speak_pass1": 44,
+    "speak_pass2": 127,
+    "emotion_pass": 22,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 39,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 43,
+   "flags": "80",
+   "gift": "02",
+   "gift_means": "A HONEYLAMP",
+   "slots": {
+    "speak_pass1": 46,
+    "speak_pass2": 127,
+    "emotion_pass": 1,
+    "message_pass": 164,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 40,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 30,
+   "flags": "23",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 59,
+    "speak_pass2": 39,
+    "emotion_pass": 17,
+    "message_pass": 105,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 41,
+   "species": 10,
+   "sprite_color": 8,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 63,
+   "flags": "40",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 107,
+    "speak_pass2": 0,
+    "emotion_pass": 18,
+    "message_pass": 108,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 42,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 21,
+   "flags": "23",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 35,
+    "emotion_pass": 12,
+    "message_pass": 96,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 43,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 20,
+   "flags": "00",
+   "gift": "08",
+   "gift_means": "A TOKEN",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 37,
+    "emotion_pass": 8,
+    "message_pass": 95,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 45,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 18,
+   "flags": "00",
+   "gift": "05",
+   "gift_means": "PAN BREAD",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 36,
+    "emotion_pass": 1,
+    "message_pass": 94,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 46,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 16,
+   "flags": "80",
+   "gift": "0a",
+   "gift_means": "WISSENBERRIES",
+   "slots": {
+    "speak_pass1": 40,
+    "speak_pass2": 127,
+    "emotion_pass": 10,
+    "message_pass": 92,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 49,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 17,
+   "flags": "22",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 39,
+    "emotion_pass": 11,
+    "message_pass": 93,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 51,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 3,
+   "state_index": 15,
+   "flags": "00",
+   "gift": "08",
+   "gift_means": "A TOKEN",
+   "slots": {
+    "speak_pass1": 55,
+    "speak_pass2": 37,
+    "emotion_pass": 3,
+    "message_pass": 90,
+    "speak_fail1": 66,
+    "speak_fail2": 67,
+    "emotion_fail": 2,
+    "message_fail": 91
+   }
+  },
+  {
+   "room": 52,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 31,
+   "flags": "00",
+   "gift": "08",
+   "gift_means": "A TOKEN",
+   "slots": {
+    "speak_pass1": 37,
+    "speak_pass2": 0,
+    "emotion_pass": 1,
+    "message_pass": 106,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 54,
+   "species": 4,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 48,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 177,
+    "speak_pass2": 0,
+    "emotion_pass": 178,
+    "message_pass": 176,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 55,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 3,
+   "state_index": 24,
+   "flags": "00",
+   "gift": "08",
+   "gift_means": "A TOKEN",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 42,
+    "emotion_pass": 14,
+    "message_pass": 0,
+    "speak_fail1": 69,
+    "speak_fail2": 0,
+    "emotion_fail": 15,
+    "message_fail": 99
+   }
+  },
+  {
+   "room": 56,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 3,
+   "state_index": 22,
+   "flags": "00",
+   "gift": "08",
+   "gift_means": "A TOKEN",
+   "slots": {
+    "speak_pass1": 55,
+    "speak_pass2": 41,
+    "emotion_pass": 13,
+    "message_pass": 97,
+    "speak_fail1": 68,
+    "speak_fail2": 0,
+    "emotion_fail": 5,
+    "message_fail": 98
+   }
+  },
+  {
+   "room": 57,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 49,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 179,
+    "speak_pass2": 0,
+    "emotion_pass": 3,
+    "message_pass": 180,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 58,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 122,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 181,
+    "speak_pass2": 0,
+    "emotion_pass": 8,
+    "message_pass": 182,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 60,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 3,
+   "state_index": 26,
+   "flags": "00",
+   "gift": "06",
+   "gift_means": "FRUIT & NUTS",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 36,
+    "emotion_pass": 6,
+    "message_pass": 100,
+    "speak_fail1": 70,
+    "speak_fail2": 0,
+    "emotion_fail": 9,
+    "message_fail": 101
+   }
+  },
+  {
+   "room": 62,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 27,
+   "flags": "20",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 39,
+    "emotion_pass": 7,
+    "message_pass": 103,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 63,
+   "species": 10,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 123,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 183,
+    "speak_pass2": 0,
+    "emotion_pass": 28,
+    "message_pass": 184,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 64,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 44,
+   "flags": "80",
+   "gift": "07",
+   "gift_means": "A SHUBA",
+   "slots": {
+    "speak_pass1": 47,
+    "speak_pass2": 127,
+    "emotion_pass": 22,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 66,
+   "species": 8,
+   "sprite_color": 5,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 92,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 67,
+   "species": 6,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 94,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 68,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 45,
+   "flags": "80",
+   "gift": "0b",
+   "gift_means": "A VINE ROPE",
+   "slots": {
+    "speak_pass1": 49,
+    "speak_pass2": 127,
+    "emotion_pass": 24,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 69,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 46,
+   "flags": "80",
+   "gift": "05",
+   "gift_means": "PAN BREAD",
+   "slots": {
+    "speak_pass1": 48,
+    "speak_pass2": 127,
+    "emotion_pass": 25,
+    "message_pass": 165,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 71,
+   "species": 10,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 71,
+   "flags": "d0",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 121,
+    "speak_pass2": 122,
+    "emotion_pass": 20,
+    "message_pass": 123,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 72,
+   "species": 1,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 70,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 120,
+    "speak_pass2": 0,
+    "emotion_pass": 6,
+    "message_pass": 160,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 74,
+   "species": 0,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 127,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 50,
+    "emotion_pass": 1,
+    "message_pass": 51,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 76,
+   "species": 0,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 68,
+   "flags": "00",
+   "gift": "06",
+   "gift_means": "FRUIT & NUTS",
+   "slots": {
+    "speak_pass1": 54,
+    "speak_pass2": 38,
+    "emotion_pass": 8,
+    "message_pass": 147,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 77,
+   "species": 5,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 69,
+   "flags": "00",
+   "gift": "10",
+   "gift_means": "a nid (rest)",
+   "slots": {
+    "speak_pass1": 58,
+    "speak_pass2": 39,
+    "emotion_pass": 13,
+    "message_pass": 148,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 81,
+   "species": 4,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 67,
+   "flags": "00",
+   "gift": "0c",
+   "gift_means": "THE TEMPLE KEY",
+   "slots": {
+    "speak_pass1": 115,
+    "speak_pass2": 114,
+    "emotion_pass": 4,
+    "message_pass": 159,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 82,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 4,
+   "state_index": 12,
+   "flags": "30",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 63,
+    "emotion_pass": 2,
+    "message_pass": 86,
+    "speak_fail1": 64,
+    "speak_fail2": 65,
+    "emotion_fail": 5,
+    "message_fail": 87
+   }
+  },
+  {
+   "room": 89,
+   "species": 9,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 106,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 91,
+   "species": 5,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 47,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 175,
+    "speak_pass2": 0,
+    "emotion_pass": 26,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 94,
+   "species": 0,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 39,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 173,
+    "speak_pass2": 0,
+    "emotion_pass": 174,
+    "message_pass": 172,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 98,
+   "species": 7,
+   "sprite_color": 7,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 91,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 108,
+   "species": 8,
+   "sprite_color": 5,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 101,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 116,
+   "species": 0,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 72,
+   "flags": "40",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 57,
+    "speak_pass2": 72,
+    "emotion_pass": 8,
+    "message_pass": 149,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 122,
+   "species": 9,
+   "sprite_color": 2,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 107,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 126,
+   "species": 7,
+   "sprite_color": 10,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 97,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 133,
+   "species": 9,
+   "sprite_color": 4,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 98,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 134,
+   "species": 7,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 99,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 138,
+   "species": 1,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 79,
+   "flags": "e1",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 33,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 149,
+   "species": 4,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 125,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 187,
+    "speak_pass2": 0,
+    "emotion_pass": 8,
+    "message_pass": 134,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 158,
+   "species": 6,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 96,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 160,
+   "species": 1,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 81,
+   "flags": "e1",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 33,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 163,
+   "species": 0,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 76,
+   "flags": "e0",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 31,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 164,
+   "species": 8,
+   "sprite_color": 8,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 90,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 173,
+   "species": 9,
+   "sprite_color": 2,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 102,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 177,
+   "species": 0,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 80,
+   "flags": "e1",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 33,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 179,
+   "species": 4,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 65,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 129,
+    "speak_pass2": 0,
+    "emotion_pass": 28,
+    "message_pass": 157,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 181,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 83,
+   "flags": "e2",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 30,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 191,
+   "species": 10,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 51,
+   "flags": "40",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 109,
+    "speak_pass2": 110,
+    "emotion_pass": 18,
+    "message_pass": 111,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 192,
+   "species": 6,
+   "sprite_color": 12,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 88,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 193,
+   "species": 0,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 54,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 52,
+    "speak_pass2": 137,
+    "emotion_pass": 1,
+    "message_pass": 144,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 203,
+   "species": 5,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 61,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 130,
+    "speak_pass2": 0,
+    "emotion_pass": 27,
+    "message_pass": 155,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 204,
+   "species": 1,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 33,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 56,
+    "speak_pass2": 0,
+    "emotion_pass": 25,
+    "message_pass": 71,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 207,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 62,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 84,
+    "speak_pass2": 0,
+    "emotion_pass": 29,
+    "message_pass": 156,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 213,
+   "species": 7,
+   "sprite_color": 8,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 103,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 214,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 66,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 137,
+    "emotion_pass": 1,
+    "message_pass": 158,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 221,
+   "species": 8,
+   "sprite_color": 7,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 104,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 230,
+   "species": 5,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 55,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 115,
+    "speak_pass2": 0,
+    "emotion_pass": 27,
+    "message_pass": 161,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 238,
+   "species": 0,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 34,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 53,
+    "speak_pass2": 0,
+    "emotion_pass": 13,
+    "message_pass": 136,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 241,
+   "species": 0,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 78,
+   "flags": "e0",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 31,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 244,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 35,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 138,
+    "speak_pass2": 0,
+    "emotion_pass": 4,
+    "message_pass": 137,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 245,
+   "species": 1,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 64,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 145,
+    "speak_pass2": 146,
+    "emotion_pass": 26,
+    "message_pass": 128,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 248,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 124,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 185,
+    "speak_pass2": 0,
+    "emotion_pass": 25,
+    "message_pass": 186,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 257,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 32,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 54,
+    "speak_pass2": 0,
+    "emotion_pass": 27,
+    "message_pass": 102,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 260,
+   "species": 9,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 89,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 269,
+   "species": 1,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 77,
+   "flags": "e0",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 31,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 296,
+   "species": 6,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 100,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 316,
+   "species": 7,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 105,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 352,
+   "species": 1,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 52,
+   "flags": "c0",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 139,
+    "speak_pass2": 0,
+    "emotion_pass": 141,
+    "message_pass": 140,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 363,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 84,
+   "flags": "e2",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 30,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 380,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 82,
+   "flags": "e2",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 30,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 385,
+   "species": 5,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 126,
+   "flags": "90",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 131,
+    "speak_pass2": 0,
+    "emotion_pass": 132,
+    "message_pass": 133,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 386,
+   "species": 9,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 109,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 388,
+   "species": 2,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 86,
+   "flags": "e3",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 32,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 402,
+   "species": 9,
+   "sprite_color": 13,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 116,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 410,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 87,
+   "flags": "e3",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 32,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 417,
+   "species": 9,
+   "sprite_color": 7,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 110,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 420,
+   "species": 9,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 111,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 433,
+   "species": 9,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 117,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 437,
+   "species": 8,
+   "sprite_color": 7,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 114,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 447,
+   "species": 9,
+   "sprite_color": 2,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 119,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 452,
+   "species": 8,
+   "sprite_color": 2,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 108,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 458,
+   "species": 9,
+   "sprite_color": 8,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 112,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 464,
+   "species": 1,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 73,
+   "flags": "f0",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 124,
+    "speak_pass2": 126,
+    "emotion_pass": 21,
+    "message_pass": 125,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 467,
+   "species": 8,
+   "sprite_color": 5,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 115,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 472,
+   "species": 8,
+   "sprite_color": 8,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 121,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 476,
+   "species": 9,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 120,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 489,
+   "species": 9,
+   "sprite_color": 15,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 113,
+   "flags": "02",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 0,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 492,
+   "species": 10,
+   "sprite_color": 1,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 74,
+   "flags": "40",
+   "gift": "06",
+   "gift_means": "FRUIT & NUTS",
+   "slots": {
+    "speak_pass1": 112,
+    "speak_pass2": 0,
+    "emotion_pass": 19,
+    "message_pass": 113,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 496,
+   "species": 6,
+   "sprite_color": 1,
+   "gate_stat": 0,
+   "gate_level": 0,
+   "state_index": 118,
+   "flags": "01",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 152,
+    "message_pass": 151,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  },
+  {
+   "room": 501,
+   "species": 3,
+   "sprite_color": 7,
+   "gate_stat": 1,
+   "gate_level": 0,
+   "state_index": 85,
+   "flags": "e3",
+   "gift": "00",
+   "gift_means": "A SPIRIT BELL",
+   "slots": {
+    "speak_pass1": 0,
+    "speak_pass2": 0,
+    "emotion_pass": 32,
+    "message_pass": 0,
+    "speak_fail1": 0,
+    "speak_fail2": 0,
+    "emotion_fail": 0,
+    "message_fail": 0
+   }
+  }
+ ],
+ "by_message": {
+  "1": [
+   {
+    "room": 7,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 8,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 14,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 27,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 39,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 45,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 52,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 74,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 193,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 214,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "2": [
+   {
+    "room": 4,
+    "slot": "emotion_fail",
+    "species": 1
+   },
+   {
+    "room": 7,
+    "slot": "emotion_fail",
+    "species": 0
+   },
+   {
+    "room": 8,
+    "slot": "emotion_fail",
+    "species": 3
+   },
+   {
+    "room": 14,
+    "slot": "emotion_fail",
+    "species": 1
+   },
+   {
+    "room": 51,
+    "slot": "emotion_fail",
+    "species": 0
+   },
+   {
+    "room": 82,
+    "slot": "emotion_pass",
+    "species": 0
+   }
+  ],
+  "3": [
+   {
+    "room": 4,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 13,
+    "slot": "emotion_pass",
+    "species": 5
+   },
+   {
+    "room": 22,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 51,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 57,
+    "slot": "emotion_pass",
+    "species": 0
+   }
+  ],
+  "4": [
+   {
+    "room": 6,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 81,
+    "slot": "emotion_pass",
+    "species": 4
+   },
+   {
+    "room": 244,
+    "slot": "emotion_pass",
+    "species": 2
+   }
+  ],
+  "5": [
+   {
+    "room": 6,
+    "slot": "emotion_fail",
+    "species": 2
+   },
+   {
+    "room": 11,
+    "slot": "emotion_fail",
+    "species": 0
+   },
+   {
+    "room": 56,
+    "slot": "emotion_fail",
+    "species": 0
+   },
+   {
+    "room": 82,
+    "slot": "emotion_fail",
+    "species": 0
+   }
+  ],
+  "6": [
+   {
+    "room": 11,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 36,
+    "slot": "emotion_pass",
+    "species": 10
+   },
+   {
+    "room": 60,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 72,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "7": [
+   {
+    "room": 20,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 62,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "8": [
+   {
+    "room": 18,
+    "slot": "emotion_pass",
+    "species": 4
+   },
+   {
+    "room": 21,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 30,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 43,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 58,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 76,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 116,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 149,
+    "slot": "emotion_pass",
+    "species": 4
+   }
+  ],
+  "9": [
+   {
+    "room": 29,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 60,
+    "slot": "emotion_fail",
+    "species": 1
+   }
+  ],
+  "10": [
+   {
+    "room": 46,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "11": [
+   {
+    "room": 32,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 49,
+    "slot": "emotion_pass",
+    "species": 2
+   }
+  ],
+  "12": [
+   {
+    "room": 42,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "13": [
+   {
+    "room": 25,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 56,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 77,
+    "slot": "emotion_pass",
+    "species": 5
+   },
+   {
+    "room": 238,
+    "slot": "emotion_pass",
+    "species": 0
+   }
+  ],
+  "14": [
+   {
+    "room": 55,
+    "slot": "emotion_pass",
+    "species": 2
+   }
+  ],
+  "15": [
+   {
+    "room": 55,
+    "slot": "emotion_fail",
+    "species": 2
+   }
+  ],
+  "16": [
+   {
+    "room": 10,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "17": [
+   {
+    "room": 40,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "18": [
+   {
+    "room": 41,
+    "slot": "emotion_pass",
+    "species": 10
+   },
+   {
+    "room": 191,
+    "slot": "emotion_pass",
+    "species": 10
+   }
+  ],
+  "19": [
+   {
+    "room": 23,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 492,
+    "slot": "emotion_pass",
+    "species": 10
+   }
+  ],
+  "20": [
+   {
+    "room": 71,
+    "slot": "emotion_pass",
+    "species": 10
+   }
+  ],
+  "21": [
+   {
+    "room": 19,
+    "slot": "emotion_pass",
+    "species": 4
+   },
+   {
+    "room": 464,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "22": [
+   {
+    "room": 38,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 64,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "23": [
+   {
+    "room": 37,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "24": [
+   {
+    "room": 17,
+    "slot": "emotion_pass",
+    "species": 4
+   },
+   {
+    "room": 68,
+    "slot": "emotion_pass",
+    "species": 2
+   }
+  ],
+  "25": [
+   {
+    "room": 12,
+    "slot": "emotion_pass",
+    "species": 5
+   },
+   {
+    "room": 69,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 204,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 248,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "26": [
+   {
+    "room": 91,
+    "slot": "emotion_pass",
+    "species": 5
+   },
+   {
+    "room": 245,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "27": [
+   {
+    "room": 24,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 203,
+    "slot": "emotion_pass",
+    "species": 5
+   },
+   {
+    "room": 230,
+    "slot": "emotion_pass",
+    "species": 5
+   },
+   {
+    "room": 257,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "28": [
+   {
+    "room": 63,
+    "slot": "emotion_pass",
+    "species": 10
+   },
+   {
+    "room": 179,
+    "slot": "emotion_pass",
+    "species": 4
+   }
+  ],
+  "29": [
+   {
+    "room": 207,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "30": [
+   {
+    "room": 181,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 363,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 380,
+    "slot": "emotion_pass",
+    "species": 2
+   }
+  ],
+  "31": [
+   {
+    "room": 163,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 241,
+    "slot": "emotion_pass",
+    "species": 0
+   },
+   {
+    "room": 269,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "32": [
+   {
+    "room": 388,
+    "slot": "emotion_pass",
+    "species": 2
+   },
+   {
+    "room": 410,
+    "slot": "emotion_pass",
+    "species": 3
+   },
+   {
+    "room": 501,
+    "slot": "emotion_pass",
+    "species": 3
+   }
+  ],
+  "33": [
+   {
+    "room": 138,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 160,
+    "slot": "emotion_pass",
+    "species": 1
+   },
+   {
+    "room": 177,
+    "slot": "emotion_pass",
+    "species": 0
+   }
+  ],
+  "34": [],
+  "35": [
+   {
+    "room": 7,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 8,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 11,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 22,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 25,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 29,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 42,
+    "slot": "speak_pass2",
+    "species": 3
+   }
+  ],
+  "36": [
+   {
+    "room": 4,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 10,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 21,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 30,
+    "slot": "speak_pass2",
+    "species": 2
+   },
+   {
+    "room": 45,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 60,
+    "slot": "speak_pass2",
+    "species": 1
+   }
+  ],
+  "37": [
+   {
+    "room": 6,
+    "slot": "speak_pass2",
+    "species": 2
+   },
+   {
+    "room": 43,
+    "slot": "speak_pass2",
+    "species": 2
+   },
+   {
+    "room": 51,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 52,
+    "slot": "speak_pass1",
+    "species": 2
+   }
+  ],
+  "38": [
+   {
+    "room": 14,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 76,
+    "slot": "speak_pass2",
+    "species": 0
+   }
+  ],
+  "39": [
+   {
+    "room": 20,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 40,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 49,
+    "slot": "speak_pass2",
+    "species": 2
+   },
+   {
+    "room": 62,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 77,
+    "slot": "speak_pass2",
+    "species": 5
+   }
+  ],
+  "40": [
+   {
+    "room": 46,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "41": [
+   {
+    "room": 56,
+    "slot": "speak_pass2",
+    "species": 0
+   }
+  ],
+  "42": [
+   {
+    "room": 55,
+    "slot": "speak_pass2",
+    "species": 2
+   }
+  ],
+  "43": [
+   {
+    "room": 26,
+    "slot": "speak_pass1",
+    "species": 3
+   }
+  ],
+  "44": [
+   {
+    "room": 38,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "45": [
+   {
+    "room": 37,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "46": [
+   {
+    "room": 39,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "47": [
+   {
+    "room": 64,
+    "slot": "speak_pass1",
+    "species": 3
+   }
+  ],
+  "48": [
+   {
+    "room": 69,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "49": [
+   {
+    "room": 68,
+    "slot": "speak_pass1",
+    "species": 2
+   }
+  ],
+  "50": [
+   {
+    "room": 74,
+    "slot": "speak_pass2",
+    "species": 0
+   }
+  ],
+  "51": [
+   {
+    "room": 74,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "52": [
+   {
+    "room": 4,
+    "slot": "speak_pass1",
+    "species": 1
+   },
+   {
+    "room": 4,
+    "slot": "speak_fail1",
+    "species": 1
+   },
+   {
+    "room": 7,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 7,
+    "slot": "speak_fail1",
+    "species": 0
+   },
+   {
+    "room": 21,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 45,
+    "slot": "speak_pass1",
+    "species": 1
+   },
+   {
+    "room": 60,
+    "slot": "speak_pass1",
+    "species": 1
+   },
+   {
+    "room": 82,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 193,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "53": [
+   {
+    "room": 6,
+    "slot": "speak_pass1",
+    "species": 2
+   },
+   {
+    "room": 8,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 8,
+    "slot": "speak_fail1",
+    "species": 3
+   },
+   {
+    "room": 11,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 14,
+    "slot": "speak_pass1",
+    "species": 1
+   },
+   {
+    "room": 14,
+    "slot": "speak_fail1",
+    "species": 1
+   },
+   {
+    "room": 20,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 22,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 29,
+    "slot": "speak_pass1",
+    "species": 1
+   },
+   {
+    "room": 30,
+    "slot": "speak_pass1",
+    "species": 2
+   },
+   {
+    "room": 42,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 43,
+    "slot": "speak_pass1",
+    "species": 2
+   },
+   {
+    "room": 49,
+    "slot": "speak_pass1",
+    "species": 2
+   },
+   {
+    "room": 55,
+    "slot": "speak_pass1",
+    "species": 2
+   },
+   {
+    "room": 62,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 74,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 214,
+    "slot": "speak_pass1",
+    "species": 1
+   },
+   {
+    "room": 238,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "54": [
+   {
+    "room": 6,
+    "slot": "speak_fail1",
+    "species": 2
+   },
+   {
+    "room": 25,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 76,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 257,
+    "slot": "speak_pass1",
+    "species": 3
+   }
+  ],
+  "55": [
+   {
+    "room": 11,
+    "slot": "speak_fail1",
+    "species": 0
+   },
+   {
+    "room": 51,
+    "slot": "speak_pass1",
+    "species": 0
+   },
+   {
+    "room": 56,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "56": [
+   {
+    "room": 27,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 204,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "57": [
+   {
+    "room": 116,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "58": [
+   {
+    "room": 10,
+    "slot": "speak_pass1",
+    "species": 3
+   },
+   {
+    "room": 77,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "59": [
+   {
+    "room": 40,
+    "slot": "speak_pass1",
+    "species": 3
+   }
+  ],
+  "60": [
+   {
+    "room": 8,
+    "slot": "speak_fail2",
+    "species": 3
+   },
+   {
+    "room": 25,
+    "slot": "speak_fail1",
+    "species": 3
+   }
+  ],
+  "61": [
+   {
+    "room": 6,
+    "slot": "speak_fail2",
+    "species": 2
+   }
+  ],
+  "62": [
+   {
+    "room": 14,
+    "slot": "speak_fail2",
+    "species": 1
+   }
+  ],
+  "63": [
+   {
+    "room": 82,
+    "slot": "speak_pass2",
+    "species": 0
+   }
+  ],
+  "64": [
+   {
+    "room": 82,
+    "slot": "speak_fail1",
+    "species": 0
+   }
+  ],
+  "65": [
+   {
+    "room": 82,
+    "slot": "speak_fail2",
+    "species": 0
+   }
+  ],
+  "66": [
+   {
+    "room": 51,
+    "slot": "speak_fail1",
+    "species": 0
+   }
+  ],
+  "67": [
+   {
+    "room": 51,
+    "slot": "speak_fail2",
+    "species": 0
+   }
+  ],
+  "68": [
+   {
+    "room": 56,
+    "slot": "speak_fail1",
+    "species": 0
+   }
+  ],
+  "69": [
+   {
+    "room": 55,
+    "slot": "speak_fail1",
+    "species": 2
+   }
+  ],
+  "70": [
+   {
+    "room": 60,
+    "slot": "speak_fail1",
+    "species": 1
+   }
+  ],
+  "71": [
+   {
+    "room": 7,
+    "slot": "message_pass",
+    "species": 0
+   },
+   {
+    "room": 204,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "72": [
+   {
+    "room": 116,
+    "slot": "speak_pass2",
+    "species": 0
+   }
+  ],
+  "73": [
+   {
+    "room": 4,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "74": [
+   {
+    "room": 4,
+    "slot": "message_fail",
+    "species": 1
+   },
+   {
+    "room": 7,
+    "slot": "message_fail",
+    "species": 0
+   }
+  ],
+  "75": [
+   {
+    "room": 8,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "76": [
+   {
+    "room": 8,
+    "slot": "message_fail",
+    "species": 3
+   }
+  ],
+  "77": [
+   {
+    "room": 6,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "78": [
+   {
+    "room": 6,
+    "slot": "message_fail",
+    "species": 2
+   }
+  ],
+  "79": [
+   {
+    "room": 11,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "80": [
+   {
+    "room": 11,
+    "slot": "message_fail",
+    "species": 0
+   }
+  ],
+  "81": [
+   {
+    "room": 14,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "82": [
+   {
+    "room": 14,
+    "slot": "message_fail",
+    "species": 1
+   }
+  ],
+  "83": [
+   {
+    "room": 20,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "84": [
+   {
+    "room": 21,
+    "slot": "message_pass",
+    "species": 0
+   },
+   {
+    "room": 207,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "85": [
+   {
+    "room": 22,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "86": [
+   {
+    "room": 82,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "87": [
+   {
+    "room": 82,
+    "slot": "message_fail",
+    "species": 0
+   }
+  ],
+  "88": [
+   {
+    "room": 29,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "89": [
+   {
+    "room": 30,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "90": [
+   {
+    "room": 51,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "91": [
+   {
+    "room": 51,
+    "slot": "message_fail",
+    "species": 0
+   }
+  ],
+  "92": [
+   {
+    "room": 46,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "93": [
+   {
+    "room": 49,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "94": [
+   {
+    "room": 45,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "95": [
+   {
+    "room": 43,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "96": [
+   {
+    "room": 42,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "97": [
+   {
+    "room": 56,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "98": [
+   {
+    "room": 56,
+    "slot": "message_fail",
+    "species": 0
+   }
+  ],
+  "99": [
+   {
+    "room": 55,
+    "slot": "message_fail",
+    "species": 2
+   }
+  ],
+  "100": [
+   {
+    "room": 60,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "101": [
+   {
+    "room": 60,
+    "slot": "message_fail",
+    "species": 1
+   }
+  ],
+  "102": [
+   {
+    "room": 257,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "103": [
+   {
+    "room": 62,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "104": [
+   {
+    "room": 10,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "105": [
+   {
+    "room": 40,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "106": [
+   {
+    "room": 52,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "107": [
+   {
+    "room": 41,
+    "slot": "speak_pass1",
+    "species": 10
+   }
+  ],
+  "108": [
+   {
+    "room": 41,
+    "slot": "message_pass",
+    "species": 10
+   }
+  ],
+  "109": [
+   {
+    "room": 191,
+    "slot": "speak_pass1",
+    "species": 10
+   }
+  ],
+  "110": [
+   {
+    "room": 191,
+    "slot": "speak_pass2",
+    "species": 10
+   }
+  ],
+  "111": [
+   {
+    "room": 191,
+    "slot": "message_pass",
+    "species": 10
+   }
+  ],
+  "112": [
+   {
+    "room": 492,
+    "slot": "speak_pass1",
+    "species": 10
+   }
+  ],
+  "113": [
+   {
+    "room": 492,
+    "slot": "message_pass",
+    "species": 10
+   }
+  ],
+  "114": [
+   {
+    "room": 17,
+    "slot": "speak_pass1",
+    "species": 4
+   },
+   {
+    "room": 81,
+    "slot": "speak_pass2",
+    "species": 4
+   }
+  ],
+  "115": [
+   {
+    "room": 81,
+    "slot": "speak_pass1",
+    "species": 4
+   },
+   {
+    "room": 230,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "116": [
+   {
+    "room": 12,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "117": [
+   {
+    "room": 13,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "118": [
+   {
+    "room": 18,
+    "slot": "speak_pass1",
+    "species": 4
+   }
+  ],
+  "119": [
+   {
+    "room": 19,
+    "slot": "message_pass",
+    "species": 4
+   }
+  ],
+  "120": [
+   {
+    "room": 72,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "121": [
+   {
+    "room": 71,
+    "slot": "speak_pass1",
+    "species": 10
+   }
+  ],
+  "122": [
+   {
+    "room": 71,
+    "slot": "speak_pass2",
+    "species": 10
+   }
+  ],
+  "123": [
+   {
+    "room": 71,
+    "slot": "message_pass",
+    "species": 10
+   }
+  ],
+  "124": [
+   {
+    "room": 464,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "125": [
+   {
+    "room": 464,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "126": [
+   {
+    "room": 464,
+    "slot": "speak_pass2",
+    "species": 1
+   }
+  ],
+  "127": [
+   {
+    "room": 26,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 37,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 38,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 39,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 46,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 64,
+    "slot": "speak_pass2",
+    "species": 3
+   },
+   {
+    "room": 68,
+    "slot": "speak_pass2",
+    "species": 2
+   },
+   {
+    "room": 69,
+    "slot": "speak_pass2",
+    "species": 1
+   }
+  ],
+  "128": [
+   {
+    "room": 245,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "129": [
+   {
+    "room": 179,
+    "slot": "speak_pass1",
+    "species": 4
+   }
+  ],
+  "130": [
+   {
+    "room": 203,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "131": [
+   {
+    "room": 385,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "132": [
+   {
+    "room": 385,
+    "slot": "emotion_pass",
+    "species": 5
+   }
+  ],
+  "133": [
+   {
+    "room": 385,
+    "slot": "message_pass",
+    "species": 5
+   }
+  ],
+  "134": [
+   {
+    "room": 149,
+    "slot": "message_pass",
+    "species": 4
+   }
+  ],
+  "135": [],
+  "136": [
+   {
+    "room": 238,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "137": [
+   {
+    "room": 193,
+    "slot": "speak_pass2",
+    "species": 0
+   },
+   {
+    "room": 214,
+    "slot": "speak_pass2",
+    "species": 1
+   },
+   {
+    "room": 244,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "138": [
+   {
+    "room": 244,
+    "slot": "speak_pass1",
+    "species": 2
+   }
+  ],
+  "139": [
+   {
+    "room": 352,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "140": [
+   {
+    "room": 352,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "141": [
+   {
+    "room": 352,
+    "slot": "emotion_pass",
+    "species": 1
+   }
+  ],
+  "142": [
+   {
+    "room": 32,
+    "slot": "speak_pass1",
+    "species": 3
+   }
+  ],
+  "143": [
+   {
+    "room": 32,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "144": [
+   {
+    "room": 193,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "145": [
+   {
+    "room": 245,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "146": [
+   {
+    "room": 245,
+    "slot": "speak_pass2",
+    "species": 1
+   }
+  ],
+  "147": [
+   {
+    "room": 76,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "148": [
+   {
+    "room": 77,
+    "slot": "message_pass",
+    "species": 5
+   }
+  ],
+  "149": [
+   {
+    "room": 116,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "150": [
+   {
+    "room": 19,
+    "slot": "speak_pass1",
+    "species": 4
+   }
+  ],
+  "151": [
+   {
+    "room": 67,
+    "slot": "message_pass",
+    "species": 6
+   },
+   {
+    "room": 98,
+    "slot": "message_pass",
+    "species": 7
+   },
+   {
+    "room": 126,
+    "slot": "message_pass",
+    "species": 7
+   },
+   {
+    "room": 134,
+    "slot": "message_pass",
+    "species": 7
+   },
+   {
+    "room": 158,
+    "slot": "message_pass",
+    "species": 6
+   },
+   {
+    "room": 192,
+    "slot": "message_pass",
+    "species": 6
+   },
+   {
+    "room": 213,
+    "slot": "message_pass",
+    "species": 7
+   },
+   {
+    "room": 296,
+    "slot": "message_pass",
+    "species": 6
+   },
+   {
+    "room": 316,
+    "slot": "message_pass",
+    "species": 7
+   },
+   {
+    "room": 496,
+    "slot": "message_pass",
+    "species": 6
+   }
+  ],
+  "152": [
+   {
+    "room": 67,
+    "slot": "emotion_pass",
+    "species": 6
+   },
+   {
+    "room": 98,
+    "slot": "emotion_pass",
+    "species": 7
+   },
+   {
+    "room": 126,
+    "slot": "emotion_pass",
+    "species": 7
+   },
+   {
+    "room": 134,
+    "slot": "emotion_pass",
+    "species": 7
+   },
+   {
+    "room": 158,
+    "slot": "emotion_pass",
+    "species": 6
+   },
+   {
+    "room": 192,
+    "slot": "emotion_pass",
+    "species": 6
+   },
+   {
+    "room": 213,
+    "slot": "emotion_pass",
+    "species": 7
+   },
+   {
+    "room": 296,
+    "slot": "emotion_pass",
+    "species": 6
+   },
+   {
+    "room": 316,
+    "slot": "emotion_pass",
+    "species": 7
+   },
+   {
+    "room": 496,
+    "slot": "emotion_pass",
+    "species": 6
+   }
+  ],
+  "153": [
+   {
+    "room": 36,
+    "slot": "speak_pass1",
+    "species": 10
+   }
+  ],
+  "154": [
+   {
+    "room": 36,
+    "slot": "message_pass",
+    "species": 10
+   }
+  ],
+  "155": [
+   {
+    "room": 203,
+    "slot": "message_pass",
+    "species": 5
+   }
+  ],
+  "156": [
+   {
+    "room": 207,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "157": [
+   {
+    "room": 179,
+    "slot": "message_pass",
+    "species": 4
+   }
+  ],
+  "158": [
+   {
+    "room": 214,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "159": [
+   {
+    "room": 81,
+    "slot": "message_pass",
+    "species": 4
+   }
+  ],
+  "160": [
+   {
+    "room": 72,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "161": [
+   {
+    "room": 230,
+    "slot": "message_pass",
+    "species": 5
+   }
+  ],
+  "162": [
+   {
+    "room": 13,
+    "slot": "message_pass",
+    "species": 5
+   }
+  ],
+  "163": [
+   {
+    "room": 18,
+    "slot": "message_pass",
+    "species": 4
+   }
+  ],
+  "164": [
+   {
+    "room": 39,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "165": [
+   {
+    "room": 69,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "166": [
+   {
+    "room": 23,
+    "slot": "speak_pass1",
+    "species": 2
+   }
+  ],
+  "167": [
+   {
+    "room": 23,
+    "slot": "speak_pass2",
+    "species": 2
+   }
+  ],
+  "168": [
+   {
+    "room": 23,
+    "slot": "message_pass",
+    "species": 2
+   }
+  ],
+  "169": [
+   {
+    "room": 24,
+    "slot": "speak_pass1",
+    "species": 3
+   }
+  ],
+  "170": [
+   {
+    "room": 27,
+    "slot": "message_pass",
+    "species": 3
+   }
+  ],
+  "171": [],
+  "172": [
+   {
+    "room": 94,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "173": [
+   {
+    "room": 94,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "174": [
+   {
+    "room": 94,
+    "slot": "emotion_pass",
+    "species": 0
+   }
+  ],
+  "175": [
+   {
+    "room": 91,
+    "slot": "speak_pass1",
+    "species": 5
+   }
+  ],
+  "176": [
+   {
+    "room": 54,
+    "slot": "message_pass",
+    "species": 4
+   }
+  ],
+  "177": [
+   {
+    "room": 54,
+    "slot": "speak_pass1",
+    "species": 4
+   }
+  ],
+  "178": [
+   {
+    "room": 54,
+    "slot": "emotion_pass",
+    "species": 4
+   }
+  ],
+  "179": [
+   {
+    "room": 57,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "180": [
+   {
+    "room": 57,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "181": [
+   {
+    "room": 58,
+    "slot": "speak_pass1",
+    "species": 0
+   }
+  ],
+  "182": [
+   {
+    "room": 58,
+    "slot": "message_pass",
+    "species": 0
+   }
+  ],
+  "183": [
+   {
+    "room": 63,
+    "slot": "speak_pass1",
+    "species": 10
+   }
+  ],
+  "184": [
+   {
+    "room": 63,
+    "slot": "message_pass",
+    "species": 10
+   }
+  ],
+  "185": [
+   {
+    "room": 248,
+    "slot": "speak_pass1",
+    "species": 1
+   }
+  ],
+  "186": [
+   {
+    "room": 248,
+    "slot": "message_pass",
+    "species": 1
+   }
+  ],
+  "187": [
+   {
+    "room": 149,
+    "slot": "speak_pass1",
+    "species": 4
+   }
+  ]
+ },
+ "print_message_sites": [
+  {
+   "addr": "3cce",
+   "dest": "c349",
+   "row": 21,
+   "col": 1
+  },
+  {
+   "addr": "3cd8",
+   "dest": "c371",
+   "row": 22,
+   "col": 1
+  },
+  {
+   "addr": "410f",
+   "dest": "c352",
+   "row": 21,
+   "col": 10
+  },
+  {
+   "addr": "4162",
+   "dest": "c3c1",
+   "row": 24,
+   "col": 1
+  }
+ ]
+}
