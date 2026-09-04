@@ -112,8 +112,9 @@ Records pair up: `2k` is the top half and `2k+1` the bottom half of one
 frame, verified for the standing frame from the ingame sprite pointers,
 and every other pair renders as a coherent figure.  `playerN` is
 24 frames of one playable character (stand, walk, glide, climb, sit,
-crawl); `extras` is 34 frames of NPCs and animals plus a hollow box in
-records 0/1.
+crawl); `extras` records 2-67 are the eleven creature species of
+docs/npcs-and-objects.md, three frames of two records each, and records
+0/1 are a hollow box.
 
 `player0` = Neric, matching `build/dumps/ingame.bin` at `$F100`; the
 other four files are the other playable characters (Genaa, Herd, Pomma,

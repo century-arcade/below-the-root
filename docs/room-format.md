@@ -135,9 +135,9 @@ touches this block checks that first.
 | `$EB`, `$EC` | the two SPEAK messages when the gate fails |
 | `$ED` | EMOTION message when the gate fails |
 | `$EE` | MESSAGE message when the gate fails |
-| `$EF` | what the creature gives: an object class 0-14 (`$AFF7` names), or `$10` = a nid to rest in (`$3D4E`) |
+| `$EF` | the object class 0-14 (`$AFF7` names) this character will let you TAKE; `$10` = no item, which is also what REST requires of a host |
 | `$F0` | index into the per-character state arrays at `$2300`/`$2380` |
-| `$F1` | creature kind: `$00` gift-giver, `$01` animal, `$02` silent, `$20`-`$23` nid + event, `$40` blesser, `$80` merchant, `$C0`/`$C1` door locked unless `$2334`/`$2335` or `$CD`, `$D0` D'ol Falla, `$E0`-`$E3` hostile; `$30`, `$90`, `$F0` are plain talkers (see docs/messages-and-dialog.md) |
+| `$F1` | creature kind: `$00` gift-giver, `$01` pensable animal (species 6/7), `$02` hostile animal (species 8/9), `$20`-`$23` nid + event, `$40` blesser, `$80` merchant, `$C0`/`$C1` door locked unless `$2334`/`$2335` or `$CD`, `$D0` D'ol Falla, `$E0`-`$E3` hostile; `$30`, `$90`, `$F0` are plain talkers (see docs/messages-and-dialog.md) |
 
 Message numbers are 1-based indices into a `$FF`-terminated string table at
 `$4500`; `$3C15` prints entry A at a given screen address.  Which slot is
@@ -149,14 +149,16 @@ Objects are not in the block.  `$8CA0`, run by the `$E0` opcode before the
 blit, scans 256 parallel entries:
 
 - `$0D00 + i` -- room low byte
-- `$0F00 + i` -- bit 7 = room high byte, bit 6 = on the ground here
-  (`$0AA6`), bit 5 = held/hidden (`$0AA5`), bits 0-4 = screen row
+- `$0F00 + i` -- bit 7 = room high byte, bit 6 = the object exists
+  (`$0AA6`), bit 5 = carried by the player and so not drawn (`$0AA5`),
+  bits 0-4 = screen row
 - `$0E00 + i` -- screen column
 - `$0B00 + r` / `$0B20 + r` -- lo/hi of the start of screen row `r`
 
 A matching object is drawn as two chars, `c` and `c+1`, where
 `c = $FD - 2*k` and `k` is the object class from the range table at `$A7A0`
-(`$A790` finds the `k` with `tbl[k] <= i < tbl[k+1]`).
+(`$A790` finds the `k` with `tbl[k] <= i < tbl[k+1]`).  Classes, item names
+and the verbs that move objects are in docs/npcs-and-objects.md.
 
 ## Call chain
 

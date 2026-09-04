@@ -278,10 +278,9 @@ name at `$AFF7`:
 | 6 | FRUIT & NUTS | 14 | A STRANGE ELIXER |
 | 7 | A SHUBA | | |
 
-`$10` is the one out-of-range value and means **a nid**, i.e. the NPC is
-offering a place to rest rather than an object.  (Twelve creatures use
-it; docs/room-format.md previously read `$10` as "gives nothing", which
-is backwards.)
+`$10` is the one out-of-range value: no object class, which is exactly
+what REST requires of a host -- so in practice it means the NPC offers
+**a nid** rather than an item.  Twelve creatures use it.
 
 `find_gift_item` returns at once when `$09EF` = `$10`.  Otherwise it
 scans object indices `$FE` down to 0 for the first object that is in this
