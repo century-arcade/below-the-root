@@ -1,0 +1,448 @@
+{
+ "generated_by": "tools/spec_time.py",
+ "area": "time",
+ "money": {
+  "unit": "token",
+  "item": 8,
+  "representation": "tokens are ordinary world objects of item class 8; there is no separate money counter",
+  "object_code_range": [
+   108,
+   182
+  ],
+  "total_slots": 75,
+  "placed_at_quest_start": 62,
+  "free_slots_at_quest_start": 13,
+  "purse": "the tokens you carry are the slots in the token range whose carried bit is set",
+  "hard_cap": "no more than total_slots tokens can exist anywhere in the world at once, carried or on the ground",
+  "weight": 1,
+  "src": "$4194 $4234 $A7A0"
+ },
+ "prices": {
+  "buy": 1,
+  "sell": 1,
+  "per_item": false,
+  "per_merchant": false,
+  "note": "there is no price table: every purchase costs exactly one token and every sale pays exactly one token, whatever the item and whatever the merchant",
+  "src": "$4194 $4234"
+ },
+ "buy": {
+  "requires_merchant": true,
+  "requires_adjacent": true,
+  "cost": 1,
+  "weight_reserved": 4,
+  "grants": "take_permission for the merchant stock item only; BUY hands over nothing, TAKE does",
+  "messages": {
+   "no_merchant": "THERE IS NO MERCHANT HERE",
+   "no_money": "YOU NEED MORE TOKENS",
+   "too_heavy": "SORRY, YOU'RE CARRYING TOO MUCH",
+   "ok": "TAKE WHICHEVER ONE PLEASES YOU"
+  },
+  "src": "$4194"
+ },
+ "sell": {
+  "requires_merchant": true,
+  "requires_adjacent": true,
+  "pays": 1,
+  "sellable_items": [
+   2,
+   4,
+   5,
+   6,
+   7,
+   9,
+   10,
+   11
+  ],
+  "needs_free_token_slot": true,
+  "weight_delta": "minus the sold item's weight, plus 1 for the token",
+  "messages": {
+   "prompt": "WHAT WILL YOU SELL?",
+   "no_room": "SORRY, I'M NOT INTERESTED",
+   "ok": "HERE'S YOUR TOKEN"
+  },
+  "src": "$4234 $4329"
+ },
+ "carrying": {
+  "carry_limit_start": "stamina + 26",
+  "take_refused_when": "carried_weight + item_weight >= carry_limit",
+  "buy_refused_when": "carried_weight + 4 >= carry_limit",
+  "src": "$ADBC $41CC $B5D6"
+ },
+ "items": [
+  {
+   "item": 0,
+   "class": 0,
+   "name": "A SPIRIT BELL",
+   "object_codes": [
+    0,
+    0
+   ],
+   "slots": 1,
+   "weight": 5,
+   "usable": false,
+   "sellable": false,
+   "edible": false,
+   "placed_in_world": 1
+  },
+  {
+   "item": 1,
+   "class": 1,
+   "name": "A SPIRIT LAMP",
+   "object_codes": [
+    1,
+    1
+   ],
+   "slots": 1,
+   "weight": 5,
+   "usable": false,
+   "sellable": false,
+   "edible": false,
+   "placed_in_world": 1
+  },
+  {
+   "item": 2,
+   "class": 2,
+   "name": "A HONEYLAMP",
+   "object_codes": [
+    2,
+    26
+   ],
+   "slots": 25,
+   "weight": 5,
+   "usable": true,
+   "sellable": true,
+   "edible": false,
+   "placed_in_world": 25
+  },
+  {
+   "item": 3,
+   "class": 3,
+   "name": "A WAND OF BEFAL",
+   "object_codes": [
+    27,
+    27
+   ],
+   "slots": 1,
+   "weight": 5,
+   "usable": true,
+   "sellable": false,
+   "edible": false,
+   "placed_in_world": 1
+  },
+  {
+   "item": 4,
+   "class": 4,
+   "name": "A ROAST LAPAN",
+   "object_codes": [
+    28,
+    37
+   ],
+   "slots": 10,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "placed_in_world": 10
+  },
+  {
+   "item": 5,
+   "class": 5,
+   "name": "PAN BREAD",
+   "object_codes": [
+    38,
+    62
+   ],
+   "slots": 25,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "placed_in_world": 24
+  },
+  {
+   "item": 6,
+   "class": 6,
+   "name": "FRUIT & NUTS",
+   "object_codes": [
+    63,
+    87
+   ],
+   "slots": 25,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "placed_in_world": 24
+  },
+  {
+   "item": 7,
+   "class": 7,
+   "name": "A SHUBA",
+   "object_codes": [
+    88,
+    107
+   ],
+   "slots": 20,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": false,
+   "placed_in_world": 20
+  },
+  {
+   "item": 8,
+   "class": 8,
+   "name": "A TOKEN",
+   "object_codes": [
+    108,
+    182
+   ],
+   "slots": 75,
+   "weight": 1,
+   "usable": false,
+   "sellable": false,
+   "edible": false,
+   "placed_in_world": 62
+  },
+  {
+   "item": 9,
+   "class": 9,
+   "name": "A TRENCHER BEAK",
+   "object_codes": [
+    183,
+    207
+   ],
+   "slots": 25,
+   "weight": 5,
+   "usable": true,
+   "sellable": true,
+   "edible": false,
+   "placed_in_world": 21
+  },
+  {
+   "item": 10,
+   "class": 10,
+   "name": "WISSENBERRIES",
+   "object_codes": [
+    208,
+    217
+   ],
+   "slots": 10,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "placed_in_world": 10
+  },
+  {
+   "item": 11,
+   "class": 11,
+   "name": "A VINE ROPE",
+   "object_codes": [
+    218,
+    247
+   ],
+   "slots": 30,
+   "weight": 5,
+   "usable": true,
+   "sellable": true,
+   "edible": false,
+   "placed_in_world": 26
+  },
+  {
+   "item": 12,
+   "class": 12,
+   "name": "THE TEMPLE KEY",
+   "object_codes": [
+    248,
+    248
+   ],
+   "slots": 1,
+   "weight": 5,
+   "usable": true,
+   "sellable": false,
+   "edible": false,
+   "placed_in_world": 1
+  },
+  {
+   "item": 13,
+   "class": 13,
+   "name": "D'OL FALLA'S KEY",
+   "object_codes": [
+    249,
+    249
+   ],
+   "slots": 1,
+   "weight": 5,
+   "usable": true,
+   "sellable": false,
+   "edible": false,
+   "placed_in_world": 1
+  },
+  {
+   "item": 14,
+   "class": 14,
+   "name": "A STRANGE ELIXER",
+   "object_codes": [
+    250,
+    254
+   ],
+   "slots": 5,
+   "weight": 5,
+   "usable": false,
+   "sellable": false,
+   "edible": true,
+   "placed_in_world": 5
+  }
+ ],
+ "merchants": [
+  {
+   "room": 26,
+   "npc_id": 40,
+   "species": 3,
+   "stock_item": 4,
+   "stock_item_name": "A ROAST LAPAN",
+   "gate": {
+    "standing": "erdling",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "WOULD YOU LIKE A ROASTED LAPAN?",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": null,
+   "pense_message": null
+  },
+  {
+   "room": 37,
+   "npc_id": 41,
+   "species": 1,
+   "stock_item": 6,
+   "stock_item_name": "FRUIT & NUTS",
+   "gate": {
+    "standing": "kindar",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "WOULD YOU LIKE TO BUY FRUIT AND NUTS?",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "APATHY",
+   "pense_message": null
+  },
+  {
+   "room": 38,
+   "npc_id": 42,
+   "species": 0,
+   "stock_item": 9,
+   "stock_item_name": "A TRENCHER BEAK",
+   "gate": {
+    "standing": "kindar",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "WOULD YOU LIKE TO BUY A TRENCHER BEAK?",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "INDIFFERENCE",
+   "pense_message": null
+  },
+  {
+   "room": 39,
+   "npc_id": 43,
+   "species": 0,
+   "stock_item": 2,
+   "stock_item_name": "A HONEYLAMP",
+   "gate": {
+    "standing": "kindar",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "HAVE A NICE HONEY LAMP?",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "SYMPATHY",
+   "pense_message": "PERHAPS THE HERMIT WILL HELP YOU"
+  },
+  {
+   "room": 46,
+   "npc_id": 16,
+   "species": 1,
+   "stock_item": 10,
+   "stock_item_name": "WISSENBERRIES",
+   "gate": {
+    "standing": "kindar",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "DO YOU WANT TO BUY BERRIES?",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "A LISTLESS CALM",
+   "pense_message": "DON'T WORRY.  HAVE A BERRY"
+  },
+  {
+   "room": 64,
+   "npc_id": 44,
+   "species": 3,
+   "stock_item": 7,
+   "stock_item_name": "A SHUBA",
+   "gate": {
+    "standing": "erdling",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "YOU NEED A SHUBA?",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "INDIFFERENCE",
+   "pense_message": null
+  },
+  {
+   "room": 68,
+   "npc_id": 45,
+   "species": 2,
+   "stock_item": 11,
+   "stock_item_name": "A VINE ROPE",
+   "gate": {
+    "standing": "erdling",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "VINE ROPE IS VERY USEFUL",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "BOREDOM",
+   "pense_message": null
+  },
+  {
+   "room": 69,
+   "npc_id": 46,
+   "species": 1,
+   "stock_item": 5,
+   "stock_item_name": "PAN BREAD",
+   "gate": {
+    "standing": "kindar",
+    "min_level": 0
+   },
+   "speak_lines": [
+    "I'VE FRESH PAN BREAD",
+    "ONLY A TOKEN"
+   ],
+   "pense_emotion": "CONCERN",
+   "pense_message": "PENSE STRANGERS FROM A DISTANCE"
+  }
+ ],
+ "other_token_sinks": [
+  {
+   "what": "OFFER a token to the room 32 gate guard",
+   "effect": "the token is destroyed, the door opens for this visit only",
+   "src": "$44C3"
+  },
+  {
+   "what": "REST in a room whose creature kind is the token thief",
+   "effect": "every carried token is destroyed",
+   "src": "$AAAB"
+  }
+ ]
+}

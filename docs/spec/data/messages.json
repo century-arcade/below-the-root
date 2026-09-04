@@ -1,0 +1,4250 @@
+{
+ "generated_by": "tools/spec_creatures.py",
+ "rules": "docs/spec/creatures.md",
+ "source": "the $4500 string table (187 entries) and the print_inline sites",
+ "naming": {
+  "hand_curated": [
+   "fixed_strings[].name",
+   "fixed_strings[].verb",
+   "fixed_strings[].printed_when",
+   "sinks[].name"
+  ],
+  "note": "all text and screen positions are read from the binary; the names and trigger descriptions are chosen in this script and match the rules in docs/spec/creatures.md."
+ },
+ "encoding": "uppercase ASCII, one byte per screen cell",
+ "count": 187,
+ "sinks": [
+  {
+   "name": "speak_line1",
+   "verb": "SPEAK",
+   "row": 21,
+   "col": 1,
+   "src": "$3CCE"
+  },
+  {
+   "name": "speak_line2",
+   "verb": "SPEAK",
+   "row": 22,
+   "col": 1,
+   "src": "$3CD8"
+  },
+  {
+   "name": "emotion",
+   "verb": "PENSE EMOTIONS",
+   "row": 21,
+   "col": 10,
+   "src": "$410F"
+  },
+  {
+   "name": "message",
+   "verb": "PENSE MESSAGES",
+   "row": 24,
+   "col": 1,
+   "src": "$4162"
+  }
+ ],
+ "messages": [
+  {
+   "id": 1,
+   "text": "SYMPATHY",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 27,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 39,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 45,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 52,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 74,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 193,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 214,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "text": "SUSPICION",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "text": "GOODWILL",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 13,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 22,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 57,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "text": "INTEREST",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 81,
+     "creature_kind": "gift_giver",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 244,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "text": "RESENTMENT",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "text": "RESERVE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 36,
+     "creature_kind": "plain_talker",
+     "species": "ol_zhaan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 72,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "text": "AVARICE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 20,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 62,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "text": "COMPASSION",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 18,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 21,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 30,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 43,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 58,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 76,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 116,
+     "creature_kind": "blesser",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 149,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "text": "DECEIT",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 29,
+     "creature_kind": "rest_trap_kidnap_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "text": "A LISTLESS CALM",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 46,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "text": "GREED",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 32,
+     "creature_kind": "gate_guard_token",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 49,
+     "creature_kind": "rest_trap_steal_shubas",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "text": "FURTIVENESS",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 42,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "text": "APPROVAL",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 25,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 77,
+     "creature_kind": "gift_giver",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 238,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "text": "GRUDGING INTEREST",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 55,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "text": "ANTAGONISM",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 55,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "fail",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "text": "ACCEPTANCE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 10,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "text": "GUILE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 40,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "text": "BENEVOLENCE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 41,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 191,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "text": "LOVE AND SUPPORT",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 23,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 492,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "text": "LOVE AND TRUST",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 71,
+     "creature_kind": "key_revealer",
+     "species": "ol_zhaan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "text": "HOPE AND JOY",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 19,
+     "creature_kind": "blesser",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 464,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "text": "INDIFFERENCE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 38,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 64,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "text": "APATHY",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 37,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "text": "BOREDOM",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 17,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 68,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "text": "CONCERN",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 12,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 69,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 204,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 248,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "text": "PRIDE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 91,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 245,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "text": "FRIENDLY INTEREST",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 24,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 203,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 230,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 257,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "text": "KINDLY WARMTH",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 63,
+     "creature_kind": "plain_talker",
+     "species": "ol_zhaan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 179,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "text": "AMITY",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 207,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 30,
+   "text": "HOSTILITY",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 181,
+     "creature_kind": "ambusher_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 363,
+     "creature_kind": "ambusher_kidnap_nekom",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 380,
+     "creature_kind": "ambusher_kidnap_nekom",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "text": "DEVIOUSNESS",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 163,
+     "creature_kind": "ambusher_kidnap_salaat",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 241,
+     "creature_kind": "ambusher_kidnap_salaat",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 269,
+     "creature_kind": "ambusher_kidnap_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 32,
+   "text": "RAGE",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 388,
+     "creature_kind": "ambusher_attack_nekom",
+     "species": "erdling_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 410,
+     "creature_kind": "ambusher_attack_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 501,
+     "creature_kind": "ambusher_attack_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "text": "INSANE FANATICISM",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 138,
+     "creature_kind": "ambusher_attack_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 160,
+     "creature_kind": "ambusher_attack_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 177,
+     "creature_kind": "ambusher_attack_salaat",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 34,
+   "text": "NOTHING",
+   "group": "unused",
+   "emitters": []
+  },
+  {
+   "id": 35,
+   "text": "DO YOU NEED REST?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 22,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 25,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 29,
+     "creature_kind": "rest_trap_kidnap_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 42,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 36,
+   "text": "DO YOU NEED FOOD?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 10,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 21,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 30,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 45,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 37,
+   "text": "DO YOU NEED A TOKEN?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 43,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 52,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 38,
+   "text": "DO YOU WISH TO EAT?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 76,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 39,
+   "text": "WOULD YOU LIKE TO REST?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 20,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 40,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 49,
+     "creature_kind": "rest_trap_steal_shubas",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 62,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 77,
+     "creature_kind": "gift_giver",
+     "species": "child_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 40,
+   "text": "DO YOU WANT TO BUY BERRIES?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 46,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 41,
+   "text": "MAY I OFFER A TOKEN?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 42,
+   "text": "I SUPPOSE YOU NEED A TOKEN?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 55,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 43,
+   "text": "WOULD YOU LIKE A ROASTED LAPAN?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 26,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 44,
+   "text": "WOULD YOU LIKE TO BUY A TRENCHER BEAK?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 38,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 45,
+   "text": "WOULD YOU LIKE TO BUY FRUIT AND NUTS?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 37,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 46,
+   "text": "HAVE A NICE HONEY LAMP?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 39,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 47,
+   "text": "YOU NEED A SHUBA?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 64,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 48,
+   "text": "I'VE FRESH PAN BREAD",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 69,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 49,
+   "text": "VINE ROPE IS VERY USEFUL",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 68,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 50,
+   "text": "D'OL FALLA AWAITS YOU IN THE PALACE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 74,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 51,
+   "text": "THE CHAMBER LIES BEYOND THESE GATES",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 74,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 52,
+   "text": "PEACE AND JOY TO YOU, QUESTER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 21,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 45,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 193,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 53,
+   "text": "GREETINGS QUESTER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 20,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 22,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 29,
+     "creature_kind": "rest_trap_kidnap_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 30,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 42,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 43,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 49,
+     "creature_kind": "rest_trap_steal_shubas",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 55,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 62,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 74,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 214,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 238,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 54,
+   "text": "GREETINGS!",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 25,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 76,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 257,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 55,
+   "text": "PEACE AND JOY TO ALL KINDAR",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 56,
+   "text": "PEACE AND JOY TO ALL QUESTERS",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 27,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 204,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 57,
+   "text": "RAAMO'S MOTHER: SEEK THE SPIRIT",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 116,
+     "creature_kind": "blesser",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 58,
+   "text": "ENTER QUESTER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 10,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 77,
+     "creature_kind": "gift_giver",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 59,
+   "text": "WELCOME TO MY HUMBLE ABODE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 40,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 60,
+   "text": "I HAVE NOTHING TO OFFER YOU",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "fail",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 25,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 61,
+   "text": "ARE THERE NO ERDLING QUESTERS?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 62,
+   "text": "I HAVE NOTHING TO GIVE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 63,
+   "text": "YOU HAVE MY BLESSING",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 64,
+   "text": "WE WOULD NEED NO QUEST IF PEOPLE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 65,
+   "text": "STAYED WHERE THEY BELONG",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 66,
+   "text": "THERE MUST BE SOME MISTAKE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 67,
+   "text": "THIS IS A KINDAR HOME",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 68,
+   "text": "I GAVE AT THE TEMPLE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 69,
+   "text": "I HAVE NO TOKENS FOR KINDAR",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 55,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 70,
+   "text": "SORRY, WE HAVE JUST EATEN",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "fail",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 71,
+   "text": "SEEK THE FORGOTTEN CHAMBER ON TEMPLE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 204,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 72,
+   "text": "LAMP. IT SHINES WITHOUT END",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 116,
+     "creature_kind": "blesser",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 73,
+   "text": "SEEK HIGH AND LOW",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 74,
+   "text": "YOU WILL HEAR NOTHING FROM ME",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 4,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 7,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 75,
+   "text": "THE ELIXER WILL STRENGTHEN YOU",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 76,
+   "text": "I DON'T TRUST KINDAR",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 8,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 77,
+   "text": "ROPES WILL TAKE YOU TO SKY GRUND TOP",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 78,
+   "text": "BE OFF, KINDAR",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 6,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 79,
+   "text": "THE QUEST IS HOPELESS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 80,
+   "text": "THE OLD WAYS WERE BETTER",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 11,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "text": "MY NEIGHBORS ARE UNTRUSTWORTHY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 82,
+   "text": "GO AWAY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 14,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 83,
+   "text": "SLEEP WELL, FOOL",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 20,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 84,
+   "text": "FIND THE WISE CHILD OF THE GARDEN",
+   "group": "speech_and_pense_message",
+   "emitters": [
+    {
+     "room": 21,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 207,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 85,
+   "text": "MAY NESHOM BLESS YOU",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 22,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 86,
+   "text": "I HAVE NO FAITH IN YOUR QUEST",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 87,
+   "text": "YOU WILL GET NO HELP FROM ME",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 82,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 88,
+   "text": "D'OL SOLAAT'S MEN ARE WAITING",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 29,
+     "creature_kind": "rest_trap_kidnap_salaat",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 89,
+   "text": "BEWARE OF MY NEIGHBORS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 30,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 90,
+   "text": "BEWARE OF SNAKES",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 91,
+   "text": "CAN AN ERDLING BE TRUSTED?",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 51,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 92,
+   "text": "DON'T WORRY.  HAVE A BERRY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 46,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 93,
+   "text": "I NEED A SHUBA",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 49,
+     "creature_kind": "rest_trap_steal_shubas",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 94,
+   "text": "THE HERMIT BESTOWS SPIRIT",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 45,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 95,
+   "text": "SEEKERS NEED A HONEY LAMP",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 43,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 96,
+   "text": "THE NEKOM WILL REWARD ME",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 42,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 97,
+   "text": "A TOKEN BUYS ENTRY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 98,
+   "text": "MIND BLOCKING",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 56,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 99,
+   "text": "LET YOUR OWN KIND FEED YOU",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 55,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 100,
+   "text": "DREAM IN THE SKY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 101,
+   "text": "SEEK ELSEWHERE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 60,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "fail",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 102,
+   "text": "VISIT THE TEMPLE GRUNDS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 257,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 103,
+   "text": "TOKENS ARE ERDLING COIN",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 62,
+     "creature_kind": "rest_trap_steal_tokens",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 104,
+   "text": "THE GUARD EATS TOO MANY BERRIES",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 10,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 105,
+   "text": "THE NEKOM WILL PAY ME WELL",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 40,
+     "creature_kind": "rest_trap_kidnap_nekom",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 106,
+   "text": "LOOK BELOW",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 52,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 107,
+   "text": "THE HERMIT: EARN D'OL NESHOM'S BLESSING",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 41,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 108,
+   "text": "SEEK A SKY-NID AND A DREAM",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 41,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 109,
+   "text": "D'OL NESHOM: MY BLESSING QUESTER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 191,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 110,
+   "text": "I GRANT YOU THE SPIRIT BELL",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 191,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 111,
+   "text": "YOU CAN RAISE THE FALLEN SPIRIT LEADER",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 191,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 112,
+   "text": "VATAR: MAY THE SPIRIT SUSTAIN YOU",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 492,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 113,
+   "text": "ONLY THE SPIRIT BELL CAN GUIDE YOU",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 492,
+     "creature_kind": "blesser",
+     "species": "ol_zhaan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 114,
+   "text": "WANT TO PLAY?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 17,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 81,
+     "creature_kind": "gift_giver",
+     "species": "child_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 115,
+   "text": "HELLO, QUESTER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 81,
+     "creature_kind": "gift_giver",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 230,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 116,
+   "text": "I LOST MY TOKEN",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 12,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 117,
+   "text": "I HAD PAN FOR LUNCH",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 13,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 118,
+   "text": "FIND THE WISE ONE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 18,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 119,
+   "text": "RAAMO'S MOTHER CAN HELP YOU",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 19,
+     "creature_kind": "blesser",
+     "species": "child_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 120,
+   "text": "D'FALLA AWAITS YOU",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 72,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 121,
+   "text": "D'OL FALLA: SEEK THE FORGOTTEN KEY",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 71,
+     "creature_kind": "key_revealer",
+     "species": "ol_zhaan",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 122,
+   "text": "IT NOW BELONGS TO YOU",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 71,
+     "creature_kind": "key_revealer",
+     "species": "ol_zhaan",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 123,
+   "text": "THE FORGOTTEN CHAMBER IS NEAR",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 71,
+     "creature_kind": "key_revealer",
+     "species": "ol_zhaan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 124,
+   "text": "RAAMO: MAY THE SPIRIT BLESS YOU",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 464,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 125,
+   "text": "I NEED A ROPE OR A SHUBA",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 464,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 126,
+   "text": "I'M AFRAID OF FALLING",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 464,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 127,
+   "text": "ONLY A TOKEN",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 26,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 37,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 38,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 39,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 46,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 64,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 68,
+     "creature_kind": "merchant",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 69,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 128,
+   "text": "THE QUESTER ADMIRES MY VOICE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 245,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 129,
+   "text": "RAISE YOUR SPIRIT IN THE GARDEN",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 179,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 130,
+   "text": "SEARCH THE HEIGHTS OF GRAND GRUND",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 203,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 131,
+   "text": "I HEARD A VOICE CALLING FROM BELOW",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 385,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 132,
+   "text": "FEAR",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 385,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 133,
+   "text": "SOMEONE MUST BE LOST DOWN THERE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 385,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 134,
+   "text": "ENTER WITH THE TEMPLE KEY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 149,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 135,
+   "text": "*",
+   "group": "unused",
+   "emitters": []
+  },
+  {
+   "id": 136,
+   "text": "YOU SHOULD CARRY A ROPE AND A BEAK",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 238,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 137,
+   "text": "SEEK THE HERMIT OF GRAND GRUND",
+   "group": "speech_and_pense_message",
+   "emitters": [
+    {
+     "room": 193,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 214,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    },
+    {
+     "room": 244,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 138,
+   "text": "PEACE TO YOU PILGRIM",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 244,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 139,
+   "text": "MAY I SEE YOUR PASS?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 352,
+     "creature_kind": "gate_guard_pass",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 140,
+   "text": "I'D SETTLE FOR SOME GOOD BERRY",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 352,
+     "creature_kind": "gate_guard_pass",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 141,
+   "text": "PITY",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 352,
+     "creature_kind": "gate_guard_pass",
+     "species": "kindar_adult_short_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 142,
+   "text": "WAIT A MINUTE.  I WANT TOKENS.",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 32,
+     "creature_kind": "gate_guard_token",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 143,
+   "text": "I HOPE YOUR STAMINA IS HIGH",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 32,
+     "creature_kind": "gate_guard_token",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 144,
+   "text": "GATHER BERRIES ON BRANCH ENDS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 193,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 145,
+   "text": "THE SPIRIT FADES, IN DARKNESS LYING",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 245,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 146,
+   "text": "A QUEST PROCLAIM!  THE LIGHT IS DYING",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 245,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 147,
+   "text": "CLIMB AT THE BASE OF THE CENTER TRUNK",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 76,
+     "creature_kind": "gift_giver",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 148,
+   "text": "SEEK THE LOST KEY ABOVE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 77,
+     "creature_kind": "gift_giver",
+     "species": "child_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 149,
+   "text": "MY SON LIVES. YOU MUST SAVE HIM",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 116,
+     "creature_kind": "blesser",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 150,
+   "text": "THE WISE CHILD: THE BLESSED ONE LIVES",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 19,
+     "creature_kind": "blesser",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 151,
+   "text": "THE SPIRIT RISES WITHIN",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 67,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 98,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 126,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 134,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 158,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 192,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 213,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 296,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 316,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    },
+    {
+     "room": 496,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 152,
+   "text": "WARMTH",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 67,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 98,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 126,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 134,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 158,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 192,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 213,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 296,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 316,
+     "creature_kind": "pensable_animal",
+     "species": "sima",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    },
+    {
+     "room": 496,
+     "creature_kind": "pensable_animal",
+     "species": "lapan",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 153,
+   "text": "PASS THE TWO GATES OF THE FORGOTTEN",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 36,
+     "creature_kind": "plain_talker",
+     "species": "ol_zhaan",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 154,
+   "text": "D'OL FALLA'S KEY IS WELL HIDDEN",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 36,
+     "creature_kind": "plain_talker",
+     "species": "ol_zhaan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 155,
+   "text": "FIND THOSE WHO WILL RAISE YOUR SPIRIT",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 203,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 156,
+   "text": "PENSE THE ANIMALS IF YOU HAVE THE POWER",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 207,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 157,
+   "text": "PENSE DEEPLY IF YOU FIND THE ANIMALS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 179,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 158,
+   "text": "THE HERMIT HELPS IN MANY WAYS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 214,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 159,
+   "text": "THE TEMPLE KEY OPENS MANY GATES",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 81,
+     "creature_kind": "gift_giver",
+     "species": "child_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 160,
+   "text": "GIVE UP THIS FOOLISH QUEST",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 72,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 161,
+   "text": "THE WISE CHILD KNOWS MORE THAN I DO",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 230,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 162,
+   "text": "THE WISE ONE LIVES NEAR",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 13,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 163,
+   "text": "LEARN TO USE THE SPIRIT POWERS",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 18,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 164,
+   "text": "PERHAPS THE HERMIT WILL HELP YOU",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 39,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 165,
+   "text": "PENSE STRANGERS FROM A DISTANCE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 69,
+     "creature_kind": "merchant",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 166,
+   "text": "WELCOME QUESTER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 23,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 167,
+   "text": "DO YOU NEED AN EXTRA SHUBA?",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 23,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "speak_line2",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 168,
+   "text": "GLIDE FROM STAR TO TEMPLE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 23,
+     "creature_kind": "gift_giver",
+     "species": "erdling_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 169,
+   "text": "VATAR BELIEVES IN YOUR QUEST",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 24,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 170,
+   "text": "VATAR LIVES BELOW THE ROOT",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 27,
+     "creature_kind": "plain_talker",
+     "species": "erdling_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 171,
+   "text": "*",
+   "group": "unused",
+   "emitters": []
+  },
+  {
+   "id": 172,
+   "text": "RAAMO WOULD HAVE UNITED OUR PEOPLE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 94,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 173,
+   "text": "AT LAST!  A QUESTER COMES",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 94,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 174,
+   "text": "SADNESS",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 94,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 175,
+   "text": "I'VE BEEN OVER THE TEMPLE GATE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 91,
+     "creature_kind": "plain_talker",
+     "species": "child_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 176,
+   "text": "GRUNDSPREKE AND GLIDE OVER",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 54,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 177,
+   "text": "I LOVE TO GLIDE",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 54,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 178,
+   "text": "EXCITEMENT",
+   "group": "emotion",
+   "emitters": [
+    {
+     "room": 54,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "emotion",
+     "gate": "pass",
+     "verb": "PENSE EMOTIONS"
+    }
+   ]
+  },
+  {
+   "id": 179,
+   "text": "THE QUEST IS WOVEN LIKE A TAPESTRY",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 57,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 180,
+   "text": "SEEK EVERYWHERE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 57,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 181,
+   "text": "LEARN THE SPIRIT SKILLS",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 58,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 182,
+   "text": "CARRY BOTH SPIRIT TOOLS BELOW",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 58,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_long_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 183,
+   "text": "SPEAK WITH STAR IF YOU HAVE THE POWER",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 63,
+     "creature_kind": "plain_talker",
+     "species": "ol_zhaan",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 184,
+   "text": "GLIDE FROM ABOVE",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 63,
+     "creature_kind": "plain_talker",
+     "species": "ol_zhaan",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 185,
+   "text": "THE TEMPLE KEY OPENS THE GATES",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 248,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  },
+  {
+   "id": 186,
+   "text": "THE KEY IS LOST",
+   "group": "pense_message",
+   "emitters": [
+    {
+     "room": 248,
+     "creature_kind": "plain_talker",
+     "species": "kindar_adult_short_hair",
+     "slot": "message",
+     "gate": "pass",
+     "verb": "PENSE MESSAGES"
+    }
+   ]
+  },
+  {
+   "id": 187,
+   "text": "THE MOTHER MOURNS HER SON",
+   "group": "speech",
+   "emitters": [
+    {
+     "room": 149,
+     "creature_kind": "plain_talker",
+     "species": "child_long_hair",
+     "slot": "speak_line1",
+     "gate": "pass",
+     "verb": "SPEAK"
+    }
+   ]
+  }
+ ],
+ "fixed_strings": [
+  {
+   "name": "speak_with_whom",
+   "text": "SPEAK WITH WHOM?",
+   "verb": "SPEAK",
+   "printed_when": "no creature in the room, or none adjacent",
+   "row": 21,
+   "col": 1,
+   "src": "$3C50"
+  },
+  {
+   "name": "come_back_tomorrow",
+   "text": "COME BACK TOMORROW, MY FRIEND",
+   "verb": "SPEAK",
+   "printed_when": "gift-giver already spoken to today",
+   "row": 21,
+   "col": 1,
+   "src": "$3C88"
+  },
+  {
+   "name": "nothing_more_to_give",
+   "text": "I HAVE NOTHING MORE TO GIVE",
+   "verb": "SPEAK",
+   "printed_when": "gift-giver whose room has no object left on the ground",
+   "row": 21,
+   "col": 1,
+   "src": "$3D5F"
+  },
+  {
+   "name": "no_response_line1",
+   "text": "NO RESPONSE",
+   "verb": "SPEAK / PENSE EMOTIONS",
+   "printed_when": "the selected speech or emotion slot is empty; also BUY/SELL/OFFER with no adjacent creature",
+   "row": 21,
+   "col": 15,
+   "src": "$439A"
+  },
+  {
+   "name": "no_response_message",
+   "text": "NO RESPONSE",
+   "verb": "PENSE MESSAGES",
+   "printed_when": "the selected message slot is empty",
+   "row": 23,
+   "col": 10,
+   "src": "$43AE"
+  },
+  {
+   "name": "pense_whom",
+   "text": "PENSE WHOM?",
+   "verb": "PENSE",
+   "printed_when": "no creature in the room",
+   "row": 21,
+   "col": 1,
+   "src": "$4083"
+  },
+  {
+   "name": "pense_lacks_skill",
+   "text": "YOU LACK THE SPRIT SKILL",
+   "verb": "PENSE",
+   "printed_when": "spirit limit below 5",
+   "row": 21,
+   "col": 1,
+   "src": "$409E"
+  },
+  {
+   "name": "pense_needs_energy",
+   "text": "YOU NEED MORE SPIRIT ENERGY",
+   "verb": "PENSE",
+   "printed_when": "spirit energy is 0",
+   "row": 21,
+   "col": 1,
+   "src": "$40C4"
+  },
+  {
+   "name": "emotion_label",
+   "text": "EMOTION:",
+   "verb": "PENSE EMOTIONS",
+   "printed_when": "always, before the emotion word",
+   "row": 21,
+   "col": 1,
+   "src": "$40E8"
+  },
+  {
+   "name": "message_label",
+   "text": "MESSAGE:",
+   "verb": "PENSE MESSAGES",
+   "printed_when": "when the message half runs",
+   "row": 23,
+   "col": 1,
+   "src": "$413B"
+  },
+  {
+   "name": "buy_needs_tokens",
+   "text": "YOU NEED MORE TOKENS",
+   "verb": "BUY",
+   "printed_when": "no token carried",
+   "row": 21,
+   "col": 1,
+   "src": "$41AF"
+  },
+  {
+   "name": "buy_too_heavy",
+   "text": "SORRY, YOU'RE CARRYING TOO MUCH",
+   "verb": "BUY",
+   "printed_when": "carrying too much to add a purchase",
+   "row": 21,
+   "col": 1,
+   "src": "$41D7"
+  },
+  {
+   "name": "buy_granted",
+   "text": "TAKE WHICHEVER ONE PLEASES YOU",
+   "verb": "BUY",
+   "printed_when": "token spent; TAKE is now permitted for the stock class",
+   "row": 21,
+   "col": 1,
+   "src": "$420D"
+  },
+  {
+   "name": "sell_prompt",
+   "text": "WHAT WILL YOU SELL?",
+   "verb": "SELL",
+   "printed_when": "the inventory cycle opens",
+   "row": 21,
+   "col": 1,
+   "src": "$4242"
+  },
+  {
+   "name": "sell_nothing",
+   "text": "NOTHING         ",
+   "verb": "SELL",
+   "printed_when": "the inventory cycle wrapped past the last item",
+   "row": 21,
+   "col": 22,
+   "src": "$4275"
+  },
+  {
+   "name": "sell_refused",
+   "text": "SORRY, I'M NOT INTERESTED",
+   "verb": "SELL",
+   "printed_when": "no free carried slot for the token",
+   "row": 21,
+   "col": 1,
+   "src": "$42D6"
+  },
+  {
+   "name": "sell_paid",
+   "text": "HERE'S YOUR TOKEN",
+   "verb": "SELL",
+   "printed_when": "the item became a token",
+   "row": 21,
+   "col": 1,
+   "src": "$430F"
+  },
+  {
+   "name": "no_merchant_here",
+   "text": "THERE IS NO MERCHANT HERE",
+   "verb": "BUY / SELL",
+   "printed_when": "the creature is not a merchant",
+   "row": 21,
+   "col": 1,
+   "src": "$433F"
+  },
+  {
+   "name": "offer_to_whom",
+   "text": "OFFER TO WHOM?",
+   "verb": "OFFER",
+   "printed_when": "no creature in the room, or none adjacent",
+   "row": 21,
+   "col": 1,
+   "src": "$43D4"
+  },
+  {
+   "name": "offer_what",
+   "text": "OFFER WHAT?",
+   "verb": "OFFER",
+   "printed_when": "the inventory cycle opens",
+   "row": 21,
+   "col": 1,
+   "src": "$43F0"
+  },
+  {
+   "name": "offer_nothing",
+   "text": "NOTHING         ",
+   "verb": "OFFER",
+   "printed_when": "the inventory cycle wrapped past the last item",
+   "row": 21,
+   "col": 14,
+   "src": "$441B"
+  },
+  {
+   "name": "offer_refused",
+   "text": "THAT WON'T HELP",
+   "verb": "OFFER",
+   "printed_when": "wrong item class for this creature",
+   "row": 21,
+   "col": 1,
+   "src": "$4484"
+  },
+  {
+   "name": "offer_gate_accepted",
+   "text": "YOU MAY ENTER",
+   "verb": "OFFER",
+   "printed_when": "a gate guard took the item",
+   "row": 21,
+   "col": 1,
+   "src": "$44D2"
+  },
+  {
+   "name": "door_is_locked",
+   "text": "THE DOOR IS LOCKED",
+   "verb": "walk into a door",
+   "printed_when": "a gate guard blocks it and neither flag is set",
+   "row": 21,
+   "col": 1,
+   "src": "$96CE"
+  },
+  {
+   "name": "no_nid_offered",
+   "text": "NO ONE OFFERED YOU A NID",
+   "verb": "REST",
+   "printed_when": "away from home without an offered nid",
+   "row": 21,
+   "col": 1,
+   "src": "$AC50"
+  },
+  {
+   "name": "not_offered_to_you",
+   "text": "IT WAS NOT OFFERED TO YOU",
+   "verb": "TAKE",
+   "printed_when": "indoors, of an object whose class is not the one offered",
+   "row": 21,
+   "col": 1,
+   "src": "$AD96"
+  },
+  {
+   "name": "kidnapped_salaat",
+   "text": "YOU WERE KIDNAPPED BY THE FOLLOWERS     OF D'OL SALAAT",
+   "verb": "ambush contact / REST trap",
+   "printed_when": "kind kidnap_salaat",
+   "row": 21,
+   "col": 1,
+   "src": "$AAF5"
+  },
+  {
+   "name": "kidnapped_nekom",
+   "text": "YOU WERE KIDNAPPED BY THE NEKOM",
+   "verb": "ambush contact / REST trap",
+   "printed_when": "kind kidnap_nekom",
+   "row": 21,
+   "col": 1,
+   "src": "$AB5F"
+  },
+  {
+   "name": "attacked_salaat",
+   "text": "YOU WERE ATTACKED BY A FOLLOWER OF      D'OL SALAAT.  TIME HAS PASSED.",
+   "verb": "ambush contact",
+   "printed_when": "kind attack_salaat",
+   "row": 21,
+   "col": 1,
+   "src": "$B33C"
+  },
+  {
+   "name": "attacked_nekom",
+   "text": "YOU WERE ATTACKED BY A MEMBER OF THE    NEKOM.  TIME HAS PASSED.",
+   "verb": "ambush contact",
+   "printed_when": "kind attack_nekom",
+   "row": 21,
+   "col": 1,
+   "src": "$B398"
+  }
+ ]
+}

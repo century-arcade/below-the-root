@@ -1,0 +1,3949 @@
+{
+ "generated_by": "tools/spec_time.py",
+ "area": "time",
+ "player": {
+  "replaces": "the joystick read, while the demo flag is set",
+  "value_shape": "one byte shaped like the joystick port: bit 0 up, 1 down, 2 left, 3 right, 4 fire, all active low.  Bits 5-7 are never tested, which is what leaves room for the two-byte opcodes",
+  "idle_value": 31,
+  "step": "one input read by the player state machine, i.e. one pass of the state step, which runs every step_period frames (8 walking, 6 leaping, 15 knocked down)",
+  "countdown": "each read decrements the step counter; while it is non-zero the held value is returned unchanged",
+  "abort": "the real fire button is polled first; pressing it stops the game loop and asks for the main menu.  The keyboard is never polled",
+  "src": "$3000"
+ },
+ "opcodes": [
+  {
+   "byte": [
+    0,
+    127
+   ],
+   "op": "tap",
+   "operands": [],
+   "effect": "return this joystick value for exactly one step"
+  },
+  {
+   "byte": [
+    128,
+    191
+   ],
+   "op": "hold",
+   "operands": [
+    "steps"
+   ],
+   "effect": "return this joystick value for `steps` steps"
+  },
+  {
+   "byte": [
+    198,
+    254
+   ],
+   "op": "hold",
+   "operands": [
+    "steps"
+   ],
+   "effect": "same as $80-$BF; the opcode band is split by the $C0-$C5 cases"
+  },
+  {
+   "byte": [
+    192,
+    192
+   ],
+   "op": "music",
+   "operands": [
+    "tune"
+   ],
+   "effect": "start tune `tune`, then decode the next opcode in the same call"
+  },
+  {
+   "byte": [
+    193,
+    193
+   ],
+   "op": "delay",
+   "operands": [],
+   "effect": "one busy-wait of about two thirds of a second, then one idle step"
+  },
+  {
+   "byte": [
+    194,
+    194
+   ],
+   "op": "delay",
+   "operands": [
+    "units"
+   ],
+   "effect": "`units` such busy-waits, then one idle step"
+  },
+  {
+   "byte": [
+    195,
+    195
+   ],
+   "op": "goto_room",
+   "operands": [
+    "room"
+   ],
+   "effect": "end the script: hand `room` to the outer loop, stop the game loop, return one idle step.  The pointer is deliberately left on the operand"
+  },
+  {
+   "byte": [
+    196,
+    196
+   ],
+   "op": "text_page",
+   "operands": [
+    "page"
+   ],
+   "effect": "ask the outer loop to print intro text page `page`, stop the game loop, return one idle step"
+  },
+  {
+   "byte": [
+    197,
+    197
+   ],
+   "op": "end_rest_delay",
+   "operands": [],
+   "effect": "force the REST bell delay currently running to finish on its next iteration, then one idle step"
+  },
+  {
+   "byte": [
+    255,
+    255
+   ],
+   "op": "end_demo",
+   "operands": [],
+   "effect": "clear the demo flag and return \"no input\"; neither script uses it"
+  }
+ ],
+ "text_pages": {
+  "1": [
+   "WINDHAM CLASSICS",
+   "COPYRIGHT (C) 1984",
+   "ALL RIGHTS RESERVED"
+  ],
+  "2": [
+   "CHOOSE TO BE ERDLING OR KINDAR, MALE OR FEMALE, CHILD OR ADULT.  SET FORTH TO SOLVE THE RIDDLE OF THE PROPHESY AND SAVE GREEN-SKY FROM DESTRUCTION."
+  ],
+  "3": [
+   "SEEK EVERYWHERE, FROM THE THIN FRONDS OF THE HIGHEST GRUND TO THE DEEPEST CAVERN BELOW THE ROOT.  BEWARE THE NEKOM AND SALITE."
+  ],
+  "4": [
+   "TO DO THIS YOU MUST GROW STRONG IN SPIRIT AND SKILL.  ONLY THEN CAN YOU SAVE GREEN-SKY."
+  ],
+  "5": [
+   "(clears the text rows)"
+  ]
+ },
+ "attract_flow": {
+  "cold_boot": "attract state 0 -> run the intro script once, then fall into the main menu",
+  "sample_quest": "attract state $FF -> the two scripts chase each other's goto_room forever until fire is pressed",
+  "goto_room_157": "run the intro script again",
+  "goto_room_other": "main menu if the attract state is 1, else run the quest script",
+  "src": "$952B $93C0"
+ },
+ "demo_character": {
+  "character_slot": 5,
+  "extras": "a shuba is placed in the first shuba slot, marked carried",
+  "take_rule": "TAKE skips the \"IT WAS NOT OFFERED TO YOU\" check",
+  "src": "$9C6E $AD6D"
+ },
+ "scripts": [
+  {
+   "name": "intro",
+   "room": 157,
+   "indoors": true,
+   "start_col": 6,
+   "start_row": 14,
+   "facing": "left",
+   "crawling": true,
+   "bytes": 151,
+   "steps": [
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      1
+     ],
+     "page": 1,
+     "page_name": "copyright",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "WINDHAM CLASSICS",
+      "COPYRIGHT (C) 1984",
+      "ALL RIGHTS RESERVED"
+     ]
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "music",
+     "bytes": [
+      192,
+      0
+     ],
+     "tune": 0
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      5
+     ],
+     "joy": "right",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      7
+     ],
+     "joy": "idle",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      15
+     ],
+     "joy": "right",
+     "steps": 15
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      11
+     ],
+     "joy": "idle",
+     "steps": 11
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      16
+     ],
+     "joy": "right",
+     "steps": 16
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      5
+     ],
+     "page": 5,
+     "page_name": "clear text",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "(clears the text rows)"
+     ]
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      2
+     ],
+     "page": 2,
+     "page_name": "choose to be",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "CHOOSE TO BE ERDLING OR KINDAR, MALE OR FEMALE, CHILD OR ADULT.  SET FORTH TO SOLVE THE RIDDLE OF THE PROPHESY AND SAVE GREEN-SKY FROM DESTRUCTION."
+     ]
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      31
+     ],
+     "joy": "right",
+     "steps": 31
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      7
+     ],
+     "joy": "idle",
+     "steps": 7
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      10
+     ],
+     "joy": "left",
+     "steps": 10
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      6
+     ],
+     "joy": "left",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      6
+     ],
+     "joy": "up",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      5
+     ],
+     "joy": "left",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      8
+     ],
+     "joy": "up",
+     "steps": 8
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      5
+     ],
+     "page": 5,
+     "page_name": "clear text",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "(clears the text rows)"
+     ]
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      3
+     ],
+     "page": 3,
+     "page_name": "seek everywhere",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "SEEK EVERYWHERE, FROM THE THIN FRONDS OF THE HIGHEST GRUND TO THE DEEPEST CAVERN BELOW THE ROOT.  BEWARE THE NEKOM AND SALITE."
+     ]
+    },
+    {
+     "op": "music",
+     "bytes": [
+      192,
+      0
+     ],
+     "tune": 0
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      3
+     ],
+     "joy": "up",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      5
+     ],
+     "joy": "right",
+     "steps": 5
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      4
+     ],
+     "joy": "right",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      3
+     ],
+     "joy": "right",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      15
+     ],
+     "joy": "right",
+     "steps": 15
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      7
+     ],
+     "joy": "up",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      7
+     ],
+     "joy": "idle",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      8
+     ],
+     "joy": "left",
+     "steps": 8
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      3
+     ],
+     "joy": "left",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      7
+     ],
+     "joy": "left",
+     "steps": 7
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      5
+     ],
+     "page": 5,
+     "page_name": "clear text",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "(clears the text rows)"
+     ]
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      4
+     ],
+     "page": 4,
+     "page_name": "grow strong",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "TO DO THIS YOU MUST GROW STRONG IN SPIRIT AND SKILL.  ONLY THEN CAN YOU SAVE GREEN-SKY."
+     ]
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      8
+     ],
+     "joy": "up",
+     "steps": 8
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      2
+     ],
+     "joy": "left",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      7
+     ],
+     "joy": "idle",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      8
+     ],
+     "joy": "up",
+     "steps": 8
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      6
+     ],
+     "joy": "left",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "text_page",
+     "bytes": [
+      196,
+      5
+     ],
+     "page": 5,
+     "page_name": "clear text",
+     "joy": "idle",
+     "steps": 1,
+     "lines": [
+      "(clears the text rows)"
+     ]
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      10
+     ],
+     "joy": "idle",
+     "steps": 10
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      5
+     ],
+     "joy": "right",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "goto_room",
+     "bytes": [
+      195,
+      228
+     ],
+     "room": 228,
+     "joy": "idle",
+     "steps": 1
+    }
+   ],
+   "src": "$2F00 (setup $9789)"
+  },
+  {
+   "name": "quest",
+   "room": 228,
+   "indoors": false,
+   "start_col": 24,
+   "start_row": 14,
+   "facing": "left",
+   "crawling": false,
+   "bytes": 523,
+   "steps": [
+    {
+     "op": "music",
+     "bytes": [
+      192,
+      1
+     ],
+     "tune": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      6
+     ],
+     "joy": "right",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      9
+     ],
+     "joy": "left",
+     "steps": 9
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      2
+     ],
+     "joy": "right",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      3
+     ],
+     "units": 3,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      4
+     ],
+     "units": 4,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      2
+     ],
+     "joy": "right",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      4
+     ],
+     "joy": "right",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      4
+     ],
+     "joy": "right",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      157,
+      5
+     ],
+     "joy": "down",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      157,
+      11
+     ],
+     "joy": "down",
+     "steps": 11
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      157,
+      2
+     ],
+     "joy": "down",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      3
+     ],
+     "joy": "left",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      9
+     ],
+     "joy": "right",
+     "steps": 9
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      15
+     ],
+     "joy": "idle",
+     "steps": 15
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      8
+     ],
+     "joy": "idle",
+     "steps": 8
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      16
+     ],
+     "joy": "idle",
+     "steps": 16
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      2
+     ],
+     "joy": "left",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      4
+     ],
+     "joy": "right",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      4
+     ],
+     "units": 4,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      10
+     ],
+     "joy": "right",
+     "steps": 10
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      9
+     ],
+     "joy": "right",
+     "steps": 9
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      10
+     ],
+     "joy": "right",
+     "steps": 10
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      20
+     ],
+     "joy": "right",
+     "steps": 20
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      11
+     ],
+     "joy": "right",
+     "steps": 11
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      6
+     ],
+     "joy": "left",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      3
+     ],
+     "joy": "left",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      3
+     ],
+     "joy": "left",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      30
+     ],
+     "joy": "idle",
+     "steps": 30
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      11
+     ],
+     "joy": "right",
+     "steps": 11
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      10
+     ],
+     "joy": "left",
+     "steps": 10
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      20
+     ],
+     "joy": "right",
+     "steps": 20
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      10
+     ],
+     "joy": "right",
+     "steps": 10
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      20
+     ],
+     "joy": "right",
+     "steps": 20
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      28
+     ],
+     "joy": "right",
+     "steps": 28
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      17
+     ],
+     "joy": "up",
+     "steps": 17
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      19
+     ],
+     "joy": "up",
+     "steps": 19
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      5
+     ],
+     "joy": "up",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      12
+     ],
+     "joy": "right",
+     "steps": 12
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      2
+     ],
+     "joy": "right",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      3
+     ],
+     "joy": "right",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      8
+     ],
+     "joy": "idle",
+     "steps": 8
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      9
+     ],
+     "joy": "idle",
+     "steps": 9
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      21
+     ],
+     "joy": "right",
+     "steps": 21
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      23
+     ],
+     "joy": "right",
+     "steps": 23
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      2
+     ],
+     "joy": "left",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      12
+     ],
+     "joy": "idle",
+     "steps": 12
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      3
+     ],
+     "joy": "right",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      18
+     ],
+     "joy": "right",
+     "steps": 18
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      12
+     ],
+     "joy": "right",
+     "steps": 12
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      23
+     ],
+     "joy": "right",
+     "steps": 23
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      9
+     ],
+     "joy": "right",
+     "steps": 9
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      11
+     ],
+     "joy": "left",
+     "steps": 11
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      10
+     ],
+     "joy": "left",
+     "steps": 10
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      17
+     ],
+     "joy": "up",
+     "steps": 17
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      9
+     ],
+     "joy": "up",
+     "steps": 9
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      7
+     ],
+     "joy": "left",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      20
+     ],
+     "units": 20,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      3
+     ],
+     "joy": "left",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      3
+     ],
+     "units": 3,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      3
+     ],
+     "units": 3,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      3
+     ],
+     "units": 3,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      3
+     ],
+     "units": 3,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      2
+     ],
+     "joy": "left",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      7
+     ],
+     "joy": "up",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      19
+     ],
+     "joy": "up",
+     "steps": 19
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      3
+     ],
+     "joy": "up",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      16
+     ],
+     "joy": "right",
+     "steps": 16
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      20
+     ],
+     "joy": "idle",
+     "steps": 20
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      5
+     ],
+     "joy": "right",
+     "steps": 5
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      18
+     ],
+     "joy": "right",
+     "steps": 18
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      12
+     ],
+     "joy": "right",
+     "steps": 12
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      24
+     ],
+     "joy": "idle",
+     "steps": 24
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      17
+     ],
+     "joy": "right",
+     "steps": 17
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      24
+     ],
+     "joy": "idle",
+     "steps": 24
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      7
+     ],
+     "joy": "right",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      12
+     ],
+     "joy": "up",
+     "steps": 12
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      6
+     ],
+     "joy": "left",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      5
+     ],
+     "joy": "up",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      5
+     ],
+     "joy": "up",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      5
+     ],
+     "joy": "left",
+     "steps": 5
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      2
+     ],
+     "joy": "left",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      11
+     ],
+     "joy": "up",
+     "steps": 11
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      2
+     ],
+     "joy": "up",
+     "steps": 2
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      13
+     ],
+     "joy": "right",
+     "steps": 13
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      14
+     ],
+     "joy": "right",
+     "steps": 14
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      3
+     ],
+     "joy": "right",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      30
+     ],
+     "joy": "idle",
+     "steps": 30
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      30
+     ],
+     "joy": "up",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      4
+     ],
+     "joy": "left",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      16
+     ],
+     "joy": "left",
+     "steps": 16
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      19
+     ],
+     "joy": "left",
+     "steps": 19
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      9
+     ],
+     "joy": "left",
+     "steps": 9
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      5
+     ],
+     "joy": "left",
+     "steps": 5
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      2
+     ],
+     "joy": "idle",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      5
+     ],
+     "units": 5,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      3
+     ],
+     "joy": "idle",
+     "steps": 3
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      6
+     ],
+     "joy": "left",
+     "steps": 6
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      11
+     ],
+     "joy": "left+fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      3
+     ],
+     "joy": "left",
+     "steps": 3
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      7
+     ],
+     "joy": "right+fire",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      10
+     ],
+     "joy": "right",
+     "steps": 10
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      4
+     ],
+     "joy": "idle",
+     "steps": 4
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      13
+     ],
+     "joy": "down+fire",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      23
+     ],
+     "joy": "right",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      29
+     ],
+     "joy": "down",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      2
+     ],
+     "units": 2,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      193
+     ],
+     "units": 1,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "end_rest_delay",
+     "bytes": [
+      197
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "delay",
+     "bytes": [
+      194,
+      6
+     ],
+     "units": 6,
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      1
+     ],
+     "joy": "idle",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      158,
+      2
+     ],
+     "joy": "up",
+     "steps": 2
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      27
+     ],
+     "joy": "left",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      6
+     ],
+     "joy": "idle",
+     "steps": 6
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      18
+     ],
+     "joy": "left",
+     "steps": 18
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      151,
+      20
+     ],
+     "joy": "right",
+     "steps": 20
+    },
+    {
+     "op": "tap",
+     "bytes": [
+      15
+     ],
+     "joy": "fire",
+     "steps": 1
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      155,
+      7
+     ],
+     "joy": "left",
+     "steps": 7
+    },
+    {
+     "op": "hold",
+     "bytes": [
+      159,
+      5
+     ],
+     "joy": "idle",
+     "steps": 5
+    },
+    {
+     "op": "goto_room",
+     "bytes": [
+      195,
+      157
+     ],
+     "room": 157,
+     "joy": "idle",
+     "steps": 1
+    }
+   ],
+   "src": "$3100 (setup $97C4)"
+  }
+ ]
+}

@@ -1,0 +1,121 @@
+{
+ "generated_by": "tools/spec_player.py",
+ "spec": "docs/spec/player.md",
+ "hand_curated": [
+  "energy_cost",
+  "range",
+  "effect",
+  "menu_cell"
+ ],
+ "hand_curated_source": "docs/menus-and-saves.md \"Spirit gift and visions\"; docs/verbs-and-inventory.md HEAL/GRUNSPREKE/KINIPORT",
+ "notes": [
+  "spirit_limit is the permanent skill level and gates \"you lack the spirit skill\"; spirit_energy is the pool that is spent and gates \"you need more spirit energy\".",
+  "The limit rises only two ways: +5 from an NPC spirit gift (once per NPC), and +1 per new NPC pensed for a message.  Both go through the same congratulation/vision path, which names the skill at floor(limit/5)+1.",
+  "The limit is announced in steps of 5, so a character can hold a skill without ever having seen its announcement (Pomma starts at 10 with both pense skills)."
+ ],
+ "skills": [
+  {
+   "id": 0,
+   "key": "pense_emotions",
+   "verb": "PENSE",
+   "menu_cell": [
+    0,
+    2
+   ],
+   "spirit_limit": 5,
+   "energy_cost": 1,
+   "range": "any distance in the room",
+   "effect": "Prints the emotion message the room block names for this NPC.  Erdlings (Herd, Charn) have this and not messages.",
+   "src": "$407B",
+   "display_name": "PENSE EMOTIONS",
+   "granted_to_at_start": [
+    "Neric",
+    "Herd",
+    "Pomma",
+    "Charn"
+   ]
+  },
+  {
+   "id": 1,
+   "key": "pense_messages",
+   "verb": "PENSE",
+   "menu_cell": [
+    0,
+    2
+   ],
+   "spirit_limit": 10,
+   "energy_cost": 1,
+   "range": "adjacent, same test SPEAK uses",
+   "effect": "Prints the message the room block names for this NPC.  An NPC of type 1 also raises the spirit limit by 1 the first time; five of those trigger the next vision.",
+   "src": "$418E",
+   "display_name": "PENSE MESSAGES",
+   "granted_to_at_start": [
+    "Pomma"
+   ]
+  },
+  {
+   "id": 2,
+   "key": "heal",
+   "verb": "HEAL",
+   "menu_cell": [
+    2,
+    2
+   ],
+   "spirit_limit": 15,
+   "energy_cost": 5,
+   "range": "self",
+   "effect": "food += 2 (capped at food_cap), rest += 2 (capped at rest_cap).  PM_HEAL_YOURSELF.",
+   "src": "$84B5",
+   "display_name": "HEAL YOURSELF",
+   "granted_to_at_start": []
+  },
+  {
+   "id": 3,
+   "key": "grunspreke",
+   "verb": "GRUNSPREKE",
+   "menu_cell": [
+    3,
+    2
+   ],
+   "spirit_limit": 20,
+   "energy_cost": 2,
+   "range": "the cell diagonally in front and one row down",
+   "effect": "Above ground only (tile set 0), floor must be a limb top ($DF or $02-$06) and the target must not already be one.  Writes tile $DF there, colour 9.  PM_LIMB_GROWS.",
+   "src": "$8510",
+   "display_name": "GRUNSPREKE",
+   "granted_to_at_start": []
+  },
+  {
+   "id": 4,
+   "key": "kiniport_tools",
+   "verb": "KINIPORT",
+   "menu_cell": [
+    3,
+    3
+   ],
+   "spirit_limit": 25,
+   "energy_cost": 5,
+   "range": "anywhere in the room, chosen with a joystick pointer",
+   "effect": "Move one object tile ($E1 and up) to any cell whose two halves are clear and whose floor has support.  Rewrites the object's column/row.",
+   "src": "$85B8",
+   "display_name": "KINIPORT TOOLS",
+   "granted_to_at_start": []
+  },
+  {
+   "id": 5,
+   "key": "kiniport_body",
+   "verb": "KINIPORT",
+   "menu_cell": [
+    3,
+    3
+   ],
+   "spirit_limit": 30,
+   "energy_cost": 10,
+   "range": "anywhere in the room, chosen with a joystick pointer",
+   "effect": "Point at your own column on your own row, row-1 or row-2 to select your body, then pick a destination with support under it that is not a wall, bramble or object.  Teleports you.",
+   "src": "$85B8",
+   "display_name": "KINIPORT YOUR BODY",
+   "granted_to_at_start": []
+  }
+ ]
+}

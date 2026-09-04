@@ -1,0 +1,6433 @@
+{
+ "generated_by": "tools/spec_assets.py",
+ "inputs": [
+  "build/raw/*.bin",
+  "build/dumps/ingame.bin"
+ ],
+ "palette": {
+  "name": "Pepto PAL",
+  "note": "Pepto/colodore PAL measurement, the same 16 RGB triples tools/assets.py renders the sheets with.",
+  "colors": [
+   {
+    "index": 0,
+    "name": "black",
+    "rgb": [
+     0,
+     0,
+     0
+    ],
+    "hex": "#000000"
+   },
+   {
+    "index": 1,
+    "name": "white",
+    "rgb": [
+     255,
+     255,
+     255
+    ],
+    "hex": "#FFFFFF"
+   },
+   {
+    "index": 2,
+    "name": "red",
+    "rgb": [
+     104,
+     55,
+     43
+    ],
+    "hex": "#68372B"
+   },
+   {
+    "index": 3,
+    "name": "cyan",
+    "rgb": [
+     112,
+     164,
+     178
+    ],
+    "hex": "#70A4B2"
+   },
+   {
+    "index": 4,
+    "name": "purple",
+    "rgb": [
+     111,
+     61,
+     134
+    ],
+    "hex": "#6F3D86"
+   },
+   {
+    "index": 5,
+    "name": "green",
+    "rgb": [
+     88,
+     141,
+     67
+    ],
+    "hex": "#588D43"
+   },
+   {
+    "index": 6,
+    "name": "blue",
+    "rgb": [
+     53,
+     40,
+     121
+    ],
+    "hex": "#352879"
+   },
+   {
+    "index": 7,
+    "name": "yellow",
+    "rgb": [
+     184,
+     199,
+     111
+    ],
+    "hex": "#B8C76F"
+   },
+   {
+    "index": 8,
+    "name": "orange",
+    "rgb": [
+     111,
+     79,
+     37
+    ],
+    "hex": "#6F4F25"
+   },
+   {
+    "index": 9,
+    "name": "brown",
+    "rgb": [
+     67,
+     57,
+     0
+    ],
+    "hex": "#433900"
+   },
+   {
+    "index": 10,
+    "name": "light red",
+    "rgb": [
+     154,
+     103,
+     89
+    ],
+    "hex": "#9A6759"
+   },
+   {
+    "index": 11,
+    "name": "dark grey",
+    "rgb": [
+     68,
+     68,
+     68
+    ],
+    "hex": "#444444"
+   },
+   {
+    "index": 12,
+    "name": "grey",
+    "rgb": [
+     108,
+     108,
+     108
+    ],
+    "hex": "#6C6C6C"
+   },
+   {
+    "index": 13,
+    "name": "light green",
+    "rgb": [
+     154,
+     210,
+     132
+    ],
+    "hex": "#9AD284"
+   },
+   {
+    "index": 14,
+    "name": "light blue",
+    "rgb": [
+     108,
+     94,
+     181
+    ],
+    "hex": "#6C5EB5"
+   },
+   {
+    "index": 15,
+    "name": "light grey",
+    "rgb": [
+     149,
+     149,
+     149
+    ],
+    "hex": "#959595"
+   }
+  ],
+  "emulator_sample": {
+   "source": "VICE 3.9 internal generator, build/shots/ingame.png",
+   "hex": {
+    "0": "#000000",
+    "3": "#7EF3D6",
+    "4": "#AA40F5",
+    "5": "#62D532",
+    "7": "#FFFF46",
+    "8": "#B7631E",
+    "9": "#775300",
+    "10": "#EE7B95",
+    "13": "#B7FF86",
+    "14": "#7385FF"
+   }
+  }
+ },
+ "video": {
+  "mode": "hires text",
+  "multicolour": false,
+  "src": "$D016 = $C8 (MCM clear, 40 columns), $D011 = $1B",
+  "screen": {
+   "cols": 40,
+   "rows": 25,
+   "cell_px": [
+    8,
+    8
+   ],
+   "display_px": [
+    320,
+    200
+   ]
+  },
+  "background_color": 0,
+  "border_color": 5,
+  "regions": [
+   {
+    "id": "playfield",
+    "rows": [
+     0,
+     19
+    ],
+    "cols": [
+     0,
+     39
+    ],
+    "font": "room charset",
+    "src": "$C000-$C31F"
+   },
+   {
+    "id": "message_line",
+    "rows": [
+     20,
+     20
+    ],
+    "cols": [
+     0,
+     39
+    ],
+    "font": "text font",
+    "color": 1,
+    "src": "$C320-$C347",
+    "note": "cleared on every room load and never written again; every inline string and every print_message call site targets rows 21-24.  Only the shipped room editor uses this row."
+   },
+   {
+    "id": "panel",
+    "rows": [
+     21,
+     24
+    ],
+    "cols": [
+     0,
+     39
+    ],
+    "font": "text font while text_font_panel is set, else room charset",
+    "color": "set per screen, 1 (white) everywhere in the shipped game",
+    "src": "$C348-$C3E7"
+   }
+  ],
+  "raster_split": {
+   "note": "Three splits per frame re-point the character generator. Raster lines are C64 raster numbers; text row r occupies rasters 51+8r .. 58+8r.",
+   "src": "$8AAF",
+   "steps": [
+    {
+     "raster": 210,
+     "after_row": 19,
+     "font": "room charset"
+    },
+    {
+     "raster": 218,
+     "after_row": 20,
+     "font": "text font"
+    },
+    {
+     "raster": 250,
+     "after_row": 24,
+     "font": "text font if text_font_panel else room charset",
+     "also": "runs the per-frame game tick"
+    }
+   ],
+   "effect": "rows 0-19 always use the room charset; row 20 always uses the text font; rows 21-24 use whichever the text_font_panel flag selects ($0A4B: 4 = text font, 2 = room charset)."
+  },
+  "sprites": {
+   "size_px": [
+    24,
+    21
+   ],
+   "multicolour": false,
+   "expand_x": false,
+   "expand_y": false,
+   "priority": "all sprites draw in front of the characters",
+   "src": "$D01B = 0, $D01C = 0, $D017 = 0, $D01D = 0",
+   "hardware_slots": [
+    {
+     "slot": 0,
+     "use": "player, upper half",
+     "color": 1
+    },
+    {
+     "slot": 1,
+     "use": "player, lower half",
+     "color": 1
+    },
+    {
+     "slot": 2,
+     "use": "creature, upper half",
+     "color": "room block creature colour nibble"
+    },
+    {
+     "slot": 3,
+     "use": "creature, lower half",
+     "color": "room block creature colour nibble"
+    },
+    {
+     "slot": 7,
+     "use": "kiniport / room-editor pointer",
+     "color": 7,
+     "frame": "extras frame 0"
+    }
+   ],
+   "placement": {
+    "note": "Both the player and a creature are one 24x42 figure made of two stacked hardware sprites, positioned from a whole cell.",
+    "top_left_px": [
+     "8 * col - 8",
+     "8 * row - 34"
+    ],
+    "feet_row_boundary": "the bottom pixel row of the figure is the top edge of row + 1",
+    "columns_spanned": [
+     "col - 1",
+     "col + 1"
+    ],
+    "src": "$9D36 player, $9B37 creature, tables $0B40/$0B70"
+   }
+  },
+  "frame_rate": {
+   "ticks_are": "video frames",
+   "ntsc_hz": 59.826,
+   "pal_hz": 50.125,
+   "note": "The game shipped for NTSC; every duration in this spec is a frame count, and seconds assume NTSC."
+  }
+ },
+ "text_encoding": {
+  "font": "charset_text",
+  "encoding": "ASCII",
+  "reverse_video": "code | 0x80",
+  "inline_string": "two-byte little-endian screen address, then ASCII bytes; the first byte with bit 7 set ends the string and is not drawn",
+  "message_table": "same, without the address; strings are concatenated and each is terminated by a byte with bit 7 set",
+  "src": "$828B, $3C15"
+ },
+ "charsets": [
+  {
+   "id": "charset_outdoor",
+   "kind": "charset",
+   "disk_file": "outdoor",
+   "load_address": "$C700",
+   "bitmaps": "assets/charset_outdoor.json",
+   "sheets": {
+    "hires": "assets/charset_outdoor_hires.png",
+    "multicolour_reading": "assets/charset_outdoor_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 16,
+    "rows": 16,
+    "cell_px": [
+     8,
+     8
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect": "x = 1 + 9 * (code % 16), y = 1 + 9 * (code // 16)",
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "glyphs": 256,
+   "glyph_px": [
+    8,
+    8
+   ],
+   "bits_per_pixel": 1,
+   "colour_mode": "hires",
+   "tileset": 0,
+   "default_colors": [
+    0,
+    2,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    11,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    5,
+    5,
+    5,
+    5,
+    5,
+    15,
+    11,
+    14,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    7,
+    7,
+    4,
+    4,
+    4,
+    4,
+    12,
+    12,
+    12,
+    12,
+    12,
+    12,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    1,
+    1,
+    12,
+    10,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    10,
+    10,
+    10,
+    10,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    13,
+    13,
+    13,
+    4,
+    4,
+    4,
+    6,
+    11,
+    1,
+    14,
+    14,
+    14,
+    4,
+    4,
+    4,
+    4,
+    13,
+    13,
+    13,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    8,
+    8,
+    5,
+    5,
+    5,
+    5,
+    8,
+    8,
+    8,
+    8,
+    8,
+    1,
+    1,
+    2,
+    2,
+    2,
+    9,
+    8,
+    4,
+    4,
+    3,
+    3,
+    15,
+    15,
+    8,
+    8,
+    8,
+    8,
+    14,
+    14,
+    13,
+    13,
+    13,
+    13,
+    5,
+    5,
+    4,
+    4,
+    8,
+    8,
+    1,
+    1,
+    13,
+    13,
+    7,
+    7,
+    7,
+    7,
+    5
+   ],
+   "char_color_slot": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "color_rule": "slot is null -> use default_colors[code]; otherwise use the room block colour slot of that index",
+   "color_slots": [
+    {
+     "slot": 0,
+     "name": "sign",
+     "room_footer_byte": 0,
+     "codes": [
+      119,
+      179
+     ]
+    },
+    {
+     "slot": 1,
+     "name": "wall",
+     "room_footer_byte": 1,
+     "codes": [
+      82,
+      88
+     ]
+    },
+    {
+     "slot": 2,
+     "name": "structure",
+     "room_footer_byte": 2,
+     "codes": [
+      89,
+      114
+     ]
+    },
+    {
+     "slot": 3,
+     "name": "ground",
+     "room_footer_byte": 3,
+     "codes": [
+      115,
+      118
+     ]
+    }
+   ],
+   "animated_chars": [
+    {
+     "char": 32,
+     "role": "water; stepping onto it drowns the player",
+     "source_chars": [
+      189,
+      190,
+      191
+     ],
+     "cycle": [
+      191,
+      190,
+      189
+     ],
+     "period_frames": 8,
+     "src": "$9C43"
+    }
+   ],
+   "notable_ranges": [
+    {
+     "first": 2,
+     "last": 79,
+     "what": "tile-set scenery (differs between the two sets)"
+    },
+    {
+     "first": 7,
+     "last": 8,
+     "what": "wall: walking into it knocks the player down"
+    },
+    {
+     "first": 28,
+     "last": 28,
+     "what": "bramble: knocks the player down; cut by a trencher beak or the wand"
+    },
+    {
+     "first": 32,
+     "last": 32,
+     "what": "animated water"
+    },
+    {
+     "first": 60,
+     "last": 61,
+     "what": "hanging nid, left and right halves (REST needs $3C one row up)"
+    },
+    {
+     "first": 82,
+     "last": 82,
+     "what": "wall (knocks the player down)"
+    },
+    {
+     "first": 119,
+     "last": 179,
+     "what": "sign range; A-Z is $80-$99"
+    },
+    {
+     "first": 180,
+     "last": 185,
+     "what": "ladder / vine, two sets of three columns (left, centre, right)"
+    },
+    {
+     "first": 186,
+     "last": 188,
+     "what": "doorway tiles 1, 2, 3"
+    },
+    {
+     "first": 189,
+     "last": 191,
+     "what": "the three water frames copied into char $20"
+    },
+    {
+     "first": 223,
+     "last": 223,
+     "what": "grunspreked limb"
+    },
+    {
+     "first": 224,
+     "last": 224,
+     "what": "vine rope (solid only while crawling)"
+    },
+    {
+     "first": 225,
+     "last": 255,
+     "what": "object halves painted by the object table: class k is $FD-2k and $FE-2k"
+    }
+   ]
+  },
+  {
+   "id": "charset_indoor",
+   "kind": "charset",
+   "disk_file": "indoor",
+   "load_address": "$B700",
+   "bitmaps": "assets/charset_indoor.json",
+   "sheets": {
+    "hires": "assets/charset_indoor_hires.png",
+    "multicolour_reading": "assets/charset_indoor_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 16,
+    "rows": 16,
+    "cell_px": [
+     8,
+     8
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect": "x = 1 + 9 * (code % 16), y = 1 + 9 * (code // 16)",
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "glyphs": 256,
+   "glyph_px": [
+    8,
+    8
+   ],
+   "bits_per_pixel": 1,
+   "colour_mode": "hires",
+   "tileset": 1,
+   "default_colors": [
+    0,
+    2,
+    2,
+    11,
+    11,
+    11,
+    8,
+    11,
+    1,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    8,
+    8,
+    8,
+    9,
+    15,
+    15,
+    11,
+    14,
+    12,
+    12,
+    12,
+    12,
+    12,
+    12,
+    8,
+    8,
+    8,
+    8,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    15,
+    15,
+    15,
+    15,
+    15,
+    14,
+    14,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    4,
+    4,
+    4,
+    7,
+    13,
+    10,
+    10,
+    10,
+    10,
+    14,
+    14,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    10,
+    10,
+    10,
+    10,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    2,
+    2,
+    2,
+    9,
+    9,
+    9,
+    6,
+    6,
+    5,
+    14,
+    14,
+    14,
+    8,
+    8,
+    8,
+    8,
+    14,
+    13,
+    15,
+    4,
+    4,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    8,
+    8,
+    8,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    14,
+    14,
+    9,
+    8,
+    4,
+    4,
+    3,
+    3,
+    15,
+    15,
+    10,
+    10,
+    8,
+    8,
+    14,
+    14,
+    13,
+    13,
+    13,
+    13,
+    5,
+    5,
+    4,
+    4,
+    8,
+    8,
+    1,
+    1,
+    13,
+    13,
+    7,
+    7,
+    7,
+    7,
+    5
+   ],
+   "char_color_slot": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "color_rule": "slot is null -> use default_colors[code]; otherwise use the room block colour slot of that index",
+   "color_slots": [
+    {
+     "slot": 0,
+     "name": "sign",
+     "room_footer_byte": 0,
+     "codes": [
+      119,
+      179
+     ]
+    },
+    {
+     "slot": 1,
+     "name": "wall",
+     "room_footer_byte": 1,
+     "codes": [
+      82,
+      88
+     ]
+    },
+    {
+     "slot": 2,
+     "name": "structure",
+     "room_footer_byte": 2,
+     "codes": [
+      89,
+      114
+     ]
+    },
+    {
+     "slot": 3,
+     "name": "ground",
+     "room_footer_byte": 3,
+     "codes": [
+      115,
+      118
+     ]
+    }
+   ],
+   "animated_chars": [
+    {
+     "char": 32,
+     "role": "water; stepping onto it drowns the player",
+     "source_chars": [
+      189,
+      190,
+      191
+     ],
+     "cycle": [
+      191,
+      190,
+      189
+     ],
+     "period_frames": 8,
+     "src": "$9C43"
+    }
+   ],
+   "notable_ranges": [
+    {
+     "first": 2,
+     "last": 79,
+     "what": "tile-set scenery (differs between the two sets)"
+    },
+    {
+     "first": 7,
+     "last": 8,
+     "what": "wall: walking into it knocks the player down"
+    },
+    {
+     "first": 28,
+     "last": 28,
+     "what": "bramble: knocks the player down; cut by a trencher beak or the wand"
+    },
+    {
+     "first": 32,
+     "last": 32,
+     "what": "animated water"
+    },
+    {
+     "first": 60,
+     "last": 61,
+     "what": "hanging nid, left and right halves (REST needs $3C one row up)"
+    },
+    {
+     "first": 82,
+     "last": 82,
+     "what": "wall (knocks the player down)"
+    },
+    {
+     "first": 119,
+     "last": 179,
+     "what": "sign range; A-Z is $80-$99"
+    },
+    {
+     "first": 180,
+     "last": 185,
+     "what": "ladder / vine, two sets of three columns (left, centre, right)"
+    },
+    {
+     "first": 186,
+     "last": 188,
+     "what": "doorway tiles 1, 2, 3"
+    },
+    {
+     "first": 189,
+     "last": 191,
+     "what": "the three water frames copied into char $20"
+    },
+    {
+     "first": 223,
+     "last": 223,
+     "what": "grunspreked limb"
+    },
+    {
+     "first": 224,
+     "last": 224,
+     "what": "vine rope (solid only while crawling)"
+    },
+    {
+     "first": 225,
+     "last": 255,
+     "what": "object halves painted by the object table: class k is $FD-2k and $FE-2k"
+    }
+   ]
+  },
+  {
+   "id": "charset_text",
+   "kind": "charset",
+   "disk_file": null,
+   "built_at_runtime": "copied out of the C64 character ROM into RAM under the I/O area, re-ordered into ASCII order",
+   "load_address": "$D000",
+   "bitmaps": "assets/charset_text.json",
+   "sheets": {
+    "hires": "assets/charset_text.png"
+   },
+   "sheet_layout": {
+    "cols": 16,
+    "rows": 16,
+    "cell_px": [
+     8,
+     8
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect": "x = 1 + 9 * (code % 16), y = 1 + 9 * (code // 16)",
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "glyphs": 256,
+   "glyph_px": [
+    8,
+    8
+   ],
+   "bits_per_pixel": 1,
+   "colour_mode": "hires",
+   "encoding": "ASCII: glyph code == ASCII code",
+   "defined_ranges": [
+    {
+     "first": 32,
+     "last": 63,
+     "what": "space, punctuation, digits"
+    },
+    {
+     "first": 65,
+     "last": 90,
+     "what": "A-Z"
+    },
+    {
+     "first": 97,
+     "last": 122,
+     "what": "a-z"
+    },
+    {
+     "first": 160,
+     "last": 255,
+     "what": "reverse video of $20-$7F"
+    }
+   ],
+   "undefined_ranges": [
+    {
+     "first": 0,
+     "last": 31
+    },
+    {
+     "first": 128,
+     "last": 159
+    }
+   ],
+   "reverse_video": "set bit 7 of the code",
+   "blank_code": 0,
+   "src": "$8B20",
+   "checksum_note": "extracted from build/dumps/ingame.bin ($D000-$D7FF)",
+   "nonblank_glyphs": 254
+  }
+ ],
+ "sprite_sheets": [
+  {
+   "id": "sprites_player0",
+   "kind": "sprite-sheet",
+   "disk_file": "player0",
+   "load_address": "$F100",
+   "character": 0,
+   "character_name": "Neric",
+   "character_name_confidence": "certain",
+   "records": 48,
+   "frames": 24,
+   "frame_px": [
+    24,
+    42
+   ],
+   "colour_mode": "hires",
+   "bits_per_pixel": 1,
+   "sprite_color": 1,
+   "record_bitmaps": "assets/sprites_player0.json",
+   "sheets": {
+    "frames": "assets/sprites_player0_frames.png",
+    "records": "assets/sprites_player0_hires.png",
+    "multicolour_reading": "assets/sprites_player0_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 8,
+    "cell_px": [
+     24,
+     42
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "frame_table": [
+    {
+     "frame": 0,
+     "records": [
+      0,
+      1
+     ],
+     "rect": {
+      "x": 1,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 6,
+      "w": 10,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 1,
+     "records": [
+      2,
+      3
+     ],
+     "rect": {
+      "x": 26,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 5,
+      "w": 18,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 2,
+     "records": [
+      4,
+      5
+     ],
+     "rect": {
+      "x": 51,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 3,
+     "records": [
+      6,
+      7
+     ],
+     "rect": {
+      "x": 76,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 5,
+      "y": 6,
+      "w": 10,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -3,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 4,
+     "records": [
+      8,
+      9
+     ],
+     "rect": {
+      "x": 101,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 5,
+      "w": 18,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 5,
+     "records": [
+      10,
+      11
+     ],
+     "rect": {
+      "x": 126,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 6,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -2,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 6,
+     "records": [
+      12,
+      13
+     ],
+     "rect": {
+      "x": 151,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 3,
+      "w": 22,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -31,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 7,
+     "records": [
+      14,
+      15
+     ],
+     "rect": {
+      "x": 176,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 3,
+      "w": 22,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -31,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 8,
+     "records": [
+      16,
+      17
+     ],
+     "rect": {
+      "x": 1,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 6,
+      "w": 17,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 9,
+     "records": [
+      18,
+      19
+     ],
+     "rect": {
+      "x": 26,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 6,
+      "w": 17,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 10,
+     "records": [
+      20,
+      21
+     ],
+     "rect": {
+      "x": 51,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 19,
+      "w": 19,
+      "h": 23
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -15,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 11,
+     "records": [
+      22,
+      23
+     ],
+     "rect": {
+      "x": 76,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 16,
+      "w": 21,
+      "h": 26
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -18,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 12,
+     "records": [
+      24,
+      25
+     ],
+     "rect": {
+      "x": 101,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 10,
+      "w": 19,
+      "h": 32
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 13,
+     "records": [
+      26,
+      27
+     ],
+     "rect": {
+      "x": 126,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 16,
+      "w": 21,
+      "h": 26
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -18,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 14,
+     "records": [
+      28,
+      29
+     ],
+     "rect": {
+      "x": 151,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 10,
+      "w": 19,
+      "h": 32
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 15,
+     "records": [
+      30,
+      31
+     ],
+     "rect": {
+      "x": 176,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 14,
+      "w": 20,
+      "h": 28
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -20,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 16,
+     "records": [
+      32,
+      33
+     ],
+     "rect": {
+      "x": 1,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 15,
+      "w": 20,
+      "h": 27
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -19,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 17,
+     "records": [
+      34,
+      35
+     ],
+     "rect": {
+      "x": 26,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 23,
+      "w": 21,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 18,
+     "records": [
+      36,
+      37
+     ],
+     "rect": {
+      "x": 51,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 19,
+     "records": [
+      38,
+      39
+     ],
+     "rect": {
+      "x": 76,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 22,
+      "w": 24,
+      "h": 20
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -12,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 20,
+     "records": [
+      40,
+      41
+     ],
+     "rect": {
+      "x": 101,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 23,
+      "w": 21,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 21,
+     "records": [
+      42,
+      43
+     ],
+     "rect": {
+      "x": 126,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 22,
+     "records": [
+      44,
+      45
+     ],
+     "rect": {
+      "x": 151,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 22,
+      "w": 24,
+      "h": 20
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -12,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 23,
+     "records": [
+      46,
+      47
+     ],
+     "rect": {
+      "x": 176,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 21,
+      "w": 23,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    }
+   ]
+  },
+  {
+   "id": "sprites_player1",
+   "kind": "sprite-sheet",
+   "disk_file": "player1",
+   "load_address": "$F100",
+   "character": 1,
+   "character_name": "Genaa",
+   "character_name_confidence": "menu order only, not verified",
+   "records": 48,
+   "frames": 24,
+   "frame_px": [
+    24,
+    42
+   ],
+   "colour_mode": "hires",
+   "bits_per_pixel": 1,
+   "sprite_color": 1,
+   "record_bitmaps": "assets/sprites_player1.json",
+   "sheets": {
+    "frames": "assets/sprites_player1_frames.png",
+    "records": "assets/sprites_player1_hires.png",
+    "multicolour_reading": "assets/sprites_player1_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 8,
+    "cell_px": [
+     24,
+     42
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "frame_table": [
+    {
+     "frame": 0,
+     "records": [
+      0,
+      1
+     ],
+     "rect": {
+      "x": 1,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 8,
+      "w": 10,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -26,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 1,
+     "records": [
+      2,
+      3
+     ],
+     "rect": {
+      "x": 26,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 7,
+      "w": 18,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 2,
+     "records": [
+      4,
+      5
+     ],
+     "rect": {
+      "x": 51,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 7,
+      "w": 19,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 3,
+     "records": [
+      6,
+      7
+     ],
+     "rect": {
+      "x": 76,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 5,
+      "y": 8,
+      "w": 10,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -3,
+      "y": -26,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 4,
+     "records": [
+      8,
+      9
+     ],
+     "rect": {
+      "x": 101,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 7,
+      "w": 18,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 5,
+     "records": [
+      10,
+      11
+     ],
+     "rect": {
+      "x": 126,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 7,
+      "w": 19,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 6,
+     "records": [
+      12,
+      13
+     ],
+     "rect": {
+      "x": 151,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 4,
+      "w": 22,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -30,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 7,
+     "records": [
+      14,
+      15
+     ],
+     "rect": {
+      "x": 176,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 4,
+      "w": 22,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -30,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 8,
+     "records": [
+      16,
+      17
+     ],
+     "rect": {
+      "x": 1,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 8,
+      "w": 17,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -26,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 9,
+     "records": [
+      18,
+      19
+     ],
+     "rect": {
+      "x": 26,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 8,
+      "w": 17,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -26,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 10,
+     "records": [
+      20,
+      21
+     ],
+     "rect": {
+      "x": 51,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 18,
+      "w": 19,
+      "h": 24
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -16,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 11,
+     "records": [
+      22,
+      23
+     ],
+     "rect": {
+      "x": 76,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 18,
+      "w": 21,
+      "h": 24
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -16,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 12,
+     "records": [
+      24,
+      25
+     ],
+     "rect": {
+      "x": 101,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 10,
+      "w": 19,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 13,
+     "records": [
+      26,
+      27
+     ],
+     "rect": {
+      "x": 126,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 18,
+      "w": 21,
+      "h": 24
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -16,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 14,
+     "records": [
+      28,
+      29
+     ],
+     "rect": {
+      "x": 151,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 10,
+      "w": 19,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 15,
+     "records": [
+      30,
+      31
+     ],
+     "rect": {
+      "x": 176,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 14,
+      "w": 20,
+      "h": 28
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -20,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 16,
+     "records": [
+      32,
+      33
+     ],
+     "rect": {
+      "x": 1,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 15,
+      "w": 20,
+      "h": 27
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -19,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 17,
+     "records": [
+      34,
+      35
+     ],
+     "rect": {
+      "x": 26,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 24,
+      "w": 21,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 18,
+     "records": [
+      36,
+      37
+     ],
+     "rect": {
+      "x": 51,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 19,
+     "records": [
+      38,
+      39
+     ],
+     "rect": {
+      "x": 76,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 20,
+     "records": [
+      40,
+      41
+     ],
+     "rect": {
+      "x": 101,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 24,
+      "w": 21,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 21,
+     "records": [
+      42,
+      43
+     ],
+     "rect": {
+      "x": 126,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 22,
+     "records": [
+      44,
+      45
+     ],
+     "rect": {
+      "x": 151,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 23,
+     "records": [
+      46,
+      47
+     ],
+     "rect": {
+      "x": 176,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 21,
+      "w": 22,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    }
+   ]
+  },
+  {
+   "id": "sprites_player2",
+   "kind": "sprite-sheet",
+   "disk_file": "player2",
+   "load_address": "$F100",
+   "character": 2,
+   "character_name": "Herd",
+   "character_name_confidence": "menu order only, not verified",
+   "records": 48,
+   "frames": 24,
+   "frame_px": [
+    24,
+    42
+   ],
+   "colour_mode": "hires",
+   "bits_per_pixel": 1,
+   "sprite_color": 1,
+   "record_bitmaps": "assets/sprites_player2.json",
+   "sheets": {
+    "frames": "assets/sprites_player2_frames.png",
+    "records": "assets/sprites_player2_hires.png",
+    "multicolour_reading": "assets/sprites_player2_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 8,
+    "cell_px": [
+     24,
+     42
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "frame_table": [
+    {
+     "frame": 0,
+     "records": [
+      0,
+      1
+     ],
+     "rect": {
+      "x": 1,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 6,
+      "w": 9,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 1,
+     "records": [
+      2,
+      3
+     ],
+     "rect": {
+      "x": 26,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 2,
+     "records": [
+      4,
+      5
+     ],
+     "rect": {
+      "x": 51,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 3,
+     "records": [
+      6,
+      7
+     ],
+     "rect": {
+      "x": 76,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 6,
+      "y": 6,
+      "w": 9,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -2,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 4,
+     "records": [
+      8,
+      9
+     ],
+     "rect": {
+      "x": 101,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 5,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -3,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 5,
+     "records": [
+      10,
+      11
+     ],
+     "rect": {
+      "x": 126,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 6,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -2,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 6,
+     "records": [
+      12,
+      13
+     ],
+     "rect": {
+      "x": 151,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 4,
+      "w": 22,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -30,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 7,
+     "records": [
+      14,
+      15
+     ],
+     "rect": {
+      "x": 176,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 4,
+      "w": 22,
+      "h": 34
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -30,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 8,
+     "records": [
+      16,
+      17
+     ],
+     "rect": {
+      "x": 1,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 7,
+      "w": 17,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 9,
+     "records": [
+      18,
+      19
+     ],
+     "rect": {
+      "x": 26,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 7,
+      "w": 17,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 10,
+     "records": [
+      20,
+      21
+     ],
+     "rect": {
+      "x": 51,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 18,
+      "w": 19,
+      "h": 24
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -16,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 11,
+     "records": [
+      22,
+      23
+     ],
+     "rect": {
+      "x": 76,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 17,
+      "w": 21,
+      "h": 25
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -17,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 12,
+     "records": [
+      24,
+      25
+     ],
+     "rect": {
+      "x": 101,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 10,
+      "w": 19,
+      "h": 32
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 13,
+     "records": [
+      26,
+      27
+     ],
+     "rect": {
+      "x": 126,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 17,
+      "w": 21,
+      "h": 25
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -17,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 14,
+     "records": [
+      28,
+      29
+     ],
+     "rect": {
+      "x": 151,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 10,
+      "w": 19,
+      "h": 32
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 15,
+     "records": [
+      30,
+      31
+     ],
+     "rect": {
+      "x": 176,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 14,
+      "w": 20,
+      "h": 28
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -20,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 16,
+     "records": [
+      32,
+      33
+     ],
+     "rect": {
+      "x": 1,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 15,
+      "w": 20,
+      "h": 27
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -19,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 17,
+     "records": [
+      34,
+      35
+     ],
+     "rect": {
+      "x": 26,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 24,
+      "w": 21,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 18,
+     "records": [
+      36,
+      37
+     ],
+     "rect": {
+      "x": 51,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 19,
+     "records": [
+      38,
+      39
+     ],
+     "rect": {
+      "x": 76,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 20,
+     "records": [
+      40,
+      41
+     ],
+     "rect": {
+      "x": 101,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 24,
+      "w": 21,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 21,
+     "records": [
+      42,
+      43
+     ],
+     "rect": {
+      "x": 126,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 22,
+     "records": [
+      44,
+      45
+     ],
+     "rect": {
+      "x": 151,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 23,
+     "records": [
+      46,
+      47
+     ],
+     "rect": {
+      "x": 176,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 21,
+      "w": 21,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    }
+   ]
+  },
+  {
+   "id": "sprites_player3",
+   "kind": "sprite-sheet",
+   "disk_file": "player3",
+   "load_address": "$F100",
+   "character": 3,
+   "character_name": "Pomma",
+   "character_name_confidence": "menu order only, not verified",
+   "records": 48,
+   "frames": 24,
+   "frame_px": [
+    24,
+    42
+   ],
+   "colour_mode": "hires",
+   "bits_per_pixel": 1,
+   "sprite_color": 1,
+   "record_bitmaps": "assets/sprites_player3.json",
+   "sheets": {
+    "frames": "assets/sprites_player3_frames.png",
+    "records": "assets/sprites_player3_hires.png",
+    "multicolour_reading": "assets/sprites_player3_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 8,
+    "cell_px": [
+     24,
+     42
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "frame_table": [
+    {
+     "frame": 0,
+     "records": [
+      0,
+      1
+     ],
+     "rect": {
+      "x": 1,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 13,
+      "w": 10,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -21,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 1,
+     "records": [
+      2,
+      3
+     ],
+     "rect": {
+      "x": 26,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 12,
+      "w": 18,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 2,
+     "records": [
+      4,
+      5
+     ],
+     "rect": {
+      "x": 51,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 12,
+      "w": 18,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 3,
+     "records": [
+      6,
+      7
+     ],
+     "rect": {
+      "x": 76,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 5,
+      "y": 13,
+      "w": 10,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": -3,
+      "y": -21,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 4,
+     "records": [
+      8,
+      9
+     ],
+     "rect": {
+      "x": 101,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 12,
+      "w": 18,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 5,
+     "records": [
+      10,
+      11
+     ],
+     "rect": {
+      "x": 126,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 12,
+      "w": 18,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 6,
+     "records": [
+      12,
+      13
+     ],
+     "rect": {
+      "x": 151,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 9,
+      "w": 22,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -25,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 7,
+     "records": [
+      14,
+      15
+     ],
+     "rect": {
+      "x": 176,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 9,
+      "w": 22,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -25,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 8,
+     "records": [
+      16,
+      17
+     ],
+     "rect": {
+      "x": 1,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 11,
+      "w": 17,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 9,
+     "records": [
+      18,
+      19
+     ],
+     "rect": {
+      "x": 26,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 11,
+      "w": 17,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 10,
+     "records": [
+      20,
+      21
+     ],
+     "rect": {
+      "x": 51,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 21,
+      "w": 19,
+      "h": 21
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 11,
+     "records": [
+      22,
+      23
+     ],
+     "rect": {
+      "x": 76,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 17,
+      "w": 18,
+      "h": 25
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -17,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 12,
+     "records": [
+      24,
+      25
+     ],
+     "rect": {
+      "x": 101,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 12,
+      "w": 18,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 13,
+     "records": [
+      26,
+      27
+     ],
+     "rect": {
+      "x": 126,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 17,
+      "w": 18,
+      "h": 25
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -17,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 14,
+     "records": [
+      28,
+      29
+     ],
+     "rect": {
+      "x": 151,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 12,
+      "w": 18,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 15,
+     "records": [
+      30,
+      31
+     ],
+     "rect": {
+      "x": 176,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 14,
+      "w": 19,
+      "h": 28
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -20,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 16,
+     "records": [
+      32,
+      33
+     ],
+     "rect": {
+      "x": 1,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 15,
+      "w": 20,
+      "h": 27
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -19,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 17,
+     "records": [
+      34,
+      35
+     ],
+     "rect": {
+      "x": 26,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 24,
+      "w": 21,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 18,
+     "records": [
+      36,
+      37
+     ],
+     "rect": {
+      "x": 51,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 19,
+     "records": [
+      38,
+      39
+     ],
+     "rect": {
+      "x": 76,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 20,
+     "records": [
+      40,
+      41
+     ],
+     "rect": {
+      "x": 101,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 24,
+      "w": 21,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 21,
+     "records": [
+      42,
+      43
+     ],
+     "rect": {
+      "x": 126,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 22,
+     "records": [
+      44,
+      45
+     ],
+     "rect": {
+      "x": 151,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 23,
+      "w": 24,
+      "h": 19
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -11,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 23,
+     "records": [
+      46,
+      47
+     ],
+     "rect": {
+      "x": 176,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 21,
+      "w": 23,
+      "h": 8
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    }
+   ]
+  },
+  {
+   "id": "sprites_player4",
+   "kind": "sprite-sheet",
+   "disk_file": "player4",
+   "load_address": "$F100",
+   "character": 4,
+   "character_name": "Charn",
+   "character_name_confidence": "menu order only, not verified",
+   "records": 48,
+   "frames": 24,
+   "frame_px": [
+    24,
+    42
+   ],
+   "colour_mode": "hires",
+   "bits_per_pixel": 1,
+   "sprite_color": 1,
+   "record_bitmaps": "assets/sprites_player4.json",
+   "sheets": {
+    "frames": "assets/sprites_player4_frames.png",
+    "records": "assets/sprites_player4_hires.png",
+    "multicolour_reading": "assets/sprites_player4_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 8,
+    "cell_px": [
+     24,
+     42
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "frame_table": [
+    {
+     "frame": 0,
+     "records": [
+      0,
+      1
+     ],
+     "rect": {
+      "x": 1,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 12,
+      "w": 9,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 1,
+     "records": [
+      2,
+      3
+     ],
+     "rect": {
+      "x": 26,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 11,
+      "w": 18,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 2,
+     "records": [
+      4,
+      5
+     ],
+     "rect": {
+      "x": 51,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 11,
+      "w": 18,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 3,
+     "records": [
+      6,
+      7
+     ],
+     "rect": {
+      "x": 76,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 6,
+      "y": 12,
+      "w": 9,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -2,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 4,
+     "records": [
+      8,
+      9
+     ],
+     "rect": {
+      "x": 101,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 11,
+      "w": 18,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 5,
+     "records": [
+      10,
+      11
+     ],
+     "rect": {
+      "x": 126,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 11,
+      "w": 18,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 6,
+     "records": [
+      12,
+      13
+     ],
+     "rect": {
+      "x": 151,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 9,
+      "w": 22,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -25,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 7,
+     "records": [
+      14,
+      15
+     ],
+     "rect": {
+      "x": 176,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 9,
+      "w": 22,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -25,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 8,
+     "records": [
+      16,
+      17
+     ],
+     "rect": {
+      "x": 1,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 10,
+      "w": 17,
+      "h": 32
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 9,
+     "records": [
+      18,
+      19
+     ],
+     "rect": {
+      "x": 26,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 10,
+      "w": 17,
+      "h": 32
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -24,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 10,
+     "records": [
+      20,
+      21
+     ],
+     "rect": {
+      "x": 51,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 21,
+      "w": 19,
+      "h": 21
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 11,
+     "records": [
+      22,
+      23
+     ],
+     "rect": {
+      "x": 76,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 18,
+      "w": 18,
+      "h": 24
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -16,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 12,
+     "records": [
+      24,
+      25
+     ],
+     "rect": {
+      "x": 101,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 12,
+      "w": 18,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 13,
+     "records": [
+      26,
+      27
+     ],
+     "rect": {
+      "x": 126,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 18,
+      "w": 18,
+      "h": 24
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -16,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 14,
+     "records": [
+      28,
+      29
+     ],
+     "rect": {
+      "x": 151,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 12,
+      "w": 18,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 15,
+     "records": [
+      30,
+      31
+     ],
+     "rect": {
+      "x": 176,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 14,
+      "w": 19,
+      "h": 28
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -20,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 16,
+     "records": [
+      32,
+      33
+     ],
+     "rect": {
+      "x": 1,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 15,
+      "w": 20,
+      "h": 27
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -19,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 17,
+     "records": [
+      34,
+      35
+     ],
+     "rect": {
+      "x": 26,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 25,
+      "w": 21,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 18,
+     "records": [
+      36,
+      37
+     ],
+     "rect": {
+      "x": 51,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 25,
+      "w": 24,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 19,
+     "records": [
+      38,
+      39
+     ],
+     "rect": {
+      "x": 76,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 20,
+     "records": [
+      40,
+      41
+     ],
+     "rect": {
+      "x": 101,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 25,
+      "w": 21,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 21,
+     "records": [
+      42,
+      43
+     ],
+     "rect": {
+      "x": 126,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 25,
+      "w": 24,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 22,
+     "records": [
+      44,
+      45
+     ],
+     "rect": {
+      "x": 151,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 24,
+      "w": 24,
+      "h": 18
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -10,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 23,
+     "records": [
+      46,
+      47
+     ],
+     "rect": {
+      "x": 176,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 21,
+      "w": 21,
+      "h": 8
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -13,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    }
+   ]
+  },
+  {
+   "id": "sprites_extras",
+   "kind": "sprite-sheet",
+   "disk_file": "extras",
+   "load_address": "$E000",
+   "records": 68,
+   "frames": 34,
+   "frame_px": [
+    24,
+    42
+   ],
+   "colour_mode": "hires",
+   "bits_per_pixel": 1,
+   "record_bitmaps": "assets/sprites_extras.json",
+   "sheets": {
+    "frames": "assets/sprites_extras_frames.png",
+    "records": "assets/sprites_extras_hires.png",
+    "multicolour_reading": "assets/sprites_extras_mc.png"
+   },
+   "sheet_layout": {
+    "cols": 8,
+    "cell_px": [
+     24,
+     42
+    ],
+    "gridline_px": 1,
+    "png_scale": 4,
+    "rect_units": "source pixels; multiply by png_scale for the PNG"
+   },
+   "frame_table": [
+    {
+     "frame": 0,
+     "records": [
+      0,
+      1
+     ],
+     "rect": {
+      "x": 1,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 8,
+      "y": 2,
+      "w": 8,
+      "h": 8
+     },
+     "ink_offset_from_cell_px": {
+      "x": 0,
+      "y": -32,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 1,
+     "records": [
+      2,
+      3
+     ],
+     "rect": {
+      "x": 26,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 8,
+      "y": 7,
+      "w": 11,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": 0,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 2,
+     "records": [
+      4,
+      5
+     ],
+     "rect": {
+      "x": 51,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 6,
+      "w": 19,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 3,
+     "records": [
+      6,
+      7
+     ],
+     "rect": {
+      "x": 76,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 6,
+      "w": 21,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 4,
+     "records": [
+      8,
+      9
+     ],
+     "rect": {
+      "x": 101,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 7,
+      "w": 10,
+      "h": 35
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -27,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 5,
+     "records": [
+      10,
+      11
+     ],
+     "rect": {
+      "x": 126,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 6,
+      "w": 18,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 6,
+     "records": [
+      12,
+      13
+     ],
+     "rect": {
+      "x": 151,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 6,
+      "w": 17,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 7,
+     "records": [
+      14,
+      15
+     ],
+     "rect": {
+      "x": 176,
+      "y": 1,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 8,
+      "y": 6,
+      "w": 11,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": 0,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 8,
+     "records": [
+      16,
+      17
+     ],
+     "rect": {
+      "x": 1,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 5,
+      "w": 18,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 9,
+     "records": [
+      18,
+      19
+     ],
+     "rect": {
+      "x": 26,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 10,
+     "records": [
+      20,
+      21
+     ],
+     "rect": {
+      "x": 51,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 6,
+      "w": 9,
+      "h": 36
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -28,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 11,
+     "records": [
+      22,
+      23
+     ],
+     "rect": {
+      "x": 76,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 12,
+     "records": [
+      24,
+      25
+     ],
+     "rect": {
+      "x": 101,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 5,
+      "w": 17,
+      "h": 37
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -29,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 13,
+     "records": [
+      26,
+      27
+     ],
+     "rect": {
+      "x": 126,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 13,
+      "w": 10,
+      "h": 29
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -21,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 14,
+     "records": [
+      28,
+      29
+     ],
+     "rect": {
+      "x": 151,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 12,
+      "w": 18,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 15,
+     "records": [
+      30,
+      31
+     ],
+     "rect": {
+      "x": 176,
+      "y": 44,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 12,
+      "w": 18,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 16,
+     "records": [
+      32,
+      33
+     ],
+     "rect": {
+      "x": 1,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 9,
+      "y": 12,
+      "w": 9,
+      "h": 30
+     },
+     "ink_offset_from_cell_px": {
+      "x": 1,
+      "y": -22,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 17,
+     "records": [
+      34,
+      35
+     ],
+     "rect": {
+      "x": 26,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 11,
+      "w": 18,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 18,
+     "records": [
+      36,
+      37
+     ],
+     "rect": {
+      "x": 51,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 11,
+      "w": 18,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 19,
+     "records": [
+      38,
+      39
+     ],
+     "rect": {
+      "x": 76,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 6,
+      "y": 33,
+      "w": 16,
+      "h": 9
+     },
+     "ink_offset_from_cell_px": {
+      "x": -2,
+      "y": -1,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 20,
+     "records": [
+      40,
+      41
+     ],
+     "rect": {
+      "x": 101,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 33,
+      "w": 17,
+      "h": 9
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -1,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 21,
+     "records": [
+      42,
+      43
+     ],
+     "rect": {
+      "x": 126,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 32,
+      "w": 17,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -2,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 22,
+     "records": [
+      44,
+      45
+     ],
+     "rect": {
+      "x": 151,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 4,
+      "y": 25,
+      "w": 20,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -4,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 23,
+     "records": [
+      46,
+      47
+     ],
+     "rect": {
+      "x": 176,
+      "y": 87,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 25,
+      "w": 23,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 24,
+     "records": [
+      48,
+      49
+     ],
+     "rect": {
+      "x": 1,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 25,
+      "w": 23,
+      "h": 17
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -9,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 25,
+     "records": [
+      50,
+      51
+     ],
+     "rect": {
+      "x": 26,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 2,
+      "y": 32,
+      "w": 22,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -6,
+      "y": -2,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 26,
+     "records": [
+      52,
+      53
+     ],
+     "rect": {
+      "x": 51,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 33,
+      "w": 20,
+      "h": 9
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -1,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 27,
+     "records": [
+      54,
+      55
+     ],
+     "rect": {
+      "x": 76,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 32,
+      "w": 22,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -2,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 28,
+     "records": [
+      56,
+      57
+     ],
+     "rect": {
+      "x": 101,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 3,
+      "y": 32,
+      "w": 21,
+      "h": 10
+     },
+     "ink_offset_from_cell_px": {
+      "x": -5,
+      "y": -2,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 29,
+     "records": [
+      58,
+      59
+     ],
+     "rect": {
+      "x": 126,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 30,
+      "w": 20,
+      "h": 12
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -4,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 30,
+     "records": [
+      60,
+      61
+     ],
+     "rect": {
+      "x": 151,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 0,
+      "y": 31,
+      "w": 19,
+      "h": 11
+     },
+     "ink_offset_from_cell_px": {
+      "x": -8,
+      "y": -3,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 31,
+     "records": [
+      62,
+      63
+     ],
+     "rect": {
+      "x": 176,
+      "y": 130,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 6,
+      "y": 9,
+      "w": 14,
+      "h": 33
+     },
+     "ink_offset_from_cell_px": {
+      "x": -2,
+      "y": -25,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 32,
+     "records": [
+      64,
+      65
+     ],
+     "rect": {
+      "x": 1,
+      "y": 173,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 11,
+      "w": 19,
+      "h": 31
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -23,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    },
+    {
+     "frame": 33,
+     "records": [
+      66,
+      67
+     ],
+     "rect": {
+      "x": 26,
+      "y": 173,
+      "w": 24,
+      "h": 42
+     },
+     "ink_bbox": {
+      "x": 1,
+      "y": 9,
+      "w": 18,
+      "h": 33
+     },
+     "ink_offset_from_cell_px": {
+      "x": -7,
+      "y": -25,
+      "note": "add to (8 * col, 8 * row) for the ink corner"
+     }
+    }
+   ],
+   "frame_roles": [
+    {
+     "frame": 0,
+     "role": "hollow box; sprite 7, the kiniport and room-editor pointer, colour 7"
+    }
+   ],
+   "species": [
+    {
+     "species": 0,
+     "name": "long-haired adult",
+     "frames": [
+      1,
+      2,
+      3
+     ],
+     "src": "$994F/$995A -> extras record 2"
+    },
+    {
+     "species": 1,
+     "name": "short-haired adult",
+     "frames": [
+      4,
+      5,
+      6
+     ],
+     "src": "$994F/$995A -> extras record 8"
+    },
+    {
+     "species": 2,
+     "name": "long-haired adult (Erdling)",
+     "frames": [
+      7,
+      8,
+      9
+     ],
+     "src": "$994F/$995A -> extras record 14"
+    },
+    {
+     "species": 3,
+     "name": "short-haired adult (Erdling)",
+     "frames": [
+      10,
+      11,
+      12
+     ],
+     "src": "$994F/$995A -> extras record 20"
+    },
+    {
+     "species": 4,
+     "name": "long-haired child",
+     "frames": [
+      13,
+      14,
+      15
+     ],
+     "src": "$994F/$995A -> extras record 26"
+    },
+    {
+     "species": 5,
+     "name": "short-haired child",
+     "frames": [
+      16,
+      17,
+      18
+     ],
+     "src": "$994F/$995A -> extras record 32"
+    },
+    {
+     "species": 6,
+     "name": "lapan",
+     "frames": [
+      19,
+      20,
+      21
+     ],
+     "src": "$994F/$995A -> extras record 38"
+    },
+    {
+     "species": 7,
+     "name": "sima",
+     "frames": [
+      22,
+      23,
+      24
+     ],
+     "src": "$994F/$995A -> extras record 44"
+    },
+    {
+     "species": 8,
+     "name": "snake",
+     "frames": [
+      25,
+      26,
+      27
+     ],
+     "src": "$994F/$995A -> extras record 50"
+    },
+    {
+     "species": 9,
+     "name": "many-legged crawler",
+     "frames": [
+      28,
+      29,
+      30
+     ],
+     "src": "$994F/$995A -> extras record 56"
+    },
+    {
+     "species": 10,
+     "name": "Ol-zhaan",
+     "frames": [
+      31,
+      32,
+      33
+     ],
+     "src": "$994F/$995A -> extras record 62"
+    }
+   ],
+   "facing": {
+    "stored": "left",
+    "right": "horizontal mirror of the same frame, built at run time by reversing the bits of each row and swapping the row's first and third byte",
+    "src": "$9887/$989F/$98B4"
+   },
+   "walk_cycle": {
+    "note": "the creature walk cycle is frame 0, 1, 0, 2, 0, 1, ... ; the column advances on the even phase only",
+    "ticks_per_half_step": {
+     "gait_0": [
+      8,
+      12
+     ],
+     "gait_1": [
+      6,
+      10
+     ]
+    },
+    "turn_pause_ticks": {
+     "gait_0": 12,
+     "gait_1": 8
+    },
+    "fall_ticks": 4,
+    "src": "$9971, $9AF4/$9AF6/$9AF8, $9A68"
+   }
+  }
+ ],
+ "player_animations": {
+  "note": "Every player sheet has the same 24 frames.  A step lasts `ticks` video frames and then the next step runs; dx/dy is the cell movement that happens on that step.",
+  "src": "$9DF6 stand, $A41D walk, $A4A8 climb, $A39A glide, $A21C leap, $A2FB knock-down",
+  "idle": {
+   "loop": false,
+   "steps": {
+    "left": [
+     {
+      "frame": 0,
+      "ticks": 8
+     }
+    ],
+    "right": [
+     {
+      "frame": 3,
+      "ticks": 8
+     }
+    ]
+   }
+  },
+  "walk": {
+   "loop": true,
+   "cells_per_cycle": 2,
+   "ticks_per_cycle": 20,
+   "steps": {
+    "left": [
+     {
+      "frame": 1,
+      "ticks": 6,
+      "dx": 0
+     },
+     {
+      "frame": 0,
+      "ticks": 4,
+      "dx": -1
+     },
+     {
+      "frame": 2,
+      "ticks": 6,
+      "dx": 0
+     },
+     {
+      "frame": 0,
+      "ticks": 4,
+      "dx": -1
+     }
+    ],
+    "right": [
+     {
+      "frame": 4,
+      "ticks": 6,
+      "dx": 0
+     },
+     {
+      "frame": 3,
+      "ticks": 4,
+      "dx": 1
+     },
+     {
+      "frame": 5,
+      "ticks": 6,
+      "dx": 0
+     },
+     {
+      "frame": 3,
+      "ticks": 4,
+      "dx": 1
+     }
+    ]
+   }
+  },
+  "run": {
+   "loop": true,
+   "cells_per_cycle": 2,
+   "ticks_per_cycle": 10,
+   "note": "same frames as walk, periods 3 and 2",
+   "steps": {
+    "left": [
+     {
+      "frame": 1,
+      "ticks": 3,
+      "dx": 0
+     },
+     {
+      "frame": 0,
+      "ticks": 2,
+      "dx": -1
+     },
+     {
+      "frame": 2,
+      "ticks": 3,
+      "dx": 0
+     },
+     {
+      "frame": 0,
+      "ticks": 2,
+      "dx": -1
+     }
+    ],
+    "right": [
+     {
+      "frame": 4,
+      "ticks": 3,
+      "dx": 0
+     },
+     {
+      "frame": 3,
+      "ticks": 2,
+      "dx": 1
+     },
+     {
+      "frame": 5,
+      "ticks": 3,
+      "dx": 0
+     },
+     {
+      "frame": 3,
+      "ticks": 2,
+      "dx": 1
+     }
+    ]
+   }
+  },
+  "crawl": {
+   "loop": true,
+   "cells_per_cycle": 2,
+   "ticks_per_cycle": 32,
+   "steps": {
+    "left": [
+     {
+      "frame": 18,
+      "ticks": 8,
+      "dx": 0
+     },
+     {
+      "frame": 17,
+      "ticks": 8,
+      "dx": -1
+     },
+     {
+      "frame": 19,
+      "ticks": 8,
+      "dx": 0
+     },
+     {
+      "frame": 17,
+      "ticks": 8,
+      "dx": -1
+     }
+    ],
+    "right": [
+     {
+      "frame": 21,
+      "ticks": 8,
+      "dx": 0
+     },
+     {
+      "frame": 20,
+      "ticks": 8,
+      "dx": 1
+     },
+     {
+      "frame": 22,
+      "ticks": 8,
+      "dx": 0
+     },
+     {
+      "frame": 20,
+      "ticks": 8,
+      "dx": 1
+     }
+    ]
+   }
+  },
+  "climb": {
+   "loop": true,
+   "note": "dy is -1 going up, +1 going down",
+   "steps": {
+    "left": [
+     {
+      "frame": 8,
+      "ticks": 10,
+      "dy": -1
+     },
+     {
+      "frame": 9,
+      "ticks": 10,
+      "dy": -1
+     }
+    ],
+    "right": [
+     {
+      "frame": 8,
+      "ticks": 10,
+      "dy": -1
+     },
+     {
+      "frame": 9,
+      "ticks": 10,
+      "dy": -1
+     }
+    ]
+   },
+   "top_of_ladder_frame": 10
+  },
+  "glide": {
+   "loop": true,
+   "note": "45 degrees, steerable in mid air",
+   "steps": {
+    "left": [
+     {
+      "frame": 6,
+      "ticks": 8,
+      "dx": -1,
+      "dy": 1
+     }
+    ],
+    "right": [
+     {
+      "frame": 7,
+      "ticks": 8,
+      "dx": 1,
+      "dy": 1
+     }
+    ]
+   }
+  },
+  "fall": {
+   "loop": true,
+   "note": "falling never changes the sprite; whatever frame was showing stays up for the whole fall",
+   "steps": {
+    "left": [
+     {
+      "frame": null,
+      "ticks": 4,
+      "dy": 1
+     }
+    ],
+    "right": [
+     {
+      "frame": null,
+      "ticks": 4,
+      "dy": 1
+     }
+    ]
+   }
+  },
+  "leap": {
+   "loop": false,
+   "note": "one launch step, then 4-6 flight steps; dx is always one column in the facing direction, dy comes from the arc in docs/spec/player.md",
+   "steps": {
+    "left": [
+     {
+      "frame": 11,
+      "ticks": 6
+     },
+     {
+      "frame": 12,
+      "ticks": 4,
+      "repeat": "4-6"
+     }
+    ],
+    "right": [
+     {
+      "frame": 13,
+      "ticks": 6
+     },
+     {
+      "frame": 14,
+      "ticks": 4,
+      "repeat": "4-6"
+     }
+    ]
+   }
+  },
+  "stoop": {
+   "loop": false,
+   "note": "one-shot pose entering or leaving a crawl",
+   "steps": {
+    "left": [
+     {
+      "frame": 11,
+      "ticks": 5
+     }
+    ],
+    "right": [
+     {
+      "frame": 13,
+      "ticks": 5
+     }
+    ]
+   }
+  },
+  "knocked_down": {
+   "loop": false,
+   "total_ticks": 165,
+   "note": "11 steps of 15 ticks: 9 alternating stars frames, then the stoop pose, then back to idle",
+   "steps": {
+    "left": [
+     {
+      "frame": 15,
+      "ticks": 15
+     },
+     {
+      "frame": 16,
+      "ticks": 15,
+      "alternate_with": 15,
+      "repeat": 8
+     },
+     {
+      "frame": 11,
+      "ticks": 15
+     }
+    ],
+    "right": [
+     {
+      "frame": 15,
+      "ticks": 15
+     },
+     {
+      "frame": 16,
+      "ticks": 15,
+      "alternate_with": 15,
+      "repeat": 8
+     },
+     {
+      "frame": 13,
+      "ticks": 15
+     }
+    ]
+   }
+  },
+  "lying_down": {
+   "loop": false,
+   "note": "asleep in a nid, or carried home",
+   "steps": {
+    "left": [
+     {
+      "frame": 23,
+      "ticks": null
+     }
+    ],
+    "right": [
+     {
+      "frame": 23,
+      "ticks": null
+     }
+    ]
+   }
+  }
+ },
+ "screens": [
+  {
+   "id": "screen_title_menu",
+   "kind": "screen",
+   "render": "room 157 in the playfield, main-menu text in the panel",
+   "playfield": {
+    "room": 157,
+    "tileset": 0,
+    "note": "the \"BELOW THE ROOT / STORY BY ZILPHA KEATLEY SNYDER\" lettering is room tiles, drawn from the sign range $80-$99 of the room charset"
+   },
+   "panel": {
+    "font": "text font",
+    "color": 1,
+    "items": [
+     {
+      "row": 21,
+      "col": 13,
+      "text": "START GAME"
+     },
+     {
+      "row": 22,
+      "col": 13,
+      "text": "CONTINUE"
+     },
+     {
+      "row": 23,
+      "col": 13,
+      "text": "DISK STORAGE"
+     },
+     {
+      "row": 24,
+      "col": 13,
+      "text": "SAMPLE QUEST"
+     }
+    ],
+    "highlight": {
+     "width": 14,
+     "col": 13,
+     "how": "set bit 7 of each code"
+    }
+   },
+   "src": "$3406, $3A38, $3A89"
+  },
+  {
+   "id": "screen_charselect",
+   "kind": "screen",
+   "render": "room 157 in the playfield, character text in the panel",
+   "preview": "assets/screen_charselect.png",
+   "preview_caveat": "rows 20-24 of that PNG use stale colour bytes; the real panel is colour 1",
+   "panel": {
+    "font": "text font",
+    "color": 1,
+    "items": [
+     {
+      "row": 21,
+      "col": 7,
+      "text": "CHOOSE YOUR PLAYER:"
+     },
+     {
+      "row": 21,
+      "col": 28,
+      "text": "<name>"
+     },
+     {
+      "row": 22,
+      "col": 1,
+      "text": "<description>"
+     },
+     {
+      "row": 23,
+      "col": 1,
+      "text": "<trait line>"
+     }
+    ]
+   },
+   "src": "$3497, $34A3"
+  },
+  {
+   "id": "screen_room",
+   "kind": "screen",
+   "render": "the decoded room in the playfield; message line and panel blank",
+   "preview": "assets/screen_ingame.png",
+   "src": "$8C0C"
+  },
+  {
+   "id": "screen_tool_menu",
+   "kind": "screen",
+   "render": "four rows of verb names over the panel",
+   "panel": {
+    "font": "text font",
+    "color": 1,
+    "text_rows": [
+     " PAUSE  TAKE  DROP  EXAMINE     STATUS  ",
+     " SPEAK  BUY   SELL  INVENTORY   RENEW   ",
+     " PENSE  USE   HEAL  GRUNSPREKE  MENU    ",
+     " OFFER  EAT   REST  KINIPORT            "
+    ],
+    "row_offsets": [
+     0,
+     40,
+     80,
+     120
+    ],
+    "column_offsets": [
+     0,
+     7,
+     13,
+     19,
+     31
+    ],
+    "column_widths": [
+     7,
+     6,
+     6,
+     12,
+     8
+    ],
+    "highlight": "set bit 7 of every code in the selected cell"
+   },
+   "src": "$A800, $A93C, $A94D, $AA1F/$AA23/$AA28"
+  },
+  {
+   "id": "screen_status",
+   "kind": "screen",
+   "render": "the four-line status panel",
+   "panel": {
+    "font": "text font",
+    "color": 1,
+    "fields": [
+     {
+      "row": 21,
+      "col": 1,
+      "label": "DAY",
+      "value_col": 5
+     },
+     {
+      "row": 21,
+      "col": 20,
+      "label": "<character name>"
+     },
+     {
+      "row": 22,
+      "col": 1,
+      "label": "<time of day>",
+      "width": 15
+     },
+     {
+      "row": 22,
+      "col": 20,
+      "label": "LEVEL OF REST",
+      "value_col": 36
+     },
+     {
+      "row": 23,
+      "col": 1,
+      "label": "SPIRIT LIMIT",
+      "value_col": 14
+     },
+     {
+      "row": 23,
+      "col": 20,
+      "label": "LEVEL OF FOOD",
+      "value_col": 36
+     },
+     {
+      "row": 24,
+      "col": 1,
+      "label": "STAMINA",
+      "value_col": 9
+     },
+     {
+      "row": 24,
+      "col": 20,
+      "label": "LEVEL OF SPIRIT",
+      "value_col": 37
+     }
+    ],
+    "numbers": "two ASCII digits, zero padded"
+   },
+   "src": "$B125, $B1AE, $B261"
+  },
+  {
+   "id": "screen_message",
+   "kind": "screen",
+   "render": "text written into the message line and/or the panel over whatever room is showing",
+   "src": "$8009 print_inline, $3C15 print_message"
+  },
+  {
+   "id": "screen_demo",
+   "kind": "screen",
+   "render": "room 157 or 228 with a scripted player, plus four inline text pages in the panel",
+   "src": "$952B, $2C00"
+  }
+ ],
+ "other": [
+  {
+   "id": "object_table",
+   "kind": "table",
+   "disk_file": "tooltab",
+   "load_address": "$C400",
+   "file": "assets/tooltab.json",
+   "what": "the initial object table, copied wholesale to $0D00-$0FFF when a quest starts",
+   "fields": [
+    {
+     "json_key": "c400",
+     "meaning": "room number, low byte"
+    },
+    {
+     "json_key": "c500",
+     "meaning": "screen column"
+    },
+    {
+     "json_key": "c600",
+     "meaning": "bits 0-4 screen row, bit 5 carried, bit 6 exists, bit 7 room number high bit"
+    }
+   ],
+   "entries": 256,
+   "free_slots": [
+    62,
+    87,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    204,
+    205,
+    206,
+    207,
+    244,
+    245,
+    246,
+    247,
+    255
+   ],
+   "not_graphics": "the PNGs assets/tooltab_chars.png and assets/tooltab_sprites.png are the discarded graphics readings; they are noise",
+   "src": "$950F -> $97BB"
+  },
+  {
+   "id": "messages",
+   "kind": "text",
+   "file": "docs/spec/data/messages.json",
+   "what": "the $4500 message table; see docs/spec/creatures.md"
+  },
+  {
+   "id": "message_xref",
+   "kind": "text",
+   "file": "assets/message-xref.json",
+   "what": "which room and rule emits each message"
+  },
+  {
+   "id": "demo_scripts",
+   "kind": "script",
+   "file": "docs/spec/data/demo.json",
+   "what": "the two attract-mode joystick scripts; see docs/spec/time.md"
+  },
+  {
+   "id": "music",
+   "kind": "music",
+   "file": "docs/spec/data/music.json",
+   "per_tune_files": "assets/music/tuneNN.json",
+   "tunes": 11
+  },
+  {
+   "id": "sfx",
+   "kind": "sfx",
+   "file": "docs/spec/data/music.json",
+   "effects": 14
+  }
+ ]
+}

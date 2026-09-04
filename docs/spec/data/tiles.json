@@ -1,0 +1,5647 @@
+{
+ "generated_by": "tools/spec_world.py",
+ "spec": "docs/spec/world.md",
+ "source": "tile_props $9D90, the verb handlers, and the two tile sets",
+ "charsets": [
+  "outdoor",
+  "indoor"
+ ],
+ "notes": [
+  "Behaviour is a function of the char code alone; the two tile sets only change the glyph and the fixed colour.",
+  "used_in_room_data counts cells in the 438 shipped rooms, so codes with 0 in both columns are only ever painted at run time (objects, the grown limb, the vine rope) or are unused."
+ ],
+ "tiles": [
+  {
+   "code": 0,
+   "role": "empty",
+   "note": "blank cell; the cutting tools write this",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 0,
+    "indoor": 0
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 98899,
+    "indoor": 69783
+   }
+  },
+  {
+   "code": 1,
+   "role": "platform",
+   "note": "solid scenery you can stand on and step up onto",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1239,
+    "indoor": 369
+   }
+  },
+  {
+   "code": 2,
+   "role": "limb_top",
+   "note": "solid branch top; GRUNSPREKE can grow a new limb from it",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 2210,
+    "indoor": 120
+   }
+  },
+  {
+   "code": 3,
+   "role": "limb_top",
+   "note": "solid branch top; GRUNSPREKE can grow a new limb from it",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 62,
+    "indoor": 2838
+   }
+  },
+  {
+   "code": 4,
+   "role": "limb_top",
+   "note": "solid branch top; GRUNSPREKE can grow a new limb from it",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 253,
+    "indoor": 383
+   }
+  },
+  {
+   "code": 5,
+   "role": "limb_top",
+   "note": "solid branch top; GRUNSPREKE can grow a new limb from it",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 305,
+    "indoor": 371
+   }
+  },
+  {
+   "code": 6,
+   "role": "limb_top",
+   "note": "solid branch top; GRUNSPREKE can grow a new limb from it",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 87,
+    "indoor": 688
+   }
+  },
+  {
+   "code": 7,
+   "role": "wall",
+   "note": "impassable: the move is reverted and you are knocked down",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": true,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 10,
+    "indoor": 1906
+   }
+  },
+  {
+   "code": 8,
+   "role": "wall",
+   "note": "impassable: the move is reverted and you are knocked down",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": true,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 11,
+    "indoor": 1
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 4,
+    "indoor": 47
+   }
+  },
+  {
+   "code": 9,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 20,
+    "indoor": 46063
+   }
+  },
+  {
+   "code": 10,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 101,
+    "indoor": 240
+   }
+  },
+  {
+   "code": 11,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 13,
+    "indoor": 342
+   }
+  },
+  {
+   "code": 12,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 238,
+    "indoor": 634
+   }
+  },
+  {
+   "code": 13,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 208,
+    "indoor": 351
+   }
+  },
+  {
+   "code": 14,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 19185,
+    "indoor": 252
+   }
+  },
+  {
+   "code": 15,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 727,
+    "indoor": 1321
+   }
+  },
+  {
+   "code": 16,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 532,
+    "indoor": 892
+   }
+  },
+  {
+   "code": 17,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 13595,
+    "indoor": 44
+   }
+  },
+  {
+   "code": 18,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 588,
+    "indoor": 41
+   }
+  },
+  {
+   "code": 19,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 791,
+    "indoor": 579
+   }
+  },
+  {
+   "code": 20,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 9156,
+    "indoor": 267
+   }
+  },
+  {
+   "code": 21,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 70,
+    "indoor": 311
+   }
+  },
+  {
+   "code": 22,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 78,
+    "indoor": 407
+   }
+  },
+  {
+   "code": 23,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 338,
+    "indoor": 253
+   }
+  },
+  {
+   "code": 24,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 778,
+    "indoor": 263
+   }
+  },
+  {
+   "code": 25,
+   "role": "platform",
+   "note": "solid scenery you can stand on and step up onto",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 35,
+    "indoor": 75
+   }
+  },
+  {
+   "code": 26,
+   "role": "platform",
+   "note": "solid scenery you can stand on and step up onto",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1227,
+    "indoor": 1276
+   }
+  },
+  {
+   "code": 27,
+   "role": "platform",
+   "note": "solid scenery you can stand on and step up onto",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 41,
+    "indoor": 70
+   }
+  },
+  {
+   "code": 28,
+   "role": "bramble",
+   "note": "impassable like a wall; cut by a wand of befal or a trencher beak",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": true,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 9
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 192,
+    "indoor": 48
+   }
+  },
+  {
+   "code": 29,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1592,
+    "indoor": 484
+   }
+  },
+  {
+   "code": 30,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 15,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 80,
+    "indoor": 63
+   }
+  },
+  {
+   "code": 31,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 11,
+    "indoor": 11
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 340,
+    "indoor": 641
+   }
+  },
+  {
+   "code": 32,
+   "role": "water",
+   "note": "animated; standing in it drowns you",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": true,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 14,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 223,
+    "indoor": 1234
+   }
+  },
+  {
+   "code": 33,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 12
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 8,
+    "indoor": 43
+   }
+  },
+  {
+   "code": 34,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 12
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 38,
+    "indoor": 46
+   }
+  },
+  {
+   "code": 35,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 12
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 73,
+    "indoor": 52
+   }
+  },
+  {
+   "code": 36,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 12
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 60,
+    "indoor": 58
+   }
+  },
+  {
+   "code": 37,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 12
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 53,
+    "indoor": 44
+   }
+  },
+  {
+   "code": 38,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 12
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 54,
+    "indoor": 110
+   }
+  },
+  {
+   "code": 39,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 15,
+    "indoor": 20
+   }
+  },
+  {
+   "code": 40,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 35,
+    "indoor": 20
+   }
+  },
+  {
+   "code": 41,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 17,
+    "indoor": 16
+   }
+  },
+  {
+   "code": 42,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 8,
+    "indoor": 16
+   }
+  },
+  {
+   "code": 43,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 8,
+    "indoor": 50
+   }
+  },
+  {
+   "code": 44,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 15,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 45,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 40,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 46,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 22,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 47,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 62,
+    "indoor": 12
+   }
+  },
+  {
+   "code": 48,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 50,
+    "indoor": 29
+   }
+  },
+  {
+   "code": 49,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 72,
+    "indoor": 173
+   }
+  },
+  {
+   "code": 50,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 105,
+    "indoor": 188
+   }
+  },
+  {
+   "code": 51,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 47,
+    "indoor": 39
+   }
+  },
+  {
+   "code": 52,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 4,
+    "indoor": 44
+   }
+  },
+  {
+   "code": 53,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 2512,
+    "indoor": 28
+   }
+  },
+  {
+   "code": 54,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 175,
+    "indoor": 24
+   }
+  },
+  {
+   "code": 55,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 147,
+    "indoor": 50
+   }
+  },
+  {
+   "code": 56,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7514,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 57,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 4808,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 58,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 3962,
+    "indoor": 404
+   }
+  },
+  {
+   "code": 59,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 8806,
+    "indoor": 43
+   }
+  },
+  {
+   "code": 60,
+   "role": "nid_left",
+   "note": "left half of a hanging nid; REST tests the cell one row up for this",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 309,
+    "indoor": 218
+   }
+  },
+  {
+   "code": 61,
+   "role": "nid_right",
+   "note": "right half of a hanging nid",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 265,
+    "indoor": 43
+   }
+  },
+  {
+   "code": 62,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 286,
+    "indoor": 354
+   }
+  },
+  {
+   "code": 63,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 362,
+    "indoor": 241
+   }
+  },
+  {
+   "code": 64,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 280,
+    "indoor": 14
+   }
+  },
+  {
+   "code": 65,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 237,
+    "indoor": 15
+   }
+  },
+  {
+   "code": 66,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 424,
+    "indoor": 12
+   }
+  },
+  {
+   "code": 67,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 224,
+    "indoor": 11
+   }
+  },
+  {
+   "code": 68,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 16,
+    "indoor": 13
+   }
+  },
+  {
+   "code": 69,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 29,
+    "indoor": 13
+   }
+  },
+  {
+   "code": 70,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 36,
+    "indoor": 15
+   }
+  },
+  {
+   "code": 71,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 15,
+    "indoor": 22
+   }
+  },
+  {
+   "code": 72,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 30,
+    "indoor": 22
+   }
+  },
+  {
+   "code": 73,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 35,
+    "indoor": 54
+   }
+  },
+  {
+   "code": 74,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 4,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 75,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 11,
+    "indoor": 161
+   }
+  },
+  {
+   "code": 76,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 106,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 77,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 135,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 78,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 180,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 79,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 177,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 80,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 81,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 82,
+   "role": "wall",
+   "note": "impassable: the move is reverted and you are knocked down",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": true,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 12,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 3397
+   }
+  },
+  {
+   "code": 83,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 10,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 355
+   }
+  },
+  {
+   "code": 84,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 27,
+    "indoor": 336
+   }
+  },
+  {
+   "code": 85,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 79,
+    "indoor": 250
+   }
+  },
+  {
+   "code": 86,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1039,
+    "indoor": 296
+   }
+  },
+  {
+   "code": 87,
+   "role": "home_nid",
+   "note": "nid-place marker; DROP puts an item into the nid two rows up",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 77,
+    "indoor": 367
+   }
+  },
+  {
+   "code": 88,
+   "role": "home_nid",
+   "note": "nid-place marker; DROP puts an item into the nid two rows up",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "wall",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 255,
+    "indoor": 383
+   }
+  },
+  {
+   "code": 89,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 55,
+    "indoor": 157
+   }
+  },
+  {
+   "code": 90,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 27,
+    "indoor": 196
+   }
+  },
+  {
+   "code": 91,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 30,
+    "indoor": 207
+   }
+  },
+  {
+   "code": 92,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 58,
+    "indoor": 178
+   }
+  },
+  {
+   "code": 93,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 305,
+    "indoor": 310
+   }
+  },
+  {
+   "code": 94,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1238,
+    "indoor": 190
+   }
+  },
+  {
+   "code": 95,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1748,
+    "indoor": 402
+   }
+  },
+  {
+   "code": 96,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 12,
+    "indoor": 16
+   }
+  },
+  {
+   "code": 97,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 322,
+    "indoor": 16
+   }
+  },
+  {
+   "code": 98,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 12,
+    "indoor": 6
+   }
+  },
+  {
+   "code": 99,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 89,
+    "indoor": 11
+   }
+  },
+  {
+   "code": 100,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 39,
+    "indoor": 65
+   }
+  },
+  {
+   "code": 101,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 29,
+    "indoor": 32
+   }
+  },
+  {
+   "code": 102,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 18,
+    "indoor": 10
+   }
+  },
+  {
+   "code": 103,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 22,
+    "indoor": 7
+   }
+  },
+  {
+   "code": 104,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 75,
+    "indoor": 191
+   }
+  },
+  {
+   "code": 105,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 20,
+    "indoor": 201
+   }
+  },
+  {
+   "code": 106,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 14,
+    "indoor": 234
+   }
+  },
+  {
+   "code": 107,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 14,
+    "indoor": 241
+   }
+  },
+  {
+   "code": 108,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 20,
+    "indoor": 1
+   }
+  },
+  {
+   "code": 109,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 59,
+    "indoor": 1
+   }
+  },
+  {
+   "code": 110,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 19,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 111,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 16,
+    "indoor": 16
+   }
+  },
+  {
+   "code": 112,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 29,
+    "indoor": 18
+   }
+  },
+  {
+   "code": 113,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 36,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 114,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "structure",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 67,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 115,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "ground",
+   "fixed_color": {
+    "outdoor": 10,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 162,
+    "indoor": 229
+   }
+  },
+  {
+   "code": 116,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "ground",
+   "fixed_color": {
+    "outdoor": 10,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 137,
+    "indoor": 192
+   }
+  },
+  {
+   "code": 117,
+   "role": "ground",
+   "note": "the surface; solid",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "ground",
+   "fixed_color": {
+    "outdoor": 10,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 870,
+    "indoor": 1331
+   }
+  },
+  {
+   "code": 118,
+   "role": "scenery",
+   "note": "no behaviour; decoration",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "ground",
+   "fixed_color": {
+    "outdoor": 10,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 272,
+    "indoor": 1294
+   }
+  },
+  {
+   "code": 119,
+   "role": "sign_blank",
+   "note": "blank cell inside a sign",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 242,
+    "indoor": 236
+   }
+  },
+  {
+   "code": 120,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 45,
+    "indoor": 142
+   }
+  },
+  {
+   "code": 121,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 72,
+    "indoor": 81
+   }
+  },
+  {
+   "code": 122,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 39,
+    "indoor": 80
+   }
+  },
+  {
+   "code": 123,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 25,
+    "indoor": 57
+   }
+  },
+  {
+   "code": 124,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 286,
+    "indoor": 214
+   }
+  },
+  {
+   "code": 125,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 92,
+    "indoor": 52
+   }
+  },
+  {
+   "code": 126,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 95,
+    "indoor": 57
+   }
+  },
+  {
+   "code": 127,
+   "role": "sign_frame",
+   "note": "sign border piece",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 302,
+    "indoor": 188
+   }
+  },
+  {
+   "code": 128,
+   "role": "letter",
+   "note": "sign letter A, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "A",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 18,
+    "indoor": 14
+   }
+  },
+  {
+   "code": 129,
+   "role": "letter",
+   "note": "sign letter A, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "A",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 18,
+    "indoor": 14
+   }
+  },
+  {
+   "code": 130,
+   "role": "letter",
+   "note": "sign letter B, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "B",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7,
+    "indoor": 5
+   }
+  },
+  {
+   "code": 131,
+   "role": "letter",
+   "note": "sign letter B, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "B",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7,
+    "indoor": 5
+   }
+  },
+  {
+   "code": 132,
+   "role": "letter",
+   "note": "sign letter C, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "C",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 133,
+   "role": "letter",
+   "note": "sign letter C, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "C",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 134,
+   "role": "letter",
+   "note": "sign letter D, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "D",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 23,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 135,
+   "role": "letter",
+   "note": "sign letter D, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "D",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 23,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 136,
+   "role": "letter",
+   "note": "sign letter E, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "E",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 22,
+    "indoor": 19
+   }
+  },
+  {
+   "code": 137,
+   "role": "letter",
+   "note": "sign letter E, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "E",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 22,
+    "indoor": 19
+   }
+  },
+  {
+   "code": 138,
+   "role": "letter",
+   "note": "sign letter F, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "F",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 139,
+   "role": "letter",
+   "note": "sign letter F, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "F",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 140,
+   "role": "letter",
+   "note": "sign letter G, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "G",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 21,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 141,
+   "role": "letter",
+   "note": "sign letter G, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "G",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 21,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 142,
+   "role": "letter",
+   "note": "sign letter H, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "H",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7,
+    "indoor": 10
+   }
+  },
+  {
+   "code": 143,
+   "role": "letter",
+   "note": "sign letter H, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "H",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7,
+    "indoor": 10
+   }
+  },
+  {
+   "code": 144,
+   "role": "letter",
+   "note": "sign letter I, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "I",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 145,
+   "role": "letter",
+   "note": "sign letter I, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "I",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 7,
+    "indoor": 3
+   }
+  },
+  {
+   "code": 146,
+   "role": "letter",
+   "note": "sign letter J, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "J",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 147,
+   "role": "letter",
+   "note": "sign letter J, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "J",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 148,
+   "role": "letter",
+   "note": "sign letter K, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "K",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 6,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 149,
+   "role": "letter",
+   "note": "sign letter K, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "K",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 6,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 150,
+   "role": "letter",
+   "note": "sign letter L, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "L",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 15,
+    "indoor": 8
+   }
+  },
+  {
+   "code": 151,
+   "role": "letter",
+   "note": "sign letter L, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "L",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 15,
+    "indoor": 8
+   }
+  },
+  {
+   "code": 152,
+   "role": "letter",
+   "note": "sign letter M, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "M",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 5,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 153,
+   "role": "letter",
+   "note": "sign letter M, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "M",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 5,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 154,
+   "role": "letter",
+   "note": "sign letter N, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "N",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 22,
+    "indoor": 10
+   }
+  },
+  {
+   "code": 155,
+   "role": "letter",
+   "note": "sign letter N, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "N",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 22,
+    "indoor": 10
+   }
+  },
+  {
+   "code": 156,
+   "role": "letter",
+   "note": "sign letter O, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "O",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 14,
+    "indoor": 9
+   }
+  },
+  {
+   "code": 157,
+   "role": "letter",
+   "note": "sign letter O, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "O",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 14,
+    "indoor": 9
+   }
+  },
+  {
+   "code": 158,
+   "role": "letter",
+   "note": "sign letter P, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "P",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 9,
+    "indoor": 7
+   }
+  },
+  {
+   "code": 159,
+   "role": "letter",
+   "note": "sign letter P, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "P",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 9,
+    "indoor": 7
+   }
+  },
+  {
+   "code": 160,
+   "role": "letter",
+   "note": "sign letter Q, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "Q",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 161,
+   "role": "letter",
+   "note": "sign letter Q, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "Q",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 162,
+   "role": "letter",
+   "note": "sign letter R, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "R",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 32,
+    "indoor": 8
+   }
+  },
+  {
+   "code": 163,
+   "role": "letter",
+   "note": "sign letter R, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "R",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 32,
+    "indoor": 8
+   }
+  },
+  {
+   "code": 164,
+   "role": "letter",
+   "note": "sign letter S, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "S",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 17,
+    "indoor": 8
+   }
+  },
+  {
+   "code": 165,
+   "role": "letter",
+   "note": "sign letter S, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "S",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 17,
+    "indoor": 8
+   }
+  },
+  {
+   "code": 166,
+   "role": "letter",
+   "note": "sign letter T, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "T",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 14,
+    "indoor": 11
+   }
+  },
+  {
+   "code": 167,
+   "role": "letter",
+   "note": "sign letter T, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "T",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 14,
+    "indoor": 11
+   }
+  },
+  {
+   "code": 168,
+   "role": "letter",
+   "note": "sign letter U, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "U",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 13,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 169,
+   "role": "letter",
+   "note": "sign letter U, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "U",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 13,
+    "indoor": 4
+   }
+  },
+  {
+   "code": 170,
+   "role": "letter",
+   "note": "sign letter V, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "V",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 171,
+   "role": "letter",
+   "note": "sign letter V, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "V",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 1,
+    "indoor": 2
+   }
+  },
+  {
+   "code": 172,
+   "role": "letter",
+   "note": "sign letter W, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "W",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 2,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 173,
+   "role": "letter",
+   "note": "sign letter W, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "W",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 2,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 174,
+   "role": "letter",
+   "note": "sign letter X, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "X",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 175,
+   "role": "letter",
+   "note": "sign letter X, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "X",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 176,
+   "role": "letter",
+   "note": "sign letter Y, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "Y",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 8,
+    "indoor": 1
+   }
+  },
+  {
+   "code": 177,
+   "role": "letter",
+   "note": "sign letter Y, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "Y",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 8,
+    "indoor": 1
+   }
+  },
+  {
+   "code": 178,
+   "role": "letter",
+   "note": "sign letter Z, left half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "Z",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 2,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 179,
+   "role": "letter",
+   "note": "sign letter Z, right half",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "sign",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": "Z",
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 2,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 180,
+   "role": "climbable",
+   "note": "ladder, left column",
+   "support": true,
+   "solid": false,
+   "climbable": true,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 703,
+    "indoor": 431
+   }
+  },
+  {
+   "code": 181,
+   "role": "climbable",
+   "note": "ladder, centre column",
+   "support": true,
+   "solid": false,
+   "climbable": true,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 703,
+    "indoor": 431
+   }
+  },
+  {
+   "code": 182,
+   "role": "climbable",
+   "note": "ladder, right column",
+   "support": true,
+   "solid": false,
+   "climbable": true,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 703,
+    "indoor": 431
+   }
+  },
+  {
+   "code": 183,
+   "role": "climbable",
+   "note": "vine, left column",
+   "support": true,
+   "solid": false,
+   "climbable": true,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 9
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 745,
+    "indoor": 248
+   }
+  },
+  {
+   "code": 184,
+   "role": "climbable",
+   "note": "vine, centre column",
+   "support": true,
+   "solid": false,
+   "climbable": true,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 9
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 745,
+    "indoor": 248
+   }
+  },
+  {
+   "code": 185,
+   "role": "climbable",
+   "note": "vine, right column",
+   "support": true,
+   "solid": false,
+   "climbable": true,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 9
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 745,
+    "indoor": 248
+   }
+  },
+  {
+   "code": 186,
+   "role": "door",
+   "note": "door 1: fire with the stick centred here to use it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 6,
+    "indoor": 6
+   },
+   "letter": null,
+   "door": 1,
+   "used_in_room_data": {
+    "outdoor": 195,
+    "indoor": 333
+   }
+  },
+  {
+   "code": 187,
+   "role": "door",
+   "note": "door 2: fire with the stick centred here to use it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 11,
+    "indoor": 6
+   },
+   "letter": null,
+   "door": 2,
+   "used_in_room_data": {
+    "outdoor": 183,
+    "indoor": 213
+   }
+  },
+  {
+   "code": 188,
+   "role": "door",
+   "note": "door 3: fire with the stick centred here to use it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": 3,
+   "used_in_room_data": {
+    "outdoor": 369,
+    "indoor": 708
+   }
+  },
+  {
+   "code": 189,
+   "role": "water_frame",
+   "note": "animation frame for the water tile; copied over code 32 every 8 frames, never placed",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 14,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 190,
+   "role": "water_frame",
+   "note": "animation frame for the water tile; copied over code 32 every 8 frames, never placed",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 14,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 191,
+   "role": "water_frame",
+   "note": "animation frame for the water tile; copied over code 32 every 8 frames, never placed",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 14,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 192,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 193,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 194,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 195,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 196,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 197,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 198,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 199,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 200,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 201,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 202,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 203,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 204,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 205,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 206,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 207,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 208,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 209,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 210,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 211,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 212,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 213,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 214,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 215,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 216,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 217,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 218,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 219,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 220,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 2
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 221,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 222,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 2,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 223,
+   "role": "grown_limb",
+   "note": "the limb GRUNSPREKE creates; solid",
+   "support": true,
+   "solid": true,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 9,
+    "indoor": 9
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 224,
+   "role": "vine_rope",
+   "note": "laid down by USE vine rope; solid only while crawling",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": true,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 225,
+   "role": "object",
+   "note": "object class 14, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 226,
+   "role": "object",
+   "note": "object class 14, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 227,
+   "role": "object",
+   "note": "object class 13, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 228,
+   "role": "object",
+   "note": "object class 13, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 3,
+    "indoor": 3
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 229,
+   "role": "object",
+   "note": "object class 12, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 15,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 230,
+   "role": "object",
+   "note": "object class 12, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 15,
+    "indoor": 15
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 231,
+   "role": "object",
+   "note": "object class 11, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 232,
+   "role": "object",
+   "note": "object class 11, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 10
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 233,
+   "role": "object",
+   "note": "object class 10, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 234,
+   "role": "object",
+   "note": "object class 10, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 235,
+   "role": "object",
+   "note": "object class 9, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 14,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 236,
+   "role": "object",
+   "note": "object class 9, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 14,
+    "indoor": 14
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 237,
+   "role": "object",
+   "note": "object class 8, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 238,
+   "role": "object",
+   "note": "object class 8, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 239,
+   "role": "object",
+   "note": "object class 7, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 240,
+   "role": "object",
+   "note": "object class 7, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 241,
+   "role": "object",
+   "note": "object class 6, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 242,
+   "role": "object",
+   "note": "object class 6, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 243,
+   "role": "object",
+   "note": "object class 5, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 244,
+   "role": "object",
+   "note": "object class 5, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 4,
+    "indoor": 4
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 245,
+   "role": "object",
+   "note": "object class 4, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 246,
+   "role": "object",
+   "note": "object class 4, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 8,
+    "indoor": 8
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 247,
+   "role": "object",
+   "note": "object class 3, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 1
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 248,
+   "role": "object",
+   "note": "object class 3, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 1,
+    "indoor": 1
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 249,
+   "role": "object",
+   "note": "object class 2, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 250,
+   "role": "object",
+   "note": "object class 2, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 13,
+    "indoor": 13
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 251,
+   "role": "object",
+   "note": "object class 1, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 252,
+   "role": "object",
+   "note": "object class 1, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 253,
+   "role": "object",
+   "note": "object class 0, left half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 254,
+   "role": "object",
+   "note": "object class 0, right half (painted at run time)",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 7,
+    "indoor": 7
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  },
+  {
+   "code": 255,
+   "role": "unused",
+   "note": "no behaviour and no room uses it",
+   "support": false,
+   "solid": false,
+   "climbable": false,
+   "solid_when_crawling": false,
+   "blocks_move": false,
+   "drowns": false,
+   "color_from": "fixed",
+   "fixed_color": {
+    "outdoor": 5,
+    "indoor": 5
+   },
+   "letter": null,
+   "door": null,
+   "used_in_room_data": {
+    "outdoor": 0,
+    "indoor": 0
+   }
+  }
+ ]
+}

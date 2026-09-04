@@ -1,0 +1,522 @@
+{
+ "generated_by": "tools/spec_player.py",
+ "spec": "docs/spec/player.md",
+ "hand_curated": [
+  "edible",
+  "verbs",
+  "effects",
+  "notes"
+ ],
+ "hand_curated_source": "docs/verbs-and-inventory.md \"Verb by verb\"",
+ "notes": [
+  "The object number IS the class: 255 object slots are cut into 15 contiguous class ranges, and the class is the only thing any verb looks at.  Object 255 is the \"no object\" sentinel and belongs to no class.",
+  "There is no price table.  Everything sellable is worth exactly one token and BUY costs exactly one token.",
+  "Placement of the initial objects per room belongs to the world spec; only the id -> class mapping is here."
+ ],
+ "classes": [
+  {
+   "class": 0,
+   "name": "A SPIRIT BELL",
+   "object_ids": [
+    0,
+    0
+   ],
+   "slots": 1,
+   "exists_at_start": 1,
+   "weight": 5,
+   "usable": false,
+   "sellable": false,
+   "edible": false,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY"
+   ],
+   "effects": [
+    {
+     "verb": "walk",
+     "src": "$9FB3",
+     "effect": "Carrying object 0 and walking onto a door tile ($BB) in an underground room rings it: sfx 12, game paused, message PM_BELL_RINGS."
+    }
+   ],
+   "notes": "Exactly one exists in the world; the glide and bell tests index it by a literal object number.",
+   "src": "$A7A0 range; name $AFF7+0; weight $AE32+0; usable $9077+0; sellable $4329+0"
+  },
+  {
+   "class": 1,
+   "name": "A SPIRIT LAMP",
+   "object_ids": [
+    1,
+    1
+   ],
+   "slots": 1,
+   "exists_at_start": 1,
+   "weight": 5,
+   "usable": false,
+   "sellable": false,
+   "edible": false,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY"
+   ],
+   "effects": [
+    {
+     "verb": "carry",
+     "src": "$8C77",
+     "effect": "Carrying object 1 lights an underground room, exactly as a lit honeylamp does.  It is never consumed."
+    }
+   ],
+   "notes": "Exactly one exists in the world.",
+   "src": "$A7A0 range; name $AFF7+16; weight $AE32+1; usable $9077+1; sellable $4329+1"
+  },
+  {
+   "class": 2,
+   "name": "A HONEYLAMP",
+   "object_ids": [
+    2,
+    26
+   ],
+   "slots": 25,
+   "exists_at_start": 25,
+   "weight": 5,
+   "usable": true,
+   "sellable": true,
+   "edible": false,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "USE",
+    "SELL"
+   ],
+   "effects": [
+    {
+     "verb": "USE",
+     "src": "$9098",
+     "effect": "Already lit -> PM_LAMP_ALREADY_LIT.  Else lamp_index := this object, lamp_fuel := rnd&3 + 10 (10..13 room changes), PM_LAMP_IS_LIT, screen re-blitted lit."
+    },
+    {
+     "verb": "room change",
+     "src": "$964A",
+     "effect": "lamp_fuel -= 1; at 0 the object is destroyed and its weight removed (the lamp burns out)."
+    },
+    {
+     "verb": "DROP",
+     "src": "$AF79",
+     "effect": "Dropping the lit lamp destroys it: PM_LAMP_VANISHES."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+32; weight $AE32+2; usable $9077+2; sellable $4329+2"
+  },
+  {
+   "class": 3,
+   "name": "A WAND OF BEFAL",
+   "object_ids": [
+    27,
+    27
+   ],
+   "slots": 1,
+   "exists_at_start": 1,
+   "weight": 5,
+   "usable": true,
+   "sellable": false,
+   "edible": false,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "USE"
+   ],
+   "effects": [
+    {
+     "verb": "USE",
+     "src": "$933A",
+     "effect": "A creature within 2 columns / 1 row that is not already frozen is frozen and moved off-room (sfx 1), and costs spirit limit: -5 if the creature kind is 10 or below 6, else -1 (floor 0); spirit energy := 0.  Then, creature or not, cut bramble ($1C): PM_WAND_CUTS / PM_WAND_USELESS.  The wand is never consumed."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+48; weight $AE32+3; usable $9077+3; sellable $4329+3"
+  },
+  {
+   "class": 4,
+   "name": "A ROAST LAPAN",
+   "object_ids": [
+    28,
+    37
+   ],
+   "slots": 10,
+   "exists_at_start": 10,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "SELL",
+    "EAT"
+   ],
+   "effects": [
+    {
+     "verb": "EAT",
+     "src": "$B4AE",
+     "effect": "Herd (2) and Charn (4): PM_LAPAN_GOOD.  Everyone else: PM_LAPAN_STRANGE and spirit energy -15 (floor 0).  Both then take the +5 food bonus."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+64; weight $AE32+4; usable $9077+4; sellable $4329+4"
+  },
+  {
+   "class": 5,
+   "name": "PAN BREAD",
+   "object_ids": [
+    38,
+    62
+   ],
+   "slots": 25,
+   "exists_at_start": 24,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "SELL",
+    "EAT"
+   ],
+   "effects": [
+    {
+     "verb": "EAT",
+     "effect": "PM_PAN_BREAD_GOOD, food +5.",
+     "src": "$B50A"
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+80; weight $AE32+5; usable $9077+5; sellable $4329+5"
+  },
+  {
+   "class": 6,
+   "name": "FRUIT & NUTS",
+   "object_ids": [
+    63,
+    87
+   ],
+   "slots": 25,
+   "exists_at_start": 24,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "SELL",
+    "EAT"
+   ],
+   "effects": [
+    {
+     "verb": "EAT",
+     "effect": "PM_FRUIT_NUTS_GOOD, food +5.",
+     "src": "$B52C"
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+96; weight $AE32+6; usable $9077+6; sellable $4329+6"
+  },
+  {
+   "class": 7,
+   "name": "A SHUBA",
+   "object_ids": [
+    88,
+    107
+   ],
+   "slots": 20,
+   "exists_at_start": 20,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": false,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "SELL"
+   ],
+   "effects": [
+    {
+     "verb": "carry",
+     "src": "$A370",
+     "effect": "Carrying any shuba is what makes a mid-air glide possible.  A knock-down rolls 1-in-16 to destroy one (PM_SHUBA_TORN)."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+112; weight $AE32+7; usable $9077+7; sellable $4329+7"
+  },
+  {
+   "class": 8,
+   "name": "A TOKEN",
+   "object_ids": [
+    108,
+    182
+   ],
+   "slots": 75,
+   "exists_at_start": 62,
+   "weight": 1,
+   "usable": false,
+   "sellable": false,
+   "edible": false,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY"
+   ],
+   "effects": [
+    {
+     "verb": "BUY",
+     "src": "$4194",
+     "effect": "One carried token is destroyed and the merchant grants the TAKE permission for this room's offered class."
+    },
+    {
+     "verb": "SELL",
+     "src": "$4234",
+     "effect": "A free slot in the token range is minted as exists+carried; the sold object is destroyed."
+    }
+   ],
+   "notes": "The purse.  Everything trades for exactly one token in both directions; the free slots in the token range are the only place a sale can put money, so 75 tokens is the hard cap on wealth.",
+   "src": "$A7A0 range; name $AFF7+128; weight $AE32+8; usable $9077+8; sellable $4329+8"
+  },
+  {
+   "class": 9,
+   "name": "A TRENCHER BEAK",
+   "object_ids": [
+    183,
+    207
+   ],
+   "slots": 25,
+   "exists_at_start": 21,
+   "weight": 5,
+   "usable": true,
+   "sellable": true,
+   "edible": false,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "USE",
+    "SELL"
+   ],
+   "effects": [
+    {
+     "verb": "USE",
+     "src": "$9143",
+     "effect": "Cuts bramble ($1C).  Nothing cut -> PM_BEAK_USELESS.  Else 1-in-16 (rnd >= 240) destroys the beak (PM_BEAK_BREAKS, sfx 7), otherwise PM_BEAK_CUTS."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+144; weight $AE32+9; usable $9077+9; sellable $4329+9"
+  },
+  {
+   "class": 10,
+   "name": "WISSENBERRIES",
+   "object_ids": [
+    208,
+    217
+   ],
+   "slots": 10,
+   "exists_at_start": 10,
+   "weight": 5,
+   "usable": false,
+   "sellable": true,
+   "edible": true,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "SELL",
+    "EAT"
+   ],
+   "effects": [
+    {
+     "verb": "EAT",
+     "src": "$B563",
+     "effect": "advance_time twice, PM_FEEL_STRANGE, spirit energy -15 (floor 0).  No food bonus."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+160; weight $AE32+10; usable $9077+10; sellable $4329+10"
+  },
+  {
+   "class": 11,
+   "name": "A VINE ROPE",
+   "object_ids": [
+    218,
+    247
+   ],
+   "slots": 30,
+   "exists_at_start": 26,
+   "weight": 5,
+   "usable": true,
+   "sellable": true,
+   "edible": false,
+   "value_tokens": 1,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "USE",
+    "SELL"
+   ],
+   "effects": [
+    {
+     "verb": "USE",
+     "src": "$91CE",
+     "effect": "Scan the row below the player in the facing direction for the first non-empty cell.  Nothing before the room edge -> PM_ROPE_USELESS.  Else fill that span with tile $E0 (colour 8) and consume the rope."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+176; weight $AE32+11; usable $9077+11; sellable $4329+11"
+  },
+  {
+   "class": 12,
+   "name": "THE TEMPLE KEY",
+   "object_ids": [
+    248,
+    248
+   ],
+   "slots": 1,
+   "exists_at_start": 1,
+   "weight": 5,
+   "usable": true,
+   "sellable": false,
+   "edible": false,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "USE"
+   ],
+   "effects": [
+    {
+     "verb": "USE",
+     "src": "$9272",
+     "effect": "Anywhere except room 74: removes tile $08 in front of / above the player.  Success plays a random tune; nothing removed -> PM_KEY_USELESS.  Never consumed."
+    }
+   ],
+   "notes": "Exactly one exists in the world.",
+   "src": "$A7A0 range; name $AFF7+192; weight $AE32+12; usable $9077+12; sellable $4329+12"
+  },
+  {
+   "class": 13,
+   "name": "D'OL FALLA'S KEY",
+   "object_ids": [
+    249,
+    249
+   ],
+   "slots": 1,
+   "exists_at_start": 1,
+   "weight": 5,
+   "usable": true,
+   "sellable": false,
+   "edible": false,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "USE"
+   ],
+   "effects": [
+    {
+     "verb": "USE",
+     "src": "$9272",
+     "effect": "Only in room 74: removes tile $08; then, facing right, PM_ENTER_CHAMBER and a tune.  Never consumed."
+    },
+    {
+     "verb": "TAKE",
+     "src": "$AD5D",
+     "effect": "Takeable anywhere once an NPC has revealed it."
+    }
+   ],
+   "notes": "Exactly one exists in the world.",
+   "src": "$A7A0 range; name $AFF7+208; weight $AE32+13; usable $9077+13; sellable $4329+13"
+  },
+  {
+   "class": 14,
+   "name": "A STRANGE ELIXER",
+   "object_ids": [
+    250,
+    254
+   ],
+   "slots": 5,
+   "exists_at_start": 5,
+   "weight": 5,
+   "usable": false,
+   "sellable": false,
+   "edible": true,
+   "value_tokens": null,
+   "verbs": [
+    "EXAMINE",
+    "TAKE",
+    "DROP",
+    "OFFER",
+    "INVENTORY",
+    "EAT"
+   ],
+   "effects": [
+    {
+     "verb": "EAT",
+     "src": "$B5A2",
+     "effect": "PM_MUCH_STRONGER.  stamina += 5; food = rest = stamina/2; food_cap = rest_cap = stamina/2 + 1; carry limit += 5.  Permanent: raises the leap arc too."
+    }
+   ],
+   "notes": null,
+   "src": "$A7A0 range; name $AFF7+224; weight $AE32+14; usable $9077+14; sellable $4329+14"
+  }
+ ]
+}

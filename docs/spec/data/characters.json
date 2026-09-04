@@ -1,0 +1,424 @@
+{
+ "generated_by": "tools/spec_player.py",
+ "spec": "docs/spec/player.md",
+ "hand_curated": [
+  "people",
+  "physics.leap_columns",
+  "starting_inventory"
+ ],
+ "hand_curated_source": "docs/menus-and-saves.md \"Per-character table\"; docs/player-physics.md \"Leaping\"",
+ "notes": [
+  "Every character starts carrying nothing: no entry in the shipped object table has the carried bit set.  The items the manual calls \"provided in your nid-place\" are lying on the floor of that room and must be TAKEn.",
+  "food_cap and rest_cap are stored as cap+1 and are always equal; nothing at run time tells them apart.",
+  "carry_limit is always stamina + 26 and moves with stamina when a strange elixer raises it."
+ ],
+ "characters": [
+  {
+   "id": 0,
+   "name": "Neric",
+   "people": "Kindar",
+   "sprite_sheet": "player0",
+   "description": "A KINDAR-BORN YOUNG MAN",
+   "traits": "STRONG--IMPULSIVE--MODERATE SPIRIT",
+   "start": {
+    "day": 1,
+    "time_of_day": 0,
+    "spirit_energy": 5,
+    "spirit_limit": 5,
+    "food": 10,
+    "food_cap": 10,
+    "rest": 10,
+    "rest_cap": 10,
+    "stamina": 20,
+    "carry_limit": 46,
+    "carried_weight": 0,
+    "fatigue_pool": 255,
+    "standing_kindar": 3,
+    "standing_erdling": 0
+   },
+   "nid_place": {
+    "room": 61,
+    "col": 22,
+    "row": 9
+   },
+   "starting_inventory": [],
+   "starting_items_in_nid_place": [
+    {
+     "object": 82,
+     "class": 6,
+     "name": "FRUIT & NUTS",
+     "col": 11,
+     "row": 6
+    },
+    {
+     "object": 107,
+     "class": 7,
+     "name": "A SHUBA",
+     "col": 13,
+     "row": 6
+    },
+    {
+     "object": 144,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 16,
+     "row": 13
+    },
+    {
+     "object": 145,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 18,
+     "row": 13
+    },
+    {
+     "object": 146,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 20,
+     "row": 13
+    }
+   ],
+   "skills_at_start": [
+    "pense_emotions"
+   ],
+   "physics": {
+    "leap_hover_steps": 2,
+    "leap_columns": 5,
+    "leap_step_dy": [
+     -1,
+     -1,
+     0,
+     1,
+     1
+    ]
+   },
+   "src": "$9CA9 record 0; text $34C0-$3647; tooltab room 61"
+  },
+  {
+   "id": 1,
+   "name": "Genaa",
+   "people": "Kindar",
+   "sprite_sheet": "player1",
+   "description": "A KINDAR-BORN YOUNG WOMAN",
+   "traits": "STRONG--CHARISMATIC--NO SPIRIT SKILL",
+   "start": {
+    "day": 1,
+    "time_of_day": 0,
+    "spirit_energy": 0,
+    "spirit_limit": 0,
+    "food": 10,
+    "food_cap": 10,
+    "rest": 10,
+    "rest_cap": 10,
+    "stamina": 20,
+    "carry_limit": 46,
+    "carried_weight": 0,
+    "fatigue_pool": 255,
+    "standing_kindar": 4,
+    "standing_erdling": 2
+   },
+   "nid_place": {
+    "room": 44,
+    "col": 29,
+    "row": 9
+   },
+   "starting_inventory": [],
+   "starting_items_in_nid_place": [
+    {
+     "object": 80,
+     "class": 6,
+     "name": "FRUIT & NUTS",
+     "col": 9,
+     "row": 14
+    },
+    {
+     "object": 105,
+     "class": 7,
+     "name": "A SHUBA",
+     "col": 22,
+     "row": 7
+    },
+    {
+     "object": 138,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 9,
+     "row": 7
+    },
+    {
+     "object": 139,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 9,
+     "row": 9
+    },
+    {
+     "object": 140,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 11,
+     "row": 9
+    }
+   ],
+   "skills_at_start": [],
+   "physics": {
+    "leap_hover_steps": 2,
+    "leap_columns": 5,
+    "leap_step_dy": [
+     -1,
+     -1,
+     0,
+     1,
+     1
+    ]
+   },
+   "src": "$9CA9 record 1; text $34C0-$3647; tooltab room 44"
+  },
+  {
+   "id": 2,
+   "name": "Herd",
+   "people": "Erdling",
+   "sprite_sheet": "player2",
+   "description": "A CAVERN-BORN ERDLING",
+   "traits": "STRONG--RATIONAL--MODERATE SPIRIT",
+   "start": {
+    "day": 1,
+    "time_of_day": 0,
+    "spirit_energy": 5,
+    "spirit_limit": 5,
+    "food": 10,
+    "food_cap": 10,
+    "rest": 10,
+    "rest_cap": 10,
+    "stamina": 20,
+    "carry_limit": 46,
+    "carried_weight": 0,
+    "fatigue_pool": 255,
+    "standing_kindar": 0,
+    "standing_erdling": 3
+   },
+   "nid_place": {
+    "room": 31,
+    "col": 27,
+    "row": 9
+   },
+   "starting_inventory": [],
+   "starting_items_in_nid_place": [
+    {
+     "object": 37,
+     "class": 4,
+     "name": "A ROAST LAPAN",
+     "col": 19,
+     "row": 13
+    },
+    {
+     "object": 104,
+     "class": 7,
+     "name": "A SHUBA",
+     "col": 23,
+     "row": 9
+    },
+    {
+     "object": 133,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 14,
+     "row": 7
+    },
+    {
+     "object": 134,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 16,
+     "row": 7
+    },
+    {
+     "object": 135,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 18,
+     "row": 7
+    }
+   ],
+   "skills_at_start": [
+    "pense_emotions"
+   ],
+   "physics": {
+    "leap_hover_steps": 2,
+    "leap_columns": 5,
+    "leap_step_dy": [
+     -1,
+     -1,
+     0,
+     1,
+     1
+    ]
+   },
+   "src": "$9CA9 record 2; text $34C0-$3647; tooltab room 31"
+  },
+  {
+   "id": 3,
+   "name": "Pomma",
+   "people": "Kindar",
+   "sprite_sheet": "player3",
+   "description": "A KINDAR GIRL-CHILD",
+   "traits": "DELICATE--GREATLY SPIRIT GIFTED",
+   "start": {
+    "day": 1,
+    "time_of_day": 0,
+    "spirit_energy": 10,
+    "spirit_limit": 10,
+    "food": 5,
+    "food_cap": 5,
+    "rest": 5,
+    "rest_cap": 5,
+    "stamina": 10,
+    "carry_limit": 36,
+    "carried_weight": 0,
+    "fatigue_pool": 255,
+    "standing_kindar": 5,
+    "standing_erdling": 3
+   },
+   "nid_place": {
+    "room": 5,
+    "col": 22,
+    "row": 9
+   },
+   "starting_inventory": [],
+   "starting_items_in_nid_place": [
+    {
+     "object": 57,
+     "class": 5,
+     "name": "PAN BREAD",
+     "col": 13,
+     "row": 14
+    },
+    {
+     "object": 103,
+     "class": 7,
+     "name": "A SHUBA",
+     "col": 24,
+     "row": 9
+    },
+    {
+     "object": 114,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 18,
+     "row": 9
+    },
+    {
+     "object": 115,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 20,
+     "row": 9
+    },
+    {
+     "object": 116,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 15,
+     "row": 9
+    }
+   ],
+   "skills_at_start": [
+    "pense_emotions",
+    "pense_messages"
+   ],
+   "physics": {
+    "leap_hover_steps": 1,
+    "leap_columns": 4,
+    "leap_step_dy": [
+     -1,
+     -1,
+     1,
+     1
+    ]
+   },
+   "src": "$9CA9 record 3; text $34C0-$3647; tooltab room 5"
+  },
+  {
+   "id": 4,
+   "name": "Charn",
+   "people": "Erdling",
+   "sprite_sheet": "player4",
+   "description": "AN ERDLING BOY-CHILD",
+   "traits": "STURDY--ALERT--MODERATE SPIRIT GIFT",
+   "start": {
+    "day": 1,
+    "time_of_day": 0,
+    "spirit_energy": 5,
+    "spirit_limit": 5,
+    "food": 7,
+    "food_cap": 7,
+    "rest": 7,
+    "rest_cap": 7,
+    "stamina": 15,
+    "carry_limit": 41,
+    "carried_weight": 0,
+    "fatigue_pool": 255,
+    "standing_kindar": 2,
+    "standing_erdling": 5
+   },
+   "nid_place": {
+    "room": 53,
+    "col": 29,
+    "row": 9
+   },
+   "starting_inventory": [],
+   "starting_items_in_nid_place": [
+    {
+     "object": 81,
+     "class": 6,
+     "name": "FRUIT & NUTS",
+     "col": 27,
+     "row": 13
+    },
+    {
+     "object": 106,
+     "class": 7,
+     "name": "A SHUBA",
+     "col": 16,
+     "row": 9
+    },
+    {
+     "object": 141,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 16,
+     "row": 7
+    },
+    {
+     "object": 142,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 18,
+     "row": 7
+    },
+    {
+     "object": 143,
+     "class": 8,
+     "name": "A TOKEN",
+     "col": 20,
+     "row": 7
+    }
+   ],
+   "skills_at_start": [
+    "pense_emotions"
+   ],
+   "physics": {
+    "leap_hover_steps": 1,
+    "leap_columns": 4,
+    "leap_step_dy": [
+     -1,
+     -1,
+     1,
+     1
+    ]
+   },
+   "src": "$9CA9 record 4; text $34C0-$3647; tooltab room 53"
+  }
+ ]
+}

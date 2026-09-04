@@ -1,0 +1,469 @@
+{
+ "generated_by": "tools/spec_time.py",
+ "area": "time",
+ "file": {
+  "device": "disk drive 8, secondary address 255 -- an ordinary PRG save through the KERNAL, not the game's own block I/O",
+  "save_name": "0:QUESTn",
+  "load_name": "QUESTn",
+  "scratch_before_save": "S0:QUESTn on the command channel, wrapped in I0 initialise commands",
+  "slots": 5,
+  "slot_digit": "n = 1..5, the selected slot + 1",
+  "load_address": 8192,
+  "payload_bytes": 1408,
+  "file_bytes": 1410,
+  "note": "the two-byte little-endian load address comes first, then the payload; the game saves the range $2000-$257F",
+  "src": "$3968 $39C6"
+ },
+ "regions": [
+  {
+   "offset": 0,
+   "size": 2,
+   "name": "load_address",
+   "value": 8192,
+   "meaning": "PRG header, little endian"
+  },
+  {
+   "offset": 2,
+   "size": 256,
+   "name": "object_room_lo",
+   "meaning": "for each of the 256 object numbers, the low byte of the room it is in"
+  },
+  {
+   "offset": 258,
+   "size": 256,
+   "name": "object_col",
+   "meaning": "screen column of each object"
+  },
+  {
+   "offset": 514,
+   "size": 256,
+   "name": "object_flags",
+   "meaning": "bits 0-4 screen row, bit 5 carried by the player, bit 6 the object exists, bit 7 the high bit of its room number.  A flags byte of 0 is a free slot",
+   "bits": {
+    "row": [
+     0,
+     4
+    ],
+    "carried": 5,
+    "exists": 6,
+    "room_hi": 7
+   }
+  },
+  {
+   "offset": 770,
+   "size": 128,
+   "name": "creature_banished",
+   "meaning": "indexed by creature id 1-127; bit 7 = banished by the wand of Befal.  Entries $34 and $35 double as the two permanent gate flags"
+  },
+  {
+   "offset": 898,
+   "size": 128,
+   "name": "creature_day_stamp",
+   "meaning": "indexed by creature id 1-127; bits 0-6 = day last spoken to, bit 7 = spirit gift spent.  For ambushers bits 0-4 are the time-of-day slot they settled in"
+  },
+  {
+   "offset": 1026,
+   "size": 256,
+   "name": "variables",
+   "meaning": "a copy of the $0A00 variable page; the fields that matter are listed under `variables`.  Everything else is per-frame scratch and is overwritten before it is read"
+  },
+  {
+   "offset": 1282,
+   "size": 128,
+   "name": "zero_page",
+   "meaning": "a copy of zero page $80-$FF; the fields that matter are listed under `zero_page`"
+  }
+ ],
+ "variables": [
+  {
+   "offset": 1040,
+   "addr": "$0A0E",
+   "size": 1,
+   "name": "indoor_flag",
+   "meaning": "1 indoors, 0 outdoors"
+  },
+  {
+   "offset": 1042,
+   "addr": "$0A10",
+   "size": 1,
+   "name": "player_col",
+   "meaning": "player column 0-39"
+  },
+  {
+   "offset": 1050,
+   "addr": "$0A18",
+   "size": 1,
+   "name": "player_row",
+   "meaning": "player row 0-19"
+  },
+  {
+   "offset": 1081,
+   "addr": "$0A37",
+   "size": 1,
+   "name": "facing",
+   "meaning": "1 right, 255 left"
+  },
+  {
+   "offset": 1087,
+   "addr": "$0A3D",
+   "size": 1,
+   "name": "crawling",
+   "meaning": "crawl pose"
+  },
+  {
+   "offset": 1098,
+   "addr": "$0A48",
+   "size": 1,
+   "name": "tileset",
+   "meaning": "tile set of the current room"
+  },
+  {
+   "offset": 1122,
+   "addr": "$0A60",
+   "size": 1,
+   "name": "loaded_player",
+   "meaning": "which character sprite file is in memory; LOAD deliberately restores the pre-load value instead of the saved one"
+  },
+  {
+   "offset": 1123,
+   "addr": "$0A61",
+   "size": 1,
+   "name": "time_of_day",
+   "meaning": "0-7"
+  },
+  {
+   "offset": 1124,
+   "addr": "$0A62",
+   "size": 1,
+   "name": "day",
+   "meaning": "1-based; 51 ends the quest"
+  },
+  {
+   "offset": 1125,
+   "addr": "$0A63",
+   "size": 1,
+   "name": "spirit_energy",
+   "meaning": "current spirit energy"
+  },
+  {
+   "offset": 1126,
+   "addr": "$0A64",
+   "size": 1,
+   "name": "food",
+   "meaning": "level of food"
+  },
+  {
+   "offset": 1127,
+   "addr": "$0A65",
+   "size": 1,
+   "name": "rest",
+   "meaning": "level of rest"
+  },
+  {
+   "offset": 1128,
+   "addr": "$0A66",
+   "size": 1,
+   "name": "stamina",
+   "meaning": "stamina"
+  },
+  {
+   "offset": 1129,
+   "addr": "$0A67",
+   "size": 1,
+   "name": "spirit_limit",
+   "meaning": "spirit limit; also the skill gate"
+  },
+  {
+   "offset": 1130,
+   "addr": "$0A68",
+   "size": 1,
+   "name": "standing_kindar",
+   "meaning": "standing with the Kindar, 0-5"
+  },
+  {
+   "offset": 1131,
+   "addr": "$0A69",
+   "size": 1,
+   "name": "standing_erdling",
+   "meaning": "standing with the Erdlings, 0-5"
+  },
+  {
+   "offset": 1132,
+   "addr": "$0A6A",
+   "size": 1,
+   "name": "food_cap_plus1",
+   "meaning": "food is capped at this minus 1"
+  },
+  {
+   "offset": 1133,
+   "addr": "$0A6B",
+   "size": 1,
+   "name": "rest_cap_plus1",
+   "meaning": "rest is capped at this minus 1"
+  },
+  {
+   "offset": 1134,
+   "addr": "$0A6C",
+   "size": 1,
+   "name": "carry_limit",
+   "meaning": "weight limit"
+  },
+  {
+   "offset": 1135,
+   "addr": "$0A6D",
+   "size": 1,
+   "name": "nid_room_lo",
+   "meaning": "home nid place, room low byte"
+  },
+  {
+   "offset": 1136,
+   "addr": "$0A6E",
+   "size": 1,
+   "name": "nid_room_hi",
+   "meaning": "home nid place, room high bit"
+  },
+  {
+   "offset": 1137,
+   "addr": "$0A6F",
+   "size": 1,
+   "name": "nid_col",
+   "meaning": "home nid column"
+  },
+  {
+   "offset": 1138,
+   "addr": "$0A70",
+   "size": 1,
+   "name": "nid_row",
+   "meaning": "home nid row"
+  },
+  {
+   "offset": 1146,
+   "addr": "$0A78",
+   "size": 1,
+   "name": "clock_prescale",
+   "meaning": "frame prescaler; free-running"
+  },
+  {
+   "offset": 1147,
+   "addr": "$0A79",
+   "size": 1,
+   "name": "clock_period",
+   "meaning": "prescaler wraps left in this time slot"
+  },
+  {
+   "offset": 1148,
+   "addr": "$0A7A",
+   "size": 1,
+   "name": "carried_weight",
+   "meaning": "total weight carried"
+  },
+  {
+   "offset": 1175,
+   "addr": "$0A95",
+   "size": 1,
+   "name": "music_on",
+   "meaning": "music playing; not quest state"
+  }
+ ],
+ "zero_page": [
+  {
+   "offset": 1288,
+   "addr": "$86",
+   "size": 1,
+   "name": "room_lo",
+   "meaning": "current room, low byte"
+  },
+  {
+   "offset": 1289,
+   "addr": "$87",
+   "size": 1,
+   "name": "room_hi",
+   "meaning": "current room, high bit"
+  },
+  {
+   "offset": 1348,
+   "addr": "$C2",
+   "size": 1,
+   "name": "kiniport_index",
+   "meaning": "scratch; not meaningful across a save"
+  },
+  {
+   "offset": 1350,
+   "addr": "$C4",
+   "size": 1,
+   "name": "fatigue_cause",
+   "meaning": "0 none, 1 out of food, 2 out of rest"
+  },
+  {
+   "offset": 1351,
+   "addr": "$C5",
+   "size": 1,
+   "name": "fatigue",
+   "meaning": "down-counter; one lap costs one food and one rest"
+  },
+  {
+   "offset": 1354,
+   "addr": "$C8",
+   "size": 1,
+   "name": "dream_state",
+   "meaning": "0 normal, 1 rested in the sky nid, 255 in the clouds"
+  },
+  {
+   "offset": 1356,
+   "addr": "$CA",
+   "size": 1,
+   "name": "lamp_index",
+   "meaning": "object number of the lit honeylamp, 0 = none"
+  },
+  {
+   "offset": 1357,
+   "addr": "$CB",
+   "size": 1,
+   "name": "lamp_fuel",
+   "meaning": "room changes of light left"
+  },
+  {
+   "offset": 1358,
+   "addr": "$CC",
+   "size": 1,
+   "name": "take_permission",
+   "meaning": "an item was offered; cleared on room load"
+  },
+  {
+   "offset": 1359,
+   "addr": "$CD",
+   "size": 1,
+   "name": "door_permission",
+   "meaning": "a gate was paid for; cleared on room load"
+  },
+  {
+   "offset": 1360,
+   "addr": "$CE",
+   "size": 1,
+   "name": "falla_key_revealed",
+   "meaning": "D'ol Falla's key may be taken"
+  },
+  {
+   "offset": 1362,
+   "addr": "$D0",
+   "size": 1,
+   "name": "wissenberries_offered",
+   "meaning": "count offered to the room 352 guard"
+  },
+  {
+   "offset": 1363,
+   "addr": "$D1",
+   "size": 1,
+   "name": "creature_hit",
+   "meaning": "pending ambush effect; normally 0"
+  },
+  {
+   "offset": 1365,
+   "addr": "$D3",
+   "size": 1,
+   "name": "saved_room_lo",
+   "meaning": "room to return to; SAVE copies it into room_lo first"
+  },
+  {
+   "offset": 1366,
+   "addr": "$D4",
+   "size": 1,
+   "name": "saved_room_hi",
+   "meaning": "room high bit to return to"
+  },
+  {
+   "offset": 1367,
+   "addr": "$D5",
+   "size": 1,
+   "name": "character",
+   "meaning": "selected character 0-4"
+  },
+  {
+   "offset": 1368,
+   "addr": "$D6",
+   "size": 1,
+   "name": "menu_item",
+   "meaning": "main-menu highlight; not quest state"
+  },
+  {
+   "offset": 1369,
+   "addr": "$D7",
+   "size": 1,
+   "name": "quest_active",
+   "meaning": "a quest is in progress"
+  },
+  {
+   "offset": 1370,
+   "addr": "$D8",
+   "size": 1,
+   "name": "attract_state",
+   "meaning": "attract/menu state; not quest state"
+  },
+  {
+   "offset": 1372,
+   "addr": "$DA",
+   "size": 1,
+   "name": "storage_item",
+   "meaning": "DISK STORAGE highlight; not quest state"
+  },
+  {
+   "offset": 1373,
+   "addr": "$DB",
+   "size": 1,
+   "name": "quest_slot",
+   "meaning": "save slot 0-4; not quest state"
+  },
+  {
+   "offset": 1374,
+   "addr": "$DC",
+   "size": 1,
+   "name": "vision_count",
+   "meaning": "visions already shown, 0-5"
+  },
+  {
+   "offset": 1375,
+   "addr": "$DD",
+   "size": 1,
+   "name": "pense_message_count",
+   "meaning": "animals pensed, 0-5"
+  },
+  {
+   "offset": 1376,
+   "addr": "$DE",
+   "size": 1,
+   "name": "quest_time_up",
+   "meaning": "the day-51 timeout fired"
+  },
+  {
+   "offset": 1377,
+   "addr": "$DF",
+   "size": 1,
+   "name": "spirit_bell_rang",
+   "meaning": "the bell is ringing in this cell"
+  }
+ ],
+ "flow": {
+  "save": [
+   "room_lo/room_hi <- saved_room_lo/saved_room_hi so the room the player left is what gets written",
+   "copy the live object table into the buffer",
+   "copy the live variable page into the buffer",
+   "copy zero page $80-$FF into the buffer",
+   "the creature flag arrays already live inside the range, so nothing is copied for them",
+   "scratch the old file, then write the whole range"
+  ],
+  "load": [
+   "stash which character sprite file is in memory, because the variable page is about to be overwritten",
+   "load the file at its own address",
+   "copy the three regions back into the live locations",
+   "restore the stashed sprite-file id",
+   "return to the main menu; CONTINUE then reloads the character file if the saved character differs"
+  ],
+  "src": "$3968 $39C6"
+ },
+ "not_saved": [
+  "the room block itself -- it is re-read from the data disk",
+  "anything about the world layout; only object placement moves",
+  "the character sprite file, which is reloaded by name",
+  "the score: nothing is written on either ending"
+ ]
+}

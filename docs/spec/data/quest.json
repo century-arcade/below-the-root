@@ -1,0 +1,571 @@
+{
+ "generated_by": "tools/spec_time.py",
+ "area": "time",
+ "clock": {
+  "frames_per_prescaler_wrap": 256,
+  "prescaler_wraps_per_time_slot": 35,
+  "frames_per_time_slot": 8960,
+  "time_slots_per_day": 8,
+  "time_of_day_names": [
+   "EARLY MORNING",
+   "LATE MORNING",
+   "EARLY AFTERNOON",
+   "LATE AFTERNOON",
+   "EARLY EVENING",
+   "LATE EVENING",
+   "MIDNIGHT",
+   "LATE NIGHT"
+  ],
+  "seconds_per_time_slot": {
+   "ntsc": 149.8,
+   "pal": 178.8
+  },
+  "seconds_per_day": {
+   "ntsc": 1198.1,
+   "pal": 1430.0
+  },
+  "runs_only_while": "the game loop is running (not in menus, verbs, text prompts or the dream state)",
+  "src": "$B26F $B287"
+ },
+ "start": {
+  "day": 1,
+  "time_of_day": 0,
+  "fatigue": 255,
+  "per_character": "docs/spec/data/characters.json; the attract-demo record is demo.json demo_character",
+  "src": "$9C6E $9CA9 $975C"
+ },
+ "spirit_skills": [
+  {
+   "spirit_limit": 5,
+   "skill": "PENSE EMOTIONS"
+  },
+  {
+   "spirit_limit": 10,
+   "skill": "PENSE MESSAGES"
+  },
+  {
+   "spirit_limit": 15,
+   "skill": "HEAL YOURSELF"
+  },
+  {
+   "spirit_limit": 20,
+   "skill": "GRUNSPREKE"
+  },
+  {
+   "spirit_limit": 25,
+   "skill": "KINIPORT TOOLS"
+  },
+  {
+   "spirit_limit": 30,
+   "skill": "KINIPORT YOUR BODY"
+  }
+ ],
+ "visions": [
+  {
+   "index": 0,
+   "text": "THE BODY OF RAAMO, THE SPIRIT BLESSED, SINKS DEEP BENEATH THE SURFACE OF THE BOTTOMLESS LAKE."
+  },
+  {
+   "index": 1,
+   "text": "ALL OF GREEN-SKY MOURN FOR RAAMO, THEIR LOST SPIRIT-LEADER."
+  },
+  {
+   "index": 2,
+   "text": "RAAMO, THE LOST SON, RISES TO REUNITE THE ERDLINGS AND KINDAR OF GREEN-SKY."
+  },
+  {
+   "index": 3,
+   "text": "A BODY WASHES UP FROM THE BOTTOMLESS LAKE. THE BOY APPEARS DEAD BUT YOU CAN'T BE SURE..."
+  },
+  {
+   "index": 4,
+   "text": "ON A NARROW ROCK LEDGE RAAMO LIVES, TRAPPED IN THE CAVERNS DEEP BELOW THE ROOT."
+  }
+ ],
+ "vision_triggers": {
+  "blessers": "each of the five +5 blessers, first SPEAK only",
+  "animals": "the fifth distinct animal PENSE MESSAGES",
+  "cap": "only five visions exist; the sixth trigger prints the congratulation but no vision",
+  "src": "$3DA9 $3E13 $418E"
+ },
+ "blessers": [
+  {
+   "room": 19,
+   "npc_id": 60,
+   "species": 4,
+   "speak_lines": [
+    "THE WISE CHILD: THE BLESSED ONE LIVES"
+   ],
+   "pense_emotion": "HOPE AND JOY",
+   "pense_message": "RAAMO'S MOTHER CAN HELP YOU",
+   "grants": "spirit_limit += 5, once per quest"
+  },
+  {
+   "room": 41,
+   "npc_id": 63,
+   "species": 10,
+   "speak_lines": [
+    "THE HERMIT: EARN D'OL NESHOM'S BLESSING"
+   ],
+   "pense_emotion": "BENEVOLENCE",
+   "pense_message": "SEEK A SKY-NID AND A DREAM",
+   "grants": "spirit_limit += 5, once per quest"
+  },
+  {
+   "room": 116,
+   "npc_id": 72,
+   "species": 0,
+   "speak_lines": [
+    "RAAMO'S MOTHER: SEEK THE SPIRIT",
+    "LAMP. IT SHINES WITHOUT END"
+   ],
+   "pense_emotion": "COMPASSION",
+   "pense_message": "MY SON LIVES. YOU MUST SAVE HIM",
+   "grants": "spirit_limit += 5, once per quest"
+  },
+  {
+   "room": 191,
+   "npc_id": 51,
+   "species": 10,
+   "speak_lines": [
+    "D'OL NESHOM: MY BLESSING QUESTER",
+    "I GRANT YOU THE SPIRIT BELL"
+   ],
+   "pense_emotion": "BENEVOLENCE",
+   "pense_message": "YOU CAN RAISE THE FALLEN SPIRIT LEADER",
+   "grants": "spirit_limit += 5, once per quest"
+  },
+  {
+   "room": 492,
+   "npc_id": 74,
+   "species": 10,
+   "speak_lines": [
+    "VATAR: MAY THE SPIRIT SUSTAIN YOU"
+   ],
+   "pense_emotion": "LOVE AND SUPPORT",
+   "pense_message": "ONLY THE SPIRIT BELL CAN GUIDE YOU",
+   "grants": "spirit_limit += 5, once per quest"
+  }
+ ],
+ "animals": [
+  {
+   "room": 67,
+   "npc_id": 94,
+   "species": 6,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 98,
+   "npc_id": 91,
+   "species": 7,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 126,
+   "npc_id": 97,
+   "species": 7,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 134,
+   "npc_id": 99,
+   "species": 7,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 158,
+   "npc_id": 96,
+   "species": 6,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 192,
+   "npc_id": 88,
+   "species": 6,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 213,
+   "npc_id": 103,
+   "species": 7,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 296,
+   "npc_id": 100,
+   "species": 6,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 316,
+   "npc_id": 105,
+   "species": 7,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  },
+  {
+   "room": 496,
+   "npc_id": 118,
+   "species": 6,
+   "speak_lines": [],
+   "pense_emotion": "WARMTH",
+   "pense_message": "THE SPIRIT RISES WITHIN",
+   "grants": "spirit_limit += 1 on PENSE MESSAGES, once per quest"
+  }
+ ],
+ "gates": [
+  {
+   "room": 32,
+   "npc_id": 53,
+   "species": 3,
+   "speak_lines": [
+    "WAIT A MINUTE.  I WANT TOKENS."
+   ],
+   "pense_emotion": "GREED",
+   "pense_message": "I HOPE YOUR STAMINA IS HIGH",
+   "gate": "permanent flag gate_32_open (set only by the wand of Befal on the guard)"
+  },
+  {
+   "room": 352,
+   "npc_id": 52,
+   "species": 1,
+   "speak_lines": [
+    "MAY I SEE YOUR PASS?"
+   ],
+   "pense_emotion": "PITY",
+   "pense_message": "I'D SETTLE FOR SOME GOOD BERRY",
+   "gate": "permanent flag gate_352_open"
+  }
+ ],
+ "goal_npc": {
+  "room": 464,
+  "npc_id": 73,
+  "species": 1,
+  "speak_lines": [
+   "RAAMO: MAY THE SPIRIT BLESS YOU",
+   "I'M AFRAID OF FALLING"
+  ],
+  "pense_emotion": "HOPE AND JOY",
+  "pense_message": "I NEED A ROPE OR A SHUBA"
+ },
+ "win_condition": {
+  "who": "the creature whose state index is $49 -- Raamo, and he is the only creature in the world with it",
+  "room": 464,
+  "verb": "OFFER",
+  "accepts_items": [
+   7,
+   11
+  ],
+  "accepts_item_names": [
+   "A SHUBA",
+   "A VINE ROPE"
+  ],
+  "wrong_item": "THAT WON'T HELP",
+  "src": "$43CC $4475 $449C"
+ },
+ "ending_win": {
+  "text": [
+   "I AM RAAMO, THE SPIRIT GIFTED.",
+   "YOU HAVE SAVED MY LIFE AND FULFILLED THE PROPHESY.  THE QUEST IS COMPLETE.  GREEN-SKY IS SAVED.",
+   "YOU HAVE FINISHED THE QUEST IN nn DAYS. YOU ARE A"
+  ],
+  "music": [
+   0,
+   2
+  ],
+  "score": "the day counter and nothing else",
+  "ranks": [
+   {
+    "max_day": 14,
+    "rank": "MASTER QUESTER."
+   },
+   {
+    "min_day": 15,
+    "max_day": 29,
+    "rank": "HIGHLY GIFTED QUESTER."
+   },
+   {
+    "min_day": 30,
+    "rank": "GIFTED QUESTER."
+   }
+  ],
+  "after": "quest_active cleared, back to the main menu; nothing is written to disk",
+  "src": "$9E17"
+ },
+ "ending_timeout": {
+  "day": 51,
+  "text": [
+   "THE LIGHT FADES INTO DARKNESS...",
+   "THE TIME FOR YOUR QUEST HAS ENDED.",
+   "GREEN-SKY AWAITS THE RISE OF ANOTHER QUESTER."
+  ],
+  "music": [
+   0
+  ],
+  "after": "quest_active cleared, back to the main menu",
+  "src": "$B299 $8E76"
+ },
+ "flags": [
+  {
+   "name": "quest_active",
+   "src": "$D7",
+   "saved": true,
+   "width": 1,
+   "set_by": "starting a quest from character select",
+   "cleared_by": "SAMPLE QUEST, the MENU cell, winning, running out of time",
+   "read_by": "CONTINUE and DISK STORAGE SAVE both refuse when it is clear"
+  },
+  {
+   "name": "vision_count",
+   "src": "$DC",
+   "saved": true,
+   "width": 1,
+   "range": [
+    0,
+    5
+   ],
+   "set_by": "one per gain_spirit_power that still has a vision left",
+   "cleared_by": "starting a quest"
+  },
+  {
+   "name": "pense_message_count",
+   "src": "$DD",
+   "saved": true,
+   "width": 1,
+   "range": [
+    0,
+    5
+   ],
+   "set_by": "PENSE MESSAGES on an animal, once each",
+   "note": "reaching 5 runs the congratulation/vision path once"
+  },
+  {
+   "name": "wissenberries_offered",
+   "src": "$D0",
+   "saved": true,
+   "width": 1,
+   "set_by": "OFFER wissenberries to the room 352 gate guard",
+   "note": "the second offering permanently unlocks that gate"
+  },
+  {
+   "name": "gate_352_open",
+   "src": "$2334",
+   "saved": true,
+   "width": 1,
+   "note": "the banished-flags entry for gate guard id $34; permanent"
+  },
+  {
+   "name": "gate_32_open",
+   "src": "$2335",
+   "saved": true,
+   "width": 1,
+   "note": "never written by any code -- the room 32 gate must be paid for with a token on every visit"
+  },
+  {
+   "name": "door_permission",
+   "src": "$CD",
+   "saved": true,
+   "width": 1,
+   "note": "one-shot gate override, cleared on every room load"
+  },
+  {
+   "name": "take_permission",
+   "src": "$CC",
+   "saved": true,
+   "width": 1,
+   "note": "set by SPEAK to a gift-giver and by BUY, cleared on every room load and by a successful TAKE"
+  },
+  {
+   "name": "falla_key_revealed",
+   "src": "$CE",
+   "saved": true,
+   "width": 1,
+   "set_by": "SPEAK to D'ol Falla (room 71)",
+   "note": "without it TAKE refuses D'ol Falla's key"
+  },
+  {
+   "name": "dream_state",
+   "src": "$C8",
+   "saved": true,
+   "width": 1,
+   "values": {
+    "0": "normal",
+    "1": "rested in the sky nid, next door leads out",
+    "255": "in the cloud world, next door leads back"
+   },
+   "note": "freezes the clock and the fatigue drain and blocks RENEW"
+  },
+  {
+   "name": "lamp_index",
+   "src": "$CA",
+   "saved": true,
+   "width": 1,
+   "note": "object number of the lit honeylamp, 0 = none"
+  },
+  {
+   "name": "lamp_fuel",
+   "src": "$CB",
+   "saved": true,
+   "width": 1,
+   "note": "room changes of light left in the lit honeylamp"
+  },
+  {
+   "name": "fatigue",
+   "src": "$C5",
+   "saved": true,
+   "width": 1,
+   "note": "down-counter, $FF at quest start; one lap costs one food and one rest"
+  },
+  {
+   "name": "fatigue_cause",
+   "src": "$C4",
+   "saved": true,
+   "width": 1,
+   "values": {
+    "0": "none",
+    "1": "out of food",
+    "2": "out of rest"
+   }
+  },
+  {
+   "name": "quest_time_up",
+   "src": "$DE",
+   "saved": true,
+   "width": 1,
+   "set_by": "the clock reaching day 51"
+  },
+  {
+   "name": "spirit_bell_rang",
+   "src": "$DF",
+   "saved": true,
+   "width": 1,
+   "set_by": "standing on a doorway tile underground while carrying the bell"
+  },
+  {
+   "name": "creature_banished",
+   "src": "$2300 + npc_id",
+   "saved": true,
+   "width": 128,
+   "note": "bit 7 set by the wand of Befal; the creature never spawns again and its REST event and key unlock go dead"
+  },
+  {
+   "name": "creature_day_stamp",
+   "src": "$2380 + npc_id",
+   "saved": true,
+   "width": 128,
+   "note": "bits 0-6 = the day this creature was last spoken to (COME BACK TOMORROW while it equals today); bit 7 = its once-per-quest spirit gift is spent.  For ambushers bits 0-4 instead hold the time-of-day slot they settled in"
+  }
+ ],
+ "milestones": [
+  {
+   "n": 1,
+   "what": "Choose a character and pick up the shuba, the one food item and the three tokens lying in your own nid place.",
+   "walkthru": "STARTING THE GAME",
+   "verified": "object table: every nid room holds one shuba, one food item and three tokens"
+  },
+  {
+   "n": 2,
+   "what": "Explore, SPEAK and PENSE widely; note which houses offer food or a nid, and where the shops are.",
+   "walkthru": "STARTING THE GAME",
+   "verified": "gift-givers reset once per game day (creature_day_stamp)"
+  },
+  {
+   "n": 3,
+   "what": "Buy a trencher beak in the Broad Grund and cut your way to the Hermit at the top of the Grand Grund.  SPEAK: +5 spirit, vision 0.",
+   "walkthru": "GAINING SPIRIT AND MESSAGES / HERMIT",
+   "verified": "room 41, creature kind $40; room 38 sells trencher beaks"
+  },
+  {
+   "n": 4,
+   "what": "Reach the Child in the Garden in the small nid place on the right of the Garden Grund.  SPEAK: +5 spirit, vision 1.",
+   "walkthru": "CHILD IN THE GARDEN",
+   "verified": "room 19, creature kind $40, species 4 (a child)"
+  },
+  {
+   "n": 5,
+   "what": "Take a vine rope to the highest nid place in the Sky Grund, use it across a gap and CRAWL over.  REST in that nid; the next doorway puts you in the cloud world.",
+   "walkthru": "GIVER OF THE SPIRIT BELL",
+   "verified": "REST in room 9 sets dream_state; the next door leads to room 190 and back"
+  },
+  {
+   "n": 6,
+   "what": "Walk up the clouds to D'ol Neshom.  SPEAK: +5 spirit, vision 2, and she offers the spirit bell -- TAKE it in room 191.  Leave by entering and leaving the nid place again.",
+   "walkthru": "GIVER OF THE SPIRIT BELL",
+   "verified": "room 191 creature kind $40, gift item 0 (A SPIRIT BELL); the only spirit bell in the world is in room 191"
+  },
+  {
+   "n": 7,
+   "what": "Gather wissenberries, a token and as many honeylamps as you can carry.  Get to the surface below the Sky Grund.",
+   "walkthru": "VATAR",
+   "verified": "rooms 46 and 39 sell wissenberries and honeylamps"
+  },
+  {
+   "n": 8,
+   "what": "OFFER wissenberries to the outer gate guard twice -- the second offering unlocks that gate for good.  OFFER a token to the inner guard, which opens his door for this visit only.",
+   "walkthru": "VATAR",
+   "verified": "room 352 guard sets gate_352_open on the second berry; room 32 guard only ever sets the one-visit override"
+  },
+  {
+   "n": 9,
+   "what": "USE a honeylamp and work right and down through the caverns to Vatar.  SPEAK: +5 spirit, vision 3.",
+   "walkthru": "VATAR",
+   "verified": "room 492, creature kind $40"
+  },
+  {
+   "n": 10,
+   "what": "PENSE MESSAGES with five distinct animals.  The fifth gives the congratulation and vision 4.",
+   "walkthru": "GAINING SPIRIT AND MESSAGES",
+   "verified": "ten animals exist, creature kind $01"
+  },
+  {
+   "n": 11,
+   "what": "SPEAK to Raamo's Mother in the Temple Grund for the clue about the spirit lamp (in code this is a fifth +5 blesser).",
+   "walkthru": "TEMPLE GRUND",
+   "verified": "room 116, creature kind $40"
+  },
+  {
+   "n": 12,
+   "what": "Get the temple key (hidden hole in the leftmost temple Grund) and, after speaking to D'ol Falla, D'ol Falla's key.  The second opens the forgotten chamber and the spirit lamp inside it.",
+   "walkthru": "TEMPLE GRUND",
+   "verified": "room 71 creature kind $D0 sets falla_key_revealed; the only spirit lamp is in room 75"
+  },
+  {
+   "n": 13,
+   "what": "Raise the spirit limit to 30 so you can kiniport your body; buy a spare shuba.",
+   "walkthru": "HOW TO WIN",
+   "verified": "skill thresholds at $401A/$4022; room 64 sells shubas"
+  },
+  {
+   "n": 14,
+   "what": "Go below the root with the spirit lamp (or a lit honeylamp) and the spirit bell, find Raamo near the Bottomless Lake, and OFFER him a shuba (a vine rope also works).",
+   "walkthru": "HOW TO WIN",
+   "verified": "OFFER to state index $49 accepts item 7 or item 11"
+  }
+ ]
+}
