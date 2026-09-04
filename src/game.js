@@ -4,7 +4,7 @@ import { newPlayer, step, figureOf, haltAtEdge } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
 import { runMenu } from './verbs.js';
 import { DemoInput, buttonPress, anyInput } from './input.js';
-import { newPanel, say, clearPanel } from './text.js';
+import { newPanel, say, clearPanel } from './panel.js';
 import { newFlags, creatureTick, creatureFigure } from './creatures.js';
 import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
 import { tell } from './dialog.js';

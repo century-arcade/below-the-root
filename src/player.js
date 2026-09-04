@@ -3,7 +3,7 @@
 import {
   cell, isSolid, isClimbable, isSupport, role, doorNumber, ladderSnap, isLadderCentre, COLS, ROWS,
 } from './world.js';
-import { say } from './text.js';
+import { say } from './panel.js';
 import { spend } from './clock.js';
 
 export const SFX = {

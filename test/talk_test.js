@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { loadData } from '../src/data.js';
 import { newState, startQuest, tick } from '../src/game.js';
 import { enterRoom } from '../src/world.js';
-import { panelLines } from '../src/text.js';
+import { panelLines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
 import { CLASS, carriedOf } from '../src/inventory.js';
 

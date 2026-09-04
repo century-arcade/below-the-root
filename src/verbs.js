@@ -3,7 +3,7 @@
 import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world.js';
 import { lieDown, idleFrame, SFX } from './player.js';
 import { fireUp, anyInput, isIdle } from './input.js';
-import { say, print, clearPanel, PANEL_ROW } from './text.js';
+import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { CLASS, objectUnder, pickItem, canCarry, weightOf, destroy, carried } from './inventory.js';
 import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';

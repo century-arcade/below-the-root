@@ -1,6 +1,6 @@
 import { colorOf } from './data.js';
 import { isLit } from './world.js';
-import { PANEL_ROW, PANEL_COLS } from './text.js';
+import { PANEL_ROW, PANEL_COLS } from './panel.js';
 
 export const WIDTH = 320;
 export const HEIGHT = 200;

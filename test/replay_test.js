@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadData } from '../src/data.js';
 import { newState, startDemo, tick } from '../src/game.js';
-import { panelText, PANEL_ROW } from '../src/text.js';
+import { panelText, PANEL_ROW } from '../src/panel.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };

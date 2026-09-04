@@ -19,7 +19,7 @@ state = {
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
   events,          // [{sfx}|{music}|{page}] emitted this frame, drained by whoever plays them
-  panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (text.js)
+  panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (panel.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read
   verbWait,        // ticks left before the next read is handed to it
   ended,           // null, or why the quest is over: 'menu' 'won' 'timeout'
@@ -120,7 +120,7 @@ localStorage) and exports/imports the raw file.
 
 ## Text
 
-`text.js` owns the panel: `say(state, ...lines)` clears it and prints
+`panel.js` owns the panel: `say(state, ...lines)` clears it and prints
 from column 1 of row 21; `print(state, row, col, text, reverse)` writes
 cell by cell and runs on into the next row past column 39, as the
 original does.  Row 20 is never written.  `panelLines(state)` reads it

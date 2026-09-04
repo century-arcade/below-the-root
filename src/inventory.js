@@ -1,7 +1,7 @@
 // docs/spec/player.md, What you carry; and the item pager the five verbs share
 
 import { cell, role } from './world.js';
-import { print, PANEL_ROW } from './text.js';
+import { print, PANEL_ROW } from './panel.js';
 import { fireUp } from './input.js';
 
 export const CLASS = {

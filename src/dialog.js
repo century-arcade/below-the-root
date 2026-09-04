@@ -2,7 +2,7 @@
 
 import { facingCreature, flagsOf, isAnimal } from './creatures.js';
 import { CLASS, carriedOf, destroy, mintToken, onFloor, canCarry, pickItem } from './inventory.js';
-import { say, print, clearPanel, PANEL_ROW } from './text.js';
+import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
 
 const BUY_RESERVE = 4;

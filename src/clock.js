@@ -2,7 +2,7 @@
 
 import { enterRoom } from './world.js';
 import { lieDown, idleFrame } from './player.js';
-import { say } from './text.js';
+import { say } from './panel.js';
 
 // creatures.md, Ambush and Nid traps: the two kidnaps cost no time
 const KIDNAP = {

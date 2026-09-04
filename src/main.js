@@ -3,7 +3,7 @@ import { render, WIDTH, HEIGHT } from './video.js';
 import { newState, startQuest, startDemo, tick, figures } from './game.js';
 import { Keyboard } from './input.js';
 import { enterRoom } from './world.js';
-import { panelLines } from './text.js';
+import { panelLines } from './panel.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 
 const SLOT_KEY = (n) => `btr.quest${n}`;

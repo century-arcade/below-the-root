@@ -1,7 +1,7 @@
 // docs/spec/world.md: rooms, tiles, edges, doorways
 
 import { spawnCreature } from './creatures.js';
-import { clearPanel, say } from './text.js';
+import { clearPanel, say } from './panel.js';
 import { DREAM } from './clock.js';
 
 export const COLS = 40;
