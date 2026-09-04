@@ -68,7 +68,7 @@ function drawText(px, state) {
     const row = PANEL_ROW + Math.floor(i / PANEL_COLS);
     const col = i % PANEL_COLS;
     const code = panel[i];
-    blitCell(px, col, row, cs.glyphs, code & 0x80 ? code + 0x20 : code, color);
+    blitCell(px, col, row, cs.glyphs, code, color);
   }
 }
 

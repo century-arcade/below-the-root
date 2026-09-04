@@ -1,6 +1,6 @@
 // docs/spec/creatures.md: one creature per room -- spawn, movement, contact, ambush
 
-import { cell, isSolid } from './world.js';
+import { cell, isSolid, isSupport } from './world.js';
 
 const HOSTILE = 'hostile_animal';
 const AMBUSHER = 'ambusher';
@@ -55,7 +55,7 @@ export function creatureTick(state) {
   const def = c.def;
   const wait = WAIT[def.gait];
   if (c.stride) return plant(state, c, wait);
-  if (!isSolid(state, cell(state, c.col, c.row + 1))) {
+  if (!isSupport(state, cell(state, c.col, c.row + 1))) {
     c.row += 1;
     c.countdown = 4;
     return;

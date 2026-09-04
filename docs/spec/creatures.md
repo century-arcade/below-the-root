@@ -75,9 +75,13 @@ stride phase and a countdown.  Every tick, count down; when the countdown
 runs out, do exactly one of these, in this order:
 
 1. If the creature is mid-stride, finish the stride (rule 7) and stop.
-2. If the cell under it is not solid, drop one row and wait 4 ticks.
+2. If the cell under it is not support (solid or climbable -- the same
+   test that keeps you from falling), drop one row and wait 4 ticks.
    Gravity is the only piece of your physics a creature obeys -- they
-   never swim, glide, climb, take falling damage or touch objects.
+   never swim, glide, climb, take falling damage or touch objects.  They
+   do walk off ledges: the child in `0D` climbs the two stair steps
+   beside its nid and drops off the far side every lap, and that is what
+   the original does too (`tools/creature_watch.py`).
 3. Snakes and spiders run the contact test below; ambushers run the ambush
    test.  Everyone else stops for you: if you are 1 or 2 cells ahead of
    the way it faces and within one row, it waits and does nothing more
