@@ -608,8 +608,8 @@ door leads to room 384, the first room below the root.  That is exactly
 the walkthrough's route -- "To get permission to enter the doorway to the
 underground, OFFER the guard Wissenberries.  OFFER the guard inside a
 token, you will then be allowed to enter the underground".  Room numbers
-cross-checked against `docs/spec/data/rooms.json`; only the outer door has
-a permanent unlock (see the GAP below).
+cross-checked against `docs/spec/data/rooms.json`; only the outer door can
+be unlocked permanently by dialogue (see the GAP below).
 
 ## The wand of Befal
 
@@ -672,9 +672,9 @@ two of them are wiped so often that saving them barely matters:
 
 ## GAPs
 
-- **GAP: `$0A88`.** One byte inside the creature's runtime variable block
-  is allocated and never read or written by anything in the 64K image.
-  Assigned to the world area as a loose end; nothing here needs it.
+- **RESOLVED: `$0A88`.** One byte inside the creature's runtime variable
+  block is allocated and never read or written by anything in the 64K
+  image.  A hole in the layout; see `world.md` §10.
 - **GAP: no bounds on creature position.** Nothing clamps a creature's
   column to 0..39 or its row to 0..19.  A creature only ever turns at its
   two patrol columns, and in all 121 shipped rooms the patrol range is

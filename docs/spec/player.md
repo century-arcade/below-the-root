@@ -1022,8 +1022,8 @@ it.  [src: $409E]
   stamina 20 and Herd's nid-place, and it hands that character a shuba by
   writing the object slot directly.  `characters.json` lists the five
   playable ones only.  Cross-check with `time.md`'s demo script.
-- **GAP: the wand of befal's spirit cost keys on the creature kind**
-  (-5 when the kind is 10 or below 6, -1 otherwise).  The kind numbering
+- **GAP: the wand of befal's spirit cost keys on the creature species**
+  (-1 for species 6-9, the animals; -5 otherwise).  The species numbering
   is `creatures.md`'s; this spec only records the arithmetic.
 - **GAP: the four "free TAKE" rooms** (28, 59, 75, 81) are hard-coded
   room numbers with no comment.  `world.md` should say what they are;

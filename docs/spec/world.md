@@ -181,11 +181,6 @@ and 382 fall into it too.  It makes no difference: the bitmap already marks
 those two outdoor.  Rooms 413 and 414 would also match but are caught by the
 underground test first.
 
-Note that `tools/room.py`'s `is_outdoor()` has this case backwards -- it
-returns *indoor* for 125, 126, 157 and 158 -- so PNGs it renders for those
-four rooms are wrong.  `tools/spec_world.py` implements the game's rule and
-does not use it.
-
 ### 4.2 Underground and darkness
 
 Rooms 384-511 (the bottom four bands) are "below the root": always the

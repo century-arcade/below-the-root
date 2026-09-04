@@ -7,6 +7,9 @@ trails back to `disasm/out/*.s` -- nobody has to follow them.
 
 ## Files
 
+`overview.md` is the whole game in one read, with a scorecard of what
+is verified, what is only read off the disassembly, and what is missing.
+
 | rules | data (`data/`) | generator |
 |-------|----------------|-----------|
 | `world.md` -- rooms, doors, edges, tile sets, colours, tile semantics, signs, placed objects, the map | `rooms.json` `tiles.json` `map.json` | `tools/spec_world.py` |
