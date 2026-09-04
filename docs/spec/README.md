@@ -7,8 +7,8 @@ trails back to `disasm/out/*.s` -- nobody has to follow them.
 
 ## Files
 
-`overview.md` is the whole game in one read, with a scorecard of what
-is verified, what is only read off the disassembly, and what is missing.
+`overview.md` is the functional spec: the game in plain English, no
+implementation, with the state of the work at the end.
 
 | rules | data (`data/`) | generator |
 |-------|----------------|-----------|

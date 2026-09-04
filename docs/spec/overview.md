@@ -1,205 +1,282 @@
-# Below the Root -- the game in one document
+# Below the Root -- functional spec
 
-A front-to-back read of what the five area specs say, with a scorecard at
-the end of what is verified, what is only read off the disassembly, and
-what is missing.  The area files are the authority; this is the map.
+## The quest
 
-## What the game is
+You have fifty days to find Raamo, who is trapped on a ledge in the
+caverns below the root, and give him a shuba or a vine rope.  Do that and
+the game tells you how many days it took and ranks you: under 15 days a
+Master Quester, under 30 Highly Gifted, otherwise Gifted.  Reach day 51
+and the quest ends unfinished.  Nothing else is scored.
 
-A 50-day quest through Green-Sky, a world of seven giant trees (grunds)
-and the caverns below their roots, played as one of five characters.  You
-walk, climb, leap and glide through 438 screen-sized rooms; talk to and
-read the minds of 121 inhabitants; carry up to nine things; buy and sell
-with tokens; sleep in nids; and raise your *spirit limit* from 0-10 to 30
-by earning the trust of five blessers and ten animals, which unlocks six
-spirit skills in order.  The quest is won by reaching Raamo, alone on a
-ledge below the root, and offering him a shuba or a vine rope.  The score
-is the day count.  There is no health and no death; every misfortune costs
-a day and puts you back in your own nid.
+You play one of five characters -- Neric, Genaa, Herd, Pomma or Charn --
+who differ in stamina, starting spirit, and how the two peoples of
+Green-Sky (Kindar and Erdlings) regard them.  Each starts in their own
+nid with a shuba, one item of food and three tokens on the floor.
 
-Everything happens on a 40x25 character screen: the top 20 rows are the
-room, the bottom four are text (menus, status, dialogue).  The whole
-simulation runs in integer cells; nothing has a sub-cell position.
+There is no health and no dying.  Everything that goes badly -- starving,
+exhaustion, drowning, being attacked -- costs you a day: you wake in your
+own nid, fully fed and rested, one day later.
 
-## The world (`world.md`)
+## The screen
 
-- 512 room slots on a 32x16 grid, room `n` at `(n mod 32, n div 32)`; 438
-  are real.  Bands 3-11 tile into the printed map poster cell for cell;
-  bands 0-2 are house interiors parked in the sky; bands 12-15 are the
-  caverns, always dark unless you carry a lamp.
-- Each room is a 40x20 grid of tile codes plus four colour bytes, a
-  creature descriptor and three door records.  Colour is a function of
-  the tile code: four code ranges take the room's four colours (`sign`,
-  `wall`, `structure`, `ground`), the rest take the tile set's fixed
-  colour.  Two tile sets (outdoor/indoor) chosen from the room number.
-- Walking off an edge is arithmetic (+-1 wrapping inside the band, +-32
-  vertically).  Doors are three per room, all 144 shipped door records
-  are bidirectional pairs; two are locked by gate guards.  Ten rooms paint
-  a door with an all-zero record (leads to room 0).
-- Tile behaviour is by code: support / solid / climbable predicates plus
-  a handful of identity tests (wall, bramble, water, doors, nid halves).
-  Walls and bramble are *not* solid: you move into them and are knocked
-  back out.
-- Objects are not in rooms: one 255-slot table places every object in the
-  world; 232 lie on the ground at quest start.  Room text (signs) is
-  ordinary tiles, and decoded.
+The room fills the top four-fifths of the screen; the bottom strip is
+for text: the menu, your status, and whatever anyone says.  Rooms are
+one screen each and the world is a grid of them: walk off any edge and
+you are in the neighbouring room.  Doorways lead to interiors and other
+places; stand in one and press the button to go through.
 
-## The player (`player.md`)
+The map that came in the box is the world above ground, one square per
+room.  The caverns are not on it; you map those yourself.  Caverns are
+pitch dark unless you carry a lit honeylamp or the spirit lamp.
 
-- One state step every `step_period` ticks (8 idle, 6/4 walking, 3/2
-  running, 4 falling, 10 climbing, 8 gliding, 15 knocked down).  Each
-  step samples eleven neighbouring cells into a snapshot and every rule
-  reads the snapshot.
-- Fire held: glide (with a shuba, after two rows of fall), leap (stick in
-  the facing direction), turn, open the menu (pull back on the ground),
-  use a door (centred on a door tile).  Fire not held: fall, climb, walk,
-  crawl.
-- The leap is `hover + 3` columns with a fixed arc; hover is 1/2/3 by
-  stamina.  Fall damage is one rule: six or more rows -> 3.3 s knocked
-  down and 64 fatigue.  Wall bumps, bramble and snakes/spiders reuse the
-  same knock-down.
-- Fatigue is a hidden 8-bit pool (leap 5, rung 1, knock-down 64); each
-  wrap costs one food and one rest.  Food and rest also drop once per
-  time slot.  Either hitting -1 costs a day.
-- Inventory is the carried bit on the object table; weight 1 per token, 5
-  per anything else, limit `stamina + 26`.  Nineteen verbs on a 4x5 menu;
-  every handler is written out with its preconditions and messages.
-- Six spirit skills gated by spirit limit (5/10/15/20/25/30) and paid
-  from spirit energy, which refills 5 per time slot.
+## Moving
 
-## Creatures and dialogue (`creatures.md`)
+Everything is in whole character cells: your figure stands on a cell and
+moves by cells.  Joystick and one button.
 
-- At most one creature per room, 18 bytes in the room block: species
-  (11 sprite sets), colour, a social *kind* (gift-giver, merchant,
-  blesser, gate guard, ambusher, rest trap, plain talker, hostile animal,
-  pensable animal, key revealer), a response gate (which standing, what
-  level), spawn cell, patrol columns, gait, and eight message numbers
-  (speak x2, emotion, message; one set for gate pass, one for fail).
-- Spawn on every room entry; ambushers appear only in "their" time slot
-  with a 1-in-4 chance to move on.  Movement is a patrol between two
-  columns with random pauses and turns, gravity, and single-step climbs.
-  Snakes and spiders knock you down on contact; ambushers end the scene
-  (kidnap to room 28/59, or attack = lose a day).
-- SPEAK, PENSE (emotion anywhere; message adjacent), BUY, SELL, OFFER as
-  decision trees.  Nothing is generated: 187 fixed strings, indexed.
-  Gift-givers work once per day per creature and only while something is
-  still on the floor.  Blessers give +5 spirit limit once; animals +1
-  once on PENSE MESSAGES; the fifth animal and each blesser trigger a
-  vision.
-- Creatures never hand over objects: they set a *take permission* that
-  TAKE spends, cleared on every room load.  Two gate guards lock the
-  route underground; the wand of Befal banishes any creature permanently
-  (and opens a guard's door for good) at -5 spirit limit (-1 for animals).
-- Persistent state per creature: a banished bit and a day-stamp/gift-
-  spent byte, 128 entries each, both in the save file.
+- **Walk** left or right.  A step up onto a ledge one cell high is
+  automatic.  Walking into a wall or a bramble bush knocks you flat.
+- **Climb** ladders and vines with up and down.  Push sideways with the
+  button held to jump off one -- except underground, where that is not
+  allowed.
+- **Leap**: hold the button and push the way you are facing.  The leap
+  is 4, 5 or 6 cells long depending on stamina (under 20, 20-29, 30+),
+  rising two rows then coming back down; keep holding the direction on
+  landing and you are running.
+- **Glide**: if you carry a shuba, hold the button once you have fallen
+  two rows and you sail down at 45 degrees, steerable left and right.
+  Bumping a wall cancels gliding until you next stand up.
+- **Crawl**: pull down to stoop, push up to stand.  Crawling gets you
+  under low things and is the only way across a laid vine rope.
+- **Fall** six rows or more and you are knocked down: three seconds on
+  the floor, a big chunk of fatigue, and a one-in-sixteen chance your
+  shuba tears.  Five rows or fewer is free.
+- **Water** is fatal-ish: step in and you are found near the water a day
+  later.
 
-## Time, economy, quest, shell (`time.md`)
+Snakes and spiders knock you down if they reach you.  You never bump
+into anyone else; people simply stop and wait when you are near.
 
-- Clock: 256 x 35 ticks per time slot (150 s), 8 slots a day (20 min),
-  frozen in menus, verbs and the cloud world.  Day 51 ends the quest.
-  Time of day is shown and used only for ambusher scheduling; there is
-  no day/night rendering.
-- REST in a nid: +4 rest per hour slept, with a chime; thieves and
-  kidnappers spring their trap every hour.  REST in room 9 sets the dream
-  flag: the next door goes to the cloud world (room 190), the one after
-  comes back.
-- Economy: a token is an object; everything costs and sells for one
-  token at every merchant; eight merchants stock one item class each;
-  75 token slots cap the money supply.  BUY grants a take permission.
-- Quest state is a dozen flags and counters (in `quest.json`), the
-  object table and the two creature arrays.  Fourteen walkthrough
-  milestones are each tied to the code fact that confirms them.  Two
-  endings: OFFER to Raamo (rank by day: <15, <30, else) or day 51.
-- The attract demo is a byte script that replaces the joystick; two
-  scripts chase each other until fire is pressed.
-- Save file: 1410 bytes, four regions, every field enumerated; real C64
-  saves are readable.
+Moving tires you.  Fatigue is hidden; leaping and climbing spend it,
+being knocked down spends a lot of it, walking spends none, and every so
+often the debt comes due as one point each of food and rest.
 
-## Presentation (`assets.md`)
+## The world
 
-- 320x200, one colour per cell, no multicolour, 16-colour palette (any
-  C64 palette is correct).  Rows 0-19 room charset, rows 20-24 an
-  ASCII-ordered text font; reverse video = bit 7.
-- Two tile sets of 256 8x8 chars with colour tables; water is animated by
-  copying one of three source tiles every 8 ticks.
-- Sprites: 24x42 figures from stacked 24x21 records, 1bpp, one colour.
-  Five player sheets of 24 frames (both facings stored); one `extras`
-  sheet with 11 species x 3 frames, left-facing only, mirrored at run
-  time.  At most five hardware sprites in use, so no multiplexing.
-  Placement rule from the cell is given.
-- Music: 11 tunes as interleaved two-voice note lists (pulse, 2.4 s
-  decay, no sustain -- a music box), 14 one-shot sfx.  Note table is
-  +39 cents sharp on NTSC; MIDI numbers provided for a tuned port.
+Green-Sky is seven giant trees -- the Sky, Garden, Broad, Grand, Silk,
+Star and Temple Grunds -- with branches, houses and shops in the canopy,
+trunks you climb, and the ground far below.  Signs name the places.
+Below the ground are the caverns, entered through two guarded doors in
+series: the outer guard wants wissenberries (a second offering ever
+opens her door for good), the inner guard wants a token every single
+time.  Using the wand of Befal on a guard also opens the door
+permanently.
 
-## Scorecard
+Doorways are two-way; every door you go through has a door back.  A few
+doorways in the shipped game are broken and would dump you in room 0
+(the spec flags them; a port should just not paint them).
 
-### Verified against the running game (emulator)
+One special place: sleep in the highest nid of the Sky Grund and the next
+doorway you use takes you to the clouds, where D'ol Neshom blesses you
+and grants the spirit bell.  The doorway after that brings you back.
+Time does not pass while you are there.
 
-- Room 61 decodes byte-exact to the live screen; room 157 with the
-  outdoor set is a pixel match for the attract screen.
-- Fall-damage threshold (6 rows, 64 fatigue) and the leap arc (4/5/6
-  columns for hover 1/2/3, net 0 rows), by forcing the variables.
-- The sample-quest demo reaching the tool menu, then REST, in room 330
-  (the `end_rest_delay` opcode).
-- Sprite hardware settings (no multicolour, no expansion, priority) and
-  the raster split lines, from register dumps.
-- `tools/spec_check.py` passes: every door target, edge neighbour,
-  message id, item id, sprite record, nid-place object and quest-room
-  creature kind resolves.
+## Things
 
-### Read off the disassembly only (consistent, not observed)
+Fifteen kinds of thing exist: the spirit bell, the spirit lamp, the wand
+of Befal, a honeylamp, roast lapan, pan bread, fruit & nuts, wissenberries,
+a strange elixer, a shuba, a trencher beak, a vine rope, tokens, and the
+two temple keys.  Every one is a real object lying somewhere in the world
+at the start; nothing is ever created, so what you see is all there is.
 
-- The whole creature movement and dialogue tree; the four ambush and
-  four rest-trap effects (the two kidnaps have never been seen fire).
-- The clock rate (nobody has timed a day), the economy, both endings,
-  the save layout.
-- The ten dead doors landing in room 0; walking into an empty grid slot
-  (178 edge exits do); leaving the world vertically.
-- The cloud world route (static evidence: rooms 9/190/191 and the bell).
+- **TAKE** what you are standing over.  Outdoors anything may be taken.
+  Indoors you may take what is in your own nid, in a handful of public
+  rooms, or what someone has just offered you (by SPEAK, or by BUY).
+  The offer lapses if you leave the room.
+- **DROP** puts a thing on the floor in front of you, or on the shelf in
+  your own nid.
+- **Carrying**: a token weighs 1, everything else 5, and you can carry
+  `stamina + 26` -- nine full-weight things for the strongest characters,
+  seven for Pomma.
+- **USE**: a honeylamp lights (and burns out; a lit lamp dropped is
+  lost); a trencher beak cuts brambles slowly and eventually breaks; the
+  wand of Befal cuts brambles instantly and banishes a creature standing
+  by you, at a cost of 5 spirit limit (1 for an animal); a vine rope is
+  laid across a gap for crawling; the two keys open the two temple
+  walls.
+- **EAT**: roast lapan, pan bread and fruit & nuts each give 5 food
+  (lapan also drains 15 spirit energy unless you are an Erdling);
+  wissenberries pass two hours and cost 15 spirit energy; the strange
+  elixer permanently adds 5 stamina (so a longer leap and more carrying)
+  and refills food and rest.
+- **EXAMINE** and **INVENTORY** tell you what is there and what you have.
 
-### Open GAPs by area (29)
+Money is tokens.  Everything costs one token and everything sells for
+one token, at every merchant.  There are 62 tokens in the world and
+room for only 13 more, so selling can fail with "sorry, I'm not
+interested" when the world is full of tokens.  BUY gives you permission
+to take the merchant's one kind of stock; you then TAKE it off the floor.
+Merchants deal in roast lapan, fruit & nuts, trencher beaks, honeylamps,
+wissenberries, shubas, vine rope and pan bread -- eight shops.
 
-| area | count | the ones that matter to a port |
-|------|-------|--------------------------------|
-| world | 3 | empty-slot exits, vertical world edge, dead doors -- all "what does the original do", none affects a port that guards them |
-| creatures | 6 | no position clamp; shared crawl flag; `offers_item_class` inert on most kinds; three dead message entries |
-| player | 9 | demo character record; the four hard-coded free-TAKE rooms are unnamed; trencher-beak weight bug; BUY reserve off-by-one |
-| time | 5 | six vision triggers for five visions; Raamo has no ambush case; `return_home` past day 51 |
-| assets | 6 | loader title screen not extracted; `player1`-`4` identities from menu order; frame 0 of `extras` |
+## People and animals
 
-None blocks rendering, movement, creatures or the economy.  The two
-that need a decision before the endgame is playable are the vision
-count and the day-51 overshoot, and both are one-line choices.
+121 inhabitants, at most one per room, each always in the same room.
+Eleven looks: Kindar and Erdling adults, children, the robed Ol-zhaan,
+lapans (rabbit-like), simas (small tree climbers), snakes and spiders.
+They patrol back and forth along their stretch of floor, pausing and
+turning at random, and stop to face you when you approach.
 
-### Known inconsistencies between area files
+Each has a role:
 
-- Sprite placement: `assets.md` gives the figure's top-left as
-  `(8*col - 8, 8*row - 34)` in playfield pixels; `player.md`/
-  `creatures.md` give hardware Y `8*row + 38` for the lower record,
-  which converts to `8*row - 33`.  One pixel; settle it against a
-  screenshot before M6.0's golden test.
-- `time.md` `return_home` refills food and rest to `food_cap - 1`;
-  `player.md` `return_to_nid` says `food_cap` / `rest_cap`.  Same thing
-  given the cap is stored as cap+1, but a port should read `time.md`'s
-  form.
+- **Talkers** -- most people.  Say a line or two, have an emotion, may
+  have a message.
+- **Gift-givers** -- offer you something from their room, once a day
+  each, as long as anything is still lying there.
+- **Merchants** -- the eight shops.
+- **Blessers** -- five named figures (the Wise Child, the Hermit, Raamo's
+  Mother, D'ol Neshom, Vatar) who raise your spirit limit by 5 the first
+  time you speak to them.
+- **Animals** -- ten lapans and simas that raise your spirit limit by 1
+  the first time you read their message.
+- **The two gate guards.**
+- **D'ol Falla**, who must be spoken to before her key can be taken.
+- **Nid-offerers** -- twelve people who let you sleep in their nid.  Six
+  of them are traps: two steal every token you carry, one every shuba,
+  and three kidnap you in your sleep.  Their emotions give them away.
+- **Ambushers** -- twelve followers of D'ol Salaat and members of the
+  Nekom.  They are only sometimes in their room (each has an hour of the
+  day they favour).  Touch one and you are either kidnapped -- you wake
+  elsewhere, no time lost -- or attacked, which costs a day.
+- **Snakes and spiders** -- silent; contact knocks you down.
+- **Raamo**, alone in the caverns.
 
-### Not in the spec at all
+How people respond depends on your standing with their people: each
+character has a Kindar standing and an Erdling standing, fixed for the
+game, and a dozen inhabitants say something different -- or nothing --
+to a character they think little of.
 
-- **The shell.**  Main menu (START GAME / CONTINUE / DISK STORAGE /
-  SAMPLE QUEST), character select (name, description, trait line, RETURN
-  TO MENU), the DISK STORAGE save/load slot UI, the disk-swap prompts,
-  and the outer loop that services exit/door/menu/death requests and
-  re-enters the room loop.  All of it is in `docs/menus-and-saves.md` in
-  C64 terms; it needs a `shell.md` in spec terms (state machine + the
-  panel strings) before M6.3.  Small: one agent-hour.
-- **The intro text pages** the attract demo prints are in `demo.json`
-  (`text_pages`) but nothing describes their layout beyond row/column.
-- **The room editor** that shipped in the binary.  Deliberately skipped.
-- **Copy protection and the loader.**  Irrelevant to a port.
+## Talking
 
-### What "done" looks like for M5
+Open the menu (button plus pull back) and pick a verb.  Talking needs
+you to be next to someone and facing them.
 
-The spec is complete for a port when `shell.md` exists, the sprite
-placement pixel is settled, and the M6.0 golden test (room 61 rendered
-from `rooms.json` + `assets.json` vs `build/shots/ingame.png`) passes --
-that test is the first thing that exercises three area files together.
+- **SPEAK**: they say their piece.  Gift-givers and blessers also grant
+  their gift.
+- **PENSE**: read their **emotion** (from anywhere in the room) and, if
+  you are skilled enough and next to them, their **message**.  Each half
+  costs one spirit energy.  Pense a stranger from a distance first: rage
+  or deceit means avoid them.
+- **BUY** / **SELL**: merchants only.
+- **OFFER**: give an item.  Only three people accept anything --
+  wissenberries to the outer guard, a token to the inner guard, a shuba
+  or rope to Raamo.
+
+Everything anyone says is fixed text: 187 lines in all, plus the
+verbs' own responses.
+
+## Spirit
+
+Two numbers.  **Spirit limit** is permanent progress: it starts at 0-10
+depending on character, rises by 5 per blesser and 1 per animal (35 in
+all), and drops by 5 when you banish a person with the wand.  **Spirit
+energy** is what you spend; it refills by 5 every hour up to the limit.
+
+Skills unlock as the limit passes a threshold:
+
+| limit | skill | cost | does |
+|-------|-------|------|------|
+| 5 | Pense emotions | 1 | read an emotion from anywhere in the room |
+| 10 | Pense messages | 1 | read a message, standing next to them |
+| 15 | Heal yourself | 5 | +2 food, +2 rest |
+| 20 | Grunspreke | 2 | grow a new limb one cell out from the branch you stand on |
+| 25 | Kiniport tools | 5 | move an object in the room to a cell of your choosing |
+| 30 | Kiniport your body | 10 | move yourself to any cell in the room with floor under it |
+
+Each new threshold is announced, and the first five gains also show one
+of five visions about Raamo.
+
+## Food, rest and sleep
+
+Food and rest are two meters, 5-10 at the start depending on character.
+Both drop by one every hour of game time and by one each time your
+fatigue debt comes due.  Either reaching zero and going below costs a
+day.  You watch them with STATUS.
+
+**REST** in a nid -- your own, the sky nid, or one you have been offered:
+each hour asleep is +4 rest and a chime; any joystick movement wakes
+you.  Sleep too long and you starve in your sleep (food still drops every
+hour).  **HEAL** gives +2/+2 for 5 spirit energy.  **RENEW** gives up and
+takes the day: full food, rest and spirit, back in your nid.
+
+## Time
+
+A day is eight hours -- early morning, late morning, early afternoon,
+late afternoon, early evening, late evening, midnight, late night -- and
+each hour is two and a half minutes of real play.  The clock only runs
+while you are in the world: it stops for the menu and for every verb.
+Sleeping an hour and eating wissenberries advance it by whole hours.
+
+Nothing looks different at night.  The hour matters for exactly two
+things: the status display, and which hour the ambushers keep.
+
+## Menus and saving
+
+The main menu offers START GAME, CONTINUE, DISK STORAGE and SAMPLE
+QUEST, drawn over the title picture.  START GAME shows the five
+characters with a description each and puts you in your nid.  CONTINUE
+returns to a quest you left with the menu.  DISK STORAGE saves or loads
+one of five slots; a save holds the whole world (where every object is,
+who you have spoken to and when, whom you have banished) plus your
+stats and position.  SAMPLE QUEST plays a scripted demonstration until
+you press the button, as the game also does on its own before the menu
+first appears.
+
+## Look and sound
+
+Sixteen colours, one per character cell, black background.  Two tile
+sets -- one for outdoors, one for interiors and caverns -- with a
+different glyph and colour for most scenery, so the same room drawn with
+the other set is a different picture.  Water ripples.  Figures are
+single-colour sprites about three cells wide and five tall; each of the
+five characters has their own sheet (walk, climb, glide, leap, knocked
+down, crawl, asleep), and each of the eleven creature looks has three
+frames.
+
+Eleven short tunes played on a music-box voice -- one for winning and
+timing out, one for the demo, and a pool the game draws from when you
+are blessed or enter certain rooms -- and fourteen sound effects:
+footsteps, climbing, leaping, landing, gliding, the door, the knock-down,
+the rest chime, the spirit bell.
+
+---
+
+## Status of the spec
+
+The five area files (`world`, `player`, `creatures`, `time`, `assets`)
+carry the rules above at full precision, with data tables in
+`data/*.json` and every table regenerated from the original disk by a
+script; `tools/spec_check.py` confirms the tables agree with each other.
+
+**Checked against the running game:** room decoding is byte-exact; the
+attract screen is a pixel match; the fall threshold and the leap lengths;
+the demo reaching the REST verb; the sprite hardware settings.
+
+**Read from the code but never watched happen:** creature movement and
+all of the dialogue tree, the clock rate, both endings, the save layout,
+the cloud world, the kidnaps.
+
+**Not yet specified:** the shell -- menu flow, character select, the disk
+storage screens and the loop that ties room exits, doors, menus and lost
+days together.  The C64-level notes exist; it needs writing up in these
+terms.  Also one pixel of disagreement on where a figure is drawn
+relative to its cell.
+
+**Twenty-nine open questions** remain, listed at the end of each area
+file.  None blocks building the world, movement, creatures or the
+economy.  Two need a decision before the endgame: there are six ways to
+earn a vision and only five visions; and losing a day on day 50 can
+overshoot the fifty-day limit by an hour.
+
+**Original bugs a port must choose to keep or fix** are listed in the
+README under port notes.
