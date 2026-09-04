@@ -190,7 +190,7 @@
   {
    "code": 8,
    "role": "wall",
-   "note": "impassable: the move is reverted and you are knocked down",
+   "note": "impassable; the temple wall, removed by the two temple keys",
    "support": false,
    "solid": false,
    "climbable": false,

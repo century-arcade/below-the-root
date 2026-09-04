@@ -3,6 +3,7 @@ import { render, WIDTH, HEIGHT } from './video.js';
 import { newState, startQuest, startDemo, tick, figures } from './game.js';
 import { Keyboard } from './input.js';
 import { enterRoom } from './world.js';
+import { panelLines } from './text.js';
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -31,7 +32,8 @@ function label(state) {
     + (p.crawling ? ' crawl' : '') + (p.running ? ' run' : '') + (p.leaping ? ' leap' : '')
     + (p.gliding ? ' glide' : '') + (p.knockdown ? ` down ${p.knockdown}` : '')
     + (p.fallen ? ` fallen ${p.fallen}` : '') + `  tick ${state.tick}`
-    + (state.message ? `  "${state.message}"` : '');
+    + (state.creature ? `  npc ${state.creature.col},${state.creature.row}` : '')
+    + `  "${panelLines(state).join(' / ').trim()}"`;
 }
 
 loadData((path) => fetch(path).then((r) => {

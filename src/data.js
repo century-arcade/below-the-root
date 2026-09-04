@@ -1,7 +1,8 @@
 const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 
 export async function loadData(read) {
-  const [assets, roomsFile, tilesFile, map, itemsFile, charactersFile, demo] = await Promise.all([
+  const [assets, roomsFile, tilesFile, map, itemsFile, charactersFile, demo,
+    creaturesFile, messagesFile, skillsFile, quest] = await Promise.all([
     read('data/assets.json'),
     read('data/rooms.json'),
     read('data/tiles.json'),
@@ -9,6 +10,10 @@ export async function loadData(read) {
     read('data/items.json'),
     read('data/characters.json'),
     read('data/demo.json'),
+    read('data/creatures.json'),
+    read('data/messages.json'),
+    read('data/skills.json'),
+    read('data/quest.json'),
   ]);
 
   const palette = new Uint8Array(16 * 3);
@@ -52,14 +57,39 @@ export async function loadData(read) {
 
   const items = [];
   for (const c of itemsFile.classes) items[c.class] = c;
+  const objectChars = objectTiles(tileByCode);
+
+  const creatureByRoom = new Map();
+  for (const c of creaturesFile.creatures) creatureByRoom.set(c.room, c);
+  const extras = assets.sprite_sheets.find((s) => s.id === 'sprites_extras');
+  const species = [];
+  for (const sp of extras.species) species[sp.species] = sp;
+
+  const messages = [];
+  for (const m of messagesFile.messages) messages[m.id] = m.text;
+  const fixed = {};
+  for (const f of messagesFile.fixed_strings) fixed[f.name] = f;
 
   return {
     assets, palette, charsets, sheets, map,
     rooms, roomById, roomByCode, tiles: tileByCode,
     grid: roomsFile.grid,
     animations: assets.player_animations,
-    objects, items, characters: charactersFile.characters, demo,
+    objects, items, objectChars, characters: charactersFile.characters, demo,
+    creatures: creaturesFile.creatures, creatureByRoom, species,
+    messages, fixed, skills: skillsFile.skills, quest,
   };
+}
+
+// the two tiles an object of each class paints, from the tile notes
+function objectTiles(tiles) {
+  const chars = [];
+  for (const t of tiles) {
+    const m = t && t.role === 'object' && /object class (\d+), (left|right) half/.exec(t.note);
+    if (!m) continue;
+    (chars[m[1]] ||= [])[m[2] === 'left' ? 0 : 1] = t.code;
+  }
+  return chars;
 }
 
 function shortName(id) {

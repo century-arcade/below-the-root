@@ -1,10 +1,10 @@
 import { colorOf } from './data.js';
+import { isLit } from './world.js';
+import { PANEL_ROW, PANEL_COLS } from './text.js';
 
 export const WIDTH = 320;
 export const HEIGHT = 200;
 export const PLAYFIELD_ROWS = 20;
-export const MESSAGE_ROW = 20;
-
 
 export function renderIndexed(state) {
   const px = new Uint8Array(WIDTH * HEIGHT);
@@ -43,7 +43,7 @@ export function toIndexed(rgba, palette) {
 
 function drawRoom(px, state) {
   const room = state.room;
-  if (!room) return;
+  if (!room || (state.screen && !isLit(state))) return;
   const cs = state.data.charsets[room.tileset];
   const screen = state.screen || room.screen;
   const water = cs.water;
@@ -58,18 +58,18 @@ function drawRoom(px, state) {
   }
 }
 
+// row 20 is never written; the panel is rows 21-24, reverse video is bit 7
 function drawText(px, state) {
   const cs = state.data.charsets.text;
   const color = state.textColor ?? 1;
-  const lines = [state.message || ''];
-  for (let i = 0; i < 4; i++) lines.push((state.panel && state.panel[i]) || '');
-  lines.forEach((text, i) => {
-    const row = MESSAGE_ROW + i;
-    for (let col = 0; col < 40; col++) {
-      const code = col < text.length ? text.charCodeAt(col) & 0xff : 0;
-      blitCell(px, col, row, cs.glyphs, code, color);
-    }
-  });
+  const panel = state.panel;
+  if (!panel) return;
+  for (let i = 0; i < panel.length; i++) {
+    const row = PANEL_ROW + Math.floor(i / PANEL_COLS);
+    const col = i % PANEL_COLS;
+    const code = panel[i];
+    blitCell(px, col, row, cs.glyphs, code & 0x80 ? code + 0x20 : code, color);
+  }
 }
 
 function blitCell(px, col, row, glyphs, code, color) {

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadData } from '../src/data.js';
 import { newState, startDemo, tick } from '../src/game.js';
+import { panelText, PANEL_ROW } from '../src/text.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };
@@ -30,7 +31,7 @@ export function trace(data, name, maxReads = 5000) {
     const p = state.player;
     const op = state.demo.steps[input.index - 1] || {};
     lines.push(`${input.reads + 1} ${state.room.room} ${p.col} ${p.row} ${p.facing > 0 ? 'R' : 'L'} ${flags(p)} p${p.period} `
-      + `#${input.index - 1}:${op.op}:${op.joy || ''}/${input.remaining} "${state.message}"`);
+      + `#${input.index - 1}:${op.op}:${op.joy || ''}/${input.remaining} "${panelText(state, PANEL_ROW)}"`);
     return inner();
   };
   let ticks = 0;

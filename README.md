@@ -28,21 +28,24 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M5 the spec -- `docs/spec/`: overview + six area files + 15 JSON tables, generators, cross-checks; rewritten as plain-English functional prose | done |
 | M6.0 render -- `src/` draws any room; three pixel-exact golden tests against the original | done |
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (position, facing, state, step period) up to REST | done |
-| M6.2 talk -- creatures, dialog, verbs, inventory, skills | **next** |
-| M6.3 time -- clock, food/rest, cloud world, quest flags, endings, save/load | |
+| M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 13 scripted talk tests, both demo replays still read for read | done |
+| M6.3 time -- clock, food/rest, cloud world, quest flags, endings, save/load | **next** |
 | M6.4 polish -- title, character select, attract demo, music, map screen | |
 | M6.5 ship -- port-note decisions applied, walkthrough played through, deployed | |
 
-The spec has 23 open questions, listed at the end of each area file;
-none blocks M6.1 or M6.2.  Still read from the code but never watched
-in the emulator: creature movement, the dialog tree, both endings, the
-save layout, the cloud world.
+The spec has 24 open questions, listed at the end of each area file;
+none blocks M6.3.  Still read from the code but never watched in the
+emulator: creature movement, the dialog tree, both endings, the save
+layout, the cloud world.  Two verb rules the port follows as written
+but that look wrong on paper: DROP wants the cell in front of you to
+be solid, and STATUS's "waits for any input" was not what the trace
+showed (fixed in the spec; the DROP one needs a VICE session).
 
 ## Running it
 
 ```
 make build && make serve      # the port at http://localhost:8000/?room=T1
-make test                     # golden tests + demo replay vs build/traces, node only, ~0.3 s
+make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
 tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
 python3 tools/spec_check.py   # cross-check the spec tables
 tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room

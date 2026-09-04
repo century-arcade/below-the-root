@@ -130,8 +130,8 @@ which way it is facing.  If so the scene ends at once.
 
 | where | what happens |
 |-------|--------------|
-| `35` `H7` `D8` | `YOU WERE KIDNAPPED BY THE FOLLOWERS OF D'OL SALAAT`; you wake in `S0` |
-| `L5` `BB` `SB` | `YOU WERE KIDNAPPED BY THE NEKOM`; you wake in `R1`, the Nekom's room, where the wand of Befal lies |
+| `35` `H7` `D8` | `YOU WERE KIDNAPPED BY THE FOLLOWERS OF D'OL SALAAT`; you wake in `S0` at (21,15) |
+| `L5` `BB` `SB` | `YOU WERE KIDNAPPED BY THE NEKOM`; you wake in `R1` at (19,15), the Nekom's room, where the wand of Befal lies |
 | `A4` `05` `H5` | `YOU WERE ATTACKED BY A FOLLOWER OF D'OL SALAAT.  TIME HAS PASSED.`; you wake in your own nid |
 | `4C` `QC` `LF` | `YOU WERE ATTACKED BY A MEMBER OF THE NEKOM.  TIME HAS PASSED.`; you wake in your own nid |
 
@@ -293,8 +293,8 @@ them.
 |-------|--------------|
 | `K0`, `U1` | every token you carry is gone, and nothing is said |
 | `H1` | every shuba you carry is gone |
-| `T0` | kidnapped by the followers of D'ol Salaat; you wake in `S0` |
-| `81`, `A1` | kidnapped by the Nekom; you wake in `R1` |
+| `T0` | kidnapped by the followers of D'ol Salaat; you wake in `S0` at (21,15) |
+| `81`, `A1` | kidnapped by the Nekom; you wake in `R1` at (19,15) |
 
 Their emotions give them away -- `AVARICE`, `GREED`, `DECEIT`, `GUILE`,
 `FURTIVENESS` -- and their pense messages are blunter still: `SLEEP WELL,
@@ -328,6 +328,25 @@ again, its nid trap and its ambush are dead, and if it was a gate guard
 its door is open for the rest of the quest.  The cost is 5 off your spirit
 limit for a person, 1 for a lapan, sima, snake or spider, plus all your
 current energy -- a whole blessing undone.
+
+## The spirit gift announcement
+
+Every rise in your spirit limit -- the +5 of a blesser's first SPEAK,
+and the fifth animal's +1 -- runs the same two screens.
+
+1. Unless the limit is 35 or more, the panel prints `CONGRATULATIONS
+   QUESTER, YOU HAVE` on its first row and `GAINED THE POWER TO` and a
+   skill name on its second.  The skill named is the one at the limit's
+   current step of five, whether or not the rise reached it: PENSE
+   EMOTIONS at 5-9, PENSE MESSAGES at 10-14, HEAL YOURSELF at 15-19,
+   GRUNSPREKE at 20-24, KINIPORT TOOLS at 25-29, KINIPORT YOUR BODY at
+   30-34.  The first four animals raise the limit by one without any
+   announcement.
+2. If fewer than five visions have been shown this quest, `A VISION
+   COMES TO YOU:` on the first row and the next vision's text from the
+   second (`quest.json` `visions`, in order), and the count goes up.
+
+Both screens wait for the button like every other message.
 
 ## What each creature remembers
 
@@ -375,6 +394,9 @@ lasts the whole quest).
   for the other three the permission their SPEAK grants can never be
   spent.  A port that adds a second bell would find three more places to
   pick one up.
+- **The pause between the congratulation and the vision** is read from
+  the code as a wait for input; nobody has watched the two screens go
+  by.
 - **Three lines of dialogue nobody says.** The numbered text table has an
   unused `NOTHING` and two placeholders.  They stay in place to keep the
   numbering, but nothing refers to them and what they were for is not

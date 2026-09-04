@@ -1,5 +1,8 @@
 // docs/spec/world.md: rooms, tiles, edges, doorways
 
+import { spawnCreature } from './creatures.js';
+import { clearPanel, say } from './text.js';
+
 export const COLS = 40;
 export const ROWS = 20;
 
@@ -105,8 +108,37 @@ export function enterRoom(state, room, col, row) {
   p.lastGood = { col, row };
   p.underground = room.underground;
   paintScreen(state);
-  state.message = '';
+  clearPanel(state);
   state.tick = 0;
+  state.offered = null;
+  state.paid = false;
+  burnLamp(state);
+  spawnCreature(state);
+}
+
+// a honeylamp counts rooms entered, not time
+function burnLamp(state) {
+  const lamp = state.lamp;
+  if (!lamp) return;
+  lamp.fuel -= 1;
+  if (lamp.fuel > 0) return;
+  const o = state.objects.find((x) => x.object === lamp.object);
+  o.exists = false;
+  o.carried = false;
+  state.lamp = null;
+}
+
+export function isLit(state) {
+  return !state.room.underground || !!state.lamp
+    || state.objects.some((o) => o.class === 1 && o.exists && o.carried);
+}
+
+// a guarded door: the guard banished, the gate opened for good, or paid this visit
+function gateLocked(state, door) {
+  if (!door.lock) return false;
+  const guard = state.data.creatureByRoom.get(state.room.room);
+  if (guard && state.flags[guard.state_id].banished) return false;
+  return !state.gateOpen[door.lock] && !state.paid;
 }
 
 // off the top or bottom of the world there is nothing to load
@@ -126,6 +158,10 @@ export function useDoor(state, n) {
   if (!door || door.to_room == null) return false;
   const dest = state.data.roomById.get(door.to_room);
   if (!dest) return false;
+  if (gateLocked(state, door)) {
+    say(state, state.data.fixed.door_is_locked.text);
+    return true;
+  }
   p.facing = -p.facing;
   p.indoors = !p.indoors;
   enterRoom(state, dest, door.arrive_x, door.arrive_y);

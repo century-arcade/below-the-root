@@ -219,6 +219,8 @@ def tile_props(code):
 def tile_role(code):
     if code == 0x00:
         return 'empty', 'blank cell; the cutting tools write this'
+    if code == 0x08:
+        return 'wall', 'impassable; the temple wall, removed by the two temple keys'
     if code in WALL_CODES:
         return 'wall', 'impassable: the move is reverted and you are knocked down'
     if code == BRAMBLE:

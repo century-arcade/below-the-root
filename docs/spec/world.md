@@ -150,7 +150,7 @@ picture.  `tiles.json` is the full table, keyed by role.
 | platform | you stand on it, and walking into a one-cell step climbs onto it |
 | limb top | a platform, and the kind GRUNSPREKE can grow a new limb from |
 | grown limb | the limb GRUNSPREKE grows; a platform |
-| wall | you cannot pass.  One kind of wall is what the two temple keys remove |
+| wall | you cannot pass.  One kind of wall (`tiles.json` says which) is what the two temple keys remove |
 | bramble | you cannot pass; a wand of Befal or a trencher beak cuts it away |
 | water | drowns you; its glyph cycles through three frames, one every 8 ticks (about seven a second) |
 | ladder, vine | you climb them, and you do not fall through them |

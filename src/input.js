@@ -9,6 +9,7 @@ export function isIdle(j) {
 export class Keyboard {
   constructor(target = window) {
     this.down = new Set();
+    this.pace = 5;
     target.addEventListener('keydown', (e) => { if (this.map(e)) e.preventDefault(); });
     target.addEventListener('keyup', (e) => { this.map(e, true); });
   }
@@ -100,4 +101,19 @@ export class DemoInput {
       }
     }
   }
+}
+
+// verbs are generators: each `yield` is one joystick read, handed in by the tick
+export function* fireUp() {
+  while ((yield).fire);
+}
+
+export function* buttonPress() {
+  yield* fireUp();
+  while (!(yield).fire);
+}
+
+export function* anyInput() {
+  yield* fireUp();
+  while (isIdle(yield));
 }

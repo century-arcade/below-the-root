@@ -573,7 +573,8 @@ the button to choose.
   support, and it is not the last column.  The object moves there; 5
   energy goes.
 
-**STATUS** -- paints four lines and waits for any input:
+**STATUS** -- paints four lines and returns; they stay on the panel
+until something else writes it:
 
 | | left | right |
 |---|------|-------|

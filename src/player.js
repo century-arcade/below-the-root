@@ -3,6 +3,7 @@
 import {
   cell, isSolid, isClimbable, isSupport, role, doorNumber, ladderSnap, isLadderCentre, COLS, ROWS,
 } from './world.js';
+import { say } from './text.js';
 
 export const SFX = {
   footA: 2, footB: 3, climbUp: 4, climbDown: 5, leap: 6, knockdown: 7, glide: 8,
@@ -325,7 +326,7 @@ function tearShuba(state) {
   if (!shuba) return;
   shuba.exists = false;
   shuba.carried = false;
-  state.message = 'YOUR SHUBA HAS TORN';
+  say(state, 'YOUR SHUBA HAS TORN');
 }
 
 function knockdownStep(state) {
