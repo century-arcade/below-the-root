@@ -4,6 +4,7 @@
     tools/spec_world.py                 # write all three into docs/spec/data
     tools/spec_world.py --out /tmp
     tools/spec_world.py --contact-sheet build/rooms/contact.png
+    tools/spec_world.py --sheet build/rooms/sheet.png
 
 Decoding is `tools/room.py`; this only reshapes it and adds the runtime data
 that is not in a room block (object placement, tile behaviour, the grid).
@@ -358,6 +359,52 @@ def write(path, obj):
     print('%s (%d bytes)' % (path, os.path.getsize(path)))
 
 
+def full_sheet(rooms, game, path):
+    """Every room at 320x160 in one 32x16 grid, unlabelled, no scaling.
+
+    Written as a palette PNG whose pixel values are C64 colour indices, so a
+    port can be compared against it without agreeing on RGB.
+    """
+    import numpy as np
+    from PIL import Image
+
+    palette = json.load(open(os.path.join(
+        ROOT, 'docs', 'spec', 'data', 'assets.json')))['palette']['colors']
+    plte = []
+    for c in palette:
+        plte += list(c['rgb'])
+    plte += [0] * (768 - len(plte))
+
+    glyphs, colours = {}, {}
+    for name, outdoor in (('outdoor', True), ('indoor', False)):
+        table, chars = R.charset(game, outdoor)
+        bits = np.unpackbits(np.frombuffer(chars, dtype=np.uint8)).reshape(256, 8, 8)
+        glyphs[name] = bits.astype(bool)
+        colours[name] = np.frombuffer(table, dtype=np.uint8) & 0x0F
+
+    sheet = np.zeros((GRID_H * R.ROWS * 8, GRID_W * R.COLS * 8), dtype=np.uint8)
+    for r in rooms:
+        codes = np.array(r['tiles'], dtype=np.uint8)
+        for o in r['objects']:
+            for i, ch in enumerate(o['chars']):
+                if o['x'] + i < R.COLS:
+                    codes[o['y']][o['x'] + i] = ch
+        col = colours[r['tileset']][codes].copy()
+        for name, off, lo, hi in COLOR_RANGES:
+            col[(codes >= lo) & (codes <= hi)] = r['colors'][name]
+        bits = glyphs[r['tileset']][codes]                  # (20, 40, 8, 8)
+        cell = np.where(bits, col[:, :, None, None], 0).astype(np.uint8)
+        img = cell.transpose(0, 2, 1, 3).reshape(R.ROWS * 8, R.COLS * 8)
+        y, x = r['y'] * R.ROWS * 8, r['x'] * R.COLS * 8
+        sheet[y:y + R.ROWS * 8, x:x + R.COLS * 8] = img
+
+    im = Image.fromarray(sheet, 'P')
+    im.putpalette(plte)
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    im.save(path)
+    print('%s (%d bytes)' % (path, os.path.getsize(path)))
+
+
 def contact_sheet(blocks, game, path, cell=(64, 32), labels=False):
     from PIL import Image, ImageDraw
     cw, ch = cell
@@ -392,6 +439,9 @@ def main():
     ap.add_argument('--contact-sheet', metavar='PNG')
     ap.add_argument('--map-png', metavar='PNG',
                     help='labelled world map, 160x80 per room')
+    ap.add_argument('--sheet', metavar='PNG',
+                    help='every room at full 320x160, unlabelled, as a '
+                         'palette PNG of C64 colour indices')
     args = ap.parse_args()
 
     game = read_ram(args.ram)
@@ -439,6 +489,8 @@ def main():
         'layout': 'x = room mod 32, y = room div 32; +x is east, +y is south',
         **build_map(blocks, game, rooms),
     })
+    if args.sheet:
+        full_sheet(rooms, game, args.sheet)
     if args.contact_sheet:
         contact_sheet(blocks, game, args.contact_sheet)
     if args.map_png:

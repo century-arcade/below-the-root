@@ -34,10 +34,10 @@ COLOR_NAMES = [
 ]
 
 # VICE 3.9's internal palette generator, measured off build/shots/ingame.png
-# by tools/assets.py --compare.  Only the indices that room 61 uses.
-VICE39_SAMPLED = {0: '#000000', 3: '#7EF3D6', 4: '#AA40F5', 5: '#62D532',
-                  7: '#FFFF46', 8: '#B7631E', 9: '#775300', 10: '#EE7B95',
-                  13: '#B7FF86', 14: '#7385FF'}
+# by tools/assets.py --compare, plus white, which only the sprite layer uses.
+VICE39_SAMPLED = {0: '#000000', 1: '#FFFFFF', 3: '#7EF3D6', 4: '#AA40F5',
+                  5: '#62D532', 7: '#FFFF46', 8: '#B7631E', 9: '#775300',
+                  10: '#EE7B95', 13: '#B7FF86', 14: '#7385FF'}
 
 # $8C27 / $8CED: which room colour slot recolours which screen-code range.
 # slot i is footer byte $FB+i of the room block.
@@ -623,6 +623,10 @@ def screens():
             'render': 'the decoded room in the playfield; message line and '
                       'panel blank',
             'preview': 'assets/screen_ingame.png',
+            'preview_caveat': 'drawn from the emulator\'s screen and colour '
+                              'RAM, so it is the tile layer alone -- no player '
+                              'or creature sprite; build/shots/ingame.png is '
+                              'the capture that has them',
             'src': '$8C0C',
         },
         {

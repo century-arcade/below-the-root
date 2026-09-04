@@ -173,6 +173,7 @@
    "source": "VICE 3.9 internal generator, build/shots/ingame.png",
    "hex": {
     "0": "#000000",
+    "1": "#FFFFFF",
     "3": "#7EF3D6",
     "4": "#AA40F5",
     "5": "#62D532",
@@ -6234,6 +6235,7 @@
    "kind": "screen",
    "render": "the decoded room in the playfield; message line and panel blank",
    "preview": "assets/screen_ingame.png",
+   "preview_caveat": "drawn from the emulator's screen and colour RAM, so it is the tile layer alone -- no player or creature sprite; build/shots/ingame.png is the capture that has them",
    "src": "$8C0C"
   },
   {
