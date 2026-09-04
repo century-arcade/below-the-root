@@ -43,6 +43,9 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 
 ## Running it
 
+The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
+script, `?room=T1` to start somewhere else).
+
 ```
 make build && make serve      # the port at http://localhost:8000/?room=T1
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
