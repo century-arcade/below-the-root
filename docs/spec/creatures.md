@@ -291,7 +291,7 @@ them.
 
 | where | what they do |
 |-------|--------------|
-| `K0`, `U1` | every token you carry is gone |
+| `K0`, `U1` | every token you carry is gone, and nothing is said |
 | `H1` | every shuba you carry is gone |
 | `T0` | kidnapped by the followers of D'ol Salaat; you wake in `S0` |
 | `81`, `A1` | kidnapped by the Nekom; you wake in `R1` |

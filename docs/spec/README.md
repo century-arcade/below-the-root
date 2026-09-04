@@ -29,6 +29,8 @@ Run it after regenerating anything.
 
 - **Tick** = one video frame; **60 ticks/second** (NTSC).  Every period,
   delay and speed in the spec is a tick count; seconds are derived.
+  Tick counts were verified in a PAL emulator, where the same counts run
+  at 50/s; nobody has timed the game on NTSC hardware.
 - **Coordinates**: rooms are 40x20 cells of 8x8 pixels; `(col,row)` with
   `(0,0)` top-left.  Room `n` sits at world grid `(n mod 32, n div 32)`
   and has a two-character **code**, column digit then row digit in base
@@ -71,10 +73,12 @@ The spec records what the C64 game does, bugs included.  A port decides
 per item whether to keep it.
 
 - Ten rooms paint a door whose record is all zero; walking in lands you
-  in room 0 at (0,0).  Rooms 148 and 251 hold a valid door pair that no
-  tile lets you reach.  (`world.md`, Doorways)
+  in room 0 at (0,0) and drops you down the first column of the world to
+  the ground outside the outer gate.  Rooms 148 and 251 hold a valid door
+  pair that no tile lets you reach.  (`world.md`, Doorways)
 - 178 edge exits point at an empty grid slot, and the top/bottom world
-  edges are unguarded.  (`world.md`, Open questions)
+  edges are unguarded; crossing into a blank slot hangs the original.
+  (`world.md`, Open questions)
 - A breaking trencher beak subtracts the vine rope's weight (both 5, so
   invisible unless the weights change).  BUY reserves 4 units of carry
   capacity when every non-token item weighs 5, so a merchant can sell a
@@ -95,6 +99,9 @@ per item whether to keep it.
   SAVE/LOAD line there is no cancel.  SAMPLE QUEST and START GAME wipe
   the quest in progress without asking; CONTINUE with no quest does
   nothing at all.  (`shell.md`)
+- The original's clock stops about 100 ticks on every room load (disk
+  access); a port that loads instantly runs a wandering hour a little
+  shorter.  (`time.md`, The clock)
 - Convenience that costs no fidelity: no disk-2 swap, save anywhere (the
   save file is fully specified in `save.json`), a real map screen
   (`map.json`), any C64 palette (`assets.md`, The palette), a steady

@@ -13,9 +13,11 @@ Eight hours make a day, so a day is twenty minutes.
 The clock only runs while you are moving about the world.  It stops the
 moment a menu, a verb, a line of text or any wait-for-input is on screen
 -- the manual's promise that time does not pass while the Option Menu is
-up -- and it is frozen entirely in the cloud world.  Three things
-advance it by a whole hour without waiting: each hour you sleep in a
-nid, and eating wissenberries, which costs two.  A forced hour restarts
+up -- and it is frozen entirely in the cloud world.  It also stops while
+a room loads: about a hundred ticks on the original for every edge
+crossed or doorway taken.  Three things advance it by a whole hour
+without waiting: each hour you sleep in a nid, and eating wissenberries,
+which costs two.  A forced hour restarts
 the count, so the next natural hour is a full 8960 ticks away.
 
 Every new hour, in order:
@@ -277,8 +279,6 @@ a fresh port needs only the field list.
 
 ## Open questions
 
-- Nobody has timed a real day against a stopwatch.  The clock rate is
-  read from the code, and disk access could in principle drop ticks.
 - Six things earn a vision -- five blessers and the five-animal
   milestone -- and only five visions exist, so one gain shows nothing.
   Which one depends on play order, and no order is enforced.  Decided:
@@ -286,8 +286,6 @@ a fresh port needs only the field list.
 - Losing a day can push the day count past 51 without the quest ending
   until the next hour, so a quest can run an hour past its limit.  Never
   seen in play.  Decided: keep it; the quest ends at the next hour.
-- The two kidnaps, to `S0` and `R1`, have been read but never watched
-  happen.
 - The attack handler has no case for Raamo's kind of creature, so if he
   could ever walk into you the game would print the Nekom attack
   message.  Whether his patrol can reach you has not been checked.

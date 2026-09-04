@@ -46,7 +46,9 @@ East and west wrap around inside the row: walk east from column `V` and
 you come out at column `0` of the same row.  North and south do not wrap;
 they simply run off the world.  `rooms.json` gives each room's four
 neighbours as `exits`, and `exits_missing` names the directions whose
-neighbour is a blank slot.
+neighbour is a blank slot.  Nothing stops you crossing into one, and the
+shape of the map is the only thing that keeps you out: there is no room
+there to load, and the original locks up on a black screen.
 
 ## Doorways
 
@@ -72,7 +74,9 @@ satisfied or banished, and for a single passage when the guard has just
 given permission (docs/spec/creatures.md).
 
 Ten rooms paint a door tile with no destination behind it; using one
-puts you in `00` at column 0, row 0.  They are door 2 of `I1`, `J2`,
+puts you in `00` at column 0, row 0, which is open air -- you fall the
+whole first column of the world, twelve rooms, and land on the ground
+outside the outer gate at `0B`.  They are door 2 of `I1`, `J2`,
 `L2`, `O2`, `O3`, `AD` and `U5`, and door 1 of `K2`, `M2` and `AC` -- the
 one in `U5` never fires, because the cloud teleport is checked first.
 The opposite mistake happens once: `K4` and `R7`, the Temple interior and
@@ -180,7 +184,8 @@ the room and cell each was read from.
 Objects are not part of the room.  One table holds every object in the
 game, each with a room, a column and a row; a room draws whichever of
 them belong to it and are neither taken nor carried.  An object occupies
-two cells side by side, painted over the finished room -- so the tiles in
+two cells side by side -- its first glyph at the object's column, its
+second one to the right -- painted over the finished room, so the tiles in
 `rooms.json` are the room *without* its objects, and redrawing the room
 is what makes a thing you have just taken disappear.
 
@@ -246,15 +251,15 @@ there is no room, plus the per-row summary and every sign.
 
 ## Open questions
 
-- **What happens if you walk into a blank slot.**  Nothing checks that
-  the neighbour exists, and 46 exits north, 62 south, 35 west and 35 east
-  point at one.  The map is presumably drawn so you can never reach one,
-  but that has not been checked room by room.
+- **Whether any blank slot can actually be reached.**  46 exits north,
+  62 south, 35 west and 35 east point at one (`rooms.json`
+  `exits_missing` says 78 north and 78 south because it also counts the
+  top and bottom of the world), and crossing into one hangs the game, so
+  the map had better be drawn so you cannot -- but that has not been
+  checked room by room.
 - **What happens if you leave the world vertically.**  North from row `0`
   (32 rooms) and south from row `F` (16 rooms) are unguarded and lead
   nowhere at all.  Never reproduced.
-- **The ten dead doorways.**  "You end up at `00`, column 0, row 0" is
-  read off the code, not watched happen.
 
 ---
 

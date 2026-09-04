@@ -328,6 +328,10 @@ fifth, ding-dong -- then the confirm.
 
 ## Open questions
 
+- **Which water frame shows first.**  The period and the cycle order are
+  known; whether the cycle restarts when a room loads or runs on
+  through room changes is not.  A port that replays the demo scripts
+  against the original will see the difference only in the water.
 - **What the KINIPORT pointer should look like.**  Extras frame 0 is a
   hollow box, and both KINIPORT and the room editor that shipped in the
   binary use it as a cursor, but nothing confirms it was meant to be

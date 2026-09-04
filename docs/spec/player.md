@@ -309,7 +309,8 @@ East and west wrap within a row of the map rather than spilling into
 the next; north and south do not wrap.  `world.md` owns the grid.
 
 **Doorways.**  Press the button with the stick centred while standing
-on a doorway and you request that door -- there are up to three per
+on a doorway and you request that door -- the command menu cannot be
+opened from a doorway tile -- there are up to three per
 room, and the tile says which.  The room's own data gives each one a
 destination room, column and row.  If the room is locked you get "THE
 DOOR IS LOCKED"; otherwise you arrive there **facing the other way**,
