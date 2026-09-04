@@ -81,7 +81,7 @@ export function exportSave(state) {
   set('falla_key_revealed', state.fallaKey ? 1 : 0);
   set('wissenberries_offered', state.berriesOffered);
   set('character', state.character);
-  set('quest_active', state.ended ? 0 : 1);
+  set('quest_active', state.quest ? 1 : 0);
   set('vision_count', state.visions);
   set('pense_message_count', state.animalsPensed);
   return out;
@@ -149,6 +149,7 @@ export function importSave(state, bytes) {
     visions: get('vision_count'),
     animalsPensed: get('pense_message_count'),
     sample: false, timeUp: false, ended: null, stop: null, verb: null, creature: null,
+    quest: !!get('quest_active'),
   });
   enterRoom(state, data.roomById.get(room), p.col, p.row);
   state.offered = get('take_permission') ? offeredBy(def) : null;

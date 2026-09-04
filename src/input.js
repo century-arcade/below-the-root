@@ -6,9 +6,11 @@ export function isIdle(j) {
   return j.dx === 0 && j.dy === 0 && !j.fire;
 }
 
+// a tap shorter than the read interval still counts once: keys latch until the next read
 export class Keyboard {
   constructor(target = window) {
     this.down = new Set();
+    this.tapped = new Set();
     this.pace = 5;
     target.addEventListener('keydown', (e) => { if (this.map(e)) e.preventDefault(); });
     target.addEventListener('keyup', (e) => { this.map(e, true); });
@@ -19,12 +21,13 @@ export class Keyboard {
       ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
       W: 'up', S: 'down', A: 'left', D: 'right' }[e.key];
     if (!key) return false;
-    if (up) this.down.delete(key); else this.down.add(key);
+    if (up) this.down.delete(key); else { this.down.add(key); this.tapped.add(key); }
     return true;
   }
 
   read() {
-    const d = this.down;
+    const d = new Set([...this.down, ...this.tapped]);
+    this.tapped.clear();
     return {
       dx: (d.has('right') ? 1 : 0) - (d.has('left') ? 1 : 0),
       dy: (d.has('down') ? 1 : 0) - (d.has('up') ? 1 : 0),

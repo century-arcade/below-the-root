@@ -2,6 +2,8 @@ import { colorOf } from './data.js';
 import { isLit } from './world.js';
 import { PANEL_ROW, PANEL_COLS } from './panel.js';
 
+const TITLE_ROOM = 'T4';
+
 export const WIDTH = 320;
 export const HEIGHT = 200;
 export const PLAYFIELD_ROWS = 20;
@@ -41,11 +43,12 @@ export function toIndexed(rgba, palette) {
   return out;
 }
 
+// the menus sit over the title room, whatever room the quest is in
 function drawRoom(px, state) {
-  const room = state.room;
-  if (!room || (state.screen && !isLit(state))) return;
+  const room = state.title ? state.data.roomByCode.get(TITLE_ROOM) : state.room;
+  if (!room || (!state.title && state.screen && !isLit(state))) return;
   const cs = state.data.charsets[room.tileset];
-  const screen = state.screen || room.screen;
+  const screen = (!state.title && state.screen) || room.screen;
   const water = cs.water;
   const step = Math.floor((state.tick || 0) / (water ? water.period : 1));
   const waterGlyph = water ? water.cycle[(water.phase + step) % water.cycle.length] : -1;

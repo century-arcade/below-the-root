@@ -1,12 +1,22 @@
 import { loadData } from './data.js';
 import { render, WIDTH, HEIGHT } from './video.js';
 import { newState, startQuest, startDemo, tick, figures } from './game.js';
+import { shellFrame, coldStart, openMenu } from './shell.js';
 import { Keyboard } from './input.js';
 import { enterRoom } from './world.js';
 import { panelLines } from './panel.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 
 const SLOT_KEY = (n) => `btr.quest${n}`;
+
+// the five QUEST slots as base64 in localStorage
+const browserStorage = {
+  save: (n, bytes) => localStorage.setItem(SLOT_KEY(n), toBase64(bytes)),
+  load: (n) => {
+    const text = localStorage.getItem(SLOT_KEY(n));
+    return text ? fromBase64(text) : null;
+  },
+};
 
 // digits 1-5 save to a browser slot, shift+digit loads one, x downloads the C64 file, drop a file to load it
 function saveKeys(state, note) {
@@ -16,12 +26,12 @@ function saveKeys(state, note) {
       const n = Number(m[1]);
       try {
         if (e.shiftKey) {
-          const text = localStorage.getItem(SLOT_KEY(n));
-          if (!text) return note(`slot ${n} is empty`);
-          importSave(state, fromBase64(text));
+          const bytes = browserStorage.load(n);
+          if (!bytes) return note(`slot ${n} is empty`);
+          importSave(state, bytes);
           note(`loaded slot ${n}`);
         } else {
-          localStorage.setItem(SLOT_KEY(n), toBase64(exportSave(state)));
+          browserStorage.save(n, exportSave(state));
           note(`saved slot ${n}`);
         }
       } catch (err) { note(String(err)); }
@@ -68,6 +78,7 @@ function pickRoom(data, want) {
 function label(state) {
   const r = state.room;
   const p = state.player;
+  if (!r) return `menu  "${panelLines(state).join(' / ').trim()}"`;
   return `${r.code} (${r.room}) ${r.tileset}  day ${state.clock.day} hour ${state.clock.hour} +${state.clock.ticks}`
     + `  cell ${p.col},${p.row} ${p.facing > 0 ? 'R' : 'L'}`
     + `  frame ${p.frame} period ${p.period}`
@@ -84,15 +95,21 @@ loadData((path) => fetch(path).then((r) => {
   return r.json();
 })).then((data) => {
   const params = new URLSearchParams(location.search);
-  const state = newState(data, new Keyboard());
+  const stick = new Keyboard();
+  const state = newState(data, stick, { storage: browserStorage });
+  state.stick = stick;
   const demo = params.get('demo');
+  const room = pickRoom(data, params.get('room'));
   if (demo !== null) {
     startDemo(state, demo || 'quest');
-  } else {
+  } else if (room || params.has('player')) {
     const who = Number(params.get('player') || 0);
     startQuest(state, data.characters[who] || data.characters[0]);
-    const room = pickRoom(data, params.get('room'));
     if (room && room !== state.room) enterRoom(state, room, state.player.col, state.player.row);
+  } else if (params.has('menu')) {
+    openMenu(state);
+  } else {
+    coldStart(state);
   }
 
   const status = document.getElementById('status');
@@ -113,6 +130,7 @@ loadData((path) => fetch(path).then((r) => {
     acc += Math.min(now - last, 250);
     last = now;
     while (acc >= STEP_MS) {
+      shellFrame(state);
       tick(state);
       acc -= STEP_MS;
     }

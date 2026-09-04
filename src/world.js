@@ -122,7 +122,7 @@ export function enterRoom(state, room, col, row) {
 }
 
 // a honeylamp counts room edges crossed: doorways, the teleport and being sent home are free
-function burnLamp(state) {
+export function burnLamp(state) {
   const lamp = state.lamp;
   if (!lamp) return;
   lamp.fuel -= 1;

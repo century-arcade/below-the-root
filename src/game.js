@@ -1,6 +1,6 @@
 // the frame tick and the shell around the room loop (docs/spec/shell.md, The outer loop)
 
-import { newPlayer, step, figureOf, haltAtEdge } from './player.js';
+import { newPlayer, step, figureOf, haltAtEdge, idleFrame } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
 import { runMenu } from './verbs.js';
 import { DemoInput, buttonPress, anyInput } from './input.js';
@@ -12,6 +12,7 @@ import { tell } from './dialog.js';
 const SHUBA = 7;
 const ATTACK = { attack_salaat: 'attacked_salaat', attack_nekom: 'attacked_nekom' };
 const COLLAPSE = { food: 'FOOD', rest: 'REST' };
+const CLEAR_PAGE = 5;
 
 // every slot of every class, placed or free: a sale mints into a free token slot
 export function newObjects(data) {
@@ -27,6 +28,12 @@ export function newObjects(data) {
     }
   }
   return out;
+}
+
+// the five slots, in memory; main.js swaps in the browser's
+function memoryStorage() {
+  const slots = new Map();
+  return { save: (n, bytes) => slots.set(n, bytes), load: (n) => slots.get(n) || null };
 }
 
 export function newState(data, input, opts = {}) {
@@ -64,8 +71,20 @@ export function newState(data, input, opts = {}) {
     verbWait: 0,
     restDelayCut: false,
     ended: null,
+    quest: false,
+    title: false,
+    menuSel: 0,
+    disk: { op: 0, slot: 0 },
+    attract: 'loop',
+    stick: null,
+    stickFire: false,
+    storage: opts.storage || memoryStorage(),
     figures: [],
   };
+}
+
+export function questInProgress(state) {
+  return state.quest;
 }
 
 function applyCharacter(state, character) {
@@ -85,13 +104,14 @@ export function startQuest(state, character) {
   Object.assign(state, {
     objects: newObjects(state.data), flags: newFlags(), clock: newClock(),
     character: character.id, sample: false, fallaKey: false, berriesOffered: 0,
-    visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null,
+    visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null, quest: true,
     player: newPlayer(character.sprite_sheet, character.start.stamina),
   });
   const p = state.player;
   applyCharacter(state, character);
   p.indoors = true;
   p.facing = 1;
+  p.frame = idleFrame(p);
   const room = state.data.roomById.get(character.nid_place.room);
   enterRoom(state, room, character.nid_place.col, character.nid_place.row);
   state.active = true;
@@ -143,8 +163,13 @@ function stopped(state) {
   resolveStop(state);
 }
 
+// the script is over, or the button cut it short: the stick is a stick again and the shell owns the screen
+export function endDemo(state) {
+  Object.assign(state, { demo: null, input: state.stick || state.input, active: false, stall: 0, stop: null, verb: null });
+}
+
 // a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait
-function startVerb(state, gen) {
+export function startVerb(state, gen) {
   state.verb = gen;
   state.verbWait = 0;
   advanceVerb(state, gen.next());
@@ -193,14 +218,23 @@ function resolveStop(state) {
     case 'timeout':
       return startVerb(state, timeOver(state));
     case 'demo_room':
-      if (state.demo) startDemo(state, state.demo.name === 'intro' ? 'quest' : 'intro');
+      if (!state.demo) return;
+      if (state.attract === 'once') return endDemo(state);
+      startDemo(state, state.demo.name === 'intro' ? 'quest' : 'intro');
       return;
     case 'demo_page':
-      state.events.push({ page: stop.page });
+      showPage(state, stop.page);
       break;
   }
   if (state.stop) return resolveStop(state);
   state.active = true;
+}
+
+// the intro's story text; the last page only clears
+function showPage(state, page) {
+  const lines = state.data.demo.text_pages[page];
+  if (!lines || page === CLEAR_PAGE) return clearPanel(state);
+  say(state, ...lines);
 }
 
 // shell.md: every message the shell prints waits for the button or the stick, then clears
@@ -227,10 +261,11 @@ function* timeOver(state) {
   yield* buttonPress();
   state.timeUp = false;
   state.ended = 'timeout';
+  state.quest = false;
 }
 
 export function figures(state) {
-  if (!state.room) return [];
+  if (!state.room || state.title) return [];
   const out = [figureOf(state)];
   const c = creatureFigure(state);
   if (c) out.push(c);

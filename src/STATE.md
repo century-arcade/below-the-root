@@ -22,7 +22,13 @@ state = {
   panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (panel.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read
   verbWait,        // ticks left before the next read is handed to it
-  ended,           // null, or why the quest is over: 'menu' 'won' 'timeout'
+  ended,           // null, or why the room loop gave up to the shell: 'menu' 'won' 'timeout'
+  quest,           // a quest is in progress: START GAME sets it, winning, day 51 and SAMPLE QUEST clear it
+  title,           // the shell owns the screen: video draws room T4 and no figures (shell.js)
+  menuSel, disk,   // the main menu's cursor; {op, slot}: DISK STORAGE's remembered choices
+  attract,         // 'once' (cold start: the intro then the menu) or 'loop' (the two scripts alternate)
+  stick, stickFire,// the real joystick while a demo script is state.input; its button last frame
+  storage,         // {save(n, bytes), load(n) -> bytes|null}: the five QUEST slots
   character,       // characters.json id of who is playing; the save file records it
   player: {
     col, row, facing,          // cell and +1 right / -1 left
@@ -108,6 +114,18 @@ A `yield` may carry a tick count to wait instead of `input.pace` (REST's
 pause between chimes reads every tick).  The demo script advances one
 entry per read, so the places reads happen are part of the replay
 contract.
+
+## The shell
+
+`shell.js` runs the screens outside the room as generators through the
+same verb driver: `shellFrame(state)` once a frame (before `tick`)
+opens the main menu whenever the room loop is idle and no demo is
+running, and ends a demo on the button.  `openMenu` sets `title`, which
+makes `video.js` draw room `T4` with no figures over whatever `room`
+the quest is in; CONTINUE re-enters that room at the cell you left.
+Every screen's timing is in ticks yielded: a fifth of a second per
+main-menu move; every other screen holds its record, waits for the
+button up and a sixth of a second more, then reads for a push.
 
 ## Saves
 

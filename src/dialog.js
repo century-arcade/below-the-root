@@ -148,6 +148,7 @@ function* win(state) {
   state.events.push({ music: TUNE.rank });
   yield* buttonPress();
   state.ended = 'won';
+  state.quest = false;
 }
 
 export function* gainSpirit(state, amount) {
