@@ -4,8 +4,9 @@ A reverse-engineering of the 1984 C64 game *Below the Root* (Windham
 Classics, from Zilpha Keatley Snyder's Green-sky books), and a
 reimplementation of it in JavaScript from the resulting spec.
 
+| where | what |
+|-------|------|
 | `disasm/` + `tools/` | the 6502 disassembly, the disk decoder, the emulator harness, the asset extractors |
-|-------|------------|
 | `docs/*.md` | the original explained in C64 terms: addresses, tables, hardware |
 | `docs/spec/` | the game in plain English plus JSON tables, no 6502 needed; the port reads only this |
 | `src/` | the port: ES modules, no bundler, built into `_build/` |
