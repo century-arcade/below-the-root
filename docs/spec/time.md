@@ -281,11 +281,11 @@ a fresh port needs only the field list.
   read from the code, and disk access could in principle drop ticks.
 - Six things earn a vision -- five blessers and the five-animal
   milestone -- and only five visions exist, so one gain shows nothing.
-  Which one depends on play order, and no order is enforced.  A port has
-  to choose.
+  Which one depends on play order, and no order is enforced.  Decided:
+  keep it; the sixth gain shows no vision.
 - Losing a day can push the day count past 51 without the quest ending
   until the next hour, so a quest can run an hour past its limit.  Never
-  seen in play.
+  seen in play.  Decided: keep it; the quest ends at the next hour.
 - The two kidnaps, to `S0` and `R1`, have been read but never watched
   happen.
 - The attack handler has no case for Raamo's kind of creature, so if he

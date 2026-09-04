@@ -78,10 +78,10 @@ per item whether to keep it.
   invisible unless the weights change).  BUY reserves 4 units of carry
   capacity when every non-token item weighs 5, so a merchant can sell a
   permission you can't use.  (`player.md`, Open questions)
-- Six triggers exist for the five visions; the sixth prints nothing.
-  Raamo's own creature kind has no ambush case.  `return_to_nid` can push
-  the day past the limit without the timeout firing until the next
-  hour.  (`time.md`, Open questions)
+- Six triggers exist for the five visions; the sixth prints nothing --
+  keep it.  Losing a day can push the day count to 51 without the quest
+  ending until the next hour -- keep it.  Raamo's own creature kind has
+  no ambush case.  (`time.md`, Open questions)
 - The inner gate's permanent flag is only set by using the wand of Befal
   on its guard; otherwise it costs a token every visit.  (`creatures.md`
   door creatures)
