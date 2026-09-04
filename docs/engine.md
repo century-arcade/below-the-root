@@ -12,9 +12,11 @@ table, so the entries are the module's public API.
 |-------|--------|---------------|
 | $8000 | game: disk + core services | $8000 write block, $8003 read block, $8006 zp_swap, $8009 print_inline, $800F get_input, $8027 wait_input, $8039 rnd |
 | $8400 | game: main entry | $8400 game start (from BASIC `SYS 33792`) |
-| $8800, $8C00, $9500, $9C00 | game sub-modules | not yet named |
+| $8800 | game: rooms | $8800 editor entry, $8803 load_room, $8806 build_text_font, $8809 raster_irq_setup |
+| $9500 | game: screen + game loop | $9500 attract, $9503 clear_room_rows, $9506 clear_text_rows, $9509 clear_screen, $950C select_tileset, $950F reset_object_table, $9512 leave room, $9515 new game, $9518 resume |
+| $8C00, $9C00 | game sub-modules | see room-format.md and player-physics.md |
 | $3400 | gamelow | $3400 main menu, $3403 protection check |
-| $3000 | demolow | demo input playback |
+| $3000 | demolow | demo input playback (see demo.md) |
 
 ## Core services
 

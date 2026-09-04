@@ -1,0 +1,32 @@
+{
+ "labels": {
+  "00a9": "demo_ptr",
+  "0a90": "demo_steps",
+  "0a91": "demo_joy",
+  "0a96": "demo_next_room",
+  "0a97": "demo_text_req",
+  "2c00": "demo_text_page",
+  "2f00": "demo_script_intro",
+  "3100": "demo_script_quest",
+  "30c8": "demo_next_byte",
+  "952b": "attract_start",
+  "93c0": "demo_finished",
+  "9789": "attract_intro_setup",
+  "97c4": "attract_quest_setup"
+ },
+ "comments": {
+  "2c00": "A = page 1-4 prints, 5 clears; A > 4 falls through to page 4",
+  "3000": "fire on the real joystick aborts the demo: $0A04 = 0, $0A96 = $FF",
+  "301b": "fetch the next opcode; $0A90 has just reached 0",
+  "3030": "$C0 tune: play it and fetch the next opcode in the same call",
+  "3046": "$C1: one $803C busy-wait (X = $FA), then one idle step",
+  "3055": "$C2 n: n busy-waits, then one idle step",
+  "3073": "$C3 room: ends the script; the pointer is left on the operand",
+  "3087": "$C4 page: hand $0A97 to $2C00 through the main loop at $958E",
+  "30a1": "$C5: writes 1 to the shared temporaries $84/$85; no reader found",
+  "30b3": "$80-$BF and $C6-$FE: hold this value for the next byte's steps",
+  "30c4": "a byte under $80 is one step of that joystick value",
+  "2f00": "intro script, $2F00-$2F96; ends C3 E4 -> room 228",
+  "3100": "sample-quest script, $3100-$330A; ends C3 9D -> room 157"
+ }
+}

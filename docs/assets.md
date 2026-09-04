@@ -77,9 +77,18 @@ character-ROM shadow, so the VIC sees RAM there).
 2048 bytes of RAM under the I/O area, an ASCII-ordered font: `$20`-`$3F`
 and `$41`-`$5A` are the C64 uppercase character ROM glyphs, `$61`-`$7A`
 the lowercase set's a-z.  `$A0`-`$FF` are the reverse-video complement of
-`$20`-`$7F` (except `$C0` and `$E0`).  It is not in any disk 1 file and
-is absent from `build/dumps/loaded.bin`, so it is built or loaded later;
-`assets/charset_text.*` are extracted from `ingame.bin`.
+`$20`-`$7F` (except `$C0` and `$E0`).  It is not in any disk 1 file and is
+absent from `build/dumps/loaded.bin` because it is built at run time:
+`build_text_font` ($8B20, called from `$880F` on the way into the game and
+exposed as table entry `$8806`) banks the character ROM in over the I/O
+area (`$8021` clears CHAREN) and copies six 256-byte slices of it into the
+RAM underneath -- ROM `$D100` -> `$D100` (codes `$20`-`$3F`), `$D000` ->
+`$D200` (`$40`-`$5F`, i.e. the uppercase set's `@A-Z`), `$D800` -> `$D300`
+(`$60`-`$7F`, the lowercase set's `@a-z`), and `$D500`/`$D400`/`$DC00` ->
+`$D500`/`$D600`/`$D700` for the reverse-video halves -- then blanks char 0
+at `$D000`-`$D007`.  That ASCII ordering is why every inline string in the
+game is plain ASCII.  `assets/charset_text.*` are extracted from
+`ingame.bin`.
 
 ## `player0`-`player4` ($F100) and `extras` ($E000) -- sprites
 

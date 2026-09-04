@@ -1,0 +1,39 @@
+{
+ "labels": {
+  "0a04": "game_active",
+  "0a78": "clock_prescale",
+  "0a79": "clock_period",
+  "00d1": "creature_hit",
+  "800c": "jt_to_decimal",
+  "813e": "to_decimal",
+  "8168": "dec_pow10_lo",
+  "816d": "dec_pow10_hi",
+  "8806": "jt_build_text_font",
+  "8b20": "build_text_font",
+  "9503": "jt_clear_room_rows",
+  "9506": "jt_clear_text_rows",
+  "9509": "jt_clear_screen",
+  "93e2": "clear_room_rows",
+  "940b": "clear_screen",
+  "948a": "recover_a_day",
+  "9c18": "jt_quest_complete",
+  "a67d": "print_time_has_passed",
+  "449c": "offer_to_raamo",
+  "b122": "draw_status",
+  "b320": "creature_hit_effect"
+ },
+ "comments": {
+  "b26f": "once per frame from the IRQ tick; $C8 set freezes the clock",
+  "b287": "8 periods to the day; day $33 ends the quest",
+  "b2aa": "one food and one rest per period, $C4 set on underflow",
+  "b2da": "spirit +5 per period, capped at the limit $0A67",
+  "9f80": "X = fatigue; every 256 points costs one food and one rest",
+  "a6fb": "day +1, spirit refilled, food and rest both refilled to $0A6A - 1",
+  "8b20": "builds the $D000 ASCII text font out of the character ROM",
+  "813e": "16-bit X/Y -> five ASCII digits in $92-$96",
+  "b1e9": "eight 15-char time-of-day names",
+  "b261": "screen offset from $C348 for $0A62+y, y = 0..5",
+  "9e17": "rank comes from $0A62 alone: <15 master, <30 highly gifted, else gifted",
+  "449c": "Raamo takes a shuba (class 7) or a vine rope (class $0B)"
+ }
+}
