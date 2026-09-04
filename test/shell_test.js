@@ -88,7 +88,7 @@ test('the cursor clamps at both ends and each move waits a fifth of a second', (
   s.stick.feed(...push(J.up, 1));
   settle(s);
   assert.equal(s.menuSel, 2);
-  assert.ok(s.events.length === 0 || s.events.every((e) => 'sfx' in e));
+  assert.ok(s.events.every((e) => 'sfx' in e || e.music === null));
 });
 
 test('CONTINUE with no quest does nothing', (s) => {
@@ -291,6 +291,12 @@ test('cold start runs the intro once, prints the story pages, and lands in the m
   settle(s);
   assert.equal(s.title, true);
   assert.equal(lines(s)[0], '               START GAME');
+});
+
+test('opening the menu turns the music off', (s) => {
+  s.events.push({ music: 0 });
+  openMenu(s);
+  assert.deepEqual(s.events.filter((e) => 'music' in e).map((e) => e.music), [0, null]);
 });
 
 console.log(`all ${n} shell tests passed`);

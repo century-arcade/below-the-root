@@ -128,7 +128,11 @@
   "0b00": "row_addr_lo",
   "0b20": "row_addr_hi",
   "0b40": "col_to_x",
-  "0b70": "row_to_y"
+  "0b70": "row_to_y",
+  "95b9": "room_edge_load",
+  "964a": "load_room",
+  "9675": "load_room_air",
+  "a3a8": "glide_end"
  },
  "comments": {
   "a000": "runs once per frame from the raster IRQ at line $DE",
@@ -141,6 +145,8 @@
   "a53d": "wall in the body or head cell: revert and request a knock-down",
   "0a09": "rows fallen; $0A or more forces the knock-down at $A339",
   "8172": "returns A=1 iff fire is held -- that is what selects $A07E over $A0E7",
-  "9df6": "resting pose only; the moving states set $C3F8 themselves"
+  "9df6": "resting pose only; the moving states set $C3F8 themselves",
+  "964a": "burn the honeylamp, then: indoor flag set -> load; else outdoor bit clear -> open air, no creature",
+  "a3a8": "resting pose, sfx 2, then commit_step"
  }
 }

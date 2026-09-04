@@ -14,8 +14,10 @@ two-character code, column then row, each a digit in `0-9` then `A-V`:
 `assets/world_map.png` is every room drawn at half size with its code in
 the corner.
 
-438 of the 512 slots hold a real room; the other 74 are blank, and the
-shape of the map is what keeps you away from them.
+438 of the 512 slots hold a real room; the other 74 are blank.  The
+shape of the map keeps you away from most of them; the outdoor bit (see
+Walking off an edge) hides the rest, and the interiors parked beside the
+drawn world with them.
 
 Inside a room the playfield is 40 columns by 20 rows of character cells,
 column 0 at the left and row 0 at the top.  You and every creature stand
@@ -51,6 +53,20 @@ slot loads as open air, forty by twenty empty cells, and you fall or
 glide straight through it to the slot beyond.  The sample quest does
 exactly that, gliding south from `49` through the blank `4A` to the
 ground at `4B`.
+
+One more check, made only while the indoor flag (see Indoors, outdoors
+and the dark) is clear.  Every slot has an **outdoor bit**, `rooms.json`
+`outdoor_bit`, and an edge step outdoors into a slot whose bit is clear
+loads nothing: you arrive in open air -- forty by twenty empty cells, no
+creature -- exactly as if the slot were blank, and its neighbours are
+still the slots around it.  This is what keeps the shop interiors parked
+in rows `0`-`2` out of the sky: glide west off the treetop at `12` and
+the shuba shop at `02` is one slot away, but you pass through empty air
+and drop into `03`.  Indoors there is no check; a doorway is the only way
+into those rooms, and the flag is set once you are through one.  The bit
+is not the tile set: the caverns draw indoor but most of their bits are
+set, and the title art at `T4` draws outdoor with its bit clear (walk
+into it from `S4` and you get air).
 
 ## Doorways
 
@@ -103,7 +119,9 @@ Two separate things are called indoors.
 
 The **tile set** a room draws with is fixed per room -- one set for
 outdoors, one for interiors and caverns.  249 rooms draw outdoor, 189
-indoor; `rooms.json` gives the answer as `tileset`.  The set changes the
+indoor; `rooms.json` gives the answer as `tileset`, derived from the
+`outdoor_bit` table with the caverns forced indoor and the four title
+rooms forced outdoor on top.  The set changes the
 glyph and the colour of most scenery but never the physics, so the same
 room drawn with the other set is not a recolour, it is a different
 picture.  The title and credits art -- `T3`, `U3`, `T4`, `U4` -- draws

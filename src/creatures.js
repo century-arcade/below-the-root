@@ -24,6 +24,7 @@ export function isHostile(def) {
 
 export function spawnCreature(state) {
   state.creature = null;
+  if (state.room.blank) return;
   const def = state.data.creatureByRoom.get(state.room.room);
   if (!def) return;
   const flags = flagsOf(state, def);

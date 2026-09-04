@@ -33,7 +33,7 @@ Four options, one per panel row, at column 13.  The selected one is
 fourteen cells of reverse video, padding included.  Push up and down to
 move; the cursor stops at the ends and does not wrap, and each move
 blips and then ignores the stick for about a fifth of a second.  The
-button chooses.
+button chooses.  Arriving at the menu, by any route, turns the music off.
 
 | option | what it does |
 |--------|--------------|

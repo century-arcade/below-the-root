@@ -69,7 +69,7 @@ export class Speaker {
 
   frame(state) {
     for (const e of state.events) {
-      if ('music' in e) this.tune(e.music, state.tick);
+      if ('music' in e) { if (e.music === null) this.silence(); else this.tune(e.music, state.tick); }
       else if ('sfx' in e) this.sfx(e.sfx);
     }
     state.events.length = 0;
@@ -155,6 +155,11 @@ export class Speaker {
     else { g.cancelScheduledValues(when); g.setValueAtTime(g.value, when); }
     g.linearRampToValueAtTime(0, when + RELEASE_S);
     src.stop(when + RELEASE_S + 0.01);
+  }
+
+  silence() {
+    this.pending = null;
+    if (this.ctx) this.cutAll(this.ctx.currentTime);
   }
 
   cutAll(when) {

@@ -30,9 +30,11 @@ export function shellFrame(state) {
   if (!state.active && !state.verb && !state.stall && !state.demo) openMenu(state);
 }
 
+// the menu, by any route, turns the music off
 export function openMenu(state) {
   state.title = true;
   state.ended = null;
+  state.events.push({ music: null });
   startVerb(state, mainMenu(state));
 }
 

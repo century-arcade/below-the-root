@@ -28,11 +28,14 @@ export function neighbour(data, room, dir) {
   else if (dir === 'north') y -= 1;
   else y += 1;
   if (y < 0 || y >= g.height) return null;
-  return data.roomById.get(y * g.width + x) || blankRoom(data, x, y);
+  const n = y * g.width + x;
+  let next = data.roomById.get(n);
+  if (!next) data.roomById.set(n, next = openAir(data, x, y));
+  return next;
 }
 
 // a slot with no room on the disk loads as open air (the demo glides through 4A)
-export function blankRoom(data, x, y) {
+export function openAir(data, x, y) {
   const n = y * data.grid.width + x;
   const underground = y >= 12;
   const room = {
@@ -43,7 +46,6 @@ export function blankRoom(data, x, y) {
     objects: [], doors: [null, null, null], signs: [],
   };
   room.screen = new Uint8Array(COLS * ROWS);
-  data.roomById.set(n, room);
   return room;
 }
 
@@ -99,7 +101,7 @@ export function paintScreen(state) {
   const room = state.room;
   for (let row = 0; row < ROWS; row++) screen.set(room.tiles[row], row * COLS);
   for (const o of state.objects) {
-    if (o.room !== room.room || !o.exists || o.carried) continue;
+    if (room.blank || o.room !== room.room || !o.exists || o.carried) continue;
     for (let i = 0; i < o.chars.length && o.col + i < COLS; i++) {
       screen[o.row * COLS + o.col + i] = o.chars[i];
     }
@@ -147,11 +149,12 @@ function gateLocked(state, door) {
   return !state.paid;
 }
 
-// off the top or bottom of the world there is nothing to load
+// off the world there is nothing to load; outdoors, a clear outdoor bit loads open air instead
 export function leaveByEdge(state, dir) {
   const p = state.player;
-  const next = neighbour(state.data, state.room, dir);
+  let next = neighbour(state.data, state.room, dir);
   if (!next) return false;
+  if (!p.indoors && next.outdoor_bit === false) next = openAir(state.data, next.x, next.y);
   const at = EDGE_ARRIVAL[dir](p);
   burnLamp(state);
   enterRoom(state, next, at.col, at.row);

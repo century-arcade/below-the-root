@@ -7,7 +7,7 @@ reimplementation of it in JavaScript from the resulting spec.
 | where | what |
 |-------|------|
 | `disasm/` + `tools/` | the 6502 disassembly, the disk decoder, the emulator harness, the asset extractors |
-| `docs/*.md` | the original explained in C64 terms: addresses, tables, hardware |
+| `docs/*.md` | the original explained in C64 terms: addresses, tables, hardware; `code-map.md` indexes every labelled address against the port |
 | `docs/spec/` | the game in plain English plus JSON tables, no 6502 needed; the port reads only this |
 | `src/` | the port: ES modules, no bundler, built into `_build/` |
 
@@ -36,13 +36,10 @@ scans) is the copyrighted input and is not tracked; `build/` and
 The spec has 24 open questions, listed at the end of each area file;
 none blocks M6.4.  Still read from the code but never watched in the
 emulator: the dialog tree, both endings, the save layout (no real C64
-save has been imported yet), the cloud world.  Three things worth a VICE
-session: DROP wants the cell in front of you to be solid; every
+save has been imported yet), the cloud world.  Two things worth a VICE
+session: DROP wants the cell in front of you to be solid, and every
 verb's message now clears at your next push of the stick (the
-disassembly's `verb_done`; M6.2 had STATUS staying up); and gliding west
-off the treetop at `12` flashes through the shuba shop parked at `02` on
-the way down to `03` -- the port follows the grid arithmetic, and the
-original has never been watched doing it.
+disassembly's `verb_done`; M6.2 had STATUS staying up).
 
 ## Running it
 

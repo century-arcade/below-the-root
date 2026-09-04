@@ -85,6 +85,11 @@ def is_outdoor(room, game):
         return False
     if (room & 0xFF) in FORCED_OUTDOOR_LO:
         return True
+    return outdoor_bit(room, game)
+
+
+def outdoor_bit(room, game):
+    """$A694 alone, the bit an edge crossing tests ($964A): no $9420 overrides."""
     return bool(game[OUTDOOR_BITMAP + (room >> 3)] & (0x80 >> (room & 7)))
 
 
@@ -191,6 +196,7 @@ def build_rooms(blocks, game):
             'track': track,
             'sector': sector,
             'tileset': 'outdoor' if outdoor else 'indoor',
+            'outdoor_bit': outdoor_bit(n, game),
             'underground': n >= UNDERGROUND_FIRST,
             'colors': colors,
             'signs': read_signs(rm.tiles),
