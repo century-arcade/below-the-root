@@ -310,29 +310,23 @@ the rest chime, the spirit bell.
 
 ## Status of the spec
 
-The five area files (`world`, `player`, `creatures`, `time`, `assets`)
-carry the rules above at full precision, with data tables in
-`data/*.json` and every table regenerated from the original disk by a
-script; `tools/spec_check.py` confirms the tables agree with each other.
+The six area files (`world`, `player`, `creatures`, `time`, `assets`,
+`shell`) carry the rules above at full precision, with data tables in
+`data/*.json` regenerated from the original disk by script;
+`tools/spec_check.py` confirms the tables agree with each other.
 
 **Checked against the running game:** room decoding is byte-exact; the
-attract screen is a pixel match; the fall threshold and the leap lengths;
-the demo reaching the REST verb; the sprite hardware settings.
+attract screen and the first room with the player in it are pixel
+matches; the fall threshold and the leap lengths; the demo reaching the
+REST verb; the hour is 8960 ticks; the dead doorways, both kidnaps, both
+REST traps, the outer gate, and that a blank grid slot hangs the game.
 
 **Read from the code but never watched happen:** creature movement and
-all of the dialogue tree, the clock rate, both endings, the save layout,
-the cloud world, the kidnaps.
+all of the dialogue tree, both endings, the save layout, the cloud world.
 
-**Not yet specified:** the shell -- menu flow, character select, the disk
-storage screens and the loop that ties room exits, doors, menus and lost
-days together.  The C64-level notes exist; it needs writing up in these
-terms.
-
-**Twenty-two open questions** remain, listed at the end of each area
+**Twenty-four open questions** remain, listed at the end of each area
 file.  None blocks building the world, movement, creatures or the
-economy.  Two need a decision before the endgame: there are six ways to
-earn a vision and only five visions; and losing a day on day 50 can
-overshoot the fifty-day limit by an hour.
+economy.
 
 **Original bugs a port must choose to keep or fix** are listed in the
-README under port notes.
+README under port notes, with the decisions made so far.
