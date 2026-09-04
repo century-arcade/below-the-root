@@ -192,8 +192,8 @@ unused.
    of the nid traps, you now have permission to take -- see Permission
    below.  D'ol Falla also unlocks her key permanently at this point.
 6. If it is a blesser and it has not blessed you before: mark it, add 5 to
-   your spirit limit, refill spirit energy to the new limit, play a tune,
-   and run the new-skill and vision sequence.
+   your spirit limit, refill spirit energy to the new limit, play a tune
+   from the random pool, and run the new-skill and vision sequence.
 
 Step 6 sits outside the gate test, but never comes up: all five blessers
 have a level-0 gate.  Only SPEAK blesses -- pensing a blesser costs energy
@@ -218,7 +218,8 @@ and each person banished with the wand costs 5 of it back.
    is empty: `NO RESPONSE` under the label, and the emotion still cost its
    1.  Otherwise print it and spend a second spirit energy.
 7. If it is one of the ten animals: mark it, add 1 to your spirit limit,
-   refill energy to the new limit, play a tune.  The fifth animal you
+   refill energy to the new limit, play a tune from the random pool.
+   The fifth animal you
    pense, whichever it turns out to be, also runs the vision sequence.
 
 A full pense costs 2 spirit energy, one per half.  All ten animals say the
@@ -351,7 +352,8 @@ and the fifth animal's +1 -- runs the same two screens.
    COMES TO YOU:` on the first row and the next vision's text from the
    second (`quest.json` `visions`, in order), and the count goes up.
 
-Both screens wait for the button like every other message.
+Each screen prints, a tune from the random pool plays out, and then the
+button is waited for like every other message.
 
 ## What each creature remembers
 

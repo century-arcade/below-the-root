@@ -280,7 +280,8 @@ Two voices share a single stream of note-and-duration pairs: whichever
 voice falls silent first takes the next pair.  A tune is therefore one
 interleaved line, not two written parts.  Durations are in ticks.
 Nothing loops -- a tune plays once and stops; they run from 3.6 to 24
-seconds.  `music.json` gives each tune as two lists of events, each with
+seconds.  Outside the attract demo the game waits for every tune it
+starts: nothing moves and the stick goes unread until the tune ends.  `music.json` gives each tune as two lists of events, each with
 a start tick, a duration, a MIDI number and a note name, which is enough
 to play them on any synthesiser.
 
@@ -295,7 +296,7 @@ the original sound and `midi` for it in tune.
 | 0 | game over and victory; also the attract demo |
 | 1 | the attract demo only |
 | 2 | the end-of-quest rating; also in the random pool |
-| 3-9 | the random pool -- played when you are blessed, and on entering certain rooms |
+| 3-9 | the random pool -- one plays when you are blessed, after each screen of the spirit gift announcement, when a key opens a wall, and on entering certain rooms |
 | 10 | in the data, with nothing that plays it |
 
 ## Sound effects

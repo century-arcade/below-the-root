@@ -18,6 +18,7 @@ test:
 	node test/talk_test.js
 	node test/time_test.js
 	node test/shell_test.js
+	node test/audio_test.js
 	node test/replay_test.js intro
 	node test/replay_test.js quest
 

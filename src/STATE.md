@@ -18,7 +18,7 @@ state = {
   input,           // {read() -> {dx, dy, fire}, pace}: joystick or demo script; pace = idle ticks between verb reads
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
-  events,          // [{sfx}|{music}|{page}] emitted this frame, drained by whoever plays them
+  events,          // [{sfx: id}|{music: tune}] since the last drain; main.js's Speaker.frame plays and empties them
   panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (panel.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read
   verbWait,        // ticks left before the next read is handed to it

@@ -3,6 +3,7 @@
 import { spawnCreature } from './creatures.js';
 import { clearPanel, say } from './panel.js';
 import { DREAM } from './clock.js';
+import { startTune } from './audio.js';
 
 export const COLS = 40;
 export const ROWS = 20;
@@ -165,7 +166,7 @@ function dreamDoor(state) {
   p.indoors = false;
   p.facing = -p.facing;
   enterRoom(state, state.data.roomById.get(to.room), to.col, to.row);
-  if (TUNE_ON_ARRIVAL.has(to.room)) state.events.push({ music: 'random' });
+  if (TUNE_ON_ARRIVAL.has(to.room)) startTune(state, 'random');
 }
 
 // a door whose record is blank drops the original down the first column; the port refuses it
@@ -183,6 +184,6 @@ export function useDoor(state, n) {
   p.facing = -p.facing;
   p.indoors = !p.indoors;
   enterRoom(state, dest, door.arrive_x, door.arrive_y);
-  if (TUNE_ON_ARRIVAL.has(dest.room)) state.events.push({ music: 'random' });
+  if (TUNE_ON_ARRIVAL.has(dest.room)) startTune(state, 'random');
   return true;
 }

@@ -8,6 +8,7 @@ import { newPanel, say, clearPanel } from './panel.js';
 import { newFlags, creatureTick, creatureFigure } from './creatures.js';
 import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
 import { tell } from './dialog.js';
+import { startTune, TUNE } from './audio.js';
 
 const SHUBA = 7;
 const ATTACK = { attack_salaat: 'attacked_salaat', attack_nekom: 'attacked_nekom' };
@@ -139,7 +140,6 @@ export function startDemo(state, name = 'quest') {
 }
 
 export function tick(state) {
-  state.events.length = 0;
   if (state.stall > 0) {
     state.stall -= 1;
     return;
@@ -257,7 +257,7 @@ function* ambushed(state, outcome) {
 function* timeOver(state) {
   say(state, 'THE LIGHT FADES INTO DARKNESS...', 'THE TIME FOR YOUR QUEST HAS ENDED.',
     'GREEN-SKY AWAITS THE RISE OF ANOTHER QUESTER.');
-  state.events.push({ music: 0 });
+  startTune(state, TUNE.over);
   yield* buttonPress();
   state.timeUp = false;
   state.ended = 'timeout';

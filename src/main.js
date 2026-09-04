@@ -6,6 +6,7 @@ import { Keyboard } from './input.js';
 import { enterRoom } from './world.js';
 import { panelLines } from './panel.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
+import { Speaker } from './audio.js';
 
 const SLOT_KEY = (n) => `btr.quest${n}`;
 
@@ -112,6 +113,9 @@ loadData((path) => fetch(path).then((r) => {
     coldStart(state);
   }
 
+  const speaker = new Speaker(data.music);
+  for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
+
   const status = document.getElementById('status');
   let notice = '';
   let noticeUntil = 0;
@@ -132,6 +136,7 @@ loadData((path) => fetch(path).then((r) => {
     while (acc >= STEP_MS) {
       shellFrame(state);
       tick(state);
+      speaker.frame(state);
       acc -= STEP_MS;
     }
     draw();

@@ -2,7 +2,7 @@ const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 
 export async function loadData(read) {
   const [assets, roomsFile, tilesFile, map, itemsFile, charactersFile, demo,
-    creaturesFile, messagesFile, skillsFile, quest, save, shell] = await Promise.all([
+    creaturesFile, messagesFile, skillsFile, quest, save, shell, music] = await Promise.all([
     read('data/assets.json'),
     read('data/rooms.json'),
     read('data/tiles.json'),
@@ -16,6 +16,7 @@ export async function loadData(read) {
     read('data/quest.json'),
     read('data/save.json'),
     read('data/shell.json'),
+    read('data/music.json'),
   ]);
 
   const palette = new Uint8Array(16 * 3);
@@ -83,7 +84,7 @@ export async function loadData(read) {
     animations: assets.player_animations,
     objects, items, objectChars, characters: charactersFile.characters, demo,
     creatures: creaturesFile.creatures, creatureByRoom, creatureByState, species,
-    messages, fixed, skills: skillsFile.skills, quest, save, shell,
+    messages, fixed, music, skills: skillsFile.skills, quest, save, shell,
   };
 }
 

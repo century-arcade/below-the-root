@@ -8,6 +8,7 @@ import { CLASS, objectUnder, pickItem, canCarry, weightOf, destroy, carried } fr
 import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';
 import { advanceHour, loseDay, timeOfDay, kidnap, DREAM } from './clock.js';
+import { startTune } from './audio.js';
 
 export const MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS'],
@@ -186,7 +187,7 @@ function* use(state) {
       const wall = tileWithRole(state, 'wall', (t) => /temple/.test(t.note));
       if (!cut(state, wall)) return say(state, 'THE KEY IS USELESS HERE');
       if (o.class === CLASS.FALLA_KEY && p.facing > 0) say(state, 'ENTER THE CHAMBER OF THE FORGOTTEN');
-      state.events.push({ music: 0 });
+      startTune(state, 'random');
       return;
     }
   }

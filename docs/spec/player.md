@@ -530,11 +530,12 @@ matching tile is erased.
   gives "THE ROPE IS USELESS HERE"; otherwise the span is filled with
   rope and the rope is consumed.  You can only cross it crawling.
 - *The temple key*: anywhere except `A2`, it removes the temple wall in
-  front of or above you.  Success plays a tune; nothing removed gives
+  front of or above you.  Success plays a tune from the random pool;
+  nothing removed gives
   "THE KEY IS USELESS HERE".  Never consumed.
 - *D'ol Falla's key*: only in `A2`, where it removes the wall and, if
-  you face right, prints "ENTER THE CHAMBER OF THE FORGOTTEN" and plays
-  a tune.
+  you face right, prints "ENTER THE CHAMBER OF THE FORGOTTEN"; then the
+  same random tune.
 
 **EAT** -- pages through roast lapan, pan bread, fruit & nuts,
 wissenberries and the strange elixer.  The object is destroyed and its

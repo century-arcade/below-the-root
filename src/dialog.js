@@ -4,11 +4,11 @@ import { facingCreature, flagsOf, isAnimal } from './creatures.js';
 import { CLASS, carriedOf, destroy, mintToken, onFloor, canCarry, pickItem } from './inventory.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
+import { startTune, TUNE } from './audio.js';
 
 const BUY_RESERVE = 4;
 const STANDING = { standing_kindar: 'standingKindar', standing_erdling: 'standingErdling' };
 const GIFT_KINDS = new Set(['gift_giver', 'blesser', 'key_revealer']);
-const TUNE = { blessing: 1, win: 2, rank: 3 };
 
 export function tell(state, name, clear = true) {
   const f = state.data.fixed[name];
@@ -80,7 +80,7 @@ export function* pense(state) {
     state.animalsPensed += 1;
     p.spiritLimit += def.params.pense_message_gain;
     p.spiritEnergy = p.spiritLimit;
-    state.events.push({ music: TUNE.blessing });
+    startTune(state, 'random');
     if (state.animalsPensed === 5) yield* announce(state);
   }
 }
@@ -141,11 +141,11 @@ function* win(state) {
   const day = state.clock.day;
   say(state, 'I AM RAAMO, THE SPIRIT GIFTED.',
     'YOU HAVE SAVED MY LIFE AND FULFILLED THE PROPHESY.  THE QUEST IS COMPLETE.  GREEN-SKY IS SAVED.');
-  state.events.push({ music: TUNE.win });
+  startTune(state, TUNE.over);
   yield* buttonPress();
   const rank = day < 15 ? 'MASTER QUESTER.' : day < 30 ? 'HIGHLY GIFTED QUESTER.' : 'GIFTED QUESTER.';
   say(state, `YOU HAVE FINISHED THE QUEST IN ${day} DAYS. YOU ARE A`, '', rank);
-  state.events.push({ music: TUNE.rank });
+  startTune(state, TUNE.rank);
   yield* buttonPress();
   state.ended = 'won';
   state.quest = false;
@@ -155,7 +155,7 @@ export function* gainSpirit(state, amount) {
   const p = state.player;
   p.spiritLimit += amount;
   p.spiritEnergy = p.spiritLimit;
-  state.events.push({ music: TUNE.blessing });
+  startTune(state, 'random');
   yield* announce(state);
 }
 
@@ -165,12 +165,14 @@ function* announce(state) {
   if (p.spiritLimit < 35) {
     const skill = state.data.skills[Math.floor(p.spiritLimit / 5) - 1];
     say(state, 'CONGRATULATIONS QUESTER, YOU HAVE', `GAINED THE POWER TO ${skill.display_name}`);
+    startTune(state, 'random');
     yield* buttonPress();
   }
   const visions = state.data.quest.visions;
   if (state.visions < visions.length) {
     say(state, 'A VISION COMES TO YOU:', visions[state.visions].text);
     state.visions += 1;
+    startTune(state, 'random');
     yield* buttonPress();
   }
 }
