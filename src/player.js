@@ -253,15 +253,9 @@ function glideStep(state, s) {
   const p = state.player;
   if (isSolid(state, s.own)) {
     p.row -= 1;
-    p.gliding = false;
-    sfx(state, SFX.footA);
-    return;
+    return endGlide(state);
   }
-  if (isSolid(state, s.floor)) {
-    p.gliding = false;
-    sfx(state, SFX.footA);
-    return;
-  }
+  if (isSolid(state, s.floor)) return endGlide(state);
   const input = state.input.read();
   if (input.dx !== 0 && input.dx !== p.facing) {
     p.facing = input.dx;
@@ -270,6 +264,14 @@ function glideStep(state, s) {
   p.frame = FRAME.glide(p.facing);
   p.col += p.facing;
   p.row += 1;
+  return afterMove(state, true);
+}
+
+function endGlide(state) {
+  const p = state.player;
+  p.gliding = false;
+  p.frame = idleFrame(p);
+  sfx(state, SFX.footA);
   return afterMove(state, true);
 }
 

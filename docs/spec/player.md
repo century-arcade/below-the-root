@@ -241,8 +241,9 @@ Each glide step, in order:
 4. Move one column in the facing direction and one row down.
 
 Both tests in 1 and 2 read the cells as they stood before the step.
-Ending a glide plays the landing sound and hands you back to the normal
-fall-and-land rules.  Bumping a wall ends the glide and inhibits
+Ending a glide shows the resting pose, plays the landing sound, runs the
+after-move checks on the cell you stopped in, and hands you back to the
+normal fall-and-land rules.  Bumping a wall ends the glide and inhibits
 gliding; the knock-down that a wall bump causes clears the inhibit, so
 in practice you can glide again once you stand up.
 

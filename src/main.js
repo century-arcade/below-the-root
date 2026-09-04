@@ -63,9 +63,11 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
 
+const CHROME_PX = 32 + 28 + 20;
+
 function fit() {
   const scale = Math.max(1, Math.min(
-    Math.floor(window.innerWidth / WIDTH), Math.floor((window.innerHeight - 24) / HEIGHT)));
+    Math.floor(window.innerWidth / WIDTH), Math.floor((window.innerHeight - CHROME_PX) / HEIGHT)));
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = HEIGHT * scale + 'px';
 }
@@ -76,6 +78,11 @@ function pickRoom(data, want) {
   return data.roomByCode.get(want.toUpperCase());
 }
 
+function whereLabel(state) {
+  return state.room && !state.title ? state.room.code : '';
+}
+
+// ?debug: the whole player state on the status line
 function label(state) {
   const r = state.room;
   const p = state.player;
@@ -116,15 +123,23 @@ loadData((path) => fetch(path).then((r) => {
   const speaker = new Speaker(data.music);
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
 
+  const debug = params.has('debug');
+  const where = document.getElementById('where');
   const status = document.getElementById('status');
   let notice = '';
   let noticeUntil = 0;
   saveKeys(state, (text) => { notice = text; noticeUntil = performance.now() + 3000; });
+  function statusLine() {
+    if (performance.now() < noticeUntil) return notice;
+    if (debug) return label(state);
+    return speaker.ctx ? '' : 'press any key for sound';
+  }
   function draw() {
     state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
-    status.textContent = performance.now() < noticeUntil ? notice : label(state);
+    where.textContent = whereLabel(state);
+    status.textContent = statusLine();
   }
 
   const STEP_MS = 1000 / 60;

@@ -10,14 +10,16 @@
   body { display: flex; flex-direction: column; align-items: center;
          justify-content: center; }
   canvas { image-rendering: pixelated; display: block; }
-  #status { padding: 4px; }
+  #where { font-size: 24px; line-height: 32px; letter-spacing: 2px; }
+  #status { padding: 4px; min-height: 1.6em; }
   #help { color: #567; }
 </style>
 </head>
 <body>
+<div id="where"></div>
 <canvas id="screen"></canvas>
 <div id="status">loading...</div>
-<div id="help">arrows/wasd + space = joystick &middot; DISK STORAGE saves in this browser; 1-5 / shift+1-5 do the same &middot; x downloads the C64 QUEST file, drop one to load &middot; sound starts on the first key &middot; ?menu skips the intro</div>
+<div id="help">arrows/wasd + space = joystick &middot; 1-5 saves to a browser slot, shift+1-5 loads it (the same five slots as DISK STORAGE) &middot; x downloads the C64 QUEST save file; drop one on the page to load it</div>
 <script type="module" src="main.js"></script>
 </body>
 </html>

@@ -36,10 +36,13 @@ scans) is the copyrighted input and is not tracked; `build/` and
 The spec has 24 open questions, listed at the end of each area file;
 none blocks M6.4.  Still read from the code but never watched in the
 emulator: the dialog tree, both endings, the save layout (no real C64
-save has been imported yet), the cloud world.  Two things worth a VICE
-session: DROP wants the cell in front of you to be solid, and every
+save has been imported yet), the cloud world.  Three things worth a VICE
+session: DROP wants the cell in front of you to be solid; every
 verb's message now clears at your next push of the stick (the
-disassembly's `verb_done`; M6.2 had STATUS staying up).
+disassembly's `verb_done`; M6.2 had STATUS staying up); and gliding west
+off the treetop at `12` flashes through the shuba shop parked at `02` on
+the way down to `03` -- the port follows the grid arithmetic, and the
+original has never been watched doing it.
 
 ## Running it
 
