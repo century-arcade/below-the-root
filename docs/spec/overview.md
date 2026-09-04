@@ -17,6 +17,23 @@ There is no health and no dying.  Everything that goes badly -- starving,
 exhaustion, drowning, being attacked -- costs you a day: you wake in your
 own nid, fully fed and rested, one day later.
 
+## The characters
+
+| | people | as the game puts it | stamina | spirit limit | food & rest | standing Kindar / Erdling | starts able to | home nid |
+|---|---|---|---|---|---|---|---|---|
+| Neric | Kindar | strong, impulsive, moderate spirit | 20 | 5 | 10 | 3 / 0 | pense emotions | T1, off M5 |
+| Genaa | Kindar | strong, charismatic, no spirit skill | 20 | 0 | 10 | 4 / 2 | nothing | C1, off E6 |
+| Herd | Erdling | strong, rational, moderate spirit | 20 | 5 | 10 | 0 / 3 | pense emotions | V0, off A6 |
+| Pomma | Kindar | delicate, greatly spirit gifted | 10 | 10 | 5 | 5 / 3 | pense emotions and messages | 50, off 16 |
+| Charn | Erdling | sturdy, alert, moderate spirit gift | 15 | 5 | 7 | 2 / 5 | pense emotions | L1, off I5 |
+
+Stamina sets the leap (4 cells under 20, 5 at 20) and the carrying limit
+(stamina + 26: nine full-weight items for the three strong ones, eight
+for Charn, seven for Pomma).  Spirit energy starts equal to the limit.
+Food and rest start full; their maximum is half the stamina.  Standing
+is fixed for the game and decides who will talk to you.  Room codes are
+explained under The screen.
+
 ## The screen
 
 The room fills the top four-fifths of the screen; the bottom strip is
@@ -28,6 +45,14 @@ places; stand in one and press the button to go through.
 The map that came in the box is the world above ground, one square per
 room.  The caverns are not on it; you map those yourself.  Caverns are
 pitch dark unless you carry a lit honeylamp or the spirit lamp.
+
+The world is 32 rooms wide and 16 tall.  This spec names a room by a
+two-character code, column then row, each a digit in `0-9` then `A-V`:
+`00` is the top-left room, `VF` the bottom-right.  Rows `0`-`2` are
+mostly house and shop interiors (they are not places on the map -- you
+reach them through doorways), rows `3`-`A` are the seven trees, row `B`
+is the ground, rows `C`-`F` are the caverns.  `assets/world_map.png` is
+every room drawn at half size with its code in the corner.
 
 ## Moving
 
@@ -80,6 +105,33 @@ One special place: sleep in the highest nid of the Sky Grund and the next
 doorway you use takes you to the clouds, where D'ol Neshom blesses you
 and grants the spirit bell.  The doorway after that brings you back.
 Time does not pass while you are there.
+
+### Where things are
+
+"off" means the interior is entered by a doorway from that outdoor room.
+
+| what | where |
+|------|-------|
+| the sky nid (to the clouds) | `90`, off `10` at the top of the Sky Grund; the clouds are `U5`-`V5` |
+| the gate to the caverns | outer guard at `0B` on the ground; inner guard at `01`; first cavern `0C` |
+| Raamo | `GE` |
+| the Bottomless Lake | `ID` |
+| Broad Grund shops (fruit & nuts, trencher beaks, honeylamps) | `51`, `61`, `71`, off `B8` |
+| Star Grund shops (shubas, vine rope, pan bread) | `02`, `42`, `52`, off `M8` |
+| the Lapan House (roast lapan) | `Q0`, off `9B` |
+| wissenberries for sale | `E1`, off `G6`; also growing wild at `D5`, `O5`, `97`, `V7`, `08`, `89` |
+| the Wise Child | `J0`, off `86` in the Garden |
+| the Hermit | `91`, off `F0` |
+| Raamo's Mother | `K3` |
+| D'ol Neshom | `V5`, in the clouds, with the only spirit bell |
+| Vatar | `CF`, off `DE` in the caverns |
+| D'ol Falla and her key | `72` and `62`, off `R9` by the Vine Palace |
+| the temple key | `H2`, off `P4` |
+| the spirit lamp | `B2`, the Chamber of the Forgotten (opened with a key) |
+| the wand of Befal | `R1` -- the Nekom's room, where their kidnaps take you |
+| strange elixers (five) | `S0` (the Salaat kidnap room), `12`, `P2`, `64`, `AE` |
+| the Vine Palace, the Grand Hall, the Temple | `P6`, `F8`, `R7` on the map; interiors `82`, `S2`, `K4` |
+| the ten animals | `32`, `23`, `U3`, `64`, `U4`, `06`, `L6`, `89`, `S9`, `GF` |
 
 ## Things
 
@@ -138,7 +190,7 @@ Each has a role:
   Mother, D'ol Neshom, Vatar) who raise your spirit limit by 5 the first
   time you speak to them.
 - **Animals** -- ten lapans and simas that raise your spirit limit by 1
-  the first time you read their message.
+  the first time you pense their emotion.
 - **The two gate guards.**
 - **D'ol Falla**, who must be spoken to before her key can be taken.
 - **Nid-offerers** -- twelve people who let you sleep in their nid.  Six

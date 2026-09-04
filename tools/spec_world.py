@@ -22,6 +22,11 @@ import objects as OBJ                                   # noqa: E402
 
 OUTDIR = os.path.join(ROOT, 'docs', 'spec', 'data')
 GRID_W, GRID_H = 32, 16
+DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUV'
+
+
+def room_code(n):
+    return DIGITS[n % GRID_W] + DIGITS[n // GRID_W]
 N_SLOTS = GRID_W * GRID_H
 UNDERGROUND_FIRST = 0x180
 
@@ -179,6 +184,7 @@ def build_rooms(blocks, game):
         ex = neighbours(n)
         rooms.append({
             'room': n,
+            'code': room_code(n),
             'x': n % GRID_W,
             'y': n // GRID_W,
             'track': track,
@@ -314,8 +320,10 @@ def build_map(blocks, game, rooms):
         for s in r['signs']:
             regions.append({'room': r['room'], 'x': r['x'], 'y': r['y'],
                             'text': s})
-    return {'width': GRID_W, 'height': GRID_H, 'cells': cells,
-            'bands': bands, 'signs': regions}
+    codes = [[room_code(n) if n is not None else None for n in row] for row in cells]
+    return {'width': GRID_W, 'height': GRID_H,
+            'code': 'column digit then row digit, base 32 (0-9, A-V): 00 top-left, VF bottom-right',
+            'cells': cells, 'codes': codes, 'bands': bands, 'signs': regions}
 
 
 # --- serialisation -----------------------------------------------------------
@@ -350,18 +358,27 @@ def write(path, obj):
     print('%s (%d bytes)' % (path, os.path.getsize(path)))
 
 
-def contact_sheet(blocks, game, path, cell=(64, 32)):
-    from PIL import Image
+def contact_sheet(blocks, game, path, cell=(64, 32), labels=False):
+    from PIL import Image, ImageDraw
     cw, ch = cell
     sheet = Image.new('RGB', (GRID_W * cw, GRID_H * ch), (24, 24, 24))
+    draw = ImageDraw.Draw(sheet)
     for n, (blk, _, _) in blocks.items():
         rm = R.Room(blk)
         tbl, chars = R.charset(game, is_outdoor(n, game))
         tmp = os.path.join(os.path.dirname(path), '.cell.png')
         R.render(rm, tbl, chars, tmp)
-        sheet.paste(Image.open(tmp).resize((cw, ch)),
-                    ((n % GRID_W) * cw, (n // GRID_W) * ch))
+        x, y = (n % GRID_W) * cw, (n // GRID_W) * ch
+        sheet.paste(Image.open(tmp).resize((cw, ch)), (x, y))
         os.remove(tmp)
+        if labels:
+            draw.rectangle((x, y, x + 15, y + 10), fill=(0, 0, 0))
+            draw.text((x + 2, y), room_code(n), fill=(255, 255, 0))
+    if labels:
+        for x in range(1, GRID_W):
+            draw.line((x * cw, 0, x * cw, GRID_H * ch), fill=(96, 96, 96))
+        for y in range(1, GRID_H):
+            draw.line((0, y * ch, GRID_W * cw, y * ch), fill=(96, 96, 96))
     os.makedirs(os.path.dirname(path), exist_ok=True)
     sheet.save(path)
     print(path)
@@ -373,6 +390,8 @@ def main():
     ap.add_argument('--image', default=R.D64)
     ap.add_argument('--ram', default=R.LOADED)
     ap.add_argument('--contact-sheet', metavar='PNG')
+    ap.add_argument('--map-png', metavar='PNG',
+                    help='labelled world map, 160x80 per room')
     args = ap.parse_args()
 
     game = read_ram(args.ram)
@@ -422,6 +441,8 @@ def main():
     })
     if args.contact_sheet:
         contact_sheet(blocks, game, args.contact_sheet)
+    if args.map_png:
+        contact_sheet(blocks, game, args.map_png, cell=(160, 80), labels=True)
 
 
 if __name__ == '__main__':

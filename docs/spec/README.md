@@ -28,7 +28,10 @@ Run it after regenerating anything.
 - **Tick** = one video frame; **60 ticks/second** (NTSC).  Every period,
   delay and speed in the spec is a tick count; seconds are derived.
 - **Coordinates**: rooms are 40x20 cells of 8x8 pixels; `(col,row)` with
-  `(0,0)` top-left.  Room `n` sits at world grid `(n mod 32, n div 32)`.
+  `(0,0)` top-left.  Room `n` sits at world grid `(n mod 32, n div 32)`
+  and has a two-character **code**, column digit then row digit in base
+  32 (`0-9A-V`): `00` top-left, `VF` bottom-right (`rooms.json` `code`,
+  `map.json` `codes`).  Prose uses codes; JSON ids stay numeric.
 - **Ids** are small decimal ints, consistent across files: `room` (0-511,
   438 real), `item`/`class` (0-14; `object` is an individual instance
   0-182), `message` (1-based index into the numbered table), `species`

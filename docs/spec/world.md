@@ -19,6 +19,10 @@ x = room mod 32      column, 0..31, increasing east
 y = room div 32      band,   0..15, increasing south
 ```
 
+Prose names a room by its two-character code, column digit then row
+digit in base 32 (`0-9A-V`): room 61 is `T1`, room 464 is `GE`.
+`assets/world_map.png` is every room at half size with its code.
+
 438 of the 512 slots hold a real room; the other 74 are blank.  One of the
 missing slots is forced: room 288 maps to the sector that holds the disk
 header, so that cell can never be a room. [src: track 18 sector 0]
