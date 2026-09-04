@@ -493,7 +493,7 @@ def player_sheets():
             'character': i,
             'character_name': CHAR_NAMES[i],
             'character_name_confidence': 'certain' if i == 0 else
-                                         'menu order only, not verified',
+                                         'menu order, matches the drawing',
             'records': len(data) // 64,
             'frames': frames,
             'frame_px': [SPRITE_W, FRAME_H],

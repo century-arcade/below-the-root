@@ -2369,7 +2369,7 @@
    "load_address": "$F100",
    "character": 1,
    "character_name": "Genaa",
-   "character_name_confidence": "menu order only, not verified",
+   "character_name_confidence": "menu order, matches the drawing",
    "records": 48,
    "frames": 24,
    "frame_px": [
@@ -2981,7 +2981,7 @@
    "load_address": "$F100",
    "character": 2,
    "character_name": "Herd",
-   "character_name_confidence": "menu order only, not verified",
+   "character_name_confidence": "menu order, matches the drawing",
    "records": 48,
    "frames": 24,
    "frame_px": [
@@ -3593,7 +3593,7 @@
    "load_address": "$F100",
    "character": 3,
    "character_name": "Pomma",
-   "character_name_confidence": "menu order only, not verified",
+   "character_name_confidence": "menu order, matches the drawing",
    "records": 48,
    "frames": 24,
    "frame_px": [
@@ -4205,7 +4205,7 @@
    "load_address": "$F100",
    "character": 4,
    "character_name": "Charn",
-   "character_name_confidence": "menu order only, not verified",
+   "character_name_confidence": "menu order, matches the drawing",
    "records": 48,
    "frames": 24,
    "frame_px": [

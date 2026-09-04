@@ -159,6 +159,10 @@ Everything that moves -- you, and the one creature a room may hold -- is
 a 24x42-pixel picture in a single colour, drawn in front of the tiles.
 Six sheets: one per playable character with 24 frames each, and one
 shared **extras** sheet of 34 frames for the creatures and the pointer.
+The character sheets follow the character-select order -- Neric, Genaa,
+Herd, Pomma, Charn -- and the pictures agree: two adults and two
+children after Neric, the woman and the girl with hair to the shoulder,
+the man and the boy cropped short.
 
 You are drawn white whichever character you are.  A creature takes its
 colour from the room it lives in.
@@ -324,12 +328,6 @@ fifth, ding-dong -- then the confirm.
 
 ## Open questions
 
-- **Which sheet is which character.**  `player0` is Neric, confirmed
-  against the running game.  The other four are assigned to Genaa,
-  Herd, Pomma and Charn from the order of the character-select menu
-  alone; nobody has drawn each sheet and compared.  `player3` is
-  visibly a child, which fits Pomma.  If the assignment is wrong, four
-  characters get each other's faces.
 - **What the KINIPORT pointer should look like.**  Extras frame 0 is a
   hollow box, and both KINIPORT and the room editor that shipped in the
   binary use it as a cursor, but nothing confirms it was meant to be
