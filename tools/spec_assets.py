@@ -117,7 +117,7 @@ def write(name, obj):
 def palette():
     return {
         'name': 'Pepto PAL',
-        'note': 'Pepto/colodore PAL measurement, the same 16 RGB triples '
+        'note': 'Pepto PAL measurement (not colodore, which tools/room.py uses), the same 16 RGB triples '
                 'tools/assets.py renders the sheets with.',
         'colors': [{'index': i, 'name': COLOR_NAMES[i],
                     'rgb': list(c), 'hex': '#%02X%02X%02X' % c}

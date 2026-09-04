@@ -6,7 +6,7 @@
  ],
  "palette": {
   "name": "Pepto PAL",
-  "note": "Pepto/colodore PAL measurement, the same 16 RGB triples tools/assets.py renders the sheets with.",
+  "note": "Pepto PAL measurement (not colodore, which tools/room.py uses), the same 16 RGB triples tools/assets.py renders the sheets with.",
   "colors": [
    {
     "index": 0,
