@@ -16,12 +16,14 @@ state = {
   active,          // the room loop is running; false while the shell owns the screen
   stop,            // why it stopped: null | {reason, ...}  (see below)
   input,           // {read() -> {dx, dy, fire}, pace}: joystick or demo script; pace = idle ticks between verb reads
+  restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
   events,          // [{sfx}|{music}|{page}] emitted this frame, drained by whoever plays them
   panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (text.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read
   verbWait,        // ticks left before the next read is handed to it
-  ended,           // null, or why the quest/replay is over: 'rest' 'drown' 'menu' 'won'
+  ended,           // null, or why the quest is over: 'menu' 'won' 'timeout'
+  character,       // characters.json id of who is playing; the save file records it
   player: {
     col, row, facing,          // cell and +1 right / -1 left
     period, counter,           // ticks per state step, ticks since the last one
@@ -42,16 +44,16 @@ state = {
   },
   creature,        // null or {def, col, row, facing, stride, stepAlt, frame, turned, countdown} (creatures.js)
   flags,           // per creature state id: {banished, day, hour, gift} -- creatures.md, What each creature remembers
-  clock,           // {day, hour, ticks}; the tick counter is M6.3's
+  clock,           // {day, hour, ticks}: ticks since the hour began, 8960 to the next (clock.js)
+  timeUp,          // day 51 came round; the ending runs when the loop next stops
   nidPlace,        // {room, col, row}: the character's own nid
   sample,          // the sample quest is running (TAKE needs no permission)
   offered,         // per visit: an item class, 'nid', or null -- what SPEAK/BUY just granted
   paid,            // per visit: a gate guard has been paid
   fallaKey,        // D'ol Falla has been spoken to (lasts the quest)
-  gateOpen,        // {gate_a, gate_b}: the permanent gate flags
-  berriesOffered, visions, animalsPensed,
+  berriesOffered, visions, animalsPensed,   // a gate's permanent flag is its guard's banished flag
   lamp,            // null or {object, fuel}: the lit honeylamp and its room changes left
-  cloud,           // in the cloud world (M6.3)
+  dream,           // DREAM.none / marked (slept in the sky nid) / clouds; nonzero freezes the clock and fatigue
   pointer,         // null or {col, row}: KINIPORT's cursor, drawn as extras frame 0
 }
 ```
@@ -68,6 +70,8 @@ The room loop sets exactly one and stops; the shell checks them in
 | `menu` | | fire + down on support |
 | `drown` | | own cell is water after a move |
 | `bell` | | walking onto door 2 underground with the spirit bell |
+| `collapse` | `cause` food/rest | a drain took food or rest below zero while the loop ran |
+| `timeout` | | the hour that made it day 51, or the first verb to end after one did |
 | `ambush` | `outcome` kidnap_/attack_ salaat/nekom | a creature's ambush test, in `creatureTick` |
 | `demo_room` | `room` | the demo script's goto_room |
 | `demo_page` | `page` | the demo script's text_page |
@@ -78,12 +82,19 @@ The room loop sets exactly one and stops; the shell checks them in
 Otherwise `tick` advances (water animation).  If a `verb` is running it
 gets the frame: after `verbWait` idle ticks one stick read is handed to
 the generator; when it finishes the room loop resumes (or a stop it left
-is resolved).  Otherwise, if `active`, the creature runs its tick (it may
-stop the loop with `ambush`), then `player.counter` advances; when it
-reaches `player.period` it resets and one state step runs
-(`player.step`).  A state step may set `stop`, which clears `active`;
-the shell then resolves it and sets `active` again.  The clock (M6.3)
-will run beside the creature: both are frozen while a verb is up.
+is resolved).  Otherwise, if `active`, the clock ticks (it may stop the
+loop with `collapse` or `timeout`), the creature runs its tick (it may
+stop it with `ambush`), then `player.counter` advances; when it reaches
+`player.period` it resets and one state step runs (`player.step`).  A
+state step may set `stop`, which clears `active`; the shell then
+resolves it and sets `active` again.  Clock and creature are frozen
+while a verb is up; the clock and the fatigue drain also while `dream`
+is set.
+
+Every message the shell prints, and every verb but DROP and PAUSE, ends
+by waiting for the button to be up, then for any input, and clears the
+panel (`anyInput` in `input.js`); the original's `verb_done`.  REST's
+wake path does its own wait and skips the menu's.
 
 ## Input
 
@@ -93,8 +104,19 @@ step, rule 3 of a glide step, and every read the command menu and its
 verbs make.  Verbs are generators (`verbs.js`, `dialog.js`): each
 `yield` is one read, so the read structure is visible in the code and
 the browser can run them one read per few frames instead of spinning.
-The demo script advances one entry per read, so the places reads happen
-are part of the replay contract.
+A `yield` may carry a tick count to wait instead of `input.pace` (REST's
+pause between chimes reads every tick).  The demo script advances one
+entry per read, so the places reads happen are part of the replay
+contract.
+
+## Saves
+
+`save.js` writes and reads the original's 1410-byte QUESTn image from
+the field list in `save.json`: every object's slot, the two per-creature
+byte arrays, the named variables and zero-page fields.  `importSave`
+rebuilds `player`, `clock`, `flags`, `objects` and the quest fields and
+enters the saved room.  `main.js` keeps five browser slots (base64 in
+localStorage) and exports/imports the raw file.
 
 ## Text
 

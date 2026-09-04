@@ -92,7 +92,7 @@ export class DemoInput {
           this.remaining = 1;
           return (this.value = IDLE);
         case 'end_rest_delay':
-          state.events.push({ endRestDelay: true });
+          state.restDelayCut = true;
           this.remaining = 1;
           return (this.value = IDLE);
         default:

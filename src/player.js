@@ -4,10 +4,11 @@ import {
   cell, isSolid, isClimbable, isSupport, role, doorNumber, ladderSnap, isLadderCentre, COLS, ROWS,
 } from './world.js';
 import { say } from './text.js';
+import { spend } from './clock.js';
 
 export const SFX = {
-  footA: 2, footB: 3, climbUp: 4, climbDown: 5, leap: 6, knockdown: 7, glide: 8,
-  fall: 9, door: 10, glideTurn: 11, bell: 12,
+  blip: 0, confirm: 1, footA: 2, footB: 3, climbUp: 4, climbDown: 5, leap: 6, knockdown: 7, glide: 8,
+  fall: 9, door: 10, glideTurn: 11, bell: 12, chime: 13,
 };
 
 const FRAME = {
@@ -48,15 +49,6 @@ function sfx(state, id) {
   state.events.push({ sfx: id });
 }
 
-function spend(state, effort) {
-  const p = state.player;
-  p.fatigue -= effort;
-  while (p.fatigue < 0) {
-    p.fatigue += 256;
-    state.events.push({ fatigueWrap: true });
-  }
-}
-
 function carrying(state, cls) {
   return state.objects.some((o) => o.class === cls && o.exists && o.carried);
 }
@@ -74,7 +66,7 @@ function sample(state) {
   };
 }
 
-function idleFrame(p) {
+export function idleFrame(p) {
   return p.crawling ? FRAME.crawlIdle(p.facing) : FRAME.idle(p.facing);
 }
 

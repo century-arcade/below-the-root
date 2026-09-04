@@ -2,7 +2,7 @@ const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 
 export async function loadData(read) {
   const [assets, roomsFile, tilesFile, map, itemsFile, charactersFile, demo,
-    creaturesFile, messagesFile, skillsFile, quest] = await Promise.all([
+    creaturesFile, messagesFile, skillsFile, quest, save] = await Promise.all([
     read('data/assets.json'),
     read('data/rooms.json'),
     read('data/tiles.json'),
@@ -14,6 +14,7 @@ export async function loadData(read) {
     read('data/messages.json'),
     read('data/skills.json'),
     read('data/quest.json'),
+    read('data/save.json'),
   ]);
 
   const palette = new Uint8Array(16 * 3);
@@ -60,7 +61,11 @@ export async function loadData(read) {
   const objectChars = objectTiles(tileByCode);
 
   const creatureByRoom = new Map();
-  for (const c of creaturesFile.creatures) creatureByRoom.set(c.room, c);
+  const creatureByState = new Map();
+  for (const c of creaturesFile.creatures) {
+    creatureByRoom.set(c.room, c);
+    creatureByState.set(c.state_id, c);
+  }
   const extras = assets.sprite_sheets.find((s) => s.id === 'sprites_extras');
   const species = [];
   for (const sp of extras.species) species[sp.species] = sp;
@@ -76,8 +81,8 @@ export async function loadData(read) {
     grid: roomsFile.grid,
     animations: assets.player_animations,
     objects, items, objectChars, characters: charactersFile.characters, demo,
-    creatures: creaturesFile.creatures, creatureByRoom, species,
-    messages, fixed, skills: skillsFile.skills, quest,
+    creatures: creaturesFile.creatures, creatureByRoom, creatureByState, species,
+    messages, fixed, skills: skillsFile.skills, quest, save,
   };
 }
 

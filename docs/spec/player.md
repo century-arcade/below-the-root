@@ -444,8 +444,12 @@ USE, EAT and SELL also skip the classes they cannot act on.
 which feeds one script entry per read (`time.md`).  The menu reads until
 the button is up, then once per cursor move or choice.  A verb that pages
 reads until the button is up, then once per page or choice.  Every verb
-but DROP and PAUSE then reads until the button is up and once more before
-the room loop resumes.  Watched in VICE; `tools/trace_demo.py`.
+but DROP and PAUSE then reads until the button is up, then until the
+button is pressed or the stick moves, and clears the panel before the
+room loop resumes -- so a verb's message lasts until your next push.
+REST's chime pauses read every iteration and any push wakes you; waking
+reads until the button is up and returns without the wait above.  Read
+counts watched in VICE; `tools/trace_demo.py`.
 
 ## The verbs
 
@@ -508,8 +512,8 @@ matching tile is erased.
 
 - *A honeylamp*: already lit gives "YOUR LAMP IS ALREADY LIT".
   Otherwise it lights -- "YOUR LAMP IS LIT", the room repaints lit --
-  and burns for 10 to 13 room changes, chosen at random, after which it
-  is destroyed and its weight comes off.
+  and burns for 10 to 13 room edges crossed, chosen at random, after
+  which it is destroyed and its weight comes off.  Doorways do not count.
 - *The wand of Befal*: a creature within two columns and one row that
   is not already frozen is frozen and taken out of the room, costing
   you 5 spirit limit (1 for a lapan, sima, snake or spider, never below
@@ -592,7 +596,8 @@ above you, else "THERE IS NO NID HERE"; and the nid must be your own or
 have been offered to you, else "NO ONE OFFERED YOU A NID".  Then you
 walk right to the far end of the nid, step back one and lie down, and
 loop: paint STATUS, ring the chime, advance one hour, rest +4 up to the
-cap.  Any joystick movement aborts the verb -- that is how you wake.
+cap.  Any joystick movement aborts the verb -- that is how you wake
+(`time.md`, REST and sleeping, has the pauses).
 Because food drops one an hour too, oversleeping starves you.  Which
 nids give you a dream, or a robbery, instead of a nap is
 `creatures.md`'s and `time.md`'s.

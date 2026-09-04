@@ -13,12 +13,15 @@ Eight hours make a day, so a day is twenty minutes.
 The clock only runs while you are moving about the world.  It stops the
 moment a menu, a verb, a line of text or any wait-for-input is on screen
 -- the manual's promise that time does not pass while the Option Menu is
-up -- and it is frozen entirely in the cloud world.  It also stops while
-a room loads: about a hundred ticks on the original for every edge
+up -- and it is frozen from the moment you sleep in the sky nid until
+the doorway that brings you back from the cloud world.  It also stops
+while a room loads: about a hundred ticks on the original for every edge
 crossed or doorway taken.  Three things advance it by a whole hour
 without waiting: each hour you sleep in a nid, and eating wissenberries,
-which costs two.  A forced hour restarts
-the count, so the next natural hour is a full 8960 ticks away.
+which costs two.  A forced hour restarts the count of 256-tick wraps but
+not the wrap in progress, so the next natural hour is between 8705 and
+8960 ticks away; a port that restarts the whole count is within four
+seconds of it.
 
 Every new hour, in order:
 
@@ -88,13 +91,17 @@ character's nid place, or someone in this room has offered you their nid
 this visit.  Otherwise: THERE IS NO NID HERE, or NO ONE OFFERED YOU A
 NID.
 
-You shuffle under the nid and lie down.  Then, over and over: the bell
-chimes three times with pauses either side, an hour passes, rest goes up
-by 4 to the cap, and whatever the owner of the nid does to sleepers
-happens.  Any joystick movement during the chime wakes you and ends the
-verb; you never wake on your own.  That is how you starve in your sleep
--- food still drops every hour, silently, and collapses you when you
-stand up.
+You shuffle under the nid and lie down.  Then, over and over: the status
+panel is drawn, the bell chimes three times with pauses either side, an
+hour passes, rest goes up by 4 to the cap, and whatever the owner of the
+nid does to sleepers happens.  Each pass makes eight pauses -- two before
+the first chime, then one after each chime and each answering blip --
+and every pause reads the stick over and over, so any joystick movement
+wakes you and ends the verb; you never wake on your own.  Waking clears
+the panel and waits only for the button to be up (the usual wait for a
+push after a verb is skipped).  That is how you starve in your sleep --
+food still drops every hour, silently, and collapses you when you stand
+up.
 
 Six of the twelve people who offer a nid are traps, and the trap fires
 every hour you sleep, not once.  Banishing that person with the wand of
@@ -114,9 +121,10 @@ marked.  The next doorway you use, whichever one it is -- the check
 happens before any lock, so a locked door works too -- puts you in the
 clouds at `U5`.  Walk up to D'ol Neshom in `V5`: he blesses you (+5
 spirit limit and a vision) and offers the spirit bell, the only one in
-the world.  The next doorway after that returns you to `90`.  While you
-are up there the clock is frozen, effort costs no fatigue, and RENEW is
-refused.
+the world.  The next doorway after that returns you to `90`.  From the
+sleep in the sky nid until that doorway home the clock is frozen, effort
+costs no fatigue, and RENEW is refused -- on the way to the door as much
+as in the clouds.
 
 The bell is a proximity alarm below the root: stand on a doorway in an
 underground room carrying it and the game stops to print THE SPIRIT BELL

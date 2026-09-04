@@ -191,10 +191,11 @@ reaches the shell.
 Every message the shell prints waits for a button press or a stick push
 before the room loop resumes.
 
-Leaving a room, by an edge, by a doorway, by the cloud-world teleport, or
-by being sent home, burns one unit off a lit honeylamp, and a lamp that
-runs out is destroyed on the spot with its weight coming off what you
-carry (`player.md`).  A honeylamp counts rooms entered, not time.
+Walking off a room edge burns one unit off a lit honeylamp, and a lamp
+that runs out is destroyed on the spot with its weight coming off what
+you carry (`player.md`).  Doorways, the cloud-world teleport and being
+sent home cost it nothing: a honeylamp counts edges crossed, not time.
+CONTINUE from the main menu burns one too.
 
 Two things skip the loop and go straight to the main menu: the MENU cell
 of the command menu, which leaves the quest in progress, and offering

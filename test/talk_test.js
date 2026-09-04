@@ -34,15 +34,22 @@ function menu(verb) {
 const page = (n) => [J.idle, ...Array(n).fill(J.up), J.fire];
 const press = () => [J.idle, J.fire];
 
+// every verb ends waiting for a push and clears: the first read past the script sees the message, then pushes up
 function run(state, reads) {
   const script = [...reads];
-  state.input = { read: () => script.shift() || J.idle, pace: 0 };
+  let shown = null;
+  state.input = { read: () => {
+    const j = script.shift();
+    if (j) return j;
+    shown ??= lines(state);
+    return J.up;
+  }, pace: 0 };
   state.stop = { reason: 'menu' };
   state.active = true;
   tick(state);
   for (let i = 0; state.verb && i < 10000; i++) tick(state);
   assert.equal(state.verb, null, 'verb finished');
-  return lines(state);
+  return shown || lines(state);
 }
 
 // column 0 is always blank; compare from column 1

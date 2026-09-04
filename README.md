@@ -29,17 +29,17 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.0 render -- `src/` draws any room; three pixel-exact golden tests against the original | done |
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (position, facing, state, step period) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 13 scripted talk tests, both demo replays still read for read | done |
-| M6.3 time -- clock, food/rest, cloud world, quest flags, endings, save/load | **next** |
-| M6.4 polish -- title, character select, attract demo, music, map screen | |
+| M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
+| M6.4 polish -- title, character select, attract demo, music, map screen | **next** |
 | M6.5 ship -- port-note decisions applied, walkthrough played through, deployed | |
 
 The spec has 24 open questions, listed at the end of each area file;
-none blocks M6.3.  Still read from the code but never watched in the
-emulator: creature movement, the dialog tree, both endings, the save
-layout, the cloud world.  Two verb rules the port follows as written
-but that look wrong on paper: DROP wants the cell in front of you to
-be solid, and STATUS's "waits for any input" was not what the trace
-showed (fixed in the spec; the DROP one needs a VICE session).
+none blocks M6.4.  Still read from the code but never watched in the
+emulator: the dialog tree, both endings, the save layout (no real C64
+save has been imported yet), the cloud world.  Two things worth a VICE
+session: DROP wants the cell in front of you to be solid, and every
+verb's message now clears at your next push of the stick (the
+disassembly's `verb_done`; M6.2 had STATUS staying up).
 
 ## Running it
 

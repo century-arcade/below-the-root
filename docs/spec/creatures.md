@@ -314,8 +314,9 @@ inner guard (`WAIT A MINUTE.  I WANT TOKENS.`) stands before the door to
 
 A guarded door opens only if that guard has been banished with the wand of
 Befal (which opens it permanently), or -- the outer guard only -- has been
-offered a second wissenberry at some point (which also opens it
-permanently), or you have paid this visit, which buys exactly one passage.
+offered a second wissenberry at some point (which marks her banished just
+as the wand would: her door opens for good and she never appears again),
+or you have paid this visit, which buys exactly one passage.
 Otherwise: `THE DOOR IS LOCKED`.  The check looks at the room's guard
 whether or not she is standing there, so banishing one does not sneak you
 past the lock -- it sets the flag that opens the door instead.

@@ -3,18 +3,15 @@
 import { newPlayer, step, figureOf, haltAtEdge } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
 import { runMenu } from './verbs.js';
-import { DemoInput, buttonPress } from './input.js';
-import { newPanel, say } from './text.js';
+import { DemoInput, buttonPress, anyInput } from './input.js';
+import { newPanel, say, clearPanel } from './text.js';
 import { newFlags, creatureTick, creatureFigure } from './creatures.js';
-import { newClock, loseDay, sendTo } from './clock.js';
+import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
 import { tell } from './dialog.js';
 
 const SHUBA = 7;
-const KIDNAP = {
-  kidnap_salaat: { code: 'S0', col: 21, row: 15, text: 'kidnapped_salaat' },
-  kidnap_nekom: { code: 'R1', col: 19, row: 15, text: 'kidnapped_nekom' },
-};
 const ATTACK = { attack_salaat: 'attacked_salaat', attack_nekom: 'attacked_nekom' };
+const COLLAPSE = { food: 'FOOD', rest: 'REST' };
 
 // every slot of every class, placed or free: a sale mints into a free token slot
 export function newObjects(data) {
@@ -55,15 +52,17 @@ export function newState(data, input, opts = {}) {
     offered: null,
     paid: false,
     fallaKey: false,
-    gateOpen: { gate_a: false, gate_b: false },
     berriesOffered: 0,
     visions: 0,
     animalsPensed: 0,
     lamp: null,
-    cloud: false,
+    dream: DREAM.none,
+    timeUp: false,
+    character: null,
     pointer: null,
     verb: null,
     verbWait: 0,
+    restDelayCut: false,
     ended: null,
     figures: [],
   };
@@ -81,7 +80,14 @@ function applyCharacter(state, character) {
   state.nidPlace = character.nid_place;
 }
 
+// shell.md, Character select: a new quest over whatever was there
 export function startQuest(state, character) {
+  Object.assign(state, {
+    objects: newObjects(state.data), flags: newFlags(), clock: newClock(),
+    character: character.id, sample: false, fallaKey: false, berriesOffered: 0,
+    visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null,
+    player: newPlayer(character.sprite_sheet, character.start.stamina),
+  });
   const p = state.player;
   applyCharacter(state, character);
   p.indoors = true;
@@ -121,6 +127,7 @@ export function tick(state) {
   state.tick += 1;
   if (state.verb) return driveVerb(state);
   if (!state.active) return;
+  clockTick(state);
   creatureTick(state);
   if (state.stop) return stopped(state);
   const p = state.player;
@@ -136,11 +143,11 @@ function stopped(state) {
   resolveStop(state);
 }
 
-// a verb or shell message is a generator: one joystick read per yield, paced for a human hand
+// a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait
 function startVerb(state, gen) {
   state.verb = gen;
   state.verbWait = 0;
-  if (gen.next().done) endVerb(state);
+  advanceVerb(state, gen.next());
 }
 
 function driveVerb(state) {
@@ -148,12 +155,17 @@ function driveVerb(state) {
     state.verbWait -= 1;
     return;
   }
-  state.verbWait = state.input.pace || 0;
-  if (state.verb.next(state.input.read()).done) endVerb(state);
+  advanceVerb(state, state.verb.next(state.input.read()));
+}
+
+function advanceVerb(state, r) {
+  if (r.done) return endVerb(state);
+  state.verbWait = r.value ?? (state.input.pace || 0);
 }
 
 function endVerb(state) {
   state.verb = null;
+  if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);
   if (!state.ended) state.active = true;
 }
@@ -173,12 +185,13 @@ function resolveStop(state) {
     case 'ambush':
       return startVerb(state, ambushed(state, stop.outcome));
     case 'drown':
-      say(state, 'YOU WERE FOUND NEAR THE WATER.  TIME HAS PASSED.');
-      state.ended = 'drown';
-      return;
+      return startVerb(state, message(state, () => loseDay(state, 'YOU WERE FOUND NEAR THE WATER.', 'TIME HAS PASSED.')));
+    case 'collapse':
+      return startVerb(state, message(state, () => loseDay(state, 'YOU SPENT A DAY RECOVERING', 'FROM A LACK OF', COLLAPSE[stop.cause])));
     case 'bell':
-      say(state, 'THE SPIRIT BELL RINGS');
-      break;
+      return startVerb(state, message(state, () => say(state, 'THE SPIRIT BELL RINGS')));
+    case 'timeout':
+      return startVerb(state, timeOver(state));
     case 'demo_room':
       if (state.demo) startDemo(state, state.demo.name === 'intro' ? 'quest' : 'intro');
       return;
@@ -190,18 +203,30 @@ function resolveStop(state) {
   state.active = true;
 }
 
+// shell.md: every message the shell prints waits for the button or the stick, then clears
+function* message(state, print) {
+  print();
+  yield* anyInput();
+  clearPanel(state);
+}
+
 // creatures.md, Ambush: a kidnap costs no time, an attack costs a day
 function* ambushed(state, outcome) {
-  const kidnap = KIDNAP[outcome];
-  if (kidnap) {
-    const room = state.data.roomByCode.get(kidnap.code).room;
-    sendTo(state, { room, col: kidnap.col, row: kidnap.row });
-    tell(state, kidnap.text);
-  } else {
+  yield* message(state, () => {
+    if (outcome.startsWith('kidnap')) return kidnap(state, outcome);
     loseDay(state);
     tell(state, ATTACK[outcome]);
-  }
+  });
+}
+
+// time.md, The endings: running out of time
+function* timeOver(state) {
+  say(state, 'THE LIGHT FADES INTO DARKNESS...', 'THE TIME FOR YOUR QUEST HAS ENDED.',
+    'GREEN-SKY AWAITS THE RISE OF ANOTHER QUESTER.');
+  state.events.push({ music: 0 });
   yield* buttonPress();
+  state.timeUp = false;
+  state.ended = 'timeout';
 }
 
 export function figures(state) {

@@ -16,6 +16,7 @@ serve: build
 test:
 	node test/render_test.js
 	node test/talk_test.js
+	node test/time_test.js
 	node test/replay_test.js intro
 	node test/replay_test.js quest
 

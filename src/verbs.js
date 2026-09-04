@@ -1,13 +1,13 @@
 // docs/spec/player.md, The command menu and The verbs; every verb is a generator, one yield per read
 
 import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world.js';
-import { lieDown, SFX } from './player.js';
-import { fireUp } from './input.js';
+import { lieDown, idleFrame, SFX } from './player.js';
+import { fireUp, anyInput, isIdle } from './input.js';
 import { say, print, clearPanel, PANEL_ROW } from './text.js';
-import { CLASS, objectUnder, pickItem, canCarry, weightOf, destroy } from './inventory.js';
-import { creatureInReach, banish } from './creatures.js';
+import { CLASS, objectUnder, pickItem, canCarry, weightOf, destroy, carried } from './inventory.js';
+import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';
-import { advanceHour, loseDay, timeOfDay } from './clock.js';
+import { advanceHour, loseDay, timeOfDay, kidnap, DREAM } from './clock.js';
 
 export const MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS'],
@@ -24,6 +24,14 @@ const TAKE_ANYWHERE = new Set([28, 59, 75, 81]);
 const CHAMBER_ROOM = 74;
 const SKY_NID_ROOM = 9;
 const NO_TRAILING_READ = new Set(['DROP', 'PAUSE', '']);
+const WOKE = Symbol('woke');
+const REST_DELAY_TICKS = 20;
+const NID_HOST = {
+  steal_all_carried_tokens: (state) => carried(state).forEach((o) => o.class === CLASS.TOKEN && destroy(o)),
+  steal_all_carried_shubas: (state) => carried(state).forEach((o) => o.class === CLASS.SHUBA && destroy(o)),
+  kidnap_salaat: (state) => kidnap(state, 'kidnap_salaat'),
+  kidnap_nekom: (state) => kidnap(state, 'kidnap_nekom'),
+};
 
 function drawMenu(state, selCol, selRow) {
   clearPanel(state);
@@ -49,10 +57,10 @@ export function* runMenu(state) {
   state.events.push({ sfx: 1 });
   clearPanel(state);
   const fn = VERBS[verb];
-  if (fn) yield* fn(state);
+  if (fn && (yield* fn(state)) === WOKE) return;
   if (NO_TRAILING_READ.has(verb) || state.ended) return;
-  yield* fireUp();
-  yield;
+  yield* anyInput();
+  clearPanel(state);
 }
 
 function lacksSkill(state, limit, energy) {
@@ -337,7 +345,6 @@ export function paintStatus(state) {
   print(state, 24, 36, String(p.spiritEnergy));
 }
 
-// paints and returns; the panel stays up while you walk (watched in VICE)
 function* status(state) {
   paintStatus(state);
 }
@@ -348,11 +355,26 @@ function* inventory(state) {
 }
 
 function* renew(state) {
-  if (state.cloud) return;
+  if (state.dream) return;
   loseDay(state, 'YOU WERE FOUND UNCONSCIOUS.', 'TIME HAS PASSED.');
+  yield* anyInput();
+  clearPanel(state);
 }
 
-// the chime loop is M6.3's; lying down ends the replay
+// the pause between chimes reads the stick every tick; any movement wakes you
+function* restDelay(state) {
+  for (let i = 0; i < REST_DELAY_TICKS; i++) {
+    const j = yield 0;
+    if (!isIdle(j)) return true;
+    if (state.restDelayCut) {
+      state.restDelayCut = false;
+      return false;
+    }
+  }
+  return false;
+}
+
+// time.md, REST and sleeping: an hour per pass; waking skips the menu's trailing reads
 function* rest(state) {
   const p = state.player;
   if (!p.indoors || role(state, cell(state, p.col, p.row - 1)) !== 'nid_left') {
@@ -360,9 +382,36 @@ function* rest(state) {
   }
   const own = state.room.room === state.nidPlace.room || state.room.room === SKY_NID_ROOM;
   if (!own && state.offered !== 'nid') return say(state, 'NO ONE OFFERED YOU A NID');
-  paintStatus(state);
+  if (state.room.room === SKY_NID_ROOM) state.dream = DREAM.marked;
+  while (role(state, cell(state, p.col, p.row - 1)) !== 'nid_right') p.col += 1;
+  p.col -= 1;
+  p.lastGood = { col: p.col, row: p.row };
   lieDown(state);
-  state.ended = 'rest';
+  for (;;) {
+    paintStatus(state);
+    yield* fireUp();
+    let woke = false;
+    for (let i = 0; i < 2 && !woke; i++) woke = yield* restDelay(state);
+    for (let chime = 0; chime < 3 && !woke; chime++) {
+      state.events.push({ sfx: SFX.chime });
+      woke = yield* restDelay(state);
+      if (woke) break;
+      state.events.push({ sfx: SFX.blip });
+      woke = yield* restDelay(state);
+    }
+    if (woke) break;
+    state.events.push({ sfx: SFX.confirm });
+    advanceHour(state);
+    p.rest = Math.min(p.restCap, p.rest + 4);
+    const host = state.creature && state.creature.def;
+    if (!host || flagsOf(state, host).banished || !NID_HOST[host.params.on_rest]) continue;
+    NID_HOST[host.params.on_rest](state);
+    if (host.params.on_rest.startsWith('kidnap')) return;
+  }
+  clearPanel(state);
+  p.frame = idleFrame(p);
+  yield* fireUp();
+  return WOKE;
 }
 
 function* menu(state) {

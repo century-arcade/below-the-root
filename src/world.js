@@ -2,9 +2,15 @@
 
 import { spawnCreature } from './creatures.js';
 import { clearPanel, say } from './text.js';
+import { DREAM } from './clock.js';
 
 export const COLS = 40;
 export const ROWS = 20;
+
+// the two legs of the cloud teleport (world.md, The cloud world)
+const CLOUDS = { room: 190, col: 18, row: 14 };
+const SKY_NID = { room: 9, col: 24, row: 13 };
+const TUNE_ON_ARRIVAL = new Set([CLOUDS.room, 384]);
 
 const EDGE_ARRIVAL = {
   north: (p) => ({ col: p.col, row: 18 }),
@@ -112,11 +118,10 @@ export function enterRoom(state, room, col, row) {
   state.tick = 0;
   state.offered = null;
   state.paid = false;
-  burnLamp(state);
   spawnCreature(state);
 }
 
-// a honeylamp counts rooms entered, not time
+// a honeylamp counts room edges crossed: doorways, the teleport and being sent home are free
 function burnLamp(state) {
   const lamp = state.lamp;
   if (!lamp) return;
@@ -133,12 +138,12 @@ export function isLit(state) {
     || state.objects.some((o) => o.class === 1 && o.exists && o.carried);
 }
 
-// a guarded door: the guard banished, the gate opened for good, or paid this visit
+// a guarded door: the guard's banished flag is the gate's permanent flag, else paid this visit
 function gateLocked(state, door) {
   if (!door.lock) return false;
   const guard = state.data.creatureByRoom.get(state.room.room);
   if (guard && state.flags[guard.state_id].banished) return false;
-  return !state.gateOpen[door.lock] && !state.paid;
+  return !state.paid;
 }
 
 // off the top or bottom of the world there is nothing to load
@@ -147,13 +152,26 @@ export function leaveByEdge(state, dir) {
   const next = neighbour(state.data, state.room, dir);
   if (!next) return false;
   const at = EDGE_ARRIVAL[dir](p);
+  burnLamp(state);
   enterRoom(state, next, at.col, at.row);
   return true;
+}
+
+// slept in the sky nid: the next doorway, locked or not, goes to the clouds; the one after comes back
+function dreamDoor(state) {
+  const p = state.player;
+  const to = state.dream === DREAM.marked ? CLOUDS : SKY_NID;
+  state.dream = state.dream === DREAM.marked ? DREAM.clouds : DREAM.none;
+  p.indoors = false;
+  p.facing = -p.facing;
+  enterRoom(state, state.data.roomById.get(to.room), to.col, to.row);
+  if (TUNE_ON_ARRIVAL.has(to.room)) state.events.push({ music: 'random' });
 }
 
 // a door whose record is blank drops the original down the first column; the port refuses it
 export function useDoor(state, n) {
   const p = state.player;
+  if (state.dream) return dreamDoor(state), true;
   const door = state.room.doors[n - 1];
   if (!door || door.to_room == null) return false;
   const dest = state.data.roomById.get(door.to_room);
@@ -165,5 +183,6 @@ export function useDoor(state, n) {
   p.facing = -p.facing;
   p.indoors = !p.indoors;
   enterRoom(state, dest, door.arrive_x, door.arrive_y);
+  if (TUNE_ON_ARRIVAL.has(dest.room)) state.events.push({ music: 'random' });
   return true;
 }

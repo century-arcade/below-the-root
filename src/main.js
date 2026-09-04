@@ -4,6 +4,47 @@ import { newState, startQuest, startDemo, tick, figures } from './game.js';
 import { Keyboard } from './input.js';
 import { enterRoom } from './world.js';
 import { panelLines } from './text.js';
+import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
+
+const SLOT_KEY = (n) => `btr.quest${n}`;
+
+// digits 1-5 save to a browser slot, shift+digit loads one, x downloads the C64 file, drop a file to load it
+function saveKeys(state, note) {
+  addEventListener('keydown', (e) => {
+    const m = /^Digit([1-5])$/.exec(e.code);
+    if (m && !e.altKey && !e.ctrlKey) {
+      const n = Number(m[1]);
+      try {
+        if (e.shiftKey) {
+          const text = localStorage.getItem(SLOT_KEY(n));
+          if (!text) return note(`slot ${n} is empty`);
+          importSave(state, fromBase64(text));
+          note(`loaded slot ${n}`);
+        } else {
+          localStorage.setItem(SLOT_KEY(n), toBase64(exportSave(state)));
+          note(`saved slot ${n}`);
+        }
+      } catch (err) { note(String(err)); }
+      e.preventDefault();
+    } else if (e.key === 'x') {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([exportSave(state)], { type: 'application/octet-stream' }));
+      a.download = 'QUEST1';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  });
+  addEventListener('dragover', (e) => e.preventDefault());
+  addEventListener('drop', async (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    try {
+      importSave(state, new Uint8Array(await file.arrayBuffer()));
+      note(`loaded ${file.name}`);
+    } catch (err) { note(String(err)); }
+  });
+}
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -27,12 +68,14 @@ function pickRoom(data, want) {
 function label(state) {
   const r = state.room;
   const p = state.player;
-  return `${r.code} (${r.room}) ${r.tileset}  cell ${p.col},${p.row} ${p.facing > 0 ? 'R' : 'L'}`
+  return `${r.code} (${r.room}) ${r.tileset}  day ${state.clock.day} hour ${state.clock.hour} +${state.clock.ticks}`
+    + `  cell ${p.col},${p.row} ${p.facing > 0 ? 'R' : 'L'}`
     + `  frame ${p.frame} period ${p.period}`
     + (p.crawling ? ' crawl' : '') + (p.running ? ' run' : '') + (p.leaping ? ' leap' : '')
     + (p.gliding ? ' glide' : '') + (p.knockdown ? ` down ${p.knockdown}` : '')
     + (p.fallen ? ` fallen ${p.fallen}` : '') + `  tick ${state.tick}`
     + (state.creature ? `  npc ${state.creature.col},${state.creature.row}` : '')
+    + (state.ended ? `  ENDED: ${state.ended}` : '')
     + `  "${panelLines(state).join(' / ').trim()}"`;
 }
 
@@ -53,11 +96,14 @@ loadData((path) => fetch(path).then((r) => {
   }
 
   const status = document.getElementById('status');
+  let notice = '';
+  let noticeUntil = 0;
+  saveKeys(state, (text) => { notice = text; noticeUntil = performance.now() + 3000; });
   function draw() {
     state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
-    status.textContent = label(state);
+    status.textContent = performance.now() < noticeUntil ? notice : label(state);
   }
 
   const STEP_MS = 1000 / 60;

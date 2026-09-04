@@ -131,7 +131,7 @@ export function* offer(state) {
   state.paid = true;
   if (target.result === 'open_gate_a') {
     state.berriesOffered += 1;
-    if (state.berriesOffered >= c.def.params.offers_needed_for_permanent) state.gateOpen.gate_a = true;
+    if (state.berriesOffered >= c.def.params.offers_needed_for_permanent) flagsOf(state, c.def).banished = true;
   }
   tell(state, 'offer_gate_accepted');
 }
