@@ -40,14 +40,19 @@ export class Keyboard {
 }
 
 const TAP_MS = 150;
-const WALK_MS = 3000;
+const DOUBLE_MS = 350;
+const DOUBLE_PX = 16;
 const WALK_POLL_MS = 50;
+const WALK_MAX_MS = 15000;
+const WALK_STALL_MS = 1200;
 const DEAD_W = 14;
 const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
 
 // the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way;
-// anywhere on the figure's own 24x42 box counts as centred; a tap on a doorway walks there and goes through
+// anywhere on the figure's own 24x42 box counts as centred; a tap on a doorway, or a double tap
+// anywhere, keeps pushing toward that spot until the figure gets there or stops making progress
+// (a push down that only stooped is undone)
 export class Pointer {
   constructor(canvas, keys, anchor, doors) {
     this.canvas = canvas;
@@ -57,12 +62,13 @@ export class Pointer {
     this.held = new Set();
     this.timer = null;
     this.walk = null;
-    addEventListener('keydown', () => this.stopWalk());
+    this.lastTap = null;
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => this.down(e));
     canvas.addEventListener('pointermove', (e) => this.move(e));
     canvas.addEventListener('pointerup', (e) => this.up(e));
     canvas.addEventListener('pointercancel', () => this.hold(new Set()));
+    addEventListener('keydown', () => this.stopWalk());
   }
 
   pixel(e) {
@@ -71,8 +77,7 @@ export class Pointer {
       (e.clientY - r.top) * (this.canvas.height / r.height)];
   }
 
-  direction(e) {
-    const [x, y] = this.pixel(e);
+  directionTo(x, y) {
     const [ax, ay] = this.anchor();
     const dx = x - ax;
     const dy = y - ay;
@@ -84,33 +89,43 @@ export class Pointer {
     return keys;
   }
 
+  direction(e) {
+    return this.directionTo(...this.pixel(e));
+  }
+
   hold(keys) {
     for (const k of this.held) if (!keys.has(k)) this.keys.release(k);
     for (const k of keys) if (!this.held.has(k)) this.keys.press(k);
     this.held = keys;
   }
 
-  // walk toward the doorway's column until standing on it, then press the button
-  walkTo(col, row) {
-    const start = performance.now();
-    const step = () => {
-      const d = this.doors(col, row);
-      if (d.own === d.here) {
-        this.stopWalk();
-        this.keys.tapped.add('fire');
-      } else if (performance.now() - start > WALK_MS) {
-        this.stopWalk();
-      } else {
-        this.hold(new Set([d.side > 0 ? 'right' : 'left']));
-      }
-    };
-    this.walk = setInterval(step, WALK_POLL_MS);
-    step();
+  walkTo(x, y) {
+    const door = this.doors(Math.floor(x / 8), Math.floor(y / 8)).here;
+    const now = performance.now();
+    this.walk = { x, y, door, start: now, moved: now, at: String(this.anchor()) };
+    this.walk.poll = setInterval(() => this.walkStep(), WALK_POLL_MS);
+    this.walkStep();
+  }
+
+  walkStep() {
+    const w = this.walk;
+    const now = performance.now();
+    const at = String(this.anchor());
+    if (at !== w.at) { w.at = at; w.moved = now; }
+    if (w.door) {
+      const d = this.doors(Math.floor(w.x / 8), Math.floor(w.y / 8));
+      if (d.own === d.here) { this.stopWalk(); this.keys.tapped.add('fire'); return; }
+    }
+    const keys = this.directionTo(w.x, w.y);
+    if (keys.size && now - w.moved < WALK_STALL_MS && now - w.start < WALK_MAX_MS) return this.hold(keys);
+    const stooped = this.held.has('down') && this.held.size === 1;
+    this.stopWalk();
+    if (stooped) this.keys.tapped.add('up');
   }
 
   stopWalk() {
     if (!this.walk) return;
-    clearInterval(this.walk);
+    clearInterval(this.walk.poll);
     this.walk = null;
     this.hold(new Set());
   }
@@ -133,15 +148,21 @@ export class Pointer {
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
-      const [x, y] = this.pixel(e);
-      const col = Math.floor(x / 8);
-      const row = Math.floor(y / 8);
-      const d = this.doors(col, row);
-      if (d.here && d.own !== d.here) return this.walkTo(col, row);
-      if (!d.here) for (const k of this.direction(e)) this.keys.tapped.add(k);
-      this.keys.tapped.add('fire');
+      this.tap(e);
     }
     this.hold(new Set());
+  }
+
+  tap(e) {
+    const [x, y] = this.pixel(e);
+    const now = performance.now();
+    const again = this.lastTap && now - this.lastTap.t < DOUBLE_MS
+      && Math.hypot(x - this.lastTap.x, y - this.lastTap.y) < DOUBLE_PX;
+    this.lastTap = again ? null : { x, y, t: now };
+    const d = this.doors(Math.floor(x / 8), Math.floor(y / 8));
+    if (again || (d.here && d.own !== d.here)) return this.walkTo(x, y);
+    if (!d.here) for (const k of this.directionTo(x, y)) this.keys.tapped.add(k);
+    this.keys.tapped.add('fire');
   }
 }
 
