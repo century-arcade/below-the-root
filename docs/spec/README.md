@@ -107,3 +107,7 @@ per item whether to keep it.
   save file is fully specified in `save.json`), a real map screen
   (`map.json`), any C64 palette (`assets.md`, The palette), a steady
   60 fps.
+- The port adds one input the original never had: with a mouse or a
+  finger, a tap on a doorway walks you to it and presses the button.
+  The walk is a held stick, blind to ledges and creatures, cancelled by
+  any other input and given up after three seconds.

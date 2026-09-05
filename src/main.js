@@ -3,7 +3,7 @@ import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { newState, startQuest, startDemo, tick, figures } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { Keyboard, Pointer } from './input.js';
-import { enterRoom } from './world.js';
+import { enterRoom, cell, doorNumber } from './world.js';
 import { panelLines } from './panel.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { Speaker } from './audio.js';
@@ -85,6 +85,17 @@ function stickAnchor(state) {
   return [x + 12, y + 21];
 }
 
+// a tap on a doorway: which door is there, which one the figure stands on, and which way it lies
+function doorsAt(state, col, row) {
+  if (!state.room || state.title) return { here: 0, own: 0, side: 0 };
+  const p = state.player;
+  return {
+    here: doorNumber(state, cell(state, col, row)),
+    own: doorNumber(state, cell(state, p.col, p.row)),
+    side: Math.sign(col - p.col),
+  };
+}
+
 function whereLabel(state) {
   return state.room && !state.title ? state.room.code : '';
 }
@@ -113,7 +124,7 @@ loadData((path) => fetch(path).then((r) => {
   const stick = new Keyboard();
   const state = newState(data, stick, { storage: browserStorage });
   state.stick = stick;
-  new Pointer(canvas, stick, () => stickAnchor(state));
+  new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const demo = params.get('demo');
   const room = pickRoom(data, params.get('room'));
   if (demo !== null) {

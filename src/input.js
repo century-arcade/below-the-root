@@ -40,19 +40,24 @@ export class Keyboard {
 }
 
 const TAP_MS = 150;
+const WALK_MS = 3000;
+const WALK_POLL_MS = 50;
 const DEAD_W = 14;
 const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
 
 // the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way;
-// anywhere on the figure's own 24x42 box counts as centred
+// anywhere on the figure's own 24x42 box counts as centred; a tap on a doorway walks there and goes through
 export class Pointer {
-  constructor(canvas, keys, anchor) {
+  constructor(canvas, keys, anchor, doors) {
     this.canvas = canvas;
     this.keys = keys;
     this.anchor = anchor;
+    this.doors = doors;
     this.held = new Set();
     this.timer = null;
+    this.walk = null;
+    addEventListener('keydown', () => this.stopWalk());
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => this.down(e));
     canvas.addEventListener('pointermove', (e) => this.move(e));
@@ -60,11 +65,17 @@ export class Pointer {
     canvas.addEventListener('pointercancel', () => this.hold(new Set()));
   }
 
-  direction(e) {
+  pixel(e) {
     const r = this.canvas.getBoundingClientRect();
+    return [(e.clientX - r.left) * (this.canvas.width / r.width),
+      (e.clientY - r.top) * (this.canvas.height / r.height)];
+  }
+
+  direction(e) {
+    const [x, y] = this.pixel(e);
     const [ax, ay] = this.anchor();
-    const dx = (e.clientX - r.left) * (this.canvas.width / r.width) - ax;
-    const dy = (e.clientY - r.top) * (this.canvas.height / r.height) - ay;
+    const dx = x - ax;
+    const dy = y - ay;
     const keys = new Set();
     if (Math.abs(dx) < DEAD_W && Math.abs(dy) < DEAD_H) return keys;
     if (Math.abs(dy) < Math.abs(dx) * SECTOR) keys.add(dx > 0 ? 'right' : 'left');
@@ -79,8 +90,34 @@ export class Pointer {
     this.held = keys;
   }
 
+  // walk toward the doorway's column until standing on it, then press the button
+  walkTo(col, row) {
+    const start = performance.now();
+    const step = () => {
+      const d = this.doors(col, row);
+      if (d.own === d.here) {
+        this.stopWalk();
+        this.keys.tapped.add('fire');
+      } else if (performance.now() - start > WALK_MS) {
+        this.stopWalk();
+      } else {
+        this.hold(new Set([d.side > 0 ? 'right' : 'left']));
+      }
+    };
+    this.walk = setInterval(step, WALK_POLL_MS);
+    step();
+  }
+
+  stopWalk() {
+    if (!this.walk) return;
+    clearInterval(this.walk);
+    this.walk = null;
+    this.hold(new Set());
+  }
+
   down(e) {
     if (e.button !== 0 || this.timer) return;
+    this.stopWalk();
     e.preventDefault();
     this.canvas.setPointerCapture(e.pointerId);
     this.timer = setTimeout(() => { this.timer = null; this.hold(this.direction(this.last)); }, TAP_MS);
@@ -96,7 +133,12 @@ export class Pointer {
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
-      for (const k of this.direction(e)) this.keys.tapped.add(k);
+      const [x, y] = this.pixel(e);
+      const col = Math.floor(x / 8);
+      const row = Math.floor(y / 8);
+      const d = this.doors(col, row);
+      if (d.here && d.own !== d.here) return this.walkTo(col, row);
+      if (!d.here) for (const k of this.direction(e)) this.keys.tapped.add(k);
       this.keys.tapped.add('fire');
     }
     this.hold(new Set());
