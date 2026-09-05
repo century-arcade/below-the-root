@@ -58,10 +58,14 @@ the three things listed under What each creature remembers.
    ambusher you have never met is certain to be there in early morning and
    there one time in four otherwise; once you meet it in some hour it
    keeps that hour until a one-in-four roll moves it on.
-3. It stands on its starting cell, shifted right by a random amount up to
-   its spread (0, 1 or 2 columns), facing left or right at random; the
-   first move comes 4 ticks later.  Every spread lies inside the
-   creature's own patrol columns, so it always starts where it can walk.
+3. It stands on its starting cell, shifted right by a random number of
+   columns less than its spread (a spread of 2 means the starting cell
+   or the next one; `col_random_span` in the table), facing left or
+   right at random; the first move comes 4 ticks later.  Every spread
+   lies strictly inside the creature's own patrol columns, so it always
+   starts where it can walk, and never on a turning column -- a creature
+   standing on one turns whichever way it faces, and one born there
+   facing inward would turn outward and walk off its ledge.
 
 Leaving the room hides the creature.  Nothing else removes one: talking to
 it, paying it, sleeping in its nid and the passage of time all leave it

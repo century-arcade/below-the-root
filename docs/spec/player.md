@@ -526,10 +526,13 @@ matching tile is erased.
   USELESS HERE".  Otherwise one time in sixteen it breaks -- "THE
   TRENCHER BEAK BREAKS" with the knock-down sound -- and the rest of
   the time "THE BEAK CUTS SLOWLY".
-- *A vine rope*: the row below you is scanned in the facing direction
-  for the first cell that is not empty.  Reaching the room edge first
-  gives "THE ROPE IS USELESS HERE"; otherwise the span is filled with
-  rope and the rope is consumed.  You can only cross it crawling.
+- *A vine rope*: the row below you is scanned in the facing direction,
+  starting two cells ahead, for the first cell that is not empty.  If
+  that first cell is already not empty, or the room edge comes first,
+  "THE ROPE IS USELESS HERE".  Otherwise every cell from one ahead up
+  to the one found becomes rope -- the cell one ahead is overwritten
+  whatever it held -- and the rope is consumed.  You can only cross it
+  crawling.
 - *The temple key*: anywhere except `A2`, it removes the temple wall in
   front of or above you.  Success plays a tune from the random pool;
   nothing removed gives

@@ -35,7 +35,7 @@ export function spawnCreature(state) {
   }
   state.creature = {
     def,
-    col: def.start.col + Math.floor(state.rng() * (def.start.col_random_span + 1)),
+    col: def.start.col + Math.floor(state.rng() * def.start.col_random_span),
     row: def.start.row,
     facing: state.rng() < 0.5 ? -1 : 1,
     stride: 0, stepAlt: 0, frame: 0, turned: false,

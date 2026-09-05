@@ -193,11 +193,14 @@ function* use(state) {
   }
 }
 
+// rope span: probed from two cells ahead, filled from one, whatever the near cell holds
 function layRope(state, o) {
   const p = state.player;
   const row = p.row + 1;
-  let col = p.col + p.facing;
-  while (col >= 0 && col < COLS && cell(state, col, row) === 0) col += p.facing;
+  const isEmpty = (col) => col >= 0 && col < COLS && cell(state, col, row) === 0;
+  let col = p.col + 2 * p.facing;
+  if (!isEmpty(col)) return say(state, 'THE ROPE IS USELESS HERE');
+  while (isEmpty(col)) col += p.facing;
   if (col < 0 || col >= COLS) return say(state, 'THE ROPE IS USELESS HERE');
   for (let c = p.col + p.facing; c !== col; c += p.facing) state.screen[row * COLS + c] = VINE_ROPE_TILE;
   destroy(o);

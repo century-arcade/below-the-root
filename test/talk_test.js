@@ -237,4 +237,29 @@ test('STATUS paints the six numbers', (s) => {
   assert.equal(lines[1], `EARLY MORNING      LEVEL OF REST   ${s.player.rest}`);
 });
 
+// room 11: the branch under you ends in scenery one cell ahead, then two empty cells, then the ledge
+test('USE a vine rope bridges from two cells ahead, over the cell in front', (s) => {
+  place(s, 33, 33, 18, 1);
+  give(s, CLASS.ROPE);
+  const row = 19 * 40;
+  assert.equal(s.screen[row + 34], 0x10);
+  run(s, [...menu('USE'), ...page(0), J.idle, J.idle]);
+  assert.deepEqual([...s.screen.slice(row + 33, row + 38)], [0x02, 224, 224, 224, 0x3B]);
+  assert.equal(carriedOf(s, CLASS.ROPE), null);
+});
+
+test('USE a vine rope with no gap two cells ahead is useless and kept', (s) => {
+  place(s, 33, 38, 16, -1);
+  give(s, CLASS.ROPE);
+  assert.equal(run(s, [...menu('USE'), ...page(0), J.idle, J.idle])[0], 'THE ROPE IS USELESS HERE');
+  assert.ok(carriedOf(s, CLASS.ROPE));
+});
+
+test('a creature spawns short of its turning column', (s) => {
+  s.rng = () => 0.999;
+  place(s, 192, 0, 0);
+  assert.equal(s.creature.def.start.col_random_span, 2);
+  assert.equal(s.creature.col, 14);
+});
+
 console.log(`all ${n} talk tests passed`);
