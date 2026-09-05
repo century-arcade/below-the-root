@@ -40,10 +40,12 @@ export class Keyboard {
 }
 
 const TAP_MS = 150;
-const DEAD_PX = 8;
+const DEAD_W = 14;
+const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
 
-// the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way
+// the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way;
+// anywhere on the figure's own 24x42 box counts as centred
 export class Pointer {
   constructor(canvas, keys, anchor) {
     this.canvas = canvas;
@@ -64,7 +66,7 @@ export class Pointer {
     const dx = (e.clientX - r.left) * (this.canvas.width / r.width) - ax;
     const dy = (e.clientY - r.top) * (this.canvas.height / r.height) - ay;
     const keys = new Set();
-    if (dx * dx + dy * dy < DEAD_PX * DEAD_PX) return keys;
+    if (Math.abs(dx) < DEAD_W && Math.abs(dy) < DEAD_H) return keys;
     if (Math.abs(dy) < Math.abs(dx) * SECTOR) keys.add(dx > 0 ? 'right' : 'left');
     else if (Math.abs(dx) < Math.abs(dy) * SECTOR) keys.add(dy > 0 ? 'down' : 'up');
     else { keys.add(dx > 0 ? 'right' : 'left'); keys.add(dy > 0 ? 'down' : 'up'); }
