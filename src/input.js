@@ -21,9 +21,12 @@ export class Keyboard {
       ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
       W: 'up', S: 'down', A: 'left', D: 'right' }[e.key];
     if (!key) return false;
-    if (up) this.down.delete(key); else { this.down.add(key); this.tapped.add(key); }
+    if (up) this.release(key); else this.press(key);
     return true;
   }
+
+  press(key) { this.down.add(key); this.tapped.add(key); }
+  release(key) { this.down.delete(key); }
 
   read() {
     const d = new Set([...this.down, ...this.tapped]);
@@ -33,6 +36,68 @@ export class Keyboard {
       dy: (d.has('down') ? 1 : 0) - (d.has('up') ? 1 : 0),
       fire: d.has('fire'),
     };
+  }
+}
+
+const TAP_MS = 150;
+const DEAD_PX = 8;
+const SECTOR = Math.tan(Math.PI / 8);
+
+// the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way
+export class Pointer {
+  constructor(canvas, keys, anchor) {
+    this.canvas = canvas;
+    this.keys = keys;
+    this.anchor = anchor;
+    this.held = new Set();
+    this.timer = null;
+    canvas.style.touchAction = 'none';
+    canvas.addEventListener('pointerdown', (e) => this.down(e));
+    canvas.addEventListener('pointermove', (e) => this.move(e));
+    canvas.addEventListener('pointerup', (e) => this.up(e));
+    canvas.addEventListener('pointercancel', () => this.hold(new Set()));
+  }
+
+  direction(e) {
+    const r = this.canvas.getBoundingClientRect();
+    const [ax, ay] = this.anchor();
+    const dx = (e.clientX - r.left) * (this.canvas.width / r.width) - ax;
+    const dy = (e.clientY - r.top) * (this.canvas.height / r.height) - ay;
+    const keys = new Set();
+    if (dx * dx + dy * dy < DEAD_PX * DEAD_PX) return keys;
+    if (Math.abs(dy) < Math.abs(dx) * SECTOR) keys.add(dx > 0 ? 'right' : 'left');
+    else if (Math.abs(dx) < Math.abs(dy) * SECTOR) keys.add(dy > 0 ? 'down' : 'up');
+    else { keys.add(dx > 0 ? 'right' : 'left'); keys.add(dy > 0 ? 'down' : 'up'); }
+    return keys;
+  }
+
+  hold(keys) {
+    for (const k of this.held) if (!keys.has(k)) this.keys.release(k);
+    for (const k of keys) if (!this.held.has(k)) this.keys.press(k);
+    this.held = keys;
+  }
+
+  down(e) {
+    if (e.button !== 0 || this.timer) return;
+    e.preventDefault();
+    this.canvas.setPointerCapture(e.pointerId);
+    this.timer = setTimeout(() => { this.timer = null; this.hold(this.direction(this.last)); }, TAP_MS);
+    this.last = e;
+  }
+
+  move(e) {
+    if (this.timer) this.last = e;
+    else if (this.held.size || e.buttons) this.hold(this.direction(e));
+  }
+
+  up(e) {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+      for (const k of this.direction(e)) this.keys.tapped.add(k);
+      this.keys.tapped.add('fire');
+    }
+    this.hold(new Set());
   }
 }
 

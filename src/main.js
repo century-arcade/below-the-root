@@ -1,8 +1,8 @@
 import { loadData } from './data.js';
-import { render, WIDTH, HEIGHT } from './video.js';
+import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { newState, startQuest, startDemo, tick, figures } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
-import { Keyboard } from './input.js';
+import { Keyboard, Pointer } from './input.js';
 import { enterRoom } from './world.js';
 import { panelLines } from './panel.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
@@ -78,6 +78,13 @@ function pickRoom(data, want) {
   return data.roomByCode.get(want.toUpperCase());
 }
 
+// the pointer steers relative to the figure's body; the shell screens have none
+function stickAnchor(state) {
+  if (!state.room || state.title) return [WIDTH / 2, HEIGHT / 2];
+  const [x, y] = figureOrigin(state.player.col, state.player.row);
+  return [x + 12, y + 21];
+}
+
 function whereLabel(state) {
   return state.room && !state.title ? state.room.code : '';
 }
@@ -106,6 +113,7 @@ loadData((path) => fetch(path).then((r) => {
   const stick = new Keyboard();
   const state = newState(data, stick, { storage: browserStorage });
   state.stick = stick;
+  new Pointer(canvas, stick, () => stickAnchor(state));
   const demo = params.get('demo');
   const room = pickRoom(data, params.get('room'));
   if (demo !== null) {
