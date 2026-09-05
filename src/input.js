@@ -40,8 +40,7 @@ export class Keyboard {
 }
 
 const TAP_MS = 150;
-const DOUBLE_MS = 350;
-const DOUBLE_PX = 16;
+const DOUBLE_MS = 300;
 const WALK_POLL_MS = 50;
 const WALK_MAX_MS = 15000;
 const WALK_STALL_MS = 1200;
@@ -50,9 +49,10 @@ const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
 
 // the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way;
-// anywhere on the figure's own 24x42 box counts as centred; a tap on a doorway, or a double tap
-// anywhere, keeps pushing toward that spot until the figure gets there or stops making progress
-// (a push down that only stooped is undone)
+// anywhere on the figure's own 24x42 box counts as centred and presses at once, a tap elsewhere
+// waits out the double-tap window first.  A tap on a doorway, or a double tap anywhere, keeps
+// pushing toward that spot until the figure gets there or stops making progress (a push down
+// that only stooped is undone); while walking, a tap re-aims and a tap on the figure stops.
 export class Pointer {
   constructor(canvas, keys, anchor, doors) {
     this.canvas = canvas;
@@ -62,12 +62,13 @@ export class Pointer {
     this.held = new Set();
     this.timer = null;
     this.walk = null;
-    this.lastTap = null;
+    this.pending = null;
+    this.holding = false;
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => this.down(e));
     canvas.addEventListener('pointermove', (e) => this.move(e));
     canvas.addEventListener('pointerup', (e) => this.up(e));
-    canvas.addEventListener('pointercancel', () => this.hold(new Set()));
+    canvas.addEventListener('pointercancel', () => { this.holding = false; this.hold(new Set()); });
     addEventListener('keydown', () => this.stopWalk());
   }
 
@@ -100,6 +101,7 @@ export class Pointer {
   }
 
   walkTo(x, y) {
+    this.stopWalk();
     const door = this.doors(Math.floor(x / 8), Math.floor(y / 8)).here;
     const now = performance.now();
     this.walk = { x, y, door, start: now, moved: now, at: String(this.anchor()) };
@@ -132,16 +134,20 @@ export class Pointer {
 
   down(e) {
     if (e.button !== 0 || this.timer) return;
-    this.stopWalk();
     e.preventDefault();
     this.canvas.setPointerCapture(e.pointerId);
-    this.timer = setTimeout(() => { this.timer = null; this.hold(this.direction(this.last)); }, TAP_MS);
+    this.timer = setTimeout(() => {
+      this.timer = null;
+      this.stopWalk();
+      this.holding = true;
+      this.hold(this.direction(this.last));
+    }, TAP_MS);
     this.last = e;
   }
 
   move(e) {
     if (this.timer) this.last = e;
-    else if (this.held.size || e.buttons) this.hold(this.direction(e));
+    else if (this.holding) this.hold(this.direction(e));
   }
 
   up(e) {
@@ -149,21 +155,32 @@ export class Pointer {
       clearTimeout(this.timer);
       this.timer = null;
       this.tap(e);
+    } else if (this.holding) {
+      this.holding = false;
+      this.hold(new Set());
     }
-    this.hold(new Set());
   }
 
   tap(e) {
     const [x, y] = this.pixel(e);
-    const now = performance.now();
-    const again = this.lastTap && now - this.lastTap.t < DOUBLE_MS
-      && Math.hypot(x - this.lastTap.x, y - this.lastTap.y) < DOUBLE_PX;
-    this.lastTap = again ? null : { x, y, t: now };
+    const keys = this.directionTo(x, y);
     const d = this.doors(Math.floor(x / 8), Math.floor(y / 8));
-    if (again || (d.here && d.own !== d.here)) return this.walkTo(x, y);
-    if (!d.here) for (const k of this.directionTo(x, y)) this.keys.tapped.add(k);
-    this.keys.tapped.add('fire');
+    if (this.pending) {
+      clearTimeout(this.pending);
+      this.pending = null;
+      return this.walkTo(x, y);
+    }
+    if (this.walk && keys.size) return this.walkTo(x, y);
+    this.stopWalk();
+    if (d.here && d.own !== d.here) return this.walkTo(x, y);
+    if (!keys.size || d.here) return this.keys.tapped.add('fire');
+    this.pending = setTimeout(() => {
+      this.pending = null;
+      for (const k of keys) this.keys.tapped.add(k);
+      this.keys.tapped.add('fire');
+    }, DOUBLE_MS);
   }
+
 }
 
 // demo.json's joystick byte: bit 0 up, 1 down, 2 left, 3 right, 4 fire, active low
