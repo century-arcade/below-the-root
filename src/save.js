@@ -1,6 +1,6 @@
 // docs/spec/data/save.json: the original's QUESTn image, byte for byte, so C64 saves import and export
 
-import { enterRoom } from './world.js';
+import { enterRoom, openAir } from './world.js';
 import { newPlayer } from './player.js';
 import { weightCarried, carryLimit } from './inventory.js';
 import { TICKS_PER_HOUR, DREAM } from './clock.js';
@@ -24,6 +24,7 @@ function isAmbusher(def) {
 }
 
 export function exportSave(state) {
+  if (!state.quest || !state.room || !state.nidPlace || state.demo) throw new Error('No quest to save');
   const { at, size, loadAddress } = layout(state.data);
   const p = state.player;
   const out = new Uint8Array(size);
@@ -95,12 +96,34 @@ function offeredBy(def) {
 }
 
 export function importSave(state, bytes) {
-  const { at, size } = layout(state.data);
+  const target = state;
+  const { at, size, loadAddress } = layout(state.data);
   if (bytes.length !== size) throw new Error(`save is ${bytes.length} bytes, want ${size}`);
   const get = (name) => bytes[at[name]];
   const data = state.data;
+  if ((bytes[0] | bytes[1] << 8) !== loadAddress) throw new Error('Invalid QUEST file header');
+  const inRange = (name, lo, hi) => {
+    if (get(name) < lo || get(name) > hi) throw new Error(`Invalid save field: ${name}`);
+  };
+  inRange('character', 0, data.characters.length - 1);
+  inRange('player_col', 0, 39); inRange('player_row', 0, 19);
+  inRange('nid_col', 0, 39); inRange('nid_row', 0, 19);
+  inRange('time_of_day', 0, 7); inRange('day', 1, 255);
+  inRange('clock_period', 1, data.quest.clock.prescaler_wraps_per_time_slot);
+  inRange('food_cap_plus1', 1, 255); inRange('rest_cap_plus1', 1, 255);
+  const roomId = get('saved_room_lo') | get('saved_room_hi') << 8;
+  const nidId = get('nid_room_lo') | get('nid_room_hi') << 8;
+  if (roomId >= data.grid.width * data.grid.height || !data.roomById.has(nidId)) {
+    throw new Error('Invalid saved room');
+  }
+  // Decode into a draft: a rejected file must leave the running quest intact.
+  state = { ...state, objects: state.objects.map(o => ({ ...o })), flags: state.flags.map(f => ({ ...f })) };
   for (const o of state.objects) {
     const flags = bytes[at.object_flags + o.object];
+    if ((flags & FLAG.exists) && !(flags & FLAG.carried)
+        && ((flags & 0x1f) >= 20 || bytes[at.object_col + o.object] >= 40)) {
+      throw new Error(`Invalid object position: ${o.object}`);
+    }
     o.exists = !!(flags & FLAG.exists);
     o.carried = !!(flags & FLAG.carried);
     o.row = flags & 0x1f;
@@ -149,12 +172,19 @@ export function importSave(state, bytes) {
     visions: get('vision_count'),
     animalsPensed: get('pense_message_count'),
     sample: false, timeUp: false, ended: null, stop: null, verb: null, creature: null,
+    title: false, demo: null, input: state.stick || state.input, stall: 0, verbWait: 0,
+    pointer: null, restDelayCut: false, stickFire: false, events: [{ music: null }],
     quest: !!get('quest_active'),
   });
-  enterRoom(state, data.roomById.get(room), p.col, p.row);
+  let destination = data.roomById.get(room);
+  if (!destination || (!p.indoors && destination.outdoor_bit === false)) {
+    destination = openAir(data, room % data.grid.width, Math.floor(room / data.grid.width));
+  }
+  enterRoom(state, destination, p.col, p.row);
   state.offered = get('take_permission') ? offeredBy(def) : null;
   state.paid = !!get('door_permission');
   state.active = true;
+  Object.assign(target, state);
 }
 
 export function toBase64(bytes) {

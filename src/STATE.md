@@ -133,8 +133,16 @@ button up and a sixth of a second more, then reads for a push.
 the field list in `save.json`: every object's slot, the two per-creature
 byte arrays, the named variables and zero-page fields.  `importSave`
 rebuilds `player`, `clock`, `flags`, `objects` and the quest fields and
-enters the saved room.  `main.js` keeps five browser slots (base64 in
-localStorage) and exports/imports the raw file.
+enters the saved room.  `record.js` supplies five browser slots (base64 in localStorage). Direct
+imports validate and decode into a draft before replacing live state,
+resolve empty/outdoor rooms, clear transient shell/demo state, and restore
+the real stick. DISK STORAGE then explicitly returns to its menu context.
+
+`record.js` also owns the browser `Session`: a seeded RNG, monotonic frame
+counter, timed joystick changes and external-load actions. Its JSON
+recording reconstructs even running generators by replay and checks the
+result before adoption. `Autosave` persists it on screen changes and page
+hide; it does not change the C64 image layout. See `docs/playthrough.md`.
 
 ## Text
 

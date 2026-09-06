@@ -299,4 +299,20 @@ test('opening the menu turns the music off', (s) => {
   assert.deepEqual(s.events.filter((e) => 'music' in e).map((e) => e.music), [0, null]);
 });
 
+test('a storage write failure keeps the quest and returns to the menu', s => {
+  openMenu(s); settle(s);
+  s.stick.feed(...tap(J.fire), ...tap(J.fire)); settle(s);
+  const player = s.player;
+  s.storage.save = () => { throw new Error('quota'); };
+  openMenu(s); settle(s);
+  s.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  settle(s);
+  assert.match(lines(s).join(' '), /STORAGE FAILED/);
+  assert.equal(s.player, player);
+  assert.equal(s.quest, true);
+  s.stick.feed(...tap(J.fire)); settle(s);
+  assert.equal(lines(s)[0], '               START GAME');
+  assert.ok(s.verb);
+});
+
 console.log(`all ${n} shell tests passed`);

@@ -1,60 +1,17 @@
 import { loadData } from './data.js';
 import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
-import { newState, startQuest, startDemo, tick, figures } from './game.js';
-import { shellFrame, coldStart, openMenu } from './shell.js';
-import { Keyboard, Pointer } from './input.js';
-import { enterRoom, cell, doorNumber } from './world.js';
+import { figures } from './game.js';
+import { Keyboard, Pointer, isEditing } from './input.js';
+import { cell, doorNumber } from './world.js';
 import { panelLines } from './panel.js';
-import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
+import { Session, Autosave, AUTOSAVE_KEY } from './record.js';
+import { setupDebug } from './debug.js';
 import { Speaker } from './audio.js';
 
-const SLOT_KEY = (n) => `btr.quest${n}`;
-
-// the five QUEST slots as base64 in localStorage
-const browserStorage = {
-  save: (n, bytes) => localStorage.setItem(SLOT_KEY(n), toBase64(bytes)),
-  load: (n) => {
-    const text = localStorage.getItem(SLOT_KEY(n));
-    return text ? fromBase64(text) : null;
-  },
-};
-
-// digits 1-5 save to a browser slot, shift+digit loads one, x downloads the C64 file, drop a file to load it
-function saveKeys(state, note) {
-  addEventListener('keydown', (e) => {
-    const m = /^Digit([1-5])$/.exec(e.code);
-    if (m && !e.altKey && !e.ctrlKey) {
-      const n = Number(m[1]);
-      try {
-        if (e.shiftKey) {
-          const bytes = browserStorage.load(n);
-          if (!bytes) return note(`slot ${n} is empty`);
-          importSave(state, bytes);
-          note(`loaded slot ${n}`);
-        } else {
-          browserStorage.save(n, exportSave(state));
-          note(`saved slot ${n}`);
-        }
-      } catch (err) { note(String(err)); }
-      e.preventDefault();
-    } else if (e.key === 'x') {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([exportSave(state)], { type: 'application/octet-stream' }));
-      a.download = 'QUEST1';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-  });
-  addEventListener('dragover', (e) => e.preventDefault());
-  addEventListener('drop', async (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    try {
-      importSave(state, new Uint8Array(await file.arrayBuffer()));
-      note(`loaded ${file.name}`);
-    } catch (err) { note(String(err)); }
-  });
+function note(text) {
+  const element = document.getElementById('notice');
+  element.textContent = text;
+  element.hidden = !text;
 }
 
 const canvas = document.getElementById('screen');
@@ -63,11 +20,13 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
 
-const CHROME_PX = 32 + 28 + 20;
+const CHROME_PX = 40;
 
 function fit() {
-  const scale = Math.max(1, Math.min(
-    Math.floor(window.innerWidth / WIDTH), Math.floor((window.innerHeight - CHROME_PX) / HEIGHT)));
+  const availableHeight = window.innerHeight - CHROME_PX - document.getElementById('debug').offsetHeight;
+  const scale = Math.max(0.25, Math.min(
+    window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
+    availableHeight < HEIGHT ? availableHeight / HEIGHT : Math.floor(availableHeight / HEIGHT)));
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = HEIGHT * scale + 'px';
 }
@@ -122,54 +81,93 @@ loadData((path) => fetch(path).then((r) => {
 })).then((data) => {
   const params = new URLSearchParams(location.search);
   const stick = new Keyboard();
-  const state = newState(data, stick, { storage: browserStorage });
-  state.stick = stick;
-  new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
-  const demo = params.get('demo');
+  const debug = params.has('debug');
   const room = pickRoom(data, params.get('room'));
-  if (demo !== null) {
-    startDemo(state, demo || 'quest');
-  } else if (room || params.has('player')) {
-    const who = Number(params.get('player') || 0);
-    startQuest(state, data.characters[who] || data.characters[0]);
-    if (room && room !== state.room) enterRoom(state, room, state.player.col, state.player.row);
-  } else if (params.has('menu')) {
-    openMenu(state);
-  } else {
-    coldStart(state);
+  const initial = params.has('demo') ? { mode: 'demo', demo: params.get('demo') || 'quest' }
+    : room || params.has('player') ? { mode: 'quest', character: Number(params.get('player')) || 0, room: room?.room }
+    : params.has('menu') ? { mode: 'menu' } : { mode: 'cold' };
+  if (!data.characters[initial.character || 0]) initial.character = 0;
+  if (initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === initial.demo)) initial.demo = 'quest';
+  const slots = {};
+  let existing = null;
+  let restoreFailed = false;
+  try {
+    for (let n = 1; n <= 5; n++) { const value = localStorage.getItem(`btr.quest${n}`); if (value) slots[n] = value; }
+    existing = localStorage.getItem(AUTOSAVE_KEY);
+  } catch (err) { note(`Browser storage is unavailable: ${err.message}`); }
+  let session;
+  const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+  if (existing && initial.mode === 'cold') {
+    try { session = Session.restore(data, stick, JSON.parse(existing)); }
+    catch (err) { restoreFailed = true; note(`${err.message} Your previous autosave is preserved.`); }
   }
-
+  session ||= new Session(data, stick, { initial, slots, seed });
+  let state = session.state;
+  const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
+  const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, note);
+  const bindSlots = () => { session.saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text); };
+  bindSlots();
   const speaker = new Speaker(data.music);
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
-
-  const debug = params.has('debug');
   const where = document.getElementById('where');
-  const status = document.getElementById('status');
-  let notice = '';
-  let noticeUntil = 0;
-  saveKeys(state, (text) => { notice = text; noticeUntil = performance.now() + 3000; });
-  function statusLine() {
-    if (performance.now() < noticeUntil) return notice;
-    if (debug) return label(state);
-    return speaker.ctx ? '' : 'press any key for sound';
+  const status = document.getElementById('debug-status');
+  let paused = false;
+  const saveNow = () => restoreFailed ? false : state.demo || autosave.save(session, true) || (!state.quest && !session.record.path.some(p => p.quest));
+  const pause = () => { paused = true; pointer.cancel(); stick.reset(); speaker.silence(); };
+  const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
+  for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
+    if (!paused) session.gesture(type, ...pointer.pixel(e).map(Math.round));
+  });
+  for (const type of ['keydown', 'keyup']) addEventListener(type, e => {
+    if (!paused && !e.repeat && !isEditing(e.target) && !e.metaKey && !e.altKey
+        && /^(Arrow(Up|Down|Left|Right)|[wasdWASD]| |Shift|Control)$/.test(e.key)) {
+      session.gesture(type, e.code || e.key);
+    }
+  });
+  async function importFile(file) {
+    pause();
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (bytes[0] === 123 || file.name.endsWith('.json')) {
+        const restored = Session.restore(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
+        session = restored; state = session.state; bindSlots();
+      } else session.load(bytes);
+      restoreFailed = false;
+      speaker.silence();
+      if (saveNow()) note(`Loaded ${file.name}`);
+    } catch (err) { note(err.message); }
+    finally { resume(); }
   }
+  addEventListener('dragover', e => e.preventDefault());
+  addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
+  addEventListener('pagehide', () => saveNow());
+  document.addEventListener('visibilitychange', () => {
+    pointer.cancel(); stick.reset();
+    if (document.hidden) { saveNow(); speaker.silence(); }
+  });
+  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note }).then(fit);
+  if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
     where.textContent = whereLabel(state);
-    status.textContent = statusLine();
+    if (debug) status.textContent = label(state);
   }
 
   const STEP_MS = 1000 / 60;
   let last = performance.now();
   let acc = 0;
   function frame(now) {
-    acc += Math.min(now - last, 250);
+    acc += paused || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
     while (acc >= STEP_MS) {
-      shellFrame(state);
-      tick(state);
+      const previousRoom = state.room;
+      const previousTitle = state.title;
+      session.step();
+      if (previousRoom !== state.room || previousTitle !== state.title) pointer.cancel();
+      if (!restoreFailed) autosave.save(session);
       speaker.frame(state);
       acc -= STEP_MS;
     }
@@ -181,6 +179,6 @@ loadData((path) => fetch(path).then((r) => {
   draw();
   requestAnimationFrame(frame);
 }).catch((err) => {
-  document.getElementById('status').textContent = String(err);
+  note(String(err));
   console.error(err);
 });

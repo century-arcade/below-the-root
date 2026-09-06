@@ -262,4 +262,19 @@ test('a creature spawns short of its turning column', (s) => {
   assert.equal(s.creature.col, 14);
 });
 
+// A focused ending regression, not a substitute for reaching Raamo by normal play.
+for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.'], [30, 'GIFTED QUESTER.']]) {
+  for (const item of [CLASS.SHUBA, CLASS.ROPE]) test(`OFFER ${item} to Raamo on day ${day} wins with ${rank}`, s => {
+    faceCreature(s, data.roomByCode.get('GE').room);
+    s.clock.day = day;
+    give(s, item);
+    const shown = run(s, [...menu('OFFER'), ...page(0), ...press(), ...press()]);
+    assert.ok(shown.join(' ').includes(rank), shown.join(' '));
+    assert.equal(s.ended, 'won');
+    assert.equal(s.quest, false);
+    assert.ok(s.events.some(e => e.music === 0));
+    assert.ok(s.events.some(e => e.music === 2));
+  });
+}
+
 console.log(`all ${n} talk tests passed`);

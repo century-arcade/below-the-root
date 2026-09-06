@@ -170,11 +170,20 @@ export function* diskStorage(state) {
   yield* buttonPress();
   clearPanel(state);
   const slot = disk.slot + 1;
-  if (op === 'SAVE GAME') return state.storage.save(slot, exportSave(state));
-  const bytes = state.storage.load(slot);
-  if (!bytes) return;
-  importSave(state, bytes);
-  state.active = false;
+  try {
+    if (op === 'SAVE GAME') return state.storage.save(slot, exportSave(state));
+    const bytes = state.storage.load(slot);
+    if (!bytes) return;
+    const menu = state.verb;
+    importSave(state, bytes);
+    state.verb = menu;
+    state.title = true;
+    state.active = false;
+  } catch (err) {
+    clearPanel(state);
+    print(state, 21, 1, 'STORAGE FAILED. YOUR QUEST IS SAFE.');
+    yield* buttonPress();
+  }
 }
 
 // SAMPLE QUEST ends the quest: the world is reset and the two scripts chase each other until fire

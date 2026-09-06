@@ -1,5 +1,9 @@
 // the joystick: {dx, dy, fire}, read once per state step; and the demo script that replaces it
 
+export function isEditing(target) {
+  return !!target?.closest?.('input, textarea, select, button, a, [contenteditable], dialog');
+}
+
 export const IDLE = Object.freeze({ dx: 0, dy: 0, fire: false });
 
 export function isIdle(j) {
@@ -9,28 +13,40 @@ export function isIdle(j) {
 // a tap shorter than the read interval still counts once: keys latch until the next read
 export class Keyboard {
   constructor(target = window) {
-    this.down = new Set();
-    this.tapped = new Set();
+    this.sources = new Map();
     this.pace = 5;
     target.addEventListener('keydown', (e) => { if (this.map(e)) e.preventDefault(); });
     target.addEventListener('keyup', (e) => { this.map(e, true); });
+    target.addEventListener('blur', () => this.reset());
   }
 
   map(e, up = false) {
+    if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
     const key = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
       ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
       W: 'up', S: 'down', A: 'left', D: 'right' }[e.key];
     if (!key) return false;
-    if (up) this.release(key); else this.press(key);
+    const source = e.code || e.key;
+    if (up) this.release(key, source); else this.press(key, source);
     return true;
   }
 
-  press(key) { this.down.add(key); this.tapped.add(key); }
-  release(key) { this.down.delete(key); }
+  source(name) {
+    if (!this.sources.has(name)) this.sources.set(name, { down: new Set(), tapped: new Set() });
+    return this.sources.get(name);
+  }
+
+  press(key, source = 'keyboard') { const s = this.source(source); s.down.add(key); s.tapped.add(key); }
+  release(key, source = 'keyboard') { this.source(source).down.delete(key); }
+  tap(key, source = 'pointer') { this.source(source).tapped.add(key); }
+  reset(source) { if (source) this.sources.delete(source); else this.sources.clear(); }
 
   read() {
-    const d = new Set([...this.down, ...this.tapped]);
-    this.tapped.clear();
+    const d = new Set();
+    for (const s of this.sources.values()) {
+      for (const key of [...s.down, ...s.tapped]) d.add(key);
+      s.tapped.clear();
+    }
     return {
       dx: (d.has('right') ? 1 : 0) - (d.has('left') ? 1 : 0),
       dy: (d.has('down') ? 1 : 0) - (d.has('up') ? 1 : 0),
@@ -54,7 +70,7 @@ const SECTOR = Math.tan(Math.PI / 8);
 // pushing toward that spot until the figure gets there or stops making progress (a push down
 // that only stooped is undone); while walking, a tap re-aims and a tap on the figure stops.
 export class Pointer {
-  constructor(canvas, keys, anchor, doors) {
+  constructor(canvas, keys, anchor, doors, target = window) {
     this.canvas = canvas;
     this.keys = keys;
     this.anchor = anchor;
@@ -68,8 +84,10 @@ export class Pointer {
     canvas.addEventListener('pointerdown', (e) => this.down(e));
     canvas.addEventListener('pointermove', (e) => this.move(e));
     canvas.addEventListener('pointerup', (e) => this.up(e));
-    canvas.addEventListener('pointercancel', () => { this.holding = false; this.hold(new Set()); });
-    addEventListener('keydown', () => this.stopWalk());
+    canvas.addEventListener('pointercancel', () => this.cancel());
+    canvas.addEventListener('lostpointercapture', () => { if (this.pointerId != null) this.cancel(); });
+    target.addEventListener('keydown', () => this.cancel());
+    target.addEventListener('blur', () => this.cancel());
   }
 
   pixel(e) {
@@ -95,8 +113,8 @@ export class Pointer {
   }
 
   hold(keys) {
-    for (const k of this.held) if (!keys.has(k)) this.keys.release(k);
-    for (const k of keys) if (!this.held.has(k)) this.keys.press(k);
+    for (const k of this.held) if (!keys.has(k)) this.keys.release(k, 'pointer');
+    for (const k of keys) if (!this.held.has(k)) this.keys.press(k, 'pointer');
     this.held = keys;
   }
 
@@ -111,18 +129,19 @@ export class Pointer {
 
   walkStep() {
     const w = this.walk;
+    if (!w) return;
     const now = performance.now();
     const at = String(this.anchor());
     if (at !== w.at) { w.at = at; w.moved = now; }
     if (w.door) {
       const d = this.doors(Math.floor(w.x / 8), Math.floor(w.y / 8));
-      if (d.own === d.here) { this.stopWalk(); this.keys.tapped.add('fire'); return; }
+      if (d.here && d.own === d.here) { this.stopWalk(); this.keys.tap('fire'); return; }
     }
     const keys = this.directionTo(w.x, w.y);
     if (keys.size && now - w.moved < WALK_STALL_MS && now - w.start < WALK_MAX_MS) return this.hold(keys);
     const stooped = this.held.has('down') && this.held.size === 1;
     this.stopWalk();
-    if (stooped) this.keys.tapped.add('up');
+    if (stooped) this.keys.tap('up');
   }
 
   stopWalk() {
@@ -132,13 +151,27 @@ export class Pointer {
     this.hold(new Set());
   }
 
+  cancel() {
+    clearTimeout(this.timer);
+    clearTimeout(this.pending);
+    this.timer = this.pending = null;
+    this.stopWalk();
+    this.holding = false;
+    this.pointerId = null;
+    this.held.clear();
+    this.keys.reset('pointer');
+  }
+
   down(e) {
-    if (e.button !== 0 || this.timer) return;
+    if (e.button !== 0 || this.pointerId != null) return;
+    this.pointerId = e.pointerId;
     e.preventDefault();
     this.canvas.setPointerCapture(e.pointerId);
     this.timer = setTimeout(() => {
       this.timer = null;
       this.stopWalk();
+      clearTimeout(this.pending);
+      this.pending = null;
       this.holding = true;
       this.hold(this.direction(this.last));
     }, TAP_MS);
@@ -146,11 +179,14 @@ export class Pointer {
   }
 
   move(e) {
+    if (e.pointerId !== this.pointerId) return;
     if (this.timer) this.last = e;
     else if (this.holding) this.hold(this.direction(e));
   }
 
   up(e) {
+    if (e.pointerId !== this.pointerId) return;
+    this.pointerId = null;
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
@@ -173,11 +209,11 @@ export class Pointer {
     if (this.walk && keys.size) return this.walkTo(x, y);
     this.stopWalk();
     if (d.here && d.own !== d.here) return this.walkTo(x, y);
-    if (!keys.size || d.here) return this.keys.tapped.add('fire');
+    if (!keys.size || d.here) return this.keys.tap('fire');
     this.pending = setTimeout(() => {
       this.pending = null;
-      for (const k of keys) this.keys.tapped.add(k);
-      this.keys.tapped.add('fire');
+      for (const k of keys) this.keys.tap(k);
+      this.keys.tap('fire');
     }, DOUBLE_MS);
   }
 

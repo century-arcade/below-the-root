@@ -1,3 +1,12 @@
 [build]
 command = "make build"
 publish = "_build"
+
+[functions]
+directory = "functions"
+
+[dev]
+framework = "#static"
+publish = "_build"
+port = 8000
+autoLaunch = false

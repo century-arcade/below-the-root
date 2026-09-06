@@ -110,4 +110,12 @@ per item whether to keep it.
 - The port adds one input the original never had: with a mouse or a
   finger, a tap on a doorway walks you to it and presses the button.
   The walk is a held stick, blind to ledges and creatures, cancelled by
-  any other input and given up after three seconds.
+  keyboard input, focus loss, or a room change. A stalled walk gives up
+  after 1.2 seconds without position changes, or 15 seconds total. A
+  double tap walks toward any spot; a tap while walking re-aims it.
+
+- Browser-port storage safety: empty slots do nothing; malformed C64
+  imports are rejected without replacing the quest. Direct loads clear
+  demo/menu state. A separate versioned JSON journal autosaves on screen
+  changes and reconstructs running interactions by replay; C64 save bytes
+  stay unchanged. See `../playthrough.md`.
