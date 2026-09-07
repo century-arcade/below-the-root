@@ -1,7 +1,7 @@
 // the joystick: {dx, dy, fire}, read once per state step; and the demo script that replaces it
 
 export function isEditing(target) {
-  return !!target?.closest?.('input, textarea, select, button, a, [contenteditable], dialog');
+  return !!target?.closest?.('input:not([type="file"]), textarea, select, [contenteditable], dialog');
 }
 
 export const IDLE = Object.freeze({ dx: 0, dy: 0, fire: false });

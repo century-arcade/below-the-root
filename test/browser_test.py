@@ -49,8 +49,14 @@ with sync_playwright() as p:
     assert 'recentInputs' in posted[0]['context']
     assert 'player' in posted[0]['context']
     assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).frames") == saved['frames'], 'issue dialog must pause game time'
+    page.locator('#issue-cancel').click()
+    assert page.locator('#file-issue').evaluate("e => e === document.activeElement")
+    page.wait_for_timeout(50)
+    gestures = len(saved['gestures'])
+    page.keyboard.press('ArrowRight')
+    page.evaluate("dispatchEvent(new Event('pagehide'))")
+    assert len(page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).gestures")) == gestures + 2, 'focused debug button must not disable game keys'
     with page.expect_download() as dl:
-        page.locator('#issue-cancel').click()
         page.locator('#download-record').click()
     dl.value.save_as('/tmp/btr-browser-record.json')
     record = json.load(open('/tmp/btr-browser-record.json'))
