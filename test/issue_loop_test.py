@@ -16,6 +16,7 @@ SPEC.loader.exec_module(loop)
 class VerdictTests(unittest.TestCase):
     def test_ready_after_analysis_and_markdown(self):
         for output in ("VERDICT: ready", "Analysis.\n\n**VERDICT: ready**\n\nCriteria.",
+                       "**VERDICT: ready** — The fix is bounded.",
                        "\n`VERDICT: ready`\n", "## VERDICT: ready"):
             with self.subTest(output=output):
                 self.assertTrue(loop.verdict(output, "ready"))
@@ -99,6 +100,23 @@ class LocalDeliveryTests(unittest.TestCase):
         self.run_task(agent)
         self.assertIn("no committed changes", (self.q.todo / "github-2.md").read_text())
         self.assertEqual(self.q.git("rev-parse", "HEAD"), self.base)
+
+    def test_read_only_stages_cannot_deliver_their_own_changes(self):
+        for bad_stage in ("triage", "diagnose", "review"):
+            with self.subTest(stage=bad_stage):
+                if bad_stage != "triage":
+                    self.q.move(self.q.todo / "github-2.md", self.q.queue)
+                def agent(stage, effort, worktree, *args):
+                    result = self.agent(stage, effort, worktree, *args)
+                    self.assertNotEqual(worktree, self.repo)
+                    if stage == bad_stage:
+                        (worktree / "unexpected.txt").write_text("wrong stage\n")
+                        self.q.git("add", "unexpected.txt", cwd=worktree)
+                        self.q.git("commit", "-qm", "Wrong stage", cwd=worktree)
+                    return result
+                self.run_task(agent)
+                self.assertIn("Read-only", (self.q.todo / "github-2.md").read_text())
+                self.assertEqual(self.q.git("rev-parse", "HEAD"), self.base)
 
     def test_uncommitted_fix_is_retained(self):
         def agent(stage, effort, worktree, *args):
