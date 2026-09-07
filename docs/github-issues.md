@@ -1,7 +1,7 @@
 # Debug GitHub issue filing
 
-Only `?debug` shows **Log in to GitHub**. Once authenticated, **File an
-issue** opens a single-message dialog immediately. Submission creates an
+Only `?debug` shows **Log in to GitHub**. Once authenticated, **Report
+Issue** opens a single-message dialog immediately. Submission creates an
 issue as that user in `century-arcade/below-the-root`. The first message
 line becomes its title. State and recent moves are included; the full
 recording is a separate download, not automatically uploaded.

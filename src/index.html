@@ -5,33 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Below the Root</title>
 <style>
-  html, body { margin: 0; min-height: 100%; background: #000; color: #9ad284; font: 12px/1.6 monospace; }
+  html, body { margin: 0; min-height: 100%; background: #0b130d; color: #9ad284; font: 12px/1.6 monospace; }
   body { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   [hidden] { display: none !important; }
-  canvas { image-rendering: pixelated; display: block; }
+  canvas { image-rendering: pixelated; display: block; background: #000; }
   #where { font-size: 24px; line-height: 32px; letter-spacing: 2px; min-height: 32px; }
   #debug, #debug-status { box-sizing: border-box; width: min(960px, 100%); }
   #debug { padding: 8px; overflow-x: auto; white-space: nowrap; }
   #debug-buttons {
-    display: grid; grid-template-columns: repeat(4, 168px); gap: 4px;
+    display: grid; grid-template-columns: repeat(3, 168px); gap: 4px;
     width: max-content; margin-inline: auto;
   }
   #debug-buttons > button, #debug-buttons > .file-label {
     box-sizing: border-box; overflow: hidden; text-align: center;
     text-overflow: ellipsis; white-space: nowrap;
   }
-  #github-login, #github-logout { grid-column: 1; grid-row: 1; }
-  #file-issue { grid-column: 2; grid-row: 1; }
-  #download-record { grid-column: 3; grid-row: 1; }
-  #debug-buttons > .file-label { grid-column: 4; grid-row: 1; }
+  #file-issue { grid-column: 1; grid-row: 1; }
+  #download-record { grid-column: 2; grid-row: 1; }
+  #debug-buttons > .file-label { grid-column: 3; grid-row: 1; }
+  #github-auth { position: fixed; top: 8px; right: 8px; z-index: 2; }
+  #github-auth > button {
+    box-sizing: border-box; width: 168px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
   #debug-status {
-    height: 1.6em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    height: 1.6em; overflow: hidden; text-align: left;
+    text-overflow: ellipsis; white-space: nowrap;
   }
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #notice { position: fixed; top: 8px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
-  dialog { background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw); }
-  dialog::backdrop { background: #000a; }
+  dialog { position: static; flex: none; margin: 0 0 8px; background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw); }
   textarea { display: block; box-sizing: border-box; width: 100%; min-height: 160px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
@@ -39,18 +43,17 @@
 </head>
 <body>
 <div id="notice" role="status" hidden></div>
+<div id="github-auth" hidden>
+  <button id="github-login">Log in to GitHub</button>
+  <button id="github-logout" hidden>Log out</button>
+</div>
 <div id="debug" hidden>
   <div id="debug-buttons">
-    <button id="github-login">Log in to GitHub</button>
-    <button id="github-logout" hidden>Log out</button>
-    <button id="file-issue" hidden>File an issue</button>
+    <button id="file-issue" hidden>Report Issue</button>
     <button id="download-record">Download recording</button>
     <label class="file-label">Load recording <input id="load-record" type="file" accept=".json,.prg,application/json" hidden></label>
   </div>
 </div>
-<div id="where"></div>
-<canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
-<div id="debug-status" hidden></div>
 <dialog id="issue-dialog" aria-labelledby="issue-label">
   <form id="issue-form">
     <label id="issue-label" for="issue-message">What happened?</label>
@@ -61,6 +64,9 @@
     <p id="issue-result" role="status"></p>
   </form>
 </dialog>
+<div id="where"></div>
+<canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
+<div id="debug-status" hidden></div>
 <script type="module" src="main.js"></script>
 </body>
 </html>

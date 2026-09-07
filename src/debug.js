@@ -24,13 +24,14 @@ export function issueContext(session) {
     + '```json\n' + JSON.stringify(details, null, 2) + '\n```';
 }
 
-export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note }) {
+export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note, fit }) {
   const bar = document.getElementById('debug');
   bar.hidden = false;
   document.getElementById('debug-status').hidden = false;
+  document.getElementById('github-auth').hidden = false;
   const login = document.getElementById('github-login');
   const logout = document.getElementById('github-logout');
-  const file = document.getElementById('file-issue');
+  const report = document.getElementById('file-issue');
   const dialog = document.getElementById('issue-dialog');
   const form = document.getElementById('issue-form');
   const message = document.getElementById('issue-message');
@@ -55,20 +56,21 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     try {
       const response = await fetch(`${API}?op=logout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       if (!response.ok) throw new Error('Could not log out. Try again.');
-      login.hidden = false; logout.hidden = true; file.hidden = true;
+      login.hidden = false; logout.hidden = true; report.hidden = true;
     } catch (err) { note(err.message); }
   };
-  file.onclick = () => {
+  report.onclick = () => {
     pause(); saveNow();
     context = issueContext(getSession());
     result.textContent = '';
     try { message.value = sessionStorage.getItem(DRAFT_KEY) || ''; } catch { /* Draft is still editable. */ }
-    dialog.showModal();
+    dialog.show();
+    fit();
     message.focus();
   };
   message.oninput = () => { try { sessionStorage.setItem(DRAFT_KEY, message.value); } catch { /* Keep the text in the form. */ } };
   document.getElementById('issue-cancel').onclick = () => dialog.close();
-  dialog.addEventListener('close', resume);
+  dialog.addEventListener('close', () => { resume(); fit(); report.focus(); });
   form.onsubmit = async e => {
     e.preventDefault();
     submit.disabled = true;
@@ -93,7 +95,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     if (!response.ok) return;
     const body = await response.json();
     if (body.login) {
-      login.hidden = true; logout.hidden = false; file.hidden = false;
+      login.hidden = true; logout.hidden = false; report.hidden = false;
       logout.textContent = `Log out (${body.login})`;
       logout.title = logout.textContent;
     }

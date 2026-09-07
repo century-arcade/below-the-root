@@ -24,7 +24,8 @@ const CHROME_PX = 40;
 
 function fit() {
   const debugHeight = document.getElementById('debug').offsetHeight
-    + document.getElementById('debug-status').offsetHeight;
+    + document.getElementById('debug-status').offsetHeight
+    + document.getElementById('issue-dialog').offsetHeight;
   const availableHeight = window.innerHeight - CHROME_PX - debugHeight;
   const scale = Math.max(0.25, Math.min(
     window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
@@ -71,7 +72,7 @@ function label(state) {
     + `  frame ${p.frame} period ${p.period}`
     + (p.crawling ? ' crawl' : '') + (p.running ? ' run' : '') + (p.leaping ? ' leap' : '')
     + (p.gliding ? ' glide' : '') + (p.knockdown ? ` down ${p.knockdown}` : '')
-    + (p.fallen ? ` fallen ${p.fallen}` : '') + `  tick ${state.tick}`
+    + (p.fallen ? ` fallen ${p.fallen}` : '')
     + (state.creature ? `  npc ${state.creature.col},${state.creature.row}` : '')
     + (state.ended ? `  ENDED: ${state.ended}` : '')
     + `  "${panelLines(state).join(' / ').trim()}"`;
@@ -148,7 +149,7 @@ loadData((path) => fetch(path).then((r) => {
     pointer.cancel(); stick.reset();
     if (document.hidden) { saveNow(); speaker.silence(); }
   });
-  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note }).then(fit);
+  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note, fit }).then(fit);
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
