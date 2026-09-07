@@ -5,3 +5,4 @@ __pycache__/
 _build/
 iso/
 .netlify/
+.env.local
