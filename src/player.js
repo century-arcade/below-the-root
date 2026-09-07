@@ -229,6 +229,7 @@ function leapStep(state, s) {
   p.frame = FRAME.flight(p.facing);
   if (p.leapPhase !== 1 && isSolid(state, s.floor)) {
     p.leaping = false;
+    p.frame = idleFrame(p);
     sfx(state, SFX.footA);
     return step(state);
   }
