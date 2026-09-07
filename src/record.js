@@ -10,6 +10,7 @@ export const RECORD_VERSION = 1;
 export const ENGINE_VERSION = 'btr-session-1';
 export const AUTOSAVE_KEY = 'btr.autosave.v1';
 const MAX_FRAMES = 60 * 60 * 60 * 24;
+const MAX_GESTURES = 500;
 const copy = value => JSON.parse(JSON.stringify(value));
 const same = (a, b) => a.dx === b.dx && a.dy === b.dy && a.fire === b.fire;
 
@@ -156,6 +157,7 @@ export class Session {
   gesture(kind, ...details) {
     // Diagnostic annotations only. Replay uses the sampled joystick, never UI events.
     this.record.gestures.push([this.frame, kind, ...details]);
+    if (this.record.gestures.length > MAX_GESTURES) this.record.gestures.splice(0, this.record.gestures.length - MAX_GESTURES);
   }
 
   snapshot() {

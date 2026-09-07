@@ -63,6 +63,11 @@ const broken = copy(recorded); broken.checkpoint.player.col++;
 assert.throws(() => Session.restore(freshData, values, broken), /diverged/);
 assert.throws(() => Session.restore(freshData, values, { ...recorded, engine: 'old' }), /version/);
 
+const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
+for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);
+assert.equal(chatty.record.gestures.length, 500, 'gestures are capped');
+assert.deepEqual(chatty.record.gestures.at(-1), [0, 'keydown', 'k599'], 'the newest gestures are the ones kept');
+
 const store = new Map(); let writes = 0;
 const autosave = new Autosave({ setItem: (k, v) => { store.set(k, v); writes++; } });
 assert.ok(autosave.save(session));
@@ -98,4 +103,4 @@ try {
   assert.notEqual(spawnSync(process.execPath, [tool, original, '--cut', '100:200', '--out', edited]).status, 0);
   assert.notEqual(spawnSync(process.execPath, [tool, original, '--expect-win']).status, 0);
 } finally { rmSync(dir, { recursive: true }); }
-console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, autosave and failure handling passed');
+console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, gesture cap, autosave and failure handling passed');
