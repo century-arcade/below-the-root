@@ -125,7 +125,9 @@ First match wins.
    that way instead -- the manual's "push the button and press the
    joystick sideways".
 5. Pulled back while standing on support: the command menu opens.
-6. No direction, standing on a doorway: go through the door.
+6. No direction, standing on a doorway: go through the door -- but
+   only if the button has been seen free since the last door taken, so
+   one press is one transit however long it is held.
 7. Anything else: the button-free rules.
 
 ### With the button free

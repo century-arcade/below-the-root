@@ -46,6 +46,7 @@ state = {
     food, foodCap, rest, restCap, spiritLimit, spiritEnergy,   // player.md, Stamina, fatigue, food, rest, spirit
     standingKindar, standingErdling, name, people,             // characters.json
     indoors, underground,      // the flag that flips per doorway; the room's band
+    doorHeld,                  // a doorway was taken and the button has not been released since
     sheet,                     // 'player0'..'player4' (assets.json sprite sheet)
   },
   creature,        // null or {def, col, row, facing, stride, stepAlt, frame, turned, countdown} (creatures.js)

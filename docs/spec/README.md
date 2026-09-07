@@ -100,6 +100,11 @@ per item whether to keep it.
   SAVE/LOAD line there is no cancel.  SAMPLE QUEST and START GAME wipe
   the quest in progress without asking; CONTINUE with no quest does
   nothing at all.  (`shell.md`)
+- The original's disk load made a doorway one transit per press by
+  accident; at 60 fps a held button re-requests the door on every step
+  and the room flips back and forth.  Decided: a door request needs the
+  button seen released since the last one.  (`player.md`, With the
+  button held)
 - The original's clock stops about 100 ticks on every room load (disk
   access); a port that loads instantly runs a wandering hour a little
   shorter.  (`time.md`, The clock)
