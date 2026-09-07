@@ -64,7 +64,8 @@ can take time. There is no cross-tab synchronization.
 3. Reload periodically to test continuation. Download a recording at each
    significant milestone and before experimenting with route changes.
 4. Use **File an issue** for problems. The dialog pauses simulation and
-   includes game state, the C64 checkpoint, and recent path/input changes.
+   includes game state and recent path/input changes, with each history entry
+   on one JSON line. The C64-format save image is omitted from the report.
    It does not upload the full recording. Download that separately and
    attach it on GitHub if needed.
 5. After completing and acknowledging the winning screens, download the

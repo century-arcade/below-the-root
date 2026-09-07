@@ -15,14 +15,24 @@ export function downloadRecord(session) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export function formatIssueDetails(details) {
+  return '{\n' + Object.entries(details).filter(([, value]) => value !== undefined).map(([key, value]) => {
+    // Keep each history entry on one line while leaving state fields readable.
+    const json = ['recentPath', 'recentInputs'].includes(key) && value.length
+      ? '[\n' + value.map(entry => '    ' + JSON.stringify(entry)).join(',\n') + '\n  ]'
+      : JSON.stringify(value, null, 2).replace(/\n/g, '\n  ');
+    return `  ${JSON.stringify(key)}: ${json}`;
+  }).join(',\n') + '\n}';
+}
+
 export function issueContext(session) {
-  const record = session.snapshot();
+  const record = session.record;
   const s = session.state;
   const details = { engine: ENGINE_VERSION, frame: session.frame, room: s.room?.code,
-    player: s.player, clock: s.clock, panel: panelLines(s), c64: record.c64,
+    player: s.player, clock: s.clock, panel: panelLines(s),
     recentPath: record.path.slice(-30), recentInputs: record.inputs.slice(-50) };
   return 'Filed from the game’s debug screen. The full playthrough can be downloaded separately.\n\n'
-    + '```json\n' + JSON.stringify(details, null, 2) + '\n```';
+    + '```json\n' + formatIssueDetails(details) + '\n```';
 }
 
 export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note }) {

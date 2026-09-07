@@ -6,7 +6,9 @@ quest first. Once authenticated, either opens a single-message dialog immediatel
 The button and dialog sit below the game. Submission creates an issue as
 that user in `century-arcade/below-the-root`; its first message line
 becomes the title. State and recent moves are included; the full recording
-is a separate download, not automatically uploaded.
+is a separate download, not automatically uploaded. Each recent input change
+and room transition occupies one JSON line. The redundant C64-format save
+image is omitted from issue reports.
 
 The implementation uses a Netlify function, not credentials in the
 static build. Its source is `functions/github.mjs`, configured through
