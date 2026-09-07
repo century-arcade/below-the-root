@@ -30,6 +30,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   bar.hidden = false;
   document.body.classList.add('debugging');
   document.getElementById('debug-status').hidden = false;
+  document.getElementById('game-controls').hidden = false;
   document.getElementById('github-auth').hidden = false;
   const login = document.getElementById('github-login');
   const logout = document.getElementById('github-logout');
@@ -66,7 +67,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     context = issueContext(getSession());
     result.textContent = '';
     try { message.value = sessionStorage.getItem(DRAFT_KEY) || ''; } catch { /* Draft is still editable. */ }
-    dialog.showModal();
+    dialog.show();
     message.focus();
   };
   addEventListener('keydown', e => {

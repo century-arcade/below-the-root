@@ -2,10 +2,10 @@
 
 Only `?debug` shows **Log in to GitHub**. Once authenticated, **Report
 Issue** or the `R` key opens a single-message dialog immediately.
-Submission creates an issue as that user in
-`century-arcade/below-the-root`; its first message line becomes the title.
-State and recent moves are included; the full
-recording is a separate download, not automatically uploaded.
+The button and dialog sit below the game. Submission creates an issue as
+that user in `century-arcade/below-the-root`; its first message line
+becomes the title. State and recent moves are included; the full recording
+is a separate download, not automatically uploaded.
 
 The implementation uses a Netlify function, not credentials in the
 static build. Its source is `functions/github.mjs`, configured through

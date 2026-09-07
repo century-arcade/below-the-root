@@ -21,14 +21,12 @@ canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
 
 const CHROME_PX = 40;
-const DEBUG_DIALOG_PX = 243;
 
 function fit() {
   const debugBar = document.getElementById('debug');
   const debugHeight = debugBar.offsetHeight
     + document.getElementById('debug-status').offsetHeight;
-  const availableHeight = window.innerHeight - CHROME_PX - debugHeight
-    - (debugBar.hidden ? 0 : DEBUG_DIALOG_PX);
+  const availableHeight = window.innerHeight - CHROME_PX - debugHeight;
   const scale = Math.max(0.25, Math.min(
     window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
     availableHeight < HEIGHT ? availableHeight / HEIGHT : Math.floor(availableHeight / HEIGHT)));

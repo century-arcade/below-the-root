@@ -7,27 +7,26 @@
 <style>
   html, body { margin: 0; min-height: 100%; background: #0b130d; color: #9ad284; font: 12px/1.6 monospace; }
   body { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  body.debugging { justify-content: flex-end; }
+  body.debugging { box-sizing: border-box; justify-content: flex-start; padding-top: 48px; }
   [hidden] { display: none !important; }
   canvas { image-rendering: pixelated; display: block; background: #000; }
   #game { display: flex; flex-direction: column; align-items: stretch; }
   #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
   #debug {
     position: fixed; top: 0; left: 50%; z-index: 2; transform: translateX(-50%);
-    box-sizing: border-box; width: min(520px, 100%); padding: 8px;
+    box-sizing: border-box; width: min(356px, 100%); padding: 8px;
     overflow-x: auto; white-space: nowrap;
   }
   #debug-buttons {
-    display: grid; grid-template-columns: repeat(3, 168px); gap: 4px;
+    display: grid; grid-template-columns: repeat(2, 168px); gap: 4px;
     width: max-content; margin-inline: auto;
   }
   #debug-buttons > button, #debug-buttons > .file-label {
     box-sizing: border-box; overflow: hidden; text-align: center;
     text-overflow: ellipsis; white-space: nowrap;
   }
-  #file-issue { grid-column: 1; grid-row: 1; }
-  #download-record { grid-column: 2; grid-row: 1; }
-  #debug-buttons > .file-label { grid-column: 3; grid-row: 1; }
+  #download-record { grid-column: 1; grid-row: 1; }
+  #debug-buttons > .file-label { grid-column: 2; grid-row: 1; }
   #github-auth { position: fixed; top: 8px; right: 8px; z-index: 2; }
   #github-auth > button {
     box-sizing: border-box; width: 168px; overflow: hidden;
@@ -37,20 +36,21 @@
     box-sizing: border-box; width: 100%; height: 1.6em; overflow: hidden; text-align: left;
     text-overflow: ellipsis; white-space: nowrap;
   }
+  #game-controls { min-height: 39px; padding-top: 8px; text-align: center; }
+  #game-controls > button { box-sizing: border-box; width: 168px; }
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
-  #notice { position: fixed; top: 48px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
+  #notice { position: fixed; top: 8px; left: 8px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
   dialog {
-    position: fixed; top: 48px; right: 0; bottom: auto; left: 0;
-    max-height: calc(100dvh - 56px); margin: 0 auto; overflow: auto;
+    position: static; align-self: center; margin: 8px 0 0;
     background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
   }
-  dialog::backdrop { background: transparent; }
   textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
   @media (max-width: 720px) {
     #debug { right: 184px; left: 0; width: auto; transform: none; }
+    #notice { top: 48px; }
   }
 </style>
 </head>
@@ -62,25 +62,27 @@
 </div>
 <div id="debug" hidden>
   <div id="debug-buttons">
-    <button id="file-issue" aria-keyshortcuts="R" hidden>Report Issue</button>
     <button id="download-record">Download recording</button>
     <label class="file-label">Load recording <input id="load-record" type="file" accept=".json,.prg,application/json" hidden></label>
   </div>
 </div>
-<dialog id="issue-dialog" aria-labelledby="issue-label">
-  <form id="issue-form">
-    <label id="issue-label" for="issue-message">What happened?</label>
-    <textarea id="issue-message" required maxlength="8000" placeholder="Describe the problem…"></textarea>
-    <p>The room, game state, and recent moves will be included.</p>
-    <button id="issue-submit" type="submit">File issue</button>
-    <button id="issue-cancel" type="button">Close</button>
-    <p id="issue-result" role="status"></p>
-  </form>
-</dialog>
 <div id="game">
   <div id="where"></div>
   <canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
   <div id="debug-status" hidden></div>
+  <div id="game-controls" hidden>
+    <button id="file-issue" aria-keyshortcuts="R" hidden>Report Issue</button>
+  </div>
+  <dialog id="issue-dialog" aria-labelledby="issue-label">
+    <form id="issue-form">
+      <label id="issue-label" for="issue-message">What happened?</label>
+      <textarea id="issue-message" required maxlength="8000" placeholder="Describe the problem…"></textarea>
+      <p>The room, game state, and recent moves will be included.</p>
+      <button id="issue-submit" type="submit">File issue</button>
+      <button id="issue-cancel" type="button">Close</button>
+      <p id="issue-result" role="status"></p>
+    </form>
+  </dialog>
 </div>
 <script type="module" src="main.js"></script>
 </body>
