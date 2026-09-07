@@ -1,7 +1,8 @@
 # Debug GitHub issue filing
 
-Only `?debug` shows **Log in to GitHub**. Once authenticated, **Report
-Issue** or the `R` key opens a single-message dialog immediately.
+Only `?debug` shows **Log in to GitHub** and **Report Issue**. Clicking
+**Report Issue** or pressing `R` starts login when logged out, saving the
+quest first. Once authenticated, either opens a single-message dialog immediately.
 The button and dialog sit below the game. Submission creates an issue as
 that user in `century-arcade/below-the-root`; its first message line
 becomes the title. State and recent moves are included; the full recording
@@ -79,6 +80,7 @@ preview domains likewise need a matching app/callback configuration.
   tests use dummy credentials and mocked network calls.
 
 The toolbar's background session lookup only reveals an existing login.
-It does not gate the login button: a pending or failed lookup still allows
-navigation to the server's login endpoint. `test/browser_login_test.py`
-checks both cases with mocked navigation and confirms the quest saves first.
+It does not gate login: a pending or failed lookup still allows the login
+button, **Report Issue**, and `R` to navigate to the server's login endpoint.
+`test/browser_login_test.py` checks these cases, logged-out sessions, and
+logging out with mocked navigation, and confirms the quest saves first.

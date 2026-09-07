@@ -40,6 +40,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   const message = document.getElementById('issue-message');
   const result = document.getElementById('issue-result');
   const submit = document.getElementById('issue-submit');
+  let authenticated = false;
   let context = '';
 
   document.getElementById('download-record').onclick = () => downloadRecord(getSession());
@@ -59,10 +60,12 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     try {
       const response = await fetch(`${API}?op=logout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       if (!response.ok) throw new Error('Could not log out. Try again.');
-      login.hidden = false; logout.hidden = true; report.hidden = true;
+      authenticated = false;
+      login.hidden = false; logout.hidden = true;
     } catch (err) { note(err.message); }
   };
   report.onclick = () => {
+    if (!authenticated) { login.click(); return; }
     pause(); saveNow();
     context = issueContext(getSession());
     result.textContent = '';
@@ -105,7 +108,8 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     if (!response.ok) return;
     const body = await response.json();
     if (body.login) {
-      login.hidden = true; logout.hidden = false; report.hidden = false;
+      authenticated = true;
+      login.hidden = true; logout.hidden = false;
       logout.textContent = `Log out (${body.login})`;
       logout.title = logout.textContent;
     }
