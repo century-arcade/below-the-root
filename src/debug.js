@@ -27,6 +27,7 @@ export function issueContext(session) {
 export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note }) {
   const bar = document.getElementById('debug');
   bar.hidden = false;
+  document.body.classList.add('debugging');
   document.getElementById('debug-status').hidden = false;
   document.getElementById('github-auth').hidden = false;
   const login = document.getElementById('github-login');

@@ -7,6 +7,7 @@
 <style>
   html, body { margin: 0; min-height: 100%; background: #0b130d; color: #9ad284; font: 12px/1.6 monospace; }
   body { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  body.debugging { justify-content: flex-end; }
   [hidden] { display: none !important; }
   canvas { image-rendering: pixelated; display: block; background: #000; }
   #game { display: flex; flex-direction: column; align-items: stretch; }
@@ -39,9 +40,13 @@
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #notice { position: fixed; top: 48px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
-  dialog { background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw); }
+  dialog {
+    position: fixed; top: 48px; right: 0; bottom: auto; left: 0;
+    max-height: calc(100dvh - 56px); margin: 0 auto; overflow: auto;
+    background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
+  }
   dialog::backdrop { background: #0b130dcc; }
-  textarea { display: block; box-sizing: border-box; width: 100%; min-height: 160px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
+  textarea { display: block; box-sizing: border-box; width: 100%; min-height: 100px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
   @media (max-width: 720px) {
