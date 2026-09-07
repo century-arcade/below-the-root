@@ -7,8 +7,6 @@ import sys
 import uuid
 from pathlib import Path
 
-# Reuse the installed worker's importer, queue, locking, logs, and controls.
-# .meta/issue-loop.conf selects this runner before the shared CLI starts.
 worker = shutil.which("issue-loop")
 if not worker:
     raise RuntimeError("The workflow issue-loop command must be on PATH")
@@ -64,6 +62,17 @@ class LocalQueue(shared.Queue):
             raise RuntimeError("Main checkout has uncommitted changes; preserve them before retrying.")
         return self.git("rev-parse", "HEAD")
 
+    def close_issue(self, text: str, head: str) -> str:
+        issue = re.search(r"\A---\n(?:(?!---\n).)*?^github_issue: (\d+)$", text, re.M | re.S)
+        if not issue:
+            return ""
+        subject = self.git("log", "-1", "--format=%s", head)
+        try:
+            self.gh("issue", "close", issue[1], "--comment", f"Fixed on master by {head[:12]}: {subject}")
+        except RuntimeError as error:
+            return f"Closing issue #{issue[1]} failed: {error}"
+        return f"Closed issue #{issue[1]}."
+
     def process(self, task: Path) -> None:
         text = task.read_text()
         history = self.log / "tasks" / task.stem
@@ -118,7 +127,9 @@ class LocalQueue(shared.Queue):
                     if self.master_head() != base:
                         raise RuntimeError("Local master changed during the run; retain the fix for review.")
                     self.git("merge", "--ff-only", head)
-                    self.finish(task, f"Local master commit: `{head}`\n\n{review}", done=True)
+                    closed = self.close_issue(text, head)
+                    self.finish(task, "\n\n".join(filter(None, [f"Local master commit: `{head}`", closed, review])),
+                                done=True)
                     self.git("worktree", "remove", str(worktree))
                     return
             self.finish(task, f"Needs human review after {self.rounds} fix rounds.\n\n{review}"

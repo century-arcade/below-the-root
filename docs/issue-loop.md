@@ -19,12 +19,15 @@ review. Standalone verdicts may appear after explanatory text or in Markdown
 emphasis (including a following dash and explanation); conflicting verdicts
 and verdicts inside code blocks do not pass.
 An explanation of a fix alone is insufficient: the worker requires committed
-changes and a passing review before marking a task done.
+changes and a passing review before marking a task done. A diagnosis or TODO
+entry alone does not complete an actionable issue.
 
 Fixes start from local `master` in temporary worktrees under `_cbox/`. After
-review, the worker fast-forwards local `master` and records the commit hash in
-`.meta/done/`. It does not fetch code from origin, push commits, create PRs, or
-comment on issues. GitHub issue import remains read-only and deduplicated.
+review, the worker fast-forwards local `master`, records the commit hash in
+`.meta/done/`, and closes the task's GitHub issue (frontmatter `github_issue:`)
+with a comment naming that commit; a failed close is noted in the done record
+and the delivery stands. It does not fetch code from origin, push commits, or
+create PRs. GitHub issue import remains read-only and deduplicated.
 Triage, diagnosis, and review run in the temporary worktree too, and must leave
 its files and commit unchanged. Only the implementation stage writes fixes.
 

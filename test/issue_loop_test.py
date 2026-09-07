@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("local_loop", ROOT / "tools/issue_loop.py")
+assert SPEC and SPEC.loader
 loop = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(loop)
 
@@ -50,8 +51,10 @@ class LocalDeliveryTests(unittest.TestCase):
         self.origin = self.repo.parent / "origin.git"
         loop.shared.command("git", "clone", "--bare", "-q", str(self.repo), str(self.origin), cwd=self.repo)
         self.q.git("remote", "add", "origin", str(self.origin))
-        (self.q.queue / "github-2.md").write_text("# Fix the fixture\n\nReturn to idle after landing.\n")
+        (self.q.queue / "github-2.md").write_text(
+            "---\ndescription: fixture\ngithub_issue: 2\n---\n\n# Fix the fixture\n\nReturn to idle after landing.\n")
         self.stages = []
+        self.gh_calls = []
 
     def agent(self, stage, effort, worktree, log, context, output=None):
         self.stages.append(stage)
@@ -69,14 +72,18 @@ class LocalDeliveryTests(unittest.TestCase):
             return "Verified the fix.\n\n**VERDICT: pass**"
         self.fail(stage)
 
-    def run_task(self, agent=None):
+    def gh(self, *args):
+        self.gh_calls.append(args)
+        return ""
+
+    def run_task(self, agent=None, gh=None):
         with patch.object(self.q, "agent", side_effect=agent or self.agent), \
-             patch.object(self.q, "gh", side_effect=AssertionError("No GitHub calls during local delivery")):
+             patch.object(self.q, "gh", side_effect=gh or self.gh):
             self.q.tick("github-2.md")
         self.assertEqual(loop.shared.command("git", "rev-parse", "master", cwd=self.origin), self.base)
+        self.assertTrue(all(call[:2] == ("issue", "close") for call in self.gh_calls), self.gh_calls)
 
     def test_ready_reaches_fix_review_and_local_master_only(self):
-        # Include unpublished local work: the loop must base its fix on this.
         (self.repo / "local.txt").write_text("unpublished\n")
         self.q.git("add", "local.txt")
         self.q.git("commit", "-qm", "Local work")
@@ -88,9 +95,26 @@ class LocalDeliveryTests(unittest.TestCase):
         self.assertEqual((self.repo / "fixture.txt").read_text(), "after\n")
         self.assertEqual(self.q.git("status", "--porcelain"), "")
         self.assertEqual(list((self.repo / "_cbox").iterdir()), [])
+        head = self.q.git("rev-parse", "HEAD")
         done = (self.q.meta / "done/github-2.md").read_text()
-        self.assertIn(self.q.git("rev-parse", "HEAD"), done)
+        self.assertIn(head, done)
+        self.assertIn("Closed issue #2.", done)
         self.assertNotIn("Draft PR", done)
+        self.assertEqual(self.gh_calls, [("issue", "close", "2", "--comment",
+                                          f"Fixed on master by {head[:12]}: Fix fixture")])
+
+    def test_task_without_issue_closes_nothing(self):
+        (self.q.queue / "github-2.md").write_text("# Fix the fixture\n")
+        self.run_task()
+        self.assertEqual(self.gh_calls, [])
+        self.assertTrue((self.q.meta / "done/github-2.md").exists())
+
+    def test_issue_close_failure_keeps_delivery(self):
+        def gh(*args):
+            raise RuntimeError("gh exited 1: offline")
+        self.run_task(gh=gh)
+        self.assertEqual((self.repo / "fixture.txt").read_text(), "after\n")
+        self.assertIn("Closing issue #2 failed: gh exited 1: offline", (self.q.meta / "done/github-2.md").read_text())
 
     def test_diagnosis_alone_cannot_complete_task(self):
         def agent(stage, *args):
@@ -167,7 +191,6 @@ class LocalDeliveryTests(unittest.TestCase):
         self.assertIn("Missing regression coverage", (self.q.todo / "github-2.md").read_text())
 
     def test_config_hook_selects_local_runner(self):
-        # Exercise the real shell entrypoint and project config, without AI.
         (self.repo / "tools").mkdir()
         (self.repo / "tools/issue_loop.py").write_text((ROOT / "tools/issue_loop.py").read_text())
         (self.q.meta / "issue-loop.conf").write_text('exec python3 tools/issue_loop.py "$@"\n')
