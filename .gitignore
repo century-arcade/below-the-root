@@ -3,6 +3,7 @@ build/
 disasm/out/
 __pycache__/
 _build/
+_cbox/
 iso/
 .netlify/
 .env.local
