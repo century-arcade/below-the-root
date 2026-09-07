@@ -63,6 +63,33 @@ with sync_playwright() as p:
     page.keyboard.down('ArrowRight')
     page.wait_for_timeout(350)
     page.keyboard.up('ArrowRight')
+
+    def frames():
+        page.evaluate("dispatchEvent(new Event('pagehide'))")
+        return page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).frames")
+
+    page.keyboard.press('Escape')
+    assert page.locator('#game').evaluate("e => e.classList.contains('paused')")
+    page.wait_for_function("document.getElementById('where').textContent.includes('PAUSED')")
+    stopped = frames()
+    page.wait_for_timeout(300)
+    assert frames() == stopped, 'Escape must stop game time'
+    page.keyboard.press('ArrowRight')
+    assert not page.locator('#game').evaluate("e => e.classList.contains('paused')")
+    page.wait_for_function("!document.getElementById('where').textContent.includes('PAUSED')")
+    page.wait_for_timeout(300)
+    assert frames() > stopped, 'a movement key must resume game time'
+    page.evaluate("dispatchEvent(new Event('blur'))")
+    assert page.locator('#game').evaluate("e => e.classList.contains('paused')"), 'leaving the window must pause'
+    stopped = frames()
+    page.wait_for_timeout(300)
+    assert frames() == stopped
+    page.locator('#screen').click()
+    assert not page.locator('#game').evaluate("e => e.classList.contains('paused')"), 'a tap on the screen must resume'
+    page.wait_for_timeout(300)
+    assert frames() > stopped
+    page.wait_for_timeout(350)
+
     closed_layout = (page.locator('#debug').bounding_box(), page.locator('#screen').bounding_box())
     page.keyboard.press('r')
     assert page.locator('#issue-dialog').evaluate("e => e.open && !e.matches(':modal')")
@@ -111,4 +138,4 @@ with sync_playwright() as p:
     page.wait_for_timeout(100)
     assert page.locator('#screen').bounding_box()['width'] <= 280
     browser.close()
-    print('browser_test: autosave/resume, debug visibility, issue form isolation, mocked issue creation, record download/import, small viewport passed')
+    print('browser_test: autosave/resume, pause and resume, debug visibility, issue form isolation, mocked issue creation, record download/import, small viewport passed')

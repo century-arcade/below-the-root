@@ -12,6 +12,7 @@
   canvas { image-rendering: pixelated; display: block; background: #000; }
   #game { display: flex; flex-direction: column; align-items: stretch; }
   #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
+  #game.paused canvas { filter: grayscale(1) brightness(0.5); }
   #debug {
     position: fixed; top: 0; left: 50%; z-index: 2; transform: translateX(-50%);
     box-sizing: border-box; width: min(356px, 100%); padding: 8px;
@@ -67,8 +68,8 @@
   </div>
 </div>
 <div id="game">
-  <div id="where"></div>
-  <canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
+  <div id="where" role="status"></div>
+  <canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses."></canvas>
   <div id="debug-status" hidden></div>
   <div id="game-controls" hidden>
     <button id="file-issue" aria-keyshortcuts="R">Report Issue</button>

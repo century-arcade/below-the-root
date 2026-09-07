@@ -115,19 +115,33 @@ loadData((path) => fetch(path).then((r) => {
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
   const status = document.getElementById('debug-status');
+  const game = document.getElementById('game');
   let paused = false;
+  // held: the player's pause, sticky until they act; paused is the debug dialog's
+  let held = false;
   const saveNow = () => restoreFailed ? false : state.demo || autosave.save(session, true) || (!state.quest && !session.record.path.some(p => p.quest));
   const pause = () => { paused = true; pointer.cancel(); stick.reset(); speaker.silence(); };
   const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
+  const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.silence(); game.classList.add('paused'); };
+  const release = () => { pointer.cancel(); stick.reset(); held = false; game.classList.remove('paused'); };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
-    if (!paused) session.gesture(type, ...pointer.pixel(e).map(Math.round));
+    if (paused) return;
+    if (held) { if (type === 'pointerdown') release(); return; }
+    session.gesture(type, ...pointer.pixel(e).map(Math.round));
   });
   for (const type of ['keydown', 'keyup']) addEventListener(type, e => {
-    if (!paused && !e.repeat && !isEditing(e.target) && !e.metaKey && !e.altKey
-        && /^(Arrow(Up|Down|Left|Right)|[wasdWASD]| |Shift|Control)$/.test(e.key)) {
-      session.gesture(type, e.code || e.key);
-    }
+    if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey
+        || !/^(Arrow(Up|Down|Left|Right)|[wasdWASD]| |Shift|Control)$/.test(e.key)) return;
+    if (held) { if (type === 'keydown') release(); return; }
+    session.gesture(type, e.code || e.key);
   });
+  addEventListener('keydown', e => {
+    if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;
+    if (held) release(); else hold();
+    e.preventDefault();
+  });
+  addEventListener('blur', () => hold());
   async function importFile(file) {
     pause();
     try {
@@ -147,8 +161,7 @@ loadData((path) => fetch(path).then((r) => {
   addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
   addEventListener('pagehide', () => saveNow());
   document.addEventListener('visibilitychange', () => {
-    pointer.cancel(); stick.reset();
-    if (document.hidden) { saveNow(); speaker.silence(); }
+    if (document.hidden) { saveNow(); hold(); } else { pointer.cancel(); stick.reset(); }
   });
   if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note }).then(fit);
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
@@ -156,7 +169,10 @@ loadData((path) => fetch(path).then((r) => {
     state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
-    where.textContent = whereLabel(state);
+    const place = whereLabel(state);
+    const line = held ? `${place} PAUSED`.trim() : place;
+    // #where is a live region: rewriting the same text re-announces it
+    if (where.textContent !== line) where.textContent = line;
     if (debug) {
       status.textContent = label(state);
       status.title = status.textContent;
@@ -167,7 +183,7 @@ loadData((path) => fetch(path).then((r) => {
   let last = performance.now();
   let acc = 0;
   function frame(now) {
-    acc += paused || document.hidden ? 0 : Math.min(now - last, 250);
+    acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
     while (acc >= STEP_MS) {
       const previousRoom = state.room;
