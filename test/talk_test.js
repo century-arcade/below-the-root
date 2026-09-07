@@ -277,4 +277,23 @@ for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.
   });
 }
 
+// player.md, With the button held: a doorway takes one press, however long it is held
+test('holding the button on a doorway goes through once', (s) => {
+  place(s, 1, 18, 14);
+  s.input = { read: () => J.fire, pace: 0 };
+  s.active = true;
+  const rooms = [s.room.room];
+  for (let i = 0; i < 400; i++) {
+    tick(s);
+    if (s.room.room !== rooms.at(-1)) rooms.push(s.room.room);
+  }
+  assert.deepEqual(rooms, [1, 9], 'one transit while the button stays down');
+  assert.equal(s.player.indoors, false);
+  let reads = 0;
+  s.input = { read: () => (reads++ === 0 ? J.idle : J.fire), pace: 0 };
+  for (let i = 0; i < 400 && s.room.room === 9; i++) tick(s);
+  assert.equal(s.room.room, 1, 'releasing the button arms the door again');
+  assert.equal(s.player.indoors, true);
+});
+
 console.log(`all ${n} talk tests passed`);
