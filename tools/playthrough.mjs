@@ -17,7 +17,6 @@ try {
   const data = await loadData(async p => JSON.parse(readFileSync(new URL('../' + (p.startsWith('data/') ? 'docs/spec/' + p : p), import.meta.url))));
   const record = JSON.parse(readFileSync(file, 'utf8'));
   const live = { read: () => IDLE };
-  // Always verify the original before deriving a new route from it.
   let session = Session.restore(data, live, record);
   const cutIndex = args.indexOf('--cut');
   if (cutIndex >= 0) {
@@ -45,7 +44,6 @@ try {
     edited.frames -= duration;
     edited.edits = [...(record.edits || []), { cut: [start, end], sourceFrames: record.frames }];
     session = Session.replay(data, live, edited, false);
-    // wx prevents accidentally overwriting an existing edited recording, too.
     writeFileSync(out, JSON.stringify(session.snapshot()), { flag: 'wx' });
     console.log(`Wrote ${out}. This is a newly simulated route, not proof the shortcut still wins.`);
   }

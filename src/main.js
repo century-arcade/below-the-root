@@ -119,7 +119,7 @@ loadData((path) => fetch(path).then((r) => {
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
-  const saveNow = () => restoreFailed || state.demo || autosave.save(session, true) || (!state.quest && !session.record.path.some(p => p.quest));
+  const saveNow = () => restoreFailed || !!autosave.save(session, true);
   const pause = () => { paused = true; pointer.cancel(); stick.reset(); speaker.silence(); };
   const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
   const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.silence(); game.classList.add('paused'); };
@@ -129,12 +129,11 @@ loadData((path) => fetch(path).then((r) => {
     if (held) { if (type === 'pointerdown') release(); return; }
     session.gesture(type, ...pointer.pixel(e).map(Math.round));
   });
-  for (const type of ['keydown', 'keyup']) addEventListener(type, e => {
-    if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey
-        || !/^(Arrow(Up|Down|Left|Right)|[wasdWASD]| |Shift|Control)$/.test(e.key)) return;
+  stick.onKey = (type, source) => {
+    if (paused) return;
     if (held) { if (type === 'keydown') release(); return; }
-    session.gesture(type, e.code || e.key);
-  });
+    session.gesture(type, source);
+  };
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;

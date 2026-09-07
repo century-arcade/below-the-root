@@ -17,7 +17,6 @@ export function downloadRecord(session) {
 
 export function formatIssueDetails(details) {
   return '{\n' + Object.entries(details).filter(([, value]) => value !== undefined).map(([key, value]) => {
-    // Keep each history entry on one line while leaving state fields readable.
     const json = ['recentPath', 'recentInputs'].includes(key) && value.length
       ? '[\n' + value.map(entry => '    ' + JSON.stringify(entry)).join(',\n') + '\n  ]'
       : JSON.stringify(value, null, 2).replace(/\n/g, '\n  ');
@@ -60,8 +59,6 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     e.target.value = '';
   };
   login.onclick = () => {
-    // The session lookup only personalizes the toolbar. A slow/blocked lookup
-    // must not prevent navigating to the server's authoritative login endpoint.
     pause();
     if (!saveNow()) { resume(); return; }
     location.assign(`${API}?op=login`);
@@ -79,19 +76,19 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     pause(); saveNow();
     context = issueContext(getSession());
     result.textContent = '';
-    try { message.value = sessionStorage.getItem(DRAFT_KEY) || ''; } catch { /* Draft is still editable. */ }
+    try { message.value = sessionStorage.getItem(DRAFT_KEY) || ''; } catch {}
     dialog.show();
     message.focus();
   };
   addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'r' && !e.repeat && !e.metaKey && !e.altKey && !e.ctrlKey
-        && !isEditing(e.target) && !report.hidden && !dialog.open) {
+        && !isEditing(e.target) && !dialog.open) {
       report.focus();
       report.click();
       e.preventDefault();
     }
   });
-  message.oninput = () => { try { sessionStorage.setItem(DRAFT_KEY, message.value); } catch { /* Keep the text in the form. */ } };
+  message.oninput = () => { try { sessionStorage.setItem(DRAFT_KEY, message.value); } catch {} };
   document.getElementById('issue-cancel').onclick = () => dialog.close();
   dialog.addEventListener('close', () => { resume(); report.focus(); });
   form.onsubmit = async e => {
@@ -109,7 +106,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
       link.textContent = `Issue #${body.number} filed — open on GitHub`;
       result.replaceChildren(link);
       message.value = '';
-      try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* Issue was filed. */ }
+      try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
     } catch (err) { result.textContent = err.message; }
     finally { submit.disabled = false; }
   };

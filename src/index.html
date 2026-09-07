@@ -16,7 +16,6 @@
   #debug {
     position: fixed; top: 0; left: 50%; z-index: 2; transform: translateX(-50%);
     box-sizing: border-box; width: min(356px, 100%); padding: 8px;
-    overflow-x: auto; white-space: nowrap;
   }
   #debug-buttons {
     display: grid; grid-template-columns: repeat(2, 168px); gap: 4px;
@@ -26,8 +25,6 @@
     box-sizing: border-box; overflow: hidden; text-align: center;
     text-overflow: ellipsis; white-space: nowrap;
   }
-  #download-record { grid-column: 1; grid-row: 1; }
-  #debug-buttons > .file-label { grid-column: 2; grid-row: 1; }
   #github-auth { position: fixed; top: 8px; right: 8px; z-index: 2; }
   #github-auth > button {
     box-sizing: border-box; width: 168px; overflow: hidden;

@@ -2,7 +2,6 @@ BUILD := _build
 SPEC  := docs/spec/data
 PORT  ?= 8000
 CONTEXT ?= dev
-# The global CLI is installed in the cbox but may be absent on a developer's host.
 NETLIFY_BIN := $(shell p=$$(command -v netlify 2>/dev/null); if [ -f "$$p" ] && [ -x "$$p" ]; then printf '%s' "$$p"; fi)
 NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27.5.0 netlify)
 

@@ -77,7 +77,7 @@ assert.ok(autosave.save(session)); assert.equal(writes, 2);
 assert.ok(JSON.parse(store.get(AUTOSAVE_KEY)).inputs.length > 0);
 const previous = store.get(AUTOSAVE_KEY);
 startDemo(session.state, 'intro');
-assert.equal(autosave.save(session, true), false); assert.equal(store.get(AUTOSAVE_KEY), previous);
+assert.equal(autosave.save(session, true), 'skipped'); assert.equal(store.get(AUTOSAVE_KEY), previous);
 let error = '';
 const failing = new Autosave({ setItem: () => { throw new Error('quota'); } }, text => { error = text; });
 assert.equal(failing.save(restored), false); assert.match(error, /quota/);

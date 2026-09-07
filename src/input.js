@@ -15,6 +15,7 @@ export class Keyboard {
   constructor(target = window) {
     this.sources = new Map();
     this.pace = 5;
+    this.onKey = null;
     target.addEventListener('keydown', (e) => { if (this.map(e)) e.preventDefault(); });
     target.addEventListener('keyup', (e) => { this.map(e, true); });
     target.addEventListener('blur', () => this.reset());
@@ -28,6 +29,8 @@ export class Keyboard {
     if (!key) return false;
     const source = e.code || e.key;
     if (up) this.release(key, source); else this.press(key, source);
+    // onKey after press/release: the callback may reset what this key set
+    if (!e.repeat) this.onKey?.(up ? 'keyup' : 'keydown', source);
     return true;
   }
 

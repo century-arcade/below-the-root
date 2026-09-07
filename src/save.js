@@ -140,7 +140,7 @@ export function importSave(state, bytes) {
       f.gift = !!(stamp & GIFT_BIT);
     }
   });
-  const character = data.characters[get('character')] || data.characters[0];
+  const character = data.characters[get('character')];
   const p = newPlayer(character.sprite_sheet, get('stamina'));
   Object.assign(p, {
     name: character.name.toUpperCase(), people: character.people,

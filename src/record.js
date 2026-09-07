@@ -59,6 +59,8 @@ export class Session {
       created: new Date().toISOString(), seed, initial, slots, frames: 0,
       inputs: [], actions: [], path: [], gestures: [], storageErrors: [], outcomes: [],
     };
+    // a replay re-derives its own route and endings from the frames it runs
+    if (record) { this.record.path = []; this.record.outcomes = []; }
     this.slots = new Map(Object.entries(this.record.slots));
     const stick = { pace: 5, read: () => this.read() };
     this.state = newState(data, stick, {
@@ -121,8 +123,7 @@ export class Session {
     tick(this.state);
     this.frame++;
     if (['won', 'timeout'].includes(this.state.ended) && this.state.ended !== this.lastEnding) {
-      const outcomes = this.replayedOutcomes || this.record.outcomes;
-      if (!this.playback || this.replayedOutcomes) outcomes.push({ frame: this.frame,
+      this.record.outcomes.push({ frame: this.frame,
         kind: this.state.ended, day: this.state.clock.day, character: this.state.character });
     }
     this.lastEnding = this.state.ended;
@@ -134,8 +135,7 @@ export class Session {
     const s = this.state;
     const key = `${s.room?.code}:${!!s.room?.blank}:${s.title}:${s.quest}`;
     if (key !== this.lastRoom) {
-      const path = this.replayedPath || this.record.path;
-      if (!this.playback || this.replayedPath) path.push({ frame: this.frame, room: s.room?.code ?? null,
+      this.record.path.push({ frame: this.frame, room: s.room?.code ?? null,
         blank: !!s.room?.blank, title: s.title, quest: s.quest,
         col: s.player.col, row: s.player.row, day: s.clock.day, hour: s.clock.hour });
     }
@@ -151,7 +151,6 @@ export class Session {
     const action = { frame: this.frame, type: 'load', save: toBase64(bytes) };
     this.apply(action);
     this.record.actions.push(action);
-    this.noteRoom();
   }
 
   gesture(kind, ...details) {
@@ -168,10 +167,6 @@ export class Session {
   static replay(data, live, record, verify = true) {
     validateRecord(record, data);
     const session = new Session(data, live, { record });
-    session.replayedPath = [];
-    session.replayedOutcomes = [];
-    session.lastRoom = null;
-    session.noteRoom();
     for (let i = 0; i < record.frames; i++) {
       session.step();
       session.state.events.length = 0;
@@ -184,11 +179,6 @@ export class Session {
       throw new Error('Recording diverged from its checkpoint. The original save has been kept.');
     }
     session.playback = false;
-    session.noteRoom();
-    session.record.path = session.replayedPath;
-    session.record.outcomes = session.replayedOutcomes;
-    session.replayedPath = null;
-    session.replayedOutcomes = null;
     return session;
   }
 
@@ -238,7 +228,7 @@ export class Autosave {
   save(session, force = false) {
     const state = session.state;
     // Attract screens must never overwrite the player's quest.
-    if (state.demo || (!state.quest && !session.record.path.some(p => p.quest))) return false;
+    if (state.demo || (!state.quest && !session.record.path.some(p => p.quest))) return 'skipped';
     const key = screenKey(state);
     if (!force && key === this.key) return false;
     try {
