@@ -10,8 +10,23 @@
   [hidden] { display: none !important; }
   canvas { image-rendering: pixelated; display: block; }
   #where { font-size: 24px; line-height: 32px; letter-spacing: 2px; min-height: 32px; }
-  #debug { max-width: 960px; padding: 8px; }
-  #debug-status { overflow-wrap: anywhere; }
+  #debug, #debug-status { box-sizing: border-box; width: min(960px, 100%); }
+  #debug { padding: 8px; overflow-x: auto; white-space: nowrap; }
+  #debug-buttons {
+    display: grid; grid-template-columns: repeat(4, 168px); gap: 4px;
+    width: max-content; margin-inline: auto;
+  }
+  #debug-buttons > button, #debug-buttons > .file-label {
+    box-sizing: border-box; overflow: hidden; text-align: center;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  #github-login, #github-logout { grid-column: 1; grid-row: 1; }
+  #file-issue { grid-column: 2; grid-row: 1; }
+  #download-record { grid-column: 3; grid-row: 1; }
+  #debug-buttons > .file-label { grid-column: 4; grid-row: 1; }
+  #debug-status {
+    height: 1.6em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #notice { position: fixed; top: 8px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
@@ -25,15 +40,17 @@
 <body>
 <div id="notice" role="status" hidden></div>
 <div id="debug" hidden>
-  <button id="github-login">Log in to GitHub</button>
-  <button id="github-logout" hidden>Log out</button>
-  <button id="file-issue" hidden>File an issue</button>
-  <button id="download-record">Download recording</button>
-  <label class="file-label">Load recording <input id="load-record" type="file" accept=".json,.prg,application/json" hidden></label>
-  <div id="debug-status"></div>
+  <div id="debug-buttons">
+    <button id="github-login">Log in to GitHub</button>
+    <button id="github-logout" hidden>Log out</button>
+    <button id="file-issue" hidden>File an issue</button>
+    <button id="download-record">Download recording</button>
+    <label class="file-label">Load recording <input id="load-record" type="file" accept=".json,.prg,application/json" hidden></label>
+  </div>
 </div>
 <div id="where"></div>
 <canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
+<div id="debug-status" hidden></div>
 <dialog id="issue-dialog" aria-labelledby="issue-label">
   <form id="issue-form">
     <label id="issue-label" for="issue-message">What happened?</label>

@@ -27,6 +27,7 @@ export function issueContext(session) {
 export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note }) {
   const bar = document.getElementById('debug');
   bar.hidden = false;
+  document.getElementById('debug-status').hidden = false;
   const login = document.getElementById('github-login');
   const logout = document.getElementById('github-logout');
   const file = document.getElementById('file-issue');
@@ -94,6 +95,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     if (body.login) {
       login.hidden = true; logout.hidden = false; file.hidden = false;
       logout.textContent = `Log out (${body.login})`;
+      logout.title = logout.textContent;
     }
   } catch { /* Plain make serve has no server functions; recording still works. */ }
 }

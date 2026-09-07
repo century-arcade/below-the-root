@@ -23,7 +23,9 @@ const image = ctx.createImageData(WIDTH, HEIGHT);
 const CHROME_PX = 40;
 
 function fit() {
-  const availableHeight = window.innerHeight - CHROME_PX - document.getElementById('debug').offsetHeight;
+  const debugHeight = document.getElementById('debug').offsetHeight
+    + document.getElementById('debug-status').offsetHeight;
+  const availableHeight = window.innerHeight - CHROME_PX - debugHeight;
   const scale = Math.max(0.25, Math.min(
     window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
     availableHeight < HEIGHT ? availableHeight / HEIGHT : Math.floor(availableHeight / HEIGHT)));
@@ -153,7 +155,10 @@ loadData((path) => fetch(path).then((r) => {
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
     where.textContent = whereLabel(state);
-    if (debug) status.textContent = label(state);
+    if (debug) {
+      status.textContent = label(state);
+      status.title = status.textContent;
+    }
   }
 
   const STEP_MS = 1000 / 60;

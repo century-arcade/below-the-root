@@ -24,6 +24,23 @@ with sync_playwright() as p:
     page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
     assert page.locator('#help').count() == 0
     assert page.locator('#status').count() == 0
+    debug_box = page.locator('#debug').bounding_box()
+    status_box = page.locator('#debug-status').bounding_box()
+    screen_box = page.locator('#screen').bounding_box()
+    button_widths = page.locator('#debug-buttons > :visible').evaluate_all(
+        "els => els.map(e => Math.round(e.getBoundingClientRect().width))")
+    assert len(set(button_widths)) == 1, 'debug controls must not size themselves from their labels'
+    download_x = page.locator('#download-record').bounding_box()['x']
+    logout_text = page.locator('#github-logout').inner_text()
+    page.locator('#github-logout').evaluate("e => e.textContent = 'Log out (' + 'x'.repeat(200) + ')'")
+    assert page.locator('#download-record').bounding_box()['x'] == download_x
+    page.locator('#github-logout').evaluate("(e, text) => e.textContent = text", logout_text)
+    assert status_box['y'] >= screen_box['y'] + screen_box['height'], 'debug status belongs below the game'
+    assert round(debug_box['width']) == round(status_box['width'])
+    original_status_size = (status_box['width'], status_box['height'])
+    page.locator('#debug-status').evaluate("e => e.textContent = 'x'.repeat(2000)")
+    long_status_box = page.locator('#debug-status').bounding_box()
+    assert (long_status_box['width'], long_status_box['height']) == original_status_size
     box = page.locator('#screen').bounding_box()
     page.mouse.move(box['x'] + box['width'] * .9, box['y'] + box['height'] * .3)
     page.mouse.down()
