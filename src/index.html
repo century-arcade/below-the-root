@@ -42,6 +42,7 @@
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #notice { position: fixed; top: 8px; left: 8px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
+  body.debugging #notice { top: 48px; }
   dialog {
     position: static; align-self: center; margin: 8px 0 0;
     background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
@@ -51,7 +52,6 @@
   #issue-result { overflow-wrap: anywhere; }
   @media (max-width: 720px) {
     #debug { right: 184px; left: 0; width: auto; transform: none; }
-    #notice { top: 48px; }
   }
 </style>
 </head>

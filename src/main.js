@@ -8,10 +8,11 @@ import { Session, Autosave, AUTOSAVE_KEY } from './record.js';
 import { setupDebug } from './debug.js';
 import { Speaker } from './audio.js';
 
-function note(text) {
+function note(text, ms) {
   const element = document.getElementById('notice');
   element.textContent = text;
   element.hidden = !text;
+  if (ms) setTimeout(() => { if (element.textContent === text) note(''); }, ms);
 }
 
 const canvas = document.getElementById('screen');
@@ -23,10 +24,9 @@ const image = ctx.createImageData(WIDTH, HEIGHT);
 const CHROME_PX = 40;
 
 function fit() {
-  const debugBar = document.getElementById('debug');
-  const debugHeight = debugBar.offsetHeight
-    + document.getElementById('debug-status').offsetHeight;
-  const availableHeight = window.innerHeight - CHROME_PX - debugHeight;
+  const chrome = ['debug', 'debug-status', 'game-controls']
+    .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
+  const availableHeight = window.innerHeight - CHROME_PX - chrome;
   const scale = Math.max(0.25, Math.min(
     window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
     availableHeight < HEIGHT ? availableHeight / HEIGHT : Math.floor(availableHeight / HEIGHT)));
@@ -119,7 +119,7 @@ loadData((path) => fetch(path).then((r) => {
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
-  const saveNow = () => restoreFailed ? false : state.demo || autosave.save(session, true) || (!state.quest && !session.record.path.some(p => p.quest));
+  const saveNow = () => restoreFailed || state.demo || autosave.save(session, true) || (!state.quest && !session.record.path.some(p => p.quest));
   const pause = () => { paused = true; pointer.cancel(); stick.reset(); speaker.silence(); };
   const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
   const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.silence(); game.classList.add('paused'); };
@@ -153,7 +153,7 @@ loadData((path) => fetch(path).then((r) => {
       } else session.load(bytes);
       restoreFailed = false;
       speaker.silence();
-      if (saveNow()) note(`Loaded ${file.name}`);
+      if (saveNow()) note(`Loaded ${file.name}`, 3000);
     } catch (err) { note(err.message); }
     finally { resume(); }
   }
@@ -163,7 +163,7 @@ loadData((path) => fetch(path).then((r) => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { saveNow(); hold(); } else { pointer.cancel(); stick.reset(); }
   });
-  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note }).then(fit);
+  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note });
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
