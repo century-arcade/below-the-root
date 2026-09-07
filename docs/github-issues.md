@@ -1,9 +1,10 @@
 # Debug GitHub issue filing
 
 Only `?debug` shows **Log in to GitHub**. Once authenticated, **Report
-Issue** opens a single-message dialog immediately. Submission creates an
-issue as that user in `century-arcade/below-the-root`. The first message
-line becomes its title. State and recent moves are included; the full
+Issue** or the `R` key opens a single-message dialog immediately.
+Submission creates an issue as that user in
+`century-arcade/below-the-root`; its first message line becomes the title.
+State and recent moves are included; the full
 recording is a separate download, not automatically uploaded.
 
 The implementation uses a Netlify function, not credentials in the

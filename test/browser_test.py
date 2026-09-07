@@ -62,13 +62,16 @@ with sync_playwright() as p:
     page.wait_for_timeout(350)
     page.keyboard.up('ArrowRight')
     closed_layout = (page.locator('#debug').bounding_box(), page.locator('#screen').bounding_box())
-    page.locator('#file-issue').click()
+    page.keyboard.press('r')
     assert page.locator('#issue-dialog').evaluate("e => e.matches(':modal')")
+    assert page.locator('#issue-dialog').evaluate(
+        "e => getComputedStyle(e, '::backdrop').backgroundColor") == 'rgba(0, 0, 0, 0)'
     dialog_box = page.locator('#issue-dialog').bounding_box()
     assert round(dialog_box['y']) == 48
     open_layout = (page.locator('#debug').bounding_box(), page.locator('#screen').bounding_box())
     assert open_layout == closed_layout, 'issue dialog must not move the toolbar or game'
     assert dialog_box['y'] + dialog_box['height'] <= open_layout[1]['y'], 'issue dialog must stay above the game'
+    assert open_layout[1]['y'] - dialog_box['y'] - dialog_box['height'] <= 34
     saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
     page.locator('#issue-message').fill('wasd and spaces should only type here\nThe doorway did not open.')
     page.wait_for_timeout(150)

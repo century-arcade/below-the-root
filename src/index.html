@@ -45,8 +45,8 @@
     max-height: calc(100dvh - 56px); margin: 0 auto; overflow: auto;
     background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
   }
-  dialog::backdrop { background: #0b130dcc; }
-  textarea { display: block; box-sizing: border-box; width: 100%; min-height: 100px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
+  dialog::backdrop { background: transparent; }
+  textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
   @media (max-width: 720px) {
@@ -62,7 +62,7 @@
 </div>
 <div id="debug" hidden>
   <div id="debug-buttons">
-    <button id="file-issue" hidden>Report Issue</button>
+    <button id="file-issue" aria-keyshortcuts="R" hidden>Report Issue</button>
     <button id="download-record">Download recording</button>
     <label class="file-label">Load recording <input id="load-record" type="file" accept=".json,.prg,application/json" hidden></label>
   </div>

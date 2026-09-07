@@ -1,5 +1,6 @@
 import { ENGINE_VERSION } from './record.js';
 import { panelLines } from './panel.js';
+import { isEditing } from './input.js';
 
 const API = '/.netlify/functions/github';
 const DRAFT_KEY = 'btr.issue-draft';
@@ -68,9 +69,17 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     dialog.showModal();
     message.focus();
   };
+  addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'r' && !e.repeat && !e.metaKey && !e.altKey && !e.ctrlKey
+        && !isEditing(e.target) && !report.hidden && !dialog.open) {
+      report.focus();
+      report.click();
+      e.preventDefault();
+    }
+  });
   message.oninput = () => { try { sessionStorage.setItem(DRAFT_KEY, message.value); } catch { /* Keep the text in the form. */ } };
   document.getElementById('issue-cancel').onclick = () => dialog.close();
-  dialog.addEventListener('close', resume);
+  dialog.addEventListener('close', () => { resume(); report.focus(); });
   form.onsubmit = async e => {
     e.preventDefault();
     submit.disabled = true;
