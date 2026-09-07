@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Project issue-loop worker: review fixes, then commit locally on master."""
 
+import os
 import re
 import shutil
 import sys
@@ -16,39 +17,41 @@ from _issue_control import Aborted, Control
 
 
 def verdict(text: str, expected: str) -> bool:
-    """Accept a standalone verdict anywhere, including Markdown emphasis.
-
-    Conflicting verdicts, prose guesses, and fenced examples cannot pass.
-    """
+    """A verdict is a whole line, emphasis allowed; fenced lines never count."""
     found = set()
-    fence = None
+    fenced = False
     for line in text.splitlines():
-        line = line.strip()
-        if line.startswith(("```", "~~~")):
-            marker = line[:3]
-            if fence is None:
-                fence = marker
-            elif fence == marker:
-                fence = None
-            continue
-        if fence is None:
-            annotated = re.fullmatch(r"\*\*(VERDICT:\s*[a-z]+)\*\*\s+[—–-]\s+.+", line)
-            if annotated:
-                line = annotated[1]
-            match = re.fullmatch(r"VERDICT:\s*([a-z]+)", line.strip("*`# "))
-            if match:
-                found.add(match[1])
+        if line.lstrip().startswith(("```", "~~~")):
+            fenced = not fenced
+        elif not fenced and (match := re.match(r"[^\w>]*VERDICT:\s*(\w+)\W*$", line)):
+            found.add(match[1])
     return found == {expected}
 
 
 class LocalQueue(shared.Queue):
-    def agent(self, stage, effort, worktree, log, context, output=None):
+    def agent(self, stage, effort, worktree, log, context, output=None, slot=None):
         if stage in ("triage", "diagnose", "review"):
             context += (f"\n\n## Current stage: {stage}\n\n"
                         "This stage is read-only. Do not implement or commit the fix. "
                         "Follow this stage's output format. The worker will invoke "
                         "the implementing stage separately when appropriate.")
-        return super().agent(stage, effort, worktree, log, context, output)
+        setting = os.environ.get(f"STAGE_{(slot or stage).upper()}")
+        if not setting:
+            return super().agent(stage, effort, worktree, log, context, output)
+        vendor, model, *rest = setting.split(":")
+        effort = rest[0] if rest else effort
+        overrides = {"AGENT_VENDOR": vendor,
+                     "AGENT_CODEX_MODEL" if vendor == "codex" else f"AGENT_CLAUDE_{effort.upper()}": model}
+        saved = {key: os.environ.get(key) for key in overrides}
+        os.environ.update(overrides)
+        try:
+            return super().agent(stage, effort, worktree, log, context, output)
+        finally:
+            for key, value in saved.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
     def unchanged(self, worktree: Path, head: str, stage: str) -> None:
         if (self.git("status", "--porcelain", cwd=worktree)
@@ -109,7 +112,7 @@ class LocalQueue(shared.Queue):
             for number in range(1, self.rounds + 1):
                 fix = self.agent("fix", "high", worktree, log,
                                  context + (f"\n\n## Prior review\n\n{review}" if review else ""),
-                                 f"fix-{number}")
+                                 f"fix-{number}", slot="fix" if number == 1 else "refix")
                 if verdict(fix, "human"):
                     self.finish(task, fix + f"\n\nWorktree: `{worktree}`")
                     return

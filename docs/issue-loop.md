@@ -1,45 +1,40 @@
 # Automated issue fixes
 
-The existing `cbox btr loop` watcher imports GitHub issues into
-`.meta/todo/agent-queue/`. This project's `.meta/issue-loop.conf` selects
-`tools/issue_loop.py` through the shared command's configuration hook:
+`cbox btr loop` imports GitHub issues into `.meta/todo/agent-queue/` and runs
+the worker on each queued task.  `.meta/issue-loop.conf` (sourced by the
+shared `issue-loop` wrapper) selects this project's runner and assigns a model
+to each stage:
 
 ```sh
+STAGE_TRIAGE=claude:fable
+STAGE_DIAGNOSE=claude:fable
+STAGE_FIX=codex:gpt-6-astra
+STAGE_REFIX=claude:opus
+STAGE_REVIEW=claude:fable
 exec python3 tools/issue_loop.py "$@"
 ```
 
-Keep that config in the project's persistent `.meta` repository. No service
-restart is needed: each worker invocation reads it. The runner reuses the
-installed workflow's queue, importer, locks, session logs, and attach/abort
-controls. Its processing policy lives here because the shared workflow is
-mounted read-only in this cbox.
+A `STAGE_<NAME>` value is `vendor:model[:effort]`; an unset stage uses the
+shared defaults (`AGENT_VENDOR`, effort low for triage, medium for diagnose
+and review, high for fix).  `REFIX` is the fix stage on rounds after a failed
+review; `MAX_ROUNDS` (default 2) caps the rounds.  Each worker invocation
+reads the conf, so edits apply to the next task.
 
-A ready issue proceeds through diagnosis, implementation, tests, commit, and
-review. Standalone verdicts may appear after explanatory text or in Markdown
-emphasis (including a following dash and explanation); conflicting verdicts
-and verdicts inside code blocks do not pass.
-An explanation of a fix alone is insufficient: the worker requires committed
-changes and a passing review before marking a task done. A diagnosis or TODO
-entry alone does not complete an actionable issue.
+`tools/issue_loop.py` reuses the workflow's importer, queue, locks, logs, and
+attach/abort controls, and replaces its delivery: fixes start from local
+`master` in a detached worktree under `_cbox/`; triage, diagnose, and review
+run there too and must leave it unchanged; only the fix stage writes and
+commits.  A verdict line (`VERDICT: ready|human|pass|fail`) must stand alone,
+emphasis allowed; fenced or hedged verdicts do not count.  A passing review
+fast-forwards local `master`, records the commit in `.meta/done/`, and closes
+the task's GitHub issue (frontmatter `github_issue:`) with a comment naming
+the commit; a failed close is noted there and the delivery stands.  The
+worker never fetches, pushes, or opens PRs.
 
-Fixes start from local `master` in temporary worktrees under `_cbox/`. After
-review, the worker fast-forwards local `master`, records the commit hash in
-`.meta/done/`, and closes the task's GitHub issue (frontmatter `github_issue:`)
-with a comment naming that commit; a failed close is noted in the done record
-and the delivery stands. It does not fetch code from origin, push commits, or
-create PRs. GitHub issue import remains read-only and deduplicated.
-Triage, diagnosis, and review run in the temporary worktree too, and must leave
-its files and commit unchanged. Only the implementation stage writes fixes.
+The main checkout must be clean and on `master`.  A run that finds it
+changed, an unclear task, a failed review, or an uncommitted fix returns the
+task to `.meta/todo/` with its worktree and logs referenced.  Requeue by
+moving the complete Markdown file back into `.meta/todo/agent-queue/`;
+imported issues are not retried automatically.
 
-The main checkout must be clean and on `master`. If it changes during a run,
-the worker preserves the fix's worktree and returns the task to `.meta/todo/`
-with its logs. Unclear tasks, failed reviews, and missing commits also return
-there for inspection. Requeue a task by moving its complete Markdown file
-into `.meta/todo/agent-queue/`; previously imported issues are not retried
-automatically.
-
-Run the local worker regression tests with:
-
-```sh
-python3 -m unittest discover -s test -p 'issue_loop_test.py'
-```
+Tests (no AI): `python3 -m unittest discover -s test -p 'issue_loop_test.py'`.

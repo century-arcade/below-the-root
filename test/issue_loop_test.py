@@ -1,6 +1,7 @@
 """Exercise local delivery against real temporary Git repositories, without AI."""
 
 import importlib.util
+import os
 import subprocess
 import tempfile
 import unittest
@@ -17,15 +18,15 @@ SPEC.loader.exec_module(loop)
 class VerdictTests(unittest.TestCase):
     def test_ready_after_analysis_and_markdown(self):
         for output in ("VERDICT: ready", "Analysis.\n\n**VERDICT: ready**\n\nCriteria.",
-                       "**VERDICT: ready** — The fix is bounded.",
-                       "\n`VERDICT: ready`\n", "## VERDICT: ready"):
+                       "\n`VERDICT: ready`\n", "## VERDICT: ready", "**VERDICT: ready.**"):
             with self.subTest(output=output):
                 self.assertTrue(loop.verdict(output, "ready"))
 
     def test_missing_conflicting_or_quoted_verdict_does_not_pass(self):
         for output in ("", "Sure, ready!", "Not VERDICT: ready", "> VERDICT: ready",
                        "VERDICT: ready\nVERDICT: human", "VERDICT: unknown",
-                       "Example:\n```text\nVERDICT: ready\n```", "VERDICT: ready if tests pass"):
+                       "Example:\n```text\nVERDICT: ready\n```", "VERDICT: ready if tests pass",
+                       "**VERDICT: ready** — if the tests pass"):
             with self.subTest(output=output):
                 self.assertFalse(loop.verdict(output, "ready"))
 
@@ -56,7 +57,7 @@ class LocalDeliveryTests(unittest.TestCase):
         self.stages = []
         self.gh_calls = []
 
-    def agent(self, stage, effort, worktree, log, context, output=None):
+    def agent(self, stage, effort, worktree, log, context, output=None, **_):
         self.stages.append(stage)
         if stage == "triage":
             return "The fix is clear.\n\n**VERDICT: ready**\n\nAcceptance: fix and test."
@@ -117,7 +118,7 @@ class LocalDeliveryTests(unittest.TestCase):
         self.assertIn("Closing issue #2 failed: gh exited 1: offline", (self.q.meta / "done/github-2.md").read_text())
 
     def test_diagnosis_alone_cannot_complete_task(self):
-        def agent(stage, *args):
+        def agent(stage, *args, **_):
             if stage == "fix":
                 return "Diagnosed the issue; add one line to fix it."
             return self.agent(stage, *args)
@@ -130,7 +131,7 @@ class LocalDeliveryTests(unittest.TestCase):
             with self.subTest(stage=bad_stage):
                 if bad_stage != "triage":
                     self.q.move(self.q.todo / "github-2.md", self.q.queue)
-                def agent(stage, effort, worktree, *args):
+                def agent(stage, effort, worktree, *args, **_):
                     result = self.agent(stage, effort, worktree, *args)
                     self.assertNotEqual(worktree, self.repo)
                     if stage == bad_stage:
@@ -143,7 +144,7 @@ class LocalDeliveryTests(unittest.TestCase):
                 self.assertEqual(self.q.git("rev-parse", "HEAD"), self.base)
 
     def test_uncommitted_fix_is_retained(self):
-        def agent(stage, effort, worktree, *args):
+        def agent(stage, effort, worktree, *args, **_):
             if stage == "fix":
                 (worktree / "fixture.txt").write_text("uncommitted\n")
                 return "Forgot to commit."
@@ -154,7 +155,7 @@ class LocalDeliveryTests(unittest.TestCase):
         self.assertEqual(self.q.git("rev-parse", "HEAD"), self.base)
 
     def test_master_change_during_review_is_preserved(self):
-        def agent(stage, *args):
+        def agent(stage, *args, **_):
             result = self.agent(stage, *args)
             if stage == "review":
                 (self.repo / "human.txt").write_text("human work\n")
@@ -182,13 +183,31 @@ class LocalDeliveryTests(unittest.TestCase):
 
     def test_failed_review_keeps_commit_off_master(self):
         self.q.rounds = 1
-        def agent(stage, *args):
+        def agent(stage, *args, **_):
             if stage == "review":
                 return "VERDICT: fail\nMissing regression coverage."
             return self.agent(stage, *args)
         self.run_task(agent)
         self.assertEqual(self.q.git("rev-parse", "HEAD"), self.base)
         self.assertIn("Missing regression coverage", (self.q.todo / "github-2.md").read_text())
+
+    def test_stage_setting_selects_vendor_model_and_effort(self):
+        seen = {}
+        def shared_agent(_queue, stage, effort, *args):
+            seen[args[-1] or stage] = (effort, os.environ.get("AGENT_VENDOR"),
+                                       os.environ.get("AGENT_CODEX_MODEL"), os.environ.get("AGENT_CLAUDE_HIGH"))
+            return ""
+        settings = {"STAGE_FIX": "codex:gpt-6-astra", "STAGE_REFIX": "claude:opus", "STAGE_TRIAGE": "claude:fable:high"}
+        with patch.object(loop.shared.Queue, "agent", shared_agent), patch.dict(os.environ, settings):
+            self.q.agent("triage", "low", self.repo, self.repo, "")
+            self.q.agent("fix", "high", self.repo, self.repo, "", "fix-1", slot="fix")
+            self.q.agent("fix", "high", self.repo, self.repo, "", "fix-2", slot="refix")
+            self.q.agent("review", "medium", self.repo, self.repo, "")
+            self.assertNotIn("AGENT_VENDOR", os.environ)
+        self.assertEqual(seen, {"triage": ("high", "claude", None, "fable"),
+                                "fix-1": ("high", "codex", "gpt-6-astra", None),
+                                "fix-2": ("high", "claude", None, "opus"),
+                                "review": ("medium", None, None, None)})
 
     def test_config_hook_selects_local_runner(self):
         (self.repo / "tools").mkdir()
