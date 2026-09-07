@@ -30,6 +30,7 @@ with sync_playwright() as p:
     status_box = page.locator('#debug-status').bounding_box()
     screen_box = page.locator('#screen').bounding_box()
     auth_box = page.locator('#github-auth').bounding_box()
+    assert round(debug_box['y']) == 0
     assert round(auth_box['y']) == 8
     assert round(auth_box['x'] + auth_box['width']) == 892
     button_widths = page.locator('#debug-buttons > :visible').evaluate_all(
@@ -41,9 +42,10 @@ with sync_playwright() as p:
     assert page.locator('#download-record').bounding_box()['x'] == download_x
     page.locator('#github-logout').evaluate("(e, text) => e.textContent = text", logout_text)
     assert status_box['y'] >= screen_box['y'] + screen_box['height'], 'debug status belongs below the game'
+    assert round(status_box['x']) == round(screen_box['x'])
+    assert round(status_box['width']) == round(screen_box['width'])
     assert page.locator('#debug-status').evaluate("e => getComputedStyle(e).textAlign") == 'left'
     assert ' tick ' not in page.locator('#debug-status').inner_text()
-    assert round(debug_box['width']) == round(status_box['width'])
     original_status_size = (status_box['width'], status_box['height'])
     page.locator('#debug-status').evaluate("e => e.textContent = 'x'.repeat(2000)")
     long_status_box = page.locator('#debug-status').bounding_box()
@@ -59,10 +61,11 @@ with sync_playwright() as p:
     page.keyboard.down('ArrowRight')
     page.wait_for_timeout(350)
     page.keyboard.up('ArrowRight')
+    closed_layout = (page.locator('#debug').bounding_box(), page.locator('#screen').bounding_box())
     page.locator('#file-issue').click()
-    dialog_box = page.locator('#issue-dialog').bounding_box()
-    open_screen_box = page.locator('#screen').bounding_box()
-    assert dialog_box['y'] + dialog_box['height'] <= open_screen_box['y'], 'issue dialog must not obscure the game'
+    assert page.locator('#issue-dialog').evaluate("e => e.matches(':modal')")
+    open_layout = (page.locator('#debug').bounding_box(), page.locator('#screen').bounding_box())
+    assert open_layout == closed_layout, 'issue dialog must not move the toolbar or game'
     saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
     page.locator('#issue-message').fill('wasd and spaces should only type here\nThe doorway did not open.')
     page.wait_for_timeout(150)

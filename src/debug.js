@@ -24,7 +24,7 @@ export function issueContext(session) {
     + '```json\n' + JSON.stringify(details, null, 2) + '\n```';
 }
 
-export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note, fit }) {
+export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note }) {
   const bar = document.getElementById('debug');
   bar.hidden = false;
   document.getElementById('debug-status').hidden = false;
@@ -64,13 +64,12 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     context = issueContext(getSession());
     result.textContent = '';
     try { message.value = sessionStorage.getItem(DRAFT_KEY) || ''; } catch { /* Draft is still editable. */ }
-    dialog.show();
-    fit();
+    dialog.showModal();
     message.focus();
   };
   message.oninput = () => { try { sessionStorage.setItem(DRAFT_KEY, message.value); } catch { /* Keep the text in the form. */ } };
   document.getElementById('issue-cancel').onclick = () => dialog.close();
-  dialog.addEventListener('close', () => { resume(); fit(); report.focus(); });
+  dialog.addEventListener('close', resume);
   form.onsubmit = async e => {
     e.preventDefault();
     submit.disabled = true;

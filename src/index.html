@@ -9,9 +9,13 @@
   body { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   [hidden] { display: none !important; }
   canvas { image-rendering: pixelated; display: block; background: #000; }
-  #where { font-size: 24px; line-height: 32px; letter-spacing: 2px; min-height: 32px; }
-  #debug, #debug-status { box-sizing: border-box; width: min(960px, 100%); }
-  #debug { padding: 8px; overflow-x: auto; white-space: nowrap; }
+  #game { display: flex; flex-direction: column; align-items: stretch; }
+  #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
+  #debug {
+    position: fixed; top: 0; left: 50%; z-index: 2; transform: translateX(-50%);
+    box-sizing: border-box; width: min(520px, 100%); padding: 8px;
+    overflow-x: auto; white-space: nowrap;
+  }
   #debug-buttons {
     display: grid; grid-template-columns: repeat(3, 168px); gap: 4px;
     width: max-content; margin-inline: auto;
@@ -29,16 +33,20 @@
     text-overflow: ellipsis; white-space: nowrap;
   }
   #debug-status {
-    height: 1.6em; overflow: hidden; text-align: left;
+    box-sizing: border-box; width: 100%; height: 1.6em; overflow: hidden; text-align: left;
     text-overflow: ellipsis; white-space: nowrap;
   }
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
-  #notice { position: fixed; top: 8px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
-  dialog { position: static; flex: none; margin: 0 0 8px; background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw); }
+  #notice { position: fixed; top: 48px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
+  dialog { background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw); }
+  dialog::backdrop { background: #0b130dcc; }
   textarea { display: block; box-sizing: border-box; width: 100%; min-height: 160px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
+  @media (max-width: 720px) {
+    #debug { right: 184px; left: 0; width: auto; transform: none; }
+  }
 </style>
 </head>
 <body>
@@ -64,9 +72,11 @@
     <p id="issue-result" role="status"></p>
   </form>
 </dialog>
-<div id="where"></div>
-<canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
-<div id="debug-status" hidden></div>
+<div id="game">
+  <div id="where"></div>
+  <canvas id="screen" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button."></canvas>
+  <div id="debug-status" hidden></div>
+</div>
 <script type="module" src="main.js"></script>
 </body>
 </html>

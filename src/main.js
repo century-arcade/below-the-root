@@ -24,14 +24,14 @@ const CHROME_PX = 40;
 
 function fit() {
   const debugHeight = document.getElementById('debug').offsetHeight
-    + document.getElementById('debug-status').offsetHeight
-    + document.getElementById('issue-dialog').offsetHeight;
+    + document.getElementById('debug-status').offsetHeight;
   const availableHeight = window.innerHeight - CHROME_PX - debugHeight;
   const scale = Math.max(0.25, Math.min(
     window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
     availableHeight < HEIGHT ? availableHeight / HEIGHT : Math.floor(availableHeight / HEIGHT)));
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = HEIGHT * scale + 'px';
+  document.getElementById('game').style.width = canvas.style.width;
 }
 
 function pickRoom(data, want) {
@@ -149,7 +149,7 @@ loadData((path) => fetch(path).then((r) => {
     pointer.cancel(); stick.reset();
     if (document.hidden) { saveNow(); speaker.silence(); }
   });
-  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note, fit }).then(fit);
+  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note }).then(fit);
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
