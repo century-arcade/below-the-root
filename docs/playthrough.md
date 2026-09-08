@@ -54,6 +54,8 @@ An action in progress may restart, and transient animation, creature
 timing, and tile edits are not restored by the C64 checkpoint. If validation
 or storage fails, the original autosave stays untouched and recovery can
 be retried.
+**Dismiss** hides the panel and keeps the original autosave for recovery on
+the next load; autosaving stays disabled until recovery or a file import succeeds.
 
 **Download original save** exports the preserved autosave even if recovery
 is unavailable. After auto-resume fails, the debug **Download recording**

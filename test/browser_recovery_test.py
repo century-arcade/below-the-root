@@ -42,6 +42,13 @@ with sync_playwright() as p:
     page.get_by_role('button', name='Dismiss notice').click()
     assert not page.locator('#notice').is_visible()
     assert page.get_by_role('button', name='Recover saved game').is_visible()
+    page.get_by_role('button', name='Dismiss', exact=True).click()
+    assert not page.locator('#save-recovery').is_visible()
+    page.evaluate("dispatchEvent(new Event('pagehide'))")
+    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
+    page.reload()
+    page.get_by_role('button', name='Recover saved game').wait_for()
     with page.expect_download() as download:
         page.get_by_role('button', name='Download original save').click()
     assert open(download.value.path()).read() == original

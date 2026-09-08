@@ -253,12 +253,14 @@ loadData((path) => fetch(path).then((r) => {
   recovery.hidden = !restoreFailed;
   const downloadOriginal = () => downloadRecordingText(existing, 'btr-preserved-autosave.json');
   document.getElementById('download-preserved-save').onclick = downloadOriginal;
+  document.getElementById('dismiss-recovery').onclick = () => { recovery.hidden = true; fit(); };
   document.getElementById('recover-save').onclick = () => {
     try {
       const recovered = recoverAutosave(data, stick, existing, localStorage, { slots, seed, saveSlot });
       session = recovered; state = session.state;
       restoreFailed = false;
       recovery.hidden = true;
+      fit();
       speaker.silence();
       release();
       note('Saved game recovered', 3000);
