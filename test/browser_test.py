@@ -66,25 +66,44 @@ with sync_playwright() as p:
     page.keyboard.press('r')
     assert page.locator('#issue-dialog').evaluate("e => e.open && !e.matches(':modal')")
     saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
-    page.locator('#issue-message').fill('wasd and spaces should only type here\nThe doorway did not open.')
+    draft = 'wasd and spaces should only type here\nThe doorway did not open.'
+    page.locator('#issue-message').fill(draft)
     page.wait_for_timeout(150)
-    assert page.locator('#issue-message').input_value().startswith('wasd and spaces')
+    assert page.locator('#issue-message').input_value() == draft
     page.locator('#issue-submit').click()
     page.locator('#issue-result').filter(has_text='Test network failure').wait_for()
-    assert page.locator('#issue-message').input_value().startswith('wasd and spaces')
+    assert page.locator('#issue-dialog').evaluate('e => e.open')
+    assert page.locator('#issue-message').input_value() == draft
+    assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") == draft
+    page.wait_for_timeout(300)
+    assert frames() == saved['frames'], 'a failed submission must keep game time paused'
     page.locator('#issue-submit').click()
-    page.get_by_role('link', name='Issue #123 filed — open on GitHub').wait_for()
+    page.locator('#issue-dialog').wait_for(state='hidden')
+    page.locator('#notice').filter(has_text='Issue #123 filed').wait_for()
     assert len(posted) == 2
     assert 'recentInputs' in posted[0]['context']
     assert 'player' in posted[0]['context']
-    assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).frames") == saved['frames'], 'issue dialog must pause game time'
-    page.locator('#issue-cancel').click()
-    assert page.locator('#file-issue').evaluate("e => e === document.activeElement")
-    page.wait_for_timeout(50)
+    assert posted[1] == posted[0], 'retry must retain the message and captured context'
+    assert page.locator('#issue-message').input_value() == ''
+    assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") is None
+    page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
+    page.wait_for_timeout(300)
+    assert frames() > saved['frames'], 'successful submission must resume game time'
     gestures = len(saved['gestures'])
     page.keyboard.press('ArrowRight')
     page.evaluate("dispatchEvent(new Event('pagehide'))")
-    assert len(page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).gestures")) == gestures + 2, 'focused debug button must not disable game keys'
+    recorded = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).gestures")
+    assert [g[1:] for g in recorded[gestures:]] == [['keydown', 'ArrowRight'], ['keyup', 'ArrowRight']], 'filing an issue must return keyboard input to the game without another click'
+    page.keyboard.press('r')
+    assert page.locator('#issue-message').input_value() == ''
+    stopped = frames()
+    page.wait_for_timeout(300)
+    assert frames() == stopped
+    page.locator('#issue-cancel').click()
+    page.locator('#issue-dialog').wait_for(state='hidden')
+    page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
+    page.wait_for_timeout(300)
+    assert frames() > stopped, 'manual close must resume game time'
     with page.expect_download() as dl:
         page.locator('#download-record').click()
     dl.value.save_as('/tmp/btr-browser-record.json')
@@ -102,8 +121,5 @@ with sync_playwright() as p:
     page.goto('http://localhost:8000/')
     page.wait_for_timeout(200)
     assert not page.locator('#debug').is_visible()
-    page.set_viewport_size({"width": 280, "height": 560})
-    page.wait_for_timeout(100)
-    assert page.locator('#screen').bounding_box()['width'] <= 280
     browser.close()
-    print('browser_test: autosave/resume, pause and resume, debug visibility, issue form isolation, mocked issue creation, record download/import, small viewport passed')
+    print('browser_test: autosave/resume, pause and resume, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

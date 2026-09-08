@@ -101,12 +101,10 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Could not file the issue.');
       if (!/^https:\/\/github\.com\/century-arcade\/below-the-root\/issues\/\d+$/.test(body.url)) throw new Error('Unexpected issue response');
-      const link = document.createElement('a');
-      link.href = body.url; link.target = '_blank'; link.rel = 'noopener';
-      link.textContent = `Issue #${body.number} filed — open on GitHub`;
-      result.replaceChildren(link);
       message.value = '';
       try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+      dialog.close();
+      note(`Issue #${body.number} filed`);
     } catch (err) { result.textContent = err.message; }
     finally { submit.disabled = false; }
   };
