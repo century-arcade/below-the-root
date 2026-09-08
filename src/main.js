@@ -3,7 +3,6 @@ import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { panelLines } from './panel.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
 import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
@@ -38,7 +37,7 @@ function fit() {
     game.style.width = '';
     scale = fitScale(game.clientWidth, game.clientHeight);
   } else {
-    const chrome = ['debug', 'debug-status', 'top-controls', 'game-controls', 'notices']
+    const chrome = ['top-controls', 'game-controls', 'notices']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome);
   }
@@ -74,22 +73,6 @@ function doorsAt(state, col, row) {
 
 function whereLabel(state) {
   return state.room && !state.title ? state.room.code : '';
-}
-
-// ?debug: the whole player state on the status line
-function label(state) {
-  const r = state.room;
-  const p = state.player;
-  if (!r) return `menu  "${panelLines(state).join(' / ').trim()}"`;
-  return `${r.code} (${r.room}) ${r.tileset}  day ${state.clock.day} hour ${state.clock.hour} +${state.clock.ticks}`
-    + `  cell ${p.col},${p.row} ${p.facing > 0 ? 'R' : 'L'}`
-    + `  frame ${p.frame} period ${p.period}`
-    + (p.crawling ? ' crawl' : '') + (p.running ? ' run' : '') + (p.leaping ? ' leap' : '')
-    + (p.gliding ? ' glide' : '') + (p.knockdown ? ` down ${p.knockdown}` : '')
-    + (p.fallen ? ` fallen ${p.fallen}` : '')
-    + (state.creature ? `  npc ${state.creature.col},${state.creature.row}` : '')
-    + (state.ended ? `  ENDED: ${state.ended}` : '')
-    + `  "${panelLines(state).join(' / ').trim()}"`;
 }
 
 loadData((path) => fetch(path).then((r) => {
@@ -142,6 +125,7 @@ loadData((path) => fetch(path).then((r) => {
   function syncMuteButton() {
     muteButton.textContent = speaker.muted ? '🔇' : '🔊';
     muteButton.setAttribute('aria-label', speaker.muted ? 'Unmute' : 'Mute');
+    muteButton.title = speaker.muted ? 'Unmute' : 'Mute';
     muteButton.setAttribute('aria-pressed', String(speaker.muted));
   }
   function persist(key, value) {
@@ -177,7 +161,6 @@ loadData((path) => fetch(path).then((r) => {
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
   where.hidden = !debug;
-  const status = document.getElementById('debug-status');
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -344,10 +327,6 @@ loadData((path) => fetch(path).then((r) => {
     if (overlay?.screen === mapScreen && mapUnavailable) release();
     const showBasics = basicsVisible(state, seenInput) && !overlay;
     if (basics.hidden === showBasics) basics.hidden = !showBasics;
-    if (debug) {
-      status.textContent = label(state);
-      status.title = status.textContent;
-    }
   }
 
   const STEP_MS = 1000 / 60;

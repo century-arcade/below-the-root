@@ -22,9 +22,8 @@ with sync_playwright() as p:
     page.route('**/.netlify/functions/github?*', github)
     page.goto('http://localhost:8000/?player=0&debug')
     page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
-    assert page.locator('#help').count() == 0
-    assert page.locator('#status').count() == 0
-    assert ' tick ' not in page.locator('#debug-status').inner_text()
+    for name in ['Download recording', 'Load recording', 'Report issue']:
+        assert page.locator('#top-controls').get_by_role('button', name=name, exact=True).is_visible(), name
     box = page.locator('#screen').bounding_box()
     page.mouse.move(box['x'] + box['width'] * .9, box['y'] + box['height'] * .3)
     page.mouse.down()
@@ -108,13 +107,13 @@ with sync_playwright() as p:
     page.wait_for_timeout(200)
     assert 'diverged' not in page.locator('#notice').inner_text()
     assert page.locator('#where').inner_text() == record['checkpoint']['room']
-    page.locator('#load-record').set_input_files('/tmp/btr-browser-record.json')
+    page.locator('#record-file').set_input_files('/tmp/btr-browser-record.json')
     page.get_by_role('status').filter(has_text='Loaded btr-browser-record.json').wait_for()
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
     page.goto('http://localhost:8000/')
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
-    assert not page.locator('#debug').is_visible()
+    assert not page.locator('#debug-tools').is_visible()
     assert not page.locator('#file-issue').is_visible()
     assert page.locator('#where').text_content() == ''
     assert not page.locator('#where').is_visible()

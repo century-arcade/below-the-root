@@ -7,7 +7,6 @@
 <style>
   html, body { margin: 0; min-height: 100%; background: #0b130d; color: #9ad284; font: 12px/1.6 monospace; }
   body { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  body.debugging { box-sizing: border-box; justify-content: flex-start; padding-top: 48px; }
   [hidden] { display: none !important; }
   canvas { image-rendering: pixelated; display: block; background: #000; }
   #game { display: flex; flex-direction: column; align-items: stretch; }
@@ -33,32 +32,13 @@
   #map-grid .current { outline: 2px solid #fff; outline-offset: -2px; }
   #map-grid > button:focus-visible { outline: 2px solid #ffe866; outline-offset: -2px; }
   #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
-  #debug {
-    position: fixed; top: 0; left: 50%; z-index: 2; transform: translateX(-50%);
-    box-sizing: border-box; width: min(356px, 100%); padding: 8px;
-  }
-  #debug-buttons {
-    display: grid; grid-template-columns: repeat(2, 168px); gap: 4px;
-    width: max-content; margin-inline: auto;
-  }
-  #debug-buttons > button, #debug-buttons > .file-label {
-    box-sizing: border-box; overflow: hidden; text-align: center;
-    text-overflow: ellipsis; white-space: nowrap;
-  }
-  #report { position: fixed; top: 8px; right: 8px; z-index: 2; }
-  #report > button {
-    box-sizing: border-box; width: 168px; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap;
-  }
-  #debug-status {
-    box-sizing: border-box; width: 100%; height: 1.6em; overflow: hidden; text-align: left;
-    text-overflow: ellipsis; white-space: nowrap;
-  }
-  #top-controls { display: flex; justify-content: flex-end; gap: 4px; padding: 4px 0; }
-  #top-controls > button { box-sizing: border-box; width: 32px; height: 32px; font-size: 16px; line-height: 1; padding: 0; }
+  #top-controls, #debug-tools { display: flex; gap: 4px; }
+  #top-controls { justify-content: flex-end; padding: 4px 0; }
+  #debug-tools { margin-right: auto; }
+  #top-controls button { box-sizing: border-box; width: 32px; height: 32px; font-size: 16px; line-height: 1; padding: 0; }
   #game-controls { min-height: 39px; padding-top: 8px; text-align: center; }
   #game-controls > button { box-sizing: border-box; width: 168px; }
-  button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
+  button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #notices { max-width: min(480px, 90vw); }
   #notice-banner, #save-recovery { padding: 8px; background: #142019; }
@@ -70,9 +50,6 @@
   textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
-  @media (max-width: 720px) {
-    #debug { right: 184px; left: 0; width: auto; transform: none; }
-  }
 </style>
 </head>
 <body>
@@ -88,19 +65,16 @@
     <button id="dismiss-recovery">Dismiss</button>
   </div>
 </div>
-<div id="report">
-  <button id="file-issue" aria-keyshortcuts="R" hidden>Report Issue</button>
-</div>
-<div id="debug" hidden>
-  <div id="debug-buttons">
-    <button id="download-record">Download recording</button>
-    <label class="file-label">Load recording <input id="load-record" type="file" accept=".json,.prg,application/json" hidden></label>
-  </div>
-</div>
 <div id="game">
   <div id="top-controls">
-    <button id="mute" aria-keyshortcuts="M" aria-label="Mute">🔊</button>
-    <button id="fullscreen" aria-keyshortcuts="F" aria-label="Fullscreen">⛶</button>
+    <div id="debug-tools" hidden>
+      <button id="download-record" aria-label="Download recording" title="Download recording">⤓</button>
+      <button id="load-record" aria-label="Load recording" title="Load recording">💾</button>
+      <input id="record-file" type="file" accept=".json,.prg,application/json" hidden>
+      <button id="file-issue" aria-keyshortcuts="R" aria-label="Report issue" title="Report issue">🐞</button>
+    </div>
+    <button id="mute" aria-keyshortcuts="M" aria-label="Mute" title="Mute">🔊</button>
+    <button id="fullscreen" aria-keyshortcuts="F" aria-label="Fullscreen" title="Fullscreen">⛶</button>
   </div>
   <div id="where" role="status"></div>
   <div id="canvas-box">
@@ -139,7 +113,6 @@
       </div>
     </div>
   </div>
-  <div id="debug-status" hidden></div>
   <div id="game-controls">
     <button id="map" aria-keyshortcuts="Tab" aria-controls="map-screen" aria-expanded="false">Map</button>
     <button id="help" aria-keyshortcuts="? h" aria-controls="help-screen" aria-expanded="false">Help</button>

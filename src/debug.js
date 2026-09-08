@@ -40,11 +40,7 @@ export function issueContext(session) {
 
 export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note,
   downloadRecording }) {
-  const bar = document.getElementById('debug');
-  bar.hidden = false;
-  document.body.classList.add('debugging');
-  document.getElementById('debug-status').hidden = false;
-  document.getElementById('file-issue').hidden = false;
+  document.getElementById('debug-tools').hidden = false;
   const logout = document.getElementById('github-logout');
   const report = document.getElementById('file-issue');
   const dialog = document.getElementById('issue-dialog');
@@ -56,7 +52,9 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   let context = '';
 
   document.getElementById('download-record').onclick = downloadRecording;
-  document.getElementById('load-record').onchange = async e => {
+  const recordFile = document.getElementById('record-file');
+  document.getElementById('load-record').onclick = () => recordFile.click();
+  recordFile.onchange = async e => {
     const selected = e.target.files[0];
     if (selected) await importFile(selected);
     e.target.value = '';

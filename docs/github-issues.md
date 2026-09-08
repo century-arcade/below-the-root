@@ -1,7 +1,7 @@
 # Debug GitHub issue filing
 
-Only `?debug` shows **Report Issue**, at the top right. Clicking
-**Report Issue** or pressing `R` starts login when logged out, saving the
+Only `?debug` shows the **Report issue** button (🐞) in the top bar. Clicking
+it or pressing `R` starts login when logged out, saving the
 quest first. Once authenticated, either opens a single-message dialog immediately.
 The dialog sits below the game and includes **Log out**. Submission creates an issue as
 that user in `century-arcade/below-the-root`; its first message line
@@ -83,6 +83,6 @@ preview domains likewise need a matching app/callback configuration.
 
 The toolbar's background session lookup only reveals an existing login.
 It does not gate login: a pending or failed lookup still allows
-**Report Issue** and `R` to navigate to the server's login endpoint.
+**Report issue** and `R` to navigate to the server's login endpoint.
 `test/browser_login_test.py` checks these cases, logged-out sessions, and
 logging out with mocked navigation, and confirms the quest saves first.
