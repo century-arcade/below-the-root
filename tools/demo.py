@@ -14,6 +14,8 @@ setups: $9789 -> $2F00 (title room $9D) and $97C4 -> $3100 (room $E4).
 import argparse
 import json
 
+from common import load_ram
+
 SCRIPTS = [
     {'name': 'intro', 'addr': 0x2F00, 'setup': 0x9789, 'room': 0x9D,
      'start_col': 0x06, 'start_row': 0x0E},
@@ -87,8 +89,7 @@ def main():
     ap.add_argument('--json', default='assets/demo.json')
     ap.add_argument('--list', action='store_true')
     a = ap.parse_args()
-    raw = open(a.bin, 'rb').read()
-    mem = raw[2:]               # 2-byte PRG load address
+    mem = load_ram(a.bin)
     out = []
     for s in SCRIPTS:
         steps, end = decode(mem, s['addr'])

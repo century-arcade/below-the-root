@@ -16,19 +16,17 @@ import argparse
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT, LOADED, load_ram
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import room as R                                       # noqa: E402
-
-LOADED = os.path.join(ROOT, 'build', 'dumps', 'loaded.bin')
 
 CLASS_RANGES = 0xA7A0        # tile_range_lookup bounds, 16 bytes
 ITEM_NAMES = 0xAFF7          # 15 x 16 chars
 ITEM_WEIGHT = 0xAE32         # 15 bytes
 ITEM_USABLE = 0x9077         # 15 bytes
 ITEM_SELLABLE = 0x4329       # 15 bytes
-MSG_TABLE = 0x4500
-N_MSGS = 187
+# EAT: classes accepted by the inline compares at $B46B-$B47D
+EDIBLE = {4, 5, 6, 10, 14}
 
 SPECIES = {
     0: 'Kindar adult A', 1: 'Kindar adult B',
@@ -58,11 +56,9 @@ FLAG_NOTES = {
     0xE3: 'ambush: attacked by the Nekom',
 }
 
-STAT = {0: 'standing with Kindar', 1: 'standing with Erdlings'}
-
-
-def load_ram(path):
-    return open(path, 'rb').read()[2:]
+GATE_STATS = {0: 'kindar', 1: 'erdling'}
+STAT = {k: 'standing with ' + name.title() + ('s' if k == 1 else '')
+        for k, name in GATE_STATS.items()}
 
 
 def class_table(game):
@@ -82,19 +78,6 @@ def object_class(tbl, i):
     return None
 
 
-def messages(game):
-    out, i, cur = [], MSG_TABLE, ''
-    while len(out) < N_MSGS:
-        b = game[i]
-        i += 1
-        if b & 0x80:            # $3C15 stops on it and never copies it
-            out.append(cur)
-            cur = ''
-        else:
-            cur += chr(b)
-    return out
-
-
 def objects(game, live=False):
     """256 parallel entries: room lo, column, flags."""
     base = 0x0D00 if live else 0xC400
@@ -110,13 +93,31 @@ def objects(game, live=False):
 
 
 def npcs(image=R.D64):
-    for n in range(512):
-        blk, t, s = R.read_block(n, image=image)
-        if (t, s) == (18, 0) or blk[0] == blk[1] == 0x01:
-            continue
-        b = blk[R.OFF_NPC:R.OFF_NPC + 18]
-        if b[0]:
-            yield n, list(b)
+    return [(n, list(blk[R.OFF_NPC:R.OFF_NPC + 18]))
+            for n, (blk, _, _) in R.real_rooms(image).items() if blk[R.OFF_NPC]]
+
+
+def item_table(game):
+    tbl = class_table(game)
+    counts = {}
+    for o in objects(game):
+        if o['exists']:
+            counts[o['cls']] = counts.get(o['cls'], 0) + 1
+    out = []
+    for k in range(15):
+        out.append({
+            'item': k,
+            'class': k,
+            'name': item_name(game, k),
+            'object_codes': [tbl[k], tbl[k + 1] - 1],
+            'slots': tbl[k + 1] - tbl[k],
+            'weight': game[ITEM_WEIGHT + k],
+            'usable': bool(game[ITEM_USABLE + k]),
+            'sellable': bool(game[ITEM_SELLABLE + k]),
+            'edible': k in EDIBLE,
+            'placed_in_world': counts.get(k, 0),
+        })
+    return out
 
 
 def cmd_classes(game, args):
@@ -143,7 +144,9 @@ def cmd_objects(game, args):
 
 
 def cmd_npcs(game, args):
-    msg = messages(game)
+    from messages import messages
+
+    msg = [m['text'] for m in messages(game)]
 
     def m(n):
         return msg[n - 1] if n else ''
@@ -168,8 +171,10 @@ def cmd_npcs(game, args):
 
 
 def cmd_messages(game, args):
-    for i, s in enumerate(messages(game), 1):
-        print('%3d %s' % (i, s))
+    from messages import messages
+
+    for m in messages(game):
+        print('%3d %s' % (m['n'], m['text']))
 
 
 def main():

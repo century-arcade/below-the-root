@@ -12,19 +12,18 @@ it carries the derived tables (colour slots, frame rects, animation
 sequences, note tables) and never duplicates the bitmaps.
 """
 import argparse
-import json
 import math
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from assets import PEPTO                                   # noqa: E402
+from assets import PEPTO, PLAYERS, load_raw, load_dump, sprite_rows  # noqa: E402
+from spec_player import CHAR_NAMES
+from room import COLOR_RANGES, OFF_COLORS
 import music as musicmod                                   # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW = os.path.join(ROOT, 'build', 'raw')
-DUMPS = os.path.join(ROOT, 'build', 'dumps')
+from common import ROOT, load_ram, write_json, FPS_NTSC, FPS_PAL
 OUT = os.path.join(ROOT, 'docs', 'spec', 'data')
 
 COLOR_NAMES = [
@@ -39,17 +38,6 @@ VICE39_SAMPLED = {0: '#000000', 1: '#FFFFFF', 3: '#7EF3D6', 4: '#AA40F5',
                   5: '#62D532', 7: '#FFFF46', 8: '#B7631E', 9: '#775300',
                   10: '#EE7B95', 13: '#B7FF86', 14: '#7385FF'}
 
-# $8C27 / $8CED: which room colour slot recolours which screen-code range.
-# slot i is footer byte $FB+i of the room block.
-COLOR_RANGES = [
-    (0x00, 0x51, None, None),
-    (0x52, 0x58, 1, 'wall'),
-    (0x59, 0x72, 2, 'structure'),
-    (0x73, 0x76, 3, 'ground'),
-    (0x77, 0xB3, 0, 'sign'),
-    (0xB4, 0xFF, None, None),
-]
-
 WATER_CHAR = 0x20
 WATER_FRAMES = [0xBD, 0xBE, 0xBF]      # $CDE8 strip = chars $BD-$BF
 WATER_ORDER = [0xBF, 0xBE, 0xBD]       # $0A3F counts down 2,1,0
@@ -60,9 +48,6 @@ FRAME_H = 2 * SPRITE_H                 # a figure is a stacked record pair
 SHEET_COLS = 8
 GRID = 1                               # gridline width in the assets/ sheets
 PNG_SCALE = 4                          # tools/assets.py upscales every sheet
-
-PLAYERS = ['player%d' % i for i in range(5)]
-CHAR_NAMES = ['Neric', 'Genaa', 'Herd', 'Pomma', 'Charn']
 
 # $9DF6 / $A41D / $A4A4 / $A4A6 / $A337: pointer value -> frame index is
 # (p - $C4) / 2 for the playerN sheets.
@@ -89,26 +74,12 @@ AD_DECAY_MS = [6, 24, 48, 72, 114, 168, 204, 240, 300, 750, 1500, 2400,
 
 CLOCK_NTSC = 1022727
 CLOCK_PAL = 985248
-FPS_NTSC = 59.826
-FPS_PAL = 50.125
 
 
-def load_raw(name):
-    with open(os.path.join(RAW, name + '.bin'), 'rb') as f:
-        return f.read()
-
-
-def load_dump(name):
-    with open(os.path.join(DUMPS, name + '.bin'), 'rb') as f:
-        return f.read()[2:]
-
-
-def write(name, obj):
-    os.makedirs(OUT, exist_ok=True)
-    path = os.path.join(OUT, name)
-    with open(path, 'w') as f:
-        json.dump(obj, f, indent=1)
-        f.write('\n')
+def write(out, name, obj):
+    os.makedirs(out, exist_ok=True)
+    path = os.path.join(out, name)
+    write_json(path, obj)
     print('wrote', os.path.relpath(path, ROOT), os.path.getsize(path), 'bytes')
 
 
@@ -209,10 +180,10 @@ def video():
 # --- charsets ---------------------------------------------------------------
 
 def char_color_source(c):
-    for lo, hi, slot, name in COLOR_RANGES:
+    for _, off, lo, hi in COLOR_RANGES:
         if lo <= c <= hi:
-            return slot
-    raise AssertionError(c)
+            return off - OFF_COLORS
+    return None
 
 
 def charset_asset(aid, name, load, tileset, chars, colors):
@@ -238,11 +209,9 @@ def charset_asset(aid, name, load, tileset, chars, colors):
         'char_color_slot': [char_color_source(c) for c in range(256)],
         'color_rule': ('slot is null -> use default_colors[code]; otherwise '
                        'use the room block colour slot of that index'),
-        'color_slots': [{'slot': i, 'name': n, 'room_footer_byte': i,
-                         'codes': [lo, hi]}
-                        for lo, hi, i, n in
-                        sorted((r for r in COLOR_RANGES if r[2] is not None),
-                               key=lambda r: r[2])],
+        'color_slots': [{'slot': off - OFF_COLORS, 'name': n,
+                         'room_footer_byte': off - OFF_COLORS, 'codes': [lo, hi]}
+                        for n, off, lo, hi in COLOR_RANGES],
         'animated_chars': [{
             'char': WATER_CHAR,
             'role': 'water; stepping onto it drowns the player',
@@ -328,15 +297,9 @@ def charsets():
 
 # --- sprites ----------------------------------------------------------------
 
-def sprite_bits(rec):
-    """21x24 list of 0/1 for one 64-byte record."""
-    return [[(rec[r * 3 + i // 8] >> (7 - i % 8)) & 1 for i in range(24)]
-            for r in range(21)]
-
-
 def frame_ink_bbox(data, frame):
-    rows = (sprite_bits(data[frame * 128:frame * 128 + 64]) +
-            sprite_bits(data[frame * 128 + 64:frame * 128 + 128]))
+    rows = (sprite_rows(data[frame * 128:frame * 128 + 64]).tolist() +
+            sprite_rows(data[frame * 128 + 64:frame * 128 + 128]).tolist())
     xs = [x for y in range(FRAME_H) for x in range(SPRITE_W) if rows[y][x]]
     ys = [y for y in range(FRAME_H) if any(rows[y])]
     if not xs:
@@ -574,12 +537,8 @@ def extras_sheet():
 # --- screens ----------------------------------------------------------------
 
 def screens():
-    game = load_raw('game')
-
-    def at(a, n):
-        return game[a - 0x8000: a - 0x8000 + n]
-
-    menu_text = at(0xA94D, 160).decode('latin1')
+    game = load_ram()
+    menu_text = game[0xA94D:0xA9ED].decode('latin1')
     return [
         {
             'id': 'screen_title_menu',
@@ -778,11 +737,8 @@ def note_table(mem):
 
 
 def sfx_table(game):
-    def at(a, n):
-        return game[a - 0x8000: a - 0x8000 + n]
-
-    ad, flo, fhi, ctl = (at(0xAA73, 14), at(0xAA81, 14),
-                         at(0xAA8F, 14), at(0xAA9D, 14))
+    ad, flo, fhi, ctl = (game[0xAA73:0xAA81], game[0xAA81:0xAA8F],
+                         game[0xAA8F:0xAA9D], game[0xAA9D:0xAAAB])
     out = []
     for x in range(14):
         f = flo[x] | fhi[x] << 8
@@ -804,7 +760,7 @@ def sfx_table(game):
 
 def build_music():
     mem = load_raw('musiclow')
-    game = load_raw('game')
+    game = load_ram()
     tunes = []
     for i in range(musicmod.NTUNES):
         t = musicmod.decode(mem, i)
@@ -874,12 +830,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--assets', action='store_true')
     ap.add_argument('--music', action='store_true')
+    ap.add_argument('--out', default=OUT)
     a = ap.parse_args()
     both = not (a.assets or a.music)
     if both or a.assets:
-        write('assets.json', build_assets())
+        write(a.out, 'assets.json', build_assets())
     if both or a.music:
-        write('music.json', build_music())
+        write(a.out, 'music.json', build_music())
     return 0
 
 

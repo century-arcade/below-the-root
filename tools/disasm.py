@@ -12,7 +12,7 @@ Extra {labels, comments} files in disasm/labels/*.json are merged in
 Addresses in the config are hex strings ("8400").
 Coverage files (from `btr cov NAME`, columns io/rom/ram) supply exact
 instruction starts; only the RAM column counts.
-Output is ca65 syntax; `make verify` reassembles and compares.
+Output is ca65 syntax.
 """
 import argparse
 import glob
@@ -111,7 +111,7 @@ class Disasm:
                 self.kind[a] = 'c'
                 for i in range(1, size):
                     self.kind[a + i] = 'o'
-                target = self.target(a, mn, mode)
+                target = self.target(a, mode)
                 if target is not None:
                     self.xrefs[target].add(a)
                     if mn in BRANCHES or mn in ('jsr', 'jmp') and mode == 'abs':
@@ -144,7 +144,7 @@ class Disasm:
             return self.mem[a + 1] | (self.mem[a + 2] << 8)
         return None
 
-    def target(self, a, _mn, mode):
+    def target(self, a, mode):
         v = self.operand(a, mode)
         if v is None:
             return None
@@ -154,11 +154,9 @@ class Disasm:
             return v
         return None
 
-    def label(self, a, create=True):
+    def label(self, a):
         if a in self.labels:
             return self.labels[a]
-        if not create:
-            return None
         if self.kind[a] == 'c':
             name = f'L{a:04X}'
         elif self.kind[a] == 'o':
@@ -170,7 +168,7 @@ class Disasm:
             name = f'D{a:04X}'
         return name
 
-    def fmt_operand(self, a, mn, mode):
+    def fmt_operand(self, a, mode):
         v = self.operand(a, mode)
         if mode == 'imp':
             return ''
@@ -179,7 +177,7 @@ class Disasm:
         if mode == 'imm':
             return f'#${v:02X}'
         if mode == 'rel':
-            return self.label(self.target(a, mn, mode))
+            return self.label(self.target(a, mode))
         assert v is not None
         sym = self.label(v) if self.wants_label(v) else (f'${v:02X}' if MODES[mode] == 1 else f'${v:04X}')
         if MODES[mode] == 2 and v < 0x100 and mode != 'ind':
@@ -213,7 +211,7 @@ class Disasm:
                     size = 1 + MODES[mode]
                     raw = ' '.join(f'{self.mem[a + i]:02X}' for i in range(size))
                     cov = '*' if 'x' in self.cov.get(a, '') else ' '
-                    lines.append(f'        {mn} {self.fmt_operand(a, mn, mode):<18}; {a:04X}{cov} {raw}')
+                    lines.append(f'        {mn} {self.fmt_operand(a, mode):<18}; {a:04X}{cov} {raw}')
                     a += size
                 else:
                     run = a + 1

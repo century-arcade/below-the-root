@@ -3,11 +3,12 @@
 
     tools/code_map.py            # rewrites docs/code-map.md
 """
+import argparse
 import glob
 import json
 import os
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT
 LABELS = os.path.join(ROOT, 'disasm', 'labels')
 PORT_MAP = os.path.join(ROOT, 'disasm', 'port_map.json')
 OUT = os.path.join(ROOT, 'docs', 'code-map.md')
@@ -69,6 +70,9 @@ def cell(text):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--out', default=OUT)
+    args = ap.parse_args()
     rows, port = load()
     out = [HEADER]
     current = None
@@ -83,8 +87,8 @@ def main():
         port.pop(addr, None)
     if port:
         raise SystemExit(f'port_map.json names addresses with no label: {", ".join(f"${a:04X}" for a in sorted(port))}')
-    open(OUT, 'w').write(''.join(out).rstrip('\n') + '\n')
-    print(f'{OUT}: {len(rows)} addresses')
+    open(args.out, 'w').write(''.join(out).rstrip('\n') + '\n')
+    print(f'{args.out}: {len(rows)} addresses')
 
 
 if __name__ == '__main__':

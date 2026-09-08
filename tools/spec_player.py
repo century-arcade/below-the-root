@@ -1,67 +1,22 @@
 #!/usr/bin/env python3
 """Generate docs/spec/data/{characters,items,skills}.json.
 
-Reads the shipped disk-1 files in build/raw/ (regenerate them with
-tools/g64.py) and pulls every number out of the real byte tables:
-
-    game.bin     $8000-$B6FF   character records, class ranges, item
-                               names, weights, usable/edible predicates
-    gamelow.bin  $3400-$55FF   character-select text, skill names
-    tooltab.bin  $C400-$C6FF   initial object table (room/col/flags)
+Reads build/dumps/loaded.bin and pulls numbers from the character, item,
+object and skill tables in the loaded RAM image.
 
 Semantics that are not in a byte table -- which classes EAT accepts,
 what each USE case does, what each skill costs -- are inline compares in
-the handlers.  They live in the HAND_* dicts below and are listed in the
-"hand_curated" field of each JSON, with the docs/ section they came from.
+the handlers.  They are listed below and in the
+"hand_curated" field of each JSON; HAND_SOURCE names their docs/ sections.
 
     python3 tools/spec_player.py [--out docs/spec/data]
 """
 import argparse
-import json
 import os
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW = os.path.join(ROOT, 'build', 'raw')
-
-GAME_BASE = 0x8000
-GAMELOW_BASE = 0x3400
-
-# ---------------------------------------------------------------- loading
-
-
-class Image:
-    def __init__(self, path, base):
-        with open(path, 'rb') as f:
-            self.data = f.read()
-        self.base = base
-
-    def __getitem__(self, addr):
-        return self.data[addr - self.base]
-
-    def bytes(self, addr, n):
-        off = addr - self.base
-        return self.data[off:off + n]
-
-    def text(self, addr, n):
-        return self.bytes(addr, n).decode('latin1')
-
-    def inline_string(self, call_addr):
-        """Decode the print_inline literal that follows `jsr print_inline`.
-
-        Layout: 20 09 80, then a 2-byte screen address, then characters
-        up to (not including) the first byte with bit 7 set.
-        """
-        off = call_addr - self.base
-        assert self.data[off:off + 3] == b'\x20\x09\x80', hex(call_addr)
-        p = off + 3
-        screen = self.data[p] | (self.data[p + 1] << 8)
-        p += 2
-        out = []
-        while not self.data[p] & 0x80:
-            out.append(chr(self.data[p]))
-            p += 1
-        return screen, ''.join(out)
-
+from common import ROOT, load_ram, write_json
+import objects as O
+from messages import inline_string
 
 # ------------------------------------------------------- hand-curated bits
 
@@ -72,9 +27,6 @@ HAND_SOURCE = {
     'skills': 'docs/menus-and-saves.md "Spirit gift and visions"; '
               'docs/verbs-and-inventory.md HEAL/GRUNSPREKE/KINIPORT',
 }
-
-# EAT accepts these classes ($B46B-$B47D, inline cmp chain, no table).
-EDIBLE_CLASSES = {4, 5, 6, 10, 14}
 
 # Per-class effects, read out of the handlers.  [src] is the routine.
 CLASS_EFFECTS = {
@@ -203,24 +155,12 @@ SKILLS = [
 # ------------------------------------------------------------ table readers
 
 
-def class_ranges(game):
-    """$A7A0: 16 boundaries -> 15 class ranges over object numbers."""
-    b = game.bytes(0xA7A0, 16)
-    return [(b[i], b[i + 1] - 1) for i in range(15)]
-
-
-def class_names(game):
-    """$AFF7: 15 fixed-width 16-char names, indexed by $A780[class]."""
-    ofs = game.bytes(0xA780, 15)
-    return [game.text(0xAFF7 + o, 16).rstrip() for o in ofs]
-
-
 def char_records(game):
     """$9CA9 via the end-offset table $9CA3: 14 bytes -> $0A63..$0A70."""
-    ends = game.bytes(0x9CA3, 6)
+    ends = game[0x9CA3:0x9CA9]
     out = []
     for e in ends:
-        out.append(list(game.bytes(0x9CA9 + e - 13, 14)))
+        out.append(list(game[0x9CA9 + e - 13:0x9CA9 + e + 1]))
     return out
 
 
@@ -231,14 +171,14 @@ def charsel_text(gamelow):
              (0x3622, 0x362D, 0x3647)]
     out = []
     for name, desc, trait in calls:
-        out.append(tuple(gamelow.inline_string(a)[1].rstrip() for a in
+        out.append(tuple(inline_string(gamelow, a)[0].rstrip() for a in
                          (name, desc, trait)))
     return out
 
 
 def skill_names(gamelow):
     """$4022, six $FF-terminated names, offsets in $401A[2..7]."""
-    ofs = gamelow.bytes(0x401A, 8)
+    ofs = gamelow[0x401A:0x4022]
     out = []
     for y in range(2, 8):
         p = 0x4022 + ofs[y]
@@ -247,23 +187,6 @@ def skill_names(gamelow):
             s += chr(gamelow[p])
             p += 1
         out.append(s)
-    return out
-
-
-def initial_objects(tooltab):
-    """$C400 room_lo / $C500 column / $C600 flags, 256 parallel entries."""
-    d = tooltab.data
-    out = []
-    for i in range(256):
-        flags = d[512 + i]
-        out.append({
-            'id': i,
-            'room': d[i] | (0x100 if flags & 0x80 else 0),
-            'col': d[256 + i],
-            'row': flags & 0x1F,
-            'exists': bool(flags & 0x40),
-            'carried': bool(flags & 0x20),
-        })
     return out
 
 
@@ -282,16 +205,16 @@ REC_FIELDS = ['spirit_energy', 'food', 'rest', 'stamina', 'spirit_limit',
               'nid_col', 'nid_row']
 
 
-def build_characters(game, gamelow, objects, ranges, names):
+def build_characters(game, objects, names):
     recs = char_records(game)
-    text = charsel_text(gamelow)
+    text = charsel_text(game)
     out = []
     for i in range(5):
         r = dict(zip(REC_FIELDS, recs[i]))
         room = r['nid_room_lo'] | (r['nid_room_hi'] << 8)
         start_items = [
-            {'object': o['id'], 'class': class_of(o['id'], ranges),
-             'name': names[class_of(o['id'], ranges)],
+            {'object': o['index'], 'class': o['cls'],
+             'name': names[o['cls']],
              'col': o['col'], 'row': o['row']}
             for o in objects
             if o['exists'] and o['room'] == room
@@ -343,43 +266,28 @@ def leap_arc(hover):
     return [-1, -1] + [0] * (hover - 1) + [1, 1]
 
 
-def class_of(num, ranges):
-    for i, (lo, hi) in enumerate(ranges):
-        if lo <= num <= hi:
-            return i
-    return None
-
-
-def build_items(game, gamelow, objects, ranges, names):
-    weight = game.bytes(0xAE32, 15)
-    usable = game.bytes(0x9077, 15)
-    sellable = gamelow.bytes(0x4329, 15)
-    counts = {}
-    for o in objects:
-        if o['exists']:
-            c = class_of(o['id'], ranges)
-            counts[c] = counts.get(c, 0) + 1
+def build_items(game):
     out = []
-    for c in range(15):
-        lo, hi = ranges[c]
+    for item in O.item_table(game):
+        c = item['class']
         verbs = ['EXAMINE', 'TAKE', 'DROP', 'OFFER', 'INVENTORY']
-        if usable[c]:
+        if item['usable']:
             verbs.append('USE')
-        if sellable[c]:
+        if item['sellable']:
             verbs.append('SELL')
-        if c in EDIBLE_CLASSES:
+        if item['edible']:
             verbs.append('EAT')
         out.append({
             'class': c,
-            'name': names[c],
-            'object_ids': [lo, hi],
-            'slots': hi - lo + 1,
-            'exists_at_start': counts.get(c, 0),
-            'weight': weight[c],
-            'usable': bool(usable[c]),
-            'sellable': bool(sellable[c]),
-            'edible': c in EDIBLE_CLASSES,
-            'value_tokens': 1 if sellable[c] else None,
+            'name': item['name'],
+            'object_ids': item['object_codes'],
+            'slots': item['slots'],
+            'exists_at_start': item['placed_in_world'],
+            'weight': item['weight'],
+            'usable': item['usable'],
+            'sellable': item['sellable'],
+            'edible': item['edible'],
+            'value_tokens': 1 if item['sellable'] else None,
             'verbs': verbs,
             'effects': CLASS_EFFECTS.get(c, []),
             'notes': CLASS_NOTES.get(c),
@@ -409,17 +317,13 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'docs/spec/data'))
     args = ap.parse_args()
 
-    game = Image(os.path.join(RAW, 'game.bin'), GAME_BASE)
-    gamelow = Image(os.path.join(RAW, 'gamelow.bin'), GAMELOW_BASE)
-    tooltab = Image(os.path.join(RAW, 'tooltab.bin'), 0xC400)
+    game = load_ram()
+    names = [O.item_name(game, k) for k in range(15)]
+    objects = list(O.objects(game))
 
-    ranges = class_ranges(game)
-    names = class_names(game)
-    objects = initial_objects(tooltab)
-
-    characters = build_characters(game, gamelow, objects, ranges, names)
-    items = build_items(game, gamelow, objects, ranges, names)
-    skills = build_skills(gamelow, characters)
+    characters = build_characters(game, objects, names)
+    items = build_items(game)
+    skills = build_skills(game, characters)
 
     docs = {
         'characters': {
@@ -481,9 +385,7 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     for name, blob in docs.items():
         path = os.path.join(args.out, f'{name}.json')
-        with open(path, 'w') as f:
-            json.dump(blob, f, indent=1, sort_keys=False)
-            f.write('\n')
+        write_json(path, blob)
         print(path)
 
 

@@ -11,9 +11,8 @@ import argparse
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT, LOADED, load_ram
 D64 = os.path.join(ROOT, 'build', 'btr2.d64')
-LOADED = os.path.join(ROOT, 'build', 'dumps', 'loaded.bin')
 OUTDIR = os.path.join(ROOT, 'build', 'rooms')
 
 SECTORS_PER_TRACK = [21] * 17 + [19] * 7 + [18] * 6 + [17] * 5
@@ -25,6 +24,14 @@ END = 0xC320
 OFF_NPC = 0xE0
 OFF_DOORS = 0xF2
 OFF_COLORS = 0xFB
+
+# $8CED: inclusive character ranges coloured by the room footer
+COLOR_RANGES = [
+    ('sign', 0xFB, 0x77, 0xB3),
+    ('wall', 0xFC, 0x52, 0x58),
+    ('structure', 0xFD, 0x59, 0x72),
+    ('ground', 0xFE, 0x73, 0x76),
+]
 
 # phase-2 structure opcode -> first char of the 3-wide column it paints
 COLUMN_BASE = {0x20: 0xB4, 0x40: 0xB7, 0x80: 0xBA, 0xA0: 0xBB, 0xC0: 0xBC}
@@ -46,12 +53,23 @@ def room_to_ts(room):
     return 2 + room // 18, room % 18
 
 
-def read_block(room=None, ts=None, image=D64):
-    track, sector = ts if ts else room_to_ts(room)
+def read_block(room, image=D64):
+    track, sector = room_to_ts(room)
     with open(image, 'rb') as f:
         f.seek(track_sector_offset(track, sector))
         raw = f.read(256)
     return raw[1:], track, sector    # the drive's first sector byte is dropped
+
+
+def real_rooms(image=D64):
+    """Room number -> (block, track, sector) for every slot holding real data."""
+    out = {}
+    for n in range(512):
+        blk, track, sector = read_block(n, image=image)
+        if (track, sector) == (18, 0) or blk[0] == blk[1] == 0x01:
+            continue
+        out[n] = (blk, track, sector)
+    return out
 
 
 class Room:
@@ -83,7 +101,6 @@ class Room:
                 for _ in range(min(n, END - addr)):
                     self.put(addr, char)
                     addr += 1
-        base = 0
         while True:
             b = blk[i]
             op, n = b & 0xE0, b & 0x1F
@@ -138,20 +155,20 @@ class Room:
 
     def color_map(self, table):
         """$8CED: char code -> colour, four ranges taken from the block footer."""
-        b6, b7, b8, b9 = self.colors
         out = bytearray(len(self.tiles))
         for i, c in enumerate(self.tiles):
-            if 0x52 <= c < 0x59:
-                out[i] = b7
-            elif 0x59 <= c < 0x73:
-                out[i] = b8
-            elif 0x73 <= c < 0x77:
-                out[i] = b9
-            elif 0x77 <= c < 0xB4:
-                out[i] = b6
+            for _, off, lo, hi in COLOR_RANGES:
+                if lo <= c <= hi:
+                    out[i] = self.blk[off]
+                    break
             else:
                 out[i] = table[c]
         return out
+
+
+def outdoor_bit(room, game):
+    """$A694 alone, the bit an edge crossing tests ($964A): no $9420 overrides."""
+    return bool(game[0xA6BB + (room >> 3)] & (0x80 >> (room & 7)))
 
 
 def is_outdoor(room, game):
@@ -160,7 +177,7 @@ def is_outdoor(room, game):
         return False
     if room & 0xFF in (0x7D, 0x7E, 0x9D, 0x9E):
         return True
-    return bool(game[0xA6BB + (room >> 3)] & (0x80 >> (room & 7)))
+    return outdoor_bit(room, game)
 
 
 def charset(game, outdoor):
@@ -168,7 +185,7 @@ def charset(game, outdoor):
     return game[base:base + 0x100], game[base + 0x100:base + 0x900]
 
 
-def render(room, table, chars, path):
+def render(room, table, chars, path=None):
     from PIL import Image
     img = Image.new('RGB', (COLS * 8, ROWS * 8))
     px = img.load()
@@ -183,9 +200,10 @@ def render(room, table, chars, path):
                 bits = glyph[y]
                 for x in range(8):
                     px[c * 8 + x, r * 8 + y] = fg if bits & (0x80 >> x) else PALETTE[0]
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    img.save(path)
-    return path
+    if path is not None:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        img.save(path)
+    return img
 
 
 def describe(room, number, track, sector, outdoor):
@@ -213,9 +231,10 @@ def main():
     ap.add_argument('--ram', default=LOADED)
     args = ap.parse_args()
 
-    game = open(args.ram, 'rb').read()[2:]
+    game = load_ram(args.ram)
+    blocks = real_rooms(args.image)
     if args.all:
-        rooms = range(512)
+        rooms = blocks
     elif args.ts:
         t, s = args.ts
         rooms = [(t - 2) * 18 + s]
@@ -225,13 +244,12 @@ def main():
         ap.error('give a room number, --ts, or --all')
 
     for number in rooms:
-        blk, track, sector = read_block(number, image=args.image)
-        if (track, sector) == (18, 0):    # BAM/header block, not a room
-            continue
-        if blk[0] == blk[1] == 0x01:
-            if not args.all:
+        if number not in blocks:
+            track, sector = room_to_ts(number)
+            if (track, sector) != (18, 0):
                 print('room %d (track %d sector %d): unused sector' % (number, track, sector))
             continue
+        blk, track, sector = blocks[number]
         try:
             room = Room(blk)
         except (IndexError, ValueError) as e:
@@ -245,8 +263,9 @@ def main():
                 print('  ' + ' '.join('%02x' % c for c in
                                       room.tiles[r * COLS:(r + 1) * COLS]))
         if args.png:
-            print('  ' + render(room, table, chars,
-                                os.path.join(OUTDIR, 'room%03d.png' % number)))
+            path = os.path.join(OUTDIR, 'room%03d.png' % number)
+            render(room, table, chars, path)
+            print('  ' + path)
 
 
 if __name__ == '__main__':

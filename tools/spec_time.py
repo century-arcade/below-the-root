@@ -11,91 +11,59 @@ world stock, blessers, animals, demo scripts) is read out of the RAM dump and
 disk image so it stays honest.  Prose and pseudocode: docs/spec/time.md.
 """
 import argparse
-import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT, LOADED, load_ram, write_json, FPS_NTSC, FPS_PAL
+from messages import messages
+from spec_player import skill_names
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import objects as O                                     # noqa: E402
 import room as R                                        # noqa: E402
 import demo as D                                        # noqa: E402
 
-FRAMES = {'ntsc': 59.826, 'pal': 50.125}
+FRAMES = {'ntsc': FPS_NTSC, 'pal': FPS_PAL}
 
 TIME_OF_DAY = ['EARLY MORNING', 'LATE MORNING', 'EARLY AFTERNOON',
                'LATE AFTERNOON', 'EARLY EVENING', 'LATE EVENING',
                'MIDNIGHT', 'LATE NIGHT']
 
-EDIBLE = {4, 5, 6, 10, 14}          # $B46B-$B47D
-
-CHARACTERS = ['neric', 'genaa', 'herd', 'pomma', 'charn', 'demo']
-
-# $9CA9 through $9CA3, one record per character: $0A63-$0A70.
-CHAR_STATS = 0x9CA9
-CHAR_ENDS = 0x9CA3
-CHAR_FIELDS = ['spirit_energy', 'food', 'rest', 'stamina', 'spirit_limit',
-               'standing_kindar', 'standing_erdling', 'food_cap_plus1',
-               'rest_cap_plus1', 'carry_limit', 'nid_room_lo', 'nid_room_hi',
-               'nid_col', 'nid_row']
-
-
-def rd(bin_path):
-    return O.load_ram(bin_path)
-
-
 # ---------------------------------------------------------------- economy
 
-def item_table(game):
-    tbl = O.class_table(game)
-    counts = {}
-    for o in O.objects(game):
-        if o['exists']:
-            counts[o['cls']] = counts.get(o['cls'], 0) + 1
-    out = []
-    for k in range(15):
-        out.append({
-            'item': k,
-            'class': k,          # the player spec's items.json calls it `class`
-            'name': O.item_name(game, k),
-            'object_codes': [tbl[k], tbl[k + 1] - 1],
-            'slots': tbl[k + 1] - tbl[k],
-            'weight': game[O.ITEM_WEIGHT + k],
-            'usable': bool(game[O.ITEM_USABLE + k]),
-            'sellable': bool(game[O.ITEM_SELLABLE + k]),
-            'edible': k in EDIBLE,
-            'placed_in_world': counts.get(k, 0),
-        })
-    return out
+def npc_record(n, block, msg):
+    def m(i):
+        return msg[i - 1]['text'] if i else None
+
+    return {'room': n, 'npc_id': block[16], 'species': block[0] >> 4,
+            'speak_lines': [x for x in (m(block[7]), m(block[8])) if x],
+            'pense_emotion': m(block[9]), 'pense_message': m(block[10])}
 
 
 def merchants(game, image):
-    msg = O.messages(game)
-
-    def m(n):
-        return msg[n - 1] if n else None
+    msg = messages(game)
 
     out = []
     for n, b in O.npcs(image=image):
         if b[17] != 0x80:
             continue
+        rec = npc_record(n, b, msg)
         out.append({
-            'room': n,
-            'npc_id': b[16],
-            'species': b[0] >> 4,
+            'room': rec['room'],
+            'npc_id': rec['npc_id'],
+            'species': rec['species'],
             'stock_item': b[15],
             'stock_item_name': O.item_name(game, b[15]),
-            'gate': {'standing': ['kindar', 'erdling'][b[1] & 0x0F],
+            'gate': {'standing': O.GATE_STATS[b[1] & 0x0F],
                      'min_level': b[1] >> 4},
-            'speak_lines': [x for x in (m(b[7]), m(b[8])) if x],
-            'pense_emotion': m(b[9]),
-            'pense_message': m(b[10]),
+            'speak_lines': rec['speak_lines'],
+            'pense_emotion': rec['pense_emotion'],
+            'pense_message': rec['pense_message'],
         })
     return sorted(out, key=lambda e: e['room'])
 
 
 def economy(game, image):
-    items = item_table(game)
+    items = O.item_table(game)
     tok = items[8]
     return {
         'generated_by': 'tools/spec_time.py',
@@ -184,15 +152,6 @@ VISIONS = [
     'ROOT.',
 ]
 
-SKILLS = [
-    {'spirit_limit': 5, 'skill': 'PENSE EMOTIONS'},
-    {'spirit_limit': 10, 'skill': 'PENSE MESSAGES'},
-    {'spirit_limit': 15, 'skill': 'HEAL YOURSELF'},
-    {'spirit_limit': 20, 'skill': 'GRUNSPREKE'},
-    {'spirit_limit': 25, 'skill': 'KINIPORT TOOLS'},
-    {'spirit_limit': 30, 'skill': 'KINIPORT YOUR BODY'},
-]
-
 FLAGS = [
     {'name': 'quest_active', 'src': '$D7', 'saved': True, 'width': 1,
      'set_by': 'starting a quest from character select',
@@ -251,16 +210,11 @@ FLAGS = [
 
 
 def quest(game, image):
-    msg = O.messages(game)
-
-    def m(n):
-        return msg[n - 1] if n else None
+    msg = messages(game)
 
     blessers, animals, gates, raamo = [], [], [], None
     for n, b in O.npcs(image=image):
-        rec = {'room': n, 'npc_id': b[16], 'species': b[0] >> 4,
-               'speak_lines': [x for x in (m(b[7]), m(b[8])) if x],
-               'pense_emotion': m(b[9]), 'pense_message': m(b[10])}
+        rec = npc_record(n, b, msg)
         if b[17] == 0x40:
             rec['grants'] = 'spirit_limit += 5, once per quest'
             blessers.append(rec)
@@ -298,7 +252,8 @@ def quest(game, image):
             'per_character': 'docs/spec/data/characters.json; the attract-demo record is demo.json demo_character',
             'src': '$9C6E $9CA9 $975C'
         },
-        'spirit_skills': SKILLS,
+        'spirit_skills': [{'spirit_limit': 5 * i, 'skill': name}
+                          for i, name in enumerate(skill_names(game), 1)],
         'visions': [{'index': i, 'text': t} for i, t in enumerate(VISIONS)],
         'vision_triggers': {
             'blessers': 'each of the five +5 blessers, first SPEAK only',
@@ -460,16 +415,13 @@ TEXT_PAGES = {
 }
 
 
-def demo(bin_path):
+def demo(mem):
     scripts = []
-    mem = open(bin_path, 'rb').read()[2:]
     for s in D.SCRIPTS:
         steps, end = D.decode(mem, s['addr'])
         for st in steps:
-            if st['op'] == 'set_84_85':
-                st['op'] = 'end_rest_delay'
             if st['op'] == 'text_page':
-                st['lines'] = TEXT_PAGES.get(st['page'], TEXT_PAGES[4])
+                st['lines'] = TEXT_PAGES[st['page']]
         scripts.append({
             'name': s['name'],
             'room': s['room'],
@@ -671,21 +623,19 @@ def save():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--bin', default=os.path.join(ROOT, 'build/dumps/loaded.bin'))
+    ap.add_argument('--bin', default=LOADED)
     ap.add_argument('--image', default=R.D64)
     ap.add_argument('--out', default=os.path.join(ROOT, 'docs/spec/data'))
     a = ap.parse_args()
-    game = rd(a.bin)
+    game = load_ram(a.bin)
     os.makedirs(a.out, exist_ok=True)
     tables = {'economy': economy(game, a.image),
               'quest': quest(game, a.image),
-              'demo': demo(a.bin),
+              'demo': demo(game),
               'save': save()}
     for name, data in tables.items():
         path = os.path.join(a.out, name + '.json')
-        with open(path, 'w') as f:
-            json.dump(data, f, indent=1)
-            f.write('\n')
+        write_json(path, data)
         print('wrote %s' % path)
 
 

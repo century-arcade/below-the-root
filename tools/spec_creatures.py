@@ -12,19 +12,19 @@ names and dialog strings in build/dumps/loaded.bin.
 Rules and pseudocode: docs/spec/creatures.md.
 """
 import argparse
-import json
 import os
 import sys
 from typing import Any
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT, LOADED, load_ram, write_json, FPS_NTSC, FPS_PAL
+from objects import item_name, GATE_STATS as STANDINGS
+from messages import inline_string, screen_rowcol
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import room as R                                                    # noqa: E402
 import messages as M                                                # noqa: E402
 
 OUTDIR = os.path.join(ROOT, 'docs', 'spec', 'data')
 
-ITEM_NAMES = 0xAFF7      # $AFD4 prints 16 chars from here
 N_ITEM_CLASSES = 15
 NO_ITEM_CLASS = 0x10     # $3D51: not a class at all -- the creature offers a nid
 
@@ -135,9 +135,8 @@ OFFER_TARGETS = {
     0x35: dict(accepts_item_classes=[8], result='open_gate_b'),
 }
 
-GATE_STATS = {0: 'standing_kindar', 1: 'standing_erdling'}
+GATE_STATS = {k: 'standing_' + name for k, name in STANDINGS.items()}
 
-# movement constants, read out of the binary rather than transcribed
 TURN_PAUSE = 0x9A68        # frames to wait after turning, by gait
 STEP_SLOW = 0x9AF4         # frames to the next half-step, by the phase entered
 STEP_FAST = 0x9AF6
@@ -163,8 +162,6 @@ MESSAGE_SINKS = [
     dict(name='message', verb='PENSE MESSAGES', row=24, col=1, src='$4162'),
 ]
 
-# fixed strings the creature/dialog rules print; text is read from the binary
-# at the print_inline operand so nothing here is transcribed by hand
 FIXED = [
     (0x3C50, 'speak_with_whom', 'SPEAK', 'no creature in the room, or none adjacent'),
     (0x3C88, 'come_back_tomorrow', 'SPEAK',
@@ -204,25 +201,6 @@ FIXED = [
 ]
 
 
-def item_name(mem, k):
-    s = mem[ITEM_NAMES + 16 * k:ITEM_NAMES + 16 * k + 16]
-    return s.decode('ascii').strip()
-
-
-def inline_string(mem, addr):
-    """$8009: 2-byte screen destination, then bytes until one has bit 7 set."""
-    dest = mem[addr + 3] | mem[addr + 4] << 8
-    i = addr + 5
-    while not mem[i] & 0x80:
-        i += 1
-    text = mem[addr + 5:i].decode('ascii')
-    return text, dest
-
-
-def screen_rowcol(dest):
-    return (dest - 0xC000) // 40, (dest - 0xC000) % 40
-
-
 def movement_class(species, kind_raw):
     """$99C4-$99D8 dispatch order: species first, then the $E0 kind nibble."""
     if species in (8, 9):
@@ -233,36 +211,35 @@ def movement_class(species, kind_raw):
 
 
 def creature(mem, room, blk):
-    b = blk
-    kind_raw = b[0xF1]
+    kind_raw = blk[0xF1]
     kind = KINDS[kind_raw]
-    sp = b[0xE0] >> 4
-    spread = b[0xE2] >> 4
+    sp = blk[0xE0] >> 4
+    spread = blk[0xE2] >> 4
     rec: dict[str, Any] = dict(
         room=room,
-        state_id=b[0xF0],
+        state_id=blk[0xF0],
         species=sp,
         species_name=SPECIES[sp]['name'],
-        sprite_color=b[0xE0] & 0x0F,
+        sprite_color=blk[0xE0] & 0x0F,
         kind=kind,
         kind_raw=kind_raw,
         movement=movement_class(sp, kind_raw),
-        start=dict(col=b[0xE3], row=b[0xE4], col_random_span=spread),
-        patrol=dict(turn_col_low=b[0xE5], turn_col_high=b[0xE6]),
-        gait='fast' if b[0xE2] & 0x0F else 'slow',
-        gate=dict(stat=GATE_STATS.get(b[0xE1] & 0x0F, 'unknown_%d' % (b[0xE1] & 0x0F)),
-                  level=b[0xE1] >> 4),
+        start=dict(col=blk[0xE3], row=blk[0xE4], col_random_span=spread),
+        patrol=dict(turn_col_low=blk[0xE5], turn_col_high=blk[0xE6]),
+        gait='fast' if blk[0xE2] & 0x0F else 'slow',
+        gate=dict(stat=GATE_STATS[blk[0xE1] & 0x0F],
+                  level=blk[0xE1] >> 4),
         dialog=dict(
-            gate_passed=dict(speak=[b[0xE7], b[0xE8]], emotion=b[0xE9], message=b[0xEA]),
-            gate_failed=dict(speak=[b[0xEB], b[0xEC]], emotion=b[0xED], message=b[0xEE]),
+            gate_passed=dict(speak=[blk[0xE7], blk[0xE8]], emotion=blk[0xE9], message=blk[0xEA]),
+            gate_failed=dict(speak=[blk[0xEB], blk[0xEC]], emotion=blk[0xED], message=blk[0xEE]),
         ),
         src='room block $%03X offsets $E0-$F1' % room,
+        gait_raw=blk[0xE2] & 0x0F,
+        messages_emitted=sorted({blk[o] for o, *_ in SLOTS if blk[o]}),
     )
-    rec['gait_raw'] = b[0xE2] & 0x0F
-    rec['messages_emitted'] = sorted({b[o] for o, *_ in SLOTS if b[o]})
 
-    params = dict(KIND_RULES.get(kind, {}))
-    gift = b[0xEF]
+    params = dict(KIND_RULES[kind])
+    gift = blk[0xEF]
     # $EF only reaches TAKE/REST for the kinds that can set the permission flag
     if kind in ('gift_giver', 'blesser', 'key_revealer', 'merchant') or \
             kind.startswith('rest_trap'):
@@ -277,12 +254,9 @@ def creature(mem, room, blk):
         params.pop('offers_item_class', None)
         params.pop('offers_item', None)
         params.pop('offers', None)
-    if b[0xF0] in OFFER_TARGETS:
-        params['offer_target'] = dict(OFFER_TARGETS[b[0xF0]])
-    if kind == 'hostile_animal':
-        params['wand_of_befal_spirit_cost'] = 1
-    else:
-        params['wand_of_befal_spirit_cost'] = 1 if sp in (6, 7) else 5
+    if blk[0xF0] in OFFER_TARGETS:
+        params['offer_target'] = dict(OFFER_TARGETS[blk[0xF0]])
+    params['wand_of_befal_spirit_cost'] = 1 if kind == 'hostile_animal' or sp in (6, 7) else 5
     rec['params'] = params
     return rec
 
@@ -292,7 +266,7 @@ def movement_rules(mem):
         return (p - 0xF4) // 2      # $F4/$F6/$F8 -> left-facing frame 0/1/2
 
     return dict(
-        ticks_per_second=dict(pal=50.125, ntsc=59.826,
+        ticks_per_second=dict(pal=FPS_PAL, ntsc=FPS_NTSC,
                               note='the AI runs once per video frame, from the '
                                    'raster interrupt, independently of the '
                                    "player's own step period"),
@@ -352,11 +326,12 @@ def persistent_state():
 
 
 def build(mem):
-    creatures = [creature(mem, r, blk) for r, blk in M.npc_rooms()]
+    blocks = M.npc_rooms()
+    creatures = [creature(mem, r, blk) for r, blk in blocks]
 
     msgs = M.messages(mem)
     emitters = {m['n']: [] for m in msgs}
-    for c, (_, blk) in zip(creatures, M.npc_rooms()):
+    for c, (_, blk) in zip(creatures, blocks):
         for off, slot, gate, verb in SLOTS:
             n = blk[off]
             if n:
@@ -381,7 +356,7 @@ def build(mem):
 
     fixed = []
     for addr, name, verb, when in FIXED:
-        text, dest = inline_string(mem, addr)
+        text, dest, _ = inline_string(mem, addr)
         row, col = screen_rowcol(dest)
         fixed.append(dict(name=name, text=text, verb=verb, printed_when=when,
                           row=row, col=col, src='$%04X' % addr))
@@ -423,7 +398,7 @@ def build(mem):
         item_classes=[dict(id=k, name=item_name(mem, k)) for k in range(N_ITEM_CLASSES)],
         no_item_class=NO_ITEM_CLASS,
         gate_stats=GATE_STATS,
-        kinds={name: KIND_RULES.get(name, {}) for name in sorted(set(KINDS.values()))},
+        kinds={name: KIND_RULES[name] for name in sorted(set(KINDS.values()))},
         movement_rules=movement_rules(mem),
         persistent_state=persistent_state(),
         species=species,
@@ -451,12 +426,12 @@ def build(mem):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--ram', default=M.LOADED)
+    ap.add_argument('--ram', default=LOADED)
     ap.add_argument('--outdir', default=OUTDIR)
     ap.add_argument('--print', dest='dump', action='store_true')
     a = ap.parse_args()
 
-    mem = M.memory(a.ram)
+    mem = load_ram(a.ram)
     cj, mj = build(mem)
 
     if a.dump:
@@ -470,9 +445,7 @@ def main():
 
     os.makedirs(a.outdir, exist_ok=True)
     for name, obj in (('creatures.json', cj), ('messages.json', mj)):
-        with open(os.path.join(a.outdir, name), 'w') as f:
-            json.dump(obj, f, indent=1)
-            f.write('\n')
+        write_json(os.path.join(a.outdir, name), obj)
     print('%d creatures, %d messages, %d fixed strings'
           % (cj['count'], mj['count'], len(mj['fixed_strings'])))
 

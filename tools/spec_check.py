@@ -7,7 +7,7 @@ import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT
 DATA = os.path.join(ROOT, 'docs/spec/data')
 
 fails = 0

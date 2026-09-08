@@ -4,6 +4,7 @@
 usage: g64.py IMAGE.g64 [--d64 OUT.d64] [--dump-dir DIR] [-v]
 """
 import argparse
+import os
 import struct
 
 GCR_DECODE = {
@@ -37,7 +38,7 @@ class Track:
     def find_syncs(self):
         run = 0
         start = 0
-        # scan twice the length so a sync straddling the wrap is seen once at least
+        # sync scan: 64 extra bits cover runs crossing the track boundary
         for i in range(self.nbits + 64):
             if self.bit(i):
                 if run == 0:
@@ -116,8 +117,6 @@ class Track:
                 if sec in self.sectors:
                     self.bad.append(f"duplicate sector t{trk} s{sec}")
                 self.sectors[sec] = payload
-                self.sectors_meta = getattr(self, 'sectors_meta', {})
-                self.sectors_meta[sec] = dict(trk=trk, chk_ok=(calc == chk), sync=length)
             else:
                 self.bad.append(f"unknown block id {kind:#04x} after sync@{after} len{length}")
 
@@ -183,7 +182,6 @@ def main():
         open(a.d64, 'wb').write(out)
         print(f"wrote {a.d64} ({len(out)} bytes); missing sectors: {missing}")
     if a.dump_dir:
-        import os
         os.makedirs(a.dump_dir, exist_ok=True)
         for t in tracks:
             for s, data in t.sectors.items():

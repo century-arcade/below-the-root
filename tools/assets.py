@@ -11,7 +11,8 @@ import sys
 import numpy as np
 from PIL import Image
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT, load_ram
+from room import COLOR_RANGES, OFF_COLORS
 RAW = os.path.join(ROOT, 'build', 'raw')
 DUMPS = os.path.join(ROOT, 'build', 'dumps')
 
@@ -29,10 +30,6 @@ D021, D022, D023 = 0, 1, 2  # $D021/$D022/$D023 as the game leaves them
 CHARSETS = {'indoor': 0xB700, 'outdoor': 0xC700}
 PLAYERS = ['player%d' % i for i in range(5)]
 
-# colour override ranges from the screen-update loop at $8C27 in `game`
-THEME_RANGES = [(0x52, 0x59, 0xB7), (0x59, 0x73, 0xB8),
-                (0x73, 0x77, 0xB9), (0x77, 0xB4, 0xB6)]
-
 
 def load_raw(name):
     with open(os.path.join(RAW, name + '.bin'), 'rb') as f:
@@ -40,12 +37,11 @@ def load_raw(name):
 
 
 def load_dump(name):
-    with open(os.path.join(DUMPS, name + '.bin'), 'rb') as f:
-        return f.read()[2:]
+    return load_ram(os.path.join(DUMPS, name + '.bin'))
 
 
-def char_hires(bits, fg, bg=D021):
-    return [fg if (bits >> (7 - i)) & 1 else bg for i in range(8)]
+def char_hires(bits, fg):
+    return [fg if (bits >> (7 - i)) & 1 else D021 for i in range(8)]
 
 
 def char_mc(bits, colour):
@@ -93,8 +89,7 @@ def save(idx, path, scale=4):
 
 
 def sheet(cw, ch, cols, rows):
-    g = np.full((rows * (ch + 1) + 1, cols * (cw + 1) + 1), GRID, dtype=np.uint8)
-    return g
+    return np.full((rows * (ch + 1) + 1, cols * (cw + 1) + 1), GRID, dtype=np.uint8)
 
 
 def cell(g, cw, ch, n, cols):
@@ -192,9 +187,9 @@ def render_textfont(outdir):
 def screen_colours(scr, table, zp):
     out = bytearray(len(scr))
     for i, sc in enumerate(scr):
-        for lo, hi, addr in THEME_RANGES:
-            if lo <= sc < hi:
-                out[i] = zp[addr] & 15
+        for _, off, lo, hi in COLOR_RANGES:
+            if lo <= sc <= hi:
+                out[i] = zp[0xB6 + off - OFF_COLORS] & 15
                 break
         else:
             out[i] = table[sc] & 15

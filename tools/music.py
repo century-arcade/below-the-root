@@ -14,8 +14,9 @@ descending equal-tempered chromatic scale from E6 (index 0) to D3 (index
 constant, so on real hardware it sounds ~39 cents sharp (NTSC).
 """
 import argparse
-import json
 import os
+
+from common import FPS_NTSC, write_json
 
 BASE = 0x2800
 PTR_LO, PTR_HI = 0x2844, 0x284F
@@ -24,7 +25,6 @@ FREQ_LO, FREQ_HI = 0x2B37, 0x2B5F
 NNOTES = 40
 REST = 39
 MIDI_TOP = 88          # index 0 = E6
-FPS_NTSC = 59.826
 NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
 
@@ -84,9 +84,7 @@ def main():
     if a.json:
         os.makedirs(a.json, exist_ok=True)
         for i, tn in enumerate(tunes):
-            with open('%s/tune%02d.json' % (a.json, i), 'w') as f:
-                json.dump(tn, f, indent=1)
-                f.write('\n')
+            write_json('%s/tune%02d.json' % (a.json, i), tn)
 
 
 if __name__ == '__main__':

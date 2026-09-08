@@ -16,9 +16,10 @@ import os
 import re
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from common import ROOT, load_ram
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import room as R                                        # noqa: E402
+from room import COLOR_RANGES, is_outdoor, outdoor_bit, real_rooms
 import objects as OBJ                                   # noqa: E402
 
 OUTDIR = os.path.join(ROOT, 'docs', 'spec', 'data')
@@ -30,18 +31,6 @@ def room_code(n):
     return DIGITS[n % GRID_W] + DIGITS[n // GRID_W]
 N_SLOTS = GRID_W * GRID_H
 UNDERGROUND_FIRST = 0x180
-
-OUTDOOR_BITMAP = 0xA6BB      # $A694 room_is_outdoor, 64 bytes
-FORCED_OUTDOOR_LO = (0x7D, 0x7E, 0x9D, 0x9E)    # $9420, compares room_lo only
-
-# --- colour footer -----------------------------------------------------------
-# $8CED: four char-code ranges take their colour from the last four block bytes.
-COLOR_RANGES = [
-    ('sign', 0xFB, 0x77, 0xB3),
-    ('wall', 0xFC, 0x52, 0x58),
-    ('structure', 0xFD, 0x59, 0x72),
-    ('ground', 0xFE, 0x73, 0x76),
-]
 
 # --- tile behaviour ----------------------------------------------------------
 # $9D90 tile_props: the whole of it, as (lo, hi, support, solid, climbable).
@@ -73,37 +62,6 @@ WATER_FRAMES = (0xBD, 0xBF)  # $9C60 cycles these over char $20
 OBJECT_FIRST, OBJECT_LAST = 0xE1, 0xFE       # class k occupies $FD-2k and $FE-2k
 
 DOOR_LOCKS = {0xC0: 'gate_a', 0xC1: 'gate_b'}    # $96B9, keyed on block $F1
-
-
-def read_ram(path):
-    return open(path, 'rb').read()[2:]
-
-
-def is_outdoor(room, game):
-    """$9420 + $A694.  The title-room case compares the LOW byte only."""
-    if room >= UNDERGROUND_FIRST:
-        return False
-    if (room & 0xFF) in FORCED_OUTDOOR_LO:
-        return True
-    return outdoor_bit(room, game)
-
-
-def outdoor_bit(room, game):
-    """$A694 alone, the bit an edge crossing tests ($964A): no $9420 overrides."""
-    return bool(game[OUTDOOR_BITMAP + (room >> 3)] & (0x80 >> (room & 7)))
-
-
-def real_rooms(image):
-    """Room number -> (block, track, sector) for every slot holding real data."""
-    out = {}
-    for n in range(N_SLOTS):
-        blk, track, sector = R.read_block(n, image=image)
-        if (track, sector) == (18, 0):          # BAM/header block
-            continue
-        if blk[0] == blk[1] == 0x01:            # unused sector, $01 filler
-            continue
-        out[n] = (blk, track, sector)
-    return out
 
 
 def neighbours(room):
@@ -275,7 +233,7 @@ def tile_role(code):
     return 'scenery', 'no behaviour; decoration'
 
 
-def build_tiles(blocks, game, hist):
+def build_tiles(game, hist):
     out_tbl, _ = R.charset(game, True)
     in_tbl, _ = R.charset(game, False)
     tiles = []
@@ -342,13 +300,12 @@ class Row(list):
 
 
 def dumps(obj):
-    rows, keyed = [], {}
+    rows = []
 
     def prep(o):
         if isinstance(o, Row):
             tok = '@@%d@@' % len(rows)
             rows.append('[' + ','.join(str(v) for v in o) + ']')
-            keyed[tok] = rows[-1]
             return tok
         if isinstance(o, dict):
             return {k: prep(v) for k, v in o.items()}
@@ -357,7 +314,7 @@ def dumps(obj):
         return o
 
     text = json.dumps(prep(obj), indent=1)
-    return re.sub(r'"(@@\d+@@)"', lambda m: keyed[m.group(1)], text)
+    return re.sub(r'"@@(\d+)@@"', lambda m: rows[int(m.group(1))], text)
 
 
 def write(path, obj):
@@ -421,11 +378,9 @@ def contact_sheet(blocks, game, path, cell=(64, 32), labels=False):
     for n, (blk, _, _) in blocks.items():
         rm = R.Room(blk)
         tbl, chars = R.charset(game, is_outdoor(n, game))
-        tmp = os.path.join(os.path.dirname(path), '.cell.png')
-        R.render(rm, tbl, chars, tmp)
+        img = R.render(rm, tbl, chars)
         x, y = (n % GRID_W) * cw, (n // GRID_W) * ch
-        sheet.paste(Image.open(tmp).resize((cw, ch)), (x, y))
-        os.remove(tmp)
+        sheet.paste(img.resize((cw, ch)), (x, y))
         if labels:
             draw.rectangle((x, y, x + 15, y + 10), fill=(0, 0, 0))
             draw.text((x + 2, y), room_code(n), fill=(255, 255, 0))
@@ -452,7 +407,7 @@ def main():
                          'palette PNG of C64 colour indices')
     args = ap.parse_args()
 
-    game = read_ram(args.ram)
+    game = load_ram(args.ram)
     blocks = real_rooms(args.image)
     rooms = build_rooms(blocks, game)
 
@@ -487,7 +442,7 @@ def main():
             'with 0 in both columns are only ever painted at run time '
             '(objects, the grown limb, the vine rope) or are unused.',
         ],
-        'tiles': build_tiles(blocks, game, hist),
+        'tiles': build_tiles(game, hist),
     })
     write(os.path.join(args.out, 'map.json'), {
         'generated_by': 'tools/spec_world.py',
