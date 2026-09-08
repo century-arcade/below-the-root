@@ -1,28 +1,12 @@
 // M6.4: the main menu, character select, DISK STORAGE, SAMPLE QUEST, the attract flow
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { loadData } from '../src/data.js';
+import { loadTestData, J } from './helpers.js';
 import { newState, tick } from '../src/game.js';
 import { shellFrame, coldStart, openMenu } from '../src/shell.js';
-import { panelLines } from '../src/panel.js';
+import { panelLines as lines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
 import { CLASS } from '../src/data.js';
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };
-const read = async (path) => {
-  const [dir, ...rest] = path.split('/');
-  return JSON.parse(readFileSync(join(PATHS[dir] || ROOT, ...rest), 'utf8'));
-};
-
-const J = {
-  idle: { dx: 0, dy: 0, fire: false }, fire: { dx: 0, dy: 0, fire: true },
-  up: { dx: 0, dy: -1, fire: false }, down: { dx: 0, dy: 1, fire: false },
-  left: { dx: -1, dy: 0, fire: false }, right: { dx: 1, dy: 0, fire: false },
-};
 
 // the stick: a queue of reads, idle once it runs dry
 function stick() {
@@ -50,7 +34,6 @@ function settle(state, max = 5000) {
   assert.fail('did not settle');
 }
 
-const lines = (state) => panelLines(state);
 const reverse = (state, row) => {
   let s = '';
   for (let i = 0; i < 40; i++) s += state.panel[(row - 21) * 40 + i] & 0x80 ? 'R' : '.';
@@ -61,7 +44,7 @@ const reverse = (state, row) => {
 const tap = (j) => [j, J.idle];
 const push = (j, n = 1) => Array(n).fill([j, J.idle]).flat();
 
-const data = await loadData(read);
+const data = await loadTestData();
 let n = 0;
 function test(name, fn) {
   fn(fresh());

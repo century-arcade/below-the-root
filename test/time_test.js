@@ -1,38 +1,14 @@
 // M6.3: the clock, food and rest, REST, the cloud world, losing a day, the endings, saves
 import { CLASS } from '../src/data.js';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { loadData } from '../src/data.js';
+import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
 import { newState, startQuest, tick } from '../src/game.js';
-import { enterRoom, leaveByEdge } from '../src/world.js';
-import { panelLines } from '../src/panel.js';
-import { MENU } from '../src/verbs.js';
+import { leaveByEdge } from '../src/world.js';
 import { carriedOf, carried } from '../src/inventory.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 import { exportSave, importSave } from '../src/save.js';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };
-const read = async (path) => {
-  const [dir, ...rest] = path.split('/');
-  return JSON.parse(readFileSync(join(PATHS[dir] || ROOT, ...rest), 'utf8'));
-};
-
-const J = {
-  idle: { dx: 0, dy: 0, fire: false }, fire: { dx: 0, dy: 0, fire: true },
-  up: { dx: 0, dy: -1, fire: false }, down: { dx: 0, dy: 1, fire: false },
-  left: { dx: -1, dy: 0, fire: false }, right: { dx: 1, dy: 0, fire: false },
-};
-
-function menu(verb) {
-  const row = MENU.findIndex((r) => r.includes(verb));
-  const col = MENU[row].indexOf(verb);
-  return [J.idle, ...Array(col).fill(J.right), ...Array(row).fill(J.down), J.fire];
-}
-const page = (n) => [J.idle, ...Array(n).fill(J.up), J.fire];
 const idle = (n) => Array(n).fill(J.idle);
 
 // past the script the stick pushes up, so a message waiting to be cleared ends; `shown` is what it said
@@ -63,14 +39,6 @@ function run(state, reads) {
   return settle(state, reads);
 }
 
-const lines = (state) => panelLines(state).map((l) => l.replace(/^ /, ''));
-
-function place(state, roomId, col, row, facing = 1) {
-  enterRoom(state, state.data.roomById.get(roomId), col, row);
-  state.player.facing = facing;
-  state.player.indoors = true;
-}
-
 // stand under the left end of a room's hanging nid
 function underNid(state, roomId) {
   const room = state.data.roomById.get(roomId);
@@ -88,12 +56,6 @@ function ticks(state, n) {
   for (let i = 0; i < n; i++) tick(state);
 }
 
-function give(state, cls) {
-  const o = state.objects.find((x) => x.class === cls && x.exists && !x.carried);
-  o.carried = true;
-  return o;
-}
-
 // the room's first painted door, live or dead
 function useDoor(state) {
   const n = state.room.doors.findIndex((d) => d) + 1;
@@ -107,7 +69,7 @@ function useDoor(state) {
   while (state.stall) tick(state);
 }
 
-const data = await loadData(read);
+const data = await loadTestData();
 const pomma = data.characters.find((c) => c.name === 'Pomma');
 const neric = data.characters.find((c) => c.name === 'Neric');
 let n = 0;

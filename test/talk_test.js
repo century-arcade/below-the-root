@@ -1,39 +1,12 @@
 // M6.2: creatures, dialog and verbs against docs/spec/creatures.md and player.md, with a scripted stick
 import { CLASS } from '../src/data.js';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { loadData } from '../src/data.js';
+import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
 import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';
-import { enterRoom } from '../src/world.js';
-import { panelLines } from '../src/panel.js';
-import { MENU } from '../src/verbs.js';
 import { carriedOf } from '../src/inventory.js';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };
-const read = async (path) => {
-  const [dir, ...rest] = path.split('/');
-  return JSON.parse(readFileSync(join(PATHS[dir] || ROOT, ...rest), 'utf8'));
-};
-
-const J = {
-  idle: { dx: 0, dy: 0, fire: false }, fire: { dx: 0, dy: 0, fire: true },
-  up: { dx: 0, dy: -1, fire: false }, down: { dx: 0, dy: 1, fire: false },
-  left: { dx: -1, dy: 0, fire: false }, right: { dx: 1, dy: 0, fire: false },
-};
-
-// the reads the menu makes to reach a verb: release, one per move, choose
-function menu(verb) {
-  const row = MENU.findIndex((r) => r.includes(verb));
-  const col = MENU[row].indexOf(verb);
-  return [J.idle, ...Array(col).fill(J.right), ...Array(row).fill(J.down), J.fire];
-}
-
-const page = (n) => [J.idle, ...Array(n).fill(J.up), J.fire];
 const press = () => [J.idle, J.fire];
 
 // every verb ends waiting for a push and clears: the first read past the script sees the message, then pushes up
@@ -54,15 +27,6 @@ function run(state, reads) {
   return shown || lines(state);
 }
 
-// column 0 is always blank; compare from column 1
-const lines = (state) => panelLines(state).map((l) => l.replace(/^ /, ''));
-
-function place(state, roomId, col, row, facing = 1) {
-  enterRoom(state, state.data.roomById.get(roomId), col, row);
-  state.player.facing = facing;
-  state.player.indoors = true;
-}
-
 // stand two cells from the creature, looking at each other, and freeze it there
 function faceCreature(state, roomId) {
   place(state, roomId, 0, 0);
@@ -76,13 +40,7 @@ function faceCreature(state, roomId) {
   return c;
 }
 
-function give(state, cls) {
-  const o = state.objects.find((x) => x.class === cls && x.exists && !x.carried);
-  o.carried = true;
-  return o;
-}
-
-const data = await loadData(read);
+const data = await loadTestData();
 const pomma = data.characters.find((c) => c.name === 'Pomma');
 let n = 0;
 function test(name, fn) {

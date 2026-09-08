@@ -1,22 +1,12 @@
 // docs/spec/player.md: landing from a leap onto solid ground clears the flight pose
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { loadData } from '../src/data.js';
+import { loadTestData } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
 import { enterRoom } from '../src/world.js';
 import { idleFrame, step } from '../src/player.js';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };
-const read = async (path) => {
-  const [dir, ...rest] = path.split('/');
-  return JSON.parse(readFileSync(join(PATHS[dir] || ROOT, ...rest), 'utf8'));
-};
-
-const data = await loadData(read);
+const data = await loadTestData();
 let passed = 0;
 function test(name, fn) {
   fn();

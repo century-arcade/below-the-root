@@ -1,9 +1,9 @@
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
-import { loadData } from '../src/data.js';
+import { loadTestData } from './helpers.js';
 import { renderIndexed, WIDTH, HEIGHT, figureOrigin } from '../src/video.js';
 import { readPNG, rgbWindow, writePNG } from './png.js';
 
@@ -11,16 +11,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '_build');
 const SHEET = join(ROOT, 'build', 'rooms', 'sheet.png');
 const VICE = join(ROOT, 'build', 'shots', 'ingame.png');
-
-const PATHS = {
-  data: join(ROOT, 'docs', 'spec', 'data'),
-  assets: join(ROOT, 'assets'),
-};
-
-function read(path) {
-  const [dir, ...rest] = path.split('/');
-  return JSON.parse(readFileSync(join(PATHS[dir] || ROOT, ...rest), 'utf8'));
-}
 
 let failures = 0;
 function report(name, bad, detail) {
@@ -174,7 +164,7 @@ function testSprite(data) {
     bad, top.join('; '));
 }
 
-const data = await loadData(async (p) => read(p));
+const data = await loadTestData();
 testIngame(data);
 testWorld(data);
 testSprite(data);

@@ -5,17 +5,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadData } from '../src/data.js';
+import { loadTestData } from './helpers.js';
 import { newState, startDemo, tick } from '../src/game.js';
 import { panelText, PANEL_ROW } from '../src/panel.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };
-const read = (path) => {
-  const [dir, ...rest] = path.split('/');
-  return JSON.parse(readFileSync(join(PATHS[dir] || ROOT, ...rest), 'utf8'));
-};
-
 function flags(p) {
   return (p.crawling ? 'c' : '-') + (p.running ? 'r' : '-') + (p.leaping ? 'L' : '-')
     + (p.gliding ? 'G' : '-') + (p.knockdown ? 'K' : '-') + (p.stride ? 's' : '-');
@@ -43,7 +37,7 @@ function trace(data, name, maxReads = 5000) {
 }
 
 const name = process.argv[2] || 'intro';
-const data = await loadData(async (p) => read(p));
+const data = await loadTestData();
 const { lines, state, ticks } = trace(data, name);
 const vice = join(ROOT, 'build', 'traces', `vice_${name}.txt`);
 if (existsSync(vice)) {
