@@ -128,9 +128,9 @@ picture.  The title and credits art -- `T3`, `U3`, `T4`, `U4` -- draws
 outdoor, in leaf green and bark brown.
 
 The **indoor flag** is a separate thing, and it is not a property of the
-room.  It flips every time you go through a doorway, is forced to indoors
-when you are carried home after losing a day, and is forced to outdoors
-by either leg of the cloud teleport.  It is what TAKE means by "outdoors,
+room.  It flips every time you go through an ordinary doorway, and is forced
+to indoors when you are carried home after losing a day or by either leg
+of the cloud teleport.  It is what TAKE means by "outdoors,
 anything may be taken", and REST requires it.  A doorway is always
 assumed to cross the boundary.
 

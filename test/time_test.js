@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadData } from '../src/data.js';
 import { newState, startQuest, tick } from '../src/game.js';
-import { enterRoom } from '../src/world.js';
+import { enterRoom, leaveByEdge } from '../src/world.js';
 import { panelLines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
 import { CLASS, carriedOf, carried } from '../src/inventory.js';
@@ -238,10 +238,19 @@ test('the sky nid marks you; the next door is the clouds, the one after is home'
   assert.equal(s.clock.day, 1);
   useDoor(s);
   assert.equal(s.room.code, 'U5');
-  assert.deepEqual([p.col, p.row, p.indoors, s.dream], [18, 14, false, DREAM.clouds]);
+  assert.deepEqual([p.col, p.row, p.indoors, s.dream], [18, 14, true, DREAM.clouds]);
+  assert.ok(leaveByEdge(s, 'east'));
+  assert.equal(s.room.code, 'V5');
+  assert.ok(!s.room.blank);
+  assert.ok(s.screen.some((c) => c !== 0));
+  assert.equal(s.creature?.def.state_id, 51, "D'ol Neshom is present");
+  assert.ok(leaveByEdge(s, 'west'));
+  assert.equal(s.room.code, 'U5');
+  assert.ok(!s.room.blank);
+  assert.equal(s.dream, DREAM.clouds);
   useDoor(s);
   assert.equal(s.room.code, '90');
-  assert.deepEqual([p.col, p.row, s.dream], [24, 13, DREAM.none]);
+  assert.deepEqual([p.col, p.row, p.indoors, s.dream], [24, 13, true, DREAM.none]);
 });
 
 test('wissenberries cost two hours', (s) => {

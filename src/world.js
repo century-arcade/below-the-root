@@ -166,7 +166,7 @@ function dreamDoor(state) {
   const p = state.player;
   const to = state.dream === DREAM.marked ? CLOUDS : SKY_NID;
   state.dream = state.dream === DREAM.marked ? DREAM.clouds : DREAM.none;
-  p.indoors = false;
+  p.indoors = true;
   p.facing = -p.facing;
   enterRoom(state, state.data.roomById.get(to.room), to.col, to.row);
   if (TUNE_ON_ARRIVAL.has(to.room)) startTune(state, 'random');
