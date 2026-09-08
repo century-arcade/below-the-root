@@ -98,13 +98,12 @@ export async function loadData(read) {
   };
 }
 
-// the two tiles an object of each class paints, from the tile notes
+// the two tiles an object of each class paints
 function objectTiles(tiles) {
   const chars = [];
   for (const t of tiles) {
-    const m = t && t.role === 'object' && /object class (\d+), (left|right) half/.exec(t.note);
-    if (!m) continue;
-    (chars[m[1]] ||= [])[m[2] === 'left' ? 0 : 1] = t.code;
+    if (!t || !t.object) continue;
+    (chars[t.object.class] ||= [])[t.object.half === 'left' ? 0 : 1] = t.code;
   }
   return chars;
 }

@@ -317,7 +317,7 @@ function* kiniport(state) {
     }
     const code = cell(state, at.col, at.row);
     if (role(state, code) !== 'object') return say(state, "YOU CAN'T KINIPORT THAT");
-    if (/right half/.test(state.data.tiles[code].note)) at.col -= 1;
+    if (state.data.tiles[code].object.half === 'right') at.col -= 1;
     const o = state.objects.find((x) => x.exists && !x.carried && x.room === state.room.room
       && x.col === at.col && x.row === at.row);
     if (!o) return say(state, "YOU CAN'T KINIPORT THAT");

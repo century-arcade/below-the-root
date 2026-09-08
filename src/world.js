@@ -89,14 +89,12 @@ export function doorNumber(state, code) {
 export function ladderSnap(state, code) {
   const t = tile(state, code);
   if (!t || !t.climbable) return 0;
-  if (/left/.test(t.note)) return 1;
-  if (/right/.test(t.note)) return -1;
-  return 0;
+  return t.ladder === 'left' ? 1 : t.ladder === 'right' ? -1 : 0;
 }
 
 export function isLadderCentre(state, code) {
   const t = tile(state, code);
-  return !!t && t.climbable && /centre/.test(t.note);
+  return !!t && t.climbable && t.ladder === 'centre';
 }
 
 export function paintScreen(state) {

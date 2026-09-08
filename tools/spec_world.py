@@ -180,6 +180,14 @@ def tile_props(code):
     return 0, 0, 0
 
 
+def object_half(code):
+    if not OBJECT_FIRST <= code <= OBJECT_LAST:
+        return None
+    half = 'left' if code % 2 else 'right'
+    k = (0xFD - code) // 2 if code % 2 else (0xFE - code) // 2
+    return {'class': k, 'half': half}
+
+
 def tile_role(code):
     if code == 0x00:
         return 'empty', 'blank cell; the cutting tools write this'
@@ -220,9 +228,8 @@ def tile_role(code):
         return 'door', 'door %d: fire with the stick centred here to use it' \
             % (code - DOOR_FIRST + 1)
     if OBJECT_FIRST <= code <= OBJECT_LAST:
-        half = 'left' if code % 2 else 'right'
-        k = (0xFD - code) // 2 if code % 2 else (0xFE - code) // 2
-        return 'object', 'object class %d, %s half (painted at run time)' % (k, half)
+        obj = object_half(code)
+        return 'object', 'object class %d, %s half (painted at run time)' % (obj['class'], obj['half'])
     if WATER_FRAMES[0] <= code <= WATER_FRAMES[1]:
         return 'water_frame', ('animation frame for the water tile; copied '
                                'over code 32 every 8 frames, never placed')
@@ -248,6 +255,8 @@ def build_tiles(game, hist):
             'code': c,
             'role': role,
             'note': note,
+            'ladder': LADDER[c][1] if c in LADDER else None,
+            'object': object_half(c),
             'support': bool(sup),
             'solid': bool(sol),
             'climbable': bool(cli),

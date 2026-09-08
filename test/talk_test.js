@@ -6,6 +6,7 @@ import { loadTestData, J, menuReads as menu, page, lines, place, give } from './
 import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';
 import { carriedOf } from '../src/inventory.js';
+import { paintScreen } from '../src/world.js';
 
 const press = () => [J.idle, J.fire];
 
@@ -105,16 +106,33 @@ test('a gift-giver offers once a day', (s) => {
   assert.equal(run(s, menu('SPEAK'))[0], lines[0]);
 });
 
-test('TAKE indoors needs the offer', (s) => {
+for (const half of [0, 1]) test(`TAKE from half ${half} indoors needs the offer`, (s) => {
   faceCreature(s, 4);
   const bread = s.objects.find((o) => o.room === 4 && o.class === CLASS.BREAD);
-  s.player.col = bread.col;
+  s.player.col = bread.col + half;
   s.player.row = bread.row;
   assert.equal(run(s, menu('TAKE'))[0], 'IT WAS NOT OFFERED TO YOU');
   s.offered = CLASS.BREAD;
   assert.equal(run(s, menu('TAKE'))[0], 'YOU FIND PAN BREAD');
   assert.ok(bread.carried);
   assert.equal(s.offered, null);
+});
+
+for (const half of [0, 1]) test(`KINIPORT selects an object from half ${half}`, (s) => {
+  place(s, 4, 10, 10);
+  s.player.spiritLimit = 25;
+  s.player.spiritEnergy = 10;
+  const bread = s.objects.find((o) => o.room === 4 && o.class === CLASS.BREAD);
+  bread.col = 12;
+  bread.row = 10;
+  paintScreen(s);
+  s.screen[11 * 40 + 16] = 117; // ground supporting the destination
+  run(s, [...menu('KINIPORT'), J.idle, ...Array(2 + half).fill(J.right), J.fire,
+    J.idle, ...Array(4).fill(J.right), J.fire]);
+  assert.equal(bread.col, 16);
+  assert.equal(bread.row, 10);
+  assert.equal(bread.carried, false);
+  assert.equal(s.player.spiritEnergy, 5);
 });
 
 test('a blesser adds 5, announces the skill and shows a vision', (s) => {

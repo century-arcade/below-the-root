@@ -55,7 +55,7 @@ export function objectUnder(state) {
   for (const row of [p.row - 2, p.row]) {
     const code = cell(state, p.col, row);
     if (role(state, code) !== 'object') continue;
-    const col = /right half/.test(state.data.tiles[code].note) ? p.col - 1 : p.col;
+    const col = state.data.tiles[code].object.half === 'right' ? p.col - 1 : p.col;
     const o = state.objects.find((x) => x.exists && !x.carried && x.room === state.room.room
       && x.row === row && x.col === col);
     if (o) return o;
