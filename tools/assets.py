@@ -26,6 +26,7 @@ GRID = 16  # index reserved for sheet gridlines
 PALETTE = PEPTO + [(0x30, 0x30, 0x30)]
 
 D021, D022, D023 = 0, 1, 2  # $D021/$D022/$D023 as the game leaves them
+ZP_COLORS = 0xB6            # the room footer's four colour bytes, copied to $B6-$B9
 
 CHARSETS = {'indoor': 0xB700, 'outdoor': 0xC700}
 PLAYERS = ['player%d' % i for i in range(5)]
@@ -189,7 +190,7 @@ def screen_colours(scr, table, zp):
     for i, sc in enumerate(scr):
         for _, off, lo, hi in COLOR_RANGES:
             if lo <= sc <= hi:
-                out[i] = zp[0xB6 + off - OFF_COLORS] & 15
+                out[i] = zp[ZP_COLORS + off - OFF_COLORS] & 15
                 break
         else:
             out[i] = table[sc] & 15

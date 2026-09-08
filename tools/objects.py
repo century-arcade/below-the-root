@@ -57,8 +57,7 @@ FLAG_NOTES = {
 }
 
 GATE_STATS = {0: 'kindar', 1: 'erdling'}
-STAT = {k: 'standing with ' + name.title() + ('s' if k == 1 else '')
-        for k, name in GATE_STATS.items()}
+STAT = {0: 'standing with Kindar', 1: 'standing with Erdlings'}
 
 
 def class_table(game):

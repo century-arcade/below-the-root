@@ -182,7 +182,7 @@ def video():
 def char_color_source(c):
     for _, off, lo, hi in COLOR_RANGES:
         if lo <= c <= hi:
-            return off - OFF_COLORS
+            return off - OFF_COLORS      # the footer byte's index: slot 0..3
     return None
 
 
@@ -209,9 +209,8 @@ def charset_asset(aid, name, load, tileset, chars, colors):
         'char_color_slot': [char_color_source(c) for c in range(256)],
         'color_rule': ('slot is null -> use default_colors[code]; otherwise '
                        'use the room block colour slot of that index'),
-        'color_slots': [{'slot': off - OFF_COLORS, 'name': n,
-                         'room_footer_byte': off - OFF_COLORS, 'codes': [lo, hi]}
-                        for n, off, lo, hi in COLOR_RANGES],
+        'color_slots': [{'slot': slot, 'name': n, 'room_footer_byte': slot, 'codes': [lo, hi]}
+                        for slot, (n, _, lo, hi) in enumerate(COLOR_RANGES)],
         'animated_chars': [{
             'char': WATER_CHAR,
             'role': 'water; stepping onto it drowns the player',
