@@ -93,6 +93,49 @@ function unlock(speaker, tick = 0) {
   }
 }
 
+test('setVolume and mute drive the master gain without interrupting a tune', () => {
+  const speaker = new Speaker(music);
+  unlock(speaker);
+  speaker.playTune(0, 0);
+  const voices = [...speaker.ringing];
+  const stops = voices.map(v => v.src.stoppedAt);
+  assert.equal(speaker.master.gain.value, 0.3);
+  speaker.setVolume(0.5);
+  assert.equal(speaker.master.gain.value, 0.15);
+  speaker.mute(true);
+  assert.equal(speaker.master.gain.value, 0);
+  speaker.setVolume(0.7);
+  assert.equal(speaker.master.gain.value, 0);
+  speaker.mute(false);
+  assert.equal(speaker.master.gain.value, 0.21);
+  speaker.setVolume(2);
+  assert.equal(speaker.volume, 1);
+  assert.equal(speaker.master.gain.value, 0.3);
+  speaker.setVolume(-1);
+  assert.equal(speaker.volume, 0);
+  assert.equal(speaker.master.gain.value, 0);
+  for (const level of [NaN, Infinity, -Infinity]) {
+    speaker.setVolume(level);
+    assert.equal(speaker.volume, 1);
+    assert.equal(speaker.master.gain.value, 0.3);
+  }
+  assert.deepEqual(speaker.ringing, voices);
+  assert.deepEqual(voices.map(v => v.src.stoppedAt), stops);
+});
+
+test('volume and mute set before the context exists are applied by unlock', () => {
+  for (const muted of [false, true]) {
+    const speaker = new Speaker(music);
+    speaker.setVolume(0.5);
+    speaker.mute(muted);
+    assert.equal(speaker.ctx, null);
+    unlock(speaker);
+    assert.equal(speaker.master.gain.value, muted ? 0 : 0.15);
+    speaker.mute(false);
+    assert.equal(speaker.master.gain.value, 0.15);
+  }
+});
+
 test('suspend and resume preserve tune progress across repeated holds', () => {
   const speaker = new Speaker(music);
   unlock(speaker);

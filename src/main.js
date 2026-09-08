@@ -106,9 +106,13 @@ loadData((path) => fetch(path).then((r) => {
   const slots = {};
   let existing = null;
   let restoreFailed = false;
+  let volume = 1;
+  let muted = false;
   try {
     for (let n = 1; n <= 5; n++) { const value = localStorage.getItem(`btr.quest${n}`); if (value) slots[n] = value; }
     existing = localStorage.getItem(AUTOSAVE_KEY);
+    volume = parseFloat(localStorage.getItem('btr.volume'));
+    muted = localStorage.getItem('btr.muted') === '1';
   } catch (err) { note(`Browser storage is unavailable: ${err.message}`); }
   let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
@@ -123,6 +127,34 @@ loadData((path) => fetch(path).then((r) => {
   const bindSlots = () => { session.saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text); };
   bindSlots();
   const speaker = new Speaker(data.music);
+  speaker.setVolume(volume);
+  speaker.mute(muted);
+  const muteButton = document.getElementById('mute');
+  function syncMuteButton() {
+    muteButton.textContent = speaker.muted ? 'Unmute' : 'Mute';
+    muteButton.setAttribute('aria-pressed', String(speaker.muted));
+  }
+  function persist(key, value) {
+    try { localStorage.setItem(key, value); } catch {}
+  }
+  function toggleMute() {
+    speaker.mute(!speaker.muted);
+    persist('btr.muted', speaker.muted ? '1' : '0');
+    syncMuteButton();
+    note(speaker.muted ? 'Muted' : 'Unmuted', 1000);
+  }
+  function stepVolume(delta) {
+    speaker.setVolume(Math.round((speaker.volume + delta) * 1e10) / 1e10);
+    if (speaker.muted) {
+      speaker.mute(false);
+      persist('btr.muted', '0');
+    }
+    persist('btr.volume', speaker.volume);
+    syncMuteButton();
+    note(`Volume ${Math.round(speaker.volume * 100)}%`, 1000);
+  }
+  syncMuteButton();
+  muteButton.onclick = e => { toggleMute(); e.currentTarget.blur(); };
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
   const status = document.getElementById('debug-status');
@@ -163,6 +195,9 @@ loadData((path) => fetch(path).then((r) => {
   };
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (e.key.toLowerCase() === 'm') { toggleMute(); e.preventDefault(); return; }
+    if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
+    if (e.key === '=' || e.key === '+') { stepVolume(0.1); e.preventDefault(); return; }
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;
     if (held) release(); else hold();
     e.preventDefault();

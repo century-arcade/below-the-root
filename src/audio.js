@@ -52,6 +52,8 @@ export class Speaker {
   constructor(music) {
     this.music = music;
     this.ctx = null;
+    this.volume = 1;
+    this.muted = false;
     this.ringing = [];
     this.effect = null;
     this.tuneEnd = 0;
@@ -60,11 +62,25 @@ export class Speaker {
     this.paused = null;
   }
 
+  applyGain() {
+    if (this.master) this.master.gain.value = this.muted ? 0 : MASTER_GAIN * this.volume;
+  }
+
+  setVolume(level) {
+    this.volume = Number.isFinite(level) ? Math.min(1, Math.max(0, level)) : 1;
+    this.applyGain();
+  }
+
+  mute(on) {
+    this.muted = !!on;
+    this.applyGain();
+  }
+
   unlock(state) {
     if (!this.ctx) {
       this.ctx = new AudioContext();
       this.master = this.ctx.createGain();
-      this.master.gain.value = MASTER_GAIN;
+      this.applyGain();
       this.master.connect(this.ctx.destination);
       this.pulse = this.makePulse(this.music.driver.duty);
       this.square = this.makePulse(0.5);
