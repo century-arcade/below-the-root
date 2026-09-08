@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from assets import PEPTO, PLAYERS, load_raw, load_dump, sprite_rows  # noqa: E402
 from spec_player import CHAR_NAMES
-from room import COLOR_RANGES, OFF_COLORS
+from room import COLOR_RANGES, color_slot
 import music as musicmod                                   # noqa: E402
 
 from common import ROOT, load_ram, write_json, FPS_NTSC, FPS_PAL
@@ -182,7 +182,7 @@ def video():
 def char_color_source(c):
     for _, off, lo, hi in COLOR_RANGES:
         if lo <= c <= hi:
-            return off - OFF_COLORS      # the footer byte's index: slot 0..3
+            return color_slot(off)
     return None
 
 

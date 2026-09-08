@@ -33,6 +33,11 @@ COLOR_RANGES = [
     ('ground', 0xFE, 0x73, 0x76),
 ]
 
+
+def color_slot(offset):
+    return offset - OFF_COLORS
+
+
 # phase-2 structure opcode -> first char of the 3-wide column it paints
 COLUMN_BASE = {0x20: 0xB4, 0x40: 0xB7, 0x80: 0xBA, 0xA0: 0xBB, 0xC0: 0xBC}
 

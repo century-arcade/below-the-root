@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image
 
 from common import ROOT, load_ram
-from room import COLOR_RANGES, OFF_COLORS
+from room import COLOR_RANGES, color_slot
 RAW = os.path.join(ROOT, 'build', 'raw')
 DUMPS = os.path.join(ROOT, 'build', 'dumps')
 
@@ -190,7 +190,7 @@ def screen_colours(scr, table, zp):
     for i, sc in enumerate(scr):
         for _, off, lo, hi in COLOR_RANGES:
             if lo <= sc <= hi:
-                out[i] = zp[ZP_COLORS + off - OFF_COLORS] & 15
+                out[i] = zp[ZP_COLORS + color_slot(off)] & 15
                 break
         else:
             out[i] = table[sc] & 15
