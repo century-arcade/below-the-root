@@ -181,7 +181,6 @@ export class Session {
     session.playback = false;
     return session;
   }
-
 }
 
 export function validateRecord(r, data) {

@@ -1,7 +1,7 @@
 // M6.2: creatures, dialog and verbs against docs/spec/creatures.md and player.md, with a scripted stick
-import { CLASS } from '../src/data.js';
 import assert from 'node:assert/strict';
 
+import { CLASS } from '../src/data.js';
 import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
 import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';

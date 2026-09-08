@@ -1,7 +1,7 @@
 // M6.3: the clock, food and rest, REST, the cloud world, losing a day, the endings, saves
-import { CLASS } from '../src/data.js';
 import assert from 'node:assert/strict';
 
+import { CLASS } from '../src/data.js';
 import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
 import { newState, startQuest, tick } from '../src/game.js';
 import { leaveByEdge } from '../src/world.js';
