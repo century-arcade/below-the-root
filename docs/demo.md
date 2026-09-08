@@ -3,6 +3,9 @@
 Facts from `disasm/out/demolow.s` and `disasm/out/game.s`.  The module holds
 the four intro text pages, the joystick-script player, and two scripts.
 `tools/demo.py` decodes both scripts to `assets/demo.json`.
+This JSON is a research extraction with raw addresses, read by nothing
+in `src/`, `test/`, or the spec generators; the port's demo table is
+`docs/spec/data/demo.json`.
 
 ## Two entry points
 
