@@ -46,7 +46,7 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
 script, `?room=T1` to start somewhere else).
 
-Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume.
+Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen.
 
 ```
 make serve                    # Netlify Dev: game + functions at http://localhost:8000

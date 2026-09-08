@@ -7,6 +7,7 @@ import { panelLines } from './panel.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
 import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
+import { fitScale } from './fit.js';
 
 function note(text, ms) {
   const element = document.getElementById('notice');
@@ -20,6 +21,7 @@ function note(text, ms) {
 document.getElementById('dismiss-notice').onclick = () => note('');
 
 const canvas = document.getElementById('screen');
+const game = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
@@ -28,15 +30,19 @@ const image = ctx.createImageData(WIDTH, HEIGHT);
 const CHROME_PX = 40;
 
 function fit() {
-  const chrome = ['debug', 'debug-status', 'game-controls', 'notices']
-    .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
-  const availableHeight = window.innerHeight - CHROME_PX - chrome;
-  const scale = Math.max(0.25, Math.min(
-    window.innerWidth < WIDTH ? window.innerWidth / WIDTH : Math.floor(window.innerWidth / WIDTH),
-    availableHeight < HEIGHT ? availableHeight / HEIGHT : Math.floor(availableHeight / HEIGHT)));
+  const full = document.fullscreenElement === game;
+  let scale;
+  if (full) {
+    game.style.width = '';
+    scale = fitScale(game.clientWidth, game.clientHeight);
+  } else {
+    const chrome = ['debug', 'debug-status', 'game-controls', 'notices']
+      .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
+    scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome);
+  }
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = HEIGHT * scale + 'px';
-  document.getElementById('game').style.width = canvas.style.width;
+  if (!full) game.style.width = canvas.style.width;
 }
 
 function pickRoom(data, want) {
@@ -143,6 +149,12 @@ loadData((path) => fetch(path).then((r) => {
     syncMuteButton();
     note(speaker.muted ? 'Muted' : 'Unmuted', 1000);
   }
+  const canFullscreen = !!(game.requestFullscreen && document.exitFullscreen);
+  function toggleFullscreen() {
+    if (!canFullscreen) return;
+    const request = document.fullscreenElement ? document.exitFullscreen() : game.requestFullscreen();
+    request.catch(() => {});
+  }
   function stepVolume(delta) {
     speaker.setVolume(Math.round((speaker.volume + delta) * 1e10) / 1e10);
     if (speaker.muted) {
@@ -155,10 +167,12 @@ loadData((path) => fetch(path).then((r) => {
   }
   syncMuteButton();
   muteButton.onclick = e => { toggleMute(); e.currentTarget.blur(); };
+  const fullscreenButton = document.getElementById('fullscreen');
+  fullscreenButton.hidden = !canFullscreen;
+  fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
   const status = document.getElementById('debug-status');
-  const game = document.getElementById('game');
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -195,6 +209,7 @@ loadData((path) => fetch(path).then((r) => {
   };
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (e.key.toLowerCase() === 'f' && !e.shiftKey) { toggleFullscreen(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'm') { toggleMute(); e.preventDefault(); return; }
     if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
     if (e.key === '=' || e.key === '+') { stepVolume(0.1); e.preventDefault(); return; }
@@ -266,6 +281,7 @@ loadData((path) => fetch(path).then((r) => {
     requestAnimationFrame(frame);
   }
   addEventListener('resize', fit);
+  document.addEventListener('fullscreenchange', fit);
   fit();
   draw();
   requestAnimationFrame(frame);

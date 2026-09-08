@@ -121,5 +121,10 @@ with sync_playwright() as p:
     page.goto('http://localhost:8000/')
     page.wait_for_timeout(200)
     assert not page.locator('#debug').is_visible()
+    assert page.locator('#game-controls #fullscreen').count() == 1
+    page.keyboard.press('f')
+    page.keyboard.press('Escape')
+    page.wait_for_timeout(200)
+    assert not errors, errors
     browser.close()
     print('browser_test: autosave/resume, pause and resume, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
