@@ -14,13 +14,13 @@ import argparse
 import json
 import os
 import re
-import sys
 
 from common import ROOT, load_ram
-sys.path.insert(0, os.path.join(ROOT, 'tools'))
-import room as R                                        # noqa: E402
-from room import COLOR_RANGES, is_outdoor, outdoor_bit, real_rooms
-import objects as OBJ                                   # noqa: E402
+from room import (
+    COLOR_RANGES, COLS, ROWS, OFF_NPC, LOADED, D64, Room, charset, render,
+    is_outdoor, outdoor_bit, real_rooms,
+)
+from objects import item_name, objects
 
 OUTDIR = os.path.join(ROOT, 'docs', 'spec', 'data')
 GRID_W, GRID_H = 32, 16
@@ -80,9 +80,9 @@ def neighbours(room):
 def read_signs(tiles):
     """Sign text, from the letter pairs at $80-$B3 ($77 is the blank cell)."""
     out = []
-    for r in range(R.ROWS):
-        row, i, cur = tiles[r * R.COLS:(r + 1) * R.COLS], 0, ''
-        while i < R.COLS:
+    for r in range(ROWS):
+        row, i, cur = tiles[r * COLS:(r + 1) * COLS], 0, ''
+        while i < COLS:
             c = row[i]
             if LETTER_FIRST <= c <= LETTER_LAST and (c - LETTER_FIRST) % 2 == 0:
                 cur += chr(ord('A') + (c - LETTER_FIRST) // 2)
@@ -102,18 +102,18 @@ def read_signs(tiles):
 def door_cells(tiles, k):
     """The cells this room paints with door char $BA+k, in reading order."""
     code = DOOR_FIRST + k
-    return [[i % R.COLS, i // R.COLS] for i, c in enumerate(tiles) if c == code]
+    return [[i % COLS, i // COLS] for i, c in enumerate(tiles) if c == code]
 
 
 def objects_by_room(game):
     """The shipped object table ($C400 tooltab), grouped by room number."""
     by_room = {}
-    for o in OBJ.objects(game):
+    for o in objects(game):
         if not o['exists'] or o['held'] or o['cls'] is None:
             continue
         by_room.setdefault(o['room'], []).append(
             {'object': o['index'], 'class': o['cls'],
-             'name': OBJ.item_name(game, o['cls']),
+             'name': item_name(game, o['cls']),
              'x': o['col'], 'y': o['row'],
              'chars': [0xFD - 2 * o['cls'], 0xFE - 2 * o['cls']]})
     return by_room
@@ -126,10 +126,10 @@ def build_rooms(blocks, game):
     rooms = []
     for n in sorted(blocks):
         blk, track, sector = blocks[n]
-        rm = R.Room(blk)
+        rm = Room(blk)
         outdoor = is_outdoor(n, game)
         colors = {name: blk[off] for name, off, _, _ in COLOR_RANGES}
-        kind = blk[R.OFF_NPC + 17] if blk[R.OFF_NPC] else 0
+        kind = blk[OFF_NPC + 17] if blk[OFF_NPC] else 0
         doors = []
         for k, d in enumerate(rm.doors):
             cells = door_cells(rm.tiles, k)
@@ -162,11 +162,11 @@ def build_rooms(blocks, game):
             'exits': ex,
             'exits_missing': sorted(k for k, v in ex.items()
                                     if v is None or v not in blocks),
-            'creature_block': list(blk[R.OFF_NPC:R.OFF_NPC + 18]),
+            'creature_block': list(blk[OFF_NPC:OFF_NPC + 18]),
             'objects': sorted(objs.get(n, []), key=lambda o: (o['y'], o['x'])),
             'stream_end': rm.stream_end,
-            'tiles': [Row(rm.tiles[r * R.COLS:(r + 1) * R.COLS])
-                      for r in range(R.ROWS)],
+            'tiles': [Row(rm.tiles[r * COLS:(r + 1) * COLS])
+                      for r in range(ROWS)],
         })
     return rooms
 
@@ -241,8 +241,8 @@ def tile_role(code):
 
 
 def build_tiles(game, hist):
-    out_tbl, _ = R.charset(game, True)
-    in_tbl, _ = R.charset(game, False)
+    out_tbl, _ = charset(game, True)
+    in_tbl, _ = charset(game, False)
     tiles = []
     for c in range(256):
         sup, sol, cli = tile_props(c)
@@ -351,26 +351,26 @@ def full_sheet(rooms, game, path):
 
     glyphs, colours = {}, {}
     for name, outdoor in (('outdoor', True), ('indoor', False)):
-        table, chars = R.charset(game, outdoor)
+        table, chars = charset(game, outdoor)
         bits = np.unpackbits(np.frombuffer(chars, dtype=np.uint8)).reshape(256, 8, 8)
         glyphs[name] = bits.astype(bool)
         colours[name] = np.frombuffer(table, dtype=np.uint8) & 0x0F
 
-    sheet = np.zeros((GRID_H * R.ROWS * 8, GRID_W * R.COLS * 8), dtype=np.uint8)
+    sheet = np.zeros((GRID_H * ROWS * 8, GRID_W * COLS * 8), dtype=np.uint8)
     for r in rooms:
         codes = np.array(r['tiles'], dtype=np.uint8)
         for o in r['objects']:
             for i, ch in enumerate(o['chars']):
-                if o['x'] + i < R.COLS:
+                if o['x'] + i < COLS:
                     codes[o['y']][o['x'] + i] = ch
         col = colours[r['tileset']][codes].copy()
         for name, off, lo, hi in COLOR_RANGES:
             col[(codes >= lo) & (codes <= hi)] = r['colors'][name]
         bits = glyphs[r['tileset']][codes]                  # (20, 40, 8, 8)
         cell = np.where(bits, col[:, :, None, None], 0).astype(np.uint8)
-        img = cell.transpose(0, 2, 1, 3).reshape(R.ROWS * 8, R.COLS * 8)
-        y, x = r['y'] * R.ROWS * 8, r['x'] * R.COLS * 8
-        sheet[y:y + R.ROWS * 8, x:x + R.COLS * 8] = img
+        img = cell.transpose(0, 2, 1, 3).reshape(ROWS * 8, COLS * 8)
+        y, x = r['y'] * ROWS * 8, r['x'] * COLS * 8
+        sheet[y:y + ROWS * 8, x:x + COLS * 8] = img
 
     im = Image.fromarray(sheet, 'P')
     im.putpalette(plte)
@@ -385,9 +385,9 @@ def contact_sheet(blocks, game, path, cell=(64, 32), labels=False):
     sheet = Image.new('RGB', (GRID_W * cw, GRID_H * ch), (24, 24, 24))
     draw = ImageDraw.Draw(sheet)
     for n, (blk, _, _) in blocks.items():
-        rm = R.Room(blk)
-        tbl, chars = R.charset(game, is_outdoor(n, game))
-        img = R.render(rm, tbl, chars)
+        rm = Room(blk)
+        tbl, chars = charset(game, is_outdoor(n, game))
+        img = render(rm, tbl, chars)
         x, y = (n % GRID_W) * cw, (n // GRID_W) * ch
         sheet.paste(img.resize((cw, ch)), (x, y))
         if labels:
@@ -406,8 +406,8 @@ def contact_sheet(blocks, game, path, cell=(64, 32), labels=False):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default=OUTDIR)
-    ap.add_argument('--image', default=R.D64)
-    ap.add_argument('--ram', default=R.LOADED)
+    ap.add_argument('--image', default=D64)
+    ap.add_argument('--ram', default=LOADED)
     ap.add_argument('--contact-sheet', metavar='PNG')
     ap.add_argument('--map-png', metavar='PNG',
                     help='labelled world map, 160x80 per room')

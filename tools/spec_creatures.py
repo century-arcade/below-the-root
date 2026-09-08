@@ -13,15 +13,11 @@ Rules and pseudocode: docs/spec/creatures.md.
 """
 import argparse
 import os
-import sys
 from typing import Any
 
 from common import ROOT, LOADED, load_ram, write_json, FPS_NTSC, FPS_PAL
 from objects import item_name, GATE_STATS as STANDINGS
-from messages import inline_string, screen_rowcol
-sys.path.insert(0, os.path.join(ROOT, 'tools'))
-import room as R                                                    # noqa: E402
-import messages as M                                                # noqa: E402
+from messages import inline_string, screen_rowcol, messages, npc_rooms
 
 OUTDIR = os.path.join(ROOT, 'docs', 'spec', 'data')
 
@@ -326,10 +322,10 @@ def persistent_state():
 
 
 def build(mem):
-    blocks = M.npc_rooms()
+    blocks = npc_rooms()
     creatures = [creature(mem, r, blk) for r, blk in blocks]
 
-    msgs = M.messages(mem)
+    msgs = messages(mem)
     emitters = {m['n']: [] for m in msgs}
     for c, (_, blk) in zip(creatures, blocks):
         for off, slot, gate, verb in SLOTS:

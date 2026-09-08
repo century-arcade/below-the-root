@@ -16,14 +16,14 @@ import math
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from assets import PEPTO, PLAYERS, load_raw, load_dump, sprite_rows  # noqa: E402
+from common import ROOT, load_ram, write_json, FPS_NTSC, FPS_PAL
+from assets import PEPTO, PLAYERS, load_raw, load_dump, sprite_rows
 from spec_player import CHAR_NAMES
 from room import COLOR_RANGES, color_slot
-import music as musicmod                                   # noqa: E402
+from music import (
+    BASE, FREQ_HI, FREQ_LO, MIDI_TOP, NNOTES, NTUNES, REST, decode, note_name,
+)
 
-from common import ROOT, load_ram, write_json, FPS_NTSC, FPS_PAL
 OUT = os.path.join(ROOT, 'docs', 'spec', 'data')
 
 COLOR_NAMES = [
@@ -713,20 +713,20 @@ def build_assets():
 # --- music ------------------------------------------------------------------
 
 def note_table(mem):
-    lo = musicmod.FREQ_LO - musicmod.BASE
-    hi = musicmod.FREQ_HI - musicmod.BASE
+    lo = FREQ_LO - BASE
+    hi = FREQ_HI - BASE
     out = []
-    for n in range(musicmod.NNOTES):
+    for n in range(NNOTES):
         f = mem[lo + n] | mem[hi + n] << 8
         e = {'index': n, 'sid': f}
-        if n == musicmod.REST or f == 0:
+        if n == REST or f == 0:
             e.update(rest=True, name='R', hz_ntsc=0.0, hz_pal=0.0)
         else:
-            midi = musicmod.MIDI_TOP - n
+            midi = MIDI_TOP - n
             ideal = 440.0 * 2 ** ((midi - 69) / 12)
             ntsc = f * CLOCK_NTSC / 2 ** 24
             pal = f * CLOCK_PAL / 2 ** 24
-            e.update(rest=False, midi=midi, name=musicmod.note_name(midi),
+            e.update(rest=False, midi=midi, name=note_name(midi),
                      hz_ntsc=round(ntsc, 3), hz_pal=round(pal, 3),
                      hz_equal_temperament=round(ideal, 3),
                      cents_ntsc=round(1200 * math.log2(ntsc / ideal), 1),
@@ -761,8 +761,8 @@ def build_music():
     mem = load_raw('musiclow')
     game = load_ram()
     tunes = []
-    for i in range(musicmod.NTUNES):
-        t = musicmod.decode(mem, i)
+    for i in range(NTUNES):
+        t = decode(mem, i)
         t['tune'] = i
         t['seconds_ntsc'] = round(t['frames'] / FPS_NTSC, 2)
         t['seconds_pal'] = round(t['frames'] / FPS_PAL, 2)

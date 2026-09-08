@@ -13,12 +13,9 @@ pristine tooltab at $C400-$C6FF, `--live` reads the working copy at $0D00-$0FFF.
 Formats and addresses: docs/npcs-and-objects.md.
 """
 import argparse
-import os
-import sys
 
-from common import ROOT, LOADED, load_ram
-sys.path.insert(0, os.path.join(ROOT, 'tools'))
-import room as R                                       # noqa: E402
+from common import LOADED, load_ram
+from room import D64, OFF_NPC, real_rooms
 
 CLASS_RANGES = 0xA7A0        # tile_range_lookup bounds, 16 bytes
 ITEM_NAMES = 0xAFF7          # 15 x 16 chars
@@ -91,9 +88,9 @@ def objects(game, live=False):
                    exists=bool(f & 0x40), held=bool(f & 0x20), flags=f)
 
 
-def npcs(image=R.D64):
-    return [(n, list(blk[R.OFF_NPC:R.OFF_NPC + 18]))
-            for n, (blk, _, _) in R.real_rooms(image).items() if blk[R.OFF_NPC]]
+def npcs(image=D64):
+    return [(n, list(blk[OFF_NPC:OFF_NPC + 18]))
+            for n, (blk, _, _) in real_rooms(image).items() if blk[OFF_NPC]]
 
 
 def item_table(game):
@@ -180,7 +177,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('what', choices=['objects', 'classes', 'npcs', 'messages'])
     ap.add_argument('--ram', default=LOADED)
-    ap.add_argument('--image', default=R.D64)
+    ap.add_argument('--image', default=D64)
     ap.add_argument('--live', action='store_true',
                     help='read $0D00-$0FFF instead of the tooltab at $C400')
     ap.add_argument('--held', action='store_true')

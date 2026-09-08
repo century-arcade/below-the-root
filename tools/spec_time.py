@@ -12,15 +12,13 @@ disk image so it stays honest.  Prose and pseudocode: docs/spec/time.md.
 """
 import argparse
 import os
-import sys
 
 from common import ROOT, LOADED, load_ram, write_json, FPS_NTSC, FPS_PAL
 from messages import messages
 from spec_player import skill_names
-sys.path.insert(0, os.path.join(ROOT, 'tools'))
-import objects as O                                     # noqa: E402
-import room as R                                        # noqa: E402
-import demo as D                                        # noqa: E402
+from objects import GATE_STATS, item_name, item_table, npcs
+from room import D64
+from demo import SCRIPTS, decode
 
 FRAMES = {'ntsc': FPS_NTSC, 'pal': FPS_PAL}
 
@@ -43,7 +41,7 @@ def merchants(game, image):
     msg = messages(game)
 
     out = []
-    for n, b in O.npcs(image=image):
+    for n, b in npcs(image=image):
         if b[17] != 0x80:
             continue
         rec = npc_record(n, b, msg)
@@ -52,8 +50,8 @@ def merchants(game, image):
             'npc_id': rec['npc_id'],
             'species': rec['species'],
             'stock_item': b[15],
-            'stock_item_name': O.item_name(game, b[15]),
-            'gate': {'standing': O.GATE_STATS[b[1] & 0x0F],
+            'stock_item_name': item_name(game, b[15]),
+            'gate': {'standing': GATE_STATS[b[1] & 0x0F],
                      'min_level': b[1] >> 4},
             'speak_lines': rec['speak_lines'],
             'pense_emotion': rec['pense_emotion'],
@@ -63,7 +61,7 @@ def merchants(game, image):
 
 
 def economy(game, image):
-    items = O.item_table(game)
+    items = item_table(game)
     tok = items[8]
     return {
         'generated_by': 'tools/spec_time.py',
@@ -213,7 +211,7 @@ def quest(game, image):
     msg = messages(game)
 
     blessers, animals, gates, raamo = [], [], [], None
-    for n, b in O.npcs(image=image):
+    for n, b in npcs(image=image):
         rec = npc_record(n, b, msg)
         if b[17] == 0x40:
             rec['grants'] = 'spirit_limit += 5, once per quest'
@@ -272,7 +270,7 @@ def quest(game, image):
             'room': raamo['room'] if raamo else None,
             'verb': 'OFFER',
             'accepts_items': [7, 11],
-            'accepts_item_names': [O.item_name(game, 7), O.item_name(game, 11)],
+            'accepts_item_names': [item_name(game, 7), item_name(game, 11)],
             'wrong_item': "THAT WON'T HELP",
             'src': '$43CC $4475 $449C'
         },
@@ -417,8 +415,8 @@ TEXT_PAGES = {
 
 def demo(mem):
     scripts = []
-    for s in D.SCRIPTS:
-        steps, end = D.decode(mem, s['addr'])
+    for s in SCRIPTS:
+        steps, end = decode(mem, s['addr'])
         for st in steps:
             if st['op'] == 'text_page':
                 st['lines'] = TEXT_PAGES[st['page']]
@@ -624,7 +622,7 @@ def save():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--bin', default=LOADED)
-    ap.add_argument('--image', default=R.D64)
+    ap.add_argument('--image', default=D64)
     ap.add_argument('--out', default=os.path.join(ROOT, 'docs/spec/data'))
     a = ap.parse_args()
     game = load_ram(a.bin)

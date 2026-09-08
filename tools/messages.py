@@ -8,14 +8,12 @@ Format and addresses: docs/messages-and-dialog.md.
 """
 import argparse
 import os
-import sys
 
 from common import ROOT, LOADED, load_ram, write_json
 from objects import item_name
-ASSETS = os.path.join(ROOT, 'assets')
+from room import OFF_NPC, real_rooms
 
-sys.path.insert(0, os.path.join(ROOT, 'tools'))
-import room as R                                                    # noqa: E402
+ASSETS = os.path.join(ROOT, 'assets')
 
 MSG_TABLE = 0x4500
 MSG_COUNT = 187
@@ -43,7 +41,7 @@ def messages(mem):
 
 def npc_rooms():
     """Every room block that carries a creature descriptor ($E0 != 0)."""
-    return [(n, blk) for n, (blk, _, _) in R.real_rooms().items() if blk[R.OFF_NPC]]
+    return [(n, blk) for n, (blk, _, _) in real_rooms().items() if blk[OFF_NPC]]
 
 
 def gift(blk, names):
