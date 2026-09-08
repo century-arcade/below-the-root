@@ -15,8 +15,13 @@
   #game:fullscreen > :not(#canvas-box) { display: none; }
   #canvas-box { position: relative; container-type: inline-size; }
   #game:fullscreen #canvas-box { flex: none; }
-  #map-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
-  #map-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
+  #map-screen, #help-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
+  #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
+  #basics { position: absolute; bottom: 0; left: 0; right: 0; padding: 4px; background: #000c; color: #fff; text-align: center; pointer-events: none; }
+  #help-screen { overflow: auto; }
+  #help-content { padding: 0 12px 12px; line-height: 1.6; }
+  #help-content dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
+  #help-content dd { margin: 0; }
   #map-grid { display: grid; grid-template-columns: repeat(32, minmax(0, 1fr)); grid-template-rows: repeat(16, minmax(0, 1fr)); flex: 1; min-height: 0; gap: 1px; }
   #map-grid > button { min-width: 0; min-height: 0; padding: 0; border: 0; color: #fff; font-size: .8cqw; line-height: 1; overflow: hidden; overflow-wrap: anywhere; }
   #map-grid .sky { background: #38719c; }
@@ -102,16 +107,40 @@
   </div>
   <div id="where" role="status"></div>
   <div id="canvas-box">
-    <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses; Tab shows the map."></canvas>
+    <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses; Tab shows the map. Press ? for all controls."></canvas>
     <div id="map-screen" hidden role="dialog" aria-label="World map" aria-describedby="map-place">
       <div id="map-heading"><span>World map · bright = visited</span><button id="close-map">Close map</button></div>
       <div id="map-grid"></div>
       <div id="map-place" role="status"></div>
     </div>
+    <div id="basics" hidden>WASD / Arrows to move<br>Space to skip / jump / select</div>
+    <div id="help-screen" hidden role="dialog" aria-label="Controls" tabindex="-1">
+      <div id="help-heading"><span>Controls</span><button id="close-help">Close help</button></div>
+      <div id="help-content">
+        <h2>Keyboard</h2>
+        <dl>
+          <dt>Move</dt><dd>WASD / arrows</dd>
+          <dt>Button</dt><dd>Space / Shift / Ctrl — skip, jump, select</dd>
+          <dt>Pause</dt><dd>Escape / P</dd>
+          <dt>Map</dt><dd>Tab / Map button (during a quest)</dd>
+          <dt>Fullscreen</dt><dd>F (when supported)</dd>
+          <dt>Mute</dt><dd>M</dd>
+          <dt>Volume</dt><dd>- / = (or _ / +)</dd>
+          <dt>Help</dt><dd>? (Shift+/) / H / Help button; Escape closes</dd>
+        </dl>
+        <h2>Touch</h2>
+        <p>Hold to push toward your finger. Tap to press the button that way.
+          Tap a door or double-tap a spot to walk there. While walking, tap to
+          re-aim or tap the figure to stop.</p>
+        <h2>Gamepad</h2>
+        <p>D-pad / left stick to move; any face button to skip, jump, select.</p>
+      </div>
+    </div>
   </div>
   <div id="debug-status" hidden></div>
   <div id="game-controls">
     <button id="map" aria-keyshortcuts="Tab" aria-controls="map-screen" aria-expanded="false">Map</button>
+    <button id="help" aria-keyshortcuts="? h" aria-controls="help-screen" aria-expanded="false">Help</button>
   </div>
   <dialog id="issue-dialog" aria-labelledby="issue-label">
     <form id="issue-form">

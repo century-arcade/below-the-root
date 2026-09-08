@@ -50,6 +50,8 @@ Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute,
 
 Tab (or the Map button) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 
+? (or H, or the Help button) opens all controls; two-line basics show on the title/menu screens until the session's first joystick input.
+
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.
 
