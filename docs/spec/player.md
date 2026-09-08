@@ -221,10 +221,10 @@ A climb step happens after the row has already changed.
 2. Off the top of the room, or on the bottom row, hands over to the
    room-edge rules.
 3. On the top row, just climb.
-4. Otherwise look at the cell you are entering and the one past it in
-   the same direction.  If the cell you are entering is not climbable
+4. Otherwise look at the cell you are entering and the one above it in
+   either direction of travel.  If the cell you are entering is not climbable
    you have left the ladder: the stoop pose shows and the climb ends.
-   If the one beyond is not climbable, the reaching-the-top pose shows.
+   If the one above is not climbable, the on-the-top-rung pose shows.
 5. Otherwise animate, play the up or down climb sound, and spend 1
    fatigue -- one unit per rung.
 

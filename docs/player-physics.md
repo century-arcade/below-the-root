@@ -302,8 +302,8 @@ Reached after the row has already changed.  Clears `$0A3C` and `$0A3D`.
 - row == 0: animate only.
 - otherwise check the new cell (`$0A26` going up, `$0A23` going down):
   not climbable -> stop, stoop pose (`$A3FD`).  Then check the cell
-  beyond it (`$0A27` / `$0A20`): not climbable -> sprite `$D8`, the
-  reaching-the-top pose.
+  above the new position in both directions (`$0A27` / `$0A20`): not
+  climbable -> sprite `$D8`, the on-the-top-rung pose.
 - else alternate sprites `$D4`/`$D6` via `$0A3B`, sfx 4 up / 5 down, and
   spend 1 unit of fatigue per rung.
 

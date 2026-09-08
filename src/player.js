@@ -289,7 +289,7 @@ function climb(state, dy) {
   p.crawling = false;
   if (p.row >= 0 && p.row < ROWS - 1) {
     const entering = cell(state, p.col, p.row);
-    const beyond = cell(state, p.col, p.row + dy);
+    const beyond = cell(state, p.col, p.row - 1);
     if (p.row === 0 || isClimbable(state, entering)) {
       if (p.row !== 0 && !isClimbable(state, beyond)) {
         p.frame = FRAME.ladderTop;
