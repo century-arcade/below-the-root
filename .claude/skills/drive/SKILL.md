@@ -3,8 +3,9 @@ name: drive
 description: Drive one task through the issue-loop stages by hand, pausing for the user after each stage.
 ---
 
-Interactive issue-loop for one task.  Same stage prompts, runner, conf, and
-delivery as `tools/issue_loop.py` (see `docs/issue-loop.md`); the user sees
+Interactive issue-loop for one task.  Same stage prompts, conf, and
+delivery as the workflow worker under `PUBLISH=local`
+(`~/git/workflow/scripts/_issue_loop.py`; see `docs/issue-loop.md`); the user sees
 every stage result and can steer before the next one.  Stop after every
 stage and wait unless the user said to run through.
 
@@ -43,7 +44,7 @@ Main checkout must be clean and on `master`; `base=$(git rev-parse HEAD)`.
 
 Run `STAGE_DIAGNOSE` in that worktree with the prompt
 `~/git/workflow/lib/issue-loop/diagnose.md` + `## Task` + the `## Delivery`
-paragraph from `tools/issue_loop.py`.  When another agent diagnosed, check
+paragraph from `_issue_loop.py`'s `process`.  When another agent diagnosed, check
 the plan against the code: file:line claims, whether it is right, nothing
 about how to implement it.  Append the plan to the task file under
 `## Plan`, commit `.meta`, show plan and verdict, stop.
