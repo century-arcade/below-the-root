@@ -30,7 +30,7 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
 | M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; map/gamepad/fullscreen deferred | **in progress** |
+| M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, mute and volume; the help overlay is queued | **in progress** |
 | M6.5 ship -- normal walkthrough recording and cleanup tools ready; complete quest still to play; GitHub OAuth configured; user authorization still to verify | **next** |
 
 The spec has 24 open questions, listed at the end of each area file;
@@ -88,5 +88,5 @@ from the original C64 save format. Verify or shorten a copy with
 `node tools/playthrough.mjs run.json`; see [docs/playthrough.md](docs/playthrough.md).
 
 Next is a complete ordinary quest, not another attract-demo replay.
-The remaining map/controls/audio-controls/fullscreen/gamepad polish is
-tracked in `.meta/todo/player-polish.md`.
+Remaining polish: the help overlay (`.meta/todo/help-overlay.md`);
+mobile testing and palette choice are parked in `.meta/maybe/`.

@@ -181,8 +181,6 @@ def tile_props(code):
 
 
 def object_half(code):
-    if not OBJECT_FIRST <= code <= OBJECT_LAST:
-        return None
     half = 'left' if code % 2 else 'right'
     k = (0xFD - code) // 2 if code % 2 else (0xFE - code) // 2
     return {'class': k, 'half': half}
@@ -256,7 +254,7 @@ def build_tiles(game, hist):
             'role': role,
             'note': note,
             'ladder': LADDER[c][1] if c in LADDER else None,
-            'object': object_half(c),
+            'object': object_half(c) if OBJECT_FIRST <= c <= OBJECT_LAST else None,
             'support': bool(sup),
             'solid': bool(sol),
             'climbable': bool(cli),
