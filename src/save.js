@@ -107,7 +107,7 @@ export function importSave(state, bytes) {
   if (roomId >= data.grid.width * data.grid.height || !data.roomById.has(nidId)) {
     throw new Error('Invalid saved room');
   }
-  // Decode into a draft: a rejected file must leave the running quest intact.
+  // draft decoding: a rejected file must leave the running quest intact
   const draft = { ...state, objects: state.objects.map(o => ({ ...o })), flags: state.flags.map(f => ({ ...f })) };
   for (const o of draft.objects) {
     const flags = bytes[at.object_flags + o.object];

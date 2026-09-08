@@ -25,7 +25,7 @@ function random(seed) {
 }
 
 export function screenKey(s) {
-  // Figures/water animation aren't screen changes. Room edits and text/menu changes are.
+  // screen changes: room edits and text/menu changes, excluding figure and water animation
   return `${s.room?.room}:${!!s.room?.blank}:${s.title}:${s.quest}:`
     + Array.from(s.panel).join(',') + ':' + (s.screen ? Array.from(s.screen).join(',') : '');
 }
@@ -59,7 +59,7 @@ export class Session {
       created: new Date().toISOString(), seed, initial, slots, frames: 0,
       inputs: [], actions: [], path: [], gestures: [], storageErrors: [], outcomes: [],
     };
-    // a replay re-derives its own route and endings from the frames it runs
+    // replay route and endings: derived from the replayed frames
     if (record) { this.record.path = []; this.record.outcomes = []; }
     this.slots = new Map(Object.entries(this.record.slots));
     const stick = { pace: 5, read: () => this.read() };
@@ -68,7 +68,7 @@ export class Session {
       storage: {
         save: (n, bytes) => {
           const value = toBase64(bytes);
-          // Write first, so a failed browser write does not silently alter the slot.
+          // slot writes: browser storage must succeed before the in-memory slot changes
           if (this.playback) {
             const failure = this.record.storageErrors[this.storageErrorIndex];
             if (failure?.frame === this.frame && failure.slot === n) {
@@ -154,7 +154,7 @@ export class Session {
   }
 
   gesture(kind, ...details) {
-    // Diagnostic annotations only. Replay uses the sampled joystick, never UI events.
+    // UI events: diagnostic annotations only; replay uses the sampled joystick
     this.record.gestures.push([this.frame, kind, ...details]);
     if (this.record.gestures.length > MAX_GESTURES) this.record.gestures.splice(0, this.record.gestures.length - MAX_GESTURES);
   }
@@ -171,7 +171,7 @@ export class Session {
       session.step();
       session.state.events.length = 0;
     }
-    // A file load can happen between ticks, including immediately before saving.
+    // file loads: possible between ticks, including immediately before saving
     while (session.record.actions[session.actionIndex]?.frame === session.frame) {
       session.apply(session.record.actions[session.actionIndex++]);
     }
@@ -222,7 +222,7 @@ export function validateRecord(r, data) {
   }
 }
 
-// Keep each failed original before any replacement, including repeated recoveries.
+// failed originals: preserved before each replacement, including repeated recoveries
 export function preserveAutosave(storage, original) {
   for (let n = 0; ; n++) {
     const key = `${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`;
@@ -234,7 +234,7 @@ export function preserveAutosave(storage, original) {
 
 export function recoverAutosave(data, live, original, storage, options = {}) {
   const record = JSON.parse(original);
-  // The interoperable save does not depend on the journal's engine version.
+  // interoperable save: independent of the journal's engine version
   if (record?.format !== 'below-the-root-record' || typeof record.c64 !== 'string'
       || !record.c64.length || record.c64.length > 4096) {
     throw new Error('This autosave has no recoverable quest checkpoint. Download the original save for recovery.');
@@ -252,7 +252,7 @@ export class Autosave {
   constructor(storage, onError = () => {}) { this.storage = storage; this.onError = onError; this.key = null; }
   save(session, force = false) {
     const state = session.state;
-    // Attract screens must never overwrite the player's quest.
+    // attract screens: must never overwrite the player's quest
     if (state.demo || (!state.quest && !session.record.path.some(p => p.quest))) return 'skipped';
     const key = screenKey(state);
     if (!force && key === this.key) return false;
