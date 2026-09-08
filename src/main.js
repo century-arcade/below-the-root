@@ -8,7 +8,7 @@ import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } fr
 import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale } from './fit.js';
-import { mapCells, visitedRooms } from './map.js';
+import { drawMap, visitedRooms } from './map.js';
 import { basicsVisible } from './help.js';
 
 function note(text, ms) {
@@ -190,6 +190,25 @@ loadData((path) => fetch(path).then((r) => {
   const mapButton = document.getElementById('map');
   const mapGrid = document.getElementById('map-grid');
   const mapPlace = document.getElementById('map-place');
+  const mapPreview = document.getElementById('map-preview');
+  let mapZoom = 1;
+  const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
+    ?.scrollIntoView({ block: 'center', inline: 'center' });
+  const zoomMap = factor => {
+    mapZoom = Math.max(1, Math.min(8, mapZoom * factor));
+    mapGrid.style.width = `${mapZoom * 100}%`;
+    document.getElementById('map-zoom').textContent = `${mapZoom}×`;
+    document.getElementById('map-zoom-out').disabled = mapZoom === 1;
+    document.getElementById('map-zoom-in').disabled = mapZoom === 8;
+    (mapGrid.querySelector('.selected') || mapGrid.querySelector('.current'))
+      ?.scrollIntoView({ block: 'center', inline: 'center' });
+  };
+  document.getElementById('map-zoom-in').onclick = () => zoomMap(2);
+  document.getElementById('map-zoom-out').onclick = () => zoomMap(.5);
+  document.getElementById('map-current').onclick = () => {
+    mapGrid.querySelector('[aria-current="location"]')?.click();
+    centerMap();
+  };
   const saveNow = () => restoreFailed || autosave.save(session, true).reason !== 'failed';
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
@@ -219,25 +238,9 @@ loadData((path) => fetch(path).then((r) => {
   }
   function openMap() {
     if (state.demo || state.title || !state.room || paused) return;
-    const cells = mapCells(data, visitedRooms(session.record.path), state.room.code).flat();
-    const describe = c => `${c.code} · ${c.kind} · ${c.visited ? 'visited' : 'unvisited'}`
-      + (c.current ? ' · current room' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
-    mapPlace.textContent = `Current room: ${state.room.code}. Select a room to read its name.`;
-    mapGrid.replaceChildren(...cells.map(c => {
-      if (!c) return document.createElement('span');
-      const element = document.createElement('button');
-      element.className = `${c.kind}${c.visited ? '' : ' unvisited'}${c.current ? ' current' : ''}`;
-      element.setAttribute('aria-label', describe(c));
-      if (c.current) element.setAttribute('aria-current', 'location');
-      element.title = describe(c);
-      const sign = document.createElement('span');
-      sign.className = 'map-sign';
-      sign.textContent = c.signs.join(' ');
-      element.append(sign);
-      element.onclick = element.onfocus = () => { mapPlace.textContent = describe(c); };
-      return element;
-    }));
+    drawMap(state, visitedRooms(session.record.path), mapGrid, mapPreview, mapPlace);
     openOverlay(mapScreen, mapButton);
+    centerMap();
   }
   mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
   document.getElementById('close-map').onclick = release;

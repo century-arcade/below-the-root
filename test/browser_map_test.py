@@ -17,7 +17,14 @@ with sync_playwright() as p:
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
         assert page.locator('#map-grid > button').count() == 438
+        assert page.locator('#map-grid > button > canvas').count() == 438
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
+        assert 'current room' in page.locator('#map-place').inner_text()
+        assert page.get_by_role('button', name='Zoom out', exact=True).is_disabled()
+        page.get_by_role('button', name='Zoom in', exact=True).click()
+        assert page.locator('#map-zoom').inner_text() == '2×'
+        page.get_by_role('button', name='Zoom out', exact=True).click()
+        assert page.locator('#map-zoom').inner_text() == '1×'
         assert 'PAUSED' not in page.locator('#where').inner_text()
         stopped = record()['frames']
         page.wait_for_timeout(300)
@@ -39,6 +46,9 @@ with sync_playwright() as p:
         room = page.get_by_role('button', name='THE LAPAN HOUSE', exact=False)
         room.click()
         assert 'THE LAPAN HOUSE' in page.locator('#map-place').inner_text()
+        assert 'THE LAPAN HOUSE' in page.locator('#map-preview').get_attribute('aria-label')
+        page.get_by_role('button', name='Current room', exact=True).click()
+        assert 'current room' in page.locator('#map-place').inner_text()
         stopped = record()['frames']
         page.keyboard.press('Space')
         page.wait_for_timeout(200)
@@ -73,4 +83,4 @@ with sync_playwright() as p:
         assert not errors, errors
         page.close()
     browser.close()
-    print('browser_map_test: world rooms, hold/resume, native Tab, touch labels, input reset, fullscreen, title/demo passed')
+    print('browser_map_test: room canvases, zoom, preview, hold/resume, native Tab, input reset, fullscreen, title/demo passed')

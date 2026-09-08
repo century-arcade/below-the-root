@@ -49,6 +49,9 @@ script, `?room=T1` to start somewhere else).
 Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen.
 
 Tab (or the Map button) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
+The map is generated when opened from the original room tiles and current quest objects.
+Use +/− to zoom, scroll to explore, and select a room for its art and name;
+Current room returns to your location. Green outlines mark visited rooms, white your location.
 
 ? (or H, or the Help button) opens all controls; two-line basics show on the title/menu screens until the session's first joystick input.
 

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { loadTestData, J } from './helpers.js';
-import { mapCells, visitedRooms } from '../src/map.js';
+import { mapCells, visitedRooms, mapRoom } from '../src/map.js';
+import { render } from '../src/video.js';
 import { Session } from '../src/record.js';
 import { startQuest } from '../src/game.js';
 import { openMenu } from '../src/shell.js';
@@ -68,4 +69,22 @@ startQuest(session.state, data.characters[0]);
 session.noteRoom();
 assert.equal(session.record.path.length, count + 1, 'restarting in the same room still marks a new quest');
 assert.equal(session.record.path.at(-1).questStart, true);
-console.log('map_test: world cells, kinds, signs, current/visited flags, quest reset and replay passed');
+
+const state = session.state;
+const remote = data.rooms.find(r => r !== state.room && r.objects.length && !r.underground);
+const before = JSON.stringify(state);
+const art = mapRoom(state, remote);
+assert.deepEqual(art, render({ data, room: remote, tick: state.tick }).subarray(0, art.length),
+  'map art uses the original room tiles, glyphs, objects and palette');
+assert.equal(JSON.stringify(state), before, 'rendering the map does not change the quest');
+const objects = state.objects.map(o => o.room === remote.room ? { ...o, carried: true } : o);
+assert.notDeepEqual(mapRoom({ ...state, objects }, remote), art,
+  'collected objects disappear from the map');
+const changed = { ...state, screen: new Uint8Array(state.screen.length) };
+assert.notDeepEqual(mapRoom(changed, state.room), mapRoom(state, state.room),
+  'current-room art reflects live terrain changes');
+const cave = data.rooms.find(r => r.underground);
+assert.deepEqual(mapRoom({ ...state, room: cave, screen: cave.screen, lamp: null }, cave),
+  render({ data, room: cave, tick: state.tick }).subarray(0, art.length),
+  'underground map rooms are visible without a lamp');
+console.log('map_test: world cells, visits, quest reset, replay and live asset rendering passed');
