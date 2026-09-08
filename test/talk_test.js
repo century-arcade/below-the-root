@@ -5,7 +5,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadData } from '../src/data.js';
-import { newState, startQuest, tick } from '../src/game.js';
+import { newState, startQuest, startVerb, tick } from '../src/game.js';
+import { gainSpirit, pense } from '../src/dialog.js';
 import { enterRoom } from '../src/world.js';
 import { panelLines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
@@ -167,6 +168,73 @@ test('a blesser adds 5, announces the skill and shows a vision', (s) => {
   assert.equal(lines[0], 'A VISION COMES TO YOU:');
   assert.equal(run(s, menu('SPEAK'))[0], lines[0] === '' ? '' : data.messages[c.def.dialog.gate_passed.speak[0]]);
   assert.equal(s.player.spiritLimit, 15);
+});
+
+// Each reward screen waits for its own tune, then one release/press.
+for (const reward of ['spirit', 'fifth animal']) {
+  for (const limit of [25, 35, 40]) {
+    for (const exhausted of [false, true]) test(`${reward} at limit ${limit}, visions exhausted: ${exhausted}`, (s) => {
+      s.rng = () => (data.music.random_pool.indexOf(3) + 0.5) / data.music.random_pool.length;
+      s.visions = exhausted ? data.quest.visions.length : 0;
+      let gen;
+      if (reward === 'spirit') {
+        s.player.spiritLimit = limit - 5;
+        gen = gainSpirit(s, 5);
+      } else {
+        const c = faceCreature(s, 67);
+        assert.equal(c.def.kind, 'pensable_animal');
+        s.animalsPensed = 4;
+        s.player.spiritLimit = limit - c.def.params.pense_message_gain;
+        gen = pense(s);
+      }
+      let stick = J.fire;
+      let reads = 0;
+      s.input = { read: () => { reads += 1; return stick; }, pace: 0 };
+      const musicEvents = () => s.events.filter(e => 'music' in e);
+      const frames = data.music.tunes[3].frames;
+      const screens = [];
+      if (limit < 35) screens.push('CONGRATULATIONS QUESTER, YOU HAVE');
+      if (!exhausted) screens.push('A VISION COMES TO YOU:');
+      startVerb(s, gen);
+      assert.equal(s.player.spiritLimit, limit);
+      assert.equal(s.player.spiritEnergy, limit);
+      for (const [i, screen] of screens.entries()) {
+        assert.equal(lines(s)[0], screen);
+        if (limit === 25 && i === 0) assert.equal(lines(s)[1], 'GAINED THE POWER TO KINIPORT TOOLS');
+        assert.deepEqual(musicEvents(), Array(i + 1).fill({ music: 3 }));
+        assert.equal(s.stall, frames, 'only the playing tune blocks input');
+        const before = reads;
+        for (let frame = 0; frame < frames; frame++) tick(s);
+        assert.equal(reads, before, 'input waits until the tune finishes');
+        tick(s);
+        assert.equal(lines(s)[0], screen, 'a held button cannot acknowledge the screen');
+        assert.ok(s.verb);
+        stick = J.idle;
+        tick(s);
+        assert.equal(lines(s)[0], screen, 'releasing alone cannot acknowledge the screen');
+        stick = J.fire;
+        tick(s);
+      }
+      assert.equal(s.verb, null, 'one acknowledgement per screen finishes the reward');
+      assert.equal(s.visions, exhausted ? data.quest.visions.length : 1);
+      assert.deepEqual(musicEvents(), Array(Math.max(1, screens.length)).fill({ music: 3 }));
+      if (!screens.length) assert.equal(s.stall, frames, 'a reward without announcements still plays one tune');
+    });
+  }
+}
+
+test('an animal before the fifth gives one reward tune without an announcement', (s) => {
+  const c = faceCreature(s, 67);
+  startVerb(s, pense(s));
+  assert.equal(s.animalsPensed, 1);
+  assert.equal(s.player.spiritLimit, 10 + c.def.params.pense_message_gain);
+  assert.equal(s.player.spiritEnergy, s.player.spiritLimit);
+  assert.equal(s.visions, 0);
+  assert.equal(s.verb, null);
+  assert.equal(lines(s)[2], 'MESSAGE:');
+  const events = s.events.filter(e => 'music' in e);
+  assert.equal(events.length, 1);
+  assert.equal(s.stall, data.music.tunes[events[0].music].frames);
 });
 
 test('the outer gate: locked, then paid with a wissenberry', (s) => {

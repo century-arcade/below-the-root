@@ -80,8 +80,8 @@ export function* pense(state) {
     state.animalsPensed += 1;
     p.spiritLimit += def.params.pense_message_gain;
     p.spiritEnergy = p.spiritLimit;
-    startTune(state, 'random');
     if (state.animalsPensed === 5) yield* announce(state);
+    else startTune(state, 'random');
   }
 }
 
@@ -155,20 +155,21 @@ export function* gainSpirit(state, amount) {
   const p = state.player;
   p.spiritLimit += amount;
   p.spiritEnergy = p.spiritLimit;
-  startTune(state, 'random');
   yield* announce(state);
 }
 
 // creatures.md, The spirit gift announcement
 function* announce(state) {
   const p = state.player;
+  const visions = state.data.quest.visions;
+  // With no announcement left, the reward still gets one tune.
+  if (p.spiritLimit >= 35 && state.visions >= visions.length) return startTune(state, 'random');
   if (p.spiritLimit < 35) {
     const skill = state.data.skills[Math.floor(p.spiritLimit / 5) - 1];
     say(state, 'CONGRATULATIONS QUESTER, YOU HAVE', `GAINED THE POWER TO ${skill.display_name}`);
     startTune(state, 'random');
     yield* buttonPress();
   }
-  const visions = state.data.quest.visions;
   if (state.visions < visions.length) {
     say(state, 'A VISION COMES TO YOU:', visions[state.visions].text);
     state.visions += 1;
