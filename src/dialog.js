@@ -169,7 +169,7 @@ export function* gainSpirit(state, amount) {
 function* announce(state) {
   const p = state.player;
   const visions = state.data.quest.visions;
-  // reward tune: one even with no announcement left
+  // reward tune: still plays one when no announcement is left
   if (p.spiritLimit >= 35 && state.visions >= visions.length) return startTune(state, 'random');
   if (p.spiritLimit < 35) {
     const skill = state.data.skills[Math.floor(p.spiritLimit / 5) - 1];

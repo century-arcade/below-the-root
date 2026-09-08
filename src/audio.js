@@ -190,7 +190,7 @@ export class Speaker {
     const now = this.ctx.currentTime;
     if (this.playing && now < this.tuneEnd) {
       const { tune, t0 } = this.playing;
-      // waited tunes: progress measured on the audio clock while game ticks stop
+      // waited tunes: game ticks stop, so progress is measured on the audio clock
       this.paused = { tune, offsetTicks: (now - t0) / TICK_S };
     }
     this.cutAll(now);
