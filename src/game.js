@@ -99,6 +99,7 @@ function applyCharacter(state, character) {
 
 // shell.md, Character select: a new quest over whatever was there
 export function startQuest(state, character) {
+  state.questNumber = (state.questNumber || 0) + 1;
   Object.assign(state, {
     objects: newObjects(state.data), flags: newFlags(), clock: newClock(),
     character: character.id, sample: false, fallaKey: false, berriesOffered: 0,

@@ -134,13 +134,17 @@ export class Session {
 
   noteRoom() {
     const s = this.state;
+    // START GAME can replace an active quest without quest ever becoming false.
+    const questStart = s.questNumber !== this.lastQuestNumber;
     const key = `${s.room?.code}:${!!s.room?.blank}:${s.title}:${s.quest}`;
-    if (key !== this.lastRoom) {
+    if (key !== this.lastRoom || questStart) {
       this.record.path.push({ frame: this.frame, room: s.room?.code ?? null,
         blank: !!s.room?.blank, title: s.title, quest: s.quest,
+        ...(questStart ? { questStart: true } : {}),
         col: s.player.col, row: s.player.row, day: s.clock.day, hour: s.clock.hour });
     }
     this.lastRoom = key;
+    this.lastQuestNumber = s.questNumber;
   }
 
   apply(action) {

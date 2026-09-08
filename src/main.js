@@ -8,6 +8,7 @@ import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } fr
 import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale } from './fit.js';
+import { mapCells, visitedRooms } from './map.js';
 
 function note(text, ms) {
   const element = document.getElementById('notice');
@@ -42,6 +43,7 @@ function fit() {
   }
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = HEIGHT * scale + 'px';
+  canvas.parentElement.style.width = canvas.style.width;
   if (!full) game.style.width = canvas.style.width;
 }
 
@@ -176,12 +178,56 @@ loadData((path) => fetch(path).then((r) => {
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
+  let mapOpen = false;
+  const mapScreen = document.getElementById('map-screen');
+  const mapButton = document.getElementById('map');
+  const mapGrid = document.getElementById('map-grid');
+  const mapPlace = document.getElementById('map-place');
   const saveNow = () => restoreFailed || autosave.save(session, true).reason !== 'failed';
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; };
   const hold = () => { held = true; dropInput(); speaker.suspend(); game.classList.add('paused'); };
-  const release = () => { dropInput(); held = false; speaker.resume(); game.classList.remove('paused'); };
+  const release = () => {
+    if (mapOpen) {
+      if (mapScreen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
+      mapOpen = false;
+      mapScreen.hidden = true;
+      mapButton.setAttribute('aria-expanded', 'false');
+    }
+    dropInput(); held = false; speaker.resume(); game.classList.remove('paused');
+  };
+  function openMap() {
+    if (state.demo || state.title || !state.room || paused) return;
+    mapOpen = true;
+    hold();
+    const cells = mapCells(data, visitedRooms(session.record.path), state.room.code).flat();
+    const describe = c => `${c.code} · ${c.kind} · ${c.visited ? 'visited' : 'unvisited'}`
+      + (c.current ? ' · current room' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
+    mapPlace.textContent = `Current room: ${state.room.code}. Select a room to read its name.`;
+    mapGrid.replaceChildren(...cells.map(c => {
+      if (!c) return document.createElement('span');
+      const element = document.createElement('button');
+      element.className = `${c.kind}${c.visited ? '' : ' unvisited'}${c.current ? ' current' : ''}`;
+      element.setAttribute('aria-label', describe(c));
+      if (c.current) element.setAttribute('aria-current', 'location');
+      element.title = describe(c);
+      const sign = document.createElement('span');
+      sign.className = 'map-sign';
+      sign.textContent = c.signs.join(' ');
+      element.append(sign);
+      element.onclick = element.onfocus = () => { mapPlace.textContent = describe(c); };
+      return element;
+    }));
+    mapScreen.hidden = false;
+    mapButton.setAttribute('aria-expanded', 'true');
+  }
+  mapButton.onclick = e => { mapOpen ? release() : openMap(); e.currentTarget.blur(); };
+  document.getElementById('close-map').onclick = release;
+  // Room buttons keep native keyboard activation without sending joystick input.
+  for (const type of ['keydown', 'keyup']) mapScreen.addEventListener(type, e => {
+    if (e.key !== 'Escape' && e.key !== 'Tab') e.stopPropagation();
+  });
   const recovery = document.getElementById('save-recovery');
   recovery.hidden = !restoreFailed;
   const downloadOriginal = () => downloadRecordingText(existing, 'btr-preserved-autosave.json');
@@ -209,6 +255,14 @@ loadData((path) => fetch(path).then((r) => {
   };
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (e.key === 'Tab') {
+      if ((e.target === document.body || e.target === canvas)
+          && (mapOpen || !state.demo && !state.title && state.room)) {
+        if (mapOpen) release(); else openMap();
+        e.preventDefault();
+      }
+      return;
+    }
     if (e.key.toLowerCase() === 'f' && !e.shiftKey) { toggleFullscreen(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'm') { toggleMute(); e.preventDefault(); return; }
     if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
@@ -219,6 +273,7 @@ loadData((path) => fetch(path).then((r) => {
   });
   addEventListener('blur', () => hold());
   async function importFile(file) {
+    if (mapOpen) release();
     pause();
     try {
       if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');
@@ -253,9 +308,12 @@ loadData((path) => fetch(path).then((r) => {
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
     const place = whereLabel(state);
-    const line = held ? `${place} PAUSED`.trim() : place;
+    const line = held && !mapOpen ? `${place} PAUSED`.trim() : place;
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
+    const mapUnavailable = !!(state.demo || state.title || !state.room);
+    if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
+    if (mapOpen && mapUnavailable) release();
     if (debug) {
       status.textContent = label(state);
       status.title = status.textContent;
