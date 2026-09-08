@@ -46,8 +46,9 @@ export function checkpoint(s) {
 }
 
 export class Session {
-  constructor(data, live, { initial = { mode: 'cold' }, seed = 1, slots = {}, record = null } = {}) {
+  constructor(data, live, { initial = { mode: 'cold' }, seed = 1, slots = {}, record = null, saveSlot = null } = {}) {
     this.live = live;
+    this.saveSlot = saveSlot;
     this.frame = 0;
     this.playback = !!record;
     this.readIndex = 0;
@@ -164,9 +165,9 @@ export class Session {
       c64: this.state.quest && !this.state.demo ? toBase64(exportSave(this.state)) : null };
   }
 
-  static replay(data, live, record, verify = true) {
+  static replay(data, live, record, verify = true, options = {}) {
     validateRecord(record, data);
-    const session = new Session(data, live, { record });
+    const session = new Session(data, live, { ...options, record });
     for (let i = 0; i < record.frames; i++) {
       session.step();
       session.state.events.length = 0;
@@ -252,13 +253,13 @@ export class Autosave {
   save(session, force = false) {
     const state = session.state;
     // attract screens: must never overwrite the player's quest
-    if (state.demo || (!state.quest && !session.record.path.some(p => p.quest))) return 'skipped';
+    if (state.demo || (!state.quest && !session.record.path.some(p => p.quest))) return { written: false, reason: 'skipped' };
     const key = screenKey(state);
-    if (!force && key === this.key) return false;
+    if (!force && key === this.key) return { written: false, reason: 'unchanged' };
     try {
       this.storage.setItem(AUTOSAVE_KEY, JSON.stringify(session.snapshot()));
       this.key = key;
-      return true;
-    } catch (err) { this.onError(`Autosave failed: ${err.message}. Download your recording to keep it.`); return false; }
+      return { written: true };
+    } catch (err) { this.onError(`Autosave failed: ${err.message}. Download your recording to keep it.`); return { written: false, reason: 'failed' }; }
   }
 }

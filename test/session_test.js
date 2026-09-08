@@ -96,6 +96,25 @@ for (const failAt of [1, 2]) {
   assert.equal(saved.get(AUTOSAVE_KEY), original, 'a failed backup or replacement preserves the autosave');
 }
 
+// Slot persistence is supplied at construction, including replay and recovery.
+for (const create of [
+  options => new Session(data, values, options),
+  options => Session.replay(data, values, recorded, true, options),
+  options => recoverAutosave(data, values, original, storage, options),
+]) {
+  const saved = [];
+  const slotted = create({ saveSlot: (n, text) => {
+    if (n === 2) throw new Error('quota');
+    saved.push([n, text]);
+  } });
+  slotted.state.storage.save(1, bytes);
+  assert.deepEqual(saved, [[1, btoa(String.fromCharCode(...bytes))]]);
+  assert.equal(slotted.slots.get('1'), saved[0][1]);
+  assert.throws(() => slotted.state.storage.save(2, bytes), /quota/);
+  assert.equal(slotted.slots.has('2'), false, 'failed writes leave slots unchanged');
+  assert.deepEqual(slotted.record.storageErrors.at(-1), { frame: slotted.frame, slot: 2 });
+}
+
 const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
 for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);
 assert.equal(chatty.record.gestures.length, 500, 'gestures are capped');
@@ -103,17 +122,17 @@ assert.deepEqual(chatty.record.gestures.at(-1), [0, 'keydown', 'k599'], 'the new
 
 const store = new Map(); let writes = 0;
 const autosave = new Autosave({ setItem: (k, v) => { store.set(k, v); writes++; } });
-assert.ok(autosave.save(session));
-assert.equal(autosave.save(session), false); assert.equal(writes, 1);
+assert.deepEqual(autosave.save(session), { written: true });
+assert.deepEqual(autosave.save(session), { written: false, reason: 'unchanged' }); assert.equal(writes, 1);
 session.state.panel[0] = 65;
-assert.ok(autosave.save(session)); assert.equal(writes, 2);
+assert.deepEqual(autosave.save(session), { written: true }); assert.equal(writes, 2);
 assert.ok(JSON.parse(store.get(AUTOSAVE_KEY)).inputs.length > 0);
 const previous = store.get(AUTOSAVE_KEY);
 startDemo(session.state, 'intro');
-assert.equal(autosave.save(session, true), 'skipped'); assert.equal(store.get(AUTOSAVE_KEY), previous);
+assert.deepEqual(autosave.save(session, true), { written: false, reason: 'skipped' }); assert.equal(store.get(AUTOSAVE_KEY), previous);
 let error = '';
 const failing = new Autosave({ setItem: () => { throw new Error('quota'); } }, text => { error = text; });
-assert.equal(failing.save(restored), false); assert.match(error, /quota/);
+assert.deepEqual(failing.save(restored), { written: false, reason: 'failed' }); assert.match(error, /quota/);
 // Restore a real shell generator waiting inside character selection.
 const menu = new Session(data, values, { initial: { mode: 'menu' }, seed: 2 });
 for (let i = 0; i < 50; i++) {

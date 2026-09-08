@@ -120,19 +120,18 @@ loadData((path) => fetch(path).then((r) => {
     volume = parseFloat(localStorage.getItem('btr.volume'));
     muted = localStorage.getItem('btr.muted') === '1';
   } catch (err) { note(`Browser storage is unavailable: ${err.message}`); }
+  const saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text);
   let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   if (existing && initial.mode === 'cold') {
-    try { session = Session.replay(data, stick, JSON.parse(existing)); }
+    try { session = Session.replay(data, stick, JSON.parse(existing), true, { saveSlot }); }
     catch (err) { restoreFailed = true; note(`${err.message} Your previous autosave is preserved.`); }
   }
-  session ||= new Session(data, stick, { initial, slots, seed });
+  session ||= new Session(data, stick, { initial, slots, seed, saveSlot });
   let state = session.state;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, note);
-  const bindSlots = () => { session.saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text); };
-  bindSlots();
   const speaker = new Speaker(data.music);
   speaker.setVolume(volume);
   speaker.mute(muted);
@@ -177,7 +176,7 @@ loadData((path) => fetch(path).then((r) => {
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
-  const saveNow = () => restoreFailed || !!autosave.save(session, true);
+  const saveNow = () => restoreFailed || autosave.save(session, true).reason !== 'failed';
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; };
@@ -189,8 +188,8 @@ loadData((path) => fetch(path).then((r) => {
   document.getElementById('download-preserved-save').onclick = downloadOriginal;
   document.getElementById('recover-save').onclick = () => {
     try {
-      const recovered = recoverAutosave(data, stick, existing, localStorage, { slots, seed });
-      session = recovered; state = session.state; bindSlots();
+      const recovered = recoverAutosave(data, stick, existing, localStorage, { slots, seed, saveSlot });
+      session = recovered; state = session.state;
       restoreFailed = false;
       recovery.hidden = true;
       speaker.silence();
@@ -225,9 +224,9 @@ loadData((path) => fetch(path).then((r) => {
       if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes[0] === 123 || file.name.endsWith('.json')) {
-        const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
+        const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)), true, { saveSlot });
         if (restoreFailed) preserveAutosave(localStorage, existing);
-        session = restored; state = session.state; bindSlots();
+        session = restored; state = session.state;
       } else {
         if (restoreFailed) preserveAutosave(localStorage, existing);
         session.load(bytes);
