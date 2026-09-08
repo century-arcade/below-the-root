@@ -16,10 +16,13 @@ with sync_playwright() as p:
 
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid > button').count() == 438
-        assert page.locator('#map-grid > button > canvas').count() == 438
+        assert page.locator('#map-grid > button').count() == 195
+        assert page.locator('#map-grid > button > canvas').count() == 195
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
-        assert 'current room' in page.locator('#map-place').inner_text()
+        assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
+        assert page.locator('#map-preview, #map-place').count() == 0
+        for code in ['T1', 'T4', 'U5', 'P2', '0C']:
+            assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 0
         assert page.get_by_role('button', name='Zoom out', exact=True).is_disabled()
         page.get_by_role('button', name='Zoom in', exact=True).click()
         assert page.locator('#map-zoom').inner_text() == '2×'
@@ -43,12 +46,11 @@ with sync_playwright() as p:
         page.locator('#close-map').focus()
         page.keyboard.press('Tab')
         assert page.locator('#map-screen').is_visible()
-        room = page.get_by_role('button', name='THE LAPAN HOUSE', exact=False)
+        room = page.get_by_role('button', name='TO TEMPLE GRUND', exact=False)
         room.click()
-        assert 'THE LAPAN HOUSE' in page.locator('#map-place').inner_text()
-        assert 'THE LAPAN HOUSE' in page.locator('#map-preview').get_attribute('aria-label')
-        page.get_by_role('button', name='Current room', exact=True).click()
-        assert 'current room' in page.locator('#map-place').inner_text()
+        assert 'selected' in room.get_attribute('class')
+        page.get_by_role('button', name='Your location', exact=True).click()
+        assert 'selected' in page.locator('#map-grid [aria-current="location"]').get_attribute('class')
         stopped = record()['frames']
         page.keyboard.press('Space')
         page.wait_for_timeout(200)
@@ -75,6 +77,25 @@ with sync_playwright() as p:
         page.locator('#map-screen').wait_for(state='hidden')
         page.evaluate('document.exitFullscreen()')
 
+        # Visiting an area omitted from the paper map reveals it, including
+        # after restoring the quest, without revealing its neighbours.
+        for code, room_id, hidden_neighbour in [('0C', 384, '1C'), ('P2', 89, 'Q2')]:
+            page.goto('http://localhost:8000/?room=' + code)
+            page.wait_for_function("""room => {
+                const saved = JSON.parse(localStorage.getItem('btr.autosave.v1'));
+                return saved?.initial.room === room;
+            }""", arg=room_id)
+            page.keyboard.press('Tab')
+            page.locator('#map-screen').wait_for()
+            assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 1
+            assert page.locator(f'#map-grid button[aria-label^="{hidden_neighbour} ·"]').count() == 0
+            record()
+            page.goto('http://localhost:8000/')
+            page.wait_for_function("document.getElementById('map').onclick !== null")
+            page.keyboard.press('Tab')
+            page.locator('#map-screen').wait_for()
+            assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 1
+
         for query in ['?menu', '?demo']:
             page.goto('http://localhost:8000/' + query)
             page.wait_for_function("document.getElementById('map').hidden")
@@ -83,4 +104,4 @@ with sync_playwright() as p:
         assert not errors, errors
         page.close()
     browser.close()
-    print('browser_map_test: room canvases, zoom, preview, hold/resume, native Tab, input reset, fullscreen, title/demo passed')
+    print('browser_map_test: paper map, hidden interiors, outdoor location, zoom, hold/resume, native Tab, input reset, fullscreen, title/demo passed')

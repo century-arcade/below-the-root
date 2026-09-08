@@ -50,8 +50,10 @@ Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute,
 
 Tab (or the Map button) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
-Use +/− to zoom, scroll to explore, and select a room for its art and name;
-Current room returns to your location. Green outlines mark visited rooms, white your location.
+The six western grunds shown on the boxed map start explored; Temple Grunds and
+cavern passages appear as you visit them. Interiors stay blank. The white marker
+stays at your last outdoor location while indoors (or your nid's exit on a new quest).
+Use +/− to zoom, scroll to explore, and Your location to return to the marker.
 
 ? (or H, or the Help button) opens all controls; two-line basics show on the title/menu screens until the session's first joystick input.
 

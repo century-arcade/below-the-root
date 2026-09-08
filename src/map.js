@@ -12,32 +12,26 @@ export function mapRoom(state, room) {
   return render(view).subarray(0, WIDTH * MAP_ROOM_HEIGHT * 4);
 }
 
-export function drawMap(state, visited, grid, preview, place) {
-  const cells = mapCells(state.data, visited, state.room.code).flat();
+export function drawMap(state, visited, current, grid) {
+  const cells = mapCells(state.data, visited, current).flat();
   const source = document.createElement('canvas');
   source.width = WIDTH;
   source.height = MAP_ROOM_HEIGHT;
   const ctx = source.getContext('2d');
-  preview.width = WIDTH;
-  preview.height = MAP_ROOM_HEIGHT;
   const describe = c => `${c.code} · ${c.kind} · ${c.visited ? 'visited' : 'unvisited'}`
-    + (c.current ? ' · current room' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
+    + (c.current ? ' · your location' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
   const paint = room => ctx.putImageData(new ImageData(mapRoom(state, room), WIDTH, MAP_ROOM_HEIGHT), 0, 0);
   let selected;
-  const select = (element, c) => {
+  const select = element => {
     selected?.classList.remove('selected');
     selected = element;
     selected.classList.add('selected');
-    place.textContent = describe(c);
-    paint(state.data.roomById.get(c.room));
-    preview.getContext('2d').drawImage(source, 0, 0);
-    preview.setAttribute('aria-label', `Room ${describe(c)}`);
   };
   grid.replaceChildren(...cells.map(c => {
     if (!c) return document.createElement('span');
     const room = state.data.roomById.get(c.room);
     const element = document.createElement('button');
-    element.className = `${c.visited ? 'visited' : ''}${c.current ? ' current' : ''}`;
+    element.className = c.current ? 'current' : '';
     element.setAttribute('aria-label', describe(c));
     if (c.current) element.setAttribute('aria-current', 'location');
     element.title = describe(c);
@@ -48,16 +42,10 @@ export function drawMap(state, visited, grid, preview, place) {
     thumbnail.setAttribute('aria-hidden', 'true');
     thumbnail.getContext('2d').drawImage(source, 0, 0, thumbnail.width, thumbnail.height);
     element.append(thumbnail);
-    element.onclick = element.onfocus = () => select(element, c);
-    if (c.current) select(element, c);
+    element.onclick = element.onfocus = () => select(element);
+    if (c.current) select(element);
     return element;
   }));
-  if (!selected) {
-    place.textContent = `Current room: ${state.room.code} · open air`;
-    paint(state.room);
-    preview.getContext('2d').drawImage(source, 0, 0);
-    preview.setAttribute('aria-label', place.textContent);
-  }
 }
 
 export function roomKind(room) {
@@ -67,13 +55,40 @@ export function roomKind(room) {
   return room.tileset === 'outdoor' ? 'grund' : 'sky';
 }
 
-export function visitedRooms(path) {
-  const visited = new Set();
+// The boxed map (iso/map.jpg) draws the six western grunds. The Temple
+// Grunds, from column P onward, and everything underground are left blank.
+export function paperMapRooms(data) {
+  return new Set(data.rooms.filter(r => r.outdoor_bit && !r.underground && r.x < 25)
+    .map(r => r.code));
+}
+
+export function visitedRooms(path, data) {
+  const defaults = data ? paperMapRooms(data) : new Set();
+  let visited = new Set(defaults);
   for (const entry of path) {
-    if (entry.quest === false || entry.questStart) visited.clear();
+    if (entry.quest === false || entry.questStart) visited = new Set(defaults);
     if (entry.quest && !entry.title && !entry.blank && entry.room != null) visited.add(entry.room);
   }
   return visited;
+}
+
+// Interiors occupy unrelated grid slots. Keep the last actual exterior,
+// including cavern passages, across doors, teleports and being carried home.
+export function mapLocation(data, path, room) {
+  let last = null;
+  for (const entry of path) {
+    if (entry.quest === false || entry.questStart) last = null;
+    if (entry.quest && !entry.title && !entry.blank
+        && data.roomByCode.get(entry.room)?.outdoor_bit) last = entry.room;
+  }
+  if (room.outdoor_bit && !room.blank) return room.code;
+  if (last) return last;
+  // A new quest starts inside a nid, before there is any outdoor history.
+  for (const door of room.doors) {
+    const outside = data.roomById.get(door?.to_room);
+    if (outside?.outdoor_bit) return outside.code;
+  }
+  return null;
 }
 
 export function mapCells(data, visited, current) {
@@ -85,6 +100,7 @@ export function mapCells(data, visited, current) {
   return data.map.cells.map((row, y) => row.map((room, x) => {
     if (room == null) return null;
     const code = data.map.codes[y][x];
+    if (!data.roomById.get(room).outdoor_bit || !visited.has(code)) return null;
     return { room, code, kind: roomKind(data.roomById.get(room)),
       visited: visited.has(code), current: code === current, signs: signs.get(room) || [] };
   }));

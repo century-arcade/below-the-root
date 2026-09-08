@@ -8,7 +8,7 @@ import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } fr
 import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale } from './fit.js';
-import { drawMap, visitedRooms } from './map.js';
+import { drawMap, visitedRooms, mapLocation } from './map.js';
 import { basicsVisible } from './help.js';
 
 function note(text, ms) {
@@ -189,8 +189,6 @@ loadData((path) => fetch(path).then((r) => {
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
   const mapGrid = document.getElementById('map-grid');
-  const mapPlace = document.getElementById('map-place');
-  const mapPreview = document.getElementById('map-preview');
   let mapZoom = 1;
   const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
     ?.scrollIntoView({ block: 'center', inline: 'center' });
@@ -238,7 +236,8 @@ loadData((path) => fetch(path).then((r) => {
   }
   function openMap() {
     if (state.demo || state.title || !state.room || paused) return;
-    drawMap(state, visitedRooms(session.record.path), mapGrid, mapPreview, mapPlace);
+    drawMap(state, visitedRooms(session.record.path, data),
+      mapLocation(data, session.record.path, state.room), mapGrid);
     openOverlay(mapScreen, mapButton);
     centerMap();
   }
