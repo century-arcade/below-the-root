@@ -122,8 +122,8 @@ loadData((path) => fetch(path).then((r) => {
   const saveNow = () => restoreFailed || !!autosave.save(session, true);
   const pause = () => { paused = true; pointer.cancel(); stick.reset(); speaker.silence(); };
   const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
-  const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.silence(); game.classList.add('paused'); };
-  const release = () => { pointer.cancel(); stick.reset(); held = false; game.classList.remove('paused'); };
+  const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.suspend(); game.classList.add('paused'); };
+  const release = () => { pointer.cancel(); stick.reset(); held = false; speaker.resume(); game.classList.remove('paused'); };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
     if (held) { if (type === 'pointerdown') release(); return; }

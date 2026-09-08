@@ -47,6 +47,8 @@ export class Speaker {
     this.effect = null;
     this.tuneEnd = 0;
     this.pending = null;
+    this.playing = null;
+    this.paused = null;
   }
 
   unlock(state) {
@@ -90,6 +92,7 @@ export class Speaker {
     const tune = this.music.tunes[n];
     if (offsetTicks >= tune.frames) return;
     const t0 = now - offsetTicks * TICK_S;
+    this.playing = { tune: n, t0 };
     const { attack_ms, decay_ms } = this.music.driver;
     for (const note of planTune(this.music, n)) {
       if (note.start < offsetTicks) continue;
@@ -157,8 +160,28 @@ export class Speaker {
     src.stop(when + RELEASE_S + 0.01);
   }
 
+  suspend() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    if (this.playing && now < this.tuneEnd) {
+      const { tune, t0 } = this.playing;
+      // Game ticks stop during waited tunes, so measure progress on the audio clock.
+      this.paused = { tune, offsetTicks: (now - t0) / TICK_S };
+    }
+    this.cutAll(now);
+  }
+
+  resume() {
+    if (!this.paused) return;
+    const { tune, offsetTicks } = this.paused;
+    this.paused = null;
+    if (this.ctx.state !== 'running') this.ctx.resume();
+    this.playTune(tune, offsetTicks);
+  }
+
   silence() {
     this.pending = null;
+    this.paused = null;
     if (this.ctx) this.cutAll(this.ctx.currentTime);
   }
 
@@ -166,6 +189,7 @@ export class Speaker {
     for (const v of this.ringing) this.cut(v, when);
     this.ringing.length = 0;
     this.tuneEnd = 0;
+    this.playing = null;
   }
 
   makePulse(duty) {
