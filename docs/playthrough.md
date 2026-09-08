@@ -10,8 +10,7 @@ leaving the page saves the current frame too. Returning to `/` or
 The permanent footer and manual digit/X shortcuts have been removed.
 Keyboard movement remains arrows/WASD plus space, Shift, or Control.
 Escape or P pauses; any movement key or a tap on the screen resumes.
-Leaving the tab or window pauses too. A paused game greys the screen
-and shows PAUSED on the status line.
+Leaving the tab or window pauses too. Music continues while game time is paused.
 Mouse/touch input remains hold-to-steer, tap-for-button, and double-tap
 to walk. DISK STORAGE still offers the five C64-format browser slots.
 Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.

@@ -37,7 +37,7 @@ function fit() {
     game.style.width = '';
     scale = fitScale(game.clientWidth, game.clientHeight);
   } else {
-    const chrome = ['debug', 'debug-status', 'game-controls', 'notices']
+    const chrome = ['debug', 'debug-status', 'top-controls', 'game-controls', 'notices']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome);
   }
@@ -139,7 +139,8 @@ loadData((path) => fetch(path).then((r) => {
   speaker.mute(muted);
   const muteButton = document.getElementById('mute');
   function syncMuteButton() {
-    muteButton.textContent = speaker.muted ? 'Unmute' : 'Mute';
+    muteButton.textContent = speaker.muted ? '🔇' : '🔊';
+    muteButton.setAttribute('aria-label', speaker.muted ? 'Unmute' : 'Mute');
     muteButton.setAttribute('aria-pressed', String(speaker.muted));
   }
   function persist(key, value) {
@@ -174,6 +175,7 @@ loadData((path) => fetch(path).then((r) => {
   fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
+  where.hidden = !debug;
   const status = document.getElementById('debug-status');
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
@@ -187,7 +189,7 @@ loadData((path) => fetch(path).then((r) => {
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; };
-  const hold = () => { held = true; dropInput(); speaker.suspend(); game.classList.add('paused'); };
+  const hold = () => { held = true; dropInput(); };
   const release = () => {
     if (mapOpen) {
       if (mapScreen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
@@ -195,7 +197,7 @@ loadData((path) => fetch(path).then((r) => {
       mapScreen.hidden = true;
       mapButton.setAttribute('aria-expanded', 'false');
     }
-    dropInput(); held = false; speaker.resume(); game.classList.remove('paused');
+    dropInput(); held = false;
   };
   function openMap() {
     if (state.demo || state.title || !state.room || paused) return;
@@ -307,8 +309,7 @@ loadData((path) => fetch(path).then((r) => {
     state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
-    const place = whereLabel(state);
-    const line = held && !mapOpen ? `${place} PAUSED`.trim() : place;
+    const line = debug ? whereLabel(state) : '';
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
     const mapUnavailable = !!(state.demo || state.title || !state.room);

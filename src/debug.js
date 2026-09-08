@@ -45,8 +45,6 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   document.body.classList.add('debugging');
   document.getElementById('debug-status').hidden = false;
   document.getElementById('file-issue').hidden = false;
-  document.getElementById('github-auth').hidden = false;
-  const login = document.getElementById('github-login');
   const logout = document.getElementById('github-logout');
   const report = document.getElementById('file-issue');
   const dialog = document.getElementById('issue-dialog');
@@ -63,21 +61,22 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     if (selected) await importFile(selected);
     e.target.value = '';
   };
-  login.onclick = () => {
+  function startLogin() {
     pause();
     if (!saveNow()) { resume(); return; }
     location.assign(`${API}?op=login`);
-  };
+  }
   logout.onclick = async () => {
     try {
       const response = await fetch(`${API}?op=logout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
       if (!response.ok) throw new Error('Could not log out. Try again.');
       authenticated = false;
-      login.hidden = false; logout.hidden = true;
+      logout.hidden = true;
+      dialog.close();
     } catch (err) { note(err.message); }
   };
   report.onclick = () => {
-    if (!authenticated) { login.click(); return; }
+    if (!authenticated) { startLogin(); return; }
     pause(); saveNow();
     context = issueContext(getSession());
     result.textContent = '';
@@ -119,7 +118,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     const body = await response.json();
     if (body.login) {
       authenticated = true;
-      login.hidden = true; logout.hidden = false;
+      logout.hidden = false;
       logout.textContent = `Log out (${body.login})`;
       logout.title = logout.textContent;
     }

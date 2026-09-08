@@ -42,25 +42,19 @@ with sync_playwright() as p:
         return page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).frames")
 
     page.keyboard.press('Escape')
-    assert page.locator('#game').evaluate("e => e.classList.contains('paused')")
-    page.wait_for_function("document.getElementById('where').textContent.includes('PAUSED')")
     stopped = frames()
     page.wait_for_timeout(300)
     assert frames() == stopped, 'Escape must stop game time'
     page.keyboard.press('ArrowRight')
-    assert not page.locator('#game').evaluate("e => e.classList.contains('paused')")
-    page.wait_for_function("!document.getElementById('where').textContent.includes('PAUSED')")
     page.wait_for_timeout(300)
     assert frames() > stopped, 'a movement key must resume game time'
     page.evaluate("dispatchEvent(new Event('blur'))")
-    assert page.locator('#game').evaluate("e => e.classList.contains('paused')"), 'leaving the window must pause'
     stopped = frames()
     page.wait_for_timeout(300)
-    assert frames() == stopped
+    assert frames() == stopped, 'leaving the window must pause game time'
     page.locator('#screen').click()
-    assert not page.locator('#game').evaluate("e => e.classList.contains('paused')"), 'a tap on the screen must resume'
     page.wait_for_timeout(300)
-    assert frames() > stopped
+    assert frames() > stopped, 'a tap on the screen must resume game time'
     page.wait_for_timeout(350)
 
     page.keyboard.press('r')
@@ -119,12 +113,51 @@ with sync_playwright() as p:
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
     page.goto('http://localhost:8000/')
-    page.wait_for_timeout(200)
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
     assert not page.locator('#debug').is_visible()
-    assert page.locator('#game-controls #fullscreen').count() == 1
+    assert not page.locator('#file-issue').is_visible()
+    assert page.locator('#where').text_content() == ''
+    assert not page.locator('#where').is_visible()
+    assert page.locator('#top-controls #fullscreen').count() == 1
+    mute = page.get_by_role('button', name='Mute', exact=True)
+    assert mute.inner_text() == '🔊'
+    assert mute.get_attribute('aria-pressed') == 'false'
+    mute.click()
+    unmute = page.get_by_role('button', name='Unmute', exact=True)
+    assert unmute.inner_text() == '🔇'
+    assert unmute.get_attribute('aria-pressed') == 'true'
+    assert page.evaluate("localStorage.getItem('btr.muted')") == '1'
+    page.keyboard.press('m')
+    assert mute.get_attribute('aria-pressed') == 'false'
+    assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
+    page.get_by_role('button', name='Fullscreen', exact=True).click()
+    page.wait_for_function('document.fullscreenElement !== null')
     page.keyboard.press('f')
+    page.wait_for_function('document.fullscreenElement === null')
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
+    # The demo schedules a tune on WebAudio; pausing must not cut or restart its notes.
+    page.add_init_script('''
+        window.audioStops = 0;
+        const stop = AudioScheduledSourceNode.prototype.stop;
+        AudioScheduledSourceNode.prototype.stop = function (...args) {
+            window.audioStops++;
+            return stop.apply(this, args);
+        };
+    ''')
+    page.goto('http://localhost:8000/?demo=quest')
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.keyboard.press('-')  # Unlock audio without aborting the demo.
+    page.wait_for_function('window.audioStops > 10')
+    scheduled = page.evaluate('window.audioStops')
+    for action in ['p', 'ArrowRight', 'blur', 'Escape']:
+        if action == 'blur':
+            page.evaluate("dispatchEvent(new Event('blur'))")
+        else:
+            page.keyboard.press(action)
+        page.wait_for_timeout(200)
+        assert page.evaluate('window.audioStops') == scheduled, 'pause/resume must leave scheduled music playing'
+    assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, pause and resume, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: autosave/resume, pause/resume with continuing music, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

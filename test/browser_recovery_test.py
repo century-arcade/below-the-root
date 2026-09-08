@@ -56,15 +56,13 @@ with sync_playwright() as p:
     assert open(download.value.path()).read() == original
     # Recovery must also release a hold that was already active.
     page.keyboard.press('Escape')
-    page.wait_for_function("document.getElementById('where').textContent.includes('PAUSED')")
     page.evaluate('window.failBackup = false')
     page.get_by_role('button', name='Recover saved game').click()
     page.locator('#save-recovery').wait_for(state='hidden')
-    page.wait_for_function("document.getElementById('where').textContent && !document.getElementById('where').textContent.includes('PAUSED')")
-    assert page.locator('#where').inner_text() == record['checkpoint']['room']
     assert page.locator('#notice').inner_text() == 'Saved game recovered'
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     recovered = json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))
+    assert recovered['checkpoint']['room'] == record['checkpoint']['room']
     assert recovered['checkpoint']['quest']
     assert recovered['checkpoint']['objects'] == record['checkpoint']['objects']
     # Flush snapshots without sending input: recovered play advances on its own.
@@ -75,10 +73,11 @@ with sync_playwright() as p:
     page.locator('#notice').wait_for(state='hidden', timeout=5000)
     assert not page.get_by_role('button', name='Dismiss notice').is_visible()
     page.reload()
-    page.wait_for_function("document.getElementById('where').textContent.length > 0")
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
     assert not page.locator('#save-recovery').is_visible()
     assert 'diverged' not in page.locator('#notice').inner_text()
-    assert page.locator('#where').inner_text() == record['checkpoint']['room']
+    page.evaluate("dispatchEvent(new Event('pagehide'))")
+    assert json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))['checkpoint']['room'] == record['checkpoint']['room']
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
 
     # An unusable checkpoint still offers the original for download in debug mode.
