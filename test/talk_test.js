@@ -1,4 +1,5 @@
 // M6.2: creatures, dialog and verbs against docs/spec/creatures.md and player.md, with a scripted stick
+import { CLASS } from '../src/data.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -10,7 +11,7 @@ import { gainSpirit, pense } from '../src/dialog.js';
 import { enterRoom } from '../src/world.js';
 import { panelLines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
-import { CLASS, carriedOf } from '../src/inventory.js';
+import { carriedOf } from '../src/inventory.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };

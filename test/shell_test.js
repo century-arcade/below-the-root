@@ -9,7 +9,7 @@ import { newState, tick } from '../src/game.js';
 import { shellFrame, coldStart, openMenu } from '../src/shell.js';
 import { panelLines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
-import { CLASS } from '../src/inventory.js';
+import { CLASS } from '../src/data.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PATHS = { data: join(ROOT, 'docs', 'spec', 'data'), assets: join(ROOT, 'assets') };

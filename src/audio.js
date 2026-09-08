@@ -6,6 +6,15 @@ const FLOOR = 1 / 256;
 const NOISE_SHIFTS_PER_CYCLE = 16;
 const MASTER_GAIN = 0.3;
 
+export const SFX = {
+  blip: 0, confirm: 1, footA: 2, footB: 3, climbUp: 4, climbDown: 5, leap: 6, knockdown: 7, glide: 8,
+  fall: 9, door: 10, glideTurn: 11, bell: 12, chime: 13,
+};
+
+export function sfx(state, id) {
+  state.events.push({ sfx: id });
+}
+
 export const TUNE = { over: 0, rank: 2 };
 
 export function pickTune(music, want, rng) {

@@ -1,4 +1,5 @@
 // M6.3: the clock, food and rest, REST, the cloud world, losing a day, the endings, saves
+import { CLASS } from '../src/data.js';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -9,7 +10,7 @@ import { newState, startQuest, tick } from '../src/game.js';
 import { enterRoom, leaveByEdge } from '../src/world.js';
 import { panelLines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
-import { CLASS, carriedOf, carried } from '../src/inventory.js';
+import { carriedOf, carried } from '../src/inventory.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 import { exportSave, importSave } from '../src/save.js';
 

@@ -7,18 +7,14 @@ import { fireUp, buttonPress } from './input.js';
 import { print, clearPanel } from './panel.js';
 import { enterRoom, burnLamp } from './world.js';
 import { exportSave, importSave } from './save.js';
+import { SFX, sfx } from './audio.js';
 
 const MENU_MOVE_TICKS = 12;
 const RECORD_HOLD_TICKS = 24;
 const RELEASE_TICKS = 10;
 const RETURN_TO_MENU = 5;
-const BLIP = 0;
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-
-function blip(state) {
-  state.events.push({ sfx: BLIP });
-}
 
 // once a frame: the button ends a demo, and an idle room loop hands the screen to the menu
 export function shellFrame(state) {
@@ -64,7 +60,7 @@ export function* mainMenu(state) {
       const sel = clamp(state.menuSel + j.dy, 0, screen.items.length - 1);
       if (sel === state.menuSel) continue;
       state.menuSel = sel;
-      blip(state);
+      sfx(state, SFX.blip);
       drawMainMenu(state, sel);
       wait = MENU_MOVE_TICKS;
     }
@@ -109,7 +105,7 @@ export function* characterSelect(state) {
   let index = state.character ?? 0;
   for (;;) {
     drawRecord(state, index);
-    blip(state);
+    sfx(state, SFX.blip);
     const j = yield* nextPush((j) => j.dy < 0);
     if (j.fire) break;
     index = (index + 1) % (RETURN_TO_MENU + 1);
@@ -149,7 +145,7 @@ function drawSlots(state, sel) {
 function* pickAlong(state, count, sel, draw) {
   for (;;) {
     draw(state, sel);
-    blip(state);
+    sfx(state, SFX.blip);
     const j = yield* nextPush((j) => j.dx);
     if (j.fire) return sel;
     sel = clamp(sel + j.dx, 0, count - 1);

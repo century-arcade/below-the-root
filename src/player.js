@@ -1,15 +1,13 @@
 // docs/spec/player.md: the per-step movement state machine
 
+import { CLASS } from './data.js';
 import {
   cell, isSolid, isClimbable, isSupport, role, doorNumber, ladderSnap, isLadderCentre, COLS, ROWS,
 } from './world.js';
 import { say } from './panel.js';
 import { spend } from './clock.js';
-
-export const SFX = {
-  blip: 0, confirm: 1, footA: 2, footB: 3, climbUp: 4, climbDown: 5, leap: 6, knockdown: 7, glide: 8,
-  fall: 9, door: 10, glideTurn: 11, bell: 12, chime: 13,
-};
+import { carriedOf, destroy } from './inventory.js';
+import { SFX, sfx } from './audio.js';
 
 const FRAME = {
   idle: (f) => (f < 0 ? 0 : 3),
@@ -44,14 +42,6 @@ export function newPlayer(sheet, stamina) {
 export function figureOf(state) {
   const p = state.player;
   return { sheet: p.sheet, frame: p.frame, col: p.col, row: p.row };
-}
-
-function sfx(state, id) {
-  state.events.push({ sfx: id });
-}
-
-function carrying(state, cls) {
-  return state.objects.some((o) => o.class === cls && o.exists && o.carried);
 }
 
 // the eleven cells: read once per step and again after every move
@@ -113,7 +103,7 @@ function fireHeld(state, s, input) {
   const p = state.player;
   const supported = isSupport(state, s.floor);
   if (p.fallen >= 2 && !supported && !p.glideInhibited) {
-    if (carrying(state, 7)) {
+    if (carriedOf(state, CLASS.SHUBA)) {
       p.gliding = true;
       p.fallen = 0;
       p.crawling = false;
@@ -202,7 +192,7 @@ function walkHalf(state, s) {
   p.col += p.facing;
   if (isSolid(state, into)) p.row -= 1;
   sfx(state, p.strideAlt ? SFX.footB : SFX.footA);
-  if (p.underground && doorNumber(state, cell(state, p.col, p.row)) === 2 && carrying(state, 0)) {
+  if (p.underground && doorNumber(state, cell(state, p.col, p.row)) === 2 && carriedOf(state, CLASS.BELL)) {
     state.stop = { reason: 'bell' };
     sfx(state, SFX.bell);
   }
@@ -321,10 +311,9 @@ function startKnockdown(state) {
 }
 
 function tearShuba(state) {
-  const shuba = state.objects.find((o) => o.class === 7 && o.exists && o.carried);
+  const shuba = carriedOf(state, CLASS.SHUBA);
   if (!shuba) return;
-  shuba.exists = false;
-  shuba.carried = false;
+  destroy(shuba);
   say(state, 'YOUR SHUBA HAS TORN');
 }
 

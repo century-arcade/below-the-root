@@ -1,7 +1,8 @@
 // docs/spec/creatures.md: SPEAK, PENSE, BUY, SELL, OFFER, and the spirit gift announcement
 
+import { CLASS } from './data.js';
 import { facingCreature, flagsOf, isAnimal } from './creatures.js';
-import { CLASS, carriedOf, destroy, mintToken, onFloor, canCarry, pickItem } from './inventory.js';
+import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem } from './inventory.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
 import { startTune, TUNE } from './audio.js';

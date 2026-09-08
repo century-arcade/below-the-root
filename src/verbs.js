@@ -1,14 +1,15 @@
 // docs/spec/player.md, The command menu and The verbs; every verb is a generator, one yield per read
 
+import { CLASS } from './data.js';
 import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world.js';
-import { lieDown, idleFrame, SFX } from './player.js';
+import { lieDown, idleFrame } from './player.js';
 import { fireUp, anyInput, isIdle } from './input.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
-import { CLASS, objectUnder, pickItem, canCarry, weightOf, destroy, carried } from './inventory.js';
+import { objectUnder, pickItem, canCarry, weightOf, destroy, carried } from './inventory.js';
 import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';
 import { advanceHour, loseDay, timeOfDay, kidnap, DREAM } from './clock.js';
-import { startTune } from './audio.js';
+import { startTune, SFX, sfx } from './audio.js';
 
 export const MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS'],
@@ -55,7 +56,7 @@ export function* runMenu(state) {
     drawMenu(state, col, row);
   }
   const verb = MENU[row][col];
-  state.events.push({ sfx: 1 });
+  sfx(state, SFX.confirm);
   clearPanel(state);
   const fn = VERBS[verb];
   if (fn && (yield* fn(state)) === WOKE) return;
@@ -174,7 +175,7 @@ function* use(state) {
       if (!cut(state, bramble)) return say(state, 'THE BEAK IS USELESS HERE');
       if (Math.floor(state.rng() * 16) === 0) {
         destroy(o);
-        state.events.push({ sfx: SFX.knockdown });
+        sfx(state, SFX.knockdown);
         return say(state, 'THE TRENCHER BEAK BREAKS');
       }
       return say(state, 'THE BEAK CUTS SLOWLY');
@@ -397,14 +398,14 @@ function* rest(state) {
     let woke = false;
     for (let i = 0; i < 2 && !woke; i++) woke = yield* restDelay(state);
     for (let chime = 0; chime < 3 && !woke; chime++) {
-      state.events.push({ sfx: SFX.chime });
+      sfx(state, SFX.chime);
       woke = yield* restDelay(state);
       if (woke) break;
-      state.events.push({ sfx: SFX.blip });
+      sfx(state, SFX.blip);
       woke = yield* restDelay(state);
     }
     if (woke) break;
-    state.events.push({ sfx: SFX.confirm });
+    sfx(state, SFX.confirm);
     advanceHour(state);
     p.rest = Math.min(p.restCap, p.rest + 4);
     const host = state.creature && state.creature.def;

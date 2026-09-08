@@ -1,5 +1,6 @@
 // docs/spec/world.md: rooms, tiles, edges, doorways
 
+import { CLASS } from './data.js';
 import { spawnCreature } from './creatures.js';
 import { clearPanel, say } from './panel.js';
 import { DREAM } from './clock.js';
@@ -138,7 +139,7 @@ export function burnLamp(state) {
 
 export function isLit(state) {
   return !state.room.underground || !!state.lamp
-    || state.objects.some((o) => o.class === 1 && o.exists && o.carried);
+    || state.objects.some((o) => o.class === CLASS.SPIRIT_LAMP && o.exists && o.carried);
 }
 
 // a guarded door: the guard's banished flag is the gate's permanent flag, else paid this visit

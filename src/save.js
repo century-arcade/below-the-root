@@ -1,7 +1,7 @@
 // docs/spec/data/save.json: the original's QUESTn image, byte for byte, so C64 saves import and export
 
 import { enterRoom, openAir } from './world.js';
-import { newPlayer } from './player.js';
+import { newPlayer, idleFrame } from './player.js';
 import { weightCarried, carryLimit } from './inventory.js';
 import { TICKS_PER_HOUR, DREAM } from './clock.js';
 
@@ -151,7 +151,7 @@ export function importSave(state, bytes) {
     standingErdling: get('standing_erdling'), foodCap: get('food_cap_plus1') - 1,
     restCap: get('rest_cap_plus1') - 1, fatigue: get('fatigue'),
   });
-  p.frame = p.crawling ? (p.facing < 0 ? 17 : 20) : (p.facing < 0 ? 0 : 3);
+  p.frame = idleFrame(p);
   const dream = get('dream_state');
   const wraps = data.quest.clock.prescaler_wraps_per_time_slot;
   const room = get('saved_room_lo') | (get('saved_room_hi') << 8);

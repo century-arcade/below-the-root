@@ -3,11 +3,7 @@
 import { cell, role } from './world.js';
 import { print, PANEL_ROW } from './panel.js';
 import { fireUp } from './input.js';
-
-export const CLASS = {
-  BELL: 0, SPIRIT_LAMP: 1, HONEYLAMP: 2, WAND: 3, LAPAN: 4, BREAD: 5, FRUIT: 6, SHUBA: 7,
-  TOKEN: 8, BEAK: 9, BERRIES: 10, ROPE: 11, TEMPLE_KEY: 12, FALLA_KEY: 13, ELIXER: 14,
-};
+import { CLASS } from './data.js';
 
 export function carried(state) {
   return state.objects.filter((o) => o.exists && o.carried);

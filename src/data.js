@@ -1,3 +1,8 @@
+export const CLASS = {
+  BELL: 0, SPIRIT_LAMP: 1, HONEYLAMP: 2, WAND: 3, LAPAN: 4, BREAD: 5, FRUIT: 6, SHUBA: 7,
+  TOKEN: 8, BEAK: 9, BERRIES: 10, ROPE: 11, TEMPLE_KEY: 12, FALLA_KEY: 13, ELIXER: 14,
+};
+
 const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 
 export async function loadData(read) {

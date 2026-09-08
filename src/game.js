@@ -1,5 +1,6 @@
 // the frame tick and the shell around the room loop (docs/spec/shell.md, The outer loop)
 
+import { CLASS } from './data.js';
 import { newPlayer, step, figureOf, haltAtEdge, idleFrame } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
 import { runMenu } from './verbs.js';
@@ -10,7 +11,6 @@ import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
 import { tell } from './dialog.js';
 import { startTune, TUNE } from './audio.js';
 
-const SHUBA = 7;
 const ATTACK = { attack_salaat: 'attacked_salaat', attack_nekom: 'attacked_nekom' };
 const COLLAPSE = { food: 'FOOD', rest: 'REST' };
 const CLEAR_PAGE = 5;
@@ -122,7 +122,7 @@ export function startQuest(state, character) {
 export function startDemo(state, name = 'quest') {
   const data = state.data;
   const script = data.demo.scripts.find((s) => s.name === name);
-  const shuba = state.objects.filter((o) => o.class === SHUBA).sort((a, b) => a.object - b.object)[0];
+  const shuba = state.objects.filter((o) => o.class === CLASS.SHUBA).sort((a, b) => a.object - b.object)[0];
   if (shuba) shuba.carried = true;
   state.input = new DemoInput(script, state);
   state.demo = script;
@@ -134,7 +134,7 @@ export function startDemo(state, name = 'quest') {
   p.facing = script.facing === 'right' ? 1 : -1;
   p.crawling = !!script.crawling;
   p.indoors = !!script.indoors;
-  p.frame = p.crawling ? (p.facing < 0 ? 17 : 20) : (p.facing < 0 ? 0 : 3);
+  p.frame = idleFrame(p);
   enterRoom(state, data.roomById.get(script.room), script.start_col, script.start_row);
   state.active = true;
 }
