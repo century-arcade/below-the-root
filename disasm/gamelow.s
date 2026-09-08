@@ -25,9 +25,9 @@ menu_setup:    ; <- 340D
         lda #$00              ; 3420* A9 00
         sta $02               ; 3422* 85 02
         sta demo_flag         ; 3424* 8D 92 0A
-        jsr L9506             ; 3427* 20 06 95
+        jsr jt_clear_text_rows; 3427* 20 06 95
         lda #$01              ; 342A* A9 01
-        jsr jt_music          ; 342C* 20 03 A8
+        jsr jt_set_panel_color; 342C* 20 03 A8
         lda #$04              ; 342F* A9 04
         sta D0A4B             ; 3431* 8D 4B 0A
 ; stash the in-game room in $D3/$D4, then show the menu over attract room 157
@@ -47,7 +47,7 @@ main_menu:    ; <- 36BB 38B5 38BF 39C3 3A16
 menu_input_loop:    ; <- 3457 345D 3468 347C 370A
         jsr jt_get_input      ; 3450* 20 0F 80
         bne menu_fire         ; 3453* D0 2A
-        lda $99               ; 3455* A5 99
+        lda in_dy             ; 3455* A5 99
         beq menu_input_loop   ; 3457* F0 F7
         bpl L3464             ; 3459  10 09
         lda menu_item         ; 345B  A5 D6
@@ -86,7 +86,7 @@ menu_start_game:    ; <- 3483
         sta charsel_saved     ; 3499* 85 D9
         lda loaded_player     ; 349B* AD 60 0A
         sta character         ; 349E* 85 D5
-        jsr L9506             ; 34A0* 20 06 95
+        jsr jt_clear_text_rows; 34A0* 20 06 95
 charsel_draw:    ; <- 36AB
         jsr print_inline      ; 34A3* 20 09 80
         .byte $4F,$C3,$43,$48,$4F,$4F,$53,$45,$20,$59,$4F,$55,$52,$20,$50,$4C; 34A6  O.CHOOSE YOUR PL
@@ -156,7 +156,7 @@ L361E:    ; <- 35CC
         .byte $20,$47,$49,$46,$54,$FF                 ; 366A   GIFT.
         jmp charsel_input     ; 3670  4C 8A 36
 L3673:    ; <- 3620
-        jsr L9506             ; 3673  20 06 95
+        jsr jt_clear_text_rows; 3673  20 06 95
         jsr print_inline      ; 3676  20 09 80
         .byte $54,$C3,$52,$45,$54,$55,$52,$4E,$20,$54,$4F,$20,$4D,$45,$4E,$55; 3679  T.RETURN TO MENU
         .byte $FF                                     ; 3689  .
@@ -169,7 +169,7 @@ charsel_input:    ; <- 3511 356C 35C7 361B 3670
 L3697:    ; <- 369E
         jsr jt_get_input      ; 3697* 20 0F 80
         bne charsel_fire      ; 369A* D0 12
-        lda $99               ; 369C* A5 99
+        lda in_dy             ; 369C* A5 99
         bpl L3697             ; 369E* 10 F7
         ldx character         ; 36A0  A6 D5
         inx                   ; 36A2  E8
@@ -180,7 +180,7 @@ L36A9:    ; <- 36A5
         stx character         ; 36A9  86 D5
         jmp charsel_draw      ; 36AB  4C A3 34
 charsel_fire:    ; <- 369A
-        jsr L9506             ; 36AE* 20 06 95
+        jsr jt_clear_text_rows; 36AE* 20 06 95
         lda character         ; 36B1* A5 D5
         cmp #$05              ; 36B3* C9 05
         bne start_quest       ; 36B5* D0 07
@@ -196,15 +196,15 @@ L36C6:    ; <- 36C1
         lda #$23              ; 36C9* A9 23
         ldx #$01              ; 36CB* A2 01
         jsr jt_memclr_pages   ; 36CD* 20 33 80
-        jsr L9C15             ; 36D0* 20 15 9C
+        jsr jt_init_character ; 36D0* 20 15 9C
         lda #$FF              ; 36D3* A9 FF
-        sta $C5               ; 36D5* 85 C5
+        sta fatigue           ; 36D5* 85 C5
         lda nid_room_lo       ; 36D7* AD 6D 0A
         sta room_lo           ; 36DA* 85 86
         lda nid_room_hi       ; 36DC* AD 6E 0A
         sta room_hi           ; 36DF* 85 87
         lda #$01              ; 36E1* A9 01
-        sta D0A0E             ; 36E3* 8D 0E 0A
+        sta indoor_flag       ; 36E3* 8D 0E 0A
         sta quest_active      ; 36E6* 85 D7
         lda nid_col           ; 36E8* AD 6F 0A
         sta D0A17             ; 36EB* 8D 17 0A
@@ -213,17 +213,17 @@ L36C6:    ; <- 36C1
         jsr L8803             ; 36F4* 20 03 88
         lda #$00              ; 36F7* A9 00
         sta $D0               ; 36F9* 85 D0
-        sta $C8               ; 36FB* 85 C8
-        sta $CA               ; 36FD* 85 CA
-        sta $CB               ; 36FF* 85 CB
-        sta $CE               ; 3701* 85 CE
+        sta dream_state       ; 36FB* 85 C8
+        sta lamp_index        ; 36FD* 85 CA
+        sta lamp_fuel         ; 36FF* 85 CB
+        sta falla_key_revealed; 3701* 85 CE
         jmp jt_run_new_game   ; 3703* 4C 15 95
 menu_continue:    ; <- 348A
         lda quest_active      ; 3706  A5 D7
         bne L370D             ; 3708  D0 03
         jmp menu_input_loop   ; 370A  4C 50 34
 L370D:    ; <- 3708
-        jsr L9506             ; 370D  20 06 95
+        jsr jt_clear_text_rows; 370D  20 06 95
         lda character         ; 3710  A5 D5
         cmp loaded_player     ; 3712  CD 60 0A
         beq L371D             ; 3715  F0 06
@@ -233,7 +233,7 @@ L371D:    ; <- 3715
         lda #$01              ; 371D  A9 01
         sta $D027             ; 371F  8D 27 D0
         sta $D028             ; 3722  8D 28 D0
-        jsr L9C0F             ; 3725  20 0F 9C
+        jsr jt_draw_player    ; 3725  20 0F 9C
         lda saved_room_lo     ; 3728  A5 D3
         sta room_lo           ; 372A  85 86
         lda saved_room_hi     ; 372C  A5 D4
@@ -376,7 +376,7 @@ D3840:    ; <- 3807
 D3841:    ; <- 37B8 380F
         .byte $37                                     ; 3841  7
 menu_disk_storage:    ; <- 3491
-        jsr L9506             ; 3842  20 06 95
+        jsr jt_clear_text_rows; 3842  20 06 95
 storage_draw:    ; <- 38A7
         jsr print_inline      ; 3845  20 09 80
         .byte $49,$C3,$20,$53,$41,$56,$45,$20,$47,$41,$4D,$45,$20,$20,$4C,$4F; 3848  I. SAVE GAME  LO
@@ -401,7 +401,7 @@ L387A:    ; <- 3884
 storage_input:    ; <- 389A 389F 38A3
         jsr jt_get_input      ; 3893  20 0F 80
         bne L38AA             ; 3896  D0 12
-        lda $98               ; 3898  A5 98
+        lda in_dx             ; 3898  A5 98
         beq storage_input     ; 389A  F0 F7
         clc                   ; 389C  18
         adc storage_item      ; 389D  65 DA
@@ -415,12 +415,12 @@ L38AA:    ; <- 3896
         bne L38B8             ; 38AC  D0 0A
         lda quest_active      ; 38AE  A5 D7
         bne slot_draw         ; 38B0  D0 10
-        jsr L9506             ; 38B2  20 06 95
+        jsr jt_clear_text_rows; 38B2  20 06 95
         jmp main_menu         ; 38B5  4C 47 34
 L38B8:    ; <- 38AC
         cmp #$01              ; 38B8  C9 01
         beq slot_draw         ; 38BA  F0 06
-        jsr L9506             ; 38BC  20 06 95
+        jsr jt_clear_text_rows; 38BC  20 06 95
         jmp main_menu         ; 38BF  4C 47 34
 slot_draw:    ; <- 38B0 38BA 3912
         jsr print_inline      ; 38C2  20 09 80
@@ -444,7 +444,7 @@ L38E5:    ; <- 38EF
 slot_input:    ; <- 3905 390A 390E
         jsr jt_get_input      ; 38FE  20 0F 80
         bne storage_go        ; 3901  D0 12
-        lda $98               ; 3903  A5 98
+        lda in_dx             ; 3903  A5 98
         beq slot_input        ; 3905  F0 F7
         clc                   ; 3907  18
         adc quest_slot        ; 3908  65 DB
@@ -454,7 +454,7 @@ slot_input:    ; <- 3905 390A 390E
         sta quest_slot        ; 3910  85 DB
         jmp slot_draw         ; 3912  4C C2 38
 storage_go:    ; <- 3901
-        jsr L9506             ; 3915  20 06 95
+        jsr jt_clear_text_rows; 3915  20 06 95
         jsr print_inline      ; 3918  20 09 80
         .byte $49,$C3,$49,$4E,$53,$45,$52,$54,$20,$53,$54,$4F,$52,$41,$47,$45; 391B  I.INSERT STORAGE
         .byte $20,$44,$49,$53,$4B,$20,$2D,$20,$50,$52,$45,$53,$53,$20,$54,$52; 392B   DISK - PRESS TR
@@ -472,7 +472,7 @@ L394E:    ; <- 3951
         adc #$30              ; 3956  69 30
         sta save_name_digit   ; 3958  8D 2B 3A
         sta D3797             ; 395B  8D 97 37
-        jsr L9506             ; 395E  20 06 95
+        jsr jt_clear_text_rows; 395E  20 06 95
         lda storage_item      ; 3961  A5 DA
         beq save_game         ; 3963  F0 03
         jmp load_game         ; 3965  4C C6 39
@@ -602,7 +602,7 @@ L3A90:    ; <- 3A9A
 menu_item_col:    ; <- 3A8B
         .byte $0D,$35,$5D,$85                         ; 3A9D  .5].
 load_player_file:    ; <- 36C3 371A
-        jsr L9506             ; 3AA1  20 06 95
+        jsr jt_clear_text_rows; 3AA1  20 06 95
         jsr print_inline      ; 3AA4  20 09 80
         .byte $49,$C3,$49,$4E,$53,$45,$52,$54,$20,$53,$49,$44,$45,$20,$31,$20; 3AA7  I.INSERT SIDE 1 
         .byte $2D,$20,$50,$52,$45,$53,$53,$20,$54,$52,$49,$47,$47,$45,$52,$FF; 3AB7  - PRESS TRIGGER.
@@ -613,7 +613,7 @@ load_player_file:    ; <- 36C3 371A
 L3AD2:    ; <- 3AD5
         jsr jt_get_input      ; 3AD2  20 0F 80
         beq L3AD2             ; 3AD5  F0 FB
-        jsr L9506             ; 3AD7  20 06 95
+        jsr jt_clear_text_rows; 3AD7  20 06 95
         lda character         ; 3ADA  A5 D5
         clc                   ; 3ADC  18
         adc #$30              ; 3ADD  69 30
@@ -659,11 +659,11 @@ prompt_side2:    ; <- 39C0 3A13 3B0C
 L3B54:    ; <- 3B57
         jsr jt_get_input      ; 3B54  20 0F 80
         beq L3B54             ; 3B57  F0 FB
-        jsr L9506             ; 3B59  20 06 95
+        jsr jt_clear_text_rows; 3B59  20 06 95
         rts                   ; 3B5C  60
 prot_record:    ; <- 37C3
         lda D9C1B             ; 3B5D* AD 1B 9C
-        sta L9C12+1           ; 3B60* 8D 13 9C
+        sta jt_anim_water_char+1; 3B60* 8D 13 9C
         rts                   ; 3B63* 60
         .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00; 3B64  ................
         .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00; 3B74  ................
@@ -689,6 +689,7 @@ jt_verb_offer:    ; <- A8B4
         jmp verb_offer        ; 3C0F  4C CC 43
 jt_play_random_tune:    ; <- 8E6A 928C 92F5
         jmp play_random_tune  ; 3C12  4C 38 3D
+; A = 1-based message number; skips A-1 $FF-terminated strings from $4500
 print_message:    ; <- 3CCE 3CD8 410F 4162
         stx $80               ; 3C15  86 80
         sty $81               ; 3C17  84 81
@@ -725,23 +726,25 @@ L3C3E:    ; <- 3C27 3C45
 L3C47:    ; <- 3C40
         rts                   ; 3C47  60
 verb_speak:    ; <- 3C03
-        jsr L9506             ; 3C48  20 06 95
+        jsr jt_clear_text_rows; 3C48  20 06 95
         lda blk_creature      ; 3C4B  AD E0 09
         bne L3C69             ; 3C4E  D0 19
 L3C50:    ; <- 3C6C
         jsr print_inline      ; 3C50  20 09 80
         .byte $49,$C3,$53,$50,$45,$41,$4B,$20,$57,$49,$54,$48,$20,$57,$48,$4F; 3C53  I.SPEAK WITH WHO
         .byte $4D,$3F,$FF                             ; 3C63  M?.
-        jmp LAC12             ; 3C66  4C 12 AC
+        jmp jt_verb_done      ; 3C66  4C 12 AC
 L3C69:    ; <- 3C4E
         jsr npc_adjacent      ; 3C69  20 64 43
         bcc L3C50             ; 3C6C  90 E2
         jsr npc_gate          ; 3C6E  20 C2 43
         bcc L3CAE             ; 3C71  90 3B
-        lda D09F1             ; 3C73  AD F1 09
+; the gift/come-back-tomorrow path is only for $F1 = 0 creatures
+        lda blk_npc_kind      ; 3C73  AD F1 09
         bne L3CAE             ; 3C76  D0 36
         jsr find_gift_item    ; 3C78  20 4E 3D
-        ldx D09F0             ; 3C7B  AE F0 09
+        ldx blk_npc_id        ; 3C7B  AE F0 09
+; $2380,x low 7 bits = the day this creature was last spoken to
         lda npc_flags,x       ; 3C7E  BD 80 23
         and #$7F              ; 3C81  29 7F
         cmp day               ; 3C83  CD 62 0A
@@ -749,22 +752,22 @@ L3C69:    ; <- 3C4E
         jsr print_inline      ; 3C88  20 09 80
         .byte $49,$C3,$43,$4F,$4D,$45,$20,$42,$41,$43,$4B,$20,$54,$4F,$4D,$4F; 3C8B  I.COME BACK TOMO
         .byte $52,$52,$4F,$57,$2C,$20,$4D,$59,$20,$46,$52,$49,$45,$4E,$44,$FF; 3C9B  RROW, MY FRIEND.
-        jmp LAC12             ; 3CAB  4C 12 AC
+        jmp jt_verb_done      ; 3CAB  4C 12 AC
 L3CAE:    ; <- 3C71 3C76 3C86
         jsr npc_gate          ; 3CAE  20 C2 43
         bcc L3CBD             ; 3CB1  90 0A
-        lda D09E8             ; 3CB3  AD E8 09
+        lda blk_speak_pass2   ; 3CB3  AD E8 09
         pha                   ; 3CB6  48
-        lda D09E7             ; 3CB7  AD E7 09
+        lda blk_speak_pass1   ; 3CB7  AD E7 09
         jmp L3CC4             ; 3CBA  4C C4 3C
 L3CBD:    ; <- 3CB1
-        lda D09EC             ; 3CBD  AD EC 09
+        lda blk_speak_fail2   ; 3CBD  AD EC 09
         pha                   ; 3CC0  48
-        lda D09EB             ; 3CC1  AD EB 09
+        lda blk_speak_fail1   ; 3CC1  AD EB 09
 L3CC4:    ; <- 3CBA
         bne L3CCA             ; 3CC4  D0 04
         pla                   ; 3CC6  68
-        jmp L439A             ; 3CC7  4C 9A 43
+        jmp msg_no_response_speak; 3CC7  4C 9A 43
 L3CCA:    ; <- 3CC4
         ldx #$49              ; 3CCA  A2 49
         ldy #$C3              ; 3CCC  A0 C3
@@ -774,36 +777,38 @@ L3CCA:    ; <- 3CC4
         ldx #$71              ; 3CD4  A2 71
         ldy #$C3              ; 3CD6  A0 C3
         jsr print_message     ; 3CD8  20 15 3C
+; stamp today into $2380,x, keeping bit 7 (the once-per-quest reward flag)
 L3CDB:    ; <- 3CD2
-        ldx D09F0             ; 3CDB  AE F0 09
+        ldx blk_npc_id        ; 3CDB  AE F0 09
         lda npc_flags,x       ; 3CDE  BD 80 23
         and #$80              ; 3CE1  29 80
         ora day               ; 3CE3  0D 62 0A
         sta npc_flags,x       ; 3CE6  9D 80 23
         jsr npc_gate          ; 3CE9  20 C2 43
         bcc L3D0C             ; 3CEC  90 1E
-        lda D09F1             ; 3CEE  AD F1 09
+        lda blk_npc_kind      ; 3CEE  AD F1 09
         beq L3D08             ; 3CF1  F0 15
         cmp #$40              ; 3CF3  C9 40
         beq L3D08             ; 3CF5  F0 11
         and #$F0              ; 3CF7  29 F0
         cmp #$20              ; 3CF9  C9 20
         beq L3D08             ; 3CFB  F0 0B
-        lda D09F1             ; 3CFD  AD F1 09
+        lda blk_npc_kind      ; 3CFD  AD F1 09
         cmp #$D0              ; 3D00  C9 D0
         bne L3D0C             ; 3D02  D0 08
         lda #$01              ; 3D04  A9 01
-        sta $CE               ; 3D06  85 CE
+        sta falla_key_revealed; 3D06  85 CE
 L3D08:    ; <- 3CF1 3CF5 3CFB
         lda #$01              ; 3D08  A9 01
-        sta $CC               ; 3D0A  85 CC
+        sta take_permission   ; 3D0A  85 CC
+; $F1 = $40: first SPEAK raises the spirit limit by 5, bit 7 marks it spent
 L3D0C:    ; <- 3CEC 3D02
-        lda D09F1             ; 3D0C  AD F1 09
+        lda blk_npc_kind      ; 3D0C  AD F1 09
         cmp #$40              ; 3D0F  C9 40
         bne L3D35             ; 3D11  D0 22
-        ldx D09F0             ; 3D13  AE F0 09
+        ldx blk_npc_id        ; 3D13  AE F0 09
         lda npc_flags,x       ; 3D16  BD 80 23
-        bit D0AA7             ; 3D19  2C A7 0A
+        bit bit7_mask         ; 3D19  2C A7 0A
         bne L3D35             ; 3D1C  D0 17
         ora #$80              ; 3D1E  09 80
         sta npc_flags,x       ; 3D20  9D 80 23
@@ -815,7 +820,7 @@ L3D0C:    ; <- 3CEC 3D02
         jsr play_random_tune  ; 3D2F  20 38 3D
         jsr gain_spirit_power ; 3D32  20 A9 3D
 L3D35:    ; <- 3D11 3D1C
-        jmp LAC12             ; 3D35  4C 12 AC
+        jmp jt_verb_done      ; 3D35  4C 12 AC
 play_random_tune:    ; <- 3C12 3D2F 3E10 4018 4183
         ldx #$A0              ; 3D38  A2 A0
         jsr jt_delay          ; 3D3A  20 12 80
@@ -828,8 +833,10 @@ L3D48:    ; <- 3D4B
         lda music_on          ; 3D48  AD 95 0A
         bne L3D48             ; 3D4B  D0 FB
         rts                   ; 3D4D  60
+; the gift is any object still lying on the ground in this room
 find_gift_item:    ; <- 3C78
-        lda D09EF             ; 3D4E  AD EF 09
+        lda blk_gift_class    ; 3D4E  AD EF 09
+; $EF = $10 is not an object class: the creature offers a nid, not a thing
         cmp #$10              ; 3D51  C9 10
         bne L3D56             ; 3D53  D0 01
         rts                   ; 3D55  60
@@ -844,12 +851,12 @@ L3D58:    ; <- 3D88 3D93 3D99 3DA1 3DA6
         jsr print_inline      ; 3D5F  20 09 80
         .byte $49,$C3,$49,$20,$48,$41,$56,$45,$20,$4E,$4F,$54,$48,$49,$4E,$47; 3D62  I.I HAVE NOTHING
         .byte $20,$4D,$4F,$52,$45,$20,$54,$4F,$20,$47,$49,$56,$45,$FF; 3D72   MORE TO GIVE.
-        jmp LAC12             ; 3D80  4C 12 AC
+        jmp jt_verb_done      ; 3D80  4C 12 AC
 L3D83:    ; <- 3D5B
-        lda object_table,x    ; 3D83  BD 00 0D
+        lda obj_room_lo,x     ; 3D83  BD 00 0D
         cmp room_lo           ; 3D86  C5 86
         bne L3D58             ; 3D88  D0 CE
-        lda D0F00,x           ; 3D8A  BD 00 0F
+        lda obj_flags,x       ; 3D8A  BD 00 0F
         and #$80              ; 3D8D  29 80
         bne L3D97             ; 3D8F  D0 06
         lda room_hi           ; 3D91  A5 87
@@ -859,10 +866,10 @@ L3D97:    ; <- 3D8F
         lda room_hi           ; 3D97  A5 87
         beq L3D58             ; 3D99  F0 BD
 L3D9B:    ; <- 3D95
-        lda D0F00,x           ; 3D9B  BD 00 0F
-        bit D0AA6             ; 3D9E  2C A6 0A
+        lda obj_flags,x       ; 3D9B  BD 00 0F
+        bit obj_bit_exists    ; 3D9E  2C A6 0A
         beq L3D58             ; 3DA1  F0 B5
-        bit D0AA5             ; 3DA3  2C A5 0A
+        bit obj_bit_carried   ; 3DA3  2C A5 0A
         bne L3D58             ; 3DA6  D0 B0
         rts                   ; 3DA8  60
 gain_spirit_power:    ; <- 3D32 418E
@@ -877,7 +884,7 @@ L3DAE:    ; <- 3DB2
         bcs vision_sequence   ; 3DB6  B0 5B
         txa                   ; 3DB8  8A
         pha                   ; 3DB9  48
-        jsr LAC12             ; 3DBA  20 12 AC
+        jsr jt_verb_done      ; 3DBA  20 12 AC
         jsr print_inline      ; 3DBD  20 09 80
         .byte $49,$C3,$43,$4F,$4E,$47,$52,$41,$54,$55,$4C,$41,$54,$49,$4F,$4E; 3DC0  I.CONGRATULATION
         .byte $53,$20,$51,$55,$45,$53,$54,$45,$52,$2C,$20,$59,$4F,$55,$20,$48; 3DD0  S QUESTER, YOU H
@@ -905,7 +912,7 @@ vision_sequence:    ; <- 3DB6
         bne L3E1A             ; 3E17  D0 01
         rts                   ; 3E19  60
 L3E1A:    ; <- 3E17
-        jsr LAC12             ; 3E1A  20 12 AC
+        jsr jt_verb_done      ; 3E1A  20 12 AC
         jsr print_inline      ; 3E1D  20 09 80
         .byte $49,$C3,$41,$20,$56,$49,$53,$49,$4F,$4E,$20,$43,$4F,$4D,$45,$53; 3E20  I.A VISION COMES
         .byte $20,$54,$4F,$20,$59,$4F,$55,$3A,$FF     ; 3E30   TO YOU:.
@@ -974,12 +981,12 @@ skill_names:    ; <- 3E04
         .byte $54,$4F,$4F,$4C,$53,$FF,$4B,$49,$4E,$49,$50,$4F,$52,$54,$20,$59; 4062  TOOLS.KINIPORT Y
         .byte $4F,$55,$52,$20,$42,$4F,$44,$59,$FF     ; 4072  OUR BODY.
 verb_pense:    ; <- 3C06
-        jsr L9506             ; 407B  20 06 95
+        jsr jt_clear_text_rows; 407B  20 06 95
         lda blk_creature      ; 407E  AD E0 09
         bne L4097             ; 4081  D0 14
         jsr print_inline      ; 4083  20 09 80
         .byte $49,$C3,$50,$45,$4E,$53,$45,$20,$57,$48,$4F,$4D,$3F,$FF; 4086  I.PENSE WHOM?.
-        jmp LAC12             ; 4094  4C 12 AC
+        jmp jt_verb_done      ; 4094  4C 12 AC
 L4097:    ; <- 4081
         lda spirit_limit      ; 4097  AD 67 0A
         cmp #$05              ; 409A  C9 05
@@ -987,69 +994,72 @@ L4097:    ; <- 4081
         jsr print_inline      ; 409E  20 09 80
         .byte $49,$C3,$59,$4F,$55,$20,$4C,$41,$43,$4B,$20,$54,$48,$45,$20,$53; 40A1  I.YOU LACK THE S
         .byte $50,$52,$49,$54,$20,$53,$4B,$49,$4C,$4C,$FF; 40B1  PRIT SKILL.
-        jmp LAC12             ; 40BC  4C 12 AC
+        jmp jt_verb_done      ; 40BC  4C 12 AC
 L40BF:    ; <- 409C
         lda spirit_energy     ; 40BF  AD 63 0A
         bne L40E8             ; 40C2  D0 24
         jsr print_inline      ; 40C4  20 09 80
         .byte $49,$C3,$59,$4F,$55,$20,$4E,$45,$45,$44,$20,$4D,$4F,$52,$45,$20; 40C7  I.YOU NEED MORE 
         .byte $53,$50,$49,$52,$49,$54,$20,$45,$4E,$45,$52,$47,$59,$FF; 40D7  SPIRIT ENERGY.
-        jmp LAC12             ; 40E5  4C 12 AC
+        jmp jt_verb_done      ; 40E5  4C 12 AC
 L40E8:    ; <- 40C2
         jsr print_inline      ; 40E8  20 09 80
         .byte $49,$C3,$45,$4D,$4F,$54,$49,$4F,$4E,$3A,$FF; 40EB  I.EMOTION:.
+; emotions need no adjacency; only the MESSAGE half calls npc_adjacent
         jsr npc_gate          ; 40F6  20 C2 43
         bcc L4103             ; 40F9  90 08
-        lda D09E9             ; 40FB  AD E9 09
+        lda blk_emotion_pass  ; 40FB  AD E9 09
         bne L410B             ; 40FE  D0 0B
-        jmp L439A             ; 4100  4C 9A 43
+        jmp msg_no_response_speak; 4100  4C 9A 43
 L4103:    ; <- 40F9
-        lda D09ED             ; 4103  AD ED 09
+        lda blk_emotion_fail  ; 4103  AD ED 09
         bne L410B             ; 4106  D0 03
-        jmp L439A             ; 4108  4C 9A 43
+        jmp msg_no_response_speak; 4108  4C 9A 43
 L410B:    ; <- 40FE 4106
         ldx #$52              ; 410B  A2 52
         ldy #$C3              ; 410D  A0 C3
         jsr print_message     ; 410F  20 15 3C
         dec spirit_energy     ; 4112  CE 63 0A
         lda spirit_limit      ; 4115  AD 67 0A
+; PENSE MESSAGES needs spirit limit 10; a full pense costs 2 energy
         cmp #$0A              ; 4118  C9 0A
         bcs L411F             ; 411A  B0 03
 L411C:    ; <- 4122 4127 4139
-        jmp LAC12             ; 411C  4C 12 AC
+        jmp jt_verb_done      ; 411C  4C 12 AC
 L411F:    ; <- 411A
         lda spirit_energy     ; 411F  AD 63 0A
         beq L411C             ; 4122  F0 F8
         jsr npc_adjacent      ; 4124  20 64 43
         bcc L411C             ; 4127  90 F3
-        lda D09F1             ; 4129  AD F1 09
+; $F1 = 1 animals give their message once per quest
+        lda blk_npc_kind      ; 4129  AD F1 09
         cmp #$01              ; 412C  C9 01
         bne L413B             ; 412E  D0 0B
-        ldx D09F0             ; 4130  AE F0 09
+        ldx blk_npc_id        ; 4130  AE F0 09
         lda npc_flags,x       ; 4133  BD 80 23
-        bit D0AA7             ; 4136  2C A7 0A
+        bit bit7_mask         ; 4136  2C A7 0A
         bne L411C             ; 4139  D0 E1
 L413B:    ; <- 412E
         jsr print_inline      ; 413B  20 09 80
         .byte $99,$C3,$4D,$45,$53,$53,$41,$47,$45,$3A,$FF; 413E  ..MESSAGE:.
         jsr npc_gate          ; 4149  20 C2 43
         bcc L4156             ; 414C  90 08
-        lda D09EA             ; 414E  AD EA 09
+        lda blk_message_pass  ; 414E  AD EA 09
         bne L415E             ; 4151  D0 0B
-        jmp L43AE             ; 4153  4C AE 43
+        jmp msg_no_response_message; 4153  4C AE 43
 L4156:    ; <- 414C
-        lda D09EE             ; 4156  AD EE 09
+        lda blk_message_fail  ; 4156  AD EE 09
         bne L415E             ; 4159  D0 03
-        jmp L43AE             ; 415B  4C AE 43
+        jmp msg_no_response_message; 415B  4C AE 43
 L415E:    ; <- 4151 4159
         ldx #$C1              ; 415E  A2 C1
         ldy #$C3              ; 4160  A0 C3
         jsr print_message     ; 4162  20 15 3C
         dec spirit_energy     ; 4165  CE 63 0A
-        lda D09F1             ; 4168  AD F1 09
+        lda blk_npc_kind      ; 4168  AD F1 09
         cmp #$01              ; 416B  C9 01
         bne L4191             ; 416D  D0 22
-        ldx D09F0             ; 416F  AE F0 09
+        ldx blk_npc_id        ; 416F  AE F0 09
         lda npc_flags,x       ; 4172  BD 80 23
         ora #$80              ; 4175  09 80
         sta npc_flags,x       ; 4177  9D 80 23
@@ -1063,25 +1073,25 @@ L415E:    ; <- 4151 4159
         bne L4191             ; 418C  D0 03
         jsr gain_spirit_power ; 418E  20 A9 3D
 L4191:    ; <- 416D 418C
-        jmp LAC12             ; 4191  4C 12 AC
+        jmp jt_verb_done      ; 4191  4C 12 AC
 verb_buy:    ; <- 3C09
-        jsr L9506             ; 4194  20 06 95
-        jsr L4338             ; 4197  20 38 43
+        jsr jt_clear_text_rows; 4194  20 06 95
+        jsr require_merchant  ; 4197  20 38 43
         jsr npc_adjacent      ; 419A  20 64 43
         bcs L41A2             ; 419D  B0 03
-        jmp L439A             ; 419F  4C 9A 43
+        jmp msg_no_response_speak; 419F  4C 9A 43
 L41A2:    ; <- 419D
         ldx #$4A              ; 41A2  A2 4A
 L41A4:    ; <- 41AD
-        lda D0F6C,x           ; 41A4  BD 6C 0F
-        bit D0AA5             ; 41A7  2C A5 0A
+        lda obj_class_token,x ; 41A4  BD 6C 0F
+        bit obj_bit_carried   ; 41A7  2C A5 0A
         bne L41CC             ; 41AA  D0 20
         dex                   ; 41AC  CA
         bpl L41A4             ; 41AD  10 F5
         jsr print_inline      ; 41AF  20 09 80
         .byte $49,$C3,$59,$4F,$55,$20,$4E,$45,$45,$44,$20,$4D,$4F,$52,$45,$20; 41B2  I.YOU NEED MORE 
         .byte $54,$4F,$4B,$45,$4E,$53,$FF             ; 41C2  TOKENS.
-        jmp LAC12             ; 41C9  4C 12 AC
+        jmp jt_verb_done      ; 41C9  4C 12 AC
 L41CC:    ; <- 41AA
         lda carried_weight    ; 41CC  AD 7A 0A
         clc                   ; 41CF  18
@@ -1092,103 +1102,104 @@ L41CC:    ; <- 41AA
         .byte $49,$C3,$53,$4F,$52,$52,$59,$2C,$20,$59,$4F,$55,$27,$52,$45,$20; 41DA  I.SORRY, YOU'RE 
         .byte $43,$41,$52,$52,$59,$49,$4E,$47,$20,$54,$4F,$4F,$20,$4D,$55,$43; 41EA  CARRYING TOO MUC
         .byte $48,$FF                                 ; 41FA  H.
-        jmp LAC12             ; 41FC  4C 12 AC
+        jmp jt_verb_done      ; 41FC  4C 12 AC
 L41FF:    ; <- 41D5
         lda #$00              ; 41FF  A9 00
-        sta D0F6C,x           ; 4201  9D 6C 0F
+        sta obj_class_token,x ; 4201  9D 6C 0F
         ldy #$08              ; 4204  A0 08
-        jsr LAC0C             ; 4206  20 0C AC
+        jsr jt_subtract_weight; 4206  20 0C AC
         lda #$01              ; 4209  A9 01
-        sta $CC               ; 420B  85 CC
+        sta take_permission   ; 420B  85 CC
         jsr print_inline      ; 420D  20 09 80
         .byte $49,$C3,$54,$41,$4B,$45,$20,$57,$48,$49,$43,$48,$45,$56,$45,$52; 4210  I.TAKE WHICHEVER
         .byte $20,$4F,$4E,$45,$20,$50,$4C,$45,$41,$53,$45,$53,$20,$59,$4F,$55; 4220   ONE PLEASES YOU
         .byte $FF                                     ; 4230  .
-        jmp LAC12             ; 4231  4C 12 AC
+        jmp jt_verb_done      ; 4231  4C 12 AC
 verb_sell:    ; <- 3C0C
-        jsr L9506             ; 4234  20 06 95
-        jsr L4338             ; 4237  20 38 43
+        jsr jt_clear_text_rows; 4234  20 06 95
+        jsr require_merchant  ; 4237  20 38 43
         jsr npc_adjacent      ; 423A  20 64 43
         bcs L4242             ; 423D  B0 03
-        jmp L439A             ; 423F  4C 9A 43
+        jmp msg_no_response_speak; 423F  4C 9A 43
 L4242:    ; <- 423D
         jsr print_inline      ; 4242  20 09 80
         .byte $49,$C3,$57,$48,$41,$54,$20,$57,$49,$4C,$4C,$20,$59,$4F,$55,$20; 4245  I.WHAT WILL YOU 
         .byte $53,$45,$4C,$4C,$3F,$FF                 ; 4255  SELL?.
         lda #$FF              ; 425B  A9 FF
-        sta D0A54             ; 425D  8D 54 0A
-        sta D0A55             ; 4260  8D 55 0A
-        sta $D2               ; 4263  85 D2
+        sta pick_index        ; 425D  8D 54 0A
+        sta pick_class        ; 4260  8D 55 0A
+        sta cycle_first       ; 4263  85 D2
         jsr jt_wait_input     ; 4265  20 27 80
 L4268:    ; <- 4294 429D 42A2 42BE
-        inc D0A54             ; 4268  EE 54 0A
-        ldx D0A54             ; 426B  AE 54 0A
+        inc pick_index        ; 4268  EE 54 0A
+        ldx pick_index        ; 426B  AE 54 0A
         cpx #$FF              ; 426E  E0 FF
         bne L428E             ; 4270  D0 1C
-        stx D0A55             ; 4272  8E 55 0A
+        stx pick_class        ; 4272  8E 55 0A
         jsr print_inline      ; 4275  20 09 80
         .byte $5E,$C3,$4E,$4F,$54,$48,$49,$4E,$47,$20,$20,$20,$20,$20,$20,$20; 4278  ^.NOTHING       
         .byte $20,$20,$FF                             ; 4288    .
         jmp L42B2             ; 428B  4C B2 42
 L428E:    ; <- 4270
-        lda D0F00,x           ; 428E  BD 00 0F
-        bit D0AA5             ; 4291  2C A5 0A
+        lda obj_flags,x       ; 428E  BD 00 0F
+        bit obj_bit_carried   ; 4291  2C A5 0A
         beq L4268             ; 4294  F0 D2
         txa                   ; 4296  8A
-        jsr LAC09             ; 4297  20 09 AC
-        cpy D0A55             ; 429A  CC 55 0A
+        jsr jt_object_class   ; 4297  20 09 AC
+        cpy pick_class        ; 429A  CC 55 0A
         beq L4268             ; 429D  F0 C9
-        lda D4329,y           ; 429F  B9 29 43
+        lda item_sellable,y   ; 429F  B9 29 43
         beq L4268             ; 42A2  F0 C4
-        sty D0A55             ; 42A4  8C 55 0A
+        sty pick_class        ; 42A4  8C 55 0A
         lda #$5E              ; 42A7  A9 5E
         sta $80               ; 42A9  85 80
         lda #$C3              ; 42AB  A9 C3
         sta $81               ; 42AD  85 81
-        jsr LAC0F             ; 42AF  20 0F AC
+        jsr jt_print_item_name; 42AF  20 0F AC
 L42B2:    ; <- 428B
         jsr LA818             ; 42B2  20 18 A8
 L42B5:    ; <- 42BC
         jsr jt_get_input      ; 42B5  20 0F 80
         bne L42C1             ; 42B8  D0 07
-        lda $99               ; 42BA  A5 99
+        lda in_dy             ; 42BA  A5 99
         bpl L42B5             ; 42BC  10 F7
         jmp L4268             ; 42BE  4C 68 42
 L42C1:    ; <- 42B8
-        jsr L9506             ; 42C1  20 06 95
-        ldx D0A54             ; 42C4  AE 54 0A
+        jsr jt_clear_text_rows; 42C1  20 06 95
+        ldx pick_index        ; 42C4  AE 54 0A
         cpx #$FF              ; 42C7  E0 FF
         bne L42CC             ; 42C9  D0 01
         rts                   ; 42CB  60
 L42CC:    ; <- 42C9
         ldx #$4A              ; 42CC  A2 4A
 L42CE:    ; <- 42D4
-        lda D0F6C,x           ; 42CE  BD 6C 0F
+        lda obj_class_token,x ; 42CE  BD 6C 0F
         beq L42F8             ; 42D1  F0 25
         dex                   ; 42D3  CA
         bpl L42CE             ; 42D4  10 F8
         jsr print_inline      ; 42D6  20 09 80
         .byte $49,$C3,$53,$4F,$52,$52,$59,$2C,$20,$49,$27,$4D,$20,$4E,$4F,$54; 42D9  I.SORRY, I'M NOT
         .byte $20,$49,$4E,$54,$45,$52,$45,$53,$54,$45,$44,$FF; 42E9   INTERESTED.
-        jmp LAC12             ; 42F5  4C 12 AC
+        jmp jt_verb_done      ; 42F5  4C 12 AC
 L42F8:    ; <- 42D1
         lda #$60              ; 42F8  A9 60
-        sta D0F6C,x           ; 42FA  9D 6C 0F
-        ldx D0A54             ; 42FD  AE 54 0A
+        sta obj_class_token,x ; 42FA  9D 6C 0F
+        ldx pick_index        ; 42FD  AE 54 0A
         lda #$00              ; 4300  A9 00
-        sta D0F00,x           ; 4302  9D 00 0F
+        sta obj_flags,x       ; 4302  9D 00 0F
         txa                   ; 4305  8A
-        jsr LAC09             ; 4306  20 09 AC
-        jsr LAC0C             ; 4309  20 0C AC
+        jsr jt_object_class   ; 4306  20 09 AC
+        jsr jt_subtract_weight; 4309  20 0C AC
         inc carried_weight    ; 430C  EE 7A 0A
         jsr print_inline      ; 430F  20 09 80
         .byte $49,$C3,$48,$45,$52,$45,$27,$53,$20,$59,$4F,$55,$52,$20,$54,$4F; 4312  I.HERE'S YOUR TO
         .byte $4B,$45,$4E,$FF                         ; 4322  KEN.
-        jmp LAC12             ; 4326  4C 12 AC
-D4329:    ; <- 429F
+        jmp jt_verb_done      ; 4326  4C 12 AC
+; classes a merchant will buy: honeylamp, food, shuba, beak, berries, rope
+item_sellable:    ; <- 429F
         .byte $00,$00,$01,$00,$01,$01,$01,$01,$00,$01,$01,$01,$00,$00,$00; 4329  ...............
-L4338:    ; <- 4197 4237
-        lda D09F1             ; 4338  AD F1 09
+require_merchant:    ; <- 4197 4237
+        lda blk_npc_kind      ; 4338  AD F1 09
         cmp #$80              ; 433B  C9 80
         beq L4363             ; 433D  F0 24
         jsr print_inline      ; 433F  20 09 80
@@ -1196,131 +1207,133 @@ L4338:    ; <- 4197 4237
         .byte $52,$43,$48,$41,$4E,$54,$20,$48,$45,$52,$45,$FF; 4352  RCHANT HERE.
         pla                   ; 435E  68
         pla                   ; 435F  68
-        jmp LAC12             ; 4360  4C 12 AC
+        jmp jt_verb_done      ; 4360  4C 12 AC
 L4363:    ; <- 433D
         rts                   ; 4363  60
 npc_adjacent:    ; <- 3C69 4124 419A 423A 43EB
-        lda D0A10             ; 4364  AD 10 0A
+        lda player_col        ; 4364  AD 10 0A
         clc                   ; 4367  18
-        adc D0A37             ; 4368  6D 37 0A
-        cmp D0A80             ; 436B  CD 80 0A
+        adc facing            ; 4368  6D 37 0A
+        cmp npc_col           ; 436B  CD 80 0A
         beq L4379             ; 436E  F0 09
         clc                   ; 4370  18
-        adc D0A37             ; 4371  6D 37 0A
-        cmp D0A80             ; 4374  CD 80 0A
+        adc facing            ; 4371  6D 37 0A
+        cmp npc_col           ; 4374  CD 80 0A
         bne L4398             ; 4377  D0 1F
 L4379:    ; <- 436E
-        ldy D0A18             ; 4379  AC 18 0A
-        cpy D0A81             ; 437C  CC 81 0A
+        ldy player_row        ; 4379  AC 18 0A
+        cpy npc_row           ; 437C  CC 81 0A
         beq L438E             ; 437F  F0 0D
         iny                   ; 4381  C8
-        cpy D0A81             ; 4382  CC 81 0A
+        cpy npc_row           ; 4382  CC 81 0A
         beq L438E             ; 4385  F0 07
         dey                   ; 4387  88
         dey                   ; 4388  88
-        cpy D0A81             ; 4389  CC 81 0A
+        cpy npc_row           ; 4389  CC 81 0A
         bne L4398             ; 438C  D0 0A
 L438E:    ; <- 437F 4385
-        lda D0A37             ; 438E  AD 37 0A
-        cmp D0A85             ; 4391  CD 85 0A
+        lda facing            ; 438E  AD 37 0A
+        cmp npc_dir           ; 4391  CD 85 0A
         beq L4398             ; 4394  F0 02
         sec                   ; 4396  38
         rts                   ; 4397  60
 L4398:    ; <- 4377 438C 4394
         clc                   ; 4398  18
         rts                   ; 4399  60
-L439A:    ; <- 3CC7 4100 4108 419F 423F 4481
+msg_no_response_speak:    ; <- 3CC7 4100 4108 419F 423F 4481
         jsr print_inline      ; 439A  20 09 80
         .byte $57,$C3,$4E,$4F,$20,$52,$45,$53,$50,$4F,$4E,$53,$45,$FF; 439D  W.NO RESPONSE.
-        jmp LAC12             ; 43AB  4C 12 AC
-L43AE:    ; <- 4153 415B
+        jmp jt_verb_done      ; 43AB  4C 12 AC
+msg_no_response_message:    ; <- 4153 415B
         jsr print_inline      ; 43AE  20 09 80
         .byte $A2,$C3,$4E,$4F,$20,$52,$45,$53,$50,$4F,$4E,$53,$45,$FF; 43B1  ..NO RESPONSE.
-        jmp LAC12             ; 43BF  4C 12 AC
+        jmp jt_verb_done      ; 43BF  4C 12 AC
+; $0A68/$0A69 are set once by init_character and never change
 npc_gate:    ; <- 3C6E 3CAE 3CE9 40F6 4149
         ldx npc_req_stat      ; 43C2  AE 8F 0A
         lda standing_kindar,x ; 43C5  BD 68 0A
         cmp npc_req_level     ; 43C8  CD 8E 0A
         rts                   ; 43CB  60
 verb_offer:    ; <- 3C0F
-        jsr L9506             ; 43CC  20 06 95
+        jsr jt_clear_text_rows; 43CC  20 06 95
         lda blk_creature      ; 43CF  AD E0 09
         bne L43EB             ; 43D2  D0 17
 L43D4:    ; <- 43EE
         jsr print_inline      ; 43D4  20 09 80
         .byte $49,$C3,$4F,$46,$46,$45,$52,$20,$54,$4F,$20,$57,$48,$4F,$4D,$3F; 43D7  I.OFFER TO WHOM?
         .byte $FF                                     ; 43E7  .
-        jmp LAC12             ; 43E8  4C 12 AC
+        jmp jt_verb_done      ; 43E8  4C 12 AC
 L43EB:    ; <- 43D2
         jsr npc_adjacent      ; 43EB  20 64 43
         bcc L43D4             ; 43EE  90 E4
         jsr print_inline      ; 43F0  20 09 80
         .byte $49,$C3,$4F,$46,$46,$45,$52,$20,$57,$48,$41,$54,$3F,$FF; 43F3  I.OFFER WHAT?.
         lda #$FF              ; 4401  A9 FF
-        sta D0A54             ; 4403  8D 54 0A
-        sta $D2               ; 4406  85 D2
-        sta D0A55             ; 4408  8D 55 0A
+        sta pick_index        ; 4403  8D 54 0A
+        sta cycle_first       ; 4406  85 D2
+        sta pick_class        ; 4408  8D 55 0A
         jsr jt_wait_input     ; 440B  20 27 80
 L440E:    ; <- 443A 4443 445F
-        inc D0A54             ; 440E  EE 54 0A
-        ldx D0A54             ; 4411  AE 54 0A
+        inc pick_index        ; 440E  EE 54 0A
+        ldx pick_index        ; 4411  AE 54 0A
         cpx #$FF              ; 4414  E0 FF
         bne L4434             ; 4416  D0 1C
-        stx D0A55             ; 4418  8E 55 0A
+        stx pick_class        ; 4418  8E 55 0A
         jsr print_inline      ; 441B  20 09 80
         .byte $56,$C3,$4E,$4F,$54,$48,$49,$4E,$47,$20,$20,$20,$20,$20,$20,$20; 441E  V.NOTHING       
         .byte $20,$20,$FF                             ; 442E    .
         jmp L4453             ; 4431  4C 53 44
 L4434:    ; <- 4416
-        lda D0F00,x           ; 4434  BD 00 0F
-        bit D0AA5             ; 4437  2C A5 0A
+        lda obj_flags,x       ; 4434  BD 00 0F
+        bit obj_bit_carried   ; 4437  2C A5 0A
         beq L440E             ; 443A  F0 D2
         txa                   ; 443C  8A
-        jsr LAC09             ; 443D  20 09 AC
-        cpy D0A55             ; 4440  CC 55 0A
+        jsr jt_object_class   ; 443D  20 09 AC
+        cpy pick_class        ; 4440  CC 55 0A
         beq L440E             ; 4443  F0 C9
-        sty D0A55             ; 4445  8C 55 0A
+        sty pick_class        ; 4445  8C 55 0A
         lda #$56              ; 4448  A9 56
         sta $80               ; 444A  85 80
         lda #$C3              ; 444C  A9 C3
         sta $81               ; 444E  85 81
-        jsr LAC0F             ; 4450  20 0F AC
+        jsr jt_print_item_name; 4450  20 0F AC
 L4453:    ; <- 4431
         jsr LA818             ; 4453  20 18 A8
 L4456:    ; <- 445D
         jsr jt_get_input      ; 4456  20 0F 80
         bne L4462             ; 4459  D0 07
-        lda $99               ; 445B  A5 99
+        lda in_dy             ; 445B  A5 99
         bpl L4456             ; 445D  10 F7
         jmp L440E             ; 445F  4C 0E 44
 L4462:    ; <- 4459
-        jsr L9506             ; 4462  20 06 95
-        ldx D0A54             ; 4465  AE 54 0A
+        jsr jt_clear_text_rows; 4462  20 06 95
+        ldx pick_index        ; 4465  AE 54 0A
         cpx #$FF              ; 4468  E0 FF
         bne L446F             ; 446A  D0 03
-        jmp LAC12             ; 446C  4C 12 AC
+        jmp jt_verb_done      ; 446C  4C 12 AC
 L446F:    ; <- 446A
-        ldy D0A55             ; 446F  AC 55 0A
-        lda D09F0             ; 4472  AD F0 09
+        ldy pick_class        ; 446F  AC 55 0A
+        lda blk_npc_id        ; 4472  AD F0 09
         cmp #$49              ; 4475  C9 49
-        beq L449C             ; 4477  F0 23
+        beq offer_to_raamo    ; 4477  F0 23
         cmp #$34              ; 4479  C9 34
         beq L44AC             ; 447B  F0 2F
         cmp #$35              ; 447D  C9 35
         beq L44BF             ; 447F  F0 3E
-        jmp L439A             ; 4481  4C 9A 43
+        jmp msg_no_response_speak; 4481  4C 9A 43
 L4484:    ; <- 44A2 44AE 44C1
         jsr print_inline      ; 4484  20 09 80
         .byte $49,$C3,$54,$48,$41,$54,$20,$57,$4F,$4E,$27,$54,$20,$48,$45,$4C; 4487  I.THAT WON'T HEL
         .byte $50,$FF                                 ; 4497  P.
-        jmp LAC12             ; 4499  4C 12 AC
-L449C:    ; <- 4477
+        jmp jt_verb_done      ; 4499  4C 12 AC
+; Raamo takes a shuba (class 7) or a vine rope (class $0B)
+offer_to_raamo:    ; <- 4477
         cpy #$07              ; 449C  C0 07
         beq L44A4             ; 449E  F0 04
         cpy #$0B              ; 44A0  C0 0B
         bne L4484             ; 44A2  D0 E0
 L44A4:    ; <- 449E
-        jsr L9C18             ; 44A4  20 18 9C
+        jsr jt_quest_complete ; 44A4  20 18 9C
         pla                   ; 44A7  68
         pla                   ; 44A8  68
         jmp jt_main_menu      ; 44A9  4C 00 34
@@ -1330,23 +1343,23 @@ L44AC:    ; <- 447B
         inc $D0               ; 44B0  E6 D0
         lda $D0               ; 44B2  A5 D0
         cmp #$02              ; 44B4  C9 02
-        bne L44C3             ; 44B6  D0 0B
+        bne gate_grant_entry  ; 44B6  D0 0B
         lda #$80              ; 44B8  A9 80
-        sta D2334             ; 44BA  8D 34 23
-        bne L44C3             ; 44BD  D0 04
+        sta gate_a_open       ; 44BA  8D 34 23
+        bne gate_grant_entry  ; 44BD  D0 04
 L44BF:    ; <- 447F
         cpy #$08              ; 44BF  C0 08
         bne L4484             ; 44C1  D0 C1
-L44C3:    ; <- 44B6 44BD
+gate_grant_entry:    ; <- 44B6 44BD
         lda #$01              ; 44C3  A9 01
-        sta $CD               ; 44C5  85 CD
+        sta door_permission   ; 44C5  85 CD
         lda #$00              ; 44C7  A9 00
-        ldx D0A54             ; 44C9  AE 54 0A
-        sta D0F00,x           ; 44CC  9D 00 0F
-        jsr LAC0C             ; 44CF  20 0C AC
+        ldx pick_index        ; 44C9  AE 54 0A
+        sta obj_flags,x       ; 44CC  9D 00 0F
+        jsr jt_subtract_weight; 44CF  20 0C AC
         jsr print_inline      ; 44D2  20 09 80
         .byte $49,$C3,$59,$4F,$55,$20,$4D,$41,$59,$20,$45,$4E,$54,$45,$52,$FF; 44D5  I.YOU MAY ENTER.
-        jmp LAC12             ; 44E5  4C 12 AC
+        jmp jt_verb_done      ; 44E5  4C 12 AC
         .byte $4C,$12,$AC,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00; 44E8  L...............
         .byte $00,$DF,$00,$00,$20,$A0,$00,$00         ; 44F8  .... ...
 msg_table:
