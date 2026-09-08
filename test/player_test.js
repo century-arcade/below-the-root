@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 
 import { loadTestData } from './helpers.js';
+import { CLASS } from '../src/data.js';
 import { newState, startQuest } from '../src/game.js';
 import { enterRoom } from '../src/world.js';
 import { idleFrame, step } from '../src/player.js';
@@ -59,6 +60,38 @@ test('entering the top rung from either direction shows the top-rung pose', () =
     step(state);
     assert.equal(state.player.row, 10);
     assert.equal(state.player.frame, 10);
+  }
+});
+
+for (const fire of [false, true]) {
+  test(`a sideways push after falling two rows glides with the button ${fire ? 'held' : 'free'}`, () => {
+    for (const dx of [-1, 1]) {
+      const state = at('C4', 14, 0, -dx);
+      const p = state.player;
+      state.objects.find((o) => o.class === CLASS.SHUBA).carried = true;
+      input = { dx, dy: 0, fire };
+      for (let fallen = 1; fallen <= 2; fallen += 1) {
+        step(state);
+        assert.equal(p.gliding, false);
+        assert.equal(p.fallen, fallen);
+      }
+      step(state);
+      assert.equal(p.gliding, true);
+      assert.equal(p.fallen, 0);
+      assert.equal(p.facing, dx);
+      assert.equal(p.period, 8);
+      assert.equal(p.crawling, false);
+    }
+  });
+}
+
+test('a sideways push without a shuba keeps falling', () => {
+  const state = at('C4', 14, 0, 1);
+  input = { dx: -1, dy: 0, fire: false };
+  for (let fallen = 1; fallen <= 6; fallen += 1) {
+    step(state);
+    assert.equal(state.player.gliding, false);
+    assert.equal(state.player.fallen, fallen);
   }
 });
 

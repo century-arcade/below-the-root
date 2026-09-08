@@ -72,6 +72,10 @@ produce them.
 The spec records what the C64 game does, bugs included.  A port decides
 per item whether to keep it.
 
+- The original requires the button to start gliding.  Decided: the port
+  also accepts a sideways push alone after falling two rows, carrying a
+  shuba, with no support and gliding not inhibited.  (`player.md`, With
+  the button free)
 - Ten rooms paint a door whose record is all zero; walking in lands you
   in room 0 at (0,0) and drops you down the first column of the world to
   the ground outside the outer gate.  Rooms 148 and 251 hold a valid door

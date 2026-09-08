@@ -103,15 +103,7 @@ function fireHeld(state, s, input) {
   const p = state.player;
   const supported = isSupport(state, s.floor);
   if (p.fallen >= 2 && !supported && !p.glideInhibited) {
-    if (carriedOf(state, CLASS.SHUBA)) {
-      p.gliding = true;
-      p.fallen = 0;
-      p.crawling = false;
-      p.period = 8;
-      p.frame = FRAME.glide(p.facing);
-      sfx(state, SFX.glide);
-      return glideStep(state, s);
-    }
+    if (tryGlide(state, s)) return glideStep(state, s);
     return fireFree(state, s, input);
   }
   if (input.dx !== 0 && !supported) return fireFree(state, s, input);
@@ -138,6 +130,7 @@ function fireHeld(state, s, input) {
 
 function fireFree(state, s, input) {
   const p = state.player;
+  if (input.dx !== 0 && tryGlide(state, s)) return glideStep(state, s);
   if (!isSupport(state, s.floor)) {
     p.row += 1;
     p.period = 4;
@@ -242,6 +235,18 @@ function leapStep(state, s) {
       p.frame = idleFrame(p);
   }
   return afterMove(state, true);
+}
+
+function tryGlide(state, s) {
+  const p = state.player;
+  if (p.fallen < 2 || isSupport(state, s.floor) || p.glideInhibited || !carriedOf(state, CLASS.SHUBA)) return false;
+  p.gliding = true;
+  p.fallen = 0;
+  p.crawling = false;
+  p.period = 8;
+  p.frame = FRAME.glide(p.facing);
+  sfx(state, SFX.glide);
+  return true;
 }
 
 function glideStep(state, s) {

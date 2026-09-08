@@ -48,6 +48,9 @@ script, `?room=T1` to start somewhere else).
 
 Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen.
 
+Port note: carrying a shuba, push sideways after falling two rows to glide;
+the button is optional, unlike the original.
+
 Gamepad: d-pad or left stick moves, any face button fires; sound starts only after a keypress or canvas touch/click, since the browser needs a real gesture to unlock audio.
 
 ```

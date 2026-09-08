@@ -73,6 +73,7 @@ moves by cells.  Joystick and one button.
 - **Glide**: if you carry a shuba, hold the button once you have fallen
   two rows and you sail down at 45 degrees, steerable left and right.
   Bumping a wall cancels gliding until you next stand up.
+  Port: the button is optional when the stick is pushed sideways.
 - **Crawl**: pull down to stoop, push up to stand.  Crawling gets you
   under low things and is the only way across a laid vine rope.
 - **Fall** six rows or more and you are knocked down: just under three

@@ -132,6 +132,11 @@ First match wins.
 
 ### With the button free
 
+Port: before the rules below, a sideways push while falling two or more
+rows, with nothing supporting you, gliding not inhibited and a shuba
+carried, starts a glide just as rule 1 with the button held does.  Facing
+follows the push.
+
 First match wins.
 
 1. Nothing supporting you: fall one row and add one to the fall count,
