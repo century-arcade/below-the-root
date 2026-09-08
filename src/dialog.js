@@ -88,8 +88,14 @@ export function* pense(state) {
 
 function merchant(state) {
   const c = state.creature;
-  if (!c || c.def.kind !== 'merchant') return tell(state, 'no_merchant_here'), null;
-  if (facingCreature(state) !== c) return tell(state, 'no_response_line1'), null;
+  if (!c || c.def.kind !== 'merchant') {
+    tell(state, 'no_merchant_here');
+    return null;
+  }
+  if (facingCreature(state) !== c) {
+    tell(state, 'no_response_line1');
+    return null;
+  }
   return c;
 }
 

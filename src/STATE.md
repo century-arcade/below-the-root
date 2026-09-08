@@ -10,12 +10,14 @@ state = {
   data,            // loadData(): rooms, tiles, charsets, sheets, objects, creatures, messages, skills, quest
   room,            // the rooms.json record we are in
   screen,          // Uint8Array(40*20): the live tile grid (objects painted, verbs edit it)
+  figures,         // sprites for render: refreshed by main.js from figures(state) before each draw
   objects,         // every slot of every class: {object, class, name, room, col, row, chars, exists, carried}
   tick,            // frames since the room loop last started running
   stall,           // frames the machine is busy-waiting (demo delay): nothing runs
   active,          // the room loop is running; false while the shell owns the screen
   stop,            // why it stopped: null | {reason, ...}  (see below)
   input,           // {read() -> {dx, dy, fire}, pace}: joystick or demo script; pace = idle ticks between verb reads
+  demo,            // null or the running demo script: startDemo sets it and replaces input
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
   events,          // [{sfx: id}|{music: tune}] since the last drain; main.js's Speaker.frame plays and empties them

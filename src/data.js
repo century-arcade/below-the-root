@@ -24,6 +24,11 @@ export async function loadData(read) {
     read('data/music.json'),
   ]);
 
+  const at = {};
+  for (const r of save.regions) at[r.name] = r.offset;
+  for (const v of [...save.variables, ...save.zero_page]) at[v.name] = v.offset;
+  const saveLayout = { at, size: save.file.file_bytes, loadAddress: save.file.load_address };
+
   const palette = new Uint8Array(16 * 3);
   for (const c of assets.palette.colors) {
     palette[c.index * 3] = c.rgb[0];
@@ -89,7 +94,7 @@ export async function loadData(read) {
     animations: assets.player_animations,
     objects, items, objectChars, characters: charactersFile.characters, demo,
     creatures: creaturesFile.creatures, creatureByRoom, creatureByState, species,
-    messages, fixed, music, skills: skillsFile.skills, quest, save, shell,
+    messages, fixed, music, skills: skillsFile.skills, quest, save, saveLayout, shell,
   };
 }
 

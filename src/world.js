@@ -9,6 +9,8 @@ import { startTune } from './audio.js';
 export const COLS = 40;
 export const ROWS = 20;
 
+const CODE_DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUV';
+
 // the two legs of the cloud teleport (world.md, The cloud world)
 const CLOUDS = { room: 190, col: 18, row: 14 };
 const SKY_NID = { room: 9, col: 24, row: 13 };
@@ -40,7 +42,7 @@ export function openAir(data, x, y) {
   const n = y * data.grid.width + x;
   const underground = y >= 12;
   const room = {
-    room: n, code: '0123456789ABCDEFGHIJKLMNOPQRSTUV'[x] + '0123456789ABCDEFGHIJKLMNOPQRSTUV'[y],
+    room: n, code: CODE_DIGITS[x] + CODE_DIGITS[y],
     x, y, blank: true, tileset: underground ? 'indoor' : 'outdoor', underground,
     colors: { sign: 0, wall: 0, structure: 0, ground: 0 },
     tiles: Array.from({ length: ROWS }, () => new Array(COLS).fill(0)),

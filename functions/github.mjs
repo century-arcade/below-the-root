@@ -35,6 +35,7 @@ const equals = (a, b) => typeof a === 'string' && typeof b === 'string'
   && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
 export function createHandler(env = process.env, request = fetch) {
+  const failed = () => redirect('/?debug&github=failed', [cookie(FLOW, '', 0)]);
   return async req => {
     const url = new URL(req.url);
     const op = url.searchParams.get('op') || 'session';
@@ -60,7 +61,7 @@ export function createHandler(env = process.env, request = fetch) {
       if (op === 'callback' && req.method === 'GET') {
         const flow = unseal(req, FLOW, secret);
         if (!flow || !equals(flow.state, url.searchParams.get('state')) || !url.searchParams.get('code')) {
-          return redirect('/?debug&github=failed', [cookie(FLOW, '', 0)]);
+          return failed();
         }
         const tokenResponse = await request('https://github.com/login/oauth/access_token', {
           method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
@@ -68,10 +69,10 @@ export function createHandler(env = process.env, request = fetch) {
             redirect_uri: callback, code_verifier: flow.verifier }),
         });
         const token = await tokenResponse.json();
-        if (!tokenResponse.ok || !token.access_token) return redirect('/?debug&github=failed', [cookie(FLOW, '', 0)]);
+        if (!tokenResponse.ok || !token.access_token) return failed();
         const userResponse = await github('/user', {}, token.access_token);
         const user = await userResponse.json();
-        if (!userResponse.ok || !user.login) return redirect('/?debug&github=failed', [cookie(FLOW, '', 0)]);
+        if (!userResponse.ok || !user.login) return failed();
         return redirect('/?debug', [cookie(FLOW, '', 0), cookie(COOKIE, seal({ token: token.access_token,
           login: user.login, expires: Date.now() + SESSION_SECONDS * 1000 }, secret), SESSION_SECONDS)]);
       }

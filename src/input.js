@@ -10,6 +10,12 @@ export function isIdle(j) {
   return j.dx === 0 && j.dy === 0 && !j.fire;
 }
 
+const KEYS = {
+  ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+  ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
+  W: 'up', S: 'down', A: 'left', D: 'right',
+};
+
 // a tap shorter than the read interval still counts once: keys latch until the next read
 export class Keyboard {
   constructor(target = window) {
@@ -23,9 +29,7 @@ export class Keyboard {
 
   map(e, up = false) {
     if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
-    const key = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-      ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
-      W: 'up', S: 'down', A: 'left', D: 'right' }[e.key];
+    const key = KEYS[e.key];
     if (!key) return false;
     const source = e.code || e.key;
     if (up) this.release(key, source); else this.press(key, source);
@@ -83,6 +87,8 @@ export class Pointer {
     this.walk = null;
     this.pending = null;
     this.holding = false;
+    this.pointerId = null;
+    this.last = null;
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => this.down(e));
     canvas.addEventListener('pointermove', (e) => this.move(e));
@@ -251,42 +257,38 @@ export class DemoInput {
     return this.fetch();
   }
 
+  next(value, steps) {
+    this.value = value;
+    this.remaining = steps;
+    return value;
+  }
+
   fetch() {
     const state = this.state;
     for (;;) {
       const s = this.script.steps[this.index];
-      if (!s) { this.remaining = 0; return (this.value = IDLE); }
+      if (!s) return this.next(IDLE, 0);
       this.index += 1;
       switch (s.op) {
-        case 'tap':
-          this.remaining = 1;
-          return (this.value = decodeJoy(s.bytes[0]));
-        case 'hold':
-          this.remaining = s.steps;
-          return (this.value = decodeJoy(s.bytes[0]));
+        case 'tap': return this.next(decodeJoy(s.bytes[0]), 1);
+        case 'hold': return this.next(decodeJoy(s.bytes[0]), s.steps);
         case 'music':
           state.events.push({ music: s.tune });
           continue;
         case 'delay':
           state.stall += DELAY_TICKS * (s.units || 1);
-          this.remaining = 1;
-          return (this.value = IDLE);
+          return this.next(IDLE, 1);
         case 'goto_room':
           this.index -= 1;
           state.stop = { reason: 'demo_room', room: s.room };
-          this.remaining = 1;
-          return (this.value = IDLE);
+          return this.next(IDLE, 1);
         case 'text_page':
           state.stop = { reason: 'demo_page', page: s.page };
-          this.remaining = 1;
-          return (this.value = IDLE);
+          return this.next(IDLE, 1);
         case 'end_rest_delay':
           state.restDelayCut = true;
-          this.remaining = 1;
-          return (this.value = IDLE);
-        default:
-          this.remaining = 1;
-          return (this.value = IDLE);
+          return this.next(IDLE, 1);
+        default: return this.next(IDLE, 1);
       }
     }
   }

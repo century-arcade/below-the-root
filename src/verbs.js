@@ -67,8 +67,14 @@ export function* runMenu(state) {
 
 function lacksSkill(state, limit, energy) {
   const p = state.player;
-  if (p.spiritLimit < limit) return say(state, 'YOU LACK THE SPIRIT SKILL'), true;
-  if (p.spiritEnergy < energy) return say(state, 'YOU NEED MORE SPIRIT ENERGY'), true;
+  if (p.spiritLimit < limit) {
+    say(state, 'YOU LACK THE SPIRIT SKILL');
+    return true;
+  }
+  if (p.spiritEnergy < energy) {
+    say(state, 'YOU NEED MORE SPIRIT ENERGY');
+    return true;
+  }
   return false;
 }
 
@@ -335,19 +341,19 @@ function* kiniport(state) {
 export function paintStatus(state) {
   const p = state.player;
   clearPanel(state);
-  print(state, 21, 1, `DAY ${state.clock.day}`);
-  print(state, 21, 20, p.name);
-  print(state, 22, 1, timeOfDay(state));
-  print(state, 22, 20, 'LEVEL OF REST');
-  print(state, 22, 36, String(p.rest));
-  print(state, 23, 1, 'SPIRIT LIMIT');
-  print(state, 23, 14, String(p.spiritLimit));
-  print(state, 23, 20, 'LEVEL OF FOOD');
-  print(state, 23, 36, String(p.food));
-  print(state, 24, 1, 'STAMINA');
-  print(state, 24, 9, String(p.stamina));
-  print(state, 24, 20, 'LEVEL OF SPIRIT');
-  print(state, 24, 36, String(p.spiritEnergy));
+  print(state, PANEL_ROW, 1, `DAY ${state.clock.day}`);
+  print(state, PANEL_ROW, 20, p.name);
+  print(state, PANEL_ROW + 1, 1, timeOfDay(state));
+  print(state, PANEL_ROW + 1, 20, 'LEVEL OF REST');
+  print(state, PANEL_ROW + 1, 36, String(p.rest));
+  print(state, PANEL_ROW + 2, 1, 'SPIRIT LIMIT');
+  print(state, PANEL_ROW + 2, 14, String(p.spiritLimit));
+  print(state, PANEL_ROW + 2, 20, 'LEVEL OF FOOD');
+  print(state, PANEL_ROW + 2, 36, String(p.food));
+  print(state, PANEL_ROW + 3, 1, 'STAMINA');
+  print(state, PANEL_ROW + 3, 9, String(p.stamina));
+  print(state, PANEL_ROW + 3, 20, 'LEVEL OF SPIRIT');
+  print(state, PANEL_ROW + 3, 36, String(p.spiritEnergy));
 }
 
 function* status(state) {

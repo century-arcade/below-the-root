@@ -4,7 +4,7 @@
 import { newObjects, startQuest, startDemo, startVerb, endDemo } from './game.js';
 import { newFlags } from './creatures.js';
 import { fireUp, buttonPress } from './input.js';
-import { print, clearPanel } from './panel.js';
+import { print, clearPanel, PANEL_ROW } from './panel.js';
 import { enterRoom, burnLamp } from './world.js';
 import { exportSave, importSave } from './save.js';
 import { SFX, sfx } from './audio.js';
@@ -127,7 +127,8 @@ function resume(state) {
 
 function highlightAlong(state, line, item) {
   print(state, line.row, line.col, line.text);
-  print(state, line.row, item.col, line.text.substr(item.col - line.col, item.width), true);
+  const start = item.col - line.col;
+  print(state, line.row, item.col, line.text.slice(start, start + item.width), true);
 }
 
 function drawStorageLine(state, sel) {
@@ -177,7 +178,7 @@ export function* diskStorage(state) {
     state.active = false;
   } catch (err) {
     clearPanel(state);
-    print(state, 21, 1, 'STORAGE FAILED. YOUR QUEST IS SAFE.');
+    print(state, PANEL_ROW, 1, 'STORAGE FAILED. YOUR QUEST IS SAFE.');
     yield* buttonPress();
   }
 }

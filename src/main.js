@@ -91,9 +91,16 @@ loadData((path) => fetch(path).then((r) => {
   const stick = new Keyboard();
   const debug = params.has('debug');
   const room = pickRoom(data, params.get('room'));
-  const initial = params.has('demo') ? { mode: 'demo', demo: params.get('demo') || 'quest' }
-    : room || params.has('player') ? { mode: 'quest', character: Number(params.get('player')) || 0, room: room?.room }
-    : params.has('menu') ? { mode: 'menu' } : { mode: 'cold' };
+  let initial;
+  if (params.has('demo')) {
+    initial = { mode: 'demo', demo: params.get('demo') || 'quest' };
+  } else if (room || params.has('player')) {
+    initial = { mode: 'quest', character: Number(params.get('player')) || 0, room: room?.room };
+  } else if (params.has('menu')) {
+    initial = { mode: 'menu' };
+  } else {
+    initial = { mode: 'cold' };
+  }
   if (!data.characters[initial.character || 0]) initial.character = 0;
   if (initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === initial.demo)) initial.demo = 'quest';
   const slots = {};
@@ -124,10 +131,11 @@ loadData((path) => fetch(path).then((r) => {
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
   const saveNow = () => restoreFailed || !!autosave.save(session, true);
-  const pause = () => { paused = true; pointer.cancel(); stick.reset(); speaker.silence(); };
-  const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
-  const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.suspend(); game.classList.add('paused'); };
-  const release = () => { pointer.cancel(); stick.reset(); held = false; speaker.resume(); game.classList.remove('paused'); };
+  const dropInput = () => { pointer.cancel(); stick.reset(); };
+  const pause = () => { paused = true; dropInput(); speaker.silence(); };
+  const resume = () => { dropInput(); paused = false; };
+  const hold = () => { held = true; dropInput(); speaker.suspend(); game.classList.add('paused'); };
+  const release = () => { dropInput(); held = false; speaker.resume(); game.classList.remove('paused'); };
   const recovery = document.getElementById('save-recovery');
   recovery.hidden = !restoreFailed;
   const downloadOriginal = () => downloadRecordingText(existing, 'btr-preserved-autosave.json');
@@ -138,7 +146,7 @@ loadData((path) => fetch(path).then((r) => {
       session = recovered; state = session.state; bindSlots();
       restoreFailed = false;
       recovery.hidden = true;
-      pointer.cancel(); stick.reset(); speaker.silence();
+      speaker.silence();
       release();
       note('Saved game recovered', 3000);
     } catch (err) { note(`Recovery failed: ${err.message} Your original autosave is still preserved.`); }
@@ -185,7 +193,7 @@ loadData((path) => fetch(path).then((r) => {
   addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
   addEventListener('pagehide', () => saveNow());
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { saveNow(); hold(); } else { pointer.cancel(); stick.reset(); }
+    if (document.hidden) { saveNow(); hold(); } else { dropInput(); }
   });
   if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note,
     downloadRecording: () => restoreFailed ? downloadOriginal() : downloadRecord(session) });

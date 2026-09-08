@@ -11,21 +11,13 @@ const AMBUSHER_HOUR_MASK = 0x1f;
 const DAY_MASK = 0x7f;
 const GIFT_BIT = 0x80;
 
-function layout(data) {
-  if (data.saveLayout) return data.saveLayout;
-  const at = {};
-  for (const r of data.save.regions) at[r.name] = r.offset;
-  for (const v of [...data.save.variables, ...data.save.zero_page]) at[v.name] = v.offset;
-  return (data.saveLayout = { at, size: data.save.file.file_bytes, loadAddress: data.save.file.load_address });
-}
-
 function isAmbusher(def) {
   return !!def && def.movement === 'ambusher';
 }
 
 export function exportSave(state) {
   if (!state.quest || !state.room || !state.nidPlace || state.demo) throw new Error('No quest to save');
-  const { at, size, loadAddress } = layout(state.data);
+  const { at, size, loadAddress } = state.data.saveLayout;
   const p = state.player;
   const out = new Uint8Array(size);
   out[at.load_address] = loadAddress & 0xff;
@@ -96,8 +88,7 @@ function offeredBy(def) {
 }
 
 export function importSave(state, bytes) {
-  const target = state;
-  const { at, size, loadAddress } = layout(state.data);
+  const { at, size, loadAddress } = state.data.saveLayout;
   if (bytes.length !== size) throw new Error(`save is ${bytes.length} bytes, want ${size}`);
   const get = (name) => bytes[at[name]];
   const data = state.data;
@@ -117,8 +108,8 @@ export function importSave(state, bytes) {
     throw new Error('Invalid saved room');
   }
   // Decode into a draft: a rejected file must leave the running quest intact.
-  state = { ...state, objects: state.objects.map(o => ({ ...o })), flags: state.flags.map(f => ({ ...f })) };
-  for (const o of state.objects) {
+  const draft = { ...state, objects: state.objects.map(o => ({ ...o })), flags: state.flags.map(f => ({ ...f })) };
+  for (const o of draft.objects) {
     const flags = bytes[at.object_flags + o.object];
     if ((flags & FLAG.exists) && !(flags & FLAG.carried)
         && ((flags & 0x1f) >= 20 || bytes[at.object_col + o.object] >= 40)) {
@@ -130,7 +121,7 @@ export function importSave(state, bytes) {
     o.col = bytes[at.object_col + o.object];
     o.room = o.exists ? bytes[at.object_room_lo + o.object] | (flags & FLAG.roomHi ? 0x100 : 0) : -1;
   }
-  state.flags.forEach((f, id) => {
+  draft.flags.forEach((f, id) => {
     const stamp = bytes[at.creature_day_stamp + id];
     f.banished = !!(bytes[at.creature_banished + id] & GIFT_BIT);
     if (isAmbusher(data.creatureByState.get(id))) {
@@ -154,12 +145,10 @@ export function importSave(state, bytes) {
   p.frame = idleFrame(p);
   const dream = get('dream_state');
   const wraps = data.quest.clock.prescaler_wraps_per_time_slot;
-  const room = get('saved_room_lo') | (get('saved_room_hi') << 8);
-  const def = data.creatureByRoom.get(room);
-  Object.assign(state, {
+  Object.assign(draft, {
     player: p,
     character: character.id,
-    nidPlace: { room: get('nid_room_lo') | (get('nid_room_hi') << 8), col: get('nid_col'), row: get('nid_row') },
+    nidPlace: { room: nidId, col: get('nid_col'), row: get('nid_row') },
     clock: {
       day: get('day'), hour: get('time_of_day'),
       ticks: Math.min(TICKS_PER_HOUR - 1, (wraps - get('clock_period')) * PRESCALE_WRAP
@@ -172,19 +161,20 @@ export function importSave(state, bytes) {
     visions: get('vision_count'),
     animalsPensed: get('pense_message_count'),
     sample: false, timeUp: false, ended: null, stop: null, verb: null, creature: null,
-    title: false, demo: null, input: state.stick || state.input, stall: 0, verbWait: 0,
+    title: false, demo: null, input: draft.stick || draft.input, stall: 0, verbWait: 0,
     pointer: null, restDelayCut: false, stickFire: false, events: [{ music: null }],
     quest: !!get('quest_active'),
   });
-  let destination = data.roomById.get(room);
+  let destination = data.roomById.get(roomId);
   if (!destination || (!p.indoors && destination.outdoor_bit === false)) {
-    destination = openAir(data, room % data.grid.width, Math.floor(room / data.grid.width));
+    destination = openAir(data, roomId % data.grid.width, Math.floor(roomId / data.grid.width));
   }
-  enterRoom(state, destination, p.col, p.row);
-  state.offered = get('take_permission') ? offeredBy(def) : null;
-  state.paid = !!get('door_permission');
-  state.active = true;
-  Object.assign(target, state);
+  enterRoom(draft, destination, p.col, p.row);
+  const def = data.creatureByRoom.get(roomId);
+  draft.offered = get('take_permission') ? offeredBy(def) : null;
+  draft.paid = !!get('door_permission');
+  draft.active = true;
+  Object.assign(state, draft);
 }
 
 export function toBase64(bytes) {

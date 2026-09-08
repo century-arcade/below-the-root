@@ -48,6 +48,7 @@ export function newState(data, input, opts = {}) {
     active: false,
     stop: null,
     input,
+    demo: null,
     rng: opts.rng || Math.random,
     events: [],
     panel: newPanel(),
