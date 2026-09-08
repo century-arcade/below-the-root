@@ -21,7 +21,7 @@ function flags(p) {
     + (p.gliding ? 'G' : '-') + (p.knockdown ? 'K' : '-') + (p.stride ? 's' : '-');
 }
 
-export function trace(data, name, maxReads = 5000) {
+function trace(data, name, maxReads = 5000) {
   const lines = [];
   const state = newState(data, null, { rng: () => 0.99 });
   startDemo(state, name);

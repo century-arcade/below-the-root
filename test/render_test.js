@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 import { loadData } from '../src/data.js';
-import { renderIndexed, render, toIndexed, WIDTH, HEIGHT, figureOrigin } from '../src/video.js';
+import { renderIndexed, WIDTH, HEIGHT, figureOrigin } from '../src/video.js';
 import { readPNG, rgbWindow, writePNG } from './png.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -73,7 +73,7 @@ function indexOfRGB(palette) {
 
 function testIngame(data) {
   const room = data.roomByCode.get('T1');
-  const got = toIndexed(render({ data, room }), data.palette);
+  const got = renderIndexed({ data, room });
   const png = readPNG(join(ROOT, 'assets', 'screen_ingame.png'));
   const rgb = rgbWindow(png, 0, 0, WIDTH, HEIGHT);
   const lookup = indexOfRGB(data.palette);

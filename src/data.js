@@ -170,5 +170,3 @@ export function colorOf(charset, code, roomColors) {
   const s = charset.slot[code];
   return s < 0 ? charset.fixed[code] : roomColors[SLOT_NAMES[s]];
 }
-
-export { SLOT_NAMES };

@@ -1,7 +1,7 @@
 // docs/spec/shell.md: the main menu, character select, DISK STORAGE and SAMPLE QUEST; each screen is a
 // generator run like a verb, one yield per stick read
 
-import { newObjects, startQuest, startDemo, startVerb, endDemo, questInProgress } from './game.js';
+import { newObjects, startQuest, startDemo, startVerb, endDemo } from './game.js';
 import { newFlags } from './creatures.js';
 import { fireUp, buttonPress } from './input.js';
 import { print, clearPanel } from './panel.js';
@@ -69,7 +69,7 @@ export function* mainMenu(state) {
         if (yield* characterSelect(state)) return;
         break;
       case 'CONTINUE':
-        if (questInProgress(state)) return resume(state);
+        if (state.quest) return resume(state);
         break;
       case 'DISK STORAGE':
         yield* diskStorage(state);
@@ -159,7 +159,7 @@ export function* diskStorage(state) {
   disk.op = yield* pickAlong(state, s.disk_storage.items.length, disk.op, drawStorageLine);
   const op = s.disk_storage.items[disk.op].name;
   if (op === 'RETURN TO MENU') return;
-  if (op === 'SAVE GAME' && !questInProgress(state)) return;
+  if (op === 'SAVE GAME' && !state.quest) return;
   disk.slot = yield* pickAlong(state, s.slots.items.length, disk.slot, drawSlots);
   clearPanel(state);
   print(state, s.storage_prompt.row, s.storage_prompt.col, s.storage_prompt.text);

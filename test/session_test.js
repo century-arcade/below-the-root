@@ -52,16 +52,16 @@ for (let i = 0; i < 1000; i++) {
   session.step(); session.state.events.length = 0;
 }
 const recorded = copy(session.snapshot());
-const restored = Session.restore(freshData, values, recorded);
+const restored = Session.replay(freshData, values, recorded);
 assert.deepEqual(checkpoint(restored.state), checkpoint(session.state));
 for (let i = 0; i < 200; i++) { session.step(); restored.step(); }
 assert.deepEqual(checkpoint(restored.state), checkpoint(session.state), 'RNG and generator continuation survive restoration');
 // Direct file loads are recorded, including one made after the last completed frame.
 session.load(bytes);
-assert.deepEqual(checkpoint(Session.restore(freshData, values, copy(session.snapshot())).state), checkpoint(session.state));
+assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(session.snapshot())).state), checkpoint(session.state));
 const broken = copy(recorded); broken.checkpoint.player.col++;
-assert.throws(() => Session.restore(freshData, values, broken), /diverged/);
-assert.throws(() => Session.restore(freshData, values, { ...recorded, engine: 'old' }), /version/);
+assert.throws(() => Session.replay(freshData, values, broken), /diverged/);
+assert.throws(() => Session.replay(freshData, values, { ...recorded, engine: 'old' }), /version/);
 
 // Recover progress across incompatible engines without trusting or replaying the journal.
 const original = JSON.stringify({ ...broken, engine: 'old' });
@@ -73,12 +73,12 @@ const expected = fresh(); importSave(expected, Uint8Array.from(atob(recorded.c64
 assert.deepEqual(exportSave(recovered.state), exportSave(expected), 'quest progress comes from the saved checkpoint');
 assert.equal(recovered.slots.get('1'), recorded.c64, 'current manual slots survive recovery');
 const recoveredRecord = JSON.parse(recoveryStore.get(AUTOSAVE_KEY));
-const recoveredReload = Session.restore(freshData, values, recoveredRecord);
+const recoveredReload = Session.replay(freshData, values, recoveredRecord);
 assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state), 'the recovered save reloads exactly');
 values.joy = IDLE;
 for (let i = 0; i < 100; i++) { recovered.step(); recoveredReload.step(); }
 assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state));
-assert.deepEqual(checkpoint(Session.restore(freshData, values, copy(recovered.snapshot())).state), checkpoint(recovered.state));
+assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(recovered.snapshot())).state), checkpoint(recovered.state));
 recoverAutosave(freshData, values, JSON.stringify(broken), storage);
 assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original, 'later recovery keeps earlier backups');
 assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery.1`), JSON.stringify(broken));
@@ -122,7 +122,7 @@ for (let i = 0; i < 50; i++) {
   menu.step();
 }
 assert.ok(menu.state.verb);
-assert.deepEqual(checkpoint(Session.restore(freshData, values, copy(menu.snapshot())).state), checkpoint(menu.state));
+assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(menu.snapshot())).state), checkpoint(menu.state));
 const dir = mkdtempSync(join(tmpdir(), 'btr-record-test-'));
 try {
   const original = join(dir, 'original.json');

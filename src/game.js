@@ -84,10 +84,6 @@ export function newState(data, input, opts = {}) {
   };
 }
 
-export function questInProgress(state) {
-  return state.quest;
-}
-
 function applyCharacter(state, character) {
   const p = state.player;
   const s = character.start;

@@ -182,7 +182,6 @@ export class Session {
     return session;
   }
 
-  static restore(data, live, record) { return Session.replay(data, live, record); }
 }
 
 export function validateRecord(r, data) {

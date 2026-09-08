@@ -106,7 +106,7 @@ loadData((path) => fetch(path).then((r) => {
   let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   if (existing && initial.mode === 'cold') {
-    try { session = Session.restore(data, stick, JSON.parse(existing)); }
+    try { session = Session.replay(data, stick, JSON.parse(existing)); }
     catch (err) { restoreFailed = true; note(`${err.message} Your previous autosave is preserved.`); }
   }
   session ||= new Session(data, stick, { initial, slots, seed });
@@ -166,7 +166,7 @@ loadData((path) => fetch(path).then((r) => {
       if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes[0] === 123 || file.name.endsWith('.json')) {
-        const restored = Session.restore(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
+        const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
         if (restoreFailed) preserveAutosave(localStorage, existing);
         session = restored; state = session.state; bindSlots();
       } else {

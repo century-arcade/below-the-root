@@ -39,7 +39,7 @@ export function issueContext(session) {
 }
 
 export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note,
-  downloadRecording = () => downloadRecord(getSession()) }) {
+  downloadRecording }) {
   const bar = document.getElementById('debug');
   bar.hidden = false;
   document.body.classList.add('debugging');

@@ -30,19 +30,6 @@ export function render(state) {
   return out;
 }
 
-export function toIndexed(rgba, palette) {
-  const key = new Map();
-  for (let i = 0; i < 16; i++) {
-    key.set((palette[i * 3] << 16) | (palette[i * 3 + 1] << 8) | palette[i * 3 + 2], i);
-  }
-  const out = new Uint8Array(rgba.length / 4);
-  for (let i = 0, o = 0; o < out.length; o++, i += 4) {
-    const v = key.get((rgba[i] << 16) | (rgba[i + 1] << 8) | rgba[i + 2]);
-    out[o] = v === undefined ? 255 : v;
-  }
-  return out;
-}
-
 // the menus sit over the title room, whatever room the quest is in
 function drawRoom(px, state) {
   const room = state.title ? state.data.roomByCode.get(TITLE_ROOM) : state.room;
@@ -64,14 +51,13 @@ function drawRoom(px, state) {
 // row 20 is never written; the panel is rows 21-24, reverse video is bit 7
 function drawText(px, state) {
   const cs = state.data.charsets.text;
-  const color = state.textColor ?? 1;
   const panel = state.panel;
   if (!panel) return;
   for (let i = 0; i < panel.length; i++) {
     const row = PANEL_ROW + Math.floor(i / PANEL_COLS);
     const col = i % PANEL_COLS;
     const code = panel[i];
-    blitCell(px, col, row, cs.glyphs, code, color);
+    blitCell(px, col, row, cs.glyphs, code, 1);
   }
 }
 

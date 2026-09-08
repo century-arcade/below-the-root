@@ -17,7 +17,7 @@ try {
   const data = await loadData(async p => JSON.parse(readFileSync(new URL('../' + (p.startsWith('data/') ? 'docs/spec/' + p : p), import.meta.url))));
   const record = JSON.parse(readFileSync(file, 'utf8'));
   const live = { read: () => IDLE };
-  let session = Session.restore(data, live, record);
+  let session = Session.replay(data, live, record);
   const cutIndex = args.indexOf('--cut');
   if (cutIndex >= 0) {
     const match = /^(\d+):(\d+)$/.exec(args[cutIndex + 1] || '');
