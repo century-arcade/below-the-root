@@ -4,8 +4,8 @@ import { figures } from './game.js';
 import { Keyboard, Pointer, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { panelLines } from './panel.js';
-import { Session, Autosave, AUTOSAVE_KEY } from './record.js';
-import { setupDebug } from './debug.js';
+import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
+import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
 
 function note(text, ms) {
@@ -124,6 +124,21 @@ loadData((path) => fetch(path).then((r) => {
   const resume = () => { pointer.cancel(); stick.reset(); paused = false; };
   const hold = () => { held = true; pointer.cancel(); stick.reset(); speaker.suspend(); game.classList.add('paused'); };
   const release = () => { pointer.cancel(); stick.reset(); held = false; speaker.resume(); game.classList.remove('paused'); };
+  const recovery = document.getElementById('save-recovery');
+  recovery.hidden = !restoreFailed;
+  const downloadOriginal = () => downloadRecordingText(existing, 'btr-preserved-autosave.json');
+  document.getElementById('download-preserved-save').onclick = downloadOriginal;
+  document.getElementById('recover-save').onclick = () => {
+    try {
+      const recovered = recoverAutosave(data, stick, existing, localStorage, { slots, seed });
+      session = recovered; state = session.state; bindSlots();
+      restoreFailed = false;
+      recovery.hidden = true;
+      pointer.cancel(); stick.reset(); speaker.silence();
+      hold();
+      note('Saved game recovered and paused. Press a movement key or tap the game to continue. The original save is backed up.');
+    } catch (err) { note(`Recovery failed: ${err.message} Your original autosave is still preserved.`); }
+  };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
     if (held) { if (type === 'pointerdown') release(); return; }
@@ -148,9 +163,14 @@ loadData((path) => fetch(path).then((r) => {
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes[0] === 123 || file.name.endsWith('.json')) {
         const restored = Session.restore(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
+        if (restoreFailed) preserveAutosave(localStorage, existing);
         session = restored; state = session.state; bindSlots();
-      } else session.load(bytes);
+      } else {
+        if (restoreFailed) preserveAutosave(localStorage, existing);
+        session.load(bytes);
+      }
       restoreFailed = false;
+      recovery.hidden = true;
       speaker.silence();
       if (saveNow()) note(`Loaded ${file.name}`, 3000);
     } catch (err) { note(err.message); }
@@ -162,7 +182,8 @@ loadData((path) => fetch(path).then((r) => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { saveNow(); hold(); } else { pointer.cancel(); stick.reset(); }
   });
-  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note });
+  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note,
+    downloadRecording: () => restoreFailed ? downloadOriginal() : downloadRecord(session) });
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);

@@ -46,7 +46,21 @@ replacing the live session. It does not execute code from the file.
 Keep `ENGINE_VERSION` in sync when changing simulation rules or data in a
 way that breaks existing recordings. An unsupported or diverging record
 is rejected and the previous autosave is preserved; the C64 checkpoint
-is a possible recovery route, not a substitute for exact replay.
+can recover progress without replaying the incompatible journal.
+
+If auto-resume fails, click **Recover saved game**. The game validates the
+C64 checkpoint, backs up the original recording in browser storage, and
+starts a new recording from the recovered quest. Recovery starts paused;
+press a movement key or tap the game to continue. An action in progress
+may restart, and transient animation, creature timing, and tile edits are
+not restored by the C64 checkpoint. If validation or storage fails, the
+original autosave stays untouched and recovery can be retried.
+
+**Download original save** exports the preserved autosave even if recovery
+is unavailable. After auto-resume fails, the debug **Download recording**
+button also exports that original. Recovery backups use keys starting with
+`btr.autosave.v1.recovery`; later recoveries retain earlier backups. Download
+the original for a durable copy outside browser storage.
 
 Attract/demo screens do not overwrite a quest autosave. A new real quest
 replaces the autosave; download any run you want to retain first. Browser
@@ -111,8 +125,10 @@ With `make serve` running and Python Playwright/Chromium installed:
 
 ```
 python3 test/browser_test.py
+python3 test/browser_recovery_test.py
 ```
 
-The browser test checks autosave/resume, pointer cancellation, a typing
+The browser tests check checkpoint recovery with backup/failure handling,
+autosave/resume, pointer cancellation, a typing
 and simulation-isolated issue dialog, failure/retry, JSON download/import,
 and small-screen sizing. GitHub is mocked: this test never posts an issue.

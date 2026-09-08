@@ -10,7 +10,7 @@ import { openMenu } from '../src/shell.js';
 import { exportSave, importSave } from '../src/save.js';
 import { neighbour, enterRoom, leaveByEdge } from '../src/world.js';
 import { IDLE } from '../src/input.js';
-import { Session, Autosave, AUTOSAVE_KEY, checkpoint } from '../src/record.js';
+import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave } from '../src/record.js';
 
 const read = async p => JSON.parse(readFileSync(new URL('../' + (p.startsWith('data/') ? 'docs/spec/' + p : p), import.meta.url)));
 const data = await loadData(read);
@@ -62,6 +62,40 @@ assert.deepEqual(checkpoint(Session.restore(freshData, values, copy(session.snap
 const broken = copy(recorded); broken.checkpoint.player.col++;
 assert.throws(() => Session.restore(freshData, values, broken), /diverged/);
 assert.throws(() => Session.restore(freshData, values, { ...recorded, engine: 'old' }), /version/);
+
+// Recover progress across incompatible engines without trusting or replaying the journal.
+const original = JSON.stringify({ ...broken, engine: 'old' });
+const recoveryStore = new Map([[AUTOSAVE_KEY, original]]);
+const storage = { getItem: key => recoveryStore.get(key) ?? null, setItem: (key, value) => recoveryStore.set(key, value) };
+const recovered = recoverAutosave(freshData, values, original, storage, { seed: 77, slots: { 1: recorded.c64 } });
+assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original);
+const expected = fresh(); importSave(expected, Uint8Array.from(atob(recorded.c64), c => c.charCodeAt(0)));
+assert.deepEqual(exportSave(recovered.state), exportSave(expected), 'quest progress comes from the saved checkpoint');
+assert.equal(recovered.slots.get('1'), recorded.c64, 'current manual slots survive recovery');
+const recoveredRecord = JSON.parse(recoveryStore.get(AUTOSAVE_KEY));
+const recoveredReload = Session.restore(freshData, values, recoveredRecord);
+assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state), 'the recovered save reloads exactly');
+values.joy = IDLE;
+for (let i = 0; i < 100; i++) { recovered.step(); recoveredReload.step(); }
+assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state));
+assert.deepEqual(checkpoint(Session.restore(freshData, values, copy(recovered.snapshot())).state), checkpoint(recovered.state));
+recoverAutosave(freshData, values, JSON.stringify(broken), storage);
+assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original, 'later recovery keeps earlier backups');
+assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery.1`), JSON.stringify(broken));
+for (const c64 of [null, 'broken']) {
+  const before = [...recoveryStore];
+  assert.throws(() => recoverAutosave(freshData, values, JSON.stringify({ ...broken, c64 }), storage));
+  assert.deepEqual([...recoveryStore], before, 'invalid checkpoints leave storage untouched');
+}
+for (const failAt of [1, 2]) {
+  const saved = new Map([[AUTOSAVE_KEY, original]]);
+  let writes = 0;
+  assert.throws(() => recoverAutosave(freshData, values, original, {
+    getItem: key => saved.get(key) ?? null,
+    setItem: (key, value) => { if (++writes === failAt) throw new Error('quota'); saved.set(key, value); },
+  }), /quota/);
+  assert.equal(saved.get(AUTOSAVE_KEY), original, 'a failed backup or replacement preserves the autosave');
+}
 
 const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
 for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);

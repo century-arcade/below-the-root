@@ -38,8 +38,9 @@
   #game-controls > button { box-sizing: border-box; width: 168px; }
   button, .file-label { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
-  #notice { position: fixed; top: 8px; left: 8px; padding: 8px; background: #142019; max-width: 90vw; z-index: 2; }
-  body.debugging #notice { top: 48px; }
+  #notices { position: fixed; top: 8px; left: 8px; max-width: min(480px, 90vw); z-index: 3; }
+  #notice, #save-recovery { padding: 8px; background: #142019; }
+  body.debugging #notices { top: 48px; }
   dialog {
     position: static; align-self: center; margin: 8px 0 0;
     background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
@@ -53,7 +54,14 @@
 </style>
 </head>
 <body>
-<div id="notice" role="status" hidden></div>
+<div id="notices">
+  <div id="notice" role="status" hidden></div>
+  <div id="save-recovery" hidden>
+    <p>Recover your saved progress from its checkpoint. An action in progress may restart. A backup of the original save will be kept.</p>
+    <button id="recover-save">Recover saved game</button>
+    <button id="download-preserved-save">Download original save</button>
+  </div>
+</div>
 <div id="github-auth" hidden>
   <button id="github-login">Log in to GitHub</button>
   <button id="github-logout" hidden>Log out</button>

@@ -6,11 +6,15 @@ const API = '/.netlify/functions/github';
 const DRAFT_KEY = 'btr.issue-draft';
 
 export function downloadRecord(session) {
-  const blob = new Blob([JSON.stringify(session.snapshot())], { type: 'application/json' });
+  downloadRecordingText(JSON.stringify(session.snapshot()), `btr-playthrough-${session.frame}.json`);
+}
+
+export function downloadRecordingText(text, filename) {
+  const blob = new Blob([text], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `btr-playthrough-${session.frame}.json`;
+  a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -34,7 +38,8 @@ export function issueContext(session) {
     + '```json\n' + formatIssueDetails(details) + '\n```';
 }
 
-export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note }) {
+export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note,
+  downloadRecording = () => downloadRecord(getSession()) }) {
   const bar = document.getElementById('debug');
   bar.hidden = false;
   document.body.classList.add('debugging');
@@ -52,7 +57,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   let authenticated = false;
   let context = '';
 
-  document.getElementById('download-record').onclick = () => downloadRecord(getSession());
+  document.getElementById('download-record').onclick = downloadRecording;
   document.getElementById('load-record').onchange = async e => {
     const selected = e.target.files[0];
     if (selected) await importFile(selected);

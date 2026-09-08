@@ -223,6 +223,32 @@ export function validateRecord(r, data) {
   }
 }
 
+// Keep each failed original before any replacement, including repeated recoveries.
+export function preserveAutosave(storage, original) {
+  for (let n = 0; ; n++) {
+    const key = `${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`;
+    const previous = storage.getItem(key);
+    if (previous === original) return;
+    if (previous == null) { storage.setItem(key, original); return; }
+  }
+}
+
+export function recoverAutosave(data, live, original, storage, options = {}) {
+  const record = JSON.parse(original);
+  // The interoperable save does not depend on the journal's engine version.
+  if (record?.format !== 'below-the-root-record' || typeof record.c64 !== 'string'
+      || !record.c64.length || record.c64.length > 4096) {
+    throw new Error('This autosave has no recoverable quest checkpoint. Download the original save for recovery.');
+  }
+  const session = new Session(data, live, { ...options, initial: { mode: 'menu' }, record: null });
+  session.load(fromBase64(record.c64));
+  if (!session.state.quest) throw new Error('This checkpoint has no active quest.');
+  const replacement = JSON.stringify(session.snapshot());
+  preserveAutosave(storage, original);
+  storage.setItem(AUTOSAVE_KEY, replacement);
+  return session;
+}
+
 export class Autosave {
   constructor(storage, onError = () => {}) { this.storage = storage; this.onError = onError; this.key = null; }
   save(session, force = false) {
