@@ -17,18 +17,36 @@ If `$ARGUMENTS` names a file in `.meta/todo/`, use it.  Otherwise write
 result and how to verify it; `github_issue: N` when there is one), commit it
 in `.meta`, show it, stop.
 
-Log dir: `.meta/issue-loop/tasks/<slug>/manual-<12 hex>/`.  Save each stage's
-prompt as `<stage>.prompt.md` and output as `<stage>.md` there.
+Log dir: `.meta/issue-loop/tasks/<slug>/manual-<12 hex>/` (gitignored in
+`.meta`).  Save each stage's prompt as `<stage>.prompt.md` and output as
+`<stage>.md` there.
+
+## Who runs a stage
+
+`.meta/issue-loop.conf` assigns `STAGE_<NAME>=vendor:model[:effort]`.  A
+`claude` vendor means do the stage yourself in this session with the stage
+prompt as your brief.  A `codex` vendor means shell out, in the background
+(5-20 minutes):
+
+    $ AGENT_CODEX_MODEL=<model> agent -v codex -e <effort> -C <worktree> - \
+      < <stage>.prompt.md > <stage>.md 2> <stage>.log
+
+Defaults when the conf sets no effort: medium for diagnose and review, high
+for fix.  Read-only stages (diagnose, review) get the worker's "Current
+stage" note appended and must leave the worktree unchanged; check with
+`git status` afterwards.
 
 ## 2. Diagnose
 
 Main checkout must be clean and on `master`; `base=$(git rev-parse HEAD)`.
 `git worktree add --detach _cbox/<slug>-<suffix> $base`.
 
-Do the `diagnose` stage yourself, read-only, in that worktree, with the
-prompt `~/git/workflow/lib/issue-loop/diagnose.md` + `## Task` + the
-`## Delivery` paragraph from `tools/issue_loop.py`.  Append the plan to the
-task file under `## Plan`, commit `.meta`, show it, stop.
+Run `STAGE_DIAGNOSE` in that worktree with the prompt
+`~/git/workflow/lib/issue-loop/diagnose.md` + `## Task` + the `## Delivery`
+paragraph from `tools/issue_loop.py`.  When another agent diagnosed, check
+the plan against the code: file:line claims, whether it is right, nothing
+about how to implement it.  Append the plan to the task file under
+`## Plan`, commit `.meta`, show plan and verdict, stop.
 
 ## 3. Fix
 
@@ -37,20 +55,19 @@ Round 1 uses `STAGE_FIX` from `.meta/issue-loop.conf`, later rounds
 `~/git/workflow/lib/issue-loop/fix.md` + `## Task` + `## Delivery` +
 `## Plan` + `## Prior review` (review text plus the user's notes, verbatim).
 
-    $ AGENT_VENDOR=<vendor> AGENT_CODEX_MODEL=<model> \
-      agent -v <vendor> -e high -C _cbox/<slug>-<suffix> - \
-      < fix-<n>.prompt.md > fix-<n>.md 2> fix-<n>.log
-
-(For claude vendors set `AGENT_CLAUDE_HIGH=<model>` instead.)  Run it in the
-background; codex takes 5-20 minutes.  When it exits: `VERDICT: human` ->
-show and stop.  Uncommitted changes or no commits -> show and stop.
+A `claude` fix vendor still shells out (`AGENT_CLAUDE_HIGH=<model> agent -v
+claude -e high ...`) so the fixer never sees this conversation.  When it
+exits: `VERDICT: human` -> show and stop.  Uncommitted changes or no commits
+-> show and stop.
 
 ## 4. Review
 
-Do the `review` stage yourself, read-only, in the worktree, prompt
+Run `STAGE_REVIEW` in the worktree, prompt
 `~/git/workflow/lib/issue-loop/review.md` + `## Task` + `## Plan` +
-`## Diff` (`git diff $base...HEAD`).  Run the tests.  Show the verdict and
-review, stop for the user's additions.
+`## Diff` (`git diff $base...HEAD`).  Run the tests, including the browser
+suites against `make serve` when the diff touches `src/`.  Save the review
+as `review-<n>.md`, show the verdict and review, stop for the user's
+additions.
 
 - fail -> round n+1 at step 3, `MAX_ROUNDS` is advisory here.
 - pass -> on the user's go: `git merge --ff-only <head>` on master, close the
