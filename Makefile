@@ -26,6 +26,7 @@ test:
 	node test/shell_test.js
 	node test/audio_test.js
 	node test/input_test.js
+	node test/gamepad_test.js
 	node test/session_test.js
 	node test/github_test.mjs
 	node test/replay_test.js intro

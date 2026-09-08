@@ -228,6 +228,47 @@ export class Pointer {
 
 }
 
+const PAD_DEAD = 0.5;
+const PAD_DPAD = { 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+
+export class Gamepad {
+  constructor(keys, nav = navigator) {
+    this.keys = keys;
+    this.nav = nav;
+    this.held = new Set();
+  }
+
+  pad() {
+    const pads = this.nav?.getGamepads?.() ?? [];
+    for (const pad of pads) if (pad?.connected) return pad;
+    return null;
+  }
+
+  wanted(pad) {
+    const keys = new Set();
+    for (const [i, key] of Object.entries(PAD_DPAD)) if (pad.buttons[i]?.pressed) keys.add(key);
+    const [x = 0, y = 0] = pad.axes;
+    if (x <= -PAD_DEAD) keys.add('left'); else if (x >= PAD_DEAD) keys.add('right');
+    if (y <= -PAD_DEAD) keys.add('up'); else if (y >= PAD_DEAD) keys.add('down');
+    if ([0, 1, 2, 3].some(i => pad.buttons[i]?.pressed)) keys.add('fire');
+    return keys;
+  }
+
+  poll() {
+    const pad = this.pad();
+    if (!pad) { this.cancel(); return; }
+    const keys = this.wanted(pad);
+    for (const key of this.held) if (!keys.has(key)) this.keys.release(key, 'gamepad');
+    for (const key of keys) if (!this.held.has(key)) this.keys.press(key, 'gamepad');
+    this.held = keys;
+  }
+
+  cancel() {
+    this.held.clear();
+    this.keys.reset('gamepad');
+  }
+}
+
 // demo.json's joystick byte: bit 0 up, 1 down, 2 left, 3 right, 4 fire, active low
 export function decodeJoy(byte) {
   return {

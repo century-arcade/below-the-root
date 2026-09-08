@@ -1,7 +1,7 @@
 import { loadData } from './data.js';
 import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { figures } from './game.js';
-import { Keyboard, Pointer, isEditing } from './input.js';
+import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { panelLines } from './panel.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
@@ -129,6 +129,7 @@ loadData((path) => fetch(path).then((r) => {
   session ||= new Session(data, stick, { initial, slots, seed });
   let state = session.state;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
+  const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, note);
   const bindSlots = () => { session.saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text); };
   bindSlots();
@@ -177,7 +178,7 @@ loadData((path) => fetch(path).then((r) => {
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
   const saveNow = () => restoreFailed || !!autosave.save(session, true);
-  const dropInput = () => { pointer.cancel(); stick.reset(); };
+  const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; };
   const hold = () => { held = true; dropInput(); speaker.suspend(); game.classList.add('paused'); };
@@ -268,6 +269,7 @@ loadData((path) => fetch(path).then((r) => {
   function frame(now) {
     acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
+    gamepad.poll();
     while (acc >= STEP_MS) {
       const previousRoom = state.room;
       const previousTitle = state.title;

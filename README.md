@@ -48,6 +48,8 @@ script, `?room=T1` to start somewhere else).
 
 Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen.
 
+Gamepad: d-pad or left stick moves, any face button fires; sound starts only after a keypress or canvas touch/click, since the browser needs a real gesture to unlock audio.
+
 ```
 make serve                    # Netlify Dev: game + functions at http://localhost:8000
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
