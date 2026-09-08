@@ -12,8 +12,12 @@ function note(text, ms) {
   const element = document.getElementById('notice');
   element.textContent = text;
   element.hidden = !text;
+  document.getElementById('notice-banner').hidden = !text;
+  fit();
   if (ms) setTimeout(() => { if (element.textContent === text) note(''); }, ms);
 }
+
+document.getElementById('dismiss-notice').onclick = () => note('');
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -24,7 +28,7 @@ const image = ctx.createImageData(WIDTH, HEIGHT);
 const CHROME_PX = 40;
 
 function fit() {
-  const chrome = ['debug', 'debug-status', 'game-controls']
+  const chrome = ['debug', 'debug-status', 'game-controls', 'notices']
     .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
   const availableHeight = window.innerHeight - CHROME_PX - chrome;
   const scale = Math.max(0.25, Math.min(
@@ -135,8 +139,8 @@ loadData((path) => fetch(path).then((r) => {
       restoreFailed = false;
       recovery.hidden = true;
       pointer.cancel(); stick.reset(); speaker.silence();
-      hold();
-      note('Saved game recovered and paused. Press a movement key or tap the game to continue. The original save is backed up.');
+      release();
+      note('Saved game recovered', 3000);
     } catch (err) { note(`Recovery failed: ${err.message} Your original autosave is still preserved.`); }
   };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
@@ -171,6 +175,7 @@ loadData((path) => fetch(path).then((r) => {
       }
       restoreFailed = false;
       recovery.hidden = true;
+      fit();
       speaker.silence();
       if (saveNow()) note(`Loaded ${file.name}`, 3000);
     } catch (err) { note(err.message); }

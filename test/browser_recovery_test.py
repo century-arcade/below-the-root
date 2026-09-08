@@ -39,6 +39,9 @@ with sync_playwright() as p:
     assert 'diverged' in page.locator('#notice').inner_text()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
+    page.get_by_role('button', name='Dismiss notice').click()
+    assert not page.locator('#notice').is_visible()
+    assert page.get_by_role('button', name='Recover saved game').is_visible()
     with page.expect_download() as download:
         page.get_by_role('button', name='Download original save').click()
     assert open(download.value.path()).read() == original
@@ -46,16 +49,31 @@ with sync_playwright() as p:
     assert 'Test quota' in page.locator('#notice').inner_text()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
     assert page.get_by_role('button', name='Recover saved game').is_visible()
+    page.get_by_role('button', name='Dismiss notice').click()
+    assert not page.locator('#notice').is_visible()
+    with page.expect_download() as download:
+        page.get_by_role('button', name='Download original save').click()
+    assert open(download.value.path()).read() == original
+    # Recovery must also release a hold that was already active.
+    page.keyboard.press('Escape')
+    page.wait_for_function("document.getElementById('where').textContent.includes('PAUSED')")
     page.evaluate('window.failBackup = false')
     page.get_by_role('button', name='Recover saved game').click()
     page.locator('#save-recovery').wait_for(state='hidden')
-    page.wait_for_function("document.getElementById('where').textContent.includes('PAUSED')")
-    assert page.locator('#where').inner_text() == record['checkpoint']['room'] + ' PAUSED'
+    page.wait_for_function("document.getElementById('where').textContent && !document.getElementById('where').textContent.includes('PAUSED')")
+    assert page.locator('#where').inner_text() == record['checkpoint']['room']
+    assert page.locator('#notice').inner_text() == 'Saved game recovered'
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     recovered = json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))
-    assert recovered['frames'] == 0
     assert recovered['checkpoint']['quest']
     assert recovered['checkpoint']['objects'] == record['checkpoint']['objects']
+    # Flush snapshots without sending input: recovered play advances on its own.
+    page.wait_for_function("""(frames) => {
+        dispatchEvent(new Event('pagehide'));
+        return JSON.parse(localStorage.getItem('btr.autosave.v1')).frames > frames;
+    }""", arg=recovered['frames'])
+    page.locator('#notice').wait_for(state='hidden', timeout=5000)
+    assert not page.get_by_role('button', name='Dismiss notice').is_visible()
     page.reload()
     page.wait_for_function("document.getElementById('where').textContent.length > 0")
     assert not page.locator('#save-recovery').is_visible()
@@ -78,5 +96,12 @@ with sync_playwright() as p:
         page.get_by_role('button', name='Download recording', exact=True).click()
     assert open(download.value.path()).read() == unusable
     assert not errors, errors
+
+    # Dismissal is wired even when startup never finishes loading game data.
+    startup = browser.new_page()
+    startup.route('**/data/*.json', lambda route: route.fulfill(status=500, body='Test load failure'))
+    startup.goto(URL)
+    startup.get_by_role('button', name='Dismiss notice').click()
+    assert not startup.locator('#notice').is_visible()
     browser.close()
-    print('browser_recovery_test: original download, backup failure/retry, checkpoint recovery, reload, and missing checkpoint passed')
+    print('browser_recovery_test: dismissal, original download, backup failure/retry, resumed recovery, notice expiry, reload, missing checkpoint, and startup error passed')

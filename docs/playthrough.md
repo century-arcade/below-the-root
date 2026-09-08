@@ -50,11 +50,11 @@ can recover progress without replaying the incompatible journal.
 
 If auto-resume fails, click **Recover saved game**. The game validates the
 C64 checkpoint, backs up the original recording in browser storage, and
-starts a new recording from the recovered quest. Recovery starts paused;
-press a movement key or tap the game to continue. An action in progress
-may restart, and transient animation, creature timing, and tile edits are
-not restored by the C64 checkpoint. If validation or storage fails, the
-original autosave stays untouched and recovery can be retried.
+starts a new recording from the recovered quest. Play resumes immediately.
+An action in progress may restart, and transient animation, creature
+timing, and tile edits are not restored by the C64 checkpoint. If validation
+or storage fails, the original autosave stays untouched and recovery can
+be retried.
 
 **Download original save** exports the preserved autosave even if recovery
 is unavailable. After auto-resume fails, the debug **Download recording**
