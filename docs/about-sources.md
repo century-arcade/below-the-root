@@ -4,6 +4,14 @@ Checked 2026-09-09 against `src/index.html`, local task history, and the
 linked websites. This records research and editorial findings; it does not
 replace the public copy.
 
+The reading links now live on the top-level Resources tab (`#resources`).
+[Archive verification](resources-archive.json) records the capture URLs,
+dates and results for its 23 external destinations. Twenty-two have verified
+archived content. The Retronauts Patreon page has no matching successful
+capture; Save Page Now's browser job failed and its API required login.
+That capture remains outstanding. Page captures do not establish that
+embedded audio, video, or every image has also been preserved.
+
 ## Where the copy came from
 
 The immediate source is the agent-written front-page task brief, preserved

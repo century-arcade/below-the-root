@@ -4,11 +4,14 @@ import { startTab } from '../src/site.js';
 assert.equal(startTab('', '', false), 'about');
 assert.equal(startTab('', '#about', false), 'about');
 assert.equal(startTab('', '#play', false), 'play');
+assert.equal(startTab('', '#resources', false), 'resources');
+assert.equal(startTab('', '#resources', true), 'resources');
 assert.equal(startTab('', '', true), 'play');
 for (const param of ['demo', 'room', 'player', 'menu', 'debug', 'github']) {
   for (const search of [`?${param}`, `?${param}=T1`, `?unrelated=1&${param}=`]) {
     assert.equal(startTab(search, '', false), 'play', search);
     assert.equal(startTab(search, '#about', true), 'about', 'explicit About wins');
+    assert.equal(startTab(search, '#resources', true), 'resources', 'explicit Resources wins');
   }
 }
 assert.equal(startTab('?unrelated=1', '', false), 'about');

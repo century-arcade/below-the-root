@@ -1,0 +1,239 @@
+{
+  "checked": "2026-09-09",
+  "scope": "The 23 external destinations on the Resources page. HTML page preservation does not establish preservation of embedded audio, video, or every image.",
+  "manual_download": {
+    "url": "https://archive.org/download/below-the-root-game-manual-1984/Below%20the%20Root%20game%20manual-1984.pdf",
+    "status": 200,
+    "bytes": 7096812,
+    "sha1": "27acf1658b32a37aff604322e6b09b2d7c077364",
+    "matches_archive_metadata": true,
+    "pdf": true
+  },
+  "resources": [
+    {
+      "url": "https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania",
+      "label": "John Szczepaniak: The making of Below the Root",
+      "archive_url": "https://web.archive.org/web/20260208011141/https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania",
+      "capture_timestamp": "20260208011141",
+      "capture_digest": "RBWLPYRYY2ZBQNO5RETCBQFQG5GUL36P",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.timeextension.com%2Ffeatures%2Fthe-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania&output=json&filter=statuscode%3A200&limit=-1&to=20260909235959"
+    },
+    {
+      "url": "https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html",
+      "label": "Dale DeSharone — an unspoken legend",
+      "archive_url": "https://web.archive.org/web/20260806230240/http://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html",
+      "capture_timestamp": "20260806230240",
+      "capture_digest": "WDG2WJ7BHLJ62K7IVPQDSQYK7HBBXSVC",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fblog.hardcoregaming101.net%2F2012%2F09%2Fdale-desharone-unspoken-legend.html&output=json&filter=statuscode%3A200&limit=-1&to=20260909235959"
+    },
+    {
+      "url": "https://zacksmithwriter.wordpress.com/2013/04/18/weird-childrens-books-zilpha-keatley-snyder-and-below-the-root/",
+      "label": "Zack Smith: Weird Children’s Books: Zilpha Keatley Snyder and Below the Root",
+      "archive_url": "https://web.archive.org/web/20250820045304/https://zacksmithwriter.wordpress.com/2013/04/18/weird-childrens-books-zilpha-keatley-snyder-and-below-the-root/",
+      "capture_timestamp": "20250820045304",
+      "capture_digest": "C6SR4VWBQFBZBRQ7JYFJNFKL2XC6F66D",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fzacksmithwriter.wordpress.com%2F2013%2F04%2F18%2Fweird-childrens-books-zilpha-keatley-snyder-and-below-the-root%2F&output=json&filter=statuscode%3A200&limit=-1&to=20260909235959"
+    },
+    {
+      "url": "https://www.atarimagazines.com/compute/index/index.php?issue=issue64",
+      "label": "Compute!, September 1985",
+      "archive_url": "https://web.archive.org/web/20240528173616/https://www.atarimagazines.com/compute/index/index.php?issue=issue64",
+      "capture_timestamp": "20240528173616",
+      "capture_digest": "BPV622NPHP7T6BGSSVCWRIHZTP5XJ4VI",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.atarimagazines.com%2Fcompute%2Findex%2Findex.php%3Fissue%3Dissue64&output=json&filter=statuscode%3A200&limit=-1&to=20260909235959"
+    },
+    {
+      "url": "https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/",
+      "label": "Justin Stahlman: Below the Root: a story, a computer game and my lifelong obsession",
+      "archive_url": "https://web.archive.org/web/20260614195005/https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/",
+      "capture_timestamp": "20260614195005",
+      "capture_digest": "DVTFBQ3EYSUD7OFCKOHMU3VYH36YNTYE",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fblog.stahlmandesign.com%2Fbelow-the-root-a-story-a-computer-game-and-my-lifelong-obsession%2F&output=json&filter=statuscode%3A200&limit=-1&to=20260909235959"
+    },
+    {
+      "url": "https://obscuritory.com/platform/below-the-root/",
+      "label": "Phil Salvador: Below the Root",
+      "archive_url": "https://web.archive.org/web/20260513123100/https://obscuritory.com/platform/below-the-root/",
+      "capture_timestamp": "20260513123100",
+      "capture_digest": "GLQHUQOAXOAO22NNZBRZOP62TTDNXVTU",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fobscuritory.com%2Fplatform%2Fbelow-the-root%2F&output=json&filter=statuscode%3A200&limit=-1&to=20260909235959"
+    },
+    {
+      "url": "https://www.lemon64.com/review/below-the-root/377",
+      "label": "Mark Krepela: Below the Root",
+      "archive_url": "https://web.archive.org/web/20251122102005/https://www.lemon64.com/review/below-the-root/377",
+      "capture_timestamp": "20251122102005",
+      "capture_digest": "ZCZPO3EYNGQ32QZ6WYBNHYNG6PFNGEEC",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.lemon64.com%2Freview%2Fbelow-the-root%2F377&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://bestretrogames.blogspot.com/2012/03/below-root-commodore-64-1984.html",
+      "label": "Wingnut: Below The Root — Commodore 64 — 1984",
+      "archive_url": "https://web.archive.org/web/20250905131250/http://bestretrogames.blogspot.com/2012/03/below-root-commodore-64-1984.html",
+      "capture_timestamp": "20250905131250",
+      "capture_digest": "WRNBVWPL6YUPCUEJNK2GEHIGT24XDM2H",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fbestretrogames.blogspot.com%2F2012%2F03%2Fbelow-root-commodore-64-1984.html&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://www.gamedeveloper.com/design/digital-future-invisible-past-what-lives-on-when-a-good-game-dies-",
+      "label": "Darby McDevitt: Digital Future, Invisible Past",
+      "archive_url": "https://web.archive.org/web/20230329220609/https://www.gamedeveloper.com/design/digital-future-invisible-past-what-lives-on-when-a-good-game-dies-",
+      "capture_timestamp": "20230329220609",
+      "capture_digest": "UF32TUIU4ZYZ6SDHKBSFEHOVWF5B7XRD",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.gamedeveloper.com%2Fdesign%2Fdigital-future-invisible-past-what-lives-on-when-a-good-game-dies-&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://datadrivengamer.blogspot.com/2023/07/game-373-below-root.html",
+      "label": "Data Driven Gamer: Game 373: Below the Root",
+      "archive_url": "https://web.archive.org/web/20260211183538/https://datadrivengamer.blogspot.com/2023/07/game-373-below-root.html",
+      "capture_timestamp": "20260211183538",
+      "capture_digest": "MSFEUMBRIP32W522OJUOGWBTMVWGIN6S",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fdatadrivengamer.blogspot.com%2F2023%2F07%2Fgame-373-below-root.html&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://datadrivengamer.blogspot.com/2023/07/below-root-won.html",
+      "label": "Completion and assessment.",
+      "archive_url": "https://web.archive.org/web/20251109010705/https://datadrivengamer.blogspot.com/2023/07/below-root-won.html",
+      "capture_timestamp": "20251109010705",
+      "capture_digest": "SXOMJ5UAUN4A2H4BFEQ4UIOTF5RNANZQ",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fdatadrivengamer.blogspot.com%2F2023%2F07%2Fbelow-root-won.html&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://advgamer.blogspot.com/2011/11/game-1-below-root-1984.html",
+      "label": "The Adventurers’ Guild: Below the Root",
+      "archive_url": "https://web.archive.org/web/20260807031702/https://advgamer.blogspot.com/2011/11/game-1-below-root-1984.html",
+      "capture_timestamp": "20260807031702",
+      "capture_digest": "3EZSHWVBZDAJTEWEDTRRU7TM774OMII5",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fadvgamer.blogspot.com%2F2011%2F11%2Fgame-1-below-root-1984.html&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://advgamer.blogspot.com/2011/12/game-1-below-root-won.html",
+      "label": "The final part.",
+      "archive_url": "https://web.archive.org/web/20260511091815/https://advgamer.blogspot.com/2011/12/game-1-below-root-won.html",
+      "capture_timestamp": "20260511091815",
+      "capture_digest": "LGTZPEFPB6MANQZQQTNHBELSJ5B4AZDU",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fadvgamer.blogspot.com%2F2011%2F12%2Fgame-1-below-root-won.html&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://gamefaqs.gamespot.com/c64/581563-below-the-root/faqs/57342",
+      "label": "TarynB93: Guide and walkthrough",
+      "archive_url": "https://web.archive.org/web/20240806093550/https://gamefaqs.gamespot.com/c64/581563-below-the-root/faqs/57342",
+      "capture_timestamp": "20240806093550",
+      "capture_digest": "ZQ55PFGTYNNH2A67W5CILCCZM7WQGDKB",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fgamefaqs.gamespot.com%2Fc64%2F581563-below-the-root%2Ffaqs%2F57342&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://altusmusic.bandcamp.com/album/below-the-root",
+      "label": "Altus: Below the Root",
+      "archive_url": "https://web.archive.org/web/20250821082755/https://altusmusic.bandcamp.com/album/below-the-root",
+      "capture_timestamp": "20250821082755",
+      "capture_digest": "342KAAEZFTPVJRQBTXR4GLVB2I7MSW2G",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Faltusmusic.bandcamp.com%2Falbum%2Fbelow-the-root&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://www.patreon.com/posts/episode-536-root-83357354",
+      "label": "Retronauts episode 536: Below the Root",
+      "archive_url": null,
+      "capture_timestamp": null,
+      "capture_digest": null,
+      "verification": "capture-failed",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.patreon.com%2Fposts%2Fepisode-536-root-83357354&output=json&filter=statuscode%3A200&limit=-1",
+      "save_attempts": [
+        {
+          "endpoint": "https://web.archive.org/save",
+          "method": "POST",
+          "http_status": 401,
+          "response": "You need to be logged in to use Save Page Now."
+        },
+        {
+          "endpoint": "https://web.archive.org/save/https://www.patreon.com/posts/episode-536-root-83357354",
+          "method": "browser form",
+          "response": "Sorry. Job failed."
+        }
+      ],
+      "next_step": "Retry with an authenticated Internet Archive session, then verify the returned capture before marking preserved."
+    },
+    {
+      "url": "https://archive.org/details/below-the-root-game-manual-1984",
+      "label": "The original manual",
+      "archive_url": "https://archive.org/details/below-the-root-game-manual-1984",
+      "capture_timestamp": null,
+      "capture_digest": null,
+      "verification": "archive-item",
+      "lookup_url": "https://archive.org/metadata/below-the-root-game-manual-1984"
+    },
+    {
+      "url": "https://www.mocagh.org/loadpage.php?getgame=belowtheroot",
+      "label": "Museum of Computer Adventure Game History",
+      "archive_url": "https://web.archive.org/web/20260211181523/https://www.mocagh.org/loadpage.php?getgame=belowtheroot",
+      "capture_timestamp": "20260211181523",
+      "capture_digest": "YT35EFX2BUBVPBHUTK3FZHBPOK7FTIK6",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.mocagh.org%2Floadpage.php%3Fgetgame%3Dbelowtheroot&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://www.mocagh.org/spinnaker/belowtheroot-manual.pdf",
+      "label": "Manual PDF.",
+      "archive_url": "https://web.archive.org/web/20250327201427/https://mocagh.org/spinnaker/belowtheroot-manual.pdf",
+      "capture_timestamp": "20250327201427",
+      "capture_digest": "XB4W2ZRQJ35WDW7NRGXCQEM5YIKBYGLG",
+      "verification": "pdf",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.mocagh.org%2Fspinnaker%2Fbelowtheroot-manual.pdf&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Below_the_Root_(video_game)",
+      "label": "Wikipedia",
+      "archive_url": "https://web.archive.org/web/20260905022127/https://en.wikipedia.org/wiki/Below_the_Root_%28video_game%29",
+      "capture_timestamp": "20260905022127",
+      "capture_digest": "WL4J3GPSOQ7ADO72EA3XEDVNGANGGX3X",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FBelow_the_Root_%28video_game%29&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://www.mobygames.com/game/602/below-the-root/",
+      "label": "MobyGames",
+      "archive_url": "https://web.archive.org/web/20260117044313/https://www.mobygames.com/game/602/below-the-root/",
+      "capture_timestamp": "20260117044313",
+      "capture_digest": "YNJFLKVZKUEWZCWI57I5STLIONOCQA42",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.mobygames.com%2Fgame%2F602%2Fbelow-the-root%2F&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://www.lemon64.com/game/below-the-root",
+      "label": "Lemon64",
+      "archive_url": "https://web.archive.org/web/20251013200338/https://www.lemon64.com/game/below-the-root",
+      "capture_timestamp": "20251013200338",
+      "capture_digest": "4CY6OTEWIAQVXWFFXELFKEVGB7IO3IUC",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.lemon64.com%2Fgame%2Fbelow-the-root&output=json&filter=statuscode%3A200&limit=-1"
+    },
+    {
+      "url": "https://tcrf.net/Below_the_Root",
+      "label": "The Cutting Room Floor",
+      "archive_url": "https://web.archive.org/web/20250906182446/https://tcrf.net/Below_the_Root",
+      "capture_timestamp": "20250906182446",
+      "capture_digest": "BCO6Y6AZTTXKY2BVFTDFJ5GVBROA5JOX",
+      "verification": "readable",
+      "lookup_url": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Ftcrf.net%2FBelow_the_Root&output=json&filter=statuscode%3A200&limit=-1"
+    }
+  ],
+  "summary": {
+    "verified": 22,
+    "capture_failed": 1
+  }
+}
