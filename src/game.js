@@ -267,6 +267,6 @@ export function figures(state) {
   const out = [figureOf(state)];
   const c = creatureFigure(state);
   if (c) out.push(c);
-  if (state.pointer) out.push({ sheet: 'extras', frame: 0, col: state.pointer.col, row: state.pointer.row, color: 7 });
+  if (state.pointer) out.push({ sheet: 'extras', frame: 0, col: state.pointer.col, row: state.pointer.row, color: 7, pointer: true });
   return out;
 }

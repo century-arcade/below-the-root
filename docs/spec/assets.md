@@ -259,6 +259,10 @@ rectangles are in source pixels; the PNGs are drawn at four times size.
 Figures are clipped to the 320x200 window, so a figure standing on row 0
 or row 1 has its head cut off by the top edge.
 
+The KINIPORT pointer is one sprite, placed 31 lines below a figure's top
+half, at `(8 * col - 8, 8 * row - 2)`.  Its hollow box covers the selected
+cell exactly, including on row 0.
+
 ### Draw order
 
 Tiles first, then the KINIPORT pointer, then the creature, then you.

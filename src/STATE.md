@@ -63,7 +63,7 @@ state = {
   berriesOffered, visions, animalsPensed,   // a gate's permanent flag is its guard's banished flag
   lamp,            // null or {object, fuel}: the lit honeylamp and its room changes left
   dream,           // DREAM.none / marked (slept in the sky nid) / clouds; nonzero freezes the clock and fatigue
-  pointer,         // null or {col, row}: KINIPORT's cursor, drawn as extras frame 0
+  pointer,         // null or {col, row}: KINIPORT's cursor, drawn as extras frame 0 on its cell
 }
 ```
 

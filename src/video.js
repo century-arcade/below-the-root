@@ -101,7 +101,10 @@ function drawFigure(px, state, fig) {
   const frame = sheet.frames[fig.frame];
   if (!frame) return;
   const color = fig.color ?? sheet.color;
-  const [x0, y0] = figureOrigin(fig.col, fig.row);
+  // The pointer uses row_to_y without the upper figure sprite's 31-line offset.
+  const [x0, y0] = fig.pointer
+    ? [fig.col * 8 - 8, fig.row * 8 - 2]
+    : figureOrigin(fig.col, fig.row);
   for (let y = 0; y < 42; y++) {
     const sy = y0 + y;
     if (sy < 0 || sy >= HEIGHT) continue;
