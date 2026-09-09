@@ -13,16 +13,18 @@ import { Crt } from './crt.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 
-function note(text, ms) {
-  const element = document.getElementById('notice');
-  element.textContent = text;
-  element.hidden = !text;
-  document.getElementById('notice-banner').hidden = !text;
-  fit();
-  if (ms) setTimeout(() => { if (element.textContent === text) note(''); }, ms);
+const logElement = document.getElementById('log');
+function log(text) {
+  console.log(text);
+  const wasHidden = logElement.hidden;
+  const line = document.createElement('div');
+  line.textContent = text;
+  logElement.append(line);
+  while (logElement.childElementCount > 100) logElement.firstElementChild.remove();
+  logElement.hidden = false;
+  if (wasHidden) fit();
+  logElement.scrollTop = logElement.scrollHeight;
 }
-
-document.getElementById('dismiss-notice').onclick = () => note('');
 
 const canvas = document.getElementById('screen');
 const game = document.getElementById('game');
@@ -43,7 +45,7 @@ function fit() {
     game.style.width = '';
     scale = fitScale(game.clientWidth, game.clientHeight, HEIGHT + band);
   } else {
-    const chrome = ['top-controls', 'where', 'game-controls', 'notices']
+    const chrome = ['top-controls', 'where', 'game-controls', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome, HEIGHT + band);
   }
@@ -96,7 +98,7 @@ loadData((path) => fetch(path).then((r) => {
   const stick = new Keyboard();
   let options;
   try { options = loadOptions(localStorage); }
-  catch (err) { options = loadOptions({ getItem: () => null }); note(`Browser storage is unavailable: ${err.message}`); }
+  catch (err) { options = loadOptions({ getItem: () => null }); log(`Browser storage is unavailable: ${err.message}`); }
   let debug = params.has('debug') || options.debug;
   const room = pickRoom(data, params.get('room'));
   let initial;
@@ -124,15 +126,16 @@ loadData((path) => fetch(path).then((r) => {
     let stored = null;
     try { stored = JSON.parse(existing); } catch {}
     try { session = Session.replay(data, stick, stored, true, { saveSlot }); }
-    catch {
-      let failure = '';
+    catch (err) {
+      let reason = err;
       if (typeof stored?.c64 === 'string') {
         try { session = recoverAutosave(data, stick, existing, localStorage, { slots, seed, saveSlot }); }
-        catch (err) { failure = ` ${err.message}`; }
+        catch (recoveryErr) { reason = recoveryErr; }
       }
       if (!session) {
+        console.warn('Saved game could not be restored', reason);
         try { preserveAutosave(localStorage, existing); } catch {}
-        note(`Your saved game could not be restored.${failure}`);
+        initial = { mode: 'menu' };
       }
     }
   }
@@ -140,7 +143,7 @@ loadData((path) => fetch(path).then((r) => {
   let state = session.state;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
-  const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, note);
+  const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
@@ -171,7 +174,6 @@ loadData((path) => fetch(path).then((r) => {
   }
   function stepVolume(delta) {
     setVolume(speaker.volume + delta);
-    note(`Volume ${Math.round(speaker.volume * 100)}%`, 1000);
   }
   syncMuteButton();
   muteButton.onclick = e => { toggleMute(); e.currentTarget.blur(); };
@@ -248,7 +250,7 @@ loadData((path) => fetch(path).then((r) => {
     centerMap();
   }
   mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
-  const opt = Object.fromEntries(['volume', 'volume-out', 'crt', 'classic', 'debug', 'reset', 'reset-confirm']
+  const opt = Object.fromEntries(['volume', 'volume-out', 'crt', 'classic', 'debug', 'reset']
     .map(name => [name, document.getElementById(`opt-${name}`)]));
   const debugTools = document.getElementById('debug-tools');
   let debugReady = false;
@@ -258,7 +260,7 @@ loadData((path) => fetch(path).then((r) => {
     debugTools.hidden = !on;
     if (on && !debugReady) {
       debugReady = true;
-      setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note,
+      setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, log,
         downloadRecording: () => downloadRecord(session) });
     }
     fit();
@@ -282,8 +284,6 @@ loadData((path) => fetch(path).then((r) => {
     if (overlay) release();
     hold();
     syncOptions();
-    opt.reset.hidden = false;
-    opt['reset-confirm'].hidden = true;
     optionsDialog.show();
     opt.volume.focus();
   }
@@ -304,13 +304,8 @@ loadData((path) => fetch(path).then((r) => {
     });
   }
   opt.reset.onclick = () => {
-    opt.reset.hidden = true;
-    opt['reset-confirm'].hidden = false;
-    opt['reset-confirm'].focus();
-  };
-  opt['reset-confirm'].onclick = () => {
     try { clearAutosave(localStorage); }
-    catch (err) { note(`Reset failed: ${err.message}`); return; }
+    catch (err) { log(`Reset failed: ${err.message}`); return; }
     session = new Session(data, stick, { initial: { mode: 'menu' },
       slots: Object.fromEntries(session.slots), seed: crypto.getRandomValues(new Uint32Array(1))[0], saveSlot });
     state = session.state;
@@ -318,7 +313,7 @@ loadData((path) => fetch(path).then((r) => {
     speaker.silence();
     release();
     fit();
-    note('Game reset', 3000);
+    log('Game reset');
   };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
@@ -368,8 +363,8 @@ loadData((path) => fetch(path).then((r) => {
       }
       fit();
       speaker.silence();
-      if (saveNow()) note(`Loaded ${file.name}`, 3000);
-    } catch (err) { note(err.message); }
+      if (saveNow()) log(`Loaded ${file.name}`);
+    } catch (err) { log(err.message); }
     finally { resume(); }
   }
   addEventListener('dragover', e => e.preventDefault());
@@ -380,7 +375,7 @@ loadData((path) => fetch(path).then((r) => {
   });
   if (debug) setDebug(true);
   setCrt(options.crt);
-  if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
+  if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
     const rows = options.classic ? [] : statusRows(state);
@@ -427,6 +422,6 @@ loadData((path) => fetch(path).then((r) => {
   draw();
   requestAnimationFrame(frame);
 }).catch((err) => {
-  note(String(err));
+  log(String(err));
   console.error(err);
 });

@@ -46,15 +46,15 @@ Keep `ENGINE_VERSION` in sync when changing simulation rules or data in a
 way that breaks existing recordings. An unsupported or diverging autosave
 is recovered automatically at startup from its C64 checkpoint. The game
 backs up the original under `btr.autosave.v1.recovery` keys and starts a
-new recording from the recovered quest, without a notice or pause. Later
+new recording from the recovered quest silently. Later
 recoveries retain earlier backups. An action in progress may restart;
 transient animation, creature timing, tile edits, and the visited-room
 map are not restored by the C64 checkpoint.
 
-If there is no checkpoint or recovery fails, the game starts cold, keeps
-the original where it can, and shows “Your saved game could not be restored.”
-Recovery errors are appended to that dismissable notice. Autosaving
-continues when a new quest starts. Dropped recording files still report
+If there is no checkpoint or recovery fails, the game keeps the original
+where it can, logs the reason to the browser console only, and starts at
+the main menu. Nothing is shown on the page. Autosaving continues when a
+new quest starts. Dropped recording files still report
 replay errors without automatic recovery.
 
 Attract/demo screens do not overwrite a quest autosave. A new real quest

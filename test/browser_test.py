@@ -10,6 +10,8 @@ with sync_playwright() as p:
     page = browser.new_page(viewport={"width": 900, "height": 750})
     errors = []
     page.on('pageerror', lambda e: errors.append(str(e)))
+    logged = []
+    page.on('console', lambda msg: logged.append(msg.text) if msg.type == 'log' else None)
     posted = []
 
     def github(route):
@@ -75,7 +77,7 @@ with sync_playwright() as p:
     assert frames() == saved['frames'], 'a failed submission must keep game time paused'
     page.locator('#issue-submit').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
-    page.locator('#notice').filter(has_text='Issue #123 filed').wait_for()
+    page.locator('#log').filter(has_text='Issue #123 filed').wait_for()
     assert len(posted) == 2
     assert 'recentInputs' in posted[0]['context']
     assert 'player' in posted[0]['context']
@@ -108,10 +110,20 @@ with sync_playwright() as p:
     page.goto(BASE + '/?debug')
     page.locator('#file-issue').wait_for()
     page.wait_for_timeout(200)
-    expect(page.locator('#notice')).to_be_hidden()
+    expect(page.locator('#log')).to_be_hidden()
     assert page.locator('#where').inner_text() == record['checkpoint']['room']
     page.locator('#record-file').set_input_files('/tmp/btr-browser-record.json')
-    page.get_by_role('status').filter(has_text='Loaded btr-browser-record.json').wait_for()
+    page.locator('#log').filter(has_text='Loaded btr-browser-record.json').wait_for()
+    # Imports append in order; the log retains the latest 100 messages.
+    logged.clear()
+    for n in range(101):
+        page.locator('#record-file').set_input_files({
+            'name': f'log-{n}.json', 'mimeType': 'application/json',
+            'buffer': json.dumps(record).encode(),
+        })
+        expect(page.locator('#log')).to_contain_text(f'Loaded log-{n}.json')
+    assert page.locator('#log').inner_text().splitlines() == [f'Loaded log-{n}.json' for n in range(1, 101)]
+    assert logged == [f'Loaded log-{n}.json' for n in range(101)]
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
     page.evaluate('(save) => localStorage.setItem("btr.quest2", save)', record['c64'])
@@ -140,36 +152,27 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
-    # Reset asks again after cancelling; only confirmation discards the quest.
+    # Reset deletes the quest on one click, preserving slots and options.
     page.keyboard.press('o')
     saved = page.evaluate("localStorage.getItem('btr.autosave.v1')")
-    page.locator('#opt-reset').click()
-    expect(page.locator('#options-dialog')).to_be_visible()
-    expect(page.locator('#opt-reset-confirm')).to_be_focused()
-    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == saved
-    page.keyboard.press('Escape')
-    expect(page.locator('#screen')).to_be_focused()
-    page.keyboard.press('o')
-    expect(page.locator('#opt-reset')).to_be_visible()
-    expect(page.locator('#opt-reset-confirm')).to_be_hidden()
     page.evaluate('''(save) => {
         localStorage.setItem('btr.autosave.v1.recovery', save);
         localStorage.setItem('btr.autosave.v1.recovery.1', save);
     }''', saved)
-    page.locator('#opt-reset').click()
     # A failed deletion must not claim success or replace the running quest.
     page.evaluate('''() => {
         window.removeItem = Storage.prototype.removeItem;
         Storage.prototype.removeItem = () => { throw new Error('Test storage failure'); };
     }''')
-    page.locator('#opt-reset-confirm').click()
-    expect(page.locator('#notice')).to_have_text('Reset failed: Test storage failure')
+    page.locator('#opt-reset').click()
+    expect(page.locator('#log')).to_contain_text('Reset failed: Test storage failure')
     expect(page.locator('#options-dialog')).to_be_visible()
     expect(page.locator('#map')).to_be_visible()
     assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == saved
     page.evaluate('() => { Storage.prototype.removeItem = window.removeItem; }')
-    page.locator('#opt-reset-confirm').click()
-    expect(page.locator('#notice')).to_have_text('Game reset')
+    page.locator('#opt-reset').click()
+    expect(page.locator('#log')).to_contain_text('Game reset')
+    expect(page.locator('#log')).to_contain_text('Reset failed: Test storage failure')
     assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
     assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery')") is None
     assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery.1')") is None
@@ -195,6 +198,7 @@ with sync_playwright() as p:
     page.goto(BASE + '/?demo=quest')
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
     page.keyboard.press('-')  # Unlock audio without aborting the demo.
+    expect(page.locator('#log')).to_be_hidden()
     page.wait_for_function('window.audioStops > 10')
     scheduled = page.evaluate('window.audioStops')
     for action in ['p', 'ArrowRight', 'blur', 'Escape']:
@@ -206,4 +210,4 @@ with sync_playwright() as p:
         assert page.evaluate('window.audioStops') == scheduled, 'pause/resume must leave scheduled music playing'
     assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, reset confirmation/deletion/reload, pause/resume with continuing music, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: autosave/resume, one-click reset/deletion/reload, pause/resume with continuing music, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

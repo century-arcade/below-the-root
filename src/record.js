@@ -282,6 +282,6 @@ export class Autosave {
       this.storage.setItem(AUTOSAVE_KEY, JSON.stringify(session.snapshot()));
       this.key = key;
       return { written: true };
-    } catch (err) { this.onError(`Autosave failed: ${err.message}. Download your recording to keep it.`); return { written: false, reason: 'failed' }; }
+    } catch (err) { this.onError(`Autosave failed: ${err.message}`); return { written: false, reason: 'failed' }; }
   }
 }

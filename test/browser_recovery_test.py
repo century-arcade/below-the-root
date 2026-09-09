@@ -22,6 +22,8 @@ with sync_playwright() as p:
     context = browser.new_context()
     page = context.new_page()
     errors = []
+    warnings = []
+    page.on('console', lambda msg: warnings.append(msg.text) if msg.type == 'warning' else None)
     page.on('pageerror', lambda e: errors.append(str(e)))
     page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': False}))
     page.add_init_script("""(() => {
@@ -37,15 +39,17 @@ with sync_playwright() as p:
     page.evaluate('([key, value]) => localStorage.setItem(key, value)', [KEY, original])
     page.reload()
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
-    expect(page.locator('#notice')).to_have_text('Your saved game could not be restored. Test quota')
+    expect(page.locator('#log')).to_be_hidden()
+    assert page.locator('#log').text_content() == ''
+    assert any('could not be restored' in msg and 'Test quota' in msg for msg in warnings), warnings
     expect(page.locator('#save-recovery')).to_have_count(0)
     expect(page.locator('#map')).to_be_hidden()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
-    # Skip the intro, choose START GAME, then choose the character.
+    # Start at the main menu: choose START GAME, then the character.
     # A failed restore still allows play and autosaving a new quest.
-    for _ in range(3):
+    for _ in range(2):
         page.wait_for_timeout(150)
         page.keyboard.press('Space', delay=120)
     expect(page.locator('#map')).to_be_visible()
@@ -59,7 +63,7 @@ with sync_playwright() as p:
     }}""")
     page.reload()
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
-    expect(page.locator('#notice')).to_be_hidden()
+    expect(page.locator('#log')).to_be_hidden()
     expect(page.locator('#save-recovery')).to_have_count(0)
     expect(page.locator('#map')).to_be_visible()
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
@@ -75,19 +79,28 @@ with sync_playwright() as p:
     }""", arg=recovered['frames'])
     page.reload()
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
-    expect(page.locator('#notice')).to_be_hidden()
+    expect(page.locator('#log')).to_be_hidden()
     expect(page.locator('#map')).to_be_visible()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))['checkpoint']['room'] == record['checkpoint']['room']
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') is None
 
-    # Without a checkpoint, preserve the text and start cold with one notice.
+    # Without a checkpoint, preserve the text and start at the menu, console only.
+    warnings.clear()
     unusable = json.dumps({**record, 'c64': None, 'engine': 'old'})
     page.add_init_script(f'localStorage.setItem({json.dumps(KEY)}, {json.dumps(unusable)})')
     page.goto(URL + '?debug')
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
-    expect(page.locator('#notice')).to_have_text('Your saved game could not be restored.')
+    expect(page.locator('#log')).to_be_hidden()
+    assert page.locator('#log').text_content() == ''
+    assert any('could not be restored' in msg for msg in warnings), warnings
+    with page.expect_download() as download:
+        page.locator('#download-record').click()
+    snapshot = json.loads(open(download.value.path()).read())
+    assert snapshot['initial'] == {'mode': 'menu'}
+    assert snapshot['checkpoint']['title']
+    assert not snapshot['checkpoint']['quest']
     expect(page.locator('#save-recovery')).to_have_count(0)
     expect(page.locator('#map')).to_be_hidden()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == unusable
@@ -98,8 +111,7 @@ with sync_playwright() as p:
     # Reset retires a failed restore and allows the next quest to autosave.
     page.keyboard.press('o')
     page.locator('#opt-reset').click()
-    page.locator('#opt-reset-confirm').click()
-    expect(page.locator('#notice')).to_have_text('Game reset')
+    expect(page.locator('#log')).to_contain_text('Game reset')
     expect(page.locator('#map')).to_be_hidden()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) is None
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
@@ -114,11 +126,11 @@ with sync_playwright() as p:
     expect(page.locator('#map')).to_be_visible()
     assert not errors, errors
 
-    # Dismissal is wired even when startup never finishes loading game data.
+    # Fatal startup errors reach the log even before game data finishes loading.
     startup = browser.new_page()
     startup.route('**/data/*.json', lambda route: route.fulfill(status=500, body='Test load failure'))
     startup.goto(URL)
-    startup.get_by_role('button', name='Dismiss notice').click()
-    assert not startup.locator('#notice').is_visible()
+    expect(startup.locator('#log')).to_be_visible()
+    expect(startup.locator('#log')).to_contain_text('500')
     browser.close()
-    print('browser_recovery_test: silent recovery, backup failure, continued autosaving, reload, missing checkpoint, reset after failed restore, and startup error passed')
+    print('browser_recovery_test: silent recovery, console-only failure at the menu, continued autosaving, reload, missing checkpoint, reset after failed restore, and startup error passed')

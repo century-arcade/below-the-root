@@ -38,7 +38,7 @@ export function issueContext(session) {
     + '```json\n' + formatIssueDetails(details) + '\n```';
 }
 
-export async function setupDebug({ getSession, saveNow, pause, resume, importFile, note,
+export async function setupDebug({ getSession, saveNow, pause, resume, importFile, log,
   downloadRecording }) {
   document.getElementById('debug-tools').hidden = false;
   const logout = document.getElementById('github-logout');
@@ -71,7 +71,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
       authenticated = false;
       logout.hidden = true;
       dialog.close();
-    } catch (err) { note(err.message); }
+    } catch (err) { log(err.message); }
   };
   report.onclick = () => {
     if (!authenticated) { startLogin(); return; }
@@ -106,7 +106,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
       message.value = '';
       try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
       dialog.close();
-      note(`Issue #${body.number} filed`);
+      log(`Issue #${body.number} filed`);
     } catch (err) { result.textContent = err.message; }
     finally { submit.disabled = false; }
   };
