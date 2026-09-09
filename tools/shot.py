@@ -1,5 +1,5 @@
 #!/home/saul/.venvs/claude/bin/python
-"""shot.py [--url URL] [--width 900 --height 750] [--keys k,k,...] [--select CSS] OUT.png [PATH...]; multiple paths produce OUT-slug.png files."""
+"""shot.py [--url URL] [--width 900 --height 750] [--keys k,k,...] [--wait MS] [--select CSS] OUT.png [PATH...]; multiple paths produce OUT-slug.png files."""
 
 import argparse
 import os
@@ -16,6 +16,7 @@ def main():
     parser.add_argument('--width', type=int, default=900)
     parser.add_argument('--height', type=int, default=750)
     parser.add_argument('--keys', default='', help='comma-separated Playwright key names')
+    parser.add_argument('--wait', type=int, default=0, metavar='MS', help='extra delay in milliseconds after keys and before capture (default: 0)')
     parser.add_argument('--select', help='CSS selector to capture instead of the viewport')
     parser.add_argument('out', type=Path)
     parser.add_argument('path', nargs='*', help='paths appended to URL; multiple paths add filename slugs')
@@ -54,7 +55,7 @@ def main():
                 page_errors.append(str(error))
             # Keep a picture of failures too, including boot failures before readiness.
             try:
-                page.wait_for_timeout(200)
+                page.wait_for_timeout(200 + args.wait)
                 target = page.locator(args.select) if args.select else page
                 target.screenshot(path=out, type='png')
             except Error as error:

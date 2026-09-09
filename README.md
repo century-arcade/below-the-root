@@ -77,7 +77,7 @@ make serve                    # Netlify Dev: game + functions at http://localhos
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
 make screenshot               # regenerate assets/box/screen.png from Broad Grund (make serve first)
 make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
-tools/shot.py --keys o out.png '?menu'  # headless screenshot after keys; --select '#canvas-box' crops
+tools/shot.py --keys o out.png '?menu'  # headless screenshot after keys; --wait MS adds a delay; --select '#canvas-box' crops
 tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
 python3 tools/spec_check.py   # cross-check the spec tables
 tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room
