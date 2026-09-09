@@ -115,6 +115,8 @@ The figure is 24x42 pixels (two stacked sprites): X = `8*col + 16`
 sprite and 21 above for the upper (`$0B70[row] = 8*row + 48`).  It
 therefore spans columns col-1..col+1 and stands with its feet on the top
 edge of row+1 -- which is why `$0A23` is the floor and `$0A28` the head.
+The KINIPORT pointer is sprite 7 alone and takes `$0B70[row]` unsubtracted
+(`$87BA`), so its box sits on row itself.
 
 ### Tile properties -- `$9C09` -> `$9D90`
 

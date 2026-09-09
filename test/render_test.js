@@ -164,9 +164,41 @@ function testSprite(data) {
     bad, top.join('; '));
 }
 
+// --- 4: the KINIPORT pointer box lands on the cell it selects ----------------
+
+function testPointer(data) {
+  const room = data.roomByCode.get('T1');
+  const frame = data.sheets.extras.frames[0];
+  const base = renderIndexed({ data, room });
+  let bad = 0;
+  const detail = [];
+  for (const [col, row] of [[22, 10], [5, 0], [39, 19]]) {
+    const fig = { sheet: 'extras', frame: 0, col, row, color: 7, pointer: true };
+    const got = renderIndexed({ data, room, figures: [fig] });
+    const cell = new Set();
+    let off = 0;
+    for (let y = 0; y < frame.ink.h; y++) {
+      for (let x = 0; x < frame.ink.w; x++) {
+        if (!frame.px[(frame.ink.y + y) * 24 + frame.ink.x + x]) continue;
+        const i = (row * 8 + y) * WIDTH + col * 8 + x;
+        cell.add(i);
+        if (got[i] !== fig.color) off++;
+      }
+    }
+    let outside = 0;
+    for (let i = 0; i < got.length; i++) if (got[i] !== base[i] && !cell.has(i)) outside++;
+    bad += off + outside;
+    if (off || outside) {
+      detail.push(`(${col},${row}) ${off} unpainted in cell, ${outside} outside`);
+    }
+  }
+  report('KINIPORT pointer box on its own cell', bad, detail.join('; '));
+}
+
 const data = await loadTestData();
 testIngame(data);
 testWorld(data);
 testSprite(data);
+testPointer(data);
 console.log(failures ? `${failures} test(s) failed` : 'all tests passed');
 process.exit(failures ? 1 : 0);

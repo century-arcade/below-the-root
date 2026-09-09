@@ -95,16 +95,18 @@ export function figureOrigin(col, row) {
   return [col * 8 - 8, row * 8 - 33];
 }
 
+// pointer origin: row_to_y unsubtracted, so the box lands on its own cell
+export function pointerOrigin(col, row) {
+  return [col * 8 - 8, row * 8 - 2];
+}
+
 function drawFigure(px, state, fig) {
   const sheet = state.data.sheets[fig.sheet];
   if (!sheet) return;
   const frame = sheet.frames[fig.frame];
   if (!frame) return;
   const color = fig.color ?? sheet.color;
-  // The pointer uses row_to_y without the upper figure sprite's 31-line offset.
-  const [x0, y0] = fig.pointer
-    ? [fig.col * 8 - 8, fig.row * 8 - 2]
-    : figureOrigin(fig.col, fig.row);
+  const [x0, y0] = (fig.pointer ? pointerOrigin : figureOrigin)(fig.col, fig.row);
   for (let y = 0; y < 42; y++) {
     const sy = y0 + y;
     if (sy < 0 || sy >= HEIGHT) continue;

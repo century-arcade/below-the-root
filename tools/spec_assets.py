@@ -165,6 +165,15 @@ def video():
                                      'the first pixel row of row + 1',
                 'columns_spanned': ['col - 1', 'col + 1'],
                 'src': '$9D36 player, $9B37 creature, tables $0B40/$0B70',
+                'pointer_top_left_px': ['8 * col - 8', '8 * row - 2'],
+                'pointer_note': 'The slot 7 pointer is one sprite taking the '
+                                'row table unsubtracted, 31 lines below a '
+                                "figure's top half, so its box covers the "
+                                'selected cell.  Every per-frame '
+                                'ink_offset_from_cell_px assumes figure '
+                                'placement; for extras frame 0 as the pointer '
+                                'the ink corner is (8 * col, 8 * row).',
+                'pointer_src': '$87BA kiniport, $8869 room editor',
             },
         },
         'frame_rate': {
