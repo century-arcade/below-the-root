@@ -1,5 +1,5 @@
 import { loadData } from './data.js';
-import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
+import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from './video.js';
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
@@ -11,7 +11,7 @@ import { drawMap, visitedRooms, mapLocation } from './map.js';
 import { basicsVisible } from './help.js';
 import { Crt } from './crt.js';
 import { loadOptions, storeOption } from './options.js';
-import { statusLine } from './status.js';
+import { statusRows } from './status.js';
 
 function note(text, ms) {
   const element = document.getElementById('notice');
@@ -29,9 +29,10 @@ const game = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
-const image = ctx.createImageData(WIDTH, HEIGHT);
+const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.createImageData(WIDTH, HEIGHT + STATUS_HEIGHT) };
+let band = 0;
 const crtCanvas = document.getElementById('crt');
-const crt = Crt.create(crtCanvas, WIDTH, HEIGHT);
+const crt = Crt.create(crtCanvas, WIDTH);
 
 const CHROME_PX = 40;
 
@@ -40,17 +41,23 @@ function fit() {
   let scale;
   if (full) {
     game.style.width = '';
-    scale = fitScale(game.clientWidth, game.clientHeight);
+    scale = fitScale(game.clientWidth, game.clientHeight, HEIGHT + band);
   } else {
-    const chrome = ['top-controls', 'status', 'game-controls', 'notices']
+    const chrome = ['top-controls', 'game-controls', 'notices']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
-    scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome);
+    scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome, HEIGHT + band);
   }
   canvas.style.width = WIDTH * scale + 'px';
-  canvas.style.height = HEIGHT * scale + 'px';
+  canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   if (!full) game.style.width = canvas.style.width;
-  crt?.resize(WIDTH * scale, HEIGHT * scale);
+  crt?.resize(WIDTH * scale, (HEIGHT + band) * scale);
+}
+
+function setBand(height) {
+  band = height;
+  canvas.height = HEIGHT + band;
+  fit();
 }
 
 function pickRoom(data, want) {
@@ -139,10 +146,7 @@ loadData((path) => fetch(path).then((r) => {
     persist('muted', speaker.muted);
     syncMuteButton();
   }
-  function toggleMute() {
-    setMuted(!speaker.muted);
-    note(speaker.muted ? 'Muted' : 'Unmuted', 1000);
-  }
+  const toggleMute = () => setMuted(!speaker.muted);
   const canFullscreen = !!(game.requestFullscreen && document.exitFullscreen);
   function toggleFullscreen() {
     if (!canFullscreen) return;
@@ -166,7 +170,6 @@ loadData((path) => fetch(path).then((r) => {
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
   where.hidden = !debug;
-  const status = document.getElementById('status');
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -372,15 +375,17 @@ loadData((path) => fetch(path).then((r) => {
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
-    image.data.set(render(state));
+    const rows = options.classic ? [] : statusRows(state);
+    if (band !== (rows.length ? STATUS_HEIGHT : 0)) setBand(rows.length ? STATUS_HEIGHT : 0);
+    pointer.top = band;
+    const image = frames[band];
+    if (band) image.data.set(renderStatus(state, rows));
+    image.data.set(render(state), WIDTH * band * 4);
     ctx.putImageData(image, 0, 0);
     if (options.crt) crt.draw(image);
     const line = debug ? whereLabel(state) : '';
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
-    const strip = options.classic ? '' : statusLine(state);
-    if (status.textContent !== strip) status.textContent = strip;
-    if (status.hidden !== !strip) { status.hidden = !strip; fit(); }
     const mapUnavailable = !!(state.demo || state.title || !state.room);
     if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
     if (overlay?.screen === mapScreen && mapUnavailable) release();

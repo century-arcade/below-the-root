@@ -4,7 +4,7 @@ const TICK_S = 1 / 60;
 const RELEASE_S = 0.006;
 const FLOOR = 1 / 256;
 const NOISE_SHIFTS_PER_CYCLE = 16;
-const MASTER_GAIN = 0.3;
+const MASTER_GAIN = 0.25;
 
 export const SFX = {
   blip: 0, confirm: 1, footA: 2, footB: 3, climbUp: 4, climbDown: 5, leap: 6, knockdown: 7, glide: 8,
@@ -62,8 +62,9 @@ export class Speaker {
     this.paused = null;
   }
 
+  // squared slider: 10% on it is 1% of the gain
   applyGain() {
-    if (this.master) this.master.gain.value = this.muted ? 0 : MASTER_GAIN * this.volume;
+    if (this.master) this.master.gain.value = this.muted ? 0 : MASTER_GAIN * this.volume ** 2;
   }
 
   setVolume(level) {

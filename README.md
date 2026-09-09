@@ -57,7 +57,7 @@ Use +/− to zoom, scroll to explore, and Your location to return to the marker.
 
 ? (or H, or the ? button) opens all controls; two-line basics show under the picture on the title/menu screens until the session's first joystick input.
 
-O (or the ⚙ button) opens the options: volume (starts at 50%) and mute, the CRT effect (a WebGL pass: curvature, scanlines, phosphor stripes, colour bleed; off by default), classic display (off: the status sheet's day, time, name and six numbers stay above the picture during a quest; on: only STATUS shows them, as the original), and the debug tools (the top-bar icons `?debug` shows).  All persist in localStorage.
+O (or the ⚙ button) opens the options: volume (starts at 50%; the slider is squared, so the low end is genuinely quiet) and mute, the CRT effect (a WebGL pass: curvature, scanlines, phosphor stripes, colour bleed; off by default), classic display (off: two rows in the game's own font above the picture keep the status sheet's day, time, name and numbers live during a quest, in fullscreen too; on: only STATUS shows them, as the original), and the debug tools (the top-bar icons `?debug` shows).  All persist in localStorage.
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.

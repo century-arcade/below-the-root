@@ -17,9 +17,26 @@ export function renderIndexed(state) {
 }
 
 export function render(state) {
-  const px = renderIndexed(state);
-  const pal = state.data.palette;
-  const out = new Uint8ClampedArray(WIDTH * HEIGHT * 4);
+  return toRGBA(renderIndexed(state), state.data.palette);
+}
+
+// the status rows sit in their own band above the picture, never over it
+export const STATUS_HEIGHT = 24;
+const STATUS_MARGIN = 4;
+
+export function renderStatus(state, rows) {
+  const px = new Uint8Array(WIDTH * STATUS_HEIGHT);
+  const text = px.subarray(WIDTH * STATUS_MARGIN);
+  rows.forEach((line, row) => {
+    for (let col = 0; col < line.length; col++) {
+      blitCell(text, col, row, state.data.charsets.text.glyphs, line.charCodeAt(col) & 0x7f, 1);
+    }
+  });
+  return toRGBA(px, state.data.palette);
+}
+
+function toRGBA(px, pal) {
+  const out = new Uint8ClampedArray(px.length * 4);
   for (let i = 0, o = 0; i < px.length; i++, o += 4) {
     const c = px[i] * 3;
     out[o] = pal[c];

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { DEFAULTS, loadOptions, storeOption } from '../src/options.js';
-import { statusLine } from '../src/status.js';
+import { statusRows } from '../src/status.js';
+import { PANEL_COLS } from '../src/panel.js';
 import { loadTestData } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
 import { IDLE } from '../src/input.js';
@@ -35,14 +36,19 @@ storeOption({ setItem() { throw new Error('quota'); } }, 'crt', true);
 
 const data = await loadTestData();
 const state = newState(data, { read: () => IDLE, pace: 0 });
-assert.equal(statusLine(state), '', 'no strip before a quest');
+assert.deepEqual(statusRows(state), [], 'no rows before a quest');
 startQuest(state, data.characters[0]);
-const line = statusLine(state);
+const rows = statusRows(state);
 const p = state.player;
-assert.match(line, /^DAY 1  /);
-for (const piece of [p.name, `STAMINA ${p.stamina}`, `FOOD ${p.food}`, `REST ${p.rest}`, `SPIRIT ${p.spiritEnergy}/${p.spiritLimit}`]) {
-  assert.ok(line.includes(piece), `${piece} in ${line}`);
-}
+assert.equal(rows.length, 2);
+assert.ok(rows.every(r => r.length <= PANEL_COLS), rows);
+assert.match(rows[0], /^DAY 1 {3}EARLY MORNING/);
+assert.ok(rows[0].endsWith(p.name), rows[0]);
+assert.match(rows[1], new RegExp(`^STAMINA ${p.stamina} +FOOD ${p.food} +REST ${p.rest} +SPIRIT ${p.spiritEnergy}/${p.spiritLimit}$`));
+Object.assign(p, { stamina: 30, food: 30, rest: 30, spiritEnergy: 30, spiritLimit: 30 });
+state.clock.day = 51;
+state.clock.hour = 2;
+for (const row of statusRows(state)) assert.ok(row.length <= PANEL_COLS, row);
 state.title = true;
-assert.equal(statusLine(state), '', 'the shell screens have no strip');
+assert.deepEqual(statusRows(state), [], 'the shell screens have no rows');
 console.log('options_test: defaults, stored overrides, clamping, quota errors and the status strip passed');

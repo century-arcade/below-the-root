@@ -82,6 +82,7 @@ export class Pointer {
     this.keys = keys;
     this.anchor = anchor;
     this.doors = doors;
+    this.top = 0;
     this.held = new Set();
     this.timer = null;
     this.walk = null;
@@ -102,7 +103,7 @@ export class Pointer {
   pixel(e) {
     const r = this.canvas.getBoundingClientRect();
     return [(e.clientX - r.left) * (this.canvas.width / r.width),
-      (e.clientY - r.top) * (this.canvas.height / r.height)];
+      (e.clientY - r.top) * (this.canvas.height / r.height) - this.top];
   }
 
   directionTo(x, y) {

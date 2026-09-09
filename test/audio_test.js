@@ -99,25 +99,25 @@ test('setVolume and mute drive the master gain without interrupting a tune', () 
   speaker.playTune(0, 0);
   const voices = [...speaker.ringing];
   const stops = voices.map(v => v.src.stoppedAt);
-  assert.equal(speaker.master.gain.value, 0.3);
+  assert.equal(speaker.master.gain.value, 0.25);
   speaker.setVolume(0.5);
-  assert.equal(speaker.master.gain.value, 0.15);
+  assert.equal(speaker.master.gain.value, 0.0625);
   speaker.mute(true);
   assert.equal(speaker.master.gain.value, 0);
   speaker.setVolume(0.7);
   assert.equal(speaker.master.gain.value, 0);
   speaker.mute(false);
-  assert.equal(speaker.master.gain.value, 0.21);
+  assert.equal(speaker.master.gain.value, 0.25 * 0.7 ** 2);
   speaker.setVolume(2);
   assert.equal(speaker.volume, 1);
-  assert.equal(speaker.master.gain.value, 0.3);
+  assert.equal(speaker.master.gain.value, 0.25);
   speaker.setVolume(-1);
   assert.equal(speaker.volume, 0);
   assert.equal(speaker.master.gain.value, 0);
   for (const level of [NaN, Infinity, -Infinity]) {
     speaker.setVolume(level);
     assert.equal(speaker.volume, 1);
-    assert.equal(speaker.master.gain.value, 0.3);
+    assert.equal(speaker.master.gain.value, 0.25);
   }
   assert.deepEqual(speaker.ringing, voices);
   assert.deepEqual(voices.map(v => v.src.stoppedAt), stops);
@@ -130,9 +130,9 @@ test('volume and mute set before the context exists are applied by unlock', () =
     speaker.mute(muted);
     assert.equal(speaker.ctx, null);
     unlock(speaker);
-    assert.equal(speaker.master.gain.value, muted ? 0 : 0.15);
+    assert.equal(speaker.master.gain.value, muted ? 0 : 0.0625);
     speaker.mute(false);
-    assert.equal(speaker.master.gain.value, 0.15);
+    assert.equal(speaker.master.gain.value, 0.0625);
   }
 });
 

@@ -44,17 +44,17 @@ void main() {
 }`;
 
 export class Crt {
-  static create(canvas, width, height) {
+  static create(canvas, width) {
     const gl = canvas.getContext('webgl', { alpha: false, antialias: false, depth: false });
     if (!gl) return null;
-    try { return new Crt(canvas, gl, width, height); } catch { return null; }
+    try { return new Crt(canvas, gl, width); } catch { return null; }
   }
 
-  constructor(canvas, gl, width, height) {
+  constructor(canvas, gl, width) {
     this.canvas = canvas;
     this.gl = gl;
     this.width = width;
-    this.height = height;
+    this.rows = 0;
     const program = gl.createProgram();
     for (const [type, text] of [[gl.VERTEX_SHADER, VERTEX], [gl.FRAGMENT_SHADER, FRAGMENT]]) {
       const shader = gl.createShader(type);
@@ -76,7 +76,7 @@ export class Crt {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.uniform2f(gl.getUniformLocation(program, 'source'), width, height);
+    this.source = gl.getUniformLocation(program, 'source');
     this.pixelsPerColumn = gl.getUniformLocation(program, 'pixelsPerColumn');
   }
 
@@ -95,6 +95,10 @@ export class Crt {
 
   draw(imageData) {
     const gl = this.gl;
+    if (this.rows !== imageData.height) {
+      this.rows = imageData.height;
+      gl.uniform2f(this.source, imageData.width, imageData.height);
+    }
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageData);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
