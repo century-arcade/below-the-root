@@ -30,7 +30,7 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
 | M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, mute and volume, the ? help overlay; palette choice parked | done |
+| M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, mute and volume, the ? help overlay; the options dialog: CRT effect (WebGL), classic/modern display (modern keeps the status sheet above the picture), debug tools; palette choice parked | done |
 | M6.5 ship -- normal walkthrough recording and cleanup tools ready; speedrun playthroughs per character in progress; GitHub OAuth configured; user authorization still to verify | **in progress** |
 
 The spec has 24 open questions, listed at the end of each area file;
@@ -46,7 +46,7 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
 script, `?room=T1` to start somewhere else).
 
-Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen.
+Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen, O opens the options.
 
 Tab (or the Map button) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
@@ -55,7 +55,9 @@ cavern passages appear as you visit them. Interiors stay blank. The white marker
 stays at your last outdoor location while indoors (or your nid's exit on a new quest).
 Use +/− to zoom, scroll to explore, and Your location to return to the marker.
 
-? (or H, or the Help button) opens all controls; two-line basics show on the title/menu screens until the session's first joystick input.
+? (or H, or the ? button) opens all controls; two-line basics show under the picture on the title/menu screens until the session's first joystick input.
+
+O (or the ⚙ button) opens the options: volume (starts at 50%) and mute, the CRT effect (a WebGL pass: curvature, scanlines, phosphor stripes, colour bleed; off by default), classic display (off: the status sheet's day, time, name and six numbers stay above the picture during a quest; on: only STATUS shows them, as the original), and the debug tools (the top-bar icons `?debug` shows).  All persist in localStorage.
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.

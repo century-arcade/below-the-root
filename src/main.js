@@ -9,6 +9,9 @@ import { Speaker } from './audio.js';
 import { fitScale } from './fit.js';
 import { drawMap, visitedRooms, mapLocation } from './map.js';
 import { basicsVisible } from './help.js';
+import { Crt } from './crt.js';
+import { loadOptions, storeOption } from './options.js';
+import { statusLine } from './status.js';
 
 function note(text, ms) {
   const element = document.getElementById('notice');
@@ -27,6 +30,8 @@ const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
+const crtCanvas = document.getElementById('crt');
+const crt = Crt.create(crtCanvas, WIDTH, HEIGHT);
 
 const CHROME_PX = 40;
 
@@ -37,7 +42,7 @@ function fit() {
     game.style.width = '';
     scale = fitScale(game.clientWidth, game.clientHeight);
   } else {
-    const chrome = ['top-controls', 'game-controls', 'notices']
+    const chrome = ['top-controls', 'status', 'game-controls', 'notices']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome);
   }
@@ -45,6 +50,7 @@ function fit() {
   canvas.style.height = HEIGHT * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   if (!full) game.style.width = canvas.style.width;
+  crt?.resize(WIDTH * scale, HEIGHT * scale);
 }
 
 function pickRoom(data, want) {
@@ -81,7 +87,10 @@ loadData((path) => fetch(path).then((r) => {
 })).then((data) => {
   const params = new URLSearchParams(location.search);
   const stick = new Keyboard();
-  const debug = params.has('debug');
+  let options;
+  try { options = loadOptions(localStorage); }
+  catch (err) { options = loadOptions({ getItem: () => null }); note(`Browser storage is unavailable: ${err.message}`); }
+  let debug = params.has('debug') || options.debug;
   const room = pickRoom(data, params.get('room'));
   let initial;
   if (params.has('demo')) {
@@ -98,14 +107,10 @@ loadData((path) => fetch(path).then((r) => {
   const slots = {};
   let existing = null;
   let restoreFailed = false;
-  let volume = 1;
-  let muted = false;
   try {
     for (let n = 1; n <= 5; n++) { const value = localStorage.getItem(`btr.quest${n}`); if (value) slots[n] = value; }
     existing = localStorage.getItem(AUTOSAVE_KEY);
-    volume = parseFloat(localStorage.getItem('btr.volume'));
-    muted = localStorage.getItem('btr.muted') === '1';
-  } catch (err) { note(`Browser storage is unavailable: ${err.message}`); }
+  } catch {}
   const saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text);
   let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
@@ -119,8 +124,8 @@ loadData((path) => fetch(path).then((r) => {
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, note);
   const speaker = new Speaker(data.music);
-  speaker.setVolume(volume);
-  speaker.mute(muted);
+  speaker.setVolume(options.volume);
+  speaker.mute(options.muted);
   const muteButton = document.getElementById('mute');
   function syncMuteButton() {
     muteButton.textContent = speaker.muted ? '🔇' : '🔊';
@@ -128,13 +133,14 @@ loadData((path) => fetch(path).then((r) => {
     muteButton.title = speaker.muted ? 'Unmute' : 'Mute';
     muteButton.setAttribute('aria-pressed', String(speaker.muted));
   }
-  function persist(key, value) {
-    try { localStorage.setItem(key, value); } catch {}
+  const persist = (name, value) => storeOption(localStorage, name, value);
+  function setMuted(on) {
+    speaker.mute(on);
+    persist('muted', speaker.muted);
+    syncMuteButton();
   }
   function toggleMute() {
-    speaker.mute(!speaker.muted);
-    persist('btr.muted', speaker.muted ? '1' : '0');
-    syncMuteButton();
+    setMuted(!speaker.muted);
     note(speaker.muted ? 'Muted' : 'Unmuted', 1000);
   }
   const canFullscreen = !!(game.requestFullscreen && document.exitFullscreen);
@@ -143,14 +149,13 @@ loadData((path) => fetch(path).then((r) => {
     const request = document.fullscreenElement ? document.exitFullscreen() : game.requestFullscreen();
     request.catch(() => {});
   }
+  function setVolume(level) {
+    speaker.setVolume(Math.round(level * 1e10) / 1e10);
+    if (speaker.muted) setMuted(false);
+    persist('volume', speaker.volume);
+  }
   function stepVolume(delta) {
-    speaker.setVolume(Math.round((speaker.volume + delta) * 1e10) / 1e10);
-    if (speaker.muted) {
-      speaker.mute(false);
-      persist('btr.muted', '0');
-    }
-    persist('btr.volume', speaker.volume);
-    syncMuteButton();
+    setVolume(speaker.volume + delta);
     note(`Volume ${Math.round(speaker.volume * 100)}%`, 1000);
   }
   syncMuteButton();
@@ -161,6 +166,7 @@ loadData((path) => fetch(path).then((r) => {
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
   const where = document.getElementById('where');
   where.hidden = !debug;
+  const status = document.getElementById('status');
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -172,6 +178,8 @@ loadData((path) => fetch(path).then((r) => {
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
   const mapGrid = document.getElementById('map-grid');
+  const optionsDialog = document.getElementById('options-dialog');
+  const optionsButton = document.getElementById('options');
   let mapZoom = 1;
   const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
     ?.scrollIntoView({ block: 'center', inline: 'center' });
@@ -202,6 +210,7 @@ loadData((path) => fetch(path).then((r) => {
       overlay.button.setAttribute('aria-expanded', 'false');
       overlay = null;
     }
+    if (optionsDialog.open) optionsDialog.close();
     dropInput(); held = false;
   };
   function openOverlay(screen, button) {
@@ -225,6 +234,51 @@ loadData((path) => fetch(path).then((r) => {
     centerMap();
   }
   mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
+  const opt = Object.fromEntries(['volume', 'volume-out', 'mute', 'crt', 'classic', 'debug']
+    .map(name => [name, document.getElementById(`opt-${name}`)]));
+  const debugTools = document.getElementById('debug-tools');
+  let debugReady = false;
+  function setDebug(on) {
+    debug = on;
+    where.hidden = !on;
+    debugTools.hidden = !on;
+    if (on && !debugReady) {
+      debugReady = true;
+      setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note,
+        downloadRecording: () => restoreFailed ? downloadOriginal() : downloadRecord(session) });
+    }
+    fit();
+  }
+  function setCrt(on) {
+    options.crt = on && !!crt;
+    crtCanvas.hidden = !options.crt;
+  }
+  function syncOptions() {
+    opt.volume.value = Math.round(speaker.volume * 100);
+    opt['volume-out'].value = `${Math.round(speaker.volume * 100)}%`;
+    opt.mute.checked = speaker.muted;
+    opt.crt.checked = options.crt;
+    opt.crt.disabled = !crt;
+    opt.classic.checked = options.classic;
+    opt.debug.checked = debug;
+  }
+  function openOptions() {
+    if (paused) return;
+    if (optionsDialog.open) return release();
+    if (overlay) release();
+    hold();
+    syncOptions();
+    optionsDialog.show();
+    opt.volume.focus();
+  }
+  opt.volume.oninput = () => { setVolume(opt.volume.valueAsNumber / 100); syncOptions(); };
+  opt.mute.onchange = () => setMuted(opt.mute.checked);
+  opt.crt.onchange = () => { setCrt(opt.crt.checked); persist('crt', options.crt); };
+  opt.classic.onchange = () => { options.classic = opt.classic.checked; persist('classic', options.classic); };
+  opt.debug.onchange = () => { setDebug(opt.debug.checked); persist('debug', debug); };
+  optionsDialog.addEventListener('keydown', e => { if (e.key === 'Escape') { release(); e.preventDefault(); } });
+  optionsDialog.addEventListener('close', () => { if (held) release(); canvas.focus({ preventScroll: true }); });
+  optionsButton.onclick = e => { openOptions(); e.currentTarget.blur(); };
   document.getElementById('close-map').onclick = release;
   helpButton.onclick = e => { openHelp(); e.currentTarget.blur(); };
   document.getElementById('close-help').onclick = release;
@@ -275,6 +329,7 @@ loadData((path) => fetch(path).then((r) => {
       return;
     }
     if (e.key === '?' || (e.key.toLowerCase() === 'h' && !e.shiftKey)) { openHelp(); e.preventDefault(); return; }
+    if (e.key.toLowerCase() === 'o' && !e.shiftKey) { openOptions(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'f' && !e.shiftKey) { toggleFullscreen(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'm') { toggleMute(); e.preventDefault(); return; }
     if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
@@ -312,16 +367,20 @@ loadData((path) => fetch(path).then((r) => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { saveNow(); hold(); } else { dropInput(); }
   });
-  if (debug) setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note,
-    downloadRecording: () => restoreFailed ? downloadOriginal() : downloadRecord(session) });
+  if (debug) setDebug(true);
+  setCrt(options.crt);
   if (params.get('github') === 'failed') note('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
     image.data.set(render(state));
     ctx.putImageData(image, 0, 0);
+    if (options.crt) crt.draw(image);
     const line = debug ? whereLabel(state) : '';
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
+    const strip = options.classic ? '' : statusLine(state);
+    if (status.textContent !== strip) status.textContent = strip;
+    if (status.hidden !== !strip) { status.hidden = !strip; fit(); }
     const mapUnavailable = !!(state.demo || state.title || !state.room);
     if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
     if (overlay?.screen === mapScreen && mapUnavailable) release();

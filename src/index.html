@@ -16,7 +16,6 @@
   #game:fullscreen #canvas-box { flex: none; }
   #map-screen, #help-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
   #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
-  #basics { position: absolute; top: 0; left: 0; right: 0; padding: 4px; background: #000c; color: #fff; text-align: center; pointer-events: none; }
   #help-screen { overflow: auto; }
   #help-content { padding: 0 12px 12px; line-height: 1.6; }
   #help-content dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
@@ -31,12 +30,16 @@
   #map-grid .selected { outline: 2px solid #ffe866; outline-offset: -2px; }
   #map-grid .current { outline: 2px solid #fff; outline-offset: -2px; }
   #map-grid > button:focus-visible { outline: 2px solid #ffe866; outline-offset: -2px; }
+  #crt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
+  #status { min-height: 19px; font-size: 12px; letter-spacing: 1px; text-align: center; color: #d6f897; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #top-controls, #debug-tools { display: flex; gap: 4px; }
   #top-controls { justify-content: flex-end; padding: 4px 0; }
   #debug-tools { margin-right: auto; }
   #top-controls button { box-sizing: border-box; width: 32px; height: 32px; font-size: 16px; line-height: 1; padding: 0; }
+  #top-controls svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: middle; }
   #game-controls { min-height: 39px; padding-top: 8px; text-align: center; }
+  #basics { color: #fff; }
   #game-controls > button { box-sizing: border-box; width: 168px; }
   button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
@@ -47,6 +50,9 @@
     position: static; align-self: center; margin: 8px 0 0;
     background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
   }
+  #options-form label { display: block; margin: 6px 0; }
+  #options-form input[type="range"] { width: 160px; vertical-align: middle; }
+  #options-form h2 { margin: 0 0 8px; font-size: 14px; }
   textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
@@ -74,11 +80,15 @@
       <button id="file-issue" aria-keyshortcuts="R" aria-label="Report issue" title="Report issue">🐞</button>
     </div>
     <button id="mute" aria-keyshortcuts="M" aria-label="Mute" title="Mute">🔊</button>
-    <button id="fullscreen" aria-keyshortcuts="F" aria-label="Fullscreen" title="Fullscreen">⛶</button>
+    <button id="fullscreen" aria-keyshortcuts="F" aria-label="Fullscreen" title="Fullscreen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/></svg></button>
+    <button id="help" aria-keyshortcuts="? h" aria-controls="help-screen" aria-expanded="false" aria-label="Help" title="Help">?</button>
+    <button id="options" aria-keyshortcuts="O" aria-controls="options-dialog" aria-label="Options" title="Options">⚙</button>
   </div>
   <div id="where" role="status"></div>
+  <div id="status" role="status" hidden></div>
   <div id="canvas-box">
     <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses; Tab shows the map. Press ? for all controls."></canvas>
+    <canvas id="crt" aria-hidden="true" hidden></canvas>
     <div id="map-screen" hidden role="dialog" aria-label="World map">
       <div id="map-heading"><span>World map</span><button id="close-map">Close map</button></div>
       <div id="map-tools">
@@ -89,7 +99,6 @@
       </div>
       <div id="map-viewport"><div id="map-grid"></div></div>
     </div>
-    <div id="basics" hidden>WASD / Arrows to move<br>Space to skip / jump / select</div>
     <div id="help-screen" hidden role="dialog" aria-label="Controls" tabindex="-1">
       <div id="help-heading"><span>Controls</span><button id="close-help">Close help</button></div>
       <div id="help-content">
@@ -102,7 +111,8 @@
           <dt>Fullscreen</dt><dd>F (when supported)</dd>
           <dt>Mute</dt><dd>M</dd>
           <dt>Volume</dt><dd>- / = (or _ / +)</dd>
-          <dt>Help</dt><dd>? (Shift+/) / H / Help button; Escape closes</dd>
+          <dt>Help</dt><dd>? (Shift+/) / H / ? button; Escape closes</dd>
+          <dt>Options</dt><dd>O / ⚙ button: volume, CRT effect, classic display, debug tools</dd>
         </dl>
         <h2>Touch</h2>
         <p>Hold to push toward your finger. Tap to press the button that way.
@@ -115,8 +125,19 @@
   </div>
   <div id="game-controls">
     <button id="map" aria-keyshortcuts="Tab" aria-controls="map-screen" aria-expanded="false">Map</button>
-    <button id="help" aria-keyshortcuts="? h" aria-controls="help-screen" aria-expanded="false">Help</button>
+    <div id="basics" hidden>WASD / Arrows to move<br>Space to skip / jump / select</div>
   </div>
+  <dialog id="options-dialog" aria-labelledby="options-label">
+    <form id="options-form" method="dialog">
+      <h2 id="options-label">Options</h2>
+      <label>Volume <input id="opt-volume" type="range" min="0" max="100" step="10"> <output id="opt-volume-out"></output></label>
+      <label><input id="opt-mute" type="checkbox"> Mute</label>
+      <label><input id="opt-crt" type="checkbox"> CRT effect</label>
+      <label><input id="opt-classic" type="checkbox"> Classic display (status only on STATUS)</label>
+      <label><input id="opt-debug" type="checkbox"> Debug tools</label>
+      <button id="options-close" type="submit">Close</button>
+    </form>
+  </dialog>
   <dialog id="issue-dialog" aria-labelledby="issue-label">
     <form id="issue-form">
       <label id="issue-label" for="issue-message">What happened?</label>
