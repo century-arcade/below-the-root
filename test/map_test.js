@@ -7,16 +7,18 @@ import { startQuest } from '../src/game.js';
 import { openMenu } from '../src/shell.js';
 
 const data = await loadTestData();
-const defaults = paperMapRooms(data);
-assert.equal(defaults.size, 195);
-for (const code of ['12', '78', 'B8', 'F8', 'J7', 'M8', 'O7', '0B']) {
+const defaults = visitedRooms([], data);
+assert.deepEqual(defaults, paperMapRooms(data));
+assert.equal(defaults.size, 169);
+for (const code of ['78', 'B8', 'F8', 'J7', 'M8', 'O7', 'F3', '29', '0B', '9B', 'C3', '95', 'C5', 'A7', 'C7']) {
   assert.ok(defaults.has(code), `${code} is on the boxed map`);
 }
-for (const code of ['T1', 'T4', 'U5', 'P2', 'PB', '0C', 'AF']) {
+for (const code of ['T1', 'T4', 'U5', 'P2', 'PB', '0C', 'AF', 'F0', '10', '12',
+  '04', '07', '19', '37', '39', '49', '58', '85', '99', 'B3']) {
   assert.ok(!defaults.has(code), `${code} is not on the boxed map`);
 }
 const grid = mapCells(data, visitedRooms([], data), 'M5');
-assert.deepEqual(mapBounds(grid), { top: 0, bottom: 11, left: 0, right: 24 });
+assert.deepEqual(mapBounds(grid), { top: 3, bottom: 11, left: 0, right: 24 });
 assert.equal(mapBounds([[null, null], [null, null]]), null);
 assert.deepEqual(mapBounds([[null, null, null], [null, {}, null], [null, null, null]]),
   { top: 1, bottom: 1, left: 1, right: 1 });
@@ -38,7 +40,7 @@ assert.equal(cells.filter(c => c.current).length, 1);
 assert.deepEqual(cells.find(c => c.code === 'O7').signs, ['TO TEMPLE GRUND']);
 const explored = new Set([...defaults, '0C', 'P2', 'T1', 'U5', 'AC']);
 assert.deepEqual(mapBounds(mapCells(data, explored, '0C')),
-  { top: 0, bottom: 12, left: 0, right: 25 });
+  { top: 2, bottom: 12, left: 0, right: 25 });
 const revealed = mapCells(data, explored, '0C').flat().filter(Boolean);
 assert.ok(revealed.some(c => c.code === '0C' && c.current && c.kind === 'underground'),
   'visited cavern passages appear');
@@ -50,6 +52,8 @@ assert.ok(!mapCells(data, explored, 'T1').flat().some(c => c?.current),
   'an indoor room cannot receive the location marker');
 
 const entry = (room, extra = {}) => ({ room, quest: true, blank: false, title: false, ...extra });
+assert.deepEqual(visitedRooms([entry('B3')], data), new Set([...defaults, 'B3']),
+  'visiting the hideout reveals it');
 assert.deepEqual(visitedRooms([]), new Set());
 const path = [entry(null, { quest: false }), entry('A'), entry('B'), entry('blank', { blank: true })];
 assert.deepEqual(visitedRooms(path), new Set(['A', 'B']));

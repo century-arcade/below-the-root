@@ -28,6 +28,8 @@ def check(ok, msg):
 def main():
     rooms = load('rooms')['rooms']
     by_room = {r['room']: r for r in rooms}
+    by_code = {r['code']: r for r in rooms}
+    poster = load('poster')
     tiles = {t['code']: t for t in load('tiles')['tiles']}
     creatures = load('creatures')
     messages = load('messages')
@@ -38,6 +40,17 @@ def main():
     assets = load('assets')
     skills = load('skills')['skills']
     demo = load('demo')
+
+    # poster blanks must refer to outdoor rooms above the ground baseline
+    check(len(poster['ink']) == 16 and all(len(row) == 32 for row in poster['ink']),
+          'poster ink table must be 16 rows of 32 columns')
+    for code in poster['blank']:
+        r = by_code.get(code)
+        check(r is not None, f'poster blank {code} missing from rooms')
+        if r:
+            check(r['outdoor_bit'] and not r['underground']
+                  and 3 <= r['y'] <= 10 and r['x'] < 25,
+                  f'poster blank {code} is not an outdoor room in rows 3-A west of column P')
 
     # rooms: doors, exits, objects, tiles
     for r in rooms:

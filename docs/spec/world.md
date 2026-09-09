@@ -234,6 +234,18 @@ Rows `0`-`2` do not join it; they are a store of interiors, which is why
 the shop interiors sit nowhere near the grunds whose doorways lead to
 them.  Rows `C`-`F` are blank on the poster: the caverns are yours to map.
 
+`poster.json` measures `iso/map.jpg` on a 32 x 16 grid from `(72, 56)`,
+with column pitch 45.52 px and row pitch 39.7 px. Insetting each cell by
+5 px skips grid lines; ink is the fraction of greyscale pixels below
+120, stored as integer percentages. The raw fraction is exactly zero
+for these outdoor cells in rows `3`-`A` west of column `P`:
+`04 07 19 37 39 49 58 85 99 B3` (`B3` is Broad Grund's hideout; the rest
+are leaf tips). The port starts with outdoor rows `3`-`B` west of `P`
+explored except these blanks; faint branch lines still count. Rows
+`0`-`2`, including the grund tops, appear when visited. Row `B` stays
+whole as the baseline, including shops: the poster draws trunks there
+but no ground, so its blank cells say nothing about the ground.
+
 ### The seven grunds
 
 The columns come from the poster's label strip; the sign is the trunk

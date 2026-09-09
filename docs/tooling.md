@@ -66,3 +66,5 @@ hard way:
   `spec_world.py --sheet PNG` writes all 438 rooms at full size as a
   palette-mode PNG whose pixel values are colour indices; `make test`
   compares the port's renderer against it.
+- `poster_map.py [--image PATH]` (`make poster`) -- measure the untracked
+  `iso/map.jpg` into `docs/spec/data/poster.json` using Pillow and NumPy.

@@ -68,10 +68,11 @@ export function roomKind(room) {
   return room.tileset === 'outdoor' ? 'grund' : 'sky';
 }
 
-// The boxed map (iso/map.jpg) draws the six western grunds. The Temple
-// Grunds, from column P onward, and everything underground are left blank.
+// Start with the boxed poster's drawn cells (poster.json), keeping row B as the ground baseline.
 export function paperMapRooms(data) {
-  return new Set(data.rooms.filter(r => r.outdoor_bit && !r.underground && r.x < 25)
+  const blank = new Set(data.poster.blank);
+  return new Set(data.rooms
+    .filter(r => r.outdoor_bit && !r.underground && r.y >= 3 && r.y <= 11 && r.x < 25 && !blank.has(r.code))
     .map(r => r.code));
 }
 

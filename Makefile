@@ -8,7 +8,7 @@ NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve test browser-test clean
+.PHONY: build serve test browser-test poster clean
 
 build:
 	mkdir -p $(BUILD)/data $(BUILD)/assets
@@ -40,6 +40,9 @@ test:
 	node test/replay_test.js intro
 	node test/replay_test.js quest
 	@echo "make test: all passed"
+
+poster:
+	$(PY) tools/poster_map.py
 
 browser-test: build
 	@for t in test/browser_*.py; do BTR_URL=$(BTR_URL) $(PY) $$t || exit 1; done

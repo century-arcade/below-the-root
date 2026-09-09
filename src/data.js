@@ -6,12 +6,13 @@ export const CLASS = {
 const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 
 export async function loadData(read) {
-  const [assets, roomsFile, tilesFile, map, itemsFile, charactersFile, demo,
+  const [assets, roomsFile, tilesFile, map, poster, itemsFile, charactersFile, demo,
     creaturesFile, messagesFile, skillsFile, quest, save, shell, music] = await Promise.all([
     read('data/assets.json'),
     read('data/rooms.json'),
     read('data/tiles.json'),
     read('data/map.json'),
+    read('data/poster.json'),
     read('data/items.json'),
     read('data/characters.json'),
     read('data/demo.json'),
@@ -88,7 +89,7 @@ export async function loadData(read) {
   for (const f of messagesFile.fixed_strings) fixed[f.name] = f;
 
   return {
-    assets, palette, charsets, sheets, map,
+    assets, palette, charsets, sheets, map, poster,
     rooms, roomById, roomByCode, tiles: tileByCode,
     grid: roomsFile.grid,
     animations: assets.player_animations,

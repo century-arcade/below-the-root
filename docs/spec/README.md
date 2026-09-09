@@ -13,7 +13,7 @@ implementation, with the state of the work at the end.
 
 | rules | data (`data/`) | generator |
 |-------|----------------|-----------|
-| `world.md` -- rooms, doors, edges, tile sets, colours, tile semantics, signs, placed objects, the map | `rooms.json` `tiles.json` `map.json` | `tools/spec_world.py` |
+| `world.md` -- rooms, doors, edges, tile sets, colours, tile semantics, signs, placed objects, the map | `rooms.json` `tiles.json` `map.json` `poster.json` | `tools/spec_world.py` `tools/poster_map.py` |
 | `creatures.md` -- species, spawn, movement AI, contact, ambush, the whole dialog tree, door guards, per-creature state | `creatures.json` `messages.json` | `tools/spec_creatures.py` |
 | `player.md` -- the per-tick movement state machine, room edges, inventory, every verb, spirit skills, deaths | `characters.json` `items.json` `skills.json` | `tools/spec_player.py` |
 | `time.md` -- the clock, food/rest, the cloud world, economy, quest state, endings, attract demo, save file | `economy.json` `quest.json` `demo.json` `save.json` | `tools/spec_time.py` |
@@ -60,12 +60,14 @@ Run it after regenerating anything.
 ```
 python3 tools/spec_world.py && python3 tools/spec_creatures.py && \
 python3 tools/spec_player.py && python3 tools/spec_time.py && \
-python3 tools/spec_assets.py && python3 tools/spec_check.py
+python3 tools/spec_assets.py && python3 tools/poster_map.py && python3 tools/spec_check.py
 ```
 
 Inputs: `build/btr2.d64` (rooms), `build/dumps/loaded.bin` and
 `build/raw/*.bin` (code and tables) -- see `docs/tooling.md` for how to
-produce them.
+produce them. The poster measurement also needs the untracked `iso/map.jpg`;
+use `tools/poster_map.py --image PATH` to read it from another checkout,
+or `make poster` when the scan is present here (Pillow and NumPy required).
 
 ## Port notes -- where the original's behaviour is a choice, not a given
 

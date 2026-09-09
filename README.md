@@ -52,8 +52,9 @@ Menus wait for the stick to centre between pushes, so holding a direction moves 
 
 Tab (or the Map icon in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
-The six western grunds shown on the boxed map start explored; Temple Grunds and
-cavern passages appear as you visit them. Interiors stay blank. The white marker
+The cells the boxed poster draws start explored; the rest, including
+the grund tops and the hideout atop Broad Grund, appear as you visit
+them. Interiors stay blank. The white marker
 stays at your last outdoor location while indoors (or your nid's exit on a new quest).
 Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
 Drag or scroll to explore when zoomed, and use Your location to return to the marker.
