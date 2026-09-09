@@ -79,7 +79,6 @@ export function newState(data, input, opts = {}) {
     disk: { op: 0, slot: 0 },
     attract: 'loop',
     stick: null,
-    stickFire: false,
     storage: opts.storage || memoryStorage(),
     figures: [],
   };

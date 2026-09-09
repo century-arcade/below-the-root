@@ -3,12 +3,12 @@
 import { newState, startQuest, startDemo, tick } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
-import { IDLE } from './input.js';
+import { IDLE, pressEdge } from './input.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
 
 export const RECORD_VERSION = 1;
-export const ENGINE_VERSION = 'btr-session-1';
+export const ENGINE_VERSION = 'btr-session-2';
 export const AUTOSAVE_KEY = 'btr.autosave.v1';
 const MAX_FRAMES = 60 * 60 * 60 * 24;
 const MAX_GESTURES = 500;
@@ -40,7 +40,7 @@ export function checkpoint(s) {
     shell: { character: s.character, nidPlace: s.nidPlace, cursor: s.pointer,
       demo: s.demo?.name || null, sample: s.sample, attract: s.attract,
       menuSel: s.menuSel, disk: copy(s.disk), stop: s.stop,
-      restDelayCut: s.restDelayCut, stickFire: s.stickFire },
+      restDelayCut: s.restDelayCut },
     progress: [s.fallaKey, s.berriesOffered, s.visions, s.animalsPensed, s.dream, s.lamp, s.offered, s.paid],
     timing: [s.tick, s.stall, s.verbWait, s.active, s.ended, s.timeUp, !!s.verb],
   };
@@ -56,11 +56,14 @@ export class Session {
     this.actionIndex = 0;
     this.storageErrorIndex = 0;
     this.lastJoy = IDLE;
+    this.skippable = false;
     this.record = record ? copy(record) : {
       format: 'below-the-root-record', version: RECORD_VERSION, engine: ENGINE_VERSION,
       created: new Date().toISOString(), seed, initial, slots, frames: 0,
       inputs: [], actions: [], path: [], gestures: [], storageErrors: [], outcomes: [],
     };
+    // Cold start swallows a held startup button until the first released sample.
+    this.read = pressEdge(() => this.sample(), this.record.initial.mode === 'cold' ? { ...IDLE, fire: true } : IDLE);
     // replay route and endings: derived from the replayed frames
     if (record) { this.record.path = []; this.record.outcomes = []; }
     this.slots = new Map(Object.entries(this.record.slots));
@@ -98,8 +101,9 @@ export class Session {
     this.noteRoom();
   }
 
-  read() {
+  sample() {
     if (this.playback) {
+      // Keep separate reads within one frame (a tap can be followed by its release).
       const input = this.record.inputs[this.readIndex];
       if (input && input[0] <= this.frame) {
         this.lastJoy = { dx: input[1], dy: input[2], fire: !!input[3] };
@@ -110,7 +114,7 @@ export class Session {
     const joy = this.live.read();
     if (!same(joy, this.lastJoy)) {
       this.record.inputs.push([this.frame, joy.dx, joy.dy, +joy.fire]);
-      this.lastJoy = { ...joy };
+      this.lastJoy = { dx: joy.dx, dy: joy.dy, fire: joy.fire };
     }
     return joy;
   }
@@ -118,8 +122,16 @@ export class Session {
   step() {
     if (this.playback) {
       while (this.record.actions[this.actionIndex]?.frame === this.frame) {
-        this.apply(this.record.actions[this.actionIndex++]);
+        const action = this.record.actions[this.actionIndex++];
+        // A live skip consumes its press before clearing the wait; replay must too.
+        if (action.type === 'skip' && this.state.tuneWait != null) this.read();
+        this.apply(action);
       }
+    }
+    // Demos already read the real stick in shellFrame to end on any press.
+    if (this.state.tuneWait != null && !this.state.demo) {
+      const joy = this.read();
+      if (joy.press && this.skippable && !this.playback) this.skipTune();
     }
     shellFrame(this.state);
     tick(this.state);
@@ -156,9 +168,12 @@ export class Session {
 
   skipTune() {
     if (this.state.tuneWait == null) return;
+    const offset = this.state.data.music.tunes[this.state.tuneWait].frames - this.state.stall;
     const action = { frame: this.frame, type: 'skip' };
     this.apply(action);
     this.record.actions.push(action);
+    this.onSkip?.(offset);
+    return offset;
   }
 
   load(bytes) {

@@ -15,11 +15,7 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // once a frame: the button ends a demo, and an idle room loop hands the screen to the menu
 export function shellFrame(state) {
-  if (state.demo && state.stick) {
-    const fire = state.stick.read().fire;
-    if (fire && !state.stickFire) endDemo(state);
-    state.stickFire = fire;
-  }
+  if (state.demo && state.stick?.read().press) endDemo(state);
   if (!state.active && !state.verb && !state.stall && !state.demo) openMenu(state);
 }
 
@@ -34,7 +30,6 @@ export function openMenu(state) {
 // cold start: the intro once, then the menu
 export function coldStart(state) {
   state.attract = 'once';
-  state.stickFire = true;
   startDemo(state, 'intro');
 }
 
@@ -190,6 +185,5 @@ function sampleQuest(state) {
   state.flags = newFlags();
   state.attract = 'loop';
   state.title = false;
-  state.stickFire = true;
   startDemo(state, 'quest');
 }

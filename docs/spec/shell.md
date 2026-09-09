@@ -22,7 +22,12 @@ Over that, the attract demo runs once: a scripted figure walks around
 those rooms while four pages of story text come up in the panel in turn
 (`time.md`, The attract demo).  When the script ends the main menu
 appears over the same picture.  Pressing the button during the demo
-skips the rest of it and brings the menu up at once.
+skips the rest of it and brings the menu up at once. The session supplies
+a `press` edge between consecutive stick reads, shared by demo end,
+doorway transit and modern-display tune skip. Cold start consumes the
+starting press; choosing SAMPLE QUEST has already consumed its press.
+Waited tunes read the stick every frame, so a fresh tap skips immediately
+and cannot linger until the tune ends. Classic display never skips tunes.
 
 The menu is drawn over room `T4` every time you come back to it,
 whatever room you were standing in.

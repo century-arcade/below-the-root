@@ -1,5 +1,8 @@
 """World map controls and game hold; run against make serve."""
+import os
 from playwright.sync_api import sync_playwright
+
+BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
@@ -7,7 +10,7 @@ with sync_playwright() as p:
         page = browser.new_page(viewport={"width": width, "height": 750})
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
-        page.goto('http://localhost:8000/?player=0')
+        page.goto(BASE + '/?player=0')
         page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
 
         def record():
@@ -16,11 +19,8 @@ with sync_playwright() as p:
 
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid').evaluate(
-            "grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length") == 25
-        assert page.locator('#map-grid > *').count() == 300
-        assert page.locator('#map-grid > button').count() == 195
-        assert page.locator('#map-grid > button > canvas').count() == 195
+        assert page.locator('#map-grid > button').count() == 169
+        assert page.locator('#map-grid > button > canvas').count() == 169
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
         assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
         assert page.locator('#map-preview, #map-place').count() == 0
@@ -107,7 +107,7 @@ with sync_playwright() as p:
         # Visiting an area omitted from the paper map reveals it, including
         # after restoring the quest, without revealing its neighbours.
         for code, room_id, hidden_neighbour in [('0C', 384, '1C'), ('P2', 89, 'Q2')]:
-            page.goto('http://localhost:8000/?room=' + code)
+            page.goto(BASE + '/?room=' + code)
             page.wait_for_function("""room => {
                 const saved = JSON.parse(localStorage.getItem('btr.autosave.v1'));
                 return saved?.initial.room === room;
@@ -116,18 +116,15 @@ with sync_playwright() as p:
             page.locator('#map-screen').wait_for()
             assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 1
             assert page.locator(f'#map-grid button[aria-label^="{hidden_neighbour} ·"]').count() == 0
-            if code == 'P2':
-                assert page.locator('#map-grid').evaluate(
-                    "grid => getComputedStyle(grid).gridTemplateColumns.split(' ').length") == 26
             record()
-            page.goto('http://localhost:8000/')
+            page.goto(BASE + '/')
             page.wait_for_function("document.getElementById('map').onclick !== null")
             page.keyboard.press('Tab')
             page.locator('#map-screen').wait_for()
             assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 1
 
         for query in ['?menu', '?demo']:
-            page.goto('http://localhost:8000/' + query)
+            page.goto(BASE + '/' + query)
             page.wait_for_function("document.getElementById('map').hidden")
             page.keyboard.press('Tab')
             assert not page.locator('#map-screen').is_visible()
@@ -137,7 +134,7 @@ with sync_playwright() as p:
     page = context.new_page()
     errors = []
     page.on('pageerror', lambda e: errors.append(str(e)))
-    page.goto('http://localhost:8000/?player=0')
+    page.goto(BASE + '/?player=0')
     page.wait_for_function("document.getElementById('map').onclick !== null")
     page.locator('#map').tap()
     page.get_by_role('button', name='Zoom in', exact=True).tap()

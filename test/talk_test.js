@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 
 import { CLASS } from '../src/data.js';
-import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
+import { loadTestData, J, menuReads as menu, page, lines, place, give, stick as reader } from './helpers.js';
 import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
@@ -14,12 +14,12 @@ const press = () => [J.idle, J.fire];
 function run(state, reads) {
   const script = [...reads];
   let shown = null;
-  state.input = { read: () => {
+  state.input = reader(() => {
     const j = script.shift();
     if (j) return j;
     shown ??= lines(state);
     return J.up;
-  }, pace: 0 };
+  });
   state.stop = { reason: 'menu' };
   state.active = true;
   tick(state);
@@ -189,7 +189,7 @@ for (const reward of ['spirit', 'fifth animal']) {
       }
       let stick = J.fire;
       let reads = 0;
-      s.input = { read: () => { reads += 1; return stick; }, pace: 0 };
+      s.input = reader(() => { reads += 1; return stick; });
       const musicEvents = () => s.events.filter(e => 'music' in e);
       const frames = data.music.tunes[3].frames;
       const screens = [];
@@ -348,7 +348,7 @@ for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.
 // player.md, With the button held: a doorway takes one press, however long it is held
 test('holding the button on a doorway goes through once', (s) => {
   place(s, 1, 18, 14);
-  s.input = { read: () => J.fire, pace: 0 };
+  s.input = reader(() => J.fire);
   s.active = true;
   const rooms = [s.room.room];
   for (let i = 0; i < 400; i++) {
@@ -358,7 +358,7 @@ test('holding the button on a doorway goes through once', (s) => {
   assert.deepEqual(rooms, [1, 9], 'one transit while the button stays down');
   assert.equal(s.player.indoors, false);
   let reads = 0;
-  s.input = { read: () => (reads++ === 0 ? J.idle : J.fire), pace: 0 };
+  s.input = reader(() => (reads++ === 0 ? J.idle : J.fire));
   for (let i = 0; i < 400 && s.room.room === 9; i++) tick(s);
   assert.equal(s.room.room, 1, 'releasing the button arms the door again');
   assert.equal(s.player.indoors, true);

@@ -162,7 +162,7 @@ export function importSave(state, bytes) {
     animalsPensed: get('pense_message_count'),
     sample: false, timeUp: false, ended: null, stop: null, verb: null, creature: null,
     title: false, demo: null, input: draft.stick || draft.input, stall: 0, tuneWait: null, verbWait: 0,
-    pointer: null, restDelayCut: false, stickFire: false, events: [{ music: null }],
+    pointer: null, restDelayCut: false, events: [{ music: null }],
     quest: !!get('quest_active'),
   });
   let destination = data.roomById.get(roomId);

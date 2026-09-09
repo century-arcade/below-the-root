@@ -1,6 +1,7 @@
 // M6.3: the clock, food and rest, REST, the cloud world, losing a day, the endings, saves
 import assert from 'node:assert/strict';
 
+import { pressEdge } from '../src/input.js';
 import { CLASS } from '../src/data.js';
 import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
 import { newState, startQuest, tick } from '../src/game.js';
@@ -15,12 +16,12 @@ const idle = (n) => Array(n).fill(J.idle);
 function feed(state, reads) {
   const script = [...reads];
   const input = { shown: null, pace: 0 };
-  input.read = () => {
+  input.read = pressEdge(() => {
     const j = script.shift();
     if (j) return j;
     input.shown ??= lines(state);
     return J.up;
-  };
+  });
   state.input = input;
 }
 

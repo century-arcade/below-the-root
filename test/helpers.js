@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadData } from '../src/data.js';
-import { IDLE } from '../src/input.js';
+import { IDLE, pressEdge } from '../src/input.js';
 import { MENU } from '../src/verbs.js';
 import { panelLines } from '../src/panel.js';
 import { enterRoom } from '../src/world.js';
@@ -46,3 +46,5 @@ export function give(state, cls) {
   o.carried = true;
   return o;
 }
+
+export const stick = read => ({ read: pressEdge(read), pace: 0 });

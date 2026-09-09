@@ -1,7 +1,10 @@
 """Login and reporting must work while logged out or session lookup is unavailable.
 Run against make serve. OAuth navigation is intercepted; no GitHub login occurs.
 """
+import os
 from playwright.sync_api import sync_playwright
+
+BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
@@ -21,7 +24,7 @@ with sync_playwright() as p:
             page.route('**/.netlify/functions/github?op=logout', lambda route: route.fulfill(json={}))
             page.route('**/.netlify/functions/github?op=login', lambda route: route.fulfill(
                 content_type='text/html', body='<p>Reached login endpoint</p>'))
-            page.goto('http://localhost:8000/?debug&player=0')
+            page.goto(BASE + '/?debug&player=0')
             page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
             if mode == 'logout':
                 page.wait_for_function("!document.getElementById('github-logout').hidden")

@@ -1,7 +1,7 @@
 // docs/spec/player.md: landing from a leap onto solid ground clears the flight pose
 import assert from 'node:assert/strict';
 
-import { loadTestData } from './helpers.js';
+import { loadTestData, stick } from './helpers.js';
 import { CLASS } from '../src/data.js';
 import { newState, startQuest } from '../src/game.js';
 import { enterRoom } from '../src/world.js';
@@ -19,7 +19,7 @@ let input = { dx: 0, dy: 0, fire: false };
 
 function at(code, col, row, facing) {
   input = { dx: 0, dy: 0, fire: false };
-  const state = newState(data, { read: () => input }, { rng: () => 0.5 });
+  const state = newState(data, stick(() => input), { rng: () => 0.5 });
   startQuest(state, data.characters[0]);
   enterRoom(state, data.roomByCode.get(code), col, row);
   state.player.facing = facing;

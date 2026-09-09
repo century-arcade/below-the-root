@@ -6,12 +6,13 @@ import { newState, tick } from '../src/game.js';
 import { shellFrame, coldStart, openMenu } from '../src/shell.js';
 import { panelLines as lines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
+import { pressEdge } from '../src/input.js';
 import { CLASS } from '../src/data.js';
 
 // the stick: a queue of reads, idle once it runs dry
 function stick() {
   const s = { queue: [], pace: 0 };
-  s.read = () => s.queue.length ? s.queue.shift() : J.idle;
+  s.read = pressEdge(() => s.queue.length ? s.queue.shift() : J.idle, J.fire);
   s.feed = (...reads) => { s.queue.push(...reads); return s; };
   return s;
 }
@@ -304,6 +305,34 @@ test('cold start runs the intro once, prints the story pages, and lands in the m
   settle(s);
   assert.equal(s.title, true);
   assert.equal(lines(s)[0], '               START GAME');
+});
+
+test('cold start consumes the starting press, then a fresh press ends the intro', s => {
+  s.stick.feed(J.fire, J.fire, J.idle, J.fire);
+  coldStart(s);
+  for (let i = 0; i < 3; i++) {
+    shellFrame(s);
+    assert.equal(s.demo.name, 'intro');
+  }
+  shellFrame(s);
+  assert.equal(s.demo, null);
+  assert.equal(s.title, true);
+});
+
+test('the press choosing SAMPLE QUEST cannot end it while held', s => {
+  openMenu(s);
+  settle(s);
+  s.stick.feed(...push(J.down, 3), J.fire, ...Array(30).fill(J.fire));
+  settle(s);
+  for (let i = 0; i < 30; i++) {
+    shellFrame(s);
+    tick(s);
+    assert.equal(s.demo.name, 'quest');
+  }
+  shellFrame(s); // release
+  s.stick.feed(J.fire);
+  shellFrame(s);
+  assert.equal(s.demo, null);
 });
 
 test('opening the menu turns the music off', (s) => {

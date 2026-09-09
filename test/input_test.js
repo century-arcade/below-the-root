@@ -1,15 +1,5 @@
 import assert from 'node:assert/strict';
-import { Keyboard, Pointer, IDLE, skipArmed } from '../src/input.js';
-
-for (const armed of [false, true]) {
-  for (const fire of [false, true]) {
-    assert.equal(skipArmed(armed, false, fire), false, 'no tune clears skip arming');
-  }
-}
-assert.equal(skipArmed(false, true, true), false, 'the held verb button cannot arm a skip');
-assert.equal(skipArmed(false, true, false), true, 'releasing fire during a tune arms a skip');
-assert.equal(skipArmed(true, true, false), true, 'a skip stays armed while fire is up');
-assert.equal(skipArmed(true, true, true), true, 'a fresh press can skip an armed tune');
+import { Keyboard, Pointer, IDLE, pressEdge, DemoInput } from '../src/input.js';
 
 class Target {
   constructor() { this.listeners = {}; }
@@ -21,15 +11,25 @@ const canvas = new Target();
 Object.assign(canvas, { style: {}, width: 320, height: 200, setPointerCapture: () => {},
   getBoundingClientRect: () => ({ left: 0, top: 0, width: 320, height: 200 }) });
 const keys = new Keyboard(target);
-keys.press('fire');
-keys.read();
-assert.equal(skipArmed(false, true, keys.firePressed()), false, 'reading the held verb press cannot arm a skip');
-keys.release('fire');
-assert.equal(skipArmed(false, true, keys.firePressed()), true, 'releasing the verb press arms a skip');
+const read = pressEdge(() => keys.read());
+assert.equal(read().press, false);
+keys.map({ key: ' ', code: 'Space' });
+assert.deepEqual(read(), { ...IDLE, fire: true, press: true }, 'down is a press');
+assert.equal(read().press, false, 'held fire is not another press');
+assert.equal(keys.map({ key: ' ', code: 'Space', repeat: true }), true, 'repeat still prevents default');
+keys.map({ key: ' ', code: 'Space' }, true);
+assert.deepEqual(read(), { ...IDLE, press: false }, 'repeat must not re-latch fire after release');
+keys.map({ key: ' ', code: 'Space' });
+keys.map({ key: ' ', code: 'Space' }, true);
+assert.equal(read().press, true, 'a keyboard tap between reads counts once');
+assert.equal(read().press, false);
 keys.tap('fire');
-assert.equal(keys.firePressed(), true, 'a pointer tap can skip an armed tune');
-keys.read();
-assert.equal(keys.firePressed(), false, 'a tap consumed before the tune is no longer a press');
+assert.equal(read().press, true, 'a pointer tap counts once');
+assert.equal(read().press, false);
+const demo = new DemoInput({ steps: [
+  { op: 'hold', bytes: [15], steps: 3 }, { op: 'tap', bytes: [31] }, { op: 'tap', bytes: [15] },
+] }, {});
+assert.deepEqual(Array.from({ length: 6 }, () => demo.read().press), [true, false, false, false, true, false]);
 const pointer = new Pointer(canvas, keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
 const event = { button: 0, pointerId: 1, clientX: 200, clientY: 100, preventDefault: () => {} };
 const wait = ms => new Promise(r => setTimeout(r, ms));

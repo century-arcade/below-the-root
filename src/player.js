@@ -34,7 +34,6 @@ export function newPlayer(sheet, stamina) {
     knockdown: 0, frame: 0, frameAlt: 0,
     stamina, fatigue: 255,
     indoors: false, underground: false,
-    doorHeld: false,
     sheet,
   };
 }
@@ -94,7 +93,6 @@ export function step(state) {
   if (p.leaping) return leapStep(state, s);
   if (p.gliding) return glideStep(state, s);
   const input = state.input.read();
-  if (!input.fire) p.doorHeld = false;
   if (input.fire) return fireHeld(state, s, input);
   return fireFree(state, s, input);
 }
@@ -118,9 +116,7 @@ function fireHeld(state, s, input) {
     state.stop = { reason: 'menu' };
     return;
   }
-  if (input.dy === 0 && doorNumber(state, s.own)) {
-    if (p.doorHeld) return;
-    p.doorHeld = true;
+  if (input.dy === 0 && input.press && doorNumber(state, s.own)) {
     state.stop = { reason: 'door', n: doorNumber(state, s.own) };
     sfx(state, SFX.door);
     return;

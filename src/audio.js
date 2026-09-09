@@ -23,7 +23,7 @@ export function pickTune(music, want, rng) {
   return pool[Math.floor(rng() * pool.length)];
 }
 
-// the game waits for every tune it starts itself: nothing moves and the stick goes unread until it ends
+// The game waits for every tune it starts itself; the session still reads for a skip.
 export function startTune(state, want, wait = true) {
   const music = state.data.music;
   const tune = pickTune(music, want, state.rng);

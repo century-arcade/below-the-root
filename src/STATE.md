@@ -17,7 +17,7 @@ state = {
   tuneWait,        // the tune the stall is waiting for, or null; skipTune (a port extra) ends both
   active,          // the room loop is running; false while the shell owns the screen
   stop,            // why it stopped: null | {reason, ...}  (see below)
-  input,           // {read() -> {dx, dy, fire}, pace}: joystick or demo script; pace = idle ticks between verb reads
+  input,           // {read() -> {dx, dy, fire, press}, pace}: joystick or demo script; pace = idle ticks between verb reads
   demo,            // null or the running demo script: startDemo sets it and replaces input
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
@@ -30,7 +30,7 @@ state = {
   title,           // the shell owns the screen: video draws room T4 and no figures (shell.js)
   menuSel, disk,   // the main menu's cursor; {op, slot}: DISK STORAGE's remembered choices
   attract,         // 'once' (cold start: the intro then the menu) or 'loop' (the two scripts alternate)
-  stick, stickFire,// the real joystick while a demo script is state.input; its button last frame
+  stick,           // the real joystick while a demo script is state.input
   storage,         // {save(n, bytes), load(n) -> bytes|null}: the five QUEST slots
   character,       // characters.json id of who is playing; the save file records it
   player: {
@@ -49,7 +49,6 @@ state = {
     food, foodCap, rest, restCap, spiritLimit, spiritEnergy,   // player.md, Stamina, fatigue, food, rest, spirit
     standingKindar, standingErdling, name, people,             // characters.json
     indoors, underground,      // the flag that flips per doorway; the room's band
-    doorHeld,                  // a doorway was taken and the button has not been released since
     sheet,                     // 'player0'..'player4' (assets.json sprite sheet)
   },
   creature,        // null or {def, col, row, facing, stride, stepAlt, frame, turned, countdown} (creatures.js)
@@ -88,6 +87,8 @@ The room loop sets exactly one and stops; the shell checks them in
 
 ## Frame order
 
+`Session.step()` reads the stick during a waited tune for a fresh-press
+skip (modern display only); demos already read it in `shellFrame`.
 `tick(state)`: if `stall` > 0, decrement it and do nothing else.
 Otherwise `tick` advances (water animation).  If a `verb` is running it
 gets the frame: after `verbWait` idle ticks one stick read is handed to
@@ -108,9 +109,9 @@ wake path does its own wait and skips the menu's.
 
 ## Input
 
-`input.read()` returns `{dx: -1|0|1, dy: -1|0|1, fire: bool}` and is
-called exactly where the spec reads the joystick: rule 8 of the state
-step, rule 3 of a glide step, and every read the command menu and its
+`input.read()` returns `{dx: -1|0|1, dy: -1|0|1, fire: bool, press: bool}`.
+It is called during tune waits and where the spec reads the joystick:
+rule 8 of the state step, rule 3 of a glide step, and every read the command menu and its
 verbs make.  Verbs are generators (`verbs.js`, `dialog.js`): each
 `yield` is one read, so the read structure is visible in the code and
 the browser can run them one read per few frames instead of spinning.
@@ -118,6 +119,9 @@ A `yield` may carry a tick count to wait instead of `input.pace` (REST's
 pause between chimes reads every tick).  The demo script advances one
 entry per read, so the places reads happen are part of the replay
 contract.
+
+`press` is `fire && !previous.fire` across consecutive reads of the session
+or demo stream. Recordings store levels and reproduce the edge on replay.
 
 ## The shell
 

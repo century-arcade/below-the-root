@@ -1,4 +1,4 @@
-// the joystick: {dx, dy, fire}, read once per state step; and the demo script that replaces it
+// Joystick levels gain a press edge at each session or demo read.
 
 export function isEditing(target) {
   return !!target?.closest?.('input:not([type="file"]), textarea, select, [contenteditable], dialog');
@@ -10,9 +10,14 @@ export function isIdle(j) {
   return j.dx === 0 && j.dy === 0 && !j.fire;
 }
 
-// The button that chose a rewarding verb must come up before it can skip the tune.
-export function skipArmed(armed, tuneWaiting, firePressed) {
-  return tuneWaiting && (armed || !firePressed);
+// One edge per read stream; journals and device adapters keep level samples.
+export function pressEdge(read, last = IDLE) {
+  return () => {
+    const joy = read();
+    const press = joy.fire && !last.fire;
+    last = { ...joy };
+    return { ...joy, press };
+  };
 }
 
 const KEYS = {
@@ -36,6 +41,7 @@ export class Keyboard {
     if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
     const key = KEYS[e.key];
     if (!key) return false;
+    if (!up && e.repeat) return true;
     const source = e.code || e.key;
     if (up) this.release(key, source); else this.press(key, source);
     // onKey after press/release: the callback may reset what this key set
@@ -52,7 +58,6 @@ export class Keyboard {
   release(key, source = 'keyboard') { this.source(source).down.delete(key); }
   tap(key, source = 'pointer') { this.source(source).tapped.add(key); }
   reset(source) { if (source) this.sources.delete(source); else this.sources.clear(); }
-  firePressed() { return [...this.sources.values()].some(s => s.down.has('fire') || s.tapped.has('fire')); }
 
   read() {
     const d = new Set();
@@ -295,9 +300,10 @@ export class DemoInput {
     this.remaining = 0;
     this.value = IDLE;
     this.reads = 0;
+    this.read = pressEdge(() => this.sample());
   }
 
-  read() {
+  sample() {
     this.reads += 1;
     this.remaining -= 1;
     if (this.remaining > 0) return this.value;

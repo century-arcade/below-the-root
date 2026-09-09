@@ -9,7 +9,8 @@ import { newState, startQuest, startDemo } from '../src/game.js';
 import { openMenu } from '../src/shell.js';
 import { exportSave, importSave } from '../src/save.js';
 import { neighbour, enterRoom, leaveByEdge } from '../src/world.js';
-import { IDLE } from '../src/input.js';
+import { IDLE, Keyboard, Gamepad } from '../src/input.js';
+import { facingCreature } from '../src/creatures.js';
 import { TICKS_PER_HOUR } from '../src/clock.js';
 import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, clearAutosave, validateRecord } from '../src/record.js';
 
@@ -199,4 +200,121 @@ console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, 
   assert.equal(again.state.stall, 0);
   assert.equal(again.state.tick, s.tick);
   console.log('ok    a waited tune is skipped by a recorded action that replays');
+}
+
+// Use the real menu and input adapters so the press starting PENSE primes the edge.
+for (const source of ['keyboard held', 'keyboard tap', 'mouse tap', 'mouse hold', 'gamepad held', 'classic']) {
+  const keys = new Keyboard({ addEventListener() {} });
+  const pad = { connected: true, axes: [0, 0], buttons: [{ pressed: false }] };
+  const gamepad = new Gamepad(keys, { getGamepads: () => [pad] });
+  const session = new Session(data, keys, {
+    initial: { mode: 'quest', character: 3, room: data.roomByCode.get('U3').room }, seed: 1,
+  });
+  session.skippable = source !== 'classic';
+  const offsets = [];
+  session.onSkip = offset => offsets.push(offset);
+  const step = () => { gamepad.poll(); session.step(); session.state.events.length = 0; };
+  const frames = n => { for (let i = 0; i < n; i++) step(); };
+  const until = predicate => {
+    for (let i = 0; i < 2000; i++) { if (predicate()) return; step(); }
+    assert.fail(`${source}: input flow did not finish`);
+  };
+  const selected = () => String.fromCharCode(...session.state.panel.filter(c => c & 128).map(c => c & 127)).trim();
+  until(() => !session.state.player.fallen && !session.state.player.knockdown && facingCreature(session.state));
+  keys.press('down'); keys.press('fire');
+  until(() => session.state.verb);
+  keys.release('down'); keys.release('fire');
+  until(() => selected() === 'PAUSE');
+  keys.tap('down'); until(() => selected() === 'SPEAK');
+  keys.tap('down'); until(() => selected() === 'PENSE');
+  if (source === 'mouse tap') keys.tap('fire');
+  else if (source === 'mouse hold') keys.press('fire', 'pointer');
+  else if (source === 'gamepad held') pad.buttons[0].pressed = true;
+  else {
+    keys.map({ key: ' ', code: 'Space' });
+    if (source === 'keyboard tap') keys.map({ key: ' ', code: 'Space' }, true);
+  }
+  until(() => session.state.tuneWait != null);
+  assert.equal(session.state.animalsPensed, 1);
+  const start = session.frame;
+  const duration = session.state.stall;
+  for (let i = 0; i < 30; i++) {
+    if (source === 'keyboard held') keys.map({ key: ' ', code: 'Space', repeat: true });
+    step();
+    assert.equal(session.state.stall, duration - i - 1, `${source}: reward plays through frame ${i + 1}`);
+    assert.deepEqual(session.record.actions, [], `${source}: the selecting press cannot skip`);
+  }
+  Session.replay(data, keys, copy(session.snapshot()));
+  keys.map({ key: ' ', code: 'Space' }, true);
+  keys.release('fire', 'pointer');
+  pad.buttons[0].pressed = false;
+  frames(2);
+  keys.tap('fire'); // a tap between frames must be consumed by the tune wait
+  step();
+  if (source === 'classic') {
+    assert.deepEqual(session.record.actions, []);
+    assert.ok(session.state.stall > 0);
+    frames(session.state.stall);
+    assert.equal(session.state.tuneWait, null);
+    assert.equal(session.read().fire, false, 'classic also consumes taps during its wait');
+  } else {
+    assert.equal(session.state.tuneWait, null);
+    assert.equal(session.state.stall, 0);
+    assert.deepEqual(session.record.actions, [{ frame: start + 32, type: 'skip' }]);
+    assert.deepEqual(offsets, [32]);
+    // Verify both the saved wait and continuation after the consumed skip tap.
+    const replay = Session.replay(data, keys, copy(session.snapshot()));
+    frames(30);
+    for (let i = 0; i < 30; i++) replay.step();
+    assert.deepEqual(checkpoint(replay.state), checkpoint(session.state));
+    assert.equal(session.record.actions.length, 1);
+  }
+  Session.replay(data, keys, copy(session.snapshot()));
+  console.log(`ok    ${source}: reward survives 30 frames, fresh press and replay agree`);
+}
+
+{
+  let joy = { ...IDLE, fire: true };
+  const session = new Session(data, { read: () => joy });
+  for (let i = 0; i < 30; i++) session.step();
+  assert.equal(session.state.demo.name, 'intro', 'startup press is consumed through Session');
+  joy = IDLE; session.step();
+  joy = { ...IDLE, fire: true }; session.step();
+  assert.equal(session.state.demo, null);
+  Session.replay(data, { read: () => IDLE }, copy(session.snapshot()));
+}
+
+{
+  let joy = IDLE;
+  const session = new Session(data, { read: () => joy }, { initial: { mode: 'quest' } });
+  const saved = fresh();
+  enterRoom(saved, data.roomById.get(1), 18, 14);
+  session.load(exportSave(saved));
+  joy = { ...IDLE, fire: true };
+  const rooms = [session.state.room.room];
+  for (let i = 0; i < 400; i++) {
+    session.step();
+    if (session.state.room.room !== rooms.at(-1)) rooms.push(session.state.room.room);
+  }
+  assert.deepEqual(rooms, [1, 9]);
+  joy = IDLE;
+  for (let i = 0; i < 20; i++) session.step();
+  joy = { ...IDLE, fire: true };
+  for (let i = 0; i < 400 && session.state.room.room === 9; i++) session.step();
+  assert.equal(session.state.room.room, 1);
+  Session.replay(data, { read: () => IDLE }, copy(session.snapshot()));
+  console.log('ok    demo end and doorway transit use Session press edges and replay');
+}
+
+{
+  const keys = new Keyboard({ addEventListener() {} });
+  const session = new Session(data, keys, { initial: { mode: 'menu' } });
+  keys.tap('fire');
+  assert.equal(session.read().press, true);
+  assert.equal(session.read().press, false);
+  assert.deepEqual(session.record.inputs.map(i => [i[0], i[3]]), [[0, 1], [0, 0]],
+    'a tap and release can be recorded in separate reads in the same frame');
+  const replay = new Session(data, keys, { record: session.snapshot() });
+  assert.equal(replay.read().press, true);
+  assert.equal(replay.read().press, false);
 }
