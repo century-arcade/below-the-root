@@ -2,12 +2,11 @@
 
 import { CLASS } from './data.js';
 import { facingCreature, flagsOf, isAnimal } from './creatures.js';
-import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem } from './inventory.js';
+import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem, weightOf } from './inventory.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
 import { startTune, TUNE } from './audio.js';
 
-const BUY_RESERVE = 4;
 const STANDING = { standing_kindar: 'standingKindar', standing_erdling: 'standingErdling' };
 const GIFT_KINDS = new Set(['gift_giver', 'blesser', 'key_revealer']);
 
@@ -104,9 +103,12 @@ export function* buy(state) {
   if (!c) return;
   const token = carriedOf(state, CLASS.TOKEN);
   if (!token) return tell(state, 'buy_needs_tokens');
-  if (!canCarry(state, BUY_RESERVE)) return tell(state, 'buy_too_heavy');
+  const stock = c.def.params.stock_item_class;
+  // buy reserve: the token goes before the TAKE, so its weight is free
+  const reserve = state.data.items[stock].weight - weightOf(state, token);
+  if (!canCarry(state, reserve)) return tell(state, 'buy_too_heavy');
   destroy(token);
-  state.offered = c.def.params.stock_item_class;
+  state.offered = stock;
   tell(state, 'buy_granted');
 }
 

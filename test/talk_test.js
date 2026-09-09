@@ -5,7 +5,7 @@ import { CLASS } from '../src/data.js';
 import { loadTestData, J, menuReads as menu, page, lines, place, give } from './helpers.js';
 import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';
-import { carriedOf } from '../src/inventory.js';
+import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen } from '../src/world.js';
 
 const press = () => [J.idle, J.fire];
@@ -65,6 +65,29 @@ test('BUY needs a token, then grants TAKE of the stock', (s) => {
   assert.equal(run(s, menu('BUY'))[0], 'TAKE WHICHEVER ONE PLEASES YOU');
   assert.equal(s.offered, c.def.params.stock_item_class);
   assert.equal(carriedOf(s, CLASS.TOKEN), null);
+});
+
+test('BUY reserves the stock weight less the token it spends', (s) => {
+  const c = faceCreature(s, 26);
+  const stock = c.def.params.stock_item_class;
+  assert.equal(s.data.items[stock].weight, 5);
+  const token = give(s, CLASS.TOKEN);
+  for (let i = 0; i < 5; i++) give(s, CLASS.SHUBA);
+  s.player.stamina = 4;
+  assert.equal(weightCarried(s), carryLimit(s) - 4);
+  assert.equal(run(s, menu('BUY'))[0], "SORRY, YOU'RE CARRYING TOO MUCH");
+  assert.equal(carriedOf(s, CLASS.TOKEN), token);
+  assert.equal(s.offered, null);
+  s.player.stamina = 5;
+  assert.equal(weightCarried(s), carryLimit(s) - 5);
+  assert.equal(run(s, menu('BUY'))[0], 'TAKE WHICHEVER ONE PLEASES YOU');
+  assert.equal(carriedOf(s, CLASS.TOKEN), null);
+  assert.equal(s.offered, stock);
+  const item = s.objects.find((o) => o.exists && !o.carried && o.room === 26 && o.class === stock);
+  s.player.col = item.col;
+  s.player.row = item.row;
+  assert.equal(run(s, menu('TAKE'))[0], `YOU FIND ${s.data.items[stock].name}`);
+  assert.ok(item.carried);
 });
 
 test('SELL a shuba for a token', (s) => {

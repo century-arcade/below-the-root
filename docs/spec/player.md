@@ -421,6 +421,11 @@ the token range, and there are 75 of those against 62 tokens in the
 world at the start, so the world can hold only 13 more before sales
 start failing.  The economy is `time.md`'s.
 
+BUY refuses when you could not carry the stock item, checking what it
+weighs less the token about to be spent.  That is the original's flat
+reserve of 4 -- every non-token item weighs 5 and a token 1 -- so a sale
+you are granted is always one you can pick up.
+
 ## The command menu
 
 Pull the stick back with the button held while standing on support.
@@ -688,11 +693,6 @@ table of things people say, which is `creatures.md`'s.
 - **The food cap and the rest cap** are held separately and always set
   equal, so nothing in a run tells them apart.  Kept apart in case a
   save from a version that did distinguish them turns up.
-- **Two shipped bugs**, in the README's port notes: a breaking trencher
-  beak subtracts the vine rope's weight instead of its own (both are 5,
-  so it never shows), and BUY reserves 4 units of carrying capacity
-  when every non-token item weighs 5, so a merchant can sell you a
-  permission you cannot use.
 
 ---
 

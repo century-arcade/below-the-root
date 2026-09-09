@@ -33,7 +33,7 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, mute and volume, the ? help overlay; the options dialog: CRT effect (WebGL), classic/modern display (modern keeps the status sheet above the picture), debug tools; palette choice parked | done |
 | M6.5 ship -- normal walkthrough recording and cleanup tools ready; speedrun playthroughs per character in progress; GitHub OAuth configured; user authorization still to verify | **in progress** |
 
-The spec has 24 open questions, listed at the end of each area file;
+The spec has 23 open questions, listed at the end of each area file;
 none blocks M6.4.  Still read from the code but never watched in the
 emulator: the dialog tree, both endings, the save layout (no real C64
 save has been imported yet), the cloud world.  Two things worth a VICE

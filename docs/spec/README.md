@@ -84,10 +84,12 @@ per item whether to keep it.
   edges are unguarded.  A blank slot loads as open air (the demo relies
   on it), except once when it hung.  Decided: the port always gives open
   air and refuses the top and bottom edges.  (`world.md`, Open questions)
-- A breaking trencher beak subtracts the vine rope's weight (both 5, so
-  invisible unless the weights change).  BUY reserves 4 units of carry
-  capacity when every non-token item weighs 5, so a merchant can sell a
-  permission you can't use.  (`player.md`, Open questions)
+- The original looks like it subtracts the vine rope's weight when a
+  trencher beak breaks (both 5) and like BUY reserves a flat 4 against
+  items weighing 5.  Decided: neither is a bug.  Breaking removes the
+  beak object and carried weight is recomputed from what is left, and
+  BUY's 4 is the stock's 5 less the weight-1 token it spends.
+  (`player.md`, What you carry)
 - Six triggers exist for the five visions; the sixth prints nothing --
   keep it.  Losing a day can push the day count to 51 without the quest
   ending until the next hour -- keep it.  Raamo's own creature kind has
