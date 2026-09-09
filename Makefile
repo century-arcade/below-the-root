@@ -15,6 +15,7 @@ build:
 	cp src/index.html src/*.js $(BUILD)/
 	cp $(SPEC)/*.json $(BUILD)/data/
 	cp assets/*.json assets/*.png $(BUILD)/assets/
+	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
 
 serve: build
 	@if curl -sf -o /dev/null $(BTR_URL)/; then echo "already serving $(BUILD) at $(BTR_URL); a new build is picked up as is"; else \
