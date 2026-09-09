@@ -290,6 +290,8 @@ you press the button, as the game also does on its own before the menu
 first appears.  The menus, the save slots and what happens between
 rooms are `shell.md`.
 
+The port omits DISK STORAGE; it autosaves instead.
+
 ## Look and sound
 
 Sixteen colours, one per character cell, black background.  Two tile

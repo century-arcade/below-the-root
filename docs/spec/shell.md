@@ -49,6 +49,8 @@ Arriving at the menu, by any route, turns the music off.
 | DISK STORAGE | the save and load screen |
 | SAMPLE QUEST | the demo, played until you press the button |
 
+The port omits DISK STORAGE; it autosaves instead.
+
 A quest is in progress from the moment START GAME drops you in your nid
 until something ends it.  Three things end it: winning, reaching day 51,
 and SAMPLE QUEST.  LOAD GAME brings one back.  Going back to the menu

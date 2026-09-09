@@ -4,6 +4,7 @@ export const CLASS = {
 };
 
 const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
+const PORT_MENU = ['START GAME', 'CONTINUE', 'SAMPLE QUEST'];
 
 export async function loadData(read) {
   const [assets, roomsFile, tilesFile, map, poster, itemsFile, charactersFile, demo,
@@ -87,6 +88,11 @@ export async function loadData(read) {
   for (const m of messagesFile.messages) messages[m.id] = m.text;
   const fixed = {};
   for (const f of messagesFile.fixed_strings) fixed[f.name] = f;
+
+  // The spec keeps the original menu; the port uses autosave instead of disk slots.
+  shell.screens.main_menu.items = shell.screens.main_menu.items
+    .filter(item => PORT_MENU.includes(item.text.trim()))
+    .map((item, index) => ({ ...item, index, row: 21 + index }));
 
   return {
     assets, palette, charsets, sheets, map, poster,

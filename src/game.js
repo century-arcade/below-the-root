@@ -31,12 +31,6 @@ export function newObjects(data) {
   return out;
 }
 
-// the five slots, in memory; main.js swaps in the browser's
-function memoryStorage() {
-  const slots = new Map();
-  return { save: (n, bytes) => slots.set(n, bytes), load: (n) => slots.get(n) || null };
-}
-
 export function newState(data, input, opts = {}) {
   return {
     data,
@@ -76,10 +70,8 @@ export function newState(data, input, opts = {}) {
     quest: false,
     title: false,
     menuSel: 0,
-    disk: { op: 0, slot: 0 },
     attract: 'loop',
     stick: null,
-    storage: opts.storage || memoryStorage(),
     figures: [],
   };
 }

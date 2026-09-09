@@ -53,6 +53,22 @@ for (let i = 0; i < 1000; i++) {
   session.step(); session.state.events.length = 0;
 }
 const recorded = copy(session.snapshot());
+assert.ok(!('slots' in recorded));
+assert.ok(!('storageErrors' in recorded));
+assert.ok(!('disk' in recorded.checkpoint.shell));
+const legacy = copy(recorded);
+legacy.slots = { 1: recorded.c64 };
+legacy.storageErrors = [];
+legacy.checkpoint.shell.disk = { op: 0, slot: 0 };
+const legacyBefore = copy(legacy);
+const legacyRestored = Session.replay(freshData, values, legacy);
+assert.deepEqual(checkpoint(legacyRestored.state), recorded.checkpoint, 'obsolete slot fields do not invalidate replay');
+assert.deepEqual(legacy, legacyBefore, 'replay leaves the imported recording untouched');
+assert.ok(!('slots' in legacyRestored.snapshot()));
+assert.ok(!('storageErrors' in legacyRestored.snapshot()));
+assert.ok(!('disk' in legacyRestored.snapshot().checkpoint.shell));
+const legacyBroken = copy(legacy); legacyBroken.checkpoint.player.food++;
+assert.throws(() => Session.replay(freshData, values, legacyBroken), /does not replay/);
 const restored = Session.replay(freshData, values, recorded);
 assert.deepEqual(checkpoint(restored.state), checkpoint(session.state));
 for (let i = 0; i < 200; i++) { session.step(); restored.step(); }
@@ -68,11 +84,10 @@ assert.throws(() => Session.replay(freshData, values, { ...recorded, engine: 'ol
 const original = JSON.stringify({ ...broken, engine: 'old' });
 const recoveryStore = new Map([[AUTOSAVE_KEY, original]]);
 const storage = { getItem: key => recoveryStore.get(key) ?? null, setItem: (key, value) => recoveryStore.set(key, value) };
-const recovered = recoverAutosave(freshData, values, original, storage, { seed: 77, slots: { 1: recorded.c64 } });
+const recovered = recoverAutosave(freshData, values, original, storage, { seed: 77 });
 assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original);
 const expected = fresh(); importSave(expected, Uint8Array.from(atob(recorded.c64), c => c.charCodeAt(0)));
 assert.deepEqual(exportSave(recovered.state), exportSave(expected), 'quest progress comes from the saved checkpoint');
-assert.equal(recovered.slots.get('1'), recorded.c64, 'current manual slots survive recovery');
 const recoveredRecord = JSON.parse(recoveryStore.get(AUTOSAVE_KEY));
 const recoveredReload = Session.replay(freshData, values, recoveredRecord);
 assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state), 'the recovered save reloads exactly');
@@ -98,36 +113,17 @@ for (const failAt of [1, 2]) {
   assert.equal(saved.get(AUTOSAVE_KEY), original, 'a failed backup or replacement preserves the autosave');
 }
 
-// Reset deletes the autosave and every preserved copy, leaving slots and options.
+// Reset deletes the autosave and every preserved copy, leaving options.
 const resetStore = new Map([
   [AUTOSAVE_KEY, original], [`${AUTOSAVE_KEY}.recovery`, original],
   [`${AUTOSAVE_KEY}.recovery.1`, JSON.stringify(broken)],
-  ['btr.quest2', recorded.c64], ['btr.muted', '1'],
+  ['btr.muted', '1'],
 ]);
 const resetStorage = { getItem: key => resetStore.get(key) ?? null, removeItem: key => resetStore.delete(key) };
 clearAutosave(resetStorage);
-assert.deepEqual([...resetStore], [['btr.quest2', recorded.c64], ['btr.muted', '1']]);
+assert.deepEqual([...resetStore], [['btr.muted', '1']]);
 clearAutosave(resetStorage);
-assert.equal(resetStore.size, 2, 'reset also works without an autosave');
-
-// Slot persistence is supplied at construction, including replay and recovery.
-for (const create of [
-  options => new Session(data, values, options),
-  options => Session.replay(data, values, recorded, true, options),
-  options => recoverAutosave(data, values, original, storage, options),
-]) {
-  const saved = [];
-  const slotted = create({ saveSlot: (n, text) => {
-    if (n === 2) throw new Error('quota');
-    saved.push([n, text]);
-  } });
-  slotted.state.storage.save(1, bytes);
-  assert.deepEqual(saved, [[1, btoa(String.fromCharCode(...bytes))]]);
-  assert.equal(slotted.slots.get('1'), saved[0][1]);
-  assert.throws(() => slotted.state.storage.save(2, bytes), /quota/);
-  assert.equal(slotted.slots.has('2'), false, 'failed writes leave slots unchanged');
-  assert.deepEqual(slotted.record.storageErrors.at(-1), { frame: slotted.frame, slot: 2 });
-}
+assert.equal(resetStore.size, 1, 'reset also works without an autosave');
 
 const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
 for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);

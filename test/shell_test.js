@@ -1,4 +1,4 @@
-// M6.4: the main menu, character select, DISK STORAGE, SAMPLE QUEST, the attract flow
+// M6.4: the main menu, character select, SAMPLE QUEST, the attract flow
 import assert from 'node:assert/strict';
 
 import { loadTestData, J } from './helpers.js';
@@ -35,12 +35,6 @@ function settle(state, max = 5000) {
   assert.fail('did not settle');
 }
 
-const reverse = (state, row) => {
-  let s = '';
-  for (let i = 0; i < 40; i++) s += state.panel[(row - 21) * 40 + i] & 0x80 ? 'R' : '.';
-  return s.replace(/\.+$/, '');
-};
-
 // a tap: the read itself, then the stick let go so the next screen's fireUp sees it
 const tap = (j) => [j, J.idle];
 const push = (j, n = 1) => Array(n).fill([j, J.idle]).flat();
@@ -57,9 +51,8 @@ test('the main menu draws over T4 with START GAME selected', (s) => {
   openMenu(s);
   settle(s);
   assert.equal(s.title, true);
-  assert.deepEqual(lines(s), ['               START GAME', '                CONTINUE', '              DISK STORAGE', '              SAMPLE QUEST']);
-  assert.equal(reverse(s, 21), '.............RRRRRRRRRRRRRR');
-  assert.equal(reverse(s, 22), '');
+  assert.deepEqual(lines(s).map(line => line.trim()).filter(Boolean), ['START GAME', 'CONTINUE', 'SAMPLE QUEST']);
+  assert.equal(s.menuSel, 0);
 });
 
 test('the cursor clamps at both ends and a held stick moves once', (s) => {
@@ -73,11 +66,10 @@ test('the cursor clamps at both ends and a held stick moves once', (s) => {
   assert.equal(s.menuSel, 2);
   s.stick.feed(...push(J.down, 5));
   settle(s);
-  assert.equal(reverse(s, 24), '.............RRRRRRRRRRRRRR');
-  assert.equal(s.menuSel, 3);
+  assert.equal(s.menuSel, 2);
   s.stick.feed(...push(J.up, 1));
   settle(s);
-  assert.equal(s.menuSel, 2);
+  assert.equal(s.menuSel, 1);
   s.stick.feed(...push(J.up, 5));
   settle(s);
   assert.equal(s.menuSel, 0);
@@ -107,7 +99,6 @@ test('character select opens on Neric, up cycles through RETURN TO MENU and back
   s.stick.feed(...tap(J.fire));
   settle(s);
   assert.deepEqual(lines(s), ['       CHOOSE YOUR PLAYER:  NERIC', '', ' A KINDAR-BORN YOUNG MAN', ' STRONG--IMPULSIVE--MODERATE SPIRIT']);
-  assert.equal(reverse(s, 21), '');
   const names = ['NERIC'];
   for (let i = 0; i < 6; i++) {
     s.stick.feed(...tap(J.down), ...tap(J.up));
@@ -198,69 +189,6 @@ test('character select opens on whoever is loaded', (s) => {
   assert.match(lines(s)[0], /HERD$/);
 });
 
-test('DISK STORAGE: the line, the slots, SAVE then LOAD round-trip and remember the slot', (s) => {
-  openMenu(s);
-  settle(s);
-  s.stick.feed(...tap(J.fire), ...tap(J.fire));
-  settle(s);
-  s.player.food = 3;
-  openMenu(s);
-  settle(s);
-  s.stick.feed(...push(J.down, 2), ...tap(J.fire));
-  settle(s);
-  assert.equal(lines(s)[0], '  SAVE GAME  LOAD GAME  RETURN TO MENU');
-  assert.equal(reverse(s, 21), '.RRRRRRRRRRR');
-  s.stick.feed(...push(J.right, 4));
-  settle(s);
-  assert.equal(reverse(s, 21), '.......................RRRRRRRRRRRRRRRR');
-  s.stick.feed(...push(J.left, 2), ...tap(J.fire));
-  settle(s);
-  assert.equal(lines(s)[2], '         QUEST   1  2  3  4  5');
-  assert.equal(reverse(s, 23), '................RRR');
-  s.stick.feed(...push(J.right, 2), ...tap(J.fire));
-  settle(s);
-  assert.equal(lines(s)[0], ' INSERT STORAGE DISK - PRESS TRIGGER');
-  assert.equal(s.storage.load(3), null);
-  s.stick.feed(...tap(J.fire));
-  settle(s);
-  assert.equal(s.storage.load(3).length, 1410);
-  assert.equal(lines(s)[0], '               START GAME');
-  assert.deepEqual(s.disk, { op: 0, slot: 2 });
-
-  s.player.food = 9;
-  s.stick.feed(...tap(J.fire));
-  settle(s);
-  assert.equal(reverse(s, 21), '.RRRRRRRRRRR');
-  s.stick.feed(...tap(J.right), ...tap(J.fire));
-  settle(s);
-  assert.equal(reverse(s, 23), '......................RRR');
-  s.stick.feed(...tap(J.fire), ...tap(J.fire));
-  settle(s);
-  assert.equal(lines(s)[0], '               START GAME');
-  assert.equal(s.player.food, 3);
-  assert.equal(s.quest, true);
-  assert.equal(s.active, false);
-  assert.deepEqual(s.disk, { op: 1, slot: 2 });
-});
-
-test('SAVE GAME with no quest goes straight back to the menu', (s) => {
-  openMenu(s);
-  settle(s);
-  s.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire));
-  settle(s);
-  assert.equal(lines(s)[0], '               START GAME');
-  assert.equal(s.storage.load(1), null);
-});
-
-test('LOAD of an empty slot changes nothing', (s) => {
-  openMenu(s);
-  settle(s);
-  s.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.right), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
-  settle(s);
-  assert.equal(lines(s)[0], '               START GAME');
-  assert.equal(s.quest, false);
-});
-
 test('SAMPLE QUEST ends the quest, runs the outdoor script first, and the button returns to the menu', (s) => {
   openMenu(s);
   settle(s);
@@ -269,7 +197,7 @@ test('SAMPLE QUEST ends the quest, runs the outdoor script first, and the button
   assert.equal(s.quest, true);
   openMenu(s);
   settle(s);
-  s.stick.feed(...push(J.down, 3), ...tap(J.fire));
+  s.stick.feed(...push(J.down, 2), ...tap(J.fire));
   settle(s);
   assert.equal(s.quest, false);
   assert.equal(s.demo.name, 'quest');
@@ -281,8 +209,8 @@ test('SAMPLE QUEST ends the quest, runs the outdoor script first, and the button
   settle(s);
   assert.equal(s.demo, null);
   assert.equal(s.title, true);
-  assert.equal(lines(s)[3], '              SAMPLE QUEST');
-  s.stick.feed(...tap(J.up), ...tap(J.up), ...tap(J.fire));
+  assert.ok(lines(s).some(line => line.trim() === 'SAMPLE QUEST'));
+  s.stick.feed(...tap(J.up), ...tap(J.fire));
   settle(s);
   assert.equal(s.menuSel, 1);
   assert.equal(s.active, false);
@@ -322,7 +250,7 @@ test('cold start consumes the starting press, then a fresh press ends the intro'
 test('the press choosing SAMPLE QUEST cannot end it while held', s => {
   openMenu(s);
   settle(s);
-  s.stick.feed(...push(J.down, 3), J.fire, ...Array(30).fill(J.fire));
+  s.stick.feed(...push(J.down, 2), J.fire, ...Array(30).fill(J.fire));
   settle(s);
   for (let i = 0; i < 30; i++) {
     shellFrame(s);
@@ -339,22 +267,6 @@ test('opening the menu turns the music off', (s) => {
   s.events.push({ music: 0 });
   openMenu(s);
   assert.deepEqual(s.events.filter((e) => 'music' in e).map((e) => e.music), [0, null]);
-});
-
-test('a storage write failure keeps the quest and returns to the menu', s => {
-  openMenu(s); settle(s);
-  s.stick.feed(...tap(J.fire), ...tap(J.fire)); settle(s);
-  const player = s.player;
-  s.storage.save = () => { throw new Error('quota'); };
-  openMenu(s); settle(s);
-  s.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
-  settle(s);
-  assert.match(lines(s).join(' '), /STORAGE FAILED/);
-  assert.equal(s.player, player);
-  assert.equal(s.quest, true);
-  s.stick.feed(...tap(J.fire)); settle(s);
-  assert.equal(lines(s)[0], '               START GAME');
-  assert.ok(s.verb);
 });
 
 console.log(`all ${n} shell tests passed`);

@@ -109,23 +109,20 @@ loadData((path) => fetch(path).then((r) => {
   }
   if (!data.characters[initial.character || 0]) initial.character = 0;
   if (initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === initial.demo)) initial.demo = 'quest';
-  const slots = {};
   let existing = null;
   try {
-    for (let n = 1; n <= 5; n++) { const value = localStorage.getItem(`btr.quest${n}`); if (value) slots[n] = value; }
     existing = localStorage.getItem(AUTOSAVE_KEY);
   } catch {}
-  const saveSlot = (n, text) => localStorage.setItem(`btr.quest${n}`, text);
   let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   if (existing && initial.mode === 'cold') {
     let stored = null;
     try { stored = JSON.parse(existing); } catch {}
-    try { session = Session.replay(data, stick, stored, true, { saveSlot }); }
+    try { session = Session.replay(data, stick, stored); }
     catch (err) {
       let reason = err;
       if (typeof stored?.c64 === 'string') {
-        try { session = recoverAutosave(data, stick, existing, localStorage, { slots, seed, saveSlot }); }
+        try { session = recoverAutosave(data, stick, existing, localStorage, { seed }); }
         catch (recoveryErr) { reason = recoveryErr; }
       }
       if (!session) {
@@ -135,7 +132,7 @@ loadData((path) => fetch(path).then((r) => {
       }
     }
   }
-  session ||= new Session(data, stick, { initial, slots, seed, saveSlot });
+  session ||= new Session(data, stick, { initial, seed });
   let state = session.state;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
@@ -340,7 +337,7 @@ loadData((path) => fetch(path).then((r) => {
     try { clearAutosave(localStorage); }
     catch (err) { log(`Reset failed: ${err.message}`); return; }
     session = new Session(data, stick, { initial: { mode: 'menu' },
-      slots: Object.fromEntries(session.slots), seed: crypto.getRandomValues(new Uint32Array(1))[0], saveSlot });
+      seed: crypto.getRandomValues(new Uint32Array(1))[0] });
     state = session.state;
     autosave.key = null;
     speaker.silence();
@@ -389,7 +386,7 @@ loadData((path) => fetch(path).then((r) => {
       if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes[0] === 123 || file.name.endsWith('.json')) {
-        const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)), true, { saveSlot });
+        const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
         session = restored; state = session.state;
       } else {
         session.load(bytes);

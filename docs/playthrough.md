@@ -12,7 +12,7 @@ Keyboard movement remains arrows/WASD plus space, Shift, or Control.
 Escape or P pauses; any movement key or a tap on the screen resumes.
 Leaving the tab or window pauses too. Music continues while game time is paused.
 Mouse/touch input remains hold-to-steer, tap-for-button, and double-tap
-to walk. DISK STORAGE still offers the five C64-format browser slots.
+to walk. The port omits DISK STORAGE; the autosave is the save.
 Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
 
 ## What a recording contains
@@ -20,7 +20,7 @@ Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
 `src/record.js` owns a `Session` around the game:
 
 - Format and engine version, initial startup mode, character/optional
-  room override, initial five save slots, and a seeded game RNG.
+  room override, and a seeded game RNG.
 - A monotonic 60 Hz frame counter, independent of the room's tick.
 - Joystick changes at the frames where the game reads them. Holds are
   represented by a change followed later by a release, not thousands
@@ -29,8 +29,8 @@ Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
   as diagnostic annotations. Mouse movement is represented through the
   sampled joystick, not an event per pixel. Issue text and GitHub
   credentials are never recorded.
-- Imported C64 saves with their application frame, recorded slot-write
-  failures, and the room/title/quest path with positions and game time.
+- Imported C64 saves with their application frame, and the room/title/quest
+  path with positions and game time.
 - Won/timeout outcomes, retained even after the shell returns to its menu.
 - A final state checkpoint and, while a quest is active, a base64 C64
   QUEST image for interoperability.

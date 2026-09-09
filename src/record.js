@@ -39,7 +39,7 @@ export function checkpoint(s) {
     creature: s.creature ? copy(s.creature) : null,
     shell: { character: s.character, nidPlace: s.nidPlace, cursor: s.pointer,
       demo: s.demo?.name || null, sample: s.sample, attract: s.attract,
-      menuSel: s.menuSel, disk: copy(s.disk), stop: s.stop,
+      menuSel: s.menuSel, stop: s.stop,
       restDelayCut: s.restDelayCut },
     progress: [s.fallaKey, s.berriesOffered, s.visions, s.animalsPensed, s.dream, s.lamp, s.offered, s.paid],
     timing: [s.tick, s.stall, s.verbWait, s.active, s.ended, s.timeUp, !!s.verb],
@@ -47,48 +47,28 @@ export function checkpoint(s) {
 }
 
 export class Session {
-  constructor(data, live, { initial = { mode: 'cold' }, seed = 1, slots = {}, record = null, saveSlot = null } = {}) {
+  constructor(data, live, { initial = { mode: 'cold' }, seed = 1, record = null } = {}) {
     this.live = live;
-    this.saveSlot = saveSlot;
     this.frame = 0;
     this.playback = !!record;
     this.readIndex = 0;
     this.actionIndex = 0;
-    this.storageErrorIndex = 0;
     this.lastJoy = IDLE;
     this.skippable = false;
     this.record = record ? copy(record) : {
       format: 'below-the-root-record', version: RECORD_VERSION, engine: ENGINE_VERSION,
-      created: new Date().toISOString(), seed, initial, slots, frames: 0,
-      inputs: [], actions: [], path: [], gestures: [], storageErrors: [], outcomes: [],
+      created: new Date().toISOString(), seed, initial, frames: 0,
+      inputs: [], actions: [], path: [], gestures: [], outcomes: [],
     };
+    // Discard obsolete slot fields when continuing an older recording.
+    delete this.record.slots;
+    delete this.record.storageErrors;
     // Cold start swallows a held startup button until the first released sample.
     this.read = pressEdge(() => this.sample(), this.record.initial.mode === 'cold' ? { ...IDLE, fire: true } : IDLE);
     // replay route and endings: derived from the replayed frames
     if (record) { this.record.path = []; this.record.outcomes = []; }
-    this.slots = new Map(Object.entries(this.record.slots));
     const stick = { pace: 5, read: () => this.read() };
-    this.state = newState(data, stick, {
-      rng: random(this.record.seed),
-      storage: {
-        save: (n, bytes) => {
-          const value = toBase64(bytes);
-          // slot writes: browser storage must succeed before the in-memory slot changes
-          if (this.playback) {
-            const failure = this.record.storageErrors[this.storageErrorIndex];
-            if (failure?.frame === this.frame && failure.slot === n) {
-              this.storageErrorIndex++;
-              throw new Error('Recorded storage failure');
-            }
-          } else {
-            try { this.saveSlot?.(n, value); }
-            catch (err) { this.record.storageErrors.push({ frame: this.frame, slot: n }); throw err; }
-          }
-          this.slots.set(String(n), value);
-        },
-        load: n => this.slots.has(String(n)) ? fromBase64(this.slots.get(String(n))) : null,
-      },
-    });
+    this.state = newState(data, stick, { rng: random(this.record.seed) });
     this.state.stick = stick;
     const start = this.record.initial;
     if (start.mode === 'quest') {
@@ -193,9 +173,9 @@ export class Session {
       c64: this.state.quest && !this.state.demo ? toBase64(exportSave(this.state)) : null };
   }
 
-  static replay(data, live, record, verify = true, options = {}) {
+  static replay(data, live, record, verify = true) {
     validateRecord(record, data);
-    const session = new Session(data, live, { ...options, record });
+    const session = new Session(data, live, { record });
     for (let i = 0; i < record.frames; i++) {
       session.step();
       session.state.events.length = 0;
@@ -204,8 +184,13 @@ export class Session {
     while (session.record.actions[session.actionIndex]?.frame === session.frame) {
       session.apply(session.record.actions[session.actionIndex++]);
     }
-    if (verify && JSON.stringify(checkpoint(session.state)) !== JSON.stringify(record.checkpoint)) {
-      throw new Error('This recording does not replay in this version of the game.');
+    if (verify) {
+      const expected = copy(record.checkpoint);
+      // The removed disk cursor is not part of the port's state anymore.
+      delete expected.shell?.disk;
+      if (JSON.stringify(checkpoint(session.state)) !== JSON.stringify(expected)) {
+        throw new Error('This recording does not replay in this version of the game.');
+      }
     }
     session.playback = false;
     return session;
@@ -218,15 +203,12 @@ export function validateRecord(r, data) {
   }
   if (!Number.isInteger(r.frames) || r.frames < 0 || r.frames > MAX_FRAMES
       || !Number.isInteger(r.seed) || r.seed < 0 || r.seed > 0xffffffff
-      || !r.initial || !r.slots || !r.checkpoint) throw new Error('Invalid recording');
-  for (const [slot, value] of Object.entries(r.slots)) {
-    if (!/^[1-5]$/.test(slot) || typeof value !== 'string' || value.length > 4096) throw new Error('Invalid recording slot');
-  }
+      || !r.initial || !r.checkpoint) throw new Error('Invalid recording');
   if (!['cold', 'menu', 'quest', 'demo'].includes(r.initial.mode)
       || (r.initial.mode === 'quest' && !data.characters[r.initial.character || 0])
       || (r.initial.room != null && !data.roomById.has(r.initial.room))
       || (r.initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === r.initial.demo))) throw new Error('Invalid recording start');
-  for (const key of ['inputs', 'actions', 'path', 'gestures', 'storageErrors', 'outcomes']) {
+  for (const key of ['inputs', 'actions', 'path', 'gestures', 'outcomes']) {
     if (!Array.isArray(r[key])) throw new Error('Invalid recording journal');
   }
   let previous = 0;
@@ -241,12 +223,6 @@ export function validateRecord(r, data) {
     if (!['load', 'skip'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
         || action.frame > r.frames || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');
     previous = action.frame;
-  }
-  previous = 0;
-  for (const failure of r.storageErrors) {
-    if (!Number.isInteger(failure.frame) || failure.frame < previous || failure.frame > r.frames
-        || !Number.isInteger(failure.slot) || failure.slot < 1 || failure.slot > 5) throw new Error('Invalid storage event');
-    previous = failure.frame;
   }
 }
 

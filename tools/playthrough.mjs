@@ -39,7 +39,6 @@ try {
       record.inputs.filter(input => input[0] >= end).map(input => [shift(input[0]), ...input.slice(1)]));
     if (end === record.frames) edited.inputs = edited.inputs.filter(input => input[0] < start);
     edited.actions = record.actions.filter(action => keep(action.frame)).map(action => ({ ...action, frame: shift(action.frame) }));
-    edited.storageErrors = record.storageErrors.filter(action => keep(action.frame)).map(action => ({ ...action, frame: shift(action.frame) }));
     edited.gestures = record.gestures.filter(event => keep(event[0])).map(event => [shift(event[0]), ...event.slice(1)]);
     edited.frames -= duration;
     edited.edits = [...(record.edits || []), { cut: [start, end], sourceFrames: record.frames }];

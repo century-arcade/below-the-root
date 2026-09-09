@@ -1,12 +1,11 @@
-// docs/spec/shell.md: the main menu, character select, DISK STORAGE and SAMPLE QUEST; each screen is a
+// docs/spec/shell.md: the main menu, character select and SAMPLE QUEST; each screen is a
 // generator run like a verb, one yield per stick read
 
 import { newObjects, startQuest, startDemo, startVerb, endDemo } from './game.js';
 import { newFlags } from './creatures.js';
-import { fireUp, buttonPress } from './input.js';
-import { print, clearPanel, PANEL_ROW } from './panel.js';
+import { fireUp } from './input.js';
+import { print, clearPanel } from './panel.js';
 import { enterRoom, burnLamp } from './world.js';
-import { exportSave, importSave } from './save.js';
 import { SFX, sfx } from './audio.js';
 
 const RETURN_TO_MENU = 5;
@@ -67,9 +66,6 @@ export function* mainMenu(state) {
       case 'CONTINUE':
         if (state.quest) return resume(state);
         break;
-      case 'DISK STORAGE':
-        yield* diskStorage(state);
-        break;
       case 'SAMPLE QUEST':
         return sampleQuest(state);
     }
@@ -118,64 +114,6 @@ function resume(state) {
   enterRoom(state, state.room, p.col, p.row);
   state.title = false;
   state.active = true;
-}
-
-function highlightAlong(state, line, item) {
-  print(state, line.row, line.col, line.text);
-  const start = item.col - line.col;
-  print(state, line.row, item.col, line.text.slice(start, start + item.width), true);
-}
-
-function drawStorageLine(state, sel) {
-  const s = state.data.shell.screens.disk_storage;
-  clearPanel(state);
-  highlightAlong(state, s.line, s.items[sel]);
-}
-
-function drawSlots(state, sel) {
-  const s = state.data.shell.screens.slots;
-  highlightAlong(state, s.line, s.items[sel]);
-}
-
-// left and right along a line, clamped at the ends; the index the button lands on
-function* pickAlong(state, count, sel, draw) {
-  for (;;) {
-    draw(state, sel);
-    sfx(state, SFX.blip);
-    const j = yield* nextPush((j) => j.dx);
-    if (j.fire) return sel;
-    sel = clamp(sel + j.dx, 0, count - 1);
-  }
-}
-
-// SAVE GAME / LOAD GAME / RETURN TO MENU, then the slot, then the disk prompt; no cancel past the first line
-export function* diskStorage(state) {
-  const s = state.data.shell.screens;
-  const disk = state.disk;
-  disk.op = yield* pickAlong(state, s.disk_storage.items.length, disk.op, drawStorageLine);
-  const op = s.disk_storage.items[disk.op].name;
-  if (op === 'RETURN TO MENU') return;
-  if (op === 'SAVE GAME' && !state.quest) return;
-  disk.slot = yield* pickAlong(state, s.slots.items.length, disk.slot, drawSlots);
-  clearPanel(state);
-  print(state, s.storage_prompt.row, s.storage_prompt.col, s.storage_prompt.text);
-  yield* buttonPress();
-  clearPanel(state);
-  const slot = disk.slot + 1;
-  try {
-    if (op === 'SAVE GAME') return state.storage.save(slot, exportSave(state));
-    const bytes = state.storage.load(slot);
-    if (!bytes) return;
-    const menu = state.verb;
-    importSave(state, bytes);
-    state.verb = menu;
-    state.title = true;
-    state.active = false;
-  } catch (err) {
-    clearPanel(state);
-    print(state, PANEL_ROW, 1, 'STORAGE FAILED. YOUR QUEST IS SAFE.');
-    yield* buttonPress();
-  }
 }
 
 // SAMPLE QUEST ends the quest: the world is reset and the two scripts chase each other until fire

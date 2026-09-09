@@ -28,10 +28,9 @@ state = {
   ended,           // null, or why the room loop gave up to the shell: 'menu' 'won' 'timeout'
   quest,           // a quest is in progress: START GAME sets it, winning, day 51 and SAMPLE QUEST clear it
   title,           // the shell owns the screen: video draws room T4 and no figures (shell.js)
-  menuSel, disk,   // the main menu's cursor; {op, slot}: DISK STORAGE's remembered choices
+  menuSel,         // the main menu's cursor
   attract,         // 'once' (cold start: the intro then the menu) or 'loop' (the two scripts alternate)
   stick,           // the real joystick while a demo script is state.input
-  storage,         // {save(n, bytes), load(n) -> bytes|null}: the five QUEST slots
   character,       // characters.json id of who is playing; the save file records it
   player: {
     col, row, facing,          // cell and +1 right / -1 left
@@ -142,10 +141,9 @@ the next push or the button.
 the field list in `save.json`: every object's slot, the two per-creature
 byte arrays, the named variables and zero-page fields.  `importSave`
 rebuilds `player`, `clock`, `flags`, `objects` and the quest fields and
-enters the saved room.  `record.js` supplies five browser slots (base64 in localStorage). Direct
-imports validate and decode into a draft before replacing live state,
-resolve empty/outdoor rooms, clear transient shell/demo state, and restore
-the real stick. DISK STORAGE then explicitly returns to its menu context.
+enters the saved room. Direct imports validate and decode into a draft
+before replacing live state, resolve empty/outdoor rooms, clear transient
+shell/demo state, and restore the real stick.
 
 `record.js` also owns the browser `Session`: a seeded RNG, monotonic frame
 counter, timed joystick changes and external-load actions. Its JSON
