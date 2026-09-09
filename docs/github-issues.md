@@ -5,10 +5,12 @@ it or pressing `R` starts login when logged out, saving the
 quest first. Once authenticated, either opens a single-message dialog immediately.
 The dialog sits below the game and includes **Log out**. Submission creates an issue as
 that user in `century-arcade/below-the-root`; its first message line
-becomes the title. State and recent moves are included; the full recording
-is a separate download, not automatically uploaded. Each recent input change
-and room transition occupies one JSON line. The redundant C64-format save
-image is omitted from issue reports.
+becomes the title. The full recording is automatically uploaded to a secret gist
+under the reporter's account and linked from the issue. State and recent moves
+appear in a collapsed **State at filing** block. OAuth requests `public_repo gist`;
+existing logins are asked to log in again once to grant gist access. Each recent
+input change and room transition occupies one JSON line. The redundant C64-format
+save image is omitted from the inline state block.
 
 The implementation uses a Netlify function, not credentials in the
 static build. Its source is `functions/github.mjs`, configured through
@@ -40,7 +42,8 @@ No server package dependencies are required.
 
 The web flow uses OAuth state and PKCE; GitHub documents the parameters
 and server-side code exchange in its [OAuth authorization guide](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps).
-The OAuth scope is `public_repo` for this public repository. That scope is
+The OAuth scopes are `public_repo` for this public repository and `gist` for
+playthrough uploads. The repository scope is
 broader than issue-only access; review it when authorizing. A GitHub App
 with narrowly scoped repository permissions is a possible later change,
 not the flow implemented here.

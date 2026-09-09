@@ -18,10 +18,14 @@ with sync_playwright() as p:
     def github(route):
         if 'op=issue' in route.request.url:
             posted.append(route.request.post_data_json)
+            recording = json.loads(posted[-1]['recording'])
+            assert 'frames' in recording and 'checkpoint' in recording
+            assert posted[-1]['meta'] == {'frame': recording['frames'], 'room': recording['checkpoint']['room']}
             if len(posted) == 1:
                 route.fulfill(status=502, json={"error": "Test network failure; message kept."})
                 return
-            route.fulfill(status=201, json={"url": "https://github.com/century-arcade/below-the-root/issues/123", "number": 123})
+            route.fulfill(status=201, json={"url": "https://github.com/century-arcade/below-the-root/issues/123", "number": 123,
+                                          "gist": "https://gist.github.com/tester/456" if len(posted) == 2 else None})
         else:
             route.fulfill(json={"configured": True, "login": "tester"})
 
@@ -78,10 +82,12 @@ with sync_playwright() as p:
     assert frames() == saved['frames'], 'a failed submission must keep game time paused'
     page.locator('#issue-submit').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
-    page.locator('#log').filter(has_text='Issue #123 filed').wait_for()
+    page.locator('#log').filter(has_text='Issue #123 filed with playthrough').wait_for()
     assert len(posted) == 2
-    assert 'recentInputs' in posted[0]['context']
-    assert 'player' in posted[0]['context']
+    context = json.loads(posted[0]['context'])
+    assert 'recentInputs' in context
+    assert 'player' in context
+    assert context['frame'] == json.loads(posted[0]['recording'])['frames']
     assert posted[1] == posted[0], 'retry must retain the message and captured context'
     assert page.locator('#issue-message').input_value() == ''
     assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") is None
@@ -103,6 +109,11 @@ with sync_playwright() as p:
     page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
     page.wait_for_timeout(300)
     assert frames() > stopped, 'manual close must resume game time'
+    page.keyboard.press('r')
+    page.locator('#issue-message').fill('Report with failed playthrough upload')
+    page.locator('#issue-submit').click()
+    page.locator('#issue-dialog').wait_for(state='hidden')
+    page.locator('#log').filter(has_text='Issue #123 filed; playthrough upload failed').wait_for()
     with page.expect_download() as dl:
         page.locator('#download-record').click()
     dl.value.save_as('/tmp/btr-browser-record.json')

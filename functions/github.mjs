@@ -5,6 +5,8 @@ const REPO = 'century-arcade/below-the-root';
 const COOKIE = '__Host-btr-github';
 const FLOW = '__Host-btr-oauth';
 const SESSION_SECONDS = 8 * 60 * 60;
+const MAX_RECORDING_BYTES = 4 * 1024 * 1024;
+const tooLarge = () => json({ error: 'Issue report is too large. Download the recording and attach it by hand.' }, 413);
 const json = (body, status = 200, headers = {}) => Response.json(body, {
   status, headers: { 'Cache-Control': 'no-store', ...headers },
 });
@@ -43,18 +45,26 @@ export function createHandler(env = process.env, request = fetch) {
     const configured = !!(client && clientSecret && secret?.length >= 32);
     if (!configured) return json({ configured: false, error: 'GitHub login needs the site’s OAuth configuration.' }, op === 'session' ? 200 : 503);
     const callback = `${url.origin}/.netlify/functions/github?op=callback`;
-    const session = unseal(req, COOKIE, secret);
+    const savedSession = unseal(req, COOKIE, secret);
+    const session = typeof savedSession?.scope === 'string' && savedSession.scope.split(/[,\s]+/).includes('gist')
+      ? savedSession : null;
     const github = (path, options = {}, token = session?.token) => request(`https://api.github.com${path}`, {
       ...options, headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`,
         'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'below-the-root', 'Content-Type': 'application/json' },
     });
+    let gist = null;
+    const removeGist = async () => {
+      if (gist) {
+        try { await github(`/gists/${gist.id}`, { method: 'DELETE' }); } catch { /* Best-effort cleanup. */ }
+      }
+    };
     try {
       if (op === 'session' && req.method === 'GET') return json({ configured: true, login: session?.login || null });
       if (op === 'login' && req.method === 'GET') {
         const state = randomBytes(32).toString('base64url');
         const verifier = randomBytes(32).toString('base64url');
         const auth = new URL('https://github.com/login/oauth/authorize');
-        auth.search = new URLSearchParams({ client_id: client, redirect_uri: callback, scope: 'public_repo', state,
+        auth.search = new URLSearchParams({ client_id: client, redirect_uri: callback, scope: 'public_repo gist', state,
           code_challenge: createHash('sha256').update(verifier).digest('base64url'), code_challenge_method: 'S256' });
         return redirect(auth, [cookie(FLOW, seal({ state, verifier, expires: Date.now() + 600000 }, secret), 600)]);
       }
@@ -74,7 +84,7 @@ export function createHandler(env = process.env, request = fetch) {
         const user = await userResponse.json();
         if (!userResponse.ok || !user.login) return failed();
         return redirect('/?debug', [cookie(FLOW, '', 0), cookie(COOKIE, seal({ token: token.access_token,
-          login: user.login, expires: Date.now() + SESSION_SECONDS * 1000 }, secret), SESSION_SECONDS)]);
+          login: user.login, scope: token.scope, expires: Date.now() + SESSION_SECONDS * 1000 }, secret), SESSION_SECONDS)]);
       }
       if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
       if (req.headers.get('Origin') !== url.origin || req.headers.get('Content-Type')?.split(';')[0] !== 'application/json') {
@@ -84,19 +94,38 @@ export function createHandler(env = process.env, request = fetch) {
       if (op !== 'issue') return json({ error: 'Unknown operation' }, 404);
       if (!session) return json({ error: 'Log in to GitHub to file this issue.' }, 401);
       const text = await req.text();
-      if (text.length > 60000) return json({ error: 'Issue report is too large. Download the full recording separately.' }, 413);
+      if (Buffer.byteLength(text) > 6_000_000) return tooLarge();
       const body = JSON.parse(text);
       if (typeof body.message !== 'string' || !body.message.trim() || body.message.length > 8000
           || typeof body.context !== 'string' || body.context.length > 40000) return json({ error: 'Enter a message of at most 8,000 characters.' }, 400);
+      if (typeof body.recording !== 'string') return json({ error: 'Include the playthrough recording as JSON text.' }, 400);
+      if (Buffer.byteLength(body.recording) > MAX_RECORDING_BYTES) return tooLarge();
+      const record = body.meta?.frame == null || body.meta?.room == null ? JSON.parse(body.recording) : null;
+      const frame = body.meta?.frame ?? record?.frames;
+      const room = body.meta?.room ?? record?.checkpoint?.room;
+      const filename = `btr-playthrough-${frame}.json`;
+      const upload = await github('/gists', { method: 'POST', body: JSON.stringify({
+        public: false, description: `below-the-root playthrough, frame ${frame}, room ${room}`,
+        files: { [filename]: { content: body.recording } },
+      }) });
+      if (upload.ok) gist = await upload.json();
+      const playthrough = gist
+        ? `Playthrough: ${gist.html_url} (raw: ${gist.files[filename].raw_url}; load it with Load recording under ?debug)`
+        : `Playthrough upload failed (HTTP ${upload.status}); the reporter can attach the download by hand.`;
       const message = body.message.trim();
       const result = await github(`/repos/${REPO}/issues`, { method: 'POST', body: JSON.stringify({
-        title: message.split('\n')[0].slice(0, 120), body: `${message}\n\n${body.context}`,
+        title: message.split('\n')[0].slice(0, 120),
+        body: `${message}\n\n${playthrough}\n\n<details><summary>State at filing</summary>\n\n\`\`\`json\n${body.context}\n\`\`\`\n</details>`,
       }) });
-      if (!result.ok) return json({ error: result.status === 401 ? 'GitHub login expired. Log in again.'
-        : 'GitHub could not create the issue. Your message has been kept; try again.' }, result.status === 401 ? 401 : 502);
+      if (!result.ok) {
+        await removeGist();
+        return json({ error: result.status === 401 ? 'GitHub login expired. Log in again.'
+          : 'GitHub could not create the issue. Your message has been kept; try again.' }, result.status === 401 ? 401 : 502);
+      }
       const issue = await result.json();
-      return json({ url: issue.html_url, number: issue.number });
+      return json({ url: issue.html_url, number: issue.number, gist: gist?.html_url || null });
     } catch {
+      await removeGist();
       return json({ error: 'The GitHub request failed. Your message has been kept; try again.' }, 502);
     }
   };

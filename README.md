@@ -96,7 +96,7 @@ and `docs/tooling.md`.
 
 The game autosaves on room/menu/dialogue/terrain changes and on page hide.
 Return to `/` or `/?debug` to resume. The permanent footer is gone.
-`?debug` adds recording download/import and GitHub login/issue filing.
+`?debug` adds recording download/import and GitHub login/issue filing with automatic playthrough uploads to secret gists.
 The latter needs the one-time OAuth setup in [docs/github-issues.md](docs/github-issues.md).
 
 A recording contains the timed joystick stream, game-canvas/key event

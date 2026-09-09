@@ -34,8 +34,7 @@ export function issueContext(session) {
   const details = { engine: ENGINE_VERSION, frame: session.frame, room: s.room?.code,
     player: s.player, clock: s.clock, panel: panelLines(s),
     recentPath: record.path.slice(-30), recentInputs: record.inputs.slice(-50) };
-  return 'Filed from the game’s debug screen. The full playthrough can be downloaded separately.\n\n'
-    + '```json\n' + formatIssueDetails(details) + '\n```';
+  return formatIssueDetails(details);
 }
 
 export async function setupDebug({ getSession, saveNow, pause, resume, importFile, log,
@@ -96,17 +95,19 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   form.onsubmit = async e => {
     e.preventDefault();
     submit.disabled = true;
-    result.textContent = 'Filing issue…';
+    result.textContent = 'Uploading playthrough and filing issue…';
     try {
+      const session = getSession();
       const response = await fetch(`${API}?op=issue`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message.value, context }) });
+        body: JSON.stringify({ message: message.value, context, recording: JSON.stringify(session.snapshot()),
+          meta: { frame: session.frame, room: session.state.room?.code } }) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Could not file the issue.');
       if (!/^https:\/\/github\.com\/century-arcade\/below-the-root\/issues\/\d+$/.test(body.url)) throw new Error('Unexpected issue response');
       message.value = '';
       try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
       dialog.close();
-      log(`Issue #${body.number} filed`);
+      log(`Issue #${body.number} filed${body.gist ? ' with playthrough' : '; playthrough upload failed'}`);
     } catch (err) { result.textContent = err.message; }
     finally { submit.disabled = false; }
   };
