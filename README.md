@@ -55,7 +55,8 @@ The map is generated when opened from the original room tiles and current quest 
 The six western grunds shown on the boxed map start explored; Temple Grunds and
 cavern passages appear as you visit them. Interiors stay blank. The white marker
 stays at your last outdoor location while indoors (or your nid's exit on a new quest).
-Use +/− to zoom, scroll to explore, and Your location to return to the marker.
+Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
+Drag or scroll to explore when zoomed, and use Your location to return to the marker.
 
 ? (or H, or the ? button) opens all controls; two-line basics show under the picture on the title/menu screens until the session's first joystick input.
 

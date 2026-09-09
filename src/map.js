@@ -12,8 +12,29 @@ export function mapRoom(state, room) {
   return render(view).subarray(0, WIDTH * MAP_ROOM_HEIGHT * 4);
 }
 
+export function mapBounds(cells) {
+  let bounds = null;
+  cells.forEach((row, y) => row.forEach((cell, x) => {
+    if (cell == null) return;
+    if (!bounds) bounds = { top: y, bottom: y, left: x, right: x };
+    bounds.top = Math.min(bounds.top, y);
+    bounds.bottom = Math.max(bounds.bottom, y);
+    bounds.left = Math.min(bounds.left, x);
+    bounds.right = Math.max(bounds.right, x);
+  }));
+  return bounds;
+}
+
 export function drawMap(state, visited, current, grid) {
-  const cells = mapCells(state.data, visited, current).flat();
+  const cells = mapCells(state.data, visited, current);
+  const bounds = mapBounds(cells);
+  grid.style.gridTemplateColumns = bounds ? `repeat(${bounds.right - bounds.left + 1}, minmax(0, 1fr))` : '';
+  if (!bounds) {
+    grid.replaceChildren();
+    return;
+  }
+  const cropped = cells.slice(bounds.top, bounds.bottom + 1)
+    .flatMap(row => row.slice(bounds.left, bounds.right + 1));
   const source = document.createElement('canvas');
   source.width = WIDTH;
   source.height = MAP_ROOM_HEIGHT;
@@ -21,13 +42,7 @@ export function drawMap(state, visited, current, grid) {
   const describe = c => `${c.code} · ${c.kind} · ${c.visited ? 'visited' : 'unvisited'}`
     + (c.current ? ' · your location' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
   const paint = room => ctx.putImageData(new ImageData(mapRoom(state, room), WIDTH, MAP_ROOM_HEIGHT), 0, 0);
-  let selected;
-  const select = element => {
-    selected?.classList.remove('selected');
-    selected = element;
-    selected.classList.add('selected');
-  };
-  grid.replaceChildren(...cells.map(c => {
+  grid.replaceChildren(...cropped.map(c => {
     if (!c) return document.createElement('span');
     const room = state.data.roomById.get(c.room);
     const element = document.createElement('button');
@@ -42,8 +57,6 @@ export function drawMap(state, visited, current, grid) {
     thumbnail.setAttribute('aria-hidden', 'true');
     thumbnail.getContext('2d').drawImage(source, 0, 0, thumbnail.width, thumbnail.height);
     element.append(thumbnail);
-    element.onclick = element.onfocus = () => select(element);
-    if (c.current) select(element);
     return element;
   }));
 }

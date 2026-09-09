@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { loadTestData, J } from './helpers.js';
-import { mapCells, visitedRooms, mapRoom, paperMapRooms, mapLocation } from '../src/map.js';
+import { mapBounds, mapCells, visitedRooms, mapRoom, paperMapRooms, mapLocation } from '../src/map.js';
 import { render } from '../src/video.js';
 import { Session } from '../src/record.js';
 import { startQuest } from '../src/game.js';
@@ -16,6 +16,10 @@ for (const code of ['T1', 'T4', 'U5', 'P2', 'PB', '0C', 'AF']) {
   assert.ok(!defaults.has(code), `${code} is not on the boxed map`);
 }
 const grid = mapCells(data, visitedRooms([], data), 'M5');
+assert.deepEqual(mapBounds(grid), { top: 0, bottom: 11, left: 0, right: 24 });
+assert.equal(mapBounds([[null, null], [null, null]]), null);
+assert.deepEqual(mapBounds([[null, null, null], [null, {}, null], [null, null, null]]),
+  { top: 1, bottom: 1, left: 1, right: 1 });
 assert.equal(grid.length, 16);
 for (const [y, row] of grid.entries()) {
   assert.equal(row.length, 32);
@@ -33,6 +37,8 @@ assert.equal(cells.length, defaults.size);
 assert.equal(cells.filter(c => c.current).length, 1);
 assert.deepEqual(cells.find(c => c.code === 'O7').signs, ['TO TEMPLE GRUND']);
 const explored = new Set([...defaults, '0C', 'P2', 'T1', 'U5', 'AC']);
+assert.deepEqual(mapBounds(mapCells(data, explored, '0C')),
+  { top: 0, bottom: 12, left: 0, right: 25 });
 const revealed = mapCells(data, explored, '0C').flat().filter(Boolean);
 assert.ok(revealed.some(c => c.code === '0C' && c.current && c.kind === 'underground'),
   'visited cavern passages appear');

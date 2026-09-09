@@ -184,26 +184,62 @@ loadData((path) => fetch(path).then((r) => {
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
   const mapGrid = document.getElementById('map-grid');
+  const mapViewport = document.getElementById('map-viewport');
   const optionsDialog = document.getElementById('options-dialog');
   const optionsButton = document.getElementById('options');
   let mapZoom = 1;
   const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
     ?.scrollIntoView({ block: 'center', inline: 'center' });
-  const zoomMap = factor => {
+  const zoomMap = (factor, anchor) => {
+    const viewportRect = mapViewport.getBoundingClientRect();
+    const cx = viewportRect.left + mapViewport.clientLeft + mapViewport.clientWidth / 2;
+    const cy = viewportRect.top + mapViewport.clientTop + mapViewport.clientHeight / 2;
+    const before = mapGrid.getBoundingClientRect();
+    const cell = anchor?.getBoundingClientRect();
+    const fx = ((cell ? cell.left + cell.width / 2 : cx) - before.left) / before.width;
+    const fy = ((cell ? cell.top + cell.height / 2 : cy) - before.top) / before.height;
     mapZoom = Math.max(1, Math.min(8, mapZoom * factor));
     mapGrid.style.width = `${mapZoom * 100}%`;
     document.getElementById('map-zoom').textContent = `${mapZoom}×`;
     document.getElementById('map-zoom-out').disabled = mapZoom === 1;
     document.getElementById('map-zoom-in').disabled = mapZoom === 8;
-    (mapGrid.querySelector('.selected') || mapGrid.querySelector('.current'))
-      ?.scrollIntoView({ block: 'center', inline: 'center' });
+    // Include the grid's automatic margins when it is shorter than the viewport.
+    const after = mapGrid.getBoundingClientRect();
+    mapViewport.scrollLeft += after.left + fx * after.width - cx;
+    mapViewport.scrollTop += after.top + fy * after.height - cy;
+    mapViewport.style.cursor = mapZoom > 1 ? 'grab' : '';
   };
   document.getElementById('map-zoom-in').onclick = () => zoomMap(2);
   document.getElementById('map-zoom-out').onclick = () => zoomMap(.5);
-  document.getElementById('map-current').onclick = () => {
-    mapGrid.querySelector('[aria-current="location"]')?.click();
-    centerMap();
+  document.getElementById('map-current').onclick = centerMap;
+  mapViewport.addEventListener('dblclick', e => {
+    // Pointer capture can retarget the double-click to the viewport.
+    const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('button');
+    if (cell && mapGrid.contains(cell) && mapZoom < 8) zoomMap(2, cell);
+  });
+  let mapDrag = null;
+  const endMapDrag = e => {
+    if (mapDrag?.id !== e.pointerId) return;
+    mapDrag = null;
+    if (mapViewport.hasPointerCapture(e.pointerId)) mapViewport.releasePointerCapture(e.pointerId);
+    mapViewport.style.cursor = mapZoom > 1 ? 'grab' : '';
   };
+  mapViewport.addEventListener('pointerdown', e => {
+    if (mapZoom === 1 || e.pointerType === 'touch' || e.button !== 0 || mapDrag) return;
+    mapDrag = { id: e.pointerId, x: e.clientX, y: e.clientY,
+      left: mapViewport.scrollLeft, top: mapViewport.scrollTop };
+    mapViewport.setPointerCapture(e.pointerId);
+    mapViewport.style.cursor = 'grabbing';
+  });
+  mapViewport.addEventListener('pointermove', e => {
+    if (mapDrag?.id !== e.pointerId) return;
+    if (!(e.buttons & 1)) return endMapDrag(e);
+    mapViewport.scrollLeft = mapDrag.left - (e.clientX - mapDrag.x);
+    mapViewport.scrollTop = mapDrag.top - (e.clientY - mapDrag.y);
+  });
+  for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    mapViewport.addEventListener(event, endMapDrag);
+  }
   const saveNow = () => autosave.save(session, true).reason !== 'failed';
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
