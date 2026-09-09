@@ -69,8 +69,9 @@ the button is optional, unlike the original.
 Gamepad: d-pad or left stick moves, any face button fires; sound starts only after a keypress or canvas touch/click, since the browser needs a real gesture to unlock audio.
 
 ```
-make serve                    # Netlify Dev: game + functions at http://localhost:8000
+make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
+make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
 tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
 python3 tools/spec_check.py   # cross-check the spec tables
 tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room

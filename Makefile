@@ -5,7 +5,10 @@ CONTEXT ?= dev
 NETLIFY_BIN := $(shell p=$$(command -v netlify 2>/dev/null); if [ -f "$$p" ] && [ -x "$$p" ]; then printf '%s' "$$p"; fi)
 NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27.5.0 netlify)
 
-.PHONY: build serve test clean
+PY ?= $(HOME)/.venvs/claude/bin/python
+BTR_URL ?= http://localhost:$(PORT)
+
+.PHONY: build serve test browser-test clean
 
 build:
 	mkdir -p $(BUILD)/data $(BUILD)/assets
@@ -14,7 +17,8 @@ build:
 	cp assets/*.json assets/*.png $(BUILD)/assets/
 
 serve: build
-	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open
+	@if curl -sf -o /dev/null $(BTR_URL)/; then echo "already serving $(BUILD) at $(BTR_URL); a new build is picked up as is"; else \
+	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
 	node test/fit_test.js
@@ -34,6 +38,10 @@ test:
 	node test/github_test.mjs
 	node test/replay_test.js intro
 	node test/replay_test.js quest
+	@echo "make test: all passed"
+
+browser-test: build
+	@for t in test/browser_*.py; do BTR_URL=$(BTR_URL) $(PY) $$t || exit 1; done
 
 clean:
 	rm -rf $(BUILD)
