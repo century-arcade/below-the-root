@@ -30,7 +30,7 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
 | M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, mute and volume, the ? help overlay; the options dialog: CRT effect (WebGL), classic/modern display (modern keeps the status sheet above the picture), debug tools; palette choice parked | done |
+| M6.4 polish -- the shell is in: title over `T4`, main menu, character select, DISK STORAGE (browser slots), SAMPLE QUEST and the cold-start attract flow, 15 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, mute and volume, the ? help overlay; the options dialog: CRT effect (CSS overlay), classic/modern display (modern keeps the status sheet above the picture), debug tools; palette choice parked | done |
 | M6.5 ship -- normal walkthrough recording and cleanup tools ready; speedrun playthroughs per character in progress; GitHub OAuth configured; user authorization still to verify | **in progress** |
 
 The spec has 10 unknowns, listed under "Unknowns" at the end of most area files;
@@ -61,7 +61,7 @@ Drag or scroll to explore when zoomed, and use Your location to return to the ma
 
 ? (or H, or the ? button) opens all controls; two-line basics show under the picture on the title/menu screens until the session's first joystick input.
 
-O (or the ⚙ button) opens the options: volume (starts at 50%; the slider is squared, so the low end is genuinely quiet; M and the speaker icon mute, which the slider shows as 0%), the CRT effect (a WebGL pass: curvature, scanlines, phosphor stripes, colour bleed; off by default), classic display, the debug tools (the top-bar icons `?debug` shows), and Reset game (one click deletes the autosave and returns to the main menu; DISK STORAGE slots and options stay).  Settings persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
+O (or the ⚙ button) opens the options: volume (starts at 50%; the slider is squared, so the low end is genuinely quiet; M and the speaker icon mute, which the slider shows as 0%), the CRT effect (a CSS overlay: scanlines, phosphor stripes, vignette, colour bleed; off by default), classic display, the debug tools (the top-bar icons `?debug` shows), and Reset game (one click deletes the autosave and returns to the main menu; DISK STORAGE slots and options stay).  Settings persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
 
 Classic display means the game as designed, not a simulated C64: the map, the mouse stick and the buttonless glide stay.  Modern display adds two rows in the game's own font under the picture with the status sheet's day, time, name and numbers, live during a quest (in fullscreen too), and lets the button skip any tune the game would wait for (a recorded action, so playthroughs replay).
 
@@ -74,7 +74,7 @@ Gamepad: d-pad or left stick moves, any face button fires; sound starts only aft
 make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
 make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
-tools/shot.py --keys o out.png '?menu'  # headless screenshot (WebGL on) after keys; --select '#canvas-box' crops
+tools/shot.py --keys o out.png '?menu'  # headless screenshot after keys; --select '#canvas-box' crops
 tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
 python3 tools/spec_check.py   # cross-check the spec tables
 tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room

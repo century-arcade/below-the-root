@@ -29,7 +29,12 @@
   #map-grid canvas { width: 100%; height: 100%; }
   #map-grid .current { outline: 2px solid #fff; outline-offset: -2px; }
   #map-grid > button:focus-visible { outline: 2px solid #ffe866; outline-offset: -2px; }
-  #crt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #crt, #crt > div { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; }
+  #crt { background: radial-gradient(ellipse at center, #fff 55%, #bbb 100%); }
+  #scanlines { background: repeating-linear-gradient(to bottom, #fff 0, #fff calc(var(--row) * .5), #9e9e9e calc(var(--row) * .75), #fff var(--row)); }
+  #stripes { background: repeating-linear-gradient(to right, #ffdbdb 0, #ffdbdb calc(var(--stripe) / 3), #dbffdb calc(var(--stripe) / 3), #dbffdb calc(var(--stripe) * 2 / 3), #dbdbff calc(var(--stripe) * 2 / 3), #dbdbff var(--stripe)); }
+  #canvas-box:not(.stripes) #stripes { display: none; }
+  #screen.crt { filter: brightness(1.3) blur(var(--blur)); }
   #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
   #top-controls, #debug-tools { display: flex; gap: 4px; }
   #top-controls { justify-content: flex-end; padding: 4px 0; }
@@ -73,7 +78,7 @@
   <div id="where" role="status"></div>
   <div id="canvas-box">
     <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses; Tab shows the map. Press ? for all controls."></canvas>
-    <canvas id="crt" aria-hidden="true" hidden></canvas>
+    <div id="crt" aria-hidden="true" hidden><div id="scanlines"></div><div id="stripes"></div></div>
     <div id="map-screen" hidden role="dialog" aria-label="World map">
       <div id="map-heading"><span>World map</span><button id="close-map">Close map</button></div>
       <div id="map-tools">

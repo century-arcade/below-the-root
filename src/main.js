@@ -6,10 +6,9 @@ import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, clearAutosave } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
-import { fitScale } from './fit.js';
+import { fitScale, crtVars } from './fit.js';
 import { drawMap, visitedRooms, mapLocation } from './map.js';
 import { basicsVisible } from './help.js';
-import { Crt } from './crt.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { createLog } from './log.js';
@@ -23,8 +22,7 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.createImageData(WIDTH, HEIGHT + STATUS_HEIGHT) };
 let band = 0;
-const crtCanvas = document.getElementById('crt');
-const crt = Crt.create(crtCanvas, WIDTH);
+const crtBox = document.getElementById('crt');
 
 const CHROME_PX = 8; // body top padding
 
@@ -43,7 +41,11 @@ function fit() {
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   if (!full) game.style.width = canvas.style.width;
-  crt?.resize(WIDTH * scale, (HEIGHT + band) * scale);
+  const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
+  canvas.parentElement.style.setProperty('--row', `${row}px`);
+  canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
+  canvas.parentElement.style.setProperty('--blur', `${blur}px`);
+  canvas.parentElement.classList.toggle('stripes', stripes);
 }
 
 function setBand(height) {
@@ -292,15 +294,15 @@ loadData((path) => fetch(path).then((r) => {
     fit();
   }
   function setCrt(on) {
-    options.crt = on && !!crt;
-    crtCanvas.hidden = !options.crt;
+    options.crt = on;
+    crtBox.hidden = !on;
+    canvas.classList.toggle('crt', on);
   }
   function syncOptions() {
     const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
     opt.volume.value = level;
     opt['volume-out'].value = `${level}%`;
     opt.crt.checked = options.crt;
-    opt.crt.disabled = !crt;
     opt.classic.checked = options.classic;
     opt.debug.checked = debug;
   }
@@ -410,7 +412,6 @@ loadData((path) => fetch(path).then((r) => {
     image.data.set(render(state));
     if (band) image.data.set(renderStatus(state, rows), WIDTH * HEIGHT * 4);
     ctx.putImageData(image, 0, 0);
-    if (options.crt) crt.draw(image);
     const line = debug ? whereLabel(state) : '';
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
