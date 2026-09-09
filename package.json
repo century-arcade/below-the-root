@@ -1,0 +1,8 @@
+{
+  "name": "below-the-root",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "marked": "18.0.12"
+  }
+}

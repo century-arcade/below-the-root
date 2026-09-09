@@ -34,11 +34,11 @@ with sync_playwright() as p:
             return write.call(this, key, value);
         };
     })();""")
-    page.goto(URL)
-    page.wait_for_selector('#mute[aria-pressed]', state='attached')
+    page.goto(URL + 'about')
+    expect(page.locator('#about')).to_be_visible()
     page.evaluate('([key, value]) => localStorage.setItem(key, value)', [KEY, original])
     page.goto(URL)
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_selector('#mute[aria-pressed]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     assert page.locator('#log').text_content() == ''
     assert any('could not be restored' in msg and 'Test quota' in msg for msg in warnings), warnings
@@ -62,7 +62,7 @@ with sync_playwright() as p:
         sessionStorage.setItem('recoverySeeded', 'true');
     }}""")
     page.reload()
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_selector('#mute[aria-pressed]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     expect(page.locator('#save-recovery')).to_have_count(0)
     expect(page.locator('#map')).to_be_visible()
@@ -78,7 +78,7 @@ with sync_playwright() as p:
         return JSON.parse(localStorage.getItem('btr.autosave.v1')).frames > frames;
     }""", arg=recovered['frames'])
     page.reload()
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_selector('#mute[aria-pressed]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     expect(page.locator('#map')).to_be_visible()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
@@ -91,7 +91,7 @@ with sync_playwright() as p:
     unusable = json.dumps({**record, 'c64': None, 'engine': 'old'})
     page.add_init_script(f'localStorage.setItem({json.dumps(KEY)}, {json.dumps(unusable)})')
     page.goto(URL + '?debug')
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_selector('#mute[aria-pressed]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     assert page.locator('#log').text_content() == ''
     assert any('could not be restored' in msg for msg in warnings), warnings

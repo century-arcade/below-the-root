@@ -12,7 +12,6 @@ import { basicsVisible } from './help.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { createLog } from './log.js';
-import { setupSite } from './site.js';
 
 const log = createLog(document.getElementById('log'), { onToggle: () => fit() });
 
@@ -26,7 +25,6 @@ let band = 0;
 const crtBox = document.getElementById('crt');
 
 function fit() {
-  if (document.getElementById('play').hidden) return;
   const full = document.fullscreenElement === game;
   let scale;
   if (full) {
@@ -82,11 +80,9 @@ function whereLabel(state) {
   return state.room && !state.title ? state.room.code : '';
 }
 
-let hasAutosave = false;
-try { hasAutosave = localStorage.getItem(AUTOSAVE_KEY) !== null; } catch {}
-setupSite(hasAutosave, fit);
+canvas.focus({ preventScroll: true });
 
-loadData((path) => fetch(path).then((r) => {
+loadData((path) => fetch(`/${path}`).then((r) => {
   if (!r.ok) throw new Error(`${path}: ${r.status}`);
   return r.json();
 })).then((data) => {
@@ -430,7 +426,7 @@ loadData((path) => fetch(path).then((r) => {
   function frame(now) {
     acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
-    if (!document.getElementById('play').hidden) gamepad.poll();
+    gamepad.poll();
     if (gamepad.held.size) seenInput = true;
     while (acc >= STEP_MS) {
       session.skippable = !options.classic;

@@ -1,0 +1,69 @@
+<section id="play" aria-label="Play Below the Root">
+<div id="game">
+  <div id="where" role="status"></div>
+  <div id="canvas-box">
+    <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses; Tab shows the map. Press ? for all controls."></canvas>
+    <div id="crt" aria-hidden="true" hidden><div id="scanlines"></div><div id="stripes"></div></div>
+    <div id="map-screen" hidden role="dialog" aria-label="World map">
+      <div id="map-heading"><span>World map</span><button id="close-map">Close map</button></div>
+      <div id="map-tools">
+        <button id="map-zoom-out" aria-label="Zoom out" disabled>−</button>
+        <output id="map-zoom" aria-live="polite">1×</output>
+        <button id="map-zoom-in" aria-label="Zoom in">+</button>
+        <button id="map-current">Your location</button>
+      </div>
+      <div id="map-viewport"><div id="map-grid"></div></div>
+    </div>
+    <div id="help-screen" hidden role="dialog" aria-label="Controls" tabindex="-1">
+      <div id="help-heading"><span>Controls</span><button id="close-help">Close help</button></div>
+      <div id="help-content">
+        <h2>Keyboard</h2>
+        <dl>
+          <dt>Move</dt><dd>WASD / arrows</dd>
+          <dt>Button</dt><dd>Space / Shift / Ctrl: skip, jump, select</dd>
+          <dt>Pause</dt><dd>Escape / P</dd>
+          <dt>Map</dt><dd>Tab / Map icon in the top bar (during a quest)</dd>
+          <dt>Fullscreen</dt><dd>F (when supported)</dd>
+          <dt>Mute</dt><dd>M</dd>
+          <dt>Volume</dt><dd>- / = (or _ / +)</dd>
+          <dt>Help</dt><dd>? (Shift+/) / H / ? button; Escape closes</dd>
+          <dt>Options</dt><dd>O / ⚙ button: volume, CRT effect, classic display, debug tools</dd>
+          <dt>Skip a tune</dt><dd>the button, while the game waits for its music (modern display)</dd>
+        </dl>
+        <h2>Touch</h2>
+        <p>Hold to push toward your finger. Tap to press the button that way.
+          Tap a door or double-tap a spot to walk there. While walking, tap to
+          re-aim or tap the figure to stop.</p>
+        <h2>Gamepad</h2>
+        <p>D-pad / left stick to move; any face button to skip, jump, select.</p>
+      </div>
+    </div>
+  </div>
+  <div id="game-controls">
+    <div id="basics" hidden>WASD / Arrows to move<br>Space to skip / jump / select</div>
+  </div>
+  <div id="log" role="log" aria-live="polite" hidden></div>
+  <dialog id="options-dialog" aria-labelledby="options-label">
+    <form id="options-form" method="dialog">
+      <h2 id="options-label">Options</h2>
+      <label>Volume <input id="opt-volume" type="range" min="0" max="100" step="10"> <output id="opt-volume-out"></output></label>
+      <label><input id="opt-crt" type="checkbox"> CRT effect</label>
+      <label><input id="opt-classic" type="checkbox"> Classic display (no status rows under the picture, no tune skipping)</label>
+      <label><input id="opt-debug" type="checkbox"> Debug tools</label>
+      <div id="reset-row"><button id="opt-reset" type="button">Reset game</button></div>
+      <button id="options-close" type="submit">Close</button>
+    </form>
+  </dialog>
+  <dialog id="issue-dialog" aria-labelledby="issue-label">
+    <form id="issue-form">
+      <label id="issue-label" for="issue-message">What happened?</label>
+      <textarea id="issue-message" required maxlength="8000" placeholder="Describe the problem…"></textarea>
+      <p>The room, game state, and recent moves will be included.</p>
+      <button id="issue-submit" type="submit">File issue</button>
+      <button id="issue-cancel" type="button">Close</button>
+      <button id="github-logout" type="button" hidden>Log out</button>
+      <p id="issue-result" role="status"></p>
+    </form>
+  </dialog>
+</div>
+</section>

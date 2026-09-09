@@ -10,3 +10,18 @@ framework = "#static"
 publish = "_build"
 port = 8000
 autoLaunch = false
+
+[[redirects]]
+from = "/about"
+to = "/about.html"
+status = 200
+
+[[redirects]]
+from = "/play"
+to = "/play.html"
+status = 200
+
+[[redirects]]
+from = "/resources"
+to = "/resources.html"
+status = 200

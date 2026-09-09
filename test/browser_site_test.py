@@ -1,4 +1,5 @@
-"""Site entry, navigation and uninterrupted background play; run against make serve."""
+"""Clean page URLs, Markdown content, history and saved-game navigation."""
+import json
 import os
 from playwright.sync_api import sync_playwright, expect
 
@@ -11,86 +12,84 @@ with sync_playwright() as p:
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto(BASE + '/')
-        page.wait_for_selector('#mute[aria-pressed]', state='attached')
-        expect(page.locator('#about')).to_be_visible()
-        expect(page.locator('#play')).to_be_hidden()
-        expect(page.locator('#resources')).to_be_hidden()
-        expect(page.locator('#top-controls')).to_be_hidden()
-        expect(page.locator('#site-header a[href="#about"]')).to_have_attribute('aria-current', 'page')
-        page.locator('#site-header a[href="#resources"]').click()
+        expect(page).to_have_url(BASE + '/about')
+        expect(page.get_by_role('heading', name='Below the Root', exact=True)).to_be_visible()
+        expect(page.locator('#site-header a[aria-current]')).to_have_text('About')
+        page.get_by_role('navigation').get_by_role('link', name='Resources').click()
+        expect(page).to_have_url(BASE + '/resources')
         expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
-        expect(page.locator('#about')).to_be_hidden()
-        expect(page.locator('#play')).to_be_hidden()
-        expect(page.locator('#top-controls')).to_be_hidden()
         expect(page.locator('#site-header a[aria-current]')).to_have_text('Resources')
-        expect(page.locator('#resources').get_by_role('link', name='Phil Salvador: Below the Root', exact=True)).to_be_visible()
+        expect(page.get_by_role('link', name='Phil Salvador: Below the Root', exact=True)).to_be_visible()
         page.go_back()
-        expect(page.locator('#about')).to_be_visible()
+        expect(page).to_have_url(BASE + '/about')
         page.go_forward()
-        expect(page.locator('#resources')).to_be_visible()
+        expect(page).to_have_url(BASE + '/resources')
         page.reload()
-        expect(page.locator('#resources')).to_be_visible()
+        expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
         page.go_back()
         page.locator('.play-button').click()
-        expect(page.locator('#play')).to_be_visible()
-        expect(page.locator('#about')).to_be_hidden()
-        expect(page.locator('#top-controls')).to_be_visible()
+        expect(page).to_have_url(BASE + '/play')
+        page.wait_for_selector('#mute[aria-pressed]', state='attached')
         expect(page.locator('#screen')).to_be_focused()
-        expect(page.locator('#site-header a[href="#play"]')).to_have_attribute('aria-current', 'page')
-        # A save created after entering Play must not change the initial history entry.
-        page.evaluate("localStorage.setItem('btr.autosave.v1', '{}')")
+        expect(page.locator('#site-header a[aria-current]')).to_have_text('Play')
         page.go_back()
-        expect(page.locator('#about')).to_be_visible()
-        page.evaluate('localStorage.clear()')
+        expect(page).to_have_url(BASE + '/about')
+        # Query entry links still work, with all game assets loaded from the site root.
         for query in ['?demo', '?room=T1']:
             page.goto(BASE + '/' + query)
+            expect(page).to_have_url(BASE + '/play' + query)
             page.wait_for_selector('#mute[aria-pressed]', state='attached')
-            expect(page.locator('#play')).to_be_visible()
-            expect(page.locator('#top-controls')).to_be_visible()
             expect(page.locator('#screen')).to_be_focused()
-        # The player falls into this outdoor room when the quest starts.
-        page.goto(BASE + '/?room=B8')
-        page.wait_for_selector('#mute[aria-pressed]', state='attached')
-        page.locator('#site-header a[href="#about"]').click()
-        expect(page.locator('#play')).to_be_hidden()
-        frame = page.locator('#screen').evaluate('canvas => canvas.toDataURL()')
-        page.wait_for_timeout(1000)
-        assert page.locator('#screen').evaluate('canvas => canvas.toDataURL()') != frame, 'About must keep drawing the quest'
-        # Reading-page keys must neither open overlays nor steer the quest.
-        for tab in ['about', 'resources']:
-            page.locator(f'#site-header a[href="#{tab}"]').click()
-            page.evaluate("dispatchEvent(new Event('pagehide'))")
-            before = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+        page.keyboard.press('ArrowRight')
+        page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
+        before = page.evaluate("localStorage.getItem('btr.autosave.v1')")
+        assert before, 'Leaving Play saves the quest'
+        for name in ['About', 'Resources']:
+            page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
+            expect(page.locator('#screen')).to_have_count(0)
             for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
                 page.keyboard.press(key)
-            page.evaluate("dispatchEvent(new Event('pagehide'))")
-            after = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
-            assert after['inputs'] == before['inputs'], f'{tab} must not steer the quest'
-            assert not page.locator('#options-dialog').evaluate('dialog => dialog.open')
-            assert page.locator('#help-screen').evaluate('screen => screen.hidden')
-        page.locator('#site-header a[href="#play"]').focus()
+            assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == before
+        page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).focus()
         page.keyboard.press('Enter')
-        expect(page.locator('#play')).to_be_visible()
+        page.wait_for_selector('#mute[aria-pressed]', state='attached')
         expect(page.locator('#screen')).to_be_focused()
+        page.evaluate("dispatchEvent(new Event('pagehide'))")
+        restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+        saved = json.loads(before)
+        assert restored['initial'] == saved['initial'], 'Play restores the previous session'
+        assert restored['inputs'][:len(saved['inputs'])] == saved['inputs']
         page.goto(BASE + '/')
-        expect(page.locator('#play')).to_be_visible()  # returning player
-        page.goto(BASE + '/#about')
-        expect(page.locator('#about')).to_be_visible()  # explicit hash wins over save
-        page.goto(BASE + '/?room=B8#resources')
-        expect(page.locator('#resources')).to_be_visible()  # wins over query and save
-        expect(page.locator('#play')).to_be_hidden()
-        expect(page.locator('#site-header a[aria-current]')).to_have_text('Resources')
+        expect(page).to_have_url(BASE + '/play')
+        # Explicit pages take precedence over an autosave and game parameters.
+        page.goto(BASE + '/about?room=B8')
+        expect(page.locator('#about')).to_be_visible()
+        expect(page.locator('#screen')).to_have_count(0)
+        for legacy, target in [('/#about', '/about'), ('/#play', '/play'),
+                               ('/?room=B8#resources', '/resources?room=B8')]:
+            page.goto(BASE + legacy)
+            expect(page).to_have_url(BASE + target)
+        for name in ['about', 'resources', 'play']:
+            response = page.goto(BASE + '/' + name + '/')
+            assert response.ok
+            expect(page).to_have_url(BASE + '/' + name + '/')
+            page.reload()
+            expect(page.locator('#site-header a[aria-current]')).to_have_text(name.capitalize())
         assert not errors, errors
         page.close()
-    # Restricted storage must still leave the introduction usable.
+    # Reading pages are complete HTML and work without JavaScript or storage.
+    page = browser.new_page(java_script_enabled=False)
+    for name in ['about', 'resources']:
+        response = page.goto(BASE + '/' + name)
+        assert response.ok
+        expect(page.locator('main h1')).to_be_visible()
+        expect(page.get_by_role('navigation').get_by_role('link', name='Play')).to_have_attribute('href', '/play')
+    page.close()
     page = browser.new_page()
     page.add_init_script("Object.defineProperty(window, 'localStorage', {get() {throw new Error('blocked')}})")
     page.goto(BASE + '/')
-    expect(page.locator('#about')).to_be_visible()
-    page.locator('#site-header a[href="#resources"]').click()
-    expect(page.locator('#resources')).to_be_visible()
-    page.locator('#site-header a[href="#about"]').click()
+    expect(page).to_have_url(BASE + '/about')
     page.locator('.play-button').click()
     expect(page.locator('#screen')).to_be_focused()
     browser.close()
-    print('browser_site_test: entry, history, focus, background frames, input isolation and storage passed')
+    print('browser_site_test: URLs, Markdown pages, history, focus, saves and storage passed')

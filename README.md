@@ -73,6 +73,7 @@ the button is optional, unlike the original.
 Gamepad: d-pad or left stick moves, any face button fires; sound starts only after a keypress or canvas touch/click, since the browser needs a real gesture to unlock audio.
 
 ```
+make build                    # render Markdown pages and copy game assets
 make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
 make screenshot               # regenerate assets/box/screen.png from Broad Grund (make serve first)
@@ -90,7 +91,16 @@ or `npx --yes --package=netlify-cli@27.5.0 netlify login` / `link` without
 a global installation. It uses the `dev` environment by default; use
 `make serve CONTEXT=production` for production-context variables, or
 `make serve PORT=8888` to change the local port. Re-run `make build`
-after editing game source while the server is running.
+after editing source while the server is running.
+
+The site has separate `/about`, `/play`, and `/resources` pages. Edit
+`src/about.md` and `src/resources.md` for the reading pages; About retains a few
+HTML wrappers for its box art and styling. `tools/build-site.mjs` renders Markdown
+with Marked into the shared `src/page.html` template. `make build` installs the
+pinned npm build dependency when needed; the published pages need no Markdown
+runtime. The homepage sends new visitors to About and returning players to Play;
+old `#about`, `#play`, `#resources` and game query links still work. Leaving Play
+saves the game, and returning restores it.
 
 Regenerating the spec tables and the emulator setup: `docs/spec/README.md`
 and `docs/tooling.md`.

@@ -7,3 +7,4 @@ _cbox/
 iso/
 .netlify/
 .env.local
+node_modules/

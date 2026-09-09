@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := build
 BUILD := _build
 SPEC  := docs/spec/data
 PORT  ?= 8000
@@ -10,9 +11,13 @@ BTR_URL ?= http://localhost:$(PORT)
 
 .PHONY: build serve test browser-test poster screenshot clean
 
-build:
+node_modules/.package-lock.json: package.json package-lock.json
+	npm ci --ignore-scripts --no-audit --no-fund
+
+build: node_modules/.package-lock.json
 	mkdir -p $(BUILD)/data $(BUILD)/assets
-	cp src/index.html src/*.js src/*.css $(BUILD)/
+	cp src/*.js src/*.css $(BUILD)/
+	node tools/build-site.mjs $(BUILD)
 	cp $(SPEC)/*.json $(BUILD)/data/
 	cp assets/*.json assets/*.png $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/

@@ -1,38 +1,18 @@
 const GAME_PARAMS = ['demo', 'room', 'player', 'menu', 'debug', 'github'];
-const TABS = ['about', 'play', 'resources'];
+const PAGES = ['about', 'play', 'resources'];
 
-export function startTab(search, hash, hasAutosave) {
-  if (TABS.includes(hash.slice(1))) return hash.slice(1);
+// Only the homepage chooses an entry page; explicit page URLs always win.
+export function startPage(search, hash, hasAutosave) {
+  if (PAGES.includes(hash.slice(1))) return hash.slice(1);
   const params = new URLSearchParams(search);
   return hasAutosave || GAME_PARAMS.some(name => params.has(name)) ? 'play' : 'about';
 }
 
-export function setupSite(hasAutosave, onPlay) {
-  const initial = startTab(location.search, location.hash, hasAutosave);
-  // Give the first history entry a stable tab even if the game autosaves later.
-  if (!TABS.includes(location.hash.slice(1))) {
-    history.replaceState(history.state, '', `${location.pathname}${location.search}#${initial}`);
-  }
-  function showTab() {
-    const tab = startTab(location.search, location.hash, hasAutosave);
-    for (const name of TABS) {
-      document.getElementById(name).hidden = name !== tab;
-      const link = document.querySelector(`#site-header a[href="#${name}"]`);
-      if (name === tab) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
-    }
-    document.getElementById('top-controls').hidden = tab !== 'play';
-    if (tab === 'play') {
-      onPlay();
-      document.getElementById('screen').focus({ preventScroll: true });
-    }
-  }
-  // Reading pages retain native keys without game shortcuts.
-  for (const type of ['keydown', 'keyup']) document.addEventListener(type, e => {
-    if (document.getElementById('play').hidden) e.stopPropagation();
-  }, true);
-  addEventListener('hashchange', showTab);
-  // Initial fragment navigation happens after module startup and resets focus.
-  addEventListener('load', showTab, { once: true });
-  showTab();
+export function enterSite() {
+  let hasAutosave = false;
+  // Same storage key as record.js; do not load the game on the reading pages.
+  try { hasAutosave = localStorage.getItem('btr.autosave.v1') !== null; } catch {}
+  const page = startPage(location.search, location.hash, hasAutosave);
+  const hash = PAGES.includes(location.hash.slice(1)) ? '' : location.hash;
+  location.replace(`/${page}${location.search}${hash}`);
 }
