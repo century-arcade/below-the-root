@@ -269,7 +269,7 @@ the caverns.
 `map.json` has the grid as a 16 x 32 array of room codes, null where
 there is no room, plus the per-row summary and every sign.
 
-## Open questions
+## Unknowns
 
 - **Blank slots that hang.**  46 exits north, 62 south, 35 west and 35
   east point at a blank slot (`rooms.json` `exits_missing` says 78 north

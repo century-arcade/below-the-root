@@ -349,7 +349,9 @@ and the sprite frame each state shows.
 ## Stamina, fatigue, food, rest, spirit
 
 Six numbers, all of them shown by STATUS.  Starting values per
-character are in `characters.json`.
+character are in `characters.json`.  The demo's sixth character is not
+in that table: `startDemo` in `src/game.js` builds it from Herd's record
+with stamina 20, spirit limit and energy 10, and a shuba in hand.
 
 | number | range | what it does |
 |--------|-------|--------------|
@@ -360,8 +362,9 @@ character are in `characters.json`.
 | spirit energy | 0 to the limit | the pool skills spend |
 | standing with Kindar, standing with Erdlings | 0-5 | how people of each kind react (`creatures.md`) |
 
-The food cap and the rest cap are held separately but always set to the
-same value, so nothing at run time tells them apart.
+The port sets the food and rest caps together and refills both counters
+to those caps, so the caps are one value in play.  The save image keeps
+both bytes.
 
 ### Fatigue
 
@@ -681,18 +684,11 @@ Every message the player and its verbs print is a fixed string at a
 fixed place on the text panel; none of them come from the numbered
 table of things people say, which is `creatures.md`'s.
 
-## Open questions
+## Unknowns
 
-- **A sixth character.**  The sample quest runs a character that is not
-  one of the five: spirit 10, stamina 20, Herd's nid-place, and a shuba
-  already in hand.  `characters.json` lists the playable five only, so a
-  port driving its demo from that table needs a sixth entry.
 - **Why those four rooms allow taking indoors.**  Three of them hold
   quest items -- the wand of Befal, the spirit lamp, the temple key --
   which explains those.  The Salaat kidnap room is unexplained.
-- **The food cap and the rest cap** are held separately and always set
-  equal, so nothing in a run tells them apart.  Kept apart in case a
-  save from a version that did distinguish them turns up.
 
 ---
 

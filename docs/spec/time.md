@@ -195,7 +195,9 @@ the saved state; the fields are listed in `data/quest.json`.
   Five named figures add 5 each on your first SPEAK; ten animals add 1
   each the first time you pense their message.
 - **Visions shown**, 0-5: each spirit gain that still has a vision left
-  prints the next one.
+  prints the next one.  Six gains earn visions -- five blessers and the
+  five-animal milestone -- but there are only five visions, so the sixth
+  gain shows no vision.
 - **Animals pensed**, 0-5; the fifth prints a congratulation.
 - **Wissenberries offered to the outer gate guard**; the second offering
   opens that gate for good.
@@ -284,19 +286,6 @@ opened the menu.  It does not hold the world layout, the character's
 artwork, or any score.  `data/save.json` gives the byte-exact layout of
 the original's 1408-byte image, so a port can read and write real saves;
 a fresh port needs only the field list.
-
-## Open questions
-
-- Six things earn a vision -- five blessers and the five-animal
-  milestone -- and only five visions exist, so one gain shows nothing.
-  Which one depends on play order, and no order is enforced.  Decided:
-  keep it; the sixth gain shows no vision.
-- Losing a day can push the day count past 51 without the quest ending
-  until the next hour, so a quest can run an hour past its limit.  Never
-  seen in play.  Decided: keep it; the quest ends at the next hour.
-- The attack handler has no case for Raamo's kind of creature, so if he
-  could ever walk into you the game would print the Nekom attack
-  message.  Whether his patrol can reach you has not been checked.
 
 Derived from `docs/day-and-quest.md`, `docs/demo.md` and
 `docs/menus-and-saves.md`.

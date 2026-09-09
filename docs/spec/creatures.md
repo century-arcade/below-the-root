@@ -115,7 +115,13 @@ Waits, in ticks:
 
 Twenty-seven creatures walk slowly, ninety-four quickly.  Nothing stops a
 creature at the edge of the room; its patrol columns are the only thing
-keeping it inside, and in every shipped room they do.
+keeping it inside, and in every shipped room they do.  The port keeps
+this rule: off-playfield cells are empty, so an escaped creature would
+fall forever.
+
+The vine-rope tile is solid only while you crawl, and creatures share
+that test, gaining or losing support with your posture.  No shipped
+room places a vine rope on a creature's patrol.
 
 ## Snakes and spiders
 
@@ -129,6 +135,9 @@ chance in sixteen of tearing a shuba.  A player already lying down is left alone
 They have nothing to say: SPEAK and PENSE both answer `NO RESPONSE`.
 
 ## Ambush
+
+Only ambushers run the attack test: Raamo can walk up to you, but as a
+walker he stops for you and never reaches the attack handler.
 
 Twelve people are waiting for you: six followers of D'ol Salaat (Kindar)
 and six of the Nekom (Erdlings), who look like anyone else.  Every time
@@ -326,6 +335,9 @@ Otherwise: `THE DOOR IS LOCKED`.  The check looks at the room's guard
 whether or not she is standing there, so banishing one does not sneak you
 past the lock -- it sets the flag that opens the door instead.
 
+The inner guard's toll is per visit by design; only banishing him opens
+his door permanently.
+
 ## The wand of Befal
 
 USE a wand of Befal while a creature is next to you and it is gone from
@@ -379,27 +391,8 @@ been offered you and whether you have paid a guard this visit (both wiped
 on every room load), and whether D'ol Falla has been spoken to (which
 lasts the whole quest).
 
-## Open questions
+## Unknowns
 
-- **Creatures can walk out of the room.** Nothing clamps a creature to the
-  playfield; its patrol columns are all that keep it inside, and every
-  shipped room sets them safely.  But the step-up rule moves a creature's
-  row with no range test, so a creature that drifts out of range reads
-  cells that do not exist.  Beyond the edges the original reports empty
-  space, which has no support: such a creature falls forever.
-- **One tile means different things depending on what you are doing.** The
-  tile for an object resting in a nid counts as solid ground only while
-  *you* are crawling, and creatures share that test, so one standing over
-  it would gain and lose its footing with your posture.  No shipped room
-  seems to place a creature there; treating the tile as never supporting a
-  creature is the safer choice.
-- **Is the inner guard's toll meant to be permanent?** Nothing you can say
-  to him opens his door for good, so the token is due every single visit
-  unless you banish him.  His line -- `WAIT A MINUTE.  I WANT TOKENS.`,
-  plural -- reads as if that is deliberate, and so does the shape of the
-  world: the door you unlock for good is the outer one on a route you walk
-  over and over, and the toll is the last step down.  The manual does not
-  say, and a one-line omission is just as likely.
 - **Three blessers offer a spirit bell that is not there.** Four of the
   five nominally offer one, but only D'ol Neshom's room holds a bell, so
   for the other three the permission their SPEAK grants can never be

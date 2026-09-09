@@ -144,17 +144,15 @@ swapped in when you CONTINUE rather than at the load itself.  A load
 also restores the quest-in-progress flag and the saved room; CONTINUE
 afterwards is what puts you back in the world.
 
-Nothing checks that the load worked.  Choosing a slot that has never
-been saved copies whatever is in the save buffer into your quest; there
-is no "empty slot" message and no error of any kind anywhere in the save
-or load path.
+The original loads a never-written slot by copying the stale save buffer
+into the quest.  The port leaves the quest untouched and returns to the
+menu with no message.
 
 ## SAMPLE QUEST
 
-The demo, run from the menu, starts with the outdoor script in room
-`47`, not the story-text one you saw at boot.  When a script ends it
-hands off to the other, and the two alternate for as long as you leave
-them.  The button is the only way out, and it goes straight back to the
+SAMPLE QUEST starts with the outdoor script in room `47`.  When a script
+ends it hands off to the other, and the two alternate for as long as you
+leave them.  The button is the only way out, and it goes straight back to the
 main menu.  Both scripts are in `data/demo.json`.
 
 SAMPLE QUEST ends the quest in progress: it clears the quest-in-progress
@@ -205,20 +203,10 @@ Two things skip the loop and go straight to the main menu: the MENU cell
 of the command menu, which leaves the quest in progress, and offering
 Raamo a shuba or a vine rope, which wins and ends it.
 
-## Open questions
+## Unknowns
 
-- Loading a slot that was never written is unchecked and unwatched.
-  What you are left with depends on what was last in the save buffer,
-  which nothing else in the game uses, so probably whatever the loader
-  left there at boot.
 - The disk-storage screen has no cancel.  Whether that was deliberate or
   an oversight cannot be told from the code.
-- SAMPLE QUEST wiping the world is read from the code and never watched.
-- SAMPLE QUEST from the menu is supposed to open on the outdoor quest
-  script rather than the story-text one, because drawing the menu once
-  flips the attract state for good.  That is read from the code and
-  never watched; if a port gets it backwards the only visible difference
-  is which of the two scripts plays first.
 
 Derived from `docs/menus-and-saves.md`, `docs/boot-flow.md`,
 `docs/engine.md`, `docs/day-and-quest.md`, `docs/demo.md`,

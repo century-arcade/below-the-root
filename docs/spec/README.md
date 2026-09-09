@@ -50,8 +50,8 @@ Run it after regenerating anything.
 - **Room colour slots** `sign` `wall` `structure` `ground` are the four
   bytes at the end of a room block, in that order, in both `rooms.json`
   and `assets.json`.
-- **Open questions** close each area file: what the disassembly does
-  not settle, in plain English.
+- **Unknowns** close the area files that still have them: details of the
+  original that remain unrecoverable, in plain English.
 - JSON files carry `"hand_curated"` when a table was typed from a doc
   section rather than read from a byte table; everything else regenerates.
 
@@ -83,24 +83,25 @@ per item whether to keep it.
 - 178 edge exits point at an empty grid slot, and the top/bottom world
   edges are unguarded.  A blank slot loads as open air (the demo relies
   on it), except once when it hung.  Decided: the port always gives open
-  air and refuses the top and bottom edges.  (`world.md`, Open questions)
+  air and refuses the top and bottom edges.  (`world.md`, Unknowns)
 - The original looks like it subtracts the vine rope's weight when a
   trencher beak breaks (both 5) and like BUY reserves a flat 4 against
   items weighing 5.  Decided: neither is a bug.  Breaking removes the
   beak object and carried weight is recomputed from what is left, and
   BUY's 4 is the stock's 5 less the weight-1 token it spends.
   (`player.md`, What you carry)
-- Six triggers exist for the five visions; the sixth prints nothing --
-  keep it.  Losing a day can push the day count to 51 without the quest
-  ending until the next hour -- keep it.  Raamo's own creature kind has
-  no ambush case.  (`time.md`, Open questions)
+- Six gains earn the five visions; the sixth shows no vision.  Losing
+  a day can push the day count to 51 without the quest ending until the
+  next hour.  (`time.md`, What the quest remembers / Losing a day)
+  Raamo is a walker and never runs the attack test.  (`creatures.md`,
+  Ambush)
 - The inner gate's permanent flag is only set by using the wand of Befal
   on its guard; otherwise it costs a token every visit.  (`creatures.md`
   door creatures)
 - Oversleeping starves you silently; REST at a thief's nid is robbed
   every hour.  (`time.md`, REST and sleeping)
 - Creature positions are never clamped, and creatures share the player's
-  crawl flag for one tile's solidity.  (`creatures.md`, Open questions)
+  crawl flag for one tile's solidity.  (`creatures.md`, How they move)
 - Nothing in the save or load path checks anything: loading a slot never
   written copies the stale save buffer into the quest, and past the
   SAVE/LOAD line there is no cancel.  SAMPLE QUEST and START GAME wipe

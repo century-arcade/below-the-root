@@ -329,7 +329,7 @@ The chime that wakes you each hour of REST is not one effect but a
 sequence: the chime and the blip alternating three times -- a perfect
 fifth, ding-dong -- then the confirm.
 
-## Open questions
+## Unknowns
 
 - **What the KINIPORT pointer should look like.**  Extras frame 0 is a
   hollow box, and both KINIPORT and the room editor that shipped in the

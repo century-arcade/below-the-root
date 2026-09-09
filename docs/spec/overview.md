@@ -325,8 +325,8 @@ REST traps, the outer gate, and that a blank grid slot hangs the game.
 **Read from the code but never watched happen:** creature movement and
 all of the dialogue tree, both endings, the save layout, the cloud world.
 
-**Twenty-three open questions** remain, listed at the end of each area
-file.  None blocks building the world, movement, creatures or the
+**Ten unknowns** remain, listed under "Unknowns" at the end of most area
+files.  None blocks building the world, movement, creatures or the
 economy.
 
 **Original bugs a port must choose to keep or fix** are listed in the
