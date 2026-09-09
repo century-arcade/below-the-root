@@ -3,7 +3,7 @@ import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
+import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, clearAutosave } from './record.js';
 import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale } from './fit.js';
@@ -237,7 +237,7 @@ loadData((path) => fetch(path).then((r) => {
     centerMap();
   }
   mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
-  const opt = Object.fromEntries(['volume', 'volume-out', 'crt', 'classic', 'debug']
+  const opt = Object.fromEntries(['volume', 'volume-out', 'crt', 'classic', 'debug', 'reset', 'reset-confirm']
     .map(name => [name, document.getElementById(`opt-${name}`)]));
   const debugTools = document.getElementById('debug-tools');
   let debugReady = false;
@@ -271,6 +271,8 @@ loadData((path) => fetch(path).then((r) => {
     if (overlay) release();
     hold();
     syncOptions();
+    opt.reset.hidden = false;
+    opt['reset-confirm'].hidden = true;
     optionsDialog.show();
     opt.volume.focus();
   }
@@ -292,6 +294,25 @@ loadData((path) => fetch(path).then((r) => {
   }
   const recovery = document.getElementById('save-recovery');
   recovery.hidden = !restoreFailed;
+  opt.reset.onclick = () => {
+    opt.reset.hidden = true;
+    opt['reset-confirm'].hidden = false;
+    opt['reset-confirm'].focus();
+  };
+  opt['reset-confirm'].onclick = () => {
+    try { clearAutosave(localStorage); }
+    catch (err) { note(`Reset failed: ${err.message}`); return; }
+    session = new Session(data, stick, { initial: { mode: 'menu' },
+      slots: Object.fromEntries(session.slots), seed: crypto.getRandomValues(new Uint32Array(1))[0], saveSlot });
+    state = session.state;
+    autosave.key = null;
+    restoreFailed = false;
+    recovery.hidden = true;
+    speaker.silence();
+    release();
+    fit();
+    note('Game reset', 3000);
+  };
   const downloadOriginal = () => downloadRecordingText(existing, 'btr-preserved-autosave.json');
   document.getElementById('download-preserved-save').onclick = downloadOriginal;
   document.getElementById('dismiss-recovery').onclick = () => { recovery.hidden = true; fit(); };

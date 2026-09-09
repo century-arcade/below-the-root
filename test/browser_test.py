@@ -1,6 +1,9 @@
 """Browser integration checks; run against make serve. GitHub is mocked: no issue is posted."""
 import json
-from playwright.sync_api import sync_playwright
+import os
+from playwright.sync_api import sync_playwright, expect
+
+BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
@@ -20,7 +23,7 @@ with sync_playwright() as p:
             route.fulfill(json={"configured": True, "login": "tester"})
 
     page.route('**/.netlify/functions/github?*', github)
-    page.goto('http://localhost:8000/?player=0&debug')
+    page.goto(BASE + '/?player=0&debug')
     page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
     for name in ['Download recording', 'Load recording', 'Report issue']:
         assert page.locator('#top-controls').get_by_role('button', name=name, exact=True).is_visible(), name
@@ -102,7 +105,7 @@ with sync_playwright() as p:
     dl.value.save_as('/tmp/btr-browser-record.json')
     record = json.load(open('/tmp/btr-browser-record.json'))
     assert record['format'] == 'below-the-root-record'
-    page.goto('http://localhost:8000/?debug')
+    page.goto(BASE + '/?debug')
     page.locator('#file-issue').wait_for()
     page.wait_for_timeout(200)
     assert 'diverged' not in page.locator('#notice').inner_text()
@@ -111,7 +114,8 @@ with sync_playwright() as p:
     page.get_by_role('status').filter(has_text='Loaded btr-browser-record.json').wait_for()
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
-    page.goto('http://localhost:8000/')
+    page.evaluate('(save) => localStorage.setItem("btr.quest2", save)', record['c64'])
+    page.goto(BASE + '/')
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
     assert not page.locator('#debug-tools').is_visible()
     assert not page.locator('#file-issue').is_visible()
@@ -136,6 +140,50 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
+    # Reset asks again after cancelling; only confirmation discards the quest.
+    page.keyboard.press('o')
+    saved = page.evaluate("localStorage.getItem('btr.autosave.v1')")
+    page.locator('#opt-reset').click()
+    expect(page.locator('#options-dialog')).to_be_visible()
+    expect(page.locator('#opt-reset-confirm')).to_be_focused()
+    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == saved
+    page.keyboard.press('Escape')
+    expect(page.locator('#screen')).to_be_focused()
+    page.keyboard.press('o')
+    expect(page.locator('#opt-reset')).to_be_visible()
+    expect(page.locator('#opt-reset-confirm')).to_be_hidden()
+    page.evaluate('''(save) => {
+        localStorage.setItem('btr.autosave.v1.recovery', save);
+        localStorage.setItem('btr.autosave.v1.recovery.1', save);
+    }''', saved)
+    page.locator('#opt-reset').click()
+    # A failed deletion must not claim success or replace the running quest.
+    page.evaluate('''() => {
+        window.removeItem = Storage.prototype.removeItem;
+        Storage.prototype.removeItem = () => { throw new Error('Test storage failure'); };
+    }''')
+    page.locator('#opt-reset-confirm').click()
+    expect(page.locator('#notice')).to_have_text('Reset failed: Test storage failure')
+    expect(page.locator('#options-dialog')).to_be_visible()
+    expect(page.locator('#map')).to_be_visible()
+    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == saved
+    page.evaluate('() => { Storage.prototype.removeItem = window.removeItem; }')
+    page.locator('#opt-reset-confirm').click()
+    expect(page.locator('#notice')).to_have_text('Game reset')
+    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
+    assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery')") is None
+    assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery.1')") is None
+    assert page.evaluate("localStorage.getItem('btr.quest2')") == record['c64']
+    assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
+    expect(page.locator('#options-dialog')).to_be_hidden()
+    expect(page.locator('#save-recovery')).to_be_hidden()
+    expect(page.locator('#map')).to_be_hidden()
+    page.reload()
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_timeout(300)
+    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
+    expect(page.locator('#map')).to_be_hidden()
+    assert not errors, errors
     # The demo schedules a tune on WebAudio; pausing must not cut or restart its notes.
     page.add_init_script('''
         window.audioStops = 0;
@@ -145,7 +193,7 @@ with sync_playwright() as p:
             return stop.apply(this, args);
         };
     ''')
-    page.goto('http://localhost:8000/?demo=quest')
+    page.goto(BASE + '/?demo=quest')
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
     page.keyboard.press('-')  # Unlock audio without aborting the demo.
     page.wait_for_function('window.audioStops > 10')
@@ -159,4 +207,4 @@ with sync_playwright() as p:
         assert page.evaluate('window.audioStops') == scheduled, 'pause/resume must leave scheduled music playing'
     assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, pause/resume with continuing music, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: autosave/resume, reset confirmation/deletion/reload, pause/resume with continuing music, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

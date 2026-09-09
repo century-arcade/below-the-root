@@ -1,10 +1,11 @@
 """Autosave recovery; run against make serve. No external services are called."""
 import json
-from playwright.sync_api import sync_playwright
+import os
+from playwright.sync_api import sync_playwright, expect
 
 KEY = 'btr.autosave.v1'
 BACKUP = KEY + '.recovery'
-URL = 'http://localhost:8000/'
+URL = os.environ.get('BTR_URL', 'http://localhost:8000').rstrip('/') + '/'
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
@@ -103,6 +104,25 @@ with sync_playwright() as p:
     assert open(download.value.path()).read() == unusable
     assert not errors, errors
 
+    # Reset retires a failed restore and allows the next quest to autosave.
+    page.keyboard.press('o')
+    page.locator('#opt-reset').click()
+    page.locator('#opt-reset-confirm').click()
+    expect(page.locator('#notice')).to_have_text('Game reset')
+    expect(page.locator('#save-recovery')).to_be_hidden()
+    expect(page.locator('#map')).to_be_hidden()
+    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) is None
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
+    for _ in range(2):
+        page.wait_for_timeout(150)
+        page.keyboard.press('Space', delay=120)
+    page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
+    fresh = json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))
+    assert fresh['initial'] == {'mode': 'menu'}
+    assert fresh['checkpoint']['quest']
+    expect(page.locator('#map')).to_be_visible()
+    assert not errors, errors
+
     # Dismissal is wired even when startup never finishes loading game data.
     startup = browser.new_page()
     startup.route('**/data/*.json', lambda route: route.fulfill(status=500, body='Test load failure'))
@@ -110,4 +130,4 @@ with sync_playwright() as p:
     startup.get_by_role('button', name='Dismiss notice').click()
     assert not startup.locator('#notice').is_visible()
     browser.close()
-    print('browser_recovery_test: dismissal, original download, backup failure/retry, resumed recovery, notice expiry, reload, missing checkpoint, and startup error passed')
+    print('browser_recovery_test: dismissal, original download, backup failure/retry, resumed recovery, notice expiry, reload, missing checkpoint, reset after failed restore, and startup error passed')

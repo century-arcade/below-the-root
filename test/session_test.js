@@ -11,7 +11,7 @@ import { exportSave, importSave } from '../src/save.js';
 import { neighbour, enterRoom, leaveByEdge } from '../src/world.js';
 import { IDLE } from '../src/input.js';
 import { TICKS_PER_HOUR } from '../src/clock.js';
-import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, validateRecord } from '../src/record.js';
+import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, clearAutosave, validateRecord } from '../src/record.js';
 
 const data = await loadTestData();
 const fresh = () => { const s = newState(data, { read: () => IDLE }); startQuest(s, data.characters[0]); return s; };
@@ -96,6 +96,18 @@ for (const failAt of [1, 2]) {
   }), /quota/);
   assert.equal(saved.get(AUTOSAVE_KEY), original, 'a failed backup or replacement preserves the autosave');
 }
+
+// Reset deletes the autosave and every preserved copy, leaving slots and options.
+const resetStore = new Map([
+  [AUTOSAVE_KEY, original], [`${AUTOSAVE_KEY}.recovery`, original],
+  [`${AUTOSAVE_KEY}.recovery.1`, JSON.stringify(broken)],
+  ['btr.quest2', recorded.c64], ['btr.muted', '1'],
+]);
+const resetStorage = { getItem: key => resetStore.get(key) ?? null, removeItem: key => resetStore.delete(key) };
+clearAutosave(resetStorage);
+assert.deepEqual([...resetStore], [['btr.quest2', recorded.c64], ['btr.muted', '1']]);
+clearAutosave(resetStorage);
+assert.equal(resetStore.size, 2, 'reset also works without an autosave');
 
 // Slot persistence is supplied at construction, including replay and recovery.
 for (const create of [

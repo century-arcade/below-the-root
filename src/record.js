@@ -245,6 +245,15 @@ export function preserveAutosave(storage, original) {
   }
 }
 
+export function clearAutosave(storage) {
+  storage.removeItem(AUTOSAVE_KEY);
+  for (let n = 0; ; n++) {
+    const key = `${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`;
+    if (storage.getItem(key) == null) return;
+    storage.removeItem(key);
+  }
+}
+
 export function recoverAutosave(data, live, original, storage, options = {}) {
   const record = JSON.parse(original);
   // interoperable save: independent of the journal's engine version
