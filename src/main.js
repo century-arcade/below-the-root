@@ -12,19 +12,9 @@ import { basicsVisible } from './help.js';
 import { Crt } from './crt.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
+import { createLog } from './log.js';
 
-const logElement = document.getElementById('log');
-function log(text) {
-  console.log(text);
-  const wasHidden = logElement.hidden;
-  const line = document.createElement('div');
-  line.textContent = text;
-  logElement.append(line);
-  while (logElement.childElementCount > 100) logElement.firstElementChild.remove();
-  logElement.hidden = false;
-  if (wasHidden) fit();
-  logElement.scrollTop = logElement.scrollHeight;
-}
+const log = createLog(document.getElementById('log'), { onToggle: () => fit() });
 
 const canvas = document.getElementById('screen');
 const game = document.getElementById('game');

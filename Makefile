@@ -21,6 +21,7 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
+	node test/log_test.js
 	node test/fit_test.js
 	node test/render_test.js
 	node test/world_test.js

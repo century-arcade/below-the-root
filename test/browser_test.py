@@ -1,6 +1,7 @@
 """Browser integration checks; run against make serve. GitHub is mocked: no issue is posted."""
 import json
 import os
+import re
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -114,7 +115,7 @@ with sync_playwright() as p:
     assert page.locator('#where').inner_text() == record['checkpoint']['room']
     page.locator('#record-file').set_input_files('/tmp/btr-browser-record.json')
     page.locator('#log').filter(has_text='Loaded btr-browser-record.json').wait_for()
-    # Imports append in order; the log retains the latest 100 messages.
+    # Imports display timestamps while the console retains the original text.
     logged.clear()
     for n in range(101):
         page.locator('#record-file').set_input_files({
@@ -122,7 +123,7 @@ with sync_playwright() as p:
             'buffer': json.dumps(record).encode(),
         })
         expect(page.locator('#log')).to_contain_text(f'Loaded log-{n}.json')
-    assert page.locator('#log').inner_text().splitlines() == [f'Loaded log-{n}.json' for n in range(1, 101)]
+    expect(page.locator('#log > div').last).to_have_text(re.compile(r'^\d\d:\d\d:\d\d Loaded log-100.json$'))
     assert logged == [f'Loaded log-{n}.json' for n in range(101)]
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
