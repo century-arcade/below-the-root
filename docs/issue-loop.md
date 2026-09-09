@@ -39,7 +39,7 @@ then read `.meta/done/` (landed, with the commit), `.meta/todo/`
 `git log`:
 
 ```sh
-until [ -z "$(ls -A .meta/todo/agent-queue .meta/issue-loop/active 2>/dev/null)" ]; do sleep 30; done
+until [ -z "$(find .meta/todo/agent-queue .meta/issue-loop/active -mindepth 1 -print -quit 2>/dev/null)" ]; do sleep 30; done
 ```
 
 While a task is active, leave `master` alone: the loop needs the
