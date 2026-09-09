@@ -57,7 +57,9 @@ Use +/− to zoom, scroll to explore, and Your location to return to the marker.
 
 ? (or H, or the ? button) opens all controls; two-line basics show under the picture on the title/menu screens until the session's first joystick input.
 
-O (or the ⚙ button) opens the options: volume (starts at 50%; the slider is squared, so the low end is genuinely quiet) and mute, the CRT effect (a WebGL pass: curvature, scanlines, phosphor stripes, colour bleed; off by default), classic display (off: two rows in the game's own font above the picture keep the status sheet's day, time, name and numbers live during a quest, in fullscreen too; on: only STATUS shows them, as the original), and the debug tools (the top-bar icons `?debug` shows).  All persist in localStorage.
+O (or the ⚙ button) opens the options: volume (starts at 50%; the slider is squared, so the low end is genuinely quiet; M and the speaker icon mute, which the slider shows as 0%), the CRT effect (a WebGL pass: curvature, scanlines, phosphor stripes, colour bleed; off by default), classic display, and the debug tools (the top-bar icons `?debug` shows).  All persist in localStorage.
+
+Classic display means the game as designed, not a simulated C64: the map, the mouse stick and the buttonless glide stay.  Modern display adds two rows in the game's own font under the picture with the status sheet's day, time, name and numbers, live during a quest (in fullscreen too), and lets the button skip any tune the game would wait for (a recorded action, so playthroughs replay).
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.

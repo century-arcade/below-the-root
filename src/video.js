@@ -20,7 +20,7 @@ export function render(state) {
   return toRGBA(renderIndexed(state), state.data.palette);
 }
 
-// the status rows sit in their own band above the picture, never over it
+// the status rows sit in their own band under the picture, never over it
 export const STATUS_HEIGHT = 24;
 const STATUS_MARGIN = 4;
 

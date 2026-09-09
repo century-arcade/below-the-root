@@ -237,7 +237,7 @@ loadData((path) => fetch(path).then((r) => {
     centerMap();
   }
   mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
-  const opt = Object.fromEntries(['volume', 'volume-out', 'mute', 'crt', 'classic', 'debug']
+  const opt = Object.fromEntries(['volume', 'volume-out', 'crt', 'classic', 'debug']
     .map(name => [name, document.getElementById(`opt-${name}`)]));
   const debugTools = document.getElementById('debug-tools');
   let debugReady = false;
@@ -257,9 +257,9 @@ loadData((path) => fetch(path).then((r) => {
     crtCanvas.hidden = !options.crt;
   }
   function syncOptions() {
-    opt.volume.value = Math.round(speaker.volume * 100);
-    opt['volume-out'].value = `${Math.round(speaker.volume * 100)}%`;
-    opt.mute.checked = speaker.muted;
+    const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
+    opt.volume.value = level;
+    opt['volume-out'].value = `${level}%`;
     opt.crt.checked = options.crt;
     opt.crt.disabled = !crt;
     opt.classic.checked = options.classic;
@@ -275,7 +275,6 @@ loadData((path) => fetch(path).then((r) => {
     opt.volume.focus();
   }
   opt.volume.oninput = () => { setVolume(opt.volume.valueAsNumber / 100); syncOptions(); };
-  opt.mute.onchange = () => setMuted(opt.mute.checked);
   opt.crt.onchange = () => { setCrt(opt.crt.checked); persist('crt', options.crt); };
   opt.classic.onchange = () => { options.classic = opt.classic.checked; persist('classic', options.classic); };
   opt.debug.onchange = () => { setDebug(opt.debug.checked); persist('debug', debug); };
@@ -377,10 +376,9 @@ loadData((path) => fetch(path).then((r) => {
     state.figures = figures(state);
     const rows = options.classic ? [] : statusRows(state);
     if (band !== (rows.length ? STATUS_HEIGHT : 0)) setBand(rows.length ? STATUS_HEIGHT : 0);
-    pointer.top = band;
     const image = frames[band];
-    if (band) image.data.set(renderStatus(state, rows));
-    image.data.set(render(state), WIDTH * band * 4);
+    image.data.set(render(state));
+    if (band) image.data.set(renderStatus(state, rows), WIDTH * HEIGHT * 4);
     ctx.putImageData(image, 0, 0);
     if (options.crt) crt.draw(image);
     const line = debug ? whereLabel(state) : '';
@@ -402,6 +400,7 @@ loadData((path) => fetch(path).then((r) => {
     gamepad.poll();
     if (gamepad.held.size) seenInput = true;
     while (acc >= STEP_MS) {
+      if (!options.classic && state.tuneWait != null && stick.firePressed()) { session.skipTune(); stick.reset(); }
       const previousRoom = state.room;
       const previousTitle = state.title;
       session.step();

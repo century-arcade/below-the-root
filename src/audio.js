@@ -28,7 +28,18 @@ export function startTune(state, want, wait = true) {
   const music = state.data.music;
   const tune = pickTune(music, want, state.rng);
   state.events.push({ music: tune });
-  if (wait) state.stall += music.tunes[tune].frames;
+  if (!wait) return;
+  state.stall += music.tunes[tune].frames;
+  state.tuneWait = tune;
+}
+
+// a port extra: the wait is cut short, the tune with it
+export function skipTune(state) {
+  if (state.tuneWait == null) return false;
+  state.stall = 0;
+  state.tuneWait = null;
+  state.events.push({ music: null });
+  return true;
 }
 
 // every sounding note as {voice, hz, start, stop} in ticks; a voice's next note or rest cuts the one ringing

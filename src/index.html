@@ -111,6 +111,7 @@
           <dt>Volume</dt><dd>- / = (or _ / +)</dd>
           <dt>Help</dt><dd>? (Shift+/) / H / ? button; Escape closes</dd>
           <dt>Options</dt><dd>O / ⚙ button: volume, CRT effect, classic display, debug tools</dd>
+          <dt>Skip a tune</dt><dd>the button, while the game waits for its music (modern display)</dd>
         </dl>
         <h2>Touch</h2>
         <p>Hold to push toward your finger. Tap to press the button that way.
@@ -129,9 +130,8 @@
     <form id="options-form" method="dialog">
       <h2 id="options-label">Options</h2>
       <label>Volume <input id="opt-volume" type="range" min="0" max="100" step="10"> <output id="opt-volume-out"></output></label>
-      <label><input id="opt-mute" type="checkbox"> Mute</label>
       <label><input id="opt-crt" type="checkbox"> CRT effect</label>
-      <label><input id="opt-classic" type="checkbox"> Classic display (no status rows above the picture)</label>
+      <label><input id="opt-classic" type="checkbox"> Classic display (no status rows under the picture, no tune skipping)</label>
       <label><input id="opt-debug" type="checkbox"> Debug tools</label>
       <button id="options-close" type="submit">Close</button>
     </form>

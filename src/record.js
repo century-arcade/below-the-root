@@ -5,6 +5,7 @@ import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
 import { IDLE } from './input.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
+import { skipTune } from './audio.js';
 
 export const RECORD_VERSION = 1;
 export const ENGINE_VERSION = 'btr-session-1';
@@ -149,7 +150,15 @@ export class Session {
 
   apply(action) {
     if (action.type === 'load') importSave(this.state, fromBase64(action.save));
+    else if (action.type === 'skip') skipTune(this.state);
     this.noteRoom();
+  }
+
+  skipTune() {
+    if (this.state.tuneWait == null) return;
+    const action = { frame: this.frame, type: 'skip' };
+    this.apply(action);
+    this.record.actions.push(action);
   }
 
   load(bytes) {
@@ -214,8 +223,8 @@ export function validateRecord(r, data) {
   }
   previous = 0;
   for (const action of r.actions) {
-    if (action.type !== 'load' || !Number.isInteger(action.frame) || action.frame < previous
-        || action.frame > r.frames || typeof action.save !== 'string') throw new Error('Invalid recorded action');
+    if (!['load', 'skip'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
+        || action.frame > r.frames || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');
     previous = action.frame;
   }
   previous = 0;

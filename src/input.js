@@ -47,6 +47,7 @@ export class Keyboard {
   release(key, source = 'keyboard') { this.source(source).down.delete(key); }
   tap(key, source = 'pointer') { this.source(source).tapped.add(key); }
   reset(source) { if (source) this.sources.delete(source); else this.sources.clear(); }
+  firePressed() { return [...this.sources.values()].some(s => s.down.has('fire') || s.tapped.has('fire')); }
 
   read() {
     const d = new Set();
@@ -82,7 +83,6 @@ export class Pointer {
     this.keys = keys;
     this.anchor = anchor;
     this.doors = doors;
-    this.top = 0;
     this.held = new Set();
     this.timer = null;
     this.walk = null;
@@ -103,7 +103,7 @@ export class Pointer {
   pixel(e) {
     const r = this.canvas.getBoundingClientRect();
     return [(e.clientX - r.left) * (this.canvas.width / r.width),
-      (e.clientY - r.top) * (this.canvas.height / r.height) - this.top];
+      (e.clientY - r.top) * (this.canvas.height / r.height)];
   }
 
   directionTo(x, y) {

@@ -15,23 +15,25 @@ let storage = memory();
 assert.deepEqual(loadOptions(storage), DEFAULTS, 'an empty store gives the defaults');
 assert.equal(DEFAULTS.volume, 0.5, 'the volume starts half way');
 
-storage.setItem('btr.volume', '0.8');
+storage.setItem('btr.volume.v2', '0.8');
 storage.setItem('btr.muted', '1');
 storage.setItem('btr.crt', '1');
 storage.setItem('btr.debug', 'nonsense');
 assert.deepEqual(loadOptions(storage), { volume: 0.8, muted: true, crt: true, classic: false, debug: false },
   'stored values override the defaults; anything but 1 is off');
 
-storage.setItem('btr.volume', 'loud');
+storage.setItem('btr.volume.v2', 'loud');
 assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');
-storage.setItem('btr.volume', '7');
+storage.setItem('btr.volume.v2', '7');
 assert.equal(loadOptions(storage).volume, 1, 'volume is clamped');
 
 storage = memory();
 storeOption(storage, 'crt', true);
 storeOption(storage, 'classic', false);
 storeOption(storage, 'volume', 0.3);
-assert.deepEqual([...storage.map], [['btr.crt', '1'], ['btr.classic', '0'], ['btr.volume', '0.3']]);
+assert.deepEqual([...storage.map], [['btr.crt', '1'], ['btr.classic', '0'], ['btr.volume.v2', '0.3']]);
+storage.setItem('btr.volume', '0.1');
+assert.equal(loadOptions(storage).volume, 0.3, 'the linear-era key is ignored');
 storeOption({ setItem() { throw new Error('quota'); } }, 'crt', true);
 
 const data = await loadTestData();

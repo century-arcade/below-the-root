@@ -44,7 +44,7 @@ export function newState(data, input, opts = {}) {
     screen: null,
     objects: newObjects(data),
     tick: 0,
-    stall: 0,
+    stall: 0, tuneWait: null,
     active: false,
     stop: null,
     input,
@@ -140,6 +140,7 @@ export function startDemo(state, name = 'quest') {
 export function tick(state) {
   if (state.stall > 0) {
     state.stall -= 1;
+    if (!state.stall) state.tuneWait = null;
     return;
   }
   state.tick += 1;
@@ -163,7 +164,7 @@ function stopped(state) {
 
 // the script is over, or the button cut it short: the stick is a stick again and the shell owns the screen
 export function endDemo(state) {
-  Object.assign(state, { demo: null, input: state.stick || state.input, active: false, stall: 0, stop: null, verb: null });
+  Object.assign(state, { demo: null, input: state.stick || state.input, active: false, stall: 0, tuneWait: null, stop: null, verb: null });
 }
 
 // a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait

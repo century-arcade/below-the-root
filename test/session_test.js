@@ -10,7 +10,8 @@ import { openMenu } from '../src/shell.js';
 import { exportSave, importSave } from '../src/save.js';
 import { neighbour, enterRoom, leaveByEdge } from '../src/world.js';
 import { IDLE } from '../src/input.js';
-import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave } from '../src/record.js';
+import { TICKS_PER_HOUR } from '../src/clock.js';
+import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, validateRecord } from '../src/record.js';
 
 const data = await loadTestData();
 const fresh = () => { const s = newState(data, { read: () => IDLE }); startQuest(s, data.characters[0]); return s; };
@@ -156,3 +157,34 @@ try {
   assert.notEqual(spawnSync(process.execPath, [tool, original, '--expect-win']).status, 0);
 } finally { rmSync(dir, { recursive: true }); }
 console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, gesture cap, autosave and failure handling passed');
+
+{
+  const session = new Session(data, { read: () => IDLE, pace: 0 }, { initial: { mode: 'quest', character: 0 }, seed: 3 });
+  const s = session.state;
+  session.step();
+  assert.equal(s.tuneWait, null);
+  session.skipTune();
+  assert.deepEqual(session.record.actions, [], 'nothing to skip: nothing recorded');
+  // the timeout ending waits for its tune: a save three ticks short of day 52 gets there
+  const late = fresh();
+  Object.assign(late.clock, { day: 51, hour: 7, ticks: TICKS_PER_HOUR - 3 });
+  session.load(exportSave(late));
+  while (s.tuneWait == null) session.step();
+  s.events.length = 0;
+  session.step();
+  const before = s.stall;
+  session.skipTune();
+  assert.equal(s.stall, 0);
+  assert.equal(s.tuneWait, null);
+  assert.deepEqual(s.events, [{ music: null }], 'the speaker is told to stop');
+  assert.deepEqual(session.record.actions.map(a => a.type), ['load', 'skip']);
+  for (let i = 0; i < 5; i++) session.step();
+  assert.ok(s.verb, 'the ending text is waiting for the button');
+  const snapshot = session.snapshot();
+  validateRecord(snapshot, data);
+  assert.ok(before > 5, 'the tune outlasts the frames stepped: without the skip the replay would still be stalled');
+  const again = Session.replay(data, { read: () => IDLE, pace: 0 }, copy(snapshot), true);
+  assert.equal(again.state.stall, 0);
+  assert.equal(again.state.tick, s.tick);
+  console.log('ok    a waited tune is skipped by a recorded action that replays');
+}

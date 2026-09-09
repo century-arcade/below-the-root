@@ -1,7 +1,7 @@
 import { timeOfDay } from './clock.js';
 import { PANEL_COLS } from './panel.js';
 
-// the modern display's two text rows above the picture: the status sheet, live, during a quest
+// the modern display's two text rows under the picture: the status sheet, live, during a quest
 export function statusRows(state) {
   if (!state.quest || state.title || state.demo || !state.room) return [];
   const p = state.player;

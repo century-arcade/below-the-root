@@ -13,7 +13,8 @@ state = {
   figures,         // sprites for render: refreshed by main.js from figures(state) before each draw
   objects,         // every slot of every class: {object, class, name, room, col, row, chars, exists, carried}
   tick,            // frames since the room loop last started running
-  stall,           // frames the machine is busy-waiting (demo delay): nothing runs
+  stall,           // frames the machine is busy-waiting (demo delay, a waited tune): nothing runs
+  tuneWait,        // the tune the stall is waiting for, or null; skipTune (a port extra) ends both
   active,          // the room loop is running; false while the shell owns the screen
   stop,            // why it stopped: null | {reason, ...}  (see below)
   input,           // {read() -> {dx, dy, fire}, pace}: joystick or demo script; pace = idle ticks between verb reads
