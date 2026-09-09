@@ -127,9 +127,10 @@ opens the main menu whenever the room loop is idle and no demo is
 running, and ends a demo on the button.  `openMenu` sets `title`, which
 makes `video.js` draw room `T4` with no figures over whatever `room`
 the quest is in; CONTINUE re-enters that room at the cell you left.
-Every screen's timing is in ticks yielded: a fifth of a second per
-main-menu move; every other screen holds its record, waits for the
-button up and a sixth of a second more, then reads for a push.
+Every screen waits for input rather than counting ticks: the main menu
+moves once per push and re-arms when the stick centres; every other
+screen waits for the stick to centre and the button to be up, then for
+the next push or the button.
 
 ## Saves
 
