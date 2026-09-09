@@ -72,6 +72,7 @@ Gamepad: d-pad or left stick moves, any face button fires; sound starts only aft
 make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
 make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
+tools/shot.py --keys o out.png '?menu'  # headless screenshot (WebGL on) after keys; --select '#canvas-box' crops
 tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
 python3 tools/spec_check.py   # cross-check the spec tables
 tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room
