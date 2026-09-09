@@ -9,9 +9,6 @@ import { enterRoom, burnLamp } from './world.js';
 import { exportSave, importSave } from './save.js';
 import { SFX, sfx } from './audio.js';
 
-const MENU_MOVE_TICKS = 12;
-const RECORD_HOLD_TICKS = 24;
-const RELEASE_TICKS = 10;
 const RETURN_TO_MENU = 5;
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -46,23 +43,27 @@ function drawMainMenu(state, sel) {
   state.data.shell.screens.main_menu.items.forEach((it) => print(state, it.row, it.col, it.text, it.index === sel));
 }
 
-// each move blips and ignores the stick for a fifth of a second; the button chooses
+// a push moves once; the stick must centre before the next counts; the button chooses
 export function* mainMenu(state) {
   const screen = state.data.shell.screens.main_menu;
   for (;;) {
     yield* fireUp();
     drawMainMenu(state, state.menuSel);
-    let wait;
+    let armed = true;
     for (;;) {
-      const j = yield wait;
-      wait = undefined;
+      const j = yield;
       if (j.fire) break;
+      if (j.dy === 0) {
+        armed = true;
+        continue;
+      }
+      if (!armed) continue;
+      armed = false;
       const sel = clamp(state.menuSel + j.dy, 0, screen.items.length - 1);
       if (sel === state.menuSel) continue;
       state.menuSel = sel;
       sfx(state, SFX.blip);
       drawMainMenu(state, sel);
-      wait = MENU_MOVE_TICKS;
     }
     switch (screen.items[state.menuSel].text.trim()) {
       case 'START GAME':
@@ -80,11 +81,10 @@ export function* mainMenu(state) {
   }
 }
 
-// every screen but the main menu: hold the record, wait for the button up, a sixth of a second, then a push
+// every screen but the main menu: wait for the stick to centre and the button up, then a push or fire
 function* nextPush(pushed) {
-  let j = yield RECORD_HOLD_TICKS;
-  while (j.fire) j = yield;
-  j = yield RELEASE_TICKS;
+  let j = yield;
+  while (j.fire || pushed(j)) j = yield;
   while (!j.fire && !pushed(j)) j = yield;
   return j;
 }

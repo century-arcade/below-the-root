@@ -31,9 +31,11 @@ whatever room you were standing in.
 
 Four options, one per panel row, at column 13.  The selected one is
 fourteen cells of reverse video, padding included.  Push up and down to
-move; the cursor stops at the ends and does not wrap, and each move
-blips and then ignores the stick for about a fifth of a second.  The
-button chooses.  Arriving at the menu, by any route, turns the music off.
+move; the cursor stops at the ends and does not wrap.  In the port, a
+push moves the cursor once and blips; the stick must centre before the
+next push counts.  The original instead counted down a busy loop of
+roughly a fifth of a second after each move.  The button chooses.
+Arriving at the menu, by any route, turns the music off.
 
 | option | what it does |
 |--------|--------------|
@@ -68,9 +70,11 @@ a sixth entry that reads only RETURN TO MENU, and then back to Neric.
 Nothing is highlighted; the record on screen is the choice, and the
 button takes it.
 
-Each record blips and holds for about four tenths of a second before the
-stick is read again, so holding up walks the six entries at roughly one
-every half second.
+Each record blips and, in the port, the screen waits for the stick to
+centre and the button to be up, then for the next push or the button;
+holding up does not walk the entries.  The original used a busy loop of
+roughly four tenths of a second after each redraw, then waited for the
+button to be released and counted down a further sixth of a second.
 
 The screen opens on the character you already have loaded: Neric the
 first time, and afterwards whoever you last played or last loaded from
@@ -203,12 +207,6 @@ Raamo a shuba or a vine rope, which wins and ends it.
 
 ## Open questions
 
-- The pauses in the menus are counted-down busy loops rather than
-  frames, so their length depends on how fast the machine runs.  A
-  main-menu cursor move costs roughly a fifth of a second; every other
-  screen costs roughly four tenths after each redraw, plus a wait for
-  the button to be released and a further sixth of a second.  Nobody has
-  timed any of them.
 - Loading a slot that was never written is unchecked and unwatched.
   What you are left with depends on what was last in the save buffer,
   which nothing else in the game uses, so probably whatever the loader

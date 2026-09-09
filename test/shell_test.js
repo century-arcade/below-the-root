@@ -61,9 +61,15 @@ test('the main menu draws over T4 with START GAME selected', (s) => {
   assert.equal(reverse(s, 22), '');
 });
 
-test('the cursor clamps at both ends and each move waits a fifth of a second', (s) => {
+test('the cursor clamps at both ends and a held stick moves once', (s) => {
   openMenu(s);
   settle(s);
+  s.stick.feed(J.down, J.down, J.down, J.idle);
+  settle(s);
+  assert.equal(s.menuSel, 1);
+  s.stick.feed(...push(J.down));
+  settle(s);
+  assert.equal(s.menuSel, 2);
   s.stick.feed(...push(J.down, 5));
   settle(s);
   assert.equal(reverse(s, 24), '.............RRRRRRRRRRRRRR');
@@ -71,6 +77,15 @@ test('the cursor clamps at both ends and each move waits a fifth of a second', (
   s.stick.feed(...push(J.up, 1));
   settle(s);
   assert.equal(s.menuSel, 2);
+  s.stick.feed(...push(J.up, 5));
+  settle(s);
+  assert.equal(s.menuSel, 0);
+  s.stick.feed(J.up, J.down, J.down, J.idle);
+  settle(s);
+  assert.equal(s.menuSel, 0);
+  s.stick.feed(...push(J.down));
+  settle(s);
+  assert.equal(s.menuSel, 1);
   assert.ok(s.events.every((e) => 'sfx' in e || e.music === null));
 });
 
@@ -100,6 +115,21 @@ test('character select opens on Neric, up cycles through RETURN TO MENU and back
   }
   assert.deepEqual(names, ['NERIC', 'GENAA', 'HERD', 'POMMA', 'CHARN', 'RETURN TO MENU', 'NERIC']);
   assert.equal(s.active, false);
+});
+
+test('character select waits for release and a held stick advances one record', (s) => {
+  openMenu(s);
+  settle(s);
+  s.stick.feed(J.fire, J.fire, J.up, J.up, J.idle);
+  settle(s);
+  assert.match(lines(s)[0], /NERIC$/);
+  assert.equal(s.quest, false);
+  s.stick.feed(...Array(4).fill(J.up), J.idle);
+  settle(s);
+  assert.match(lines(s)[0], /GENAA$/);
+  s.stick.feed(...tap(J.up));
+  settle(s);
+  assert.match(lines(s)[0], /HERD$/);
 });
 
 test('RETURN TO MENU goes back with the character unchanged', (s) => {

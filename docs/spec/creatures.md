@@ -405,9 +405,6 @@ lasts the whole quest).
   for the other three the permission their SPEAK grants can never be
   spent.  A port that adds a second bell would find three more places to
   pick one up.
-- **The pause between the congratulation and the vision** is read from
-  the code as a wait for input; nobody has watched the two screens go
-  by.
 - **Three lines of dialogue nobody says.** The numbered text table has an
   unused `NOTHING` and two placeholders.  They stay in place to keep the
   numbering, but nothing refers to them and what they were for is not
