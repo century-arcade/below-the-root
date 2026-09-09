@@ -34,7 +34,7 @@ let band = 0;
 const crtCanvas = document.getElementById('crt');
 const crt = Crt.create(crtCanvas, WIDTH);
 
-const CHROME_PX = 40;
+const CHROME_PX = 8; // body top padding
 
 function fit() {
   const full = document.fullscreenElement === game;
@@ -43,7 +43,7 @@ function fit() {
     game.style.width = '';
     scale = fitScale(game.clientWidth, game.clientHeight, HEIGHT + band);
   } else {
-    const chrome = ['top-controls', 'game-controls', 'notices']
+    const chrome = ['top-controls', 'where', 'game-controls', 'notices']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome, HEIGHT + band);
   }
@@ -409,7 +409,7 @@ loadData((path) => fetch(path).then((r) => {
     if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
     if (overlay?.screen === mapScreen && mapUnavailable) release();
     const showBasics = basicsVisible(state, seenInput) && !overlay;
-    if (basics.hidden === showBasics) basics.hidden = !showBasics;
+    if (basics.hidden === showBasics) { basics.hidden = !showBasics; fit(); }
   }
 
   const STEP_MS = 1000 / 60;

@@ -50,7 +50,7 @@ Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute,
 
 Menus wait for the stick to centre between pushes, so holding a direction moves once.
 
-Tab (or the Map button) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
+Tab (or the Map icon in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
 The six western grunds shown on the boxed map start explored; Temple Grunds and
 cavern passages appear as you visit them. Interiors stay blank. The white marker
