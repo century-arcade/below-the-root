@@ -29,3 +29,19 @@ changed, an unclear task, a failed review, or an uncommitted fix returns the
 task to `.meta/todo/` with its worktree and logs referenced.  Requeue by
 moving the complete Markdown file back into `.meta/todo/agent-queue/`;
 imported issues are not retried automatically.
+
+## Waiting for the loop
+
+A session that queued tasks should not poll.  Arm one background
+watcher that exits when both the queue and the active slot are empty,
+then read `.meta/done/` (landed, with the commit), `.meta/todo/`
+(returned, with the agent's questions under "Agent result") and
+`git log`:
+
+```sh
+until [ -z "$(ls -A .meta/todo/agent-queue .meta/issue-loop/active 2>/dev/null)" ]; do sleep 30; done
+```
+
+While a task is active, leave `master` alone: the loop needs the
+checkout clean and fast-forwards `master` when a review passes, so a
+commit made meanwhile returns the task.
