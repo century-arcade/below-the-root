@@ -4,7 +4,7 @@ import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, clearAutosave } from './record.js';
-import { setupDebug, downloadRecord, downloadRecordingText } from './debug.js';
+import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale } from './fit.js';
 import { drawMap, visitedRooms, mapLocation } from './map.js';
@@ -113,7 +113,6 @@ loadData((path) => fetch(path).then((r) => {
   if (initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === initial.demo)) initial.demo = 'quest';
   const slots = {};
   let existing = null;
-  let restoreFailed = false;
   try {
     for (let n = 1; n <= 5; n++) { const value = localStorage.getItem(`btr.quest${n}`); if (value) slots[n] = value; }
     existing = localStorage.getItem(AUTOSAVE_KEY);
@@ -122,8 +121,20 @@ loadData((path) => fetch(path).then((r) => {
   let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   if (existing && initial.mode === 'cold') {
-    try { session = Session.replay(data, stick, JSON.parse(existing), true, { saveSlot }); }
-    catch (err) { restoreFailed = true; note(`${err.message} Your previous autosave is preserved.`); }
+    let stored = null;
+    try { stored = JSON.parse(existing); } catch {}
+    try { session = Session.replay(data, stick, stored, true, { saveSlot }); }
+    catch {
+      let failure = '';
+      if (typeof stored?.c64 === 'string') {
+        try { session = recoverAutosave(data, stick, existing, localStorage, { slots, seed, saveSlot }); }
+        catch (err) { failure = ` ${err.message}`; }
+      }
+      if (!session) {
+        try { preserveAutosave(localStorage, existing); } catch {}
+        note(`Your saved game could not be restored.${failure}`);
+      }
+    }
   }
   session ||= new Session(data, stick, { initial, slots, seed, saveSlot });
   let state = session.state;
@@ -201,7 +212,7 @@ loadData((path) => fetch(path).then((r) => {
     mapGrid.querySelector('[aria-current="location"]')?.click();
     centerMap();
   };
-  const saveNow = () => restoreFailed || autosave.save(session, true).reason !== 'failed';
+  const saveNow = () => autosave.save(session, true).reason !== 'failed';
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; };
@@ -248,7 +259,7 @@ loadData((path) => fetch(path).then((r) => {
     if (on && !debugReady) {
       debugReady = true;
       setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, note,
-        downloadRecording: () => restoreFailed ? downloadOriginal() : downloadRecord(session) });
+        downloadRecording: () => downloadRecord(session) });
     }
     fit();
   }
@@ -292,8 +303,6 @@ loadData((path) => fetch(path).then((r) => {
       if (!['Escape', 'Tab', '?', 'h', 'H'].includes(e.key)) e.stopPropagation();
     });
   }
-  const recovery = document.getElementById('save-recovery');
-  recovery.hidden = !restoreFailed;
   opt.reset.onclick = () => {
     opt.reset.hidden = true;
     opt['reset-confirm'].hidden = false;
@@ -306,27 +315,10 @@ loadData((path) => fetch(path).then((r) => {
       slots: Object.fromEntries(session.slots), seed: crypto.getRandomValues(new Uint32Array(1))[0], saveSlot });
     state = session.state;
     autosave.key = null;
-    restoreFailed = false;
-    recovery.hidden = true;
     speaker.silence();
     release();
     fit();
     note('Game reset', 3000);
-  };
-  const downloadOriginal = () => downloadRecordingText(existing, 'btr-preserved-autosave.json');
-  document.getElementById('download-preserved-save').onclick = downloadOriginal;
-  document.getElementById('dismiss-recovery').onclick = () => { recovery.hidden = true; fit(); };
-  document.getElementById('recover-save').onclick = () => {
-    try {
-      const recovered = recoverAutosave(data, stick, existing, localStorage, { slots, seed, saveSlot });
-      session = recovered; state = session.state;
-      restoreFailed = false;
-      recovery.hidden = true;
-      fit();
-      speaker.silence();
-      release();
-      note('Saved game recovered', 3000);
-    } catch (err) { note(`Recovery failed: ${err.message} Your original autosave is still preserved.`); }
   };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
@@ -370,14 +362,10 @@ loadData((path) => fetch(path).then((r) => {
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes[0] === 123 || file.name.endsWith('.json')) {
         const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)), true, { saveSlot });
-        if (restoreFailed) preserveAutosave(localStorage, existing);
         session = restored; state = session.state;
       } else {
-        if (restoreFailed) preserveAutosave(localStorage, existing);
         session.load(bytes);
       }
-      restoreFailed = false;
-      recovery.hidden = true;
       fit();
       speaker.silence();
       if (saveNow()) note(`Loaded ${file.name}`, 3000);
@@ -426,7 +414,7 @@ loadData((path) => fetch(path).then((r) => {
       const previousTitle = state.title;
       session.step();
       if (previousRoom !== state.room || previousTitle !== state.title) pointer.cancel();
-      if (!restoreFailed) autosave.save(session);
+      autosave.save(session);
       speaker.frame(state);
       acc -= STEP_MS;
     }

@@ -190,7 +190,7 @@ export class Session {
       session.apply(session.record.actions[session.actionIndex++]);
     }
     if (verify && JSON.stringify(checkpoint(session.state)) !== JSON.stringify(record.checkpoint)) {
-      throw new Error('Recording diverged from its checkpoint. The original save has been kept.');
+      throw new Error('This recording does not replay in this version of the game.');
     }
     session.playback = false;
     return session;
@@ -259,7 +259,7 @@ export function recoverAutosave(data, live, original, storage, options = {}) {
   // interoperable save: independent of the journal's engine version
   if (record?.format !== 'below-the-root-record' || typeof record.c64 !== 'string'
       || !record.c64.length || record.c64.length > 4096) {
-    throw new Error('This autosave has no recoverable quest checkpoint. Download the original save for recovery.');
+    throw new Error('This autosave has no recoverable quest checkpoint.');
   }
   const session = new Session(data, live, { ...options, initial: { mode: 'menu' }, record: null });
   session.load(fromBase64(record.c64));

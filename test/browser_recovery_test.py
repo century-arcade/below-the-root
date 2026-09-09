@@ -26,7 +26,7 @@ with sync_playwright() as p:
     page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': False}))
     page.add_init_script("""(() => {
         const write = Storage.prototype.setItem;
-        window.failBackup = true;
+        window.failBackup = sessionStorage.getItem('failBackup') !== 'false';
         Storage.prototype.setItem = function (key, value) {
             if (window.failBackup && key.startsWith('btr.autosave.v1.recovery')) throw new Error('Test quota');
             return write.call(this, key, value);
@@ -36,40 +36,35 @@ with sync_playwright() as p:
     page.locator('#screen').wait_for()
     page.evaluate('([key, value]) => localStorage.setItem(key, value)', [KEY, original])
     page.reload()
-    page.get_by_role('button', name='Recover saved game').wait_for()
-    assert 'diverged' in page.locator('#notice').inner_text()
-    page.evaluate("dispatchEvent(new Event('pagehide'))")
-    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
-    page.get_by_role('button', name='Dismiss notice').click()
-    assert not page.locator('#notice').is_visible()
-    assert page.get_by_role('button', name='Recover saved game').is_visible()
-    page.get_by_role('button', name='Dismiss', exact=True).click()
-    assert not page.locator('#save-recovery').is_visible()
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    expect(page.locator('#notice')).to_have_text('Your saved game could not be restored. Test quota')
+    expect(page.locator('#save-recovery')).to_have_count(0)
+    expect(page.locator('#map')).to_be_hidden()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
+    # Skip the intro, choose START GAME, then choose the character.
+    # A failed restore still allows play and autosaving a new quest.
+    for _ in range(3):
+        page.wait_for_timeout(150)
+        page.keyboard.press('Space', delay=120)
+    expect(page.locator('#map')).to_be_visible()
+    page.wait_for_function("(original) => localStorage.getItem('btr.autosave.v1') !== original", arg=original)
+
+    # Recovery on cold startup is silent and keeps the original before replacing it.
+    page.evaluate("sessionStorage.setItem('failBackup', 'false')")
+    page.add_init_script(f"""if (!sessionStorage.getItem('recoverySeeded')) {{
+        localStorage.setItem({json.dumps(KEY)}, {json.dumps(original)});
+        sessionStorage.setItem('recoverySeeded', 'true');
+    }}""")
     page.reload()
-    page.get_by_role('button', name='Recover saved game').wait_for()
-    with page.expect_download() as download:
-        page.get_by_role('button', name='Download original save').click()
-    assert open(download.value.path()).read() == original
-    page.get_by_role('button', name='Recover saved game').click()
-    assert 'Test quota' in page.locator('#notice').inner_text()
-    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
-    assert page.get_by_role('button', name='Recover saved game').is_visible()
-    page.get_by_role('button', name='Dismiss notice').click()
-    assert not page.locator('#notice').is_visible()
-    with page.expect_download() as download:
-        page.get_by_role('button', name='Download original save').click()
-    assert open(download.value.path()).read() == original
-    # Recovery must also release a hold that was already active.
-    page.keyboard.press('Escape')
-    page.evaluate('window.failBackup = false')
-    page.get_by_role('button', name='Recover saved game').click()
-    page.locator('#save-recovery').wait_for(state='hidden')
-    assert page.locator('#notice').inner_text() == 'Saved game recovered'
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    expect(page.locator('#notice')).to_be_hidden()
+    expect(page.locator('#save-recovery')).to_have_count(0)
+    expect(page.locator('#map')).to_be_visible()
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     recovered = json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))
+    assert recovered != record
     assert recovered['checkpoint']['room'] == record['checkpoint']['room']
     assert recovered['checkpoint']['quest']
     assert recovered['checkpoint']['objects'] == record['checkpoint']['objects']
@@ -78,30 +73,26 @@ with sync_playwright() as p:
         dispatchEvent(new Event('pagehide'));
         return JSON.parse(localStorage.getItem('btr.autosave.v1')).frames > frames;
     }""", arg=recovered['frames'])
-    page.locator('#notice').wait_for(state='hidden', timeout=5000)
-    assert not page.get_by_role('button', name='Dismiss notice').is_visible()
     page.reload()
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
-    assert not page.locator('#save-recovery').is_visible()
-    assert 'diverged' not in page.locator('#notice').inner_text()
+    expect(page.locator('#notice')).to_be_hidden()
+    expect(page.locator('#map')).to_be_visible()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))['checkpoint']['room'] == record['checkpoint']['room']
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') is None
 
-    # An unusable checkpoint still offers the original for download in debug mode.
-    page.keyboard.press('Escape')
-    page.evaluate("dispatchEvent(new Event('pagehide'))")
-    record['c64'] = None
-    record['engine'] = 'old'
-    unusable = json.dumps(record)
+    # Without a checkpoint, preserve the text and start cold with one notice.
+    unusable = json.dumps({**record, 'c64': None, 'engine': 'old'})
     page.add_init_script(f'localStorage.setItem({json.dumps(KEY)}, {json.dumps(unusable)})')
     page.goto(URL + '?debug')
-    page.get_by_role('button', name='Recover saved game').click()
-    assert 'no recoverable quest checkpoint' in page.locator('#notice').inner_text()
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    expect(page.locator('#notice')).to_have_text('Your saved game could not be restored.')
+    expect(page.locator('#save-recovery')).to_have_count(0)
+    expect(page.locator('#map')).to_be_hidden()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == unusable
-    with page.expect_download() as download:
-        page.get_by_role('button', name='Download recording', exact=True).click()
-    assert open(download.value.path()).read() == unusable
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') == unusable
     assert not errors, errors
 
     # Reset retires a failed restore and allows the next quest to autosave.
@@ -109,10 +100,10 @@ with sync_playwright() as p:
     page.locator('#opt-reset').click()
     page.locator('#opt-reset-confirm').click()
     expect(page.locator('#notice')).to_have_text('Game reset')
-    expect(page.locator('#save-recovery')).to_be_hidden()
     expect(page.locator('#map')).to_be_hidden()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) is None
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') is None
     for _ in range(2):
         page.wait_for_timeout(150)
         page.keyboard.press('Space', delay=120)
@@ -130,4 +121,4 @@ with sync_playwright() as p:
     startup.get_by_role('button', name='Dismiss notice').click()
     assert not startup.locator('#notice').is_visible()
     browser.close()
-    print('browser_recovery_test: dismissal, original download, backup failure/retry, resumed recovery, notice expiry, reload, missing checkpoint, reset after failed restore, and startup error passed')
+    print('browser_recovery_test: silent recovery, backup failure, continued autosaving, reload, missing checkpoint, reset after failed restore, and startup error passed')

@@ -43,25 +43,19 @@ Restoration compares the reconstructed state with the checkpoint before
 replacing the live session. It does not execute code from the file.
 
 Keep `ENGINE_VERSION` in sync when changing simulation rules or data in a
-way that breaks existing recordings. An unsupported or diverging record
-is rejected and the previous autosave is preserved; the C64 checkpoint
-can recover progress without replaying the incompatible journal.
+way that breaks existing recordings. An unsupported or diverging autosave
+is recovered automatically at startup from its C64 checkpoint. The game
+backs up the original under `btr.autosave.v1.recovery` keys and starts a
+new recording from the recovered quest, without a notice or pause. Later
+recoveries retain earlier backups. An action in progress may restart;
+transient animation, creature timing, tile edits, and the visited-room
+map are not restored by the C64 checkpoint.
 
-If auto-resume fails, click **Recover saved game**. The game validates the
-C64 checkpoint, backs up the original recording in browser storage, and
-starts a new recording from the recovered quest. Play resumes immediately.
-An action in progress may restart, and transient animation, creature
-timing, and tile edits are not restored by the C64 checkpoint. If validation
-or storage fails, the original autosave stays untouched and recovery can
-be retried.
-**Dismiss** hides the panel and keeps the original autosave for recovery on
-the next load; autosaving stays disabled until recovery or a file import succeeds.
-
-**Download original save** exports the preserved autosave even if recovery
-is unavailable. After auto-resume fails, the debug **Download recording**
-button also exports that original. Recovery backups use keys starting with
-`btr.autosave.v1.recovery`; later recoveries retain earlier backups. Download
-the original for a durable copy outside browser storage.
+If there is no checkpoint or recovery fails, the game starts cold, keeps
+the original where it can, and shows “Your saved game could not be restored.”
+Recovery errors are appended to that dismissable notice. Autosaving
+continues when a new quest starts. Dropped recording files still report
+replay errors without automatic recovery.
 
 Attract/demo screens do not overwrite a quest autosave. A new real quest
 replaces the autosave; download any run you want to retain first. Browser

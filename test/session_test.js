@@ -60,7 +60,7 @@ assert.deepEqual(checkpoint(restored.state), checkpoint(session.state), 'RNG and
 session.load(bytes);
 assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(session.snapshot())).state), checkpoint(session.state));
 const broken = copy(recorded); broken.checkpoint.player.col++;
-assert.throws(() => Session.replay(freshData, values, broken), /diverged/);
+assert.throws(() => Session.replay(freshData, values, broken), /does not replay/);
 assert.throws(() => Session.replay(freshData, values, { ...recorded, engine: 'old' }), /version/);
 
 // Recover progress across incompatible engines without trusting or replaying the journal.

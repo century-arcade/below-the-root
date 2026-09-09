@@ -42,7 +42,7 @@
   button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
   button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #notices { max-width: min(480px, 90vw); }
-  #notice-banner, #save-recovery { padding: 8px; background: #142019; }
+  #notice-banner { padding: 8px; background: #142019; }
   #notice-banner { display: flex; align-items: flex-start; gap: 8px; }
   dialog {
     position: static; align-self: center; margin: 8px 0 0;
@@ -61,12 +61,6 @@
   <div id="notice-banner" hidden>
     <div id="notice" role="status" hidden></div>
     <button id="dismiss-notice">Dismiss notice</button>
-  </div>
-  <div id="save-recovery" hidden>
-    <p>Recover your saved progress from its checkpoint. An action in progress may restart. A backup of the original save will be kept.</p>
-    <button id="recover-save">Recover saved game</button>
-    <button id="download-preserved-save">Download original save</button>
-    <button id="dismiss-recovery">Dismiss</button>
   </div>
 </div>
 <div id="game">

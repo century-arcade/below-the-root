@@ -108,7 +108,7 @@ with sync_playwright() as p:
     page.goto(BASE + '/?debug')
     page.locator('#file-issue').wait_for()
     page.wait_for_timeout(200)
-    assert 'diverged' not in page.locator('#notice').inner_text()
+    expect(page.locator('#notice')).to_be_hidden()
     assert page.locator('#where').inner_text() == record['checkpoint']['room']
     page.locator('#record-file').set_input_files('/tmp/btr-browser-record.json')
     page.get_by_role('status').filter(has_text='Loaded btr-browser-record.json').wait_for()
@@ -176,7 +176,6 @@ with sync_playwright() as p:
     assert page.evaluate("localStorage.getItem('btr.quest2')") == record['c64']
     assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
     expect(page.locator('#options-dialog')).to_be_hidden()
-    expect(page.locator('#save-recovery')).to_be_hidden()
     expect(page.locator('#map')).to_be_hidden()
     page.reload()
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
