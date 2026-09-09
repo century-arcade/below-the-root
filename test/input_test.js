@@ -1,5 +1,15 @@
 import assert from 'node:assert/strict';
-import { Keyboard, Pointer, IDLE } from '../src/input.js';
+import { Keyboard, Pointer, IDLE, skipArmed } from '../src/input.js';
+
+for (const armed of [false, true]) {
+  for (const fire of [false, true]) {
+    assert.equal(skipArmed(armed, false, fire), false, 'no tune clears skip arming');
+  }
+}
+assert.equal(skipArmed(false, true, true), false, 'the held verb button cannot arm a skip');
+assert.equal(skipArmed(false, true, false), true, 'releasing fire during a tune arms a skip');
+assert.equal(skipArmed(true, true, false), true, 'a skip stays armed while fire is up');
+assert.equal(skipArmed(true, true, true), true, 'a fresh press can skip an armed tune');
 
 class Target {
   constructor() { this.listeners = {}; }
@@ -11,6 +21,15 @@ const canvas = new Target();
 Object.assign(canvas, { style: {}, width: 320, height: 200, setPointerCapture: () => {},
   getBoundingClientRect: () => ({ left: 0, top: 0, width: 320, height: 200 }) });
 const keys = new Keyboard(target);
+keys.press('fire');
+keys.read();
+assert.equal(skipArmed(false, true, keys.firePressed()), false, 'reading the held verb press cannot arm a skip');
+keys.release('fire');
+assert.equal(skipArmed(false, true, keys.firePressed()), true, 'releasing the verb press arms a skip');
+keys.tap('fire');
+assert.equal(keys.firePressed(), true, 'a pointer tap can skip an armed tune');
+keys.read();
+assert.equal(keys.firePressed(), false, 'a tap consumed before the tune is no longer a press');
 const pointer = new Pointer(canvas, keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
 const event = { button: 0, pointerId: 1, clientX: 200, clientY: 100, preventDefault: () => {} };
 const wait = ms => new Promise(r => setTimeout(r, ms));

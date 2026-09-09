@@ -209,5 +209,49 @@ with sync_playwright() as p:
         page.wait_for_timeout(200)
         assert page.evaluate('window.audioStops') == scheduled, 'pause/resume must leave scheduled music playing'
     assert not errors, errors
+    # Pomma can PENSE messages; this seed puts the U3 animal in front of her start.
+    page.add_init_script('crypto.getRandomValues = array => { array.fill(1); return array; };')
+    page.goto(BASE + '/?room=U3&player=3')
+    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.evaluate('''async () => {
+        window.facingCreature = (await import('./creatures.js')).facingCreature;
+        window.readQuest = () => {
+            dispatchEvent(new Event('pagehide'));
+            return JSON.parse(localStorage.getItem('btr.autosave.v1'));
+        };
+        window.selectedVerb = () => String.fromCharCode(
+            ...readQuest().checkpoint.panel.filter(c => c & 128).map(c => c & 127)
+        ).trim();
+    }''')
+    page.wait_for_function('''() => {
+        const s = readQuest().checkpoint;
+        return !s.player.fallen && !s.player.knockdown && facingCreature(s) !== null;
+    }''')
+    page.keyboard.down('ArrowDown')
+    page.keyboard.down('Space')
+    page.wait_for_function('readQuest().checkpoint.timing[6]')
+    page.keyboard.up('Space')
+    page.keyboard.up('ArrowDown')
+    page.wait_for_function("selectedVerb() === 'PAUSE'")
+    page.keyboard.press('ArrowDown')
+    page.wait_for_function("selectedVerb() === 'SPEAK'")
+    page.keyboard.press('ArrowDown')
+    page.wait_for_function("selectedVerb() === 'PENSE'")
+    page.keyboard.down('Space')
+    page.wait_for_function('readQuest().checkpoint.progress[3] === 1')
+    reward_frame = frames()
+    page.wait_for_function('(frame) => readQuest().frames >= frame + 18', arg=reward_frame)
+    reward = page.evaluate('readQuest()')
+    assert reward['checkpoint']['timing'][1] > 0, 'the reward tune must still be waiting while Space is held'
+    assert not reward['actions'], 'the verb press must not skip its reward tune'
+    page.keyboard.up('Space')
+    released_frame = frames()
+    page.wait_for_function('(frame) => readQuest().frames >= frame + 2', arg=released_frame)
+    page.keyboard.press('Space')
+    page.wait_for_function("readQuest().actions.some(a => a.type === 'skip')")
+    skipped = page.evaluate('readQuest()')
+    assert [a['type'] for a in skipped['actions']] == ['skip'], 'a fresh press skips exactly once'
+    assert skipped['checkpoint']['timing'][1] == 0, 'skipping clears the tune wait'
+    assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, one-click reset/deletion/reload, pause/resume with continuing music, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: autosave/resume, one-click reset/deletion/reload, pause/resume with continuing music, held-button reward tune and fresh-press skip, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

@@ -1,7 +1,7 @@
 import { loadData } from './data.js';
 import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from './video.js';
 import { figures } from './game.js';
-import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
+import { Keyboard, Pointer, Gamepad, isEditing, skipArmed } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, clearAutosave } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
@@ -398,13 +398,16 @@ loadData((path) => fetch(path).then((r) => {
   const STEP_MS = 1000 / 60;
   let last = performance.now();
   let acc = 0;
+  let armed = false;
   function frame(now) {
     acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
     gamepad.poll();
     if (gamepad.held.size) seenInput = true;
     while (acc >= STEP_MS) {
-      if (!options.classic && state.tuneWait != null && stick.firePressed()) { session.skipTune(); stick.reset(); }
+      const fire = stick.firePressed();
+      armed = skipArmed(armed, state.tuneWait != null, fire);
+      if (!options.classic && armed && fire) { session.skipTune(); stick.reset(); armed = false; }
       const previousRoom = state.room;
       const previousTitle = state.title;
       session.step();

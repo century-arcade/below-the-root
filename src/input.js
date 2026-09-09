@@ -10,6 +10,11 @@ export function isIdle(j) {
   return j.dx === 0 && j.dy === 0 && !j.fire;
 }
 
+// The button that chose a rewarding verb must come up before it can skip the tune.
+export function skipArmed(armed, tuneWaiting, firePressed) {
+  return tuneWaiting && (armed || !firePressed);
+}
+
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
