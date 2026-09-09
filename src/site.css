@@ -1,0 +1,49 @@
+body { padding: 0; }
+#site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; border-bottom: 1px solid #354537; }
+#site-header nav { display: flex; align-self: stretch; flex-shrink: 0; }
+#site-header nav a { display: grid; place-items: center; padding: 0 12px; text-decoration: none; border-bottom: 2px solid transparent; }
+#site-header nav a[aria-current] { color: #f2ead8; border-color: #f2ead8; }
+#top-controls { min-width: 0; overflow-x: auto; flex-shrink: 1; }
+#top-controls button { flex-shrink: 0; }
+#top-controls #debug-tools { margin: 0; }
+#about, #play { scroll-margin-top: 41px; }
+#play { max-width: 100%; }
+#about { box-sizing: border-box; width: min(1100px, 100%); padding: 42px 60px; position: relative; background: #f2ead8; color: #202b42; font: 19px/1.5 Georgia, serif; }
+#about::before { content: ""; position: absolute; inset: 12px; border: 6px double #202b42; pointer-events: none; }
+#about a { color: inherit; text-underline-offset: 3px; }
+#about a:focus-visible, #site-header a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+#about h1, #about h2, #about .play-button { font-family: 'Cinzel', Georgia, serif; }
+#about h1 { margin: 0; font-size: clamp(36px, 5.5vw, 66px); line-height: 1.1; font-weight: 400; letter-spacing: -.035em; }
+.ad-heading { text-align: center; }
+.computer-line { font: 12px/1.6 monospace; text-transform: uppercase; letter-spacing: .08em; }
+.ad-images { display: grid; grid-template-columns: .85fr 1.3fr; gap: 50px; align-items: center; margin: 38px 0; }
+#about figure { margin: 0; }
+#about img { display: block; max-width: 100%; height: auto; }
+.box-front img { width: 300px; margin: auto; transform: rotate(-4deg); box-shadow: 5px 9px 12px #202b4240; }
+.monitor { padding: 22px; background: #262a2a; border: 3px solid #424744; border-radius: 25px; box-shadow: 3px 7px 0 #171d20; }
+.monitor img { width: 100%; border: 3px solid #101615; border-radius: 10px; box-sizing: border-box; image-rendering: pixelated; }
+#about figcaption { margin-top: 14px; font-size: 14px; line-height: 1.35; font-variant: small-caps; }
+.ad-copy { max-width: 730px; margin: auto; }
+.ad-copy p { margin: 0 0 16px; }
+.ad-action { text-align: center; margin: 26px 0; }
+#about .play-button { display: block; width: fit-content; margin: 0 auto 12px; padding: 10px 70px; background: #202b42; color: #f2ead8; font-size: 30px; font-weight: 700; letter-spacing: .12em; text-decoration: none; border: 4px double #f2ead8; outline: 2px solid #202b42; }
+.ad-action > a:last-child { font-size: 16px; }
+#about .fine-print { font-size: 9px; line-height: 1.5; margin: 26px 0 32px; }
+.about-details { border-top: 1px solid #202b42; padding-top: 10px; }
+#about h2 { font-size: 25px; margin: 24px 0 12px; }
+.about-details p { margin: 0 0 16px; }
+.box-back { float: right; width: 150px; margin: 0 0 18px 24px !important; }
+.about-details section { display: flow-root; }
+.extras, .elsewhere { list-style: none; padding: 0; }
+.extras li { margin: 5px 0; }
+.elsewhere li { margin: 0 0 14px; }
+#about .references { font-size: 14px; }
+@media (max-width: 899px) {
+  #about { padding: 30px 26px; font-size: 17px; }
+  .ad-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
+  .box-front img { width: min(270px, 90%); }
+  .monitor { padding: 16px; }
+  #site-header { padding: 0 4px; gap: 4px; }
+  #site-header nav a { padding: 0 9px; }
+  .box-back { width: 110px; margin-left: 16px !important; }
+}

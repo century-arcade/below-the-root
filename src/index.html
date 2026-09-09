@@ -59,10 +59,15 @@
   a { color: #c7f5ae; }
   #issue-result { overflow-wrap: anywhere; }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
-<div id="game">
-  <div id="top-controls">
+<header id="site-header">
+  <nav aria-label="Main"><a href="#about" aria-current="page">About</a><a href="#play">Play</a></nav>
+  <div id="top-controls" hidden>
     <div id="debug-tools" hidden>
       <button id="download-record" aria-label="Download recording" title="Download recording">⤓</button>
       <button id="load-record" aria-label="Load recording" title="Load recording">💾</button>
@@ -75,6 +80,69 @@
     <button id="help" aria-keyshortcuts="? h" aria-controls="help-screen" aria-expanded="false" aria-label="Help" title="Help">?</button>
     <button id="options" aria-keyshortcuts="O" aria-controls="options-dialog" aria-label="Options" title="Options">⚙</button>
   </div>
+</header>
+<main id="about">
+  <article class="ad" aria-labelledby="ad-title">
+    <div class="ad-heading">
+      <h1 id="ad-title">Below the Root</h1>
+      <p class="computer-line">Windham Classics, 1984. Commodore 64.</p>
+    </div>
+    <div class="ad-images">
+      <figure class="box-front">
+        <img src="assets/box/front.jpg" width="454" height="599" alt="The original box: William Groetzinger’s painting of treetop houses, bridges and a gliding figure above a hidden underground city.">
+      </figure>
+      <figure>
+        <div class="monitor"><img src="assets/box/screen.png" width="960" height="672" alt="Broad Grund’s shops in the browser port, with the player’s status below the picture."></div>
+        <figcaption>Actual Commodore 64 screen. Well, actual screen of the port, which is the same thing.</figcaption>
+      </figure>
+    </div>
+    <div class="ad-copy">
+      <p>Based on the Green-sky books by Zilpha Keatley Snyder, who wrote the story. You are one of five characters and you have fifty days to find a boy trapped below the root of the great trees. 438 rooms. There is nothing to fight.</p>
+      <p>This is the original C64 game, ported to the browser. The rooms, creatures, words, pictures and music come from the original. The rules follow the original, with buttonless gliding and tune skipping added. Added: a world map, mouse and touch, gamepad, autosave, fullscreen, an optional CRT effect.</p>
+      <p>Free. Runs in your browser. <a href="https://github.com/century-arcade/below-the-root">Source on GitHub.</a></p>
+    </div>
+    <div class="ad-action"><a class="play-button" href="#play">Play</a><a href="?demo">Watch the demo</a></div>
+    <p class="fine-print">BELOW THE ROOT is a trademark of Windham Classics Corp., a division of Spinnaker Software. Box art by William Groetzinger. The original program is © 1984 Windham Classics; this port is an independent reconstruction. Commodore 64 is a trademark of Commodore Electronics Ltd. Source: <a href="https://github.com/century-arcade/below-the-root">github.com/century-arcade/below-the-root</a>.</p>
+  </article>
+  <div class="about-details">
+    <section aria-labelledby="the-game">
+      <h2 id="the-game">The game</h2>
+      <figure class="box-back"><a href="assets/box/back.jpg"><img src="assets/box/back.jpg" width="454" height="604" loading="lazy" alt="Back of the cream, navy-bordered box, with the original description and screenshots of a shop and treetop platforms."></a><figcaption>The original box back</figcaption></figure>
+      <p>Windham Classics, Spinnaker’s children’s-literature label, released Below the Root in 1984, first for the Commodore 64, then for Apple II and IBM PC. Zilpha Keatley Snyder wrote the story as a continuation of her Green-sky trilogy: <i>Below the Root</i>, <i>And All Between</i> and <i>Until the Celebration</i> (1975–77). Dale DeSharone, credited as Disharoon, designed and programmed the game. William Groetzinger made the art; Jim Graham, Leonard Lebow and Vince Mills were also programmers.</p>
+      <p>Neric, Genaa and Pomma are Kindar; Herd and Charn are Erdlings. Neric and Herd are strong with moderate spirit, Genaa is strong without spirit skill, Pomma has less stamina and more spirit, and Charn falls between them in stamina with moderate spirit. Their standing with the two peoples determines who will talk to them. The quest is to reach Raamo below the root within fifty days. Its exploration and growing abilities are often described as an early metroidvania. It is a pacifist game.</p>
+    </section>
+    <section aria-labelledby="the-port">
+      <h2 id="the-port">This port</h2>
+      <p>The disks were decoded from G64 images. The 6502 program was disassembled and documented, and the art, text and music extracted. A written specification and JSON tables describe the game; the JavaScript port reads those tables, never the disassembly. Golden-image tests compare rendered screens with the original. Both attract scripts replay against VICE, with the quest script checked through its end. Walkthrough verification is still in progress.</p>
+      <ul class="extras">
+        <li>World map: original room tiles, with new areas revealed as you visit.</li>
+        <li>Mouse and touch: steer, tap a door or double-tap a destination.</li>
+        <li>Gamepad: directional pad or left stick, with face buttons to select and jump.</li>
+        <li>Autosave: resume the quest on your next visit.</li>
+        <li>Fullscreen: the game fills the display.</li>
+        <li>CRT effect: optional scanlines, phosphor stripes and colour bleed.</li>
+        <li>Modern display: live status rows and tune skipping; classic display is also available.</li>
+        <li>Gliding: pushing sideways is enough; the button is optional.</li>
+      </ul>
+      <p><a href="https://github.com/century-arcade/below-the-root">Source on GitHub</a> · <a href="https://github.com/century-arcade/below-the-root/tree/master/docs/spec">The specification</a> · <a href="https://github.com/century-arcade/below-the-root/issues">Issue tracker</a></p>
+    </section>
+    <section aria-labelledby="elsewhere">
+      <h2 id="elsewhere">Elsewhere</h2>
+      <ul class="elsewhere">
+        <li><a href="https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/">Justin Stahlman: Below the Root: a story, a computer game and my lifelong obsession</a> (2015). A long love letter, with a 10240×2560 master map and sprite sheet.</li>
+        <li><a href="https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania">John Szczepaniak, Time Extension: The making of Below the Root</a> (2024). Interviews with Bill Groetzinger.</li>
+        <li><a href="https://obscuritory.com/platform/below-the-root/">The Obscuritory: Below the Root</a>. On the game’s kindness.</li>
+        <li><a href="https://altusmusic.bandcamp.com/album/below-the-root">Altus: Below the Root</a>. An ambient album inspired by the game.</li>
+        <li><a href="https://www.lemon64.com/review/below-the-root/377">Lemon64 review</a>. A player’s account of exploring Green-sky.</li>
+        <li><a href="http://bestretrogames.blogspot.com/2012/03/below-root-commodore-64-1984.html">My all time favourite video games: Below The Root</a>. A personal retrospective of the C64 game.</li>
+        <li><a href="https://zacksmithwriter.wordpress.com/2013/04/18/weird-childrens-books-zilpha-keatley-snyder-and-below-the-root/">Zack Smith: Weird Children’s Books: Zilpha Keatley Snyder and Below the Root</a>. The novels behind the game.</li>
+      </ul>
+      <p class="references">Reference: <a href="https://en.wikipedia.org/wiki/Below_the_Root_(video_game)">Wikipedia</a>, <a href="https://www.mobygames.com/game/602/below-the-root/">MobyGames</a>, <a href="https://www.lemon64.com/game/below-the-root">Lemon64</a>, <a href="https://tcrf.net/Below_the_Root">The Cutting Room Floor</a>, <a href="https://archive.org/details/below-the-root-game-manual-1984">the manual on archive.org</a>, <a href="https://gamefaqs.gamespot.com/c64/581563-below-the-root/faqs/57342">GameFAQs walkthroughs</a>.</p>
+    </section>
+  </div>
+</main>
+<section id="play" aria-label="Play Below the Root" hidden>
+<div id="game">
   <div id="where" role="status"></div>
   <div id="canvas-box">
     <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; space is the joystick button; Escape or P pauses; Tab shows the map. Press ? for all controls."></canvas>
@@ -141,6 +209,7 @@
     </form>
   </dialog>
 </div>
+</section>
 <script type="module" src="main.js"></script>
 </body>
 </html>

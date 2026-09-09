@@ -22,7 +22,7 @@ with sync_playwright() as p:
             page.keyboard.press('?')
             page.keyboard.up('Shift')
 
-        page.goto(BASE)
+        page.goto(BASE + '/#play')
         basics = page.locator('#basics')
         help_screen = page.locator('#help-screen')
         expect(basics).to_be_visible()

@@ -12,6 +12,7 @@ import { basicsVisible } from './help.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { createLog } from './log.js';
+import { setupSite } from './site.js';
 
 const log = createLog(document.getElementById('log'), { onToggle: () => fit() });
 
@@ -24,18 +25,17 @@ const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.cre
 let band = 0;
 const crtBox = document.getElementById('crt');
 
-const CHROME_PX = 8; // body top padding
-
 function fit() {
+  if (document.getElementById('play').hidden) return;
   const full = document.fullscreenElement === game;
   let scale;
   if (full) {
     game.style.width = '';
     scale = fitScale(game.clientWidth, game.clientHeight, HEIGHT + band);
   } else {
-    const chrome = ['top-controls', 'where', 'game-controls', 'log']
+    const chrome = ['site-header', 'where', 'game-controls', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
-    scale = fitScale(window.innerWidth, window.innerHeight - CHROME_PX - chrome, HEIGHT + band);
+    scale = fitScale(window.innerWidth, window.innerHeight - chrome, HEIGHT + band);
   }
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
@@ -81,6 +81,10 @@ function doorsAt(state, col, row) {
 function whereLabel(state) {
   return state.room && !state.title ? state.room.code : '';
 }
+
+let hasAutosave = false;
+try { hasAutosave = localStorage.getItem(AUTOSAVE_KEY) !== null; } catch {}
+setupSite(hasAutosave, fit);
 
 loadData((path) => fetch(path).then((r) => {
   if (!r.ok) throw new Error(`${path}: ${r.status}`);
@@ -244,6 +248,7 @@ loadData((path) => fetch(path).then((r) => {
   }
   const saveNow = () => autosave.save(session, true).reason !== 'failed';
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
+  addEventListener('hashchange', dropInput);
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; };
   const hold = () => { held = true; dropInput(); };
@@ -428,7 +433,7 @@ loadData((path) => fetch(path).then((r) => {
   function frame(now) {
     acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
-    gamepad.poll();
+    if (!document.getElementById('play').hidden) gamepad.poll();
     if (gamepad.held.size) seenInput = true;
     while (acc >= STEP_MS) {
       session.skippable = !options.classic;

@@ -35,9 +35,9 @@ with sync_playwright() as p:
         };
     })();""")
     page.goto(URL)
-    page.locator('#screen').wait_for()
+    page.wait_for_selector('#mute[aria-pressed]', state='attached')
     page.evaluate('([key, value]) => localStorage.setItem(key, value)', [KEY, original])
-    page.reload()
+    page.goto(URL)
     page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
     expect(page.locator('#log')).to_be_hidden()
     assert page.locator('#log').text_content() == ''
@@ -129,7 +129,7 @@ with sync_playwright() as p:
     # Fatal startup errors reach the log even before game data finishes loading.
     startup = browser.new_page()
     startup.route('**/data/*.json', lambda route: route.fulfill(status=500, body='Test load failure'))
-    startup.goto(URL)
+    startup.goto(URL + '#play')
     expect(startup.locator('#log')).to_be_visible()
     expect(startup.locator('#log')).to_contain_text('500')
     browser.close()

@@ -8,11 +8,11 @@ NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve test browser-test poster clean
+.PHONY: build serve test browser-test poster screenshot clean
 
 build:
 	mkdir -p $(BUILD)/data $(BUILD)/assets
-	cp src/index.html src/*.js $(BUILD)/
+	cp src/index.html src/*.js src/*.css $(BUILD)/
 	cp $(SPEC)/*.json $(BUILD)/data/
 	cp assets/*.json assets/*.png $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
@@ -22,6 +22,7 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
+	node test/site_test.js
 	node test/log_test.js
 	node test/fit_test.js
 	node test/render_test.js
@@ -41,6 +42,10 @@ test:
 	node test/replay_test.js intro
 	node test/replay_test.js quest
 	@echo "make test: all passed"
+
+screenshot: build
+	$(PY) tools/shot.py --url $(BTR_URL)/ --width 1000 --height 750 --select '#canvas-box' --keys ArrowLeft assets/box/screen.png '?room=B8'
+	cp assets/box/screen.png $(BUILD)/assets/box/
 
 poster:
 	$(PY) tools/poster_map.py

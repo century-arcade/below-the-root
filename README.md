@@ -45,6 +45,7 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 
 The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
 script, `?room=T1` to start somewhere else).
+About introduces the game; Play opens it, and returning players with an autosave land on Play.
 
 Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen, O opens the options.
 
@@ -73,6 +74,7 @@ Gamepad: d-pad or left stick moves, any face button fires; sound starts only aft
 ```
 make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
 make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
+make screenshot               # regenerate assets/box/screen.png from Broad Grund (make serve first)
 make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
 tools/shot.py --keys o out.png '?menu'  # headless screenshot after keys; --select '#canvas-box' crops
 tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
