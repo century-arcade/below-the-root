@@ -6,7 +6,7 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 /* Opaque backing keeps the CRT blur's transparent edges from revealing its overlay. */
 #canvas-box { position: relative; container-type: inline-size; background: #000; border: var(--canvas-padding, 0px) solid #000; }
 #screen:focus-visible { outline: none; }
-#screen-focus { display: none; position: absolute; inset: calc(-1 * var(--canvas-padding, 0px)); width: calc(100% + 2 * var(--canvas-padding, 0px)); height: calc(100% + 2 * var(--canvas-padding, 0px)); fill: none; stroke: #9ad284; stroke-width: 2px; pointer-events: none; }
+#screen-focus { display: none; position: absolute; inset: calc(-1 * var(--canvas-padding, 0px)); width: calc(100% + 2 * var(--canvas-padding, 0px)); height: calc(100% + 2 * var(--canvas-padding, 0px)); fill: none; stroke: #56734e; stroke-width: 6px; filter: blur(1.5px); pointer-events: none; }
 #screen:focus-visible ~ #screen-focus { display: block; }
 #canvas-box:has(> #help-screen:not([hidden])) { min-height: max(0px, calc(var(--available-height) - 2 * var(--canvas-padding, 0px))); }
 #game:fullscreen #canvas-box { flex: none; }
