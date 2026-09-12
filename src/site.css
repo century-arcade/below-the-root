@@ -24,8 +24,10 @@ a { color: #c7f5ae; }
 #about figure { margin: 0; }
 #about img { display: block; max-width: 100%; height: auto; }
 .box-front img { width: 300px; margin: auto; transform: rotate(-4deg); box-shadow: 5px 9px 12px #202b4240; }
-.monitor { padding: 22px; background: #262a2a; border: 3px solid #424744; border-radius: 25px; box-shadow: 3px 7px 0 #171d20; }
-.monitor img { width: 100%; border: 3px solid #101615; border-radius: 10px; box-sizing: border-box; image-rendering: pixelated; }
+/* The box photographs have gently bowed edges as well as rounded corners. */
+.monitor, #canvas-box { clip-path: url(#screen-outline); }
+.monitor { padding: 3.5%; background: #000; }
+.monitor img { width: 100%; image-rendering: pixelated; }
 #about figcaption { margin-top: 14px; font-size: 14px; line-height: 1.35; font-variant: small-caps; }
 .ad-copy { max-width: 730px; margin: auto; }
 .ad-copy p { margin: 0 0 16px; }
@@ -45,7 +47,6 @@ a { color: #c7f5ae; }
   .reading-page { padding: 30px 26px; font-size: 17px; }
   .ad-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
   .box-front img { width: min(270px, 90%); }
-  .monitor { padding: 16px; }
   #site-header { padding: 0 4px; gap: 4px; }
   #site-header nav a { padding: 0 9px; }
   .box-back { width: 110px; margin-left: 16px !important; }

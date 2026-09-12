@@ -23,7 +23,7 @@ canvas.height = HEIGHT;
 const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.createImageData(WIDTH, HEIGHT + STATUS_HEIGHT) };
 let band = 0;
 const crtBox = document.getElementById('crt');
-const CANVAS_PADDING = 4; // Half an 8-pixel character, scaled with the game.
+const CANVAS_PADDING = 12; // Keep the full picture inside the bowed screen surround.
 
 function fit() {
   const full = document.fullscreenElement === game;
