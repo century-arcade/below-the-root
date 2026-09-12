@@ -214,7 +214,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   };
   document.getElementById('map-zoom-in').onclick = () => zoomMap(2);
   document.getElementById('map-zoom-out').onclick = () => zoomMap(.5);
-  document.getElementById('map-current').onclick = centerMap;
   mapViewport.addEventListener('dblclick', e => {
     // Pointer capture can retarget the double-click to the viewport.
     const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('#map-grid > span');

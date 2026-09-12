@@ -57,7 +57,7 @@ with sync_playwright() as p:
         assert not page.locator('#map-screen').is_visible()
         page.locator('#map').press('Enter')
         page.locator('#map-screen').wait_for()
-        for control in ['#close-map', '#map-zoom-in', '#map-current']:
+        for control in ['#close-map', '#map-zoom-in']:
             page.locator(control).focus()
             page.keyboard.press('Tab')
             page.locator('#map-screen').wait_for(state='hidden')
@@ -75,12 +75,11 @@ with sync_playwright() as p:
         assert page.locator('#map-zoom').inner_text() == '2×'
         room.dblclick()
         assert page.locator('#map-zoom').inner_text() == '4×'
-        page.locator('#map-current').click()
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
         page.get_by_role('button', name='Zoom out', exact=True).click()
         page.get_by_role('button', name='Zoom out', exact=True).click()
         assert page.locator('#map-zoom').inner_text() == '1×'
-        page.locator('#map-current').focus()
+        page.locator('#map-zoom-in').focus()
         stopped = record()['frames']
         page.keyboard.press('Space')
         page.wait_for_timeout(200)
