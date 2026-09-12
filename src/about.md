@@ -45,8 +45,10 @@ In any case, enjoy.
 <h2 id="the-game">The game</h2>
 <figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="Back of the cream, navy-bordered box, with the original description and screenshots of a shop and treetop platforms."></a><figcaption>The original box back</figcaption></figure>
 
-The Green-Sky trilogy consists of *Below the Root*,
-*And All Between* and *Until the Celebration*. Snyder helped design the game as a
+The Green-Sky trilogy consists of [*Below the Root*](https://openroadmedia.com/ebook/below-the-root/9781453271926),
+[*And All Between*](https://openroadmedia.com/ebook/and-all-between/9781453271933) and
+[*Until the Celebration*](https://openroadmedia.com/ebook/until-the-celebration/9781453271940).
+Snyder helped design the game as a
 continuation of the books, shaping its world and writing dialogue with designer and
 programmer [Dale DeSharone](https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html)
 (credited as Dale Disharoon). [William Groetzinger created the art](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania).
