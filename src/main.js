@@ -270,7 +270,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (overlay?.screen === helpScreen) return release();
     openOverlay(helpScreen, helpButton);
     const closeHelp = document.getElementById('close-help');
-    closeHelp.textContent = startup ? 'Continue to intro' : 'Close help';
+    closeHelp.textContent = startup ? 'Continue to intro' : 'Close';
     helpScreen.scrollTop = 0;
     (startup ? closeHelp : helpScreen).focus({ preventScroll: true });
   }
