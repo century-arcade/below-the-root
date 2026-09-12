@@ -74,7 +74,7 @@ tracker](https://github.com/century-arcade/below-the-root/issues).
 </section>
 
 Others have kept Green-Sky close through memories, writing and guides. Visit
-[Resources](/resources) for the creators’ accounts, other players’ recollections, maps and
+[Links](/links) for the creators’ accounts, other players’ recollections, maps and
 original materials, or help with your quest.
 
 </div>

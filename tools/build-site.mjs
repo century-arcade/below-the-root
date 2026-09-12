@@ -6,7 +6,7 @@ const out = process.argv[2] || '_build';
 const read = name => readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8');
 const template = read('page.html');
 mkdirSync(out, { recursive: true });
-for (const page of ['about', 'play', 'resources']) {
+for (const page of ['about', 'play', 'links']) {
   const title = `${page[0].toUpperCase() + page.slice(1)} — Below the Root`;
   const values = {
     title,

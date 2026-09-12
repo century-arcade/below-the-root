@@ -37,9 +37,9 @@ a { color: #c7f5ae; }
 .about-details p { margin: 0 0 16px; }
 .box-back { float: right; width: 150px; margin: 0 0 18px 24px !important; }
 .about-details section { display: flow-root; }
-.extras, #resources ul { list-style: none; padding: 0; }
+.extras, #links ul { list-style: none; padding: 0; }
 .extras li { margin: 5px 0; }
-#resources li { margin: 0 0 14px; }
+#links li { margin: 0 0 14px; }
 @media (max-width: 899px) {
   .reading-page { padding: 30px 26px; font-size: 17px; }
   .ad-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }

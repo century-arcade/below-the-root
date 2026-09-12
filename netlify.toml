@@ -22,6 +22,18 @@ to = "/play.html"
 status = 200
 
 [[redirects]]
-from = "/resources"
-to = "/resources.html"
+from = "/links"
+to = "/links.html"
 status = 200
+
+[[redirects]]
+from = "/resources"
+to = "/links"
+status = 301
+force = true
+
+[[redirects]]
+from = "/resources.html"
+to = "/links"
+status = 301
+force = true

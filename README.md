@@ -45,7 +45,7 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 
 The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
 script, `?room=T1` to start somewhere else).
-About introduces the game; Play opens it, and Resources collects interviews, reviews, guides and original materials.
+About introduces the game; Play opens it, and Links collects interviews, reviews, guides and original materials.
 Returning players with an autosave land on Play; an explicit tab link takes precedence.
 
 Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen, O opens the options.
@@ -93,13 +93,14 @@ a global installation. It uses the `dev` environment by default; use
 `make serve PORT=8888` to change the local port. Re-run `make build`
 after editing source while the server is running.
 
-The site has separate `/about`, `/play`, and `/resources` pages. Edit
-`src/about.md` and `src/resources.md` for the reading pages; About retains a few
+The site has separate `/about`, `/play`, and `/links` pages. Edit
+`src/about.md` and `src/links.md` for the reading pages; About retains a few
 HTML wrappers for its box art and styling. `tools/build-site.mjs` renders Markdown
 with Marked into the shared `src/page.html` template. `make build` installs the
 pinned npm build dependency when needed; the published pages need no Markdown
 runtime. The homepage sends new visitors to About and returning players to Play;
-old `#about`, `#play`, `#resources` and game query links still work. Leaving Play
+old `#about`, `#play`, `#resources` and game query links still work; `/resources`
+and `/resources.html` redirect to `/links`. Leaving Play
 saves the game, and returning restores it.
 
 Regenerating the spec tables and the emulator setup: `docs/spec/README.md`

@@ -1,6 +1,6 @@
 {
   "checked": "2026-09-09",
-  "scope": "The 23 external destinations on the Resources page. HTML page preservation does not establish preservation of embedded audio, video, or every image.",
+  "scope": "The 23 external destinations on the Links page. HTML page preservation does not establish preservation of embedded audio, video, or every image.",
   "manual_download": {
     "url": "https://archive.org/download/below-the-root-game-manual-1984/Below%20the%20Root%20game%20manual-1984.pdf",
     "status": 200,

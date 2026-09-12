@@ -1,4 +1,4 @@
-# Resources
+# Links
 
 Writing, recordings and original materials about Below the Root. Reviews and playthroughs often reveal parts of the quest.
 
