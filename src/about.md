@@ -46,6 +46,31 @@ Whoever you are, enjoy.
 <h2 id="the-game">The game</h2>
 <figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="Back of the cream, navy-bordered box, with the original description and screenshots of a shop and treetop platforms."></a><figcaption>The original box back</figcaption></figure>
 
+From the original box:
+
+> The world of Green-Sky—lush and verdant, rich with wildlife, covered with
+> gigantic trees. Here live the Kindar, high in the interwoven branches; here too
+> live the Erdling, once banished to the tunnels below the root. Yet the peace
+> that has existed between these peoples is now threatened. Green-Sky seems
+> headed for certain disaster—unless someone can discover the secret of its survival.
+>
+> In this adventure game, you’ll set off on a fantastic and challenging quest for
+> the secret of Green-Sky. You’ll explore its vast tree-world, and you’ll venture
+> below the root to probe its maze of mysterious tunnels. You’ll talk with the
+> inhabitants of Green-Sky, whose advice will help you in your quest. But be
+> careful, for some are not as friendly as they seem.
+>
+> BELOW THE ROOT combines the story-building aspects of a text adventure with
+> hundreds of colorful graphics. It also combines fast-paced excitement with a
+> unique text menu—a first in the field of adventure games. And it lets you play
+> as one of five characters—each with different abilities and strengths.
+>
+> Based on Zilpha Snyder’s recently published Green-Sky Trilogy,
+> BELOW THE ROOT begins where the final book leaves off. The program
+> is by Dale Disharoon, Inc., specialists in educational software.
+>
+> Designed for ages nine–Adult.
+
 The Green-Sky trilogy of books consists of [*Below the Root*](https://openroadmedia.com/ebook/below-the-root/9781453271926),
 [*And All Between*](https://openroadmedia.com/ebook/and-all-between/9781453271933) and
 [*Until the Celebration*](https://openroadmedia.com/ebook/until-the-celebration/9781453271940). [Dale DeSharone](https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html) (credited as Dale Disharoon) designed and programmed the game, working with Snyder to on the plot and dialogue to be a continuation of the trilogy, and with [William Groetzinger who created the art](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania).
