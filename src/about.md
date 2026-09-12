@@ -13,6 +13,7 @@
 </figure>
 </div>
 <div class="ad-copy">
+
 Below the Root is an underknown work of art. It shares the calm, thoughtful play of
 King’s Quest and Karateka, also released in 1984, but draws additional depth from the
 Green-Sky world of Zilpha Keatley Snyder’s trilogy.
