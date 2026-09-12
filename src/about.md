@@ -18,7 +18,7 @@ King’s Quest and Karateka, also released in 1984, but draws additional depth f
 Green-Sky world of Zilpha Keatley Snyder’s trilogy.
 
 The game world is remarkably open and huge for the time, with a hundred characters you
-can talk with and “pense” (sense their thoughts and feelings).
+can talk with and whose feelings and thoughts you can pense.
 There are platform challenges and thoughtful puzzles and an intricate plot to uncover within the world.
 You glide from branch to branch with your shuba and sleep in a nid and gather
 wissenberries. These details from the books shape exploration, survival, and the
@@ -35,7 +35,7 @@ beak. Perhaps you’ve just read the novels and are curious about what happens n
 Perhaps you’re a pixel artist or a chiptune musician and are inspired to enhance the
 art or music. Perhaps you just want to experience a piece of computer gaming history.
 
-In any case, enjoy.
+Whoever you are, enjoy.
 
 </div>
 <div class="ad-action"><a class="play-button" href="/play">Play</a><a href="/play?demo">Watch the demo</a></div>
@@ -45,35 +45,24 @@ In any case, enjoy.
 <h2 id="the-game">The game</h2>
 <figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="Back of the cream, navy-bordered box, with the original description and screenshots of a shop and treetop platforms."></a><figcaption>The original box back</figcaption></figure>
 
-The Green-Sky trilogy consists of [*Below the Root*](https://openroadmedia.com/ebook/below-the-root/9781453271926),
+The Green-Sky trilogy of books consists of [*Below the Root*](https://openroadmedia.com/ebook/below-the-root/9781453271926),
 [*And All Between*](https://openroadmedia.com/ebook/and-all-between/9781453271933) and
-[*Until the Celebration*](https://openroadmedia.com/ebook/until-the-celebration/9781453271940).
-Snyder helped design the game as a
-continuation of the books, shaping its world and writing dialogue with designer and
-programmer [Dale DeSharone](https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html)
-(credited as Dale Disharoon). [William Groetzinger created the art](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania).
-[Windham Classics](https://www.atarimagazines.com/v3n7/Adventure_Trends.php), a Spinnaker
-label specializing in adventures based on children’s books, published the game in 1984.
-
-You can begin without having read the books. A troubling dream sets a quest in motion, and
-the people you meet hold clues to what threatens Green-Sky. Learning whom to trust
-matters: someone may offer food or a place to rest, while another may put you in danger.
+[*Until the Celebration*](https://openroadmedia.com/ebook/until-the-celebration/9781453271940). [Dale DeSharone](https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html) (credited as Dale Disharoon) designed and programmed the game, working with Snyder to on the plot and dialogue to be a continuation of the trilogy, and with [William Groetzinger who created the art](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania).
 
 </section>
 <section aria-labelledby="the-port">
 <h2 id="the-port">Restoring a way back</h2>
 
-You can play here without setting up an emulator or swapping disks. Use the arrow keys
-or WASD, a mouse, touch or gamepad; the Help button explains the controls. A built-in map
-reveals more outdoor areas as you explore, and visible status keeps food, rest and the
-passing days in view. Autosave keeps your progress in this browser on this device so
-you can return later.
+You can [play the game right here](/play), without setting up an emulator or dealing with lesser ports (like for the IBM PC or Apple II).
 
-For how the restoration is built and checked, see the [project README and
-source](https://github.com/century-arcade/below-the-root) and [the
-specification](https://github.com/century-arcade/below-the-root/tree/master/docs/spec).
-Problems can be reported in the [issue
-tracker](https://github.com/century-arcade/below-the-root/issues).
+Move your character using the arrow keys or WASD, and press Space to use jump, run, or open the menu.  You can also click or touch the screen to move your character.
+
+Other features, like a built-in map, are available as buttons on the top toolbar, or in the settings dialog.  See the help page on the toolbar also.
+
+Autosave keeps your progress in this browser on this device so you can return later.  And you can download a full transcript of your actions if you want to share a replay with someone.
+
+For source code and other information on how this was made, see the [project README and
+source](https://github.com/century-arcade/below-the-root).  You can use the in-game "Report Bug" button available in debug mode, to submit issues to the project along with your current game context.
 
 </section>
 
