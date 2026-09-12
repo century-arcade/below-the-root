@@ -14,29 +14,9 @@
       </div>
       <div id="map-viewport"><div id="map-grid"></div></div>
     </div>
-    <div id="help-screen" hidden role="dialog" aria-label="Controls" tabindex="-1">
-      <div id="help-heading"><span>Controls</span><button id="close-help">Close help</button></div>
-      <div id="help-content">
-        <h2>Keyboard</h2>
-        <dl>
-          <dt>Move</dt><dd>WASD / arrows</dd>
-          <dt>Button</dt><dd>Space / Shift / Ctrl: skip, jump, select</dd>
-          <dt>Pause</dt><dd>Escape / P</dd>
-          <dt>Map</dt><dd>Tab / Map icon in the top bar (during a quest)</dd>
-          <dt>Fullscreen</dt><dd>F (when supported)</dd>
-          <dt>Mute</dt><dd>M</dd>
-          <dt>Volume</dt><dd>- / = (or _ / +)</dd>
-          <dt>Help</dt><dd>? (Shift+/) / H / ? button; Escape closes</dd>
-          <dt>Options</dt><dd>O / ⚙ button: volume, CRT effect, classic display, debug tools</dd>
-          <dt>Skip a tune</dt><dd>the button, while the game waits for its music (modern display)</dd>
-        </dl>
-        <h2>Touch</h2>
-        <p>Hold to push toward your finger. Tap to press the button that way.
-          Tap a door or double-tap a spot to walk there. While walking, tap to
-          re-aim or tap the figure to stop.</p>
-        <h2>Gamepad</h2>
-        <p>D-pad / left stick to move; any face button to skip, jump, select.</p>
-      </div>
+    <div id="help-screen" hidden role="dialog" aria-label="How to play" tabindex="-1">
+      <div id="help-heading"><span>How to play</span><button id="close-help">Close help</button></div>
+      <div id="help-content">{{help}}</div>
     </div>
   </div>
   <div id="game-controls">

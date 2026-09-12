@@ -1,15 +1,26 @@
+@font-face { font-family: 'Green-Sky'; src: url('/assets/game-text.woff') format('woff'); font-display: swap; }
 canvas { image-rendering: pixelated; display: block; background: #000; }
 #game { display: flex; flex-direction: column; align-items: stretch; }
 #game:fullscreen { background: #000; justify-content: center; align-items: center; }
 #game:fullscreen > :not(#canvas-box) { display: none; }
 #canvas-box { position: relative; container-type: inline-size; }
+#canvas-box:has(> #help-screen:not([hidden])) { min-height: var(--available-height); }
 #game:fullscreen #canvas-box { flex: none; }
 #map-screen, #help-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
 #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
-#help-screen { overflow: auto; }
-#help-content { padding: 0 12px 12px; line-height: 1.6; }
-#help-content dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
-#help-content dd { margin: 0; }
+#help-screen { overflow: auto; font: clamp(12px, 2cqw, 20px)/1.5 'Green-Sky', monospace; }
+#help-heading { position: sticky; top: 0; gap: 1em; padding: .75em; background: #000; border-bottom: 1px solid #fff; }
+#help-heading button { color: #fff; background: #000; border-color: #fff; }
+#help-heading button:hover, #help-heading button:focus-visible { color: #000; background: #fff; outline-color: #fff; }
+#help-content { padding: 0 1em 1em; overflow-wrap: anywhere; }
+#help-content h1, #help-content h2, #help-content h3 { font: inherit; text-transform: uppercase; margin: 1.5em 0 .75em; }
+#help-content h2 { background: #fff; color: #000; padding: 0 .25em; }
+#help-content p, #help-content ul, #help-content ol { margin: .75em 0; }
+#help-content ul, #help-content ol { padding-left: 1.5em; }
+#help-content li { margin: .5em 0; }
+#help-content strong { font-weight: normal; text-decoration: underline; }
+#help-content a { color: inherit; }
+#help-content code { font: inherit; }
 #map-tools { display: flex; align-items: center; gap: 6px; padding: 0 4px 4px; }
 #map-tools button { padding: 2px 8px; }
 #map-tools button:disabled { opacity: .4; cursor: default; }

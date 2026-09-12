@@ -26,15 +26,17 @@ const crtBox = document.getElementById('crt');
 
 function fit() {
   const full = document.fullscreenElement === game;
-  let scale;
+  let availableHeight;
   if (full) {
     game.style.width = '';
-    scale = fitScale(game.clientWidth, game.clientHeight, HEIGHT + band);
+    availableHeight = game.clientHeight;
   } else {
     const chrome = ['site-header', 'where', 'game-controls', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
-    scale = fitScale(window.innerWidth, window.innerHeight - chrome, HEIGHT + band);
+    availableHeight = window.innerHeight - chrome;
   }
+  const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band);
+  canvas.parentElement.style.setProperty('--available-height', `${Math.max(0, availableHeight)}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
@@ -128,6 +130,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       }
     }
   }
+  const freshStart = !session && initial.mode === 'cold';
   session ||= new Session(data, stick, { initial, seed });
   let state = session.state;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
@@ -262,11 +265,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     screen.hidden = false;
     button.setAttribute('aria-expanded', 'true');
   }
-  function openHelp() {
+  function openHelp(startup = false) {
     if (paused) return;
     if (overlay?.screen === helpScreen) return release();
     openOverlay(helpScreen, helpButton);
-    helpScreen.focus({ preventScroll: true });
+    const closeHelp = document.getElementById('close-help');
+    closeHelp.textContent = startup ? 'Continue to intro' : 'Close help';
+    helpScreen.scrollTop = 0;
+    (startup ? closeHelp : helpScreen).focus({ preventScroll: true });
   }
   function openMap() {
     if (state.demo || state.title || !state.room || paused) return;
@@ -444,6 +450,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
+  if (freshStart) openHelp(true);
   fit();
   draw();
   requestAnimationFrame(frame);

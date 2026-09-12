@@ -19,7 +19,7 @@ build: node_modules/.package-lock.json
 	cp src/*.js src/*.css $(BUILD)/
 	node tools/build-site.mjs $(BUILD)
 	cp $(SPEC)/*.json $(BUILD)/data/
-	cp assets/*.json assets/*.png $(BUILD)/assets/
+	cp assets/*.json assets/*.png assets/*.woff $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
 
 serve: build

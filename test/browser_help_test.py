@@ -1,6 +1,8 @@
-"""Help controls, game hold and first-input hints; run against make serve."""
+"""Markdown Help, startup intro hold, controls and hints; run against make serve."""
+import json
 import os
 import re
+from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -11,6 +13,7 @@ with sync_playwright() as p:
         page = browser.new_page(viewport={"width": width, "height": 750}, has_touch=True)
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
+        page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': False}))
 
         def record():
             page.evaluate("dispatchEvent(new Event('pagehide'))")
@@ -22,9 +25,35 @@ with sync_playwright() as p:
             page.keyboard.press('?')
             page.keyboard.up('Shift')
 
-        page.goto(BASE + '/#play')
+        def snapshot():
+            with page.expect_download() as download:
+                page.locator('#download-record').evaluate('(button) => button.click()')
+            return json.loads(Path(download.value.path()).read_text())
+
+        page.goto(BASE + '/play?debug')
         basics = page.locator('#basics')
         help_screen = page.locator('#help-screen')
+        expect(help_screen).to_be_visible()
+        expect(basics).to_be_hidden()
+        expect(page.get_by_role('button', name='Continue to intro')).to_be_focused()
+        for heading in ['Keyboard', 'Touch', 'Gamepad']:
+            expect(help_screen.get_by_role('heading', name=heading, exact=True)).to_have_count(1)
+        stopped = snapshot()
+        assert stopped['frames'] == 0, 'Help precedes the first intro frame'
+        help_screen.focus()
+        page.keyboard.press('ArrowDown')
+        page.keyboard.press('Space')
+        page.wait_for_timeout(200)
+        assert snapshot()['frames'] == 0, 'reading startup Help holds the intro'
+        page.get_by_role('button', name='Continue to intro').tap()
+        expect(help_screen).to_be_hidden()
+        expect(page.locator('#screen')).to_be_focused()
+        page.wait_for_timeout(200)
+        intro = snapshot()
+        assert intro['frames'] > 0
+        assert intro['checkpoint']['shell']['demo'] == 'intro', 'Continue starts the intro without skipping it'
+        assert intro['inputs'] == [], 'Continue does not send a joystick press'
+        page.locator('#screen').focus()
         expect(basics).to_be_visible()
         expect(page.locator('#screen')).to_have_attribute('aria-label', re.compile(r'Press \? for all controls'))
         page.keyboard.press('h')
@@ -78,6 +107,10 @@ with sync_playwright() as p:
         page.goto(BASE + '/?player=0')
         page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
         expect(page.locator('#map')).to_be_visible()
+        page.reload()
+        page.wait_for_selector('#mute[aria-pressed]', state='attached')
+        expect(help_screen).to_be_hidden()  # a saved quest resumes directly
+        expect(page.locator('#screen')).to_be_focused()
         expect(basics).to_be_hidden()
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
@@ -105,4 +138,4 @@ with sync_playwright() as p:
         assert not errors, errors
         page.close()
     browser.close()
-    print('browser_help_test: hints, keyboard/touch/gamepad, toggles, focus, hold and map switching passed')
+    print('browser_help_test: Markdown Help before intro, saved-game resume, hints, keyboard/touch/gamepad, focus, hold and map switching passed')

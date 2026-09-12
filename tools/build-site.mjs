@@ -13,7 +13,7 @@ for (const page of ['about', 'play', 'links']) {
     nav: read('nav.html').replace(`href="/${page}"`, `href="/${page}" aria-current="page"`),
     controls: page === 'play' ? read('controls.html') : '',
     styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
-    content: page === 'play' ? read('play.html')
+    content: page === 'play' ? read('play.html').replace('{{help}}', () => marked.parse(read('help.md')))
       : `<main id="${page}" class="reading-page">\n${marked.parse(read(`${page}.md`))}</main>`,
     scripts: page === 'play' ? '<script type="module" src="/main.js"></script>' : '',
   };

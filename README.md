@@ -103,6 +103,13 @@ old `#about`, `#play`, `#resources` and game query links still work; `/resources
 and `/resources.html` redirect to `/links`. Leaving Play
 saves the game, and returning restores it.
 
+Edit `src/help.md` for the in-game **?** Help screen, then run `make build`.
+Help appears before the intro on a fresh launch; saved games resume directly.
+Its web font comes from the game's extracted `assets/charset_text.json` glyphs.
+To regenerate `assets/game-text.woff`, install Python's `fonttools` package and run
+`python tools/text_font.py`. The generated font is committed, so normal builds
+need no Python font tools.
+
 Regenerating the spec tables and the emulator setup: `docs/spec/README.md`
 and `docs/tooling.md`.
 
