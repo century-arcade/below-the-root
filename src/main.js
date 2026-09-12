@@ -23,6 +23,7 @@ canvas.height = HEIGHT;
 const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.createImageData(WIDTH, HEIGHT + STATUS_HEIGHT) };
 let band = 0;
 const crtBox = document.getElementById('crt');
+const CANVAS_PADDING = 4; // Half an 8-pixel character, scaled with the game.
 
 function fit() {
   const full = document.fullscreenElement === game;
@@ -35,12 +36,13 @@ function fit() {
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome;
   }
-  const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band);
+  const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
   canvas.parentElement.style.setProperty('--available-height', `${Math.max(0, availableHeight)}px`);
+  canvas.parentElement.style.setProperty('--canvas-padding', `${CANVAS_PADDING * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
-  if (!full) game.style.width = canvas.style.width;
+  if (!full) game.style.width = (WIDTH + 2 * CANVAS_PADDING) * scale + 'px';
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
