@@ -1,6 +1,18 @@
 # Links
 
-Writing, recordings and original materials about Below the Root. Reviews and playthroughs often reveal parts of the quest.
+[Dale DeSharone](https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html) (credited as Dale Disharoon) designed and programmed the game, working with Snyder to on the plot and dialogue to be a continuation of the trilogy, and with [William Groetzinger who created the art](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania).
+
+Many other people have kept Green-Sky alive through memories, writing, and guides.
+Here are the original materials, interviews with the creators, other players' recollections, reviews, and playthroughs.
+
+## Original materials and reference
+
+- [The original manual](https://archive.org/details/below-the-root-game-manual-1984) (Internet Archive). Instructions, characters and Snyder’s account of designing the game.
+- [Museum of Computer Adventure Game History](https://www.mocagh.org/loadpage.php?getgame=belowtheroot). Box, map, manual and disk photographs. [Manual PDF.](https://www.mocagh.org/spinnaker/belowtheroot-manual.pdf)
+- [Wikipedia](https://en.wikipedia.org/wiki/Below_the_Root_(video_game)). Historical overview and bibliography.
+- [MobyGames](https://www.mobygames.com/game/602/below-the-root/). Platform information, credits and screenshots.
+- [Lemon64](https://www.lemon64.com/game/below-the-root). The C64 game entry and players’ memories.
+- [The Cutting Room Floor](https://tcrf.net/Below_the_Root). The hidden editor and other discoveries inside the game.
 
 ## The game and its makers
 
@@ -27,12 +39,3 @@ Writing, recordings and original materials about Below the Root. Reviews and pla
 
 - [Altus: Below the Root](https://altusmusic.bandcamp.com/album/below-the-root) (2017). An ambient album inspired by the game.
 - [Retronauts episode 536: Below the Root](https://www.patreon.com/posts/episode-536-root-83357354) (2023). A dedicated podcast episode. This Patreon listing requires membership.
-
-## Original materials and reference
-
-- [The original manual](https://archive.org/details/below-the-root-game-manual-1984) (Internet Archive). Instructions, characters and Snyder’s account of designing the game.
-- [Museum of Computer Adventure Game History](https://www.mocagh.org/loadpage.php?getgame=belowtheroot). Box, map, manual and disk photographs. [Manual PDF.](https://www.mocagh.org/spinnaker/belowtheroot-manual.pdf)
-- [Wikipedia](https://en.wikipedia.org/wiki/Below_the_Root_(video_game)). Historical overview and bibliography.
-- [MobyGames](https://www.mobygames.com/game/602/below-the-root/). Platform information, credits and screenshots.
-- [Lemon64](https://www.lemon64.com/game/below-the-root). The C64 game entry and players’ memories.
-- [The Cutting Room Floor](https://tcrf.net/Below_the_Root). The hidden editor and other discoveries inside the game.

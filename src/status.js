@@ -9,7 +9,7 @@ export function statusRows(state) {
   const spirit = `SPIRIT ${p.spiritEnergy}/${p.spiritLimit}`;
   return [
     place(top, PANEL_COLS - p.name.length, p.name),
-    place(place(place(place('', 0, `STAMINA ${p.stamina}`), 12, `FOOD ${p.food}`), 21, `REST ${p.rest}`),
+    place(place(place(place('', 0, `STAMINA ${p.stamina}`), 12, `FOOD ${p.food}`), 20, `REST ${p.rest}`),
       PANEL_COLS - spirit.length, spirit),
   ];
 }

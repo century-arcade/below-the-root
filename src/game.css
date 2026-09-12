@@ -1,4 +1,3 @@
-@font-face { font-family: 'Green-Sky'; src: url('/assets/game-text.woff') format('woff'); font-display: swap; }
 canvas { image-rendering: pixelated; display: block; background: #000; }
 #game { display: flex; flex-direction: column; align-items: stretch; margin-top: 12px; }
 #game:fullscreen { background: #000; justify-content: center; align-items: center; margin-top: 0; }
