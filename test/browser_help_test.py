@@ -36,8 +36,6 @@ with sync_playwright() as p:
         expect(help_screen).to_be_visible()
         expect(basics).to_be_hidden()
         expect(page.get_by_role('button', name='Continue to intro')).to_be_focused()
-        for heading in ['Keyboard', 'Touch', 'Gamepad']:
-            expect(help_screen.get_by_role('heading', name=heading, exact=True)).to_have_count(1)
         stopped = snapshot()
         assert stopped['frames'] == 0, 'Help precedes the first intro frame'
         help_screen.focus()

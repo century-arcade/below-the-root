@@ -8,9 +8,9 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #game:fullscreen #canvas-box { flex: none; }
 #map-screen, #help-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
 #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
-#help-screen { overflow: auto; font: clamp(12px, 2cqw, 20px)/1.5 'Green-Sky', monospace; }
+#help-screen { overflow: auto; font: clamp(12px, 2cqw, 20px)/1.5 'Green-Sky', monospace; text-transform: uppercase; }
 #help-heading { position: sticky; top: 0; gap: 1em; padding: .75em; background: #000; border-bottom: 1px solid #fff; }
-#help-heading button { color: #fff; background: #000; border-color: #fff; }
+#help-heading button { color: #fff; background: #000; border-color: #fff; text-transform: inherit; }
 #help-heading button:hover, #help-heading button:focus-visible { color: #000; background: #fff; outline-color: #fff; }
 #help-content { padding: 0 1em 1em; overflow-wrap: anywhere; }
 #help-content h1, #help-content h2, #help-content h3 { font: inherit; text-transform: uppercase; margin: 1.5em 0 .75em; }
