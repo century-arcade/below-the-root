@@ -74,8 +74,9 @@ Gamepad: d-pad or left stick moves, any face button fires; sound starts only aft
 
 ```
 make build                    # render Markdown pages and copy game assets
+make release                  # dist/below-the-root-preservation.zip: original media, offline site, source
 make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
-make test                     # goldens, talk tests, demo replay vs build/traces; node only, ~0.5 s
+make test                     # release packaging, game tests, demo replay vs build/traces; Python 3 + Node.js
 make screenshot               # regenerate assets/box/screen.png from Broad Grund (make serve first)
 make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
 tools/shot.py --keys o out.png '?menu'  # headless screenshot after keys; --wait MS adds a delay; --select '#canvas-box' crops
@@ -92,6 +93,28 @@ a global installation. It uses the `dev` environment by default; use
 `make serve CONTEXT=production` for production-context variables, or
 `make serve PORT=8888` to change the local port. Re-run `make build`
 after editing source while the server is running.
+
+`make release` requires Python 3.9+, Git, the normal build dependencies, and the
+complete original `iso/` directory. It builds the site in a fresh temporary
+directory and writes `dist/below-the-root-preservation.zip`; override paths with
+`make release ISO=/path/to/iso RELEASE=/path/to/archive.zip`. Missing original
+materials fail the release instead of silently producing an incomplete archive.
+The ZIP contains all of `iso/` unchanged, a ready-to-run `site/` with bundled fonts,
+and a `source/` snapshot of Git-tracked working files, including the research,
+disassembly, assets, and tools. Stage new source files before releasing so they
+are included. `release.json` records the base commit and tracked changes;
+`SHA256SUMS` covers every other file. Git history, untracked files, local secrets,
+dependencies, and generated development output are not included.
+
+Extract the ZIP and run `python3 serve.py` (Windows: `py -3 serve.py`). It opens
+the local copy at `http://127.0.0.1:8000/`; Python and a modern browser are the
+only runtime requirements. Use `--port 8888` for another port. Gameplay, autosave,
+the map, help, and recording import/export work offline. External links and
+GitHub issue reporting still require online services. The archive's `README.txt`
+includes instructions for playing, verification, and the original materials.
+To verify an extracted release in Chromium with external requests blocked, run
+`python test/release_browser_test.py` after `make release` using a Python
+environment with Playwright and its Chromium installed.
 
 The site has separate `/about`, `/play`, and `/links` pages. Edit
 `src/about.md` and `src/links.md` for the reading pages; About retains a few

@@ -3,13 +3,16 @@ BUILD := _build
 SPEC  := docs/spec/data
 PORT  ?= 8000
 CONTEXT ?= dev
+PYTHON ?= python3
+ISO ?= iso
+RELEASE ?= dist/below-the-root-preservation.zip
 NETLIFY_BIN := $(shell p=$$(command -v netlify 2>/dev/null); if [ -f "$$p" ] && [ -x "$$p" ]; then printf '%s' "$$p"; fi)
 NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27.5.0 netlify)
 
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve test browser-test poster screenshot clean
+.PHONY: build serve release test browser-test poster screenshot clean
 
 node_modules/.package-lock.json: package.json package-lock.json
 	npm ci --ignore-scripts --no-audit --no-fund
@@ -20,13 +23,18 @@ build: node_modules/.package-lock.json
 	node tools/build-site.mjs $(BUILD)
 	cp $(SPEC)/*.json $(BUILD)/data/
 	cp assets/*.json assets/*.png assets/*.woff $(BUILD)/assets/
+	cp assets/*.ttf assets/*-OFL.txt $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
+
+release:
+	$(PYTHON) tools/release.py --iso "$(ISO)" --output "$(RELEASE)"
 
 serve: build
 	@if curl -sf -o /dev/null $(BTR_URL)/; then echo "already serving $(BUILD) at $(BTR_URL); a new build is picked up as is"; else \
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
+	$(PYTHON) -m unittest discover -s test -p 'release_test.py'
 	node test/site_test.js
 	node test/log_test.js
 	node test/fit_test.js

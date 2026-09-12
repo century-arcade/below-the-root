@@ -3,6 +3,7 @@ build/
 disasm/out/
 __pycache__/
 _build/
+dist/
 _cbox/
 iso/
 .netlify/

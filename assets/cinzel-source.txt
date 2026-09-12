@@ -1,0 +1,13 @@
+Cinzel regular (400) and bold (700), retrieved 2026-09-12.
+Copyright 2020 The Cinzel Project Authors (https://github.com/NDISCOVER/Cinzel).
+License: cinzel-OFL.txt (SIL Open Font License 1.1).
+
+Google Fonts CSS:
+https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap
+
+Unmodified font files:
+https://fonts.gstatic.com/s/cinzel/v26/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnTYo.ttf
+https://fonts.gstatic.com/s/cinzel/v26/8vIU7ww63mVu7gtR-kwKxNvkNOjw-jHgTYo.ttf
+
+License source:
+https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/OFL.txt

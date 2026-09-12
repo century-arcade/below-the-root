@@ -115,6 +115,11 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     const response = await fetch(`${API}?op=session`, { cache: 'no-store' });
     if (!response.ok) return;
     const body = await response.json();
+    if (body.configured === false) {
+      report.disabled = true;
+      report.title = body.error || 'GitHub issue reporting is unavailable on this server.';
+      return;
+    }
     if (body.login) {
       authenticated = true;
       logout.hidden = false;
