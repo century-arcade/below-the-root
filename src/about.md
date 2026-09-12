@@ -48,8 +48,10 @@ In any case, enjoy.
 The Green-Sky trilogy consists of *Below the Root*,
 *And All Between* and *Until the Celebration*. Snyder helped design the game as a
 continuation of the books, shaping its world and writing dialogue with designer and
-programmer Dale DeSharone, credited as Disharoon. William Groetzinger created the art, and
-Windham Classics published the game in 1984.
+programmer [Dale DeSharone](https://blog.hardcoregaming101.net/2012/09/dale-desharone-unspoken-legend.html)
+(credited as Dale Disharoon). [William Groetzinger created the art](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania).
+[Windham Classics](https://www.atarimagazines.com/v3n7/Adventure_Trends.php), a Spinnaker
+label specializing in adventures based on children’s books, published the game in 1984.
 
 You can begin without having read the books. A troubling dream sets a quest in motion, and
 the people you meet hold clues to what threatens Green-Sky. Learning whom to trust
