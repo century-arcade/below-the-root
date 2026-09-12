@@ -3,9 +3,10 @@ body { min-height: 100dvh; box-sizing: border-box; padding: 0; display: flex; fl
 [hidden] { display: none !important; }
 a { color: #c7f5ae; }
 #site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; border-bottom: 1px solid #354537; }
-#site-header nav { display: flex; align-self: stretch; flex-shrink: 0; }
+#site-header nav { display: flex; align-self: stretch; flex-shrink: 0; margin-right: auto; }
 #site-header nav a { display: grid; place-items: center; padding: 0 12px; text-decoration: none; border-bottom: 2px solid transparent; }
 #site-header nav a[aria-current] { color: #f2ead8; border-color: #f2ead8; }
+#site-header .github-link { display: grid; place-items: center; flex-shrink: 0; padding: 8px; }
 #top-controls { min-width: 0; overflow-x: auto; flex-shrink: 1; }
 #top-controls button { flex-shrink: 0; }
 #top-controls #debug-tools { margin: 0; }

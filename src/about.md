@@ -77,7 +77,6 @@ original materials, or help with your quest.
 BELOW THE ROOT is a trademark of Windham Classics Corp., a division of Spinnaker Software.
 Box art by William Groetzinger. The original program is © 1984 Windham Classics; this port
 is an independent reconstruction. Commodore 64 is a trademark of Commodore Electronics
-Ltd. Source:
-[github.com/century-arcade/below-the-root](https://github.com/century-arcade/below-the-root).
+Ltd.
 
 </div>
