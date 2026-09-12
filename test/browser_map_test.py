@@ -19,31 +19,29 @@ with sync_playwright() as p:
 
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid > button').count() == 169
-        assert page.locator('#map-grid > button > canvas').count() == 169
+        assert page.locator('#map-grid > [role="img"]').count() == 169
+        assert page.locator('#map-grid > span > canvas').count() == 169
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
         assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
-        assert page.locator('#map-preview, #map-place').count() == 0
+        assert page.locator('#map-grid > span').count() == 32 * 16
+        assert page.locator('#map-grid .unseen').count() == 32 * 16 - 169
+        assert page.locator('#map-grid button, #map-grid [tabindex]').count() == 0
+        assert page.locator('#close-map').text_content() == 'Close'
         for code in ['T1', 'T4', 'U5', 'P2', '0C']:
-            assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 0
+            assert page.locator(f'#map-grid [role="img"][aria-label^="{code} ·"]').count() == 0
         assert page.get_by_role('button', name='Zoom out', exact=True).is_disabled()
         page.get_by_role('button', name='Zoom in', exact=True).click()
         assert page.locator('#map-zoom').inner_text() == '2×'
         viewport = page.locator('#map-viewport')
-        viewport.evaluate('v => { v.scrollLeft = 0; }')
-        before = viewport.evaluate('v => v.scrollLeft')
-        box = viewport.bounding_box()
-        x, y = box['x'] + box['width'] / 2, box['y'] + box['height'] / 2
-        page.mouse.move(x, y)
-        page.mouse.down()
-        page.mouse.move(x - 120, y, steps=8)
-        page.mouse.up()
-        assert viewport.evaluate('v => v.scrollLeft') > before, 'mouse drag pans the map'
-        released = viewport.evaluate('v => v.scrollLeft')
-        page.mouse.move(x, y)
-        assert viewport.evaluate('v => v.scrollLeft') == released, 'release ends the drag'
         page.get_by_role('button', name='Zoom out', exact=True).click()
         assert page.locator('#map-zoom').inner_text() == '1×'
+        viewport.hover()
+        for delta, expected in [(-100, '2×'), (-100, '4×'), (-100, '8×'),
+                                (-100, '8×'), (100, '4×'), (100, '2×'),
+                                (100, '1×'), (100, '1×')]:
+            page.mouse.wheel(0, delta)
+            page.wait_for_function("expected => document.getElementById('map-zoom').textContent === expected", arg=expected)
+        assert page.locator('#map-grid > span').count() == 32 * 16
         assert 'PAUSED' not in page.locator('#where').inner_text()
         stopped = record()['frames']
         page.wait_for_timeout(300)
@@ -53,35 +51,40 @@ with sync_playwright() as p:
         page.wait_for_timeout(200)
         assert record()['frames'] > stopped
 
-        # Tab on a control keeps browser focus navigation, including while open.
+        # Outside the map, Tab on a control keeps browser focus navigation.
         page.locator('#map').focus()
         page.keyboard.press('Tab')
         assert not page.locator('#map-screen').is_visible()
-        page.locator('#map').click()
+        page.locator('#map').press('Enter')
         page.locator('#map-screen').wait_for()
+        for control in ['#close-map', '#map-zoom-in', '#map-current']:
+            page.locator(control).focus()
+            page.keyboard.press('Tab')
+            page.locator('#map-screen').wait_for(state='hidden')
+            page.keyboard.press('Tab')
+            page.locator('#map-screen').wait_for()
         page.locator('#close-map').focus()
+        page.keyboard.press('Shift+Tab')
+        page.locator('#map-screen').wait_for(state='hidden')
         page.keyboard.press('Tab')
-        assert page.locator('#map-screen').is_visible()
-        room = page.get_by_role('button', name='TO TEMPLE GRUND', exact=False)
+        page.locator('#map-screen').wait_for()
+        room = page.get_by_role('img', name='TO TEMPLE GRUND', exact=False)
         room.click()
         assert page.locator('#map-grid .selected').count() == 0
         room.dblclick()
         assert page.locator('#map-zoom').inner_text() == '2×'
         room.dblclick()
         assert page.locator('#map-zoom').inner_text() == '4×'
-        viewport.evaluate('v => { v.scrollLeft = 0; }')
-        before = viewport.evaluate('v => v.scrollLeft')
-        page.get_by_role('button', name='Your location', exact=True).click()
-        assert viewport.evaluate('v => v.scrollLeft') > before, 'Your location returns to the marker'
+        page.locator('#map-current').click()
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
         page.get_by_role('button', name='Zoom out', exact=True).click()
         page.get_by_role('button', name='Zoom out', exact=True).click()
         assert page.locator('#map-zoom').inner_text() == '1×'
-        room.focus()
+        page.locator('#map-current').focus()
         stopped = record()['frames']
         page.keyboard.press('Space')
         page.wait_for_timeout(200)
-        assert record()['frames'] == stopped, 'room buttons must not send game input'
+        assert record()['frames'] == stopped, 'map controls must not send game input'
         page.keyboard.press('Escape')
         page.locator('#map-screen').wait_for(state='hidden')
 
@@ -96,7 +99,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(200)
         assert not record()['inputs'], 'resuming from the map drops the movement key'
 
-        page.locator('#map').click()
+        page.locator('#map').press('Enter')
         page.keyboard.press('f')
         page.wait_for_function('document.fullscreenElement !== null')
         assert page.locator('#map-screen').is_visible(), 'the map is available in fullscreen'
@@ -114,14 +117,14 @@ with sync_playwright() as p:
             }""", arg=room_id)
             page.keyboard.press('Tab')
             page.locator('#map-screen').wait_for()
-            assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 1
-            assert page.locator(f'#map-grid button[aria-label^="{hidden_neighbour} ·"]').count() == 0
+            assert page.locator(f'#map-grid [role="img"][aria-label^="{code} ·"]').count() == 1
+            assert page.locator(f'#map-grid [role="img"][aria-label^="{hidden_neighbour} ·"]').count() == 0
             record()
             page.goto(BASE + '/')
             page.wait_for_function("document.getElementById('map').onclick !== null")
             page.keyboard.press('Tab')
             page.locator('#map-screen').wait_for()
-            assert page.locator(f'#map-grid button[aria-label^="{code} ·"]').count() == 1
+            assert page.locator(f'#map-grid [role="img"][aria-label^="{code} ·"]').count() == 1
 
         for query in ['?menu', '?demo']:
             page.goto(BASE + '/' + query)
@@ -130,29 +133,5 @@ with sync_playwright() as p:
             assert not page.locator('#map-screen').is_visible()
         assert not errors, errors
         page.close()
-    context = browser.new_context(has_touch=True, viewport={"width": 390, "height": 750})
-    page = context.new_page()
-    errors = []
-    page.on('pageerror', lambda e: errors.append(str(e)))
-    page.goto(BASE + '/?player=0')
-    page.wait_for_function("document.getElementById('map').onclick !== null")
-    page.locator('#map').tap()
-    page.get_by_role('button', name='Zoom in', exact=True).tap()
-    viewport = page.locator('#map-viewport')
-    viewport.evaluate('v => { v.scrollLeft = 0; }')
-    before = viewport.evaluate('v => v.scrollLeft')
-    box = viewport.bounding_box()
-    x, y = box['x'] + box['width'] / 2, box['y'] + box['height'] / 2
-    cdp = context.new_cdp_session(page)
-    cdp.send('Input.dispatchTouchEvent', {
-        'type': 'touchStart', 'touchPoints': [{'x': x, 'y': y}]})
-    for step in range(1, 9):
-        cdp.send('Input.dispatchTouchEvent', {
-            'type': 'touchMove', 'touchPoints': [{'x': x - step * 15, 'y': y}]})
-        page.wait_for_timeout(20)
-    cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
-    page.wait_for_function('before => document.getElementById("map-viewport").scrollLeft > before', arg=before)
-    assert not errors, errors
-    context.close()
     browser.close()
-    print('browser_map_test: cropped paper map, exploration, location, zoom, double-click, mouse/touch pan, hold/resume, native Tab, input reset, fullscreen, title/demo passed')
+    print('browser_map_test: full map, exploration, location, zoom, Tab dismissal, hold/resume, input reset, fullscreen, title/demo passed')

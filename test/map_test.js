@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { loadTestData, J } from './helpers.js';
-import { mapBounds, mapCells, visitedRooms, mapRoom, paperMapRooms, mapLocation } from '../src/map.js';
+import { mapCells, visitedRooms, visitedEmptyRooms, mapRoom, paperMapRooms, mapLocation } from '../src/map.js';
 import { render } from '../src/video.js';
 import { Session } from '../src/record.js';
 import { startQuest } from '../src/game.js';
@@ -18,10 +18,6 @@ for (const code of ['T1', 'T4', 'U5', 'P2', 'PB', '0C', 'AF', 'F0', '10', '12',
   assert.ok(!defaults.has(code), `${code} is not on the boxed map`);
 }
 const grid = mapCells(data, visitedRooms([], data), 'M5');
-assert.deepEqual(mapBounds(grid), { top: 3, bottom: 11, left: 0, right: 24 });
-assert.equal(mapBounds([[null, null], [null, null]]), null);
-assert.deepEqual(mapBounds([[null, null, null], [null, {}, null], [null, null, null]]),
-  { top: 1, bottom: 1, left: 1, right: 1 });
 assert.equal(grid.length, 16);
 for (const [y, row] of grid.entries()) {
   assert.equal(row.length, 32);
@@ -39,8 +35,6 @@ assert.equal(cells.length, defaults.size);
 assert.equal(cells.filter(c => c.current).length, 1);
 assert.deepEqual(cells.find(c => c.code === 'O7').signs, ['TO TEMPLE GRUND']);
 const explored = new Set([...defaults, '0C', 'P2', 'T1', 'U5', 'AC']);
-assert.deepEqual(mapBounds(mapCells(data, explored, '0C')),
-  { top: 2, bottom: 12, left: 0, right: 25 });
 const revealed = mapCells(data, explored, '0C').flat().filter(Boolean);
 assert.ok(revealed.some(c => c.code === '0C' && c.current && c.kind === 'underground'),
   'visited cavern passages appear');
@@ -52,6 +46,16 @@ assert.ok(!mapCells(data, explored, 'T1').flat().some(c => c?.current),
   'an indoor room cannot receive the location marker');
 
 const entry = (room, extra = {}) => ({ room, quest: true, blank: false, title: false, ...extra });
+const emptyPath = [entry('43', { blank: true }), entry('02', { blank: true }), entry('T1')];
+const empty = visitedEmptyRooms(emptyPath);
+assert.deepEqual(empty, new Set(['43', '02']));
+const withEmpty = mapCells(data, defaults, 'M5', empty).flat().filter(Boolean);
+assert.deepEqual(withEmpty.filter(c => c.empty).map(c => c.code), ['02', '43'],
+  'visited empty space is revealed without showing interiors parked in those slots');
+assert.ok(!withEmpty.some(c => c.code === '53'), 'unseen empty space stays unrevealed');
+assert.deepEqual(visitedEmptyRooms([...emptyPath, entry('T1', { questStart: true })]), new Set(),
+  'new quests forget empty-space exploration');
+assert.deepEqual(visitedEmptyRooms([...emptyPath, entry(null, { quest: false })]), new Set());
 assert.deepEqual(visitedRooms([entry('B3')], data), new Set([...defaults, 'B3']),
   'visiting the hideout reveals it');
 assert.deepEqual(visitedRooms([]), new Set());

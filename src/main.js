@@ -7,7 +7,7 @@ import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, cle
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale, crtVars } from './fit.js';
-import { drawMap, visitedRooms, mapLocation } from './map.js';
+import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
 import { basicsVisible } from './help.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
@@ -196,12 +196,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     ?.scrollIntoView({ block: 'center', inline: 'center' });
   const zoomMap = (factor, anchor) => {
     const viewportRect = mapViewport.getBoundingClientRect();
-    const cx = viewportRect.left + mapViewport.clientLeft + mapViewport.clientWidth / 2;
-    const cy = viewportRect.top + mapViewport.clientTop + mapViewport.clientHeight / 2;
+    const cx = anchor?.x ?? viewportRect.left + mapViewport.clientLeft + mapViewport.clientWidth / 2;
+    const cy = anchor?.y ?? viewportRect.top + mapViewport.clientTop + mapViewport.clientHeight / 2;
     const before = mapGrid.getBoundingClientRect();
-    const cell = anchor?.getBoundingClientRect();
-    const fx = ((cell ? cell.left + cell.width / 2 : cx) - before.left) / before.width;
-    const fy = ((cell ? cell.top + cell.height / 2 : cy) - before.top) / before.height;
+    const fx = (cx - before.left) / before.width;
+    const fy = (cy - before.top) / before.height;
     mapZoom = Math.max(1, Math.min(8, mapZoom * factor));
     mapGrid.style.width = `${mapZoom * 100}%`;
     document.getElementById('map-zoom').textContent = `${mapZoom}×`;
@@ -218,9 +217,22 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   document.getElementById('map-current').onclick = centerMap;
   mapViewport.addEventListener('dblclick', e => {
     // Pointer capture can retarget the double-click to the viewport.
-    const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('button');
-    if (cell && mapGrid.contains(cell) && mapZoom < 8) zoomMap(2, cell);
+    const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('#map-grid > span');
+    if (cell && mapZoom < 8) zoomMap(2, { x: e.clientX, y: e.clientY });
   });
+  let wheelDelta = 0;
+  let lastWheel = 0;
+  mapViewport.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (!e.deltaY) return;
+    const now = performance.now();
+    if (now - lastWheel > 200 || Math.sign(e.deltaY) !== Math.sign(wheelDelta)) wheelDelta = 0;
+    lastWheel = now;
+    wheelDelta += e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? mapViewport.clientHeight : 1);
+    if (Math.abs(wheelDelta) < 100) return;
+    zoomMap(wheelDelta < 0 ? 2 : .5, { x: e.clientX, y: e.clientY });
+    wheelDelta = 0;
+  }, { passive: false });
   let mapDrag = null;
   const endMapDrag = e => {
     if (mapDrag?.id !== e.pointerId) return;
@@ -279,7 +291,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function openMap() {
     if (state.demo || state.title || !state.room || paused) return;
     drawMap(state, visitedRooms(session.record.path, data),
-      mapLocation(data, session.record.path, state.room), mapGrid);
+      mapLocation(data, session.record.path, state.room), mapGrid, visitedEmptyRooms(session.record.path));
     openOverlay(mapScreen, mapButton);
     centerMap();
   }
@@ -365,8 +377,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
     if (e.key === 'Tab') {
       const mapOpen = overlay?.screen === mapScreen;
-      if ((e.target === document.body || e.target === canvas)
-          && (mapOpen || !state.demo && !state.title && state.room)) {
+      if (mapOpen || (e.target === document.body || e.target === canvas)
+          && !state.demo && !state.title && state.room) {
         if (mapOpen) release(); else openMap();
         e.preventDefault();
       }
