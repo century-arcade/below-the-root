@@ -7,6 +7,7 @@ import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen } from '../src/world.js';
+import { runMenu } from '../src/verbs.js';
 
 const press = () => [J.idle, J.fire];
 
@@ -55,6 +56,52 @@ function test(name, fn) {
 test('SPEAK with nobody facing', (s) => {
   place(s, 26, 5, 5);
   assert.equal(run(s, menu('SPEAK'))[0], 'SPEAK WITH WHOM?');
+});
+
+for (const [verb, cls] of [['EAT', CLASS.BREAD], ['USE', CLASS.HONEYLAMP], ['SELL', CLASS.SHUBA], ['OFFER', CLASS.BREAD]]) {
+  for (const hasItem of [false, true]) {
+    test(`${verb} NOTHING cancels with one trigger press ${hasItem ? 'after paging past an item' : 'with no items'}`, (s) => {
+      if (verb === 'SELL' || verb === 'OFFER') faceCreature(s, 26);
+      if (hasItem) give(s, cls);
+      const objects = structuredClone(s.objects);
+      const food = s.player.food;
+      const inputs = [...menu(verb), J.idle, ...(hasItem ? [J.up] : [])];
+      s.input = reader(() => inputs.shift() || J.idle);
+      s.active = false;
+      startVerb(s, runMenu(s));
+      for (let i = 0; inputs.length && i < 100; i++) tick(s);
+      assert.equal(inputs.length, 0);
+      assert.match(lines(s)[0], /\bNOTHING$/);
+      assert.ok(s.verb, 'waiting for the choice');
+
+      inputs.push(J.fire);
+      tick(s);
+      assert.equal(s.verb, null, 'one trigger press closes the item picker');
+      assert.equal(s.active, true, 'play resumes');
+      assert.deepEqual(lines(s), ['', '', '', ''], 'the cancelled prompt is cleared');
+      assert.deepEqual(s.objects, objects, 'no item is consumed');
+      assert.equal(s.player.food, food, 'food is unchanged');
+    });
+  }
+}
+
+test('eating food keeps its result message until the next input', (s) => {
+  const bread = give(s, CLASS.BREAD);
+  s.player.food = 1;
+  const inputs = [...menu('EAT'), ...page(0)];
+  s.input = reader(() => inputs.shift() || J.idle);
+  s.active = false;
+  startVerb(s, runMenu(s));
+  for (let i = 0; i < 100; i++) tick(s);
+  assert.equal(inputs.length, 0);
+  assert.equal(bread.exists, false);
+  assert.equal(s.player.food, Math.min(s.player.foodCap, 6));
+  assert.equal(lines(s)[0], 'THE PAN BREAD IS GOOD');
+  assert.ok(s.verb, 'the result waits for acknowledgment');
+  inputs.push(J.fire);
+  tick(s);
+  assert.equal(s.verb, null);
+  assert.deepEqual(lines(s), ['', '', '', '']);
 });
 
 test('BUY needs a token, then grants TAKE of the stock', (s) => {

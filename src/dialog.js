@@ -2,7 +2,7 @@
 
 import { CLASS } from './data.js';
 import { facingCreature, flagsOf, isAnimal } from './creatures.js';
-import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem, weightOf } from './inventory.js';
+import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem, weightOf, CANCELLED } from './inventory.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
 import { startTune, TUNE } from './audio.js';
@@ -119,7 +119,7 @@ export function* sell(state) {
   const o = yield* pickItem(state, {
     accept: (x) => state.data.items[x.class].sellable, perClass: true, col: state.data.fixed.sell_nothing.col,
   });
-  if (!o) return;
+  if (!o) return CANCELLED;
   if (!state.objects.some((x) => x.class === CLASS.TOKEN && !x.exists)) return tell(state, 'sell_refused');
   destroy(o);
   mintToken(state);
@@ -131,7 +131,7 @@ export function* offer(state) {
   if (!c) return tell(state, 'offer_to_whom');
   tell(state, 'offer_what');
   const o = yield* pickItem(state, { perClass: true, col: state.data.fixed.offer_nothing.col });
-  if (!o) return;
+  if (!o) return CANCELLED;
   const target = c.def.params.offer_target;
   if (!target) return tell(state, 'no_response_line1');
   if (!target.accepts_item_classes.includes(o.class)) return tell(state, 'offer_refused');

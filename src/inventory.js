@@ -64,6 +64,7 @@ export function objectUnder(state) {
 }
 
 const ENTRY_WIDTH = 16;
+export const CANCELLED = Symbol('item choice cancelled');
 
 // up pages forward round a cycle that ends in NOTHING; fire takes the entry showing
 export function* pickItem(state, { accept = () => true, perClass = false, col = 10, noFire = false } = {}) {

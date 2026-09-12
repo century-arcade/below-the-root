@@ -457,6 +457,8 @@ showing.  Past the last entry comes "NOTHING", and past that the first
 entry again; choosing "NOTHING" cancels.  USE, EAT, SELL and OFFER show
 one entry per class; DROP and INVENTORY show one entry per object.
 USE, EAT and SELL also skip the classes they cannot act on.
+In the port, confirming "NOTHING" clears the prompt and resumes play immediately,
+without a second press to acknowledge a result message.
 
 **How often the stick is read.**  This matters only to the attract demo,
 which feeds one script entry per read (`time.md`).  The menu reads until

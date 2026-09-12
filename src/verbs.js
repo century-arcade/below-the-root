@@ -5,7 +5,7 @@ import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world
 import { lieDown, idleFrame } from './player.js';
 import { fireUp, anyInput, isIdle } from './input.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
-import { objectUnder, pickItem, canCarry, weightOf, destroy, carried } from './inventory.js';
+import { objectUnder, pickItem, canCarry, weightOf, destroy, carried, CANCELLED } from './inventory.js';
 import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';
 import { advanceHour, loseDay, timeOfDay, kidnap, DREAM } from './clock.js';
@@ -59,7 +59,9 @@ export function* runMenu(state) {
   sfx(state, SFX.confirm);
   clearPanel(state);
   const fn = VERBS[verb];
-  if (fn && (yield* fn(state)) === WOKE) return;
+  const result = fn ? yield* fn(state) : undefined;
+  if (result === WOKE) return;
+  if (result === CANCELLED) return clearPanel(state);
   if (NO_TRAILING_READ.has(verb) || state.ended) return;
   yield* anyInput();
   clearPanel(state);
@@ -126,7 +128,7 @@ function* drop(state) {
   if (!target) return say(state, 'NOT HERE');
   say(state, 'WHAT WILL YOU DROP?');
   const o = yield* pickItem(state, { col: 22 });
-  if (!o) return;
+  if (!o) return CANCELLED;
   if (state.lamp && state.lamp.object === o.object) {
     destroy(o);
     state.lamp = null;
@@ -165,7 +167,7 @@ function* use(state) {
   const o = yield* pickItem(state, {
     accept: (x) => state.data.items[x.class].usable, perClass: true, col: 11,
   });
-  if (!o) return;
+  if (!o) return CANCELLED;
   const bramble = tileWithRole(state, 'bramble');
   switch (o.class) {
     case CLASS.HONEYLAMP:
@@ -224,7 +226,7 @@ function* eat(state) {
   const o = yield* pickItem(state, {
     accept: (x) => state.data.items[x.class].edible, perClass: true, col: 21,
   });
-  if (!o) return;
+  if (!o) return CANCELLED;
   destroy(o);
   switch (o.class) {
     case CLASS.LAPAN:
