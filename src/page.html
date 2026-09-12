@@ -13,8 +13,9 @@
 <body>
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position: absolute">
   <defs>
+    <path id="screen-curve" vector-effect="non-scaling-stroke" d="M .046 .008 Q .5 -.008 .954 .008 Q .987 .01 .994 .053 Q 1.006 .5 .994 .947 Q .987 .99 .954 .992 Q .5 1.008 .046 .992 Q .013 .99 .006 .947 Q -.006 .5 .006 .053 Q .013 .01 .046 .008 Z"/>
     <clipPath id="screen-outline" clipPathUnits="objectBoundingBox">
-      <path d="M .055 .02 Q .5 -.02 .945 .02 Q .98 .022 .985 .065 Q 1.015 .5 .985 .935 Q .98 .978 .945 .98 Q .5 1.02 .055 .98 Q .02 .978 .015 .935 Q -.015 .5 .015 .065 Q .02 .022 .055 .02 Z"/>
+      <use href="#screen-curve"/>
     </clipPath>
   </defs>
 </svg>

@@ -49,7 +49,7 @@ test:
 	@echo "make test: all passed"
 
 screenshot: build
-	$(PY) tools/shot.py --url $(BTR_URL)/ --width 1000 --height 750 --select '#screen' --keys ArrowLeft --wait 3000 assets/box/screen.png '?room=B8'
+	$(PY) tools/shot.py --url $(BTR_URL)/ --width 1100 --height 850 --select '#screen' --keys ArrowLeft --wait 3000 assets/box/screen.png '?room=B8'
 	cp assets/box/screen.png $(BUILD)/assets/box/
 
 poster:

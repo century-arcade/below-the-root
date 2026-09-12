@@ -4,7 +4,9 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #game:fullscreen { background: #000; justify-content: center; align-items: center; }
 #game:fullscreen > :not(#canvas-box) { display: none; }
 #canvas-box { position: relative; container-type: inline-size; border: var(--canvas-padding, 0px) solid #000; }
-#screen:focus-visible { outline: 2px solid #9ad284; outline-offset: 2px; }
+#screen:focus-visible { outline: none; }
+#screen-focus { display: none; position: absolute; inset: calc(-1 * var(--canvas-padding, 0px)); width: calc(100% + 2 * var(--canvas-padding, 0px)); height: calc(100% + 2 * var(--canvas-padding, 0px)); fill: none; stroke: #9ad284; stroke-width: 2px; pointer-events: none; }
+#screen:focus-visible ~ #screen-focus { display: block; }
 #canvas-box:has(> #help-screen:not([hidden])) { min-height: max(0px, calc(var(--available-height) - 2 * var(--canvas-padding, 0px))); }
 #game:fullscreen #canvas-box { flex: none; }
 #map-screen, #help-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
