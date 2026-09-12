@@ -34,7 +34,7 @@ function fit() {
   } else {
     const chrome = ['site-header', 'where', 'game-controls', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
-    availableHeight = window.innerHeight - chrome;
+    availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
   const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
   canvas.parentElement.style.setProperty('--available-height', `${Math.max(0, availableHeight)}px`);
