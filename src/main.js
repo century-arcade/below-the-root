@@ -8,7 +8,6 @@ import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale, crtVars } from './fit.js';
 import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
-import { basicsVisible } from './help.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { createLog } from './log.js';
@@ -32,7 +31,7 @@ function fit() {
     game.style.width = '';
     availableHeight = game.clientHeight;
   } else {
-    const chrome = ['site-header', 'where', 'game-controls', 'log']
+    const chrome = ['site-header', 'where', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
@@ -180,8 +179,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
   let overlay = null;
-  let seenInput = false;
-  const basics = document.getElementById('basics');
   const helpScreen = document.getElementById('help-screen');
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
@@ -358,13 +355,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
-    if (type === 'pointerdown') seenInput = true;
     if (held) { if (type === 'pointerdown') release(); return; }
     session.gesture(type, ...pointer.pixel(e).map(Math.round));
   });
   stick.onKey = (type, source) => {
     if (paused) return;
-    if (type === 'keydown') seenInput = true;
     if (held) { if (type === 'keydown') release(); return; }
     session.gesture(type, source);
   };
@@ -433,8 +428,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       activeTab.setAttribute('aria-current', 'page');
       currentTab = activeTab;
     }
-    const showBasics = basicsVisible(state, seenInput) && !overlay;
-    if (basics.hidden === showBasics) { basics.hidden = !showBasics; fit(); }
   }
 
   const STEP_MS = 1000 / 60;
@@ -444,7 +437,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
     last = now;
     gamepad.poll();
-    if (gamepad.held.size) seenInput = true;
     while (acc >= STEP_MS) {
       session.skippable = !options.classic;
       session.onSkip = offset => { if (debug) log(`Tune skipped after ${offset} frames`); };

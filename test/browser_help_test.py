@@ -1,4 +1,4 @@
-"""Markdown Help, startup intro hold, controls and hints; run against make serve."""
+"""Markdown Help, startup intro hold, controls; run against make serve."""
 import json
 import os
 import re
@@ -31,10 +31,8 @@ with sync_playwright() as p:
             return json.loads(Path(download.value.path()).read_text())
 
         page.goto(BASE + '/play?debug')
-        basics = page.locator('#basics')
         help_screen = page.locator('#help-screen')
         expect(help_screen).to_be_visible()
-        expect(basics).to_be_hidden()
         expect(page.get_by_role('button', name='Continue to intro')).to_be_focused()
         stopped = snapshot()
         assert stopped['frames'] == 0, 'Help precedes the first intro frame'
@@ -52,11 +50,9 @@ with sync_playwright() as p:
         assert intro['checkpoint']['shell']['demo'] == 'intro', 'Continue starts the intro without skipping it'
         assert intro['inputs'] == [], 'Continue does not send a joystick press'
         page.locator('#screen').focus()
-        expect(basics).to_be_visible()
         expect(page.locator('#screen')).to_have_attribute('aria-label', re.compile(r'Press \? for all controls'))
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
-        expect(basics).to_be_hidden()
         page.keyboard.press('Space')
         page.keyboard.press('ArrowRight')
         expect(help_screen).to_be_visible()
@@ -64,14 +60,12 @@ with sync_playwright() as p:
         expect(page.locator('#close-help')).to_be_focused()
         question_mark()
         expect(help_screen).to_be_hidden()
-        expect(basics).to_be_visible()  # browsing help did not use the stick
         expect(page.locator('#screen')).to_be_focused()
 
         question_mark()
         expect(help_screen).to_be_visible()
         question_mark()
         expect(help_screen).to_be_hidden()
-        expect(basics).to_be_hidden()  # Shift outside help is the button
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
         page.keyboard.press('h')
@@ -85,22 +79,6 @@ with sync_playwright() as p:
         page.keyboard.press('Escape')
         expect(help_screen).to_be_hidden()
 
-        for input_type in ['keyboard', 'touch', 'gamepad']:
-            page.goto(BASE + '/?menu')
-            expect(basics).to_be_visible()
-            if input_type == 'keyboard':
-                page.keyboard.press('ArrowRight')
-            elif input_type == 'touch':
-                page.locator('#screen').tap()
-            else:
-                page.evaluate("""navigator.getGamepads = () => [{
-                    connected: true, axes: [1, 0], buttons: []
-                }]""")
-            expect(basics).to_be_hidden()
-            page.keyboard.press('h')
-            page.keyboard.press('Escape')
-            expect(basics).to_be_hidden()
-
         page.goto(BASE + '/?player=0')
         page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
         expect(page.locator('#map')).to_be_visible()
@@ -108,7 +86,6 @@ with sync_playwright() as p:
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(help_screen).to_be_hidden()  # a saved quest resumes directly
         expect(page.locator('#screen')).to_be_focused()
-        expect(basics).to_be_hidden()
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
         stopped = record()
@@ -155,4 +132,4 @@ with sync_playwright() as p:
         assert not errors, errors
         page.close()
     browser.close()
-    print('browser_help_test: Markdown Help before intro, saved-game resume, hints, keyboard/touch/gamepad, focus, hold and map switching passed')
+    print('browser_help_test: Markdown Help before intro, saved-game resume, keyboard/touch, focus, hold and map switching passed')

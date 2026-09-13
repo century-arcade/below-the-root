@@ -51,8 +51,6 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #site-header button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: middle; }
 #volume { width: 80px; min-width: 48px; margin: 0 4px; accent-color: #9ad284; }
 #site-header button[aria-pressed="true"] { background: #354537; border-color: #d6f897; }
-#game-controls { text-align: center; }
-#basics { color: #fff; padding-top: 8px; }
 button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
 button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 #log { height: calc(3 * 1.6em); overflow-y: auto; text-align: left; color: #9ad284; font: inherit; white-space: pre-wrap; }
