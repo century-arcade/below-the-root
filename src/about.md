@@ -6,7 +6,7 @@
 <div class="ad-images">
 <figure class="box-front">
 <img src="/assets/box/front.jpg" width="454" height="599" alt="The original box: William Groetzinger’s painting of treetop houses, bridges and a gliding figure above a hidden underground city.">
-<figcaption>Box art by William Groetzinger.</figcaption>
+<figcaption>Box and game art by William Groetzinger.</figcaption>
 </figure>
 <figure>
 <div class="monitor"><img src="/assets/box/screen.png" width="960" height="672" alt="A screenshot of the shops of Broad Grund"></div>
@@ -36,13 +36,13 @@ you just want to experience a piece of computer gaming history.
 
 Whoever you are, please enjoy this restoration of a beloved game from my childhood.
 
-[Saul Pwanson](https://saul.pw) (curator of the [Century Arcade](https://github.com/century-arcade))
+-- [Saul Pwanson](mailto:btr@saul.pw)
 
 </div>
 <div class="ad-action">
 <a class="play-button" href="/play">Play</a>
 <!-- When released, add href="https://github.com/century-arcade/below-the-root/releases/latest/download/below-the-root-preservation.zip" and remove aria-disabled and the coming-soon label. -->
-<a class="archive-download" role="link" aria-disabled="true">Download archival ZIP (coming soon)</a>
+<!--a class="archive-download" role="link" aria-disabled="true">Download archival ZIP (coming soon)</a-->
 <a href="/play?demo">Watch the demo</a>
 </div>
 </article>
