@@ -86,6 +86,44 @@ with sync_playwright() as p:
             expect(page.locator('#site-header a[aria-current]')).to_have_text('Game' if name == 'play' else name.capitalize())
         assert not errors, errors
         page.close()
+    # Header preferences work without loading a game and carry across every page.
+    page = browser.new_page()
+    errors = []
+    data_requests = []
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.on('request', lambda request: data_requests.append(request.url) if '/data/' in request.url else None)
+    page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': True, 'login': 'tester'}))
+    page.goto(BASE + '/about')
+    developer = page.get_by_role('button', name='Developer mode', exact=True)
+    crt = page.get_by_role('button', name='CRT effect', exact=True)
+    expect(developer).to_have_attribute('aria-pressed', 'false')
+    developer.click()
+    crt.click()
+    page.get_by_role('slider', name='Volume').fill('30')
+    page.get_by_role('navigation').get_by_role('link', name='Links').click()
+    page.reload()
+    expect(developer).to_have_attribute('aria-pressed', 'true')
+    expect(crt).to_have_attribute('aria-pressed', 'true')
+    expect(page.get_by_role('slider', name='Volume')).to_have_value('30')
+    expect(page.get_by_role('link', name='Source on GitHub')).to_be_visible()
+    assert not data_requests, 'reading-page controls must not load or start the game'
+    for source, tool in [('about', 'download-record'), ('links', 'load-record'), ('about', 'file-issue')]:
+        page.goto(BASE + '/' + source)
+        page.locator('#' + tool).click()
+        expect(page).to_have_url(BASE + '/play?debug#' + tool)
+        expect(page.locator('#' + tool)).to_be_focused()
+        expect(crt).to_have_attribute('aria-pressed', 'true')
+        expect(page.locator('#crt')).to_be_visible()
+        expect(page.get_by_role('slider', name='Volume')).to_have_value('30')
+    page.goto(BASE + '/links')
+    crt.click()
+    developer.click()
+    page.goto(BASE + '/play')
+    expect(developer).to_have_attribute('aria-pressed', 'false')
+    expect(page.locator('#debug-tools')).to_be_hidden()
+    expect(page.locator('#crt')).to_be_hidden()
+    assert not errors, errors
+    page.close()
     # Reading pages are complete HTML and work without JavaScript or storage.
     page = browser.new_page(java_script_enabled=False)
     for name in ['about', 'links']:

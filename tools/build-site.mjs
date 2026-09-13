@@ -11,12 +11,12 @@ for (const page of ['about', 'play', 'links']) {
   const values = {
     title,
     nav: read('nav.html').replace(`href="/${page}${page === 'play' ? '#home' : ''}"`, '$& aria-current="page"'),
-    controls: page === 'play' ? read('controls.html') : '',
-    developer: page === 'play' ? read('developer.html') : '',
+    controls: read('controls.html'),
+    developer: read('developer.html'),
     styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
     content: page === 'play' ? read('play.html').replace('{{help}}', () => marked.parse(read('help.md')))
       : `<main id="${page}" class="reading-page">\n${marked.parse(read(`${page}.md`))}</main>`,
-    scripts: page === 'play' ? '<script type="module" src="/main.js"></script>' : '',
+    scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>`,
   };
   const html = template.replace(/{{(\w+)}}/g, (_, key) => values[key]);
   writeFileSync(join(out, `${page}.html`), html);

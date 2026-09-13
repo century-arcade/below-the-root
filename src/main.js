@@ -11,6 +11,7 @@ import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js'
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { createLog } from './log.js';
+import { setupDeveloper, GAME_TOOLS } from './header.js';
 
 const log = createLog(document.getElementById('log'), { onToggle: () => fit() });
 
@@ -21,7 +22,6 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.createImageData(WIDTH, HEIGHT + STATUS_HEIGHT) };
 let band = 0;
-const crtBox = document.getElementById('crt');
 const CANVAS_PADDING = 12; // Keep the full picture inside the bowed screen surround.
 
 function fit() {
@@ -313,14 +313,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   addEventListener('hashchange', () => showView(location.hash.slice(1)));
 
-  const developerButton = document.getElementById('developer-mode');
-  const debugTools = document.getElementById('debug-tools');
   let debugReady = false;
   function setDebug(on) {
     debug = on;
     where.hidden = !on;
-    debugTools.hidden = !on;
-    developerButton.setAttribute('aria-pressed', String(on));
     if (on && !debugReady) {
       debugReady = true;
       setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, log,
@@ -328,23 +324,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     }
     fit();
   }
-  function setCrt(on) {
-    options.crt = on;
-    crtBox.hidden = !on;
-    canvas.parentElement.classList.toggle('crt', on);
-    document.getElementById('toggle-crt').setAttribute('aria-pressed', String(on));
-  }
-  document.getElementById('toggle-crt').onclick = e => {
-    setCrt(!options.crt);
-    persist('crt', options.crt);
-    e.currentTarget.blur();
-  };
-  developerButton.onclick = e => {
-    if (paused) return;
-    setDebug(!debug);
-    persist('debug', debug);
-    e.currentTarget.blur();
-  };
   document.getElementById('close-map').onclick = release;
   document.getElementById('close-help').onclick = release;
   // Overlay controls keep native keyboard activation without sending joystick input.
@@ -407,8 +386,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { saveNow(); hold(); } else { dropInput(); }
   });
-  setDebug(debug);
-  setCrt(options.crt);
+  setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
@@ -454,6 +432,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
   if (['home', 'map', 'help'].includes(location.hash.slice(1))) showView(location.hash.slice(1));
+  else if (debug && GAME_TOOLS.includes(location.hash.slice(1))) {
+    document.getElementById(location.hash.slice(1)).focus();
+  }
   else if (freshStart) openHelp(true);
   fit();
   draw();
