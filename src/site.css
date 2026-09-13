@@ -5,14 +5,15 @@ html, body { margin: 0; min-height: 100%; background: #0b130d; color: #9ad284; f
 body { min-height: 100dvh; box-sizing: border-box; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 [hidden] { display: none !important; }
 a { color: #c7f5ae; }
-#site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; border-bottom: 1px solid #354537; }
+#site-header { flex-wrap: wrap; position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px; border-bottom: 1px solid #354537; }
 #site-header nav { display: flex; align-self: stretch; flex-shrink: 0; margin-right: auto; font-family: 'Green-Sky', monospace; text-transform: uppercase; }
 #site-header nav a { display: grid; place-items: center; padding: 0 12px; text-decoration: none; border-bottom: 2px solid transparent; }
 #site-header nav a[aria-current] { color: #f2ead8; border-color: #f2ead8; }
 #site-header .github-link { display: grid; place-items: center; flex-shrink: 0; padding: 8px; }
+.header-actions { display: flex; align-items: center; gap: 8px; max-width: 100%; min-width: 0; margin-left: auto; }
+.source-controls { display: flex; align-items: center; flex-shrink: 0; }
 #top-controls { min-width: 0; overflow-x: auto; flex-shrink: 1; }
 #top-controls button { flex-shrink: 0; }
-#top-controls #debug-tools { margin: 0; }
 .reading-page [id] { scroll-margin-top: 55px; }
 #play { max-width: 100%; }
 .reading-page { box-sizing: border-box; width: min(1100px, 100%); padding: 42px 60px; position: relative; background: #f2ead8; color: #202b42; font: 19px/1.5 Georgia, serif; }

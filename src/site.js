@@ -1,5 +1,5 @@
 const GAME_PARAMS = ['demo', 'room', 'player', 'menu', 'debug', 'github'];
-const PAGES = ['about', 'play', 'links'];
+const PAGES = ['about', 'play', 'help', 'links'];
 
 function pageForHash(hash) {
   const page = hash === '#resources' ? 'links' : hash.slice(1);

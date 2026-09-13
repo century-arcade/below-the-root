@@ -1,7 +1,7 @@
 <article class="ad" aria-labelledby="ad-title">
 <div class="ad-heading">
 <h1 id="ad-title">Below the Root</h1>
-<p class="computer-line">Windham Classics, 1984. Commodore 64.</p>
+<p class="computer-line">Published in 1984 for the Commodore 64.<br>Ported in 2026 to JavaScript.</p>
 </div>
 <div class="ad-images">
 <figure class="box-front">

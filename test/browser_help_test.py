@@ -57,7 +57,6 @@ with sync_playwright() as p:
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
         expect(basics).to_be_hidden()
-        expect(page.locator('#help')).to_have_attribute('aria-expanded', 'true')
         page.keyboard.press('Space')
         page.keyboard.press('ArrowRight')
         expect(help_screen).to_be_visible()
@@ -67,7 +66,6 @@ with sync_playwright() as p:
         expect(help_screen).to_be_hidden()
         expect(basics).to_be_visible()  # browsing help did not use the stick
         expect(page.locator('#screen')).to_be_focused()
-        expect(page.locator('#help')).to_have_attribute('aria-expanded', 'false')
 
         question_mark()
         expect(help_screen).to_be_visible()
@@ -78,7 +76,7 @@ with sync_playwright() as p:
         expect(help_screen).to_be_visible()
         page.keyboard.press('h')
         expect(help_screen).to_be_hidden()
-        page.locator('#help').tap()
+        page.keyboard.press('h')
         expect(help_screen).to_be_visible()
         page.locator('#close-help').tap()
         expect(help_screen).to_be_hidden()

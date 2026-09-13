@@ -4,6 +4,7 @@ import { startPage } from '../src/site.js';
 assert.equal(startPage('', '', false), 'about');
 assert.equal(startPage('', '#about', false), 'about');
 assert.equal(startPage('', '#play', false), 'play');
+assert.equal(startPage('?room=B8', '#help', true), 'help');
 assert.equal(startPage('', '#links', false), 'links');
 assert.equal(startPage('', '#links', true), 'links');
 assert.equal(startPage('', '#resources', false), 'links');

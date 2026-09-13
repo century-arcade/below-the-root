@@ -183,7 +183,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seenInput = false;
   const basics = document.getElementById('basics');
   const helpScreen = document.getElementById('help-screen');
-  const helpButton = document.getElementById('help');
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
   const mapGrid = document.getElementById('map-grid');
@@ -262,7 +261,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (overlay) {
       if (overlay.screen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
       overlay.screen.hidden = true;
-      overlay.button.setAttribute('aria-expanded', 'false');
+      overlay.button?.setAttribute('aria-expanded', 'false');
       overlay = null;
     }
     dropInput(); held = false;
@@ -272,12 +271,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     overlay = { screen, button };
     hold();
     screen.hidden = false;
-    button.setAttribute('aria-expanded', 'true');
+    button?.setAttribute('aria-expanded', 'true');
   }
   function openHelp(startup = false) {
     if (paused) return;
     if (overlay?.screen === helpScreen) return release();
-    openOverlay(helpScreen, helpButton);
+    openOverlay(helpScreen);
     const closeHelp = document.getElementById('close-help');
     closeHelp.textContent = startup ? 'Continue to intro' : 'Close';
     helpScreen.scrollTop = 0;
@@ -324,7 +323,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     e.currentTarget.blur();
   };
   document.getElementById('close-map').onclick = release;
-  helpButton.onclick = e => { openHelp(); e.currentTarget.blur(); };
   document.getElementById('close-help').onclick = release;
   // Overlay controls keep native keyboard activation without sending joystick input.
   for (const screen of [mapScreen, helpScreen]) {

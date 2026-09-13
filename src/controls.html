@@ -1,15 +1,17 @@
   <div id="top-controls">
-    <div id="debug-tools" hidden>
+    <div class="control-group" role="group" aria-label="Game">
+      <button id="reset" aria-label="Reset game" title="Reset game">[!]</button>
+      <button id="map" aria-keyshortcuts="Tab" aria-controls="map-screen" aria-expanded="false" aria-label="Map" title="Map"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5l5-2 6 2 5-2v12l-5 2-6-2-5 2zM7 3v12M13 5v12"/></svg></button>
+    </div>
+    <div class="control-group" role="group" aria-label="Audio and display">
+      <input id="volume" type="range" min="0" max="100" step="10" aria-label="Volume" title="Volume">
+      <button id="fullscreen" aria-keyshortcuts="F" aria-label="Fullscreen" title="Fullscreen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/></svg></button>
+    </div>
+    <div id="debug-tools" class="control-group" role="group" aria-label="Developer tools" hidden>
       <button id="toggle-crt" aria-label="CRT effect" title="CRT effect"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="3" width="16" height="12" rx="2"/><path d="M6 18h8M10 15v3M5 7h10M5 11h10"/></svg></button>
       <button id="download-record" aria-label="Download recording" title="Download recording">⤓</button>
       <button id="load-record" aria-label="Load recording" title="Load recording">💾</button>
       <input id="record-file" type="file" accept=".json,.prg,application/json" hidden>
       <button id="file-issue" aria-keyshortcuts="R" aria-label="Report issue" title="Report issue">🐞</button>
     </div>
-    <button id="map" aria-keyshortcuts="Tab" aria-controls="map-screen" aria-expanded="false" aria-label="Map" title="Map"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5l5-2 6 2 5-2v12l-5 2-6-2-5 2zM7 3v12M13 5v12"/></svg></button>
-    <input id="volume" type="range" min="0" max="100" step="10" aria-label="Volume" title="Volume">
-    <button id="fullscreen" aria-keyshortcuts="F" aria-label="Fullscreen" title="Fullscreen"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/></svg></button>
-    <button id="help" aria-keyshortcuts="? h" aria-controls="help-screen" aria-expanded="false" aria-label="Help" title="Help">?</button>
-    <button id="reset" aria-label="Reset game" title="Reset game">[!]</button>
-    <button id="developer-mode" aria-controls="debug-tools" aria-label="Developer mode" title="Developer mode"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 5l-4 5 4 5M14 5l4 5-4 5M12 3L8 17"/></svg></button>
   </div>

@@ -26,7 +26,10 @@ with sync_playwright() as p:
         expect(page).to_have_url(BASE + '/links')
         page.reload()
         expect(page.get_by_role('heading', name='Links', exact=True)).to_be_visible()
-        page.go_back()
+        page.get_by_role('navigation').get_by_role('link', name='Help', exact=True).click()
+        expect(page).to_have_url(BASE + '/help')
+        expect(page.get_by_role('heading', name='Keyboard', exact=True)).to_be_visible()
+        page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
         page.locator('.play-button').click()
         expect(page).to_have_url(BASE + '/play')
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
@@ -46,7 +49,7 @@ with sync_playwright() as p:
         page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
         before = page.evaluate("localStorage.getItem('btr.autosave.v1')")
         assert before, 'Leaving Play saves the quest'
-        for name in ['About', 'Links']:
+        for name in ['About', 'Help', 'Links']:
             page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
             expect(page.locator('#screen')).to_have_count(0)
             for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
@@ -67,14 +70,14 @@ with sync_playwright() as p:
         page.goto(BASE + '/about?room=B8')
         expect(page.locator('#about')).to_be_visible()
         expect(page.locator('#screen')).to_have_count(0)
-        for legacy, target in [('/#about', '/about'), ('/#play', '/play'),
+        for legacy, target in [('/#about', '/about'), ('/#play', '/play'), ('/#help', '/help'),
                                ('/?room=B8#links', '/links?room=B8'),
                                ('/?room=B8#resources', '/links?room=B8'),
                                ('/resources', '/links'), ('/resources/', '/links'),
                                ('/resources.html?ref=old', '/links?ref=old')]:
             page.goto(BASE + legacy)
             expect(page).to_have_url(BASE + target)
-        for name in ['about', 'links', 'play']:
+        for name in ['about', 'help', 'links', 'play']:
             response = page.goto(BASE + '/' + name + '/')
             assert response.ok
             expect(page).to_have_url(BASE + '/' + name + '/')
@@ -84,7 +87,7 @@ with sync_playwright() as p:
         page.close()
     # Reading pages are complete HTML and work without JavaScript or storage.
     page = browser.new_page(java_script_enabled=False)
-    for name in ['about', 'links']:
+    for name in ['about', 'help', 'links']:
         response = page.goto(BASE + '/' + name)
         assert response.ok
         expect(page.locator('main h1')).to_be_visible()
