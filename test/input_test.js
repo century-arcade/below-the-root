@@ -26,6 +26,20 @@ assert.equal(read().press, false);
 keys.tap('fire');
 assert.equal(read().press, true, 'a pointer tap counts once');
 assert.equal(read().press, false);
+for (const code of ['Enter', 'NumpadEnter']) {
+  let prevented = false;
+  target.send('keydown', { key: 'Enter', code, preventDefault() { prevented = true; } });
+  assert.equal(prevented, true, 'gameplay Enter prevents native activation');
+  assert.deepEqual(read(), { ...IDLE, fire: true, press: true }, `${code} triggers`);
+  assert.equal(read().press, false, 'held Enter does not trigger again');
+  target.send('keyup', { key: 'Enter', code });
+  assert.deepEqual(read(), { ...IDLE, press: false }, 'releasing Enter clears the trigger');
+}
+for (const selector of ['input', 'dialog', 'a[href]', 'button', '[role="button"]']) {
+  const target = { closest: selectors => selectors.includes(selector) ? {} : null };
+  assert.equal(keys.map({ key: 'Enter', code: 'Enter', target }), false);
+  assert.deepEqual(keys.read(), IDLE, `Enter on ${selector} keeps native activation`);
+}
 const demo = new DemoInput({ steps: [
   { op: 'hold', bytes: [15], steps: 3 }, { op: 'tap', bytes: [31] }, { op: 'tap', bytes: [15] },
 ] }, {});

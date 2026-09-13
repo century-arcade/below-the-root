@@ -177,7 +177,8 @@ with sync_playwright() as p:
     # Developer mode toggles directly, persists, and gates the report shortcut.
     developer = page.get_by_role('button', name='Developer mode', exact=True)
     expect(developer).to_have_attribute('aria-pressed', 'false')
-    developer.click()
+    developer.focus()
+    page.keyboard.press('Enter')
     expect(developer).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#file-issue')).to_be_visible()
     crt = page.get_by_role('button', name='CRT effect', exact=True)
@@ -201,10 +202,10 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
-    # Home keeps the running quest and returns to the native menu.
+    # Game keeps the running quest and returns to the native menu.
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
-    page.get_by_role('navigation').get_by_role('link', name='Home', exact=True).click()
+    page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).click()
     expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
     expect(page.locator('#map')).to_be_hidden()
     menu = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
@@ -220,7 +221,7 @@ with sync_playwright() as p:
     expect(page.locator('#help-screen')).to_be_hidden()
     page.wait_for_timeout(150)
     page.keyboard.press('ArrowDown', delay=120)
-    page.keyboard.press('Space', delay=120)
+    page.keyboard.press('Enter', delay=120)
     expect(page.locator('#map')).to_be_visible()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     continued = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
@@ -319,4 +320,4 @@ with sync_playwright() as p:
         assert offset >= 30, 'debug log reports the skip offset from the tune start'
     assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, Home/menu/reload/Continue, pause/resume with continuing music, held/tapped keyboard and mouse reward tunes, fresh-press skip and debug offset, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: autosave/resume, Game/menu/reload/Continue, pause/resume with continuing music, held/tapped keyboard and mouse reward tunes, fresh-press skip and debug offset, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

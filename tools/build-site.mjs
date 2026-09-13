@@ -10,7 +10,7 @@ for (const page of ['about', 'play', 'links']) {
   const title = `${page[0].toUpperCase() + page.slice(1)} — Below the Root`;
   const values = {
     title,
-    nav: read('nav.html').replace(`href="/${page}"`, `href="/${page}" aria-current="page"`),
+    nav: read('nav.html').replace(`href="/${page}${page === 'play' ? '#home' : ''}"`, '$& aria-current="page"'),
     controls: page === 'play' ? read('controls.html') : '',
     developer: page === 'play' ? read('developer.html') : '',
     styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',

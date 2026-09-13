@@ -15,6 +15,7 @@ with sync_playwright() as p:
         expect(page).to_have_url(BASE + '/about')
         expect(page.get_by_role('heading', name='Below the Root', exact=True)).to_be_visible()
         expect(page.locator('#site-header a[aria-current]')).to_have_text('About')
+        expect(page.get_by_role('navigation').get_by_role('link')).to_have_text(['Game', 'Map', 'Help', 'About', 'Links'])
         page.get_by_role('navigation').get_by_role('link', name='Links').click()
         expect(page).to_have_url(BASE + '/links')
         expect(page.get_by_role('heading', name='Links', exact=True)).to_be_visible()
@@ -36,7 +37,7 @@ with sync_playwright() as p:
         expect(page.get_by_role('button', name='Continue to intro')).to_be_focused()
         page.keyboard.press('Enter')
         expect(page.locator('#screen')).to_be_focused()
-        expect(page.locator('#site-header a[aria-current]')).to_have_text('Play')
+        expect(page.locator('#site-header a[aria-current]')).to_have_text('Game')
         page.go_back()
         expect(page).to_have_url(BASE + '/about')
         # Query entry links still work, with all game assets loaded from the site root.
@@ -55,7 +56,7 @@ with sync_playwright() as p:
             for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
                 page.keyboard.press(key)
             assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == before
-        page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).focus()
+        page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).focus()
         page.keyboard.press('Enter')
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(page.locator('#screen')).to_be_focused()
@@ -82,7 +83,7 @@ with sync_playwright() as p:
             assert response.ok
             expect(page).to_have_url(BASE + '/' + name + '/')
             page.reload()
-            expect(page.locator('#site-header a[aria-current]')).to_have_text(name.capitalize())
+            expect(page.locator('#site-header a[aria-current]')).to_have_text('Game' if name == 'play' else name.capitalize())
         assert not errors, errors
         page.close()
     # Reading pages are complete HTML and work without JavaScript or storage.
@@ -91,7 +92,7 @@ with sync_playwright() as p:
         response = page.goto(BASE + '/' + name)
         assert response.ok
         expect(page.locator('main h1')).to_be_visible()
-        expect(page.get_by_role('navigation').get_by_role('link', name='Play')).to_have_attribute('href', '/play')
+        expect(page.get_by_role('navigation').get_by_role('link', name='Game')).to_have_attribute('href', '/play#home')
     page.close()
     page = browser.new_page()
     page.add_init_script("Object.defineProperty(window, 'localStorage', {get() {throw new Error('blocked')}})")

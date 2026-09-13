@@ -2,7 +2,7 @@
 ## Keyboard
 
 - **WASD or Arrows**: Move
-- **Space**: Trigger (select/skip/jump/menu)
+- **Space or Enter**: Trigger (select/skip/jump/menu)
 - **P**: Pause (Move to resume)
 - **Tab**: Open/close map
 - **?**: Help

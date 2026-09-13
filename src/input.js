@@ -22,7 +22,7 @@ export function pressEdge(read, last = IDLE) {
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-  ' ': 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
+  ' ': 'fire', Enter: 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
   W: 'up', S: 'down', A: 'left', D: 'right',
 };
 
@@ -39,6 +39,7 @@ export class Keyboard {
 
   map(e, up = false) {
     if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
+    if (!up && e.key === 'Enter' && e.target?.closest?.('a[href], button, [role="button"]')) return false;
     const key = KEYS[e.key];
     if (!key) return false;
     if (!up && e.repeat) return true;

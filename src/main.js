@@ -187,7 +187,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const mapButton = document.getElementById('map');
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
-  const playButton = document.getElementById('play-tab');
   mapButton.setAttribute('aria-controls', 'map-screen');
   helpButton.setAttribute('aria-controls', 'help-screen');
   let currentTab = document.querySelector('#site-header nav [aria-current]');
@@ -306,7 +305,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     else if (view === 'help') openHelp();
     if (!overlay) canvas.focus({ preventScroll: true });
   }
-  for (const [button, view] of [[homeButton, 'home'], [playButton, 'play'], [mapButton, 'map'], [helpButton, 'help']]) {
+  for (const [button, view] of [[homeButton, 'home'], [mapButton, 'map'], [helpButton, 'help']]) {
     button.onclick = e => {
       if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       e.preventDefault();
@@ -322,7 +321,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     debug = on;
     where.hidden = !on;
     debugTools.hidden = !on;
-    document.querySelector('.github-link').hidden = !on;
     developerButton.setAttribute('aria-pressed', String(on));
     if (on && !debugReady) {
       debugReady = true;
@@ -431,7 +429,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
     if (overlay?.screen === mapScreen && mapUnavailable) release();
     const activeTab = overlay?.screen === mapScreen ? mapButton
-      : overlay?.screen === helpScreen ? helpButton : state.title ? homeButton : playButton;
+      : overlay?.screen === helpScreen ? helpButton : homeButton;
     if (currentTab !== activeTab) {
       currentTab?.removeAttribute('aria-current');
       activeTab.setAttribute('aria-current', 'page');
