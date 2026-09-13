@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 
 import { loadTestData, J } from './helpers.js';
-import { newState, tick } from '../src/game.js';
+import { newState, startQuest, tick } from '../src/game.js';
 import { shellFrame, coldStart, openMenu } from '../src/shell.js';
 import { panelLines as lines } from '../src/panel.js';
 import { MENU } from '../src/verbs.js';
@@ -51,11 +51,12 @@ test('the main menu draws over T4 with START GAME selected', (s) => {
   openMenu(s);
   settle(s);
   assert.equal(s.title, true);
-  assert.deepEqual(lines(s).map(line => line.trim()).filter(Boolean), ['START GAME', 'CONTINUE', 'SAMPLE QUEST']);
+  assert.deepEqual(lines(s).map(line => line.trim()).filter(Boolean), ['START GAME', 'SAMPLE QUEST']);
   assert.equal(s.menuSel, 0);
 });
 
 test('the cursor clamps at both ends and a held stick moves once', (s) => {
+  startQuest(s, data.characters[0]);
   openMenu(s);
   settle(s);
   s.stick.feed(J.down, J.down, J.down, J.idle);
@@ -82,15 +83,29 @@ test('the cursor clamps at both ends and a held stick moves once', (s) => {
   assert.ok(s.events.every((e) => 'sfx' in e || e.music === null));
 });
 
-test('CONTINUE with no quest does nothing', (s) => {
+test('without a quest, navigation skips CONTINUE and selects SAMPLE QUEST', (s) => {
   openMenu(s);
   settle(s);
+  s.stick.feed(...push(J.down, 3));
+  settle(s);
+  assert.equal(s.menuSel, 2);
+  s.stick.feed(...tap(J.up));
+  settle(s);
+  assert.equal(s.menuSel, 0);
   s.stick.feed(...tap(J.down), ...tap(J.fire));
   settle(s);
-  assert.equal(s.active, false);
-  assert.equal(s.title, true);
-  assert.equal(s.menuSel, 1);
-  assert.equal(lines(s)[1], '                CONTINUE');
+  assert.equal(s.demo.name, 'quest');
+});
+
+test('a remembered CONTINUE selection resets when no quest remains', (s) => {
+  s.menuSel = 1;
+  openMenu(s);
+  settle(s);
+  assert.equal(s.menuSel, 0);
+  assert.ok(!lines(s).some(line => line.trim() === 'CONTINUE'));
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  assert.match(lines(s).join('\n'), /CHOOSE YOUR PLAYER:/);
 });
 
 test('character select opens on Neric, down cycles through RETURN TO MENU and back', (s) => {
@@ -188,6 +203,7 @@ test('the menu verb leaves the quest in progress and CONTINUE puts you back on t
   settle(s);
   assert.equal(s.title, true);
   assert.equal(s.quest, true);
+  assert.ok(lines(s).some(line => line.trim() === 'CONTINUE'));
   assert.equal(lines(s)[0], '               START GAME');
   s.stick.feed(...tap(J.down), ...tap(J.fire));
   settle(s);
@@ -231,9 +247,11 @@ test('SAMPLE QUEST ends the quest, runs the outdoor script first, and the button
   assert.equal(s.demo, null);
   assert.equal(s.title, true);
   assert.ok(lines(s).some(line => line.trim() === 'SAMPLE QUEST'));
+  assert.ok(!lines(s).some(line => line.trim() === 'CONTINUE'));
   s.stick.feed(...tap(J.up), ...tap(J.fire));
   settle(s);
-  assert.equal(s.menuSel, 1);
+  assert.equal(s.menuSel, 0);
+  assert.match(lines(s).join('\n'), /CHOOSE YOUR PLAYER:/);
   assert.equal(s.active, false);
 });
 

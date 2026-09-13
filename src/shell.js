@@ -32,17 +32,20 @@ export function coldStart(state) {
   startDemo(state, 'intro');
 }
 
-function drawMainMenu(state, sel) {
+function drawMainMenu(state, items, sel) {
   clearPanel(state);
-  state.data.shell.screens.main_menu.items.forEach((it) => print(state, it.row, it.col, it.text, it.index === sel));
+  items.forEach((it, i) => print(state, state.data.shell.screens.main_menu.items[i].row,
+    it.col, it.text, it.index === sel));
 }
 
 // a push moves once; the stick must centre before the next counts; the button chooses
 export function* mainMenu(state) {
-  const screen = state.data.shell.screens.main_menu;
+  const items = state.data.shell.screens.main_menu.items
+    .filter(it => state.quest || it.text.trim() !== 'CONTINUE');
+  if (!items.some(it => it.index === state.menuSel)) state.menuSel = items[0].index;
   for (;;) {
     yield* fireUp();
-    drawMainMenu(state, state.menuSel);
+    drawMainMenu(state, items, state.menuSel);
     let armed = true;
     for (;;) {
       const j = yield;
@@ -53,13 +56,14 @@ export function* mainMenu(state) {
       }
       if (!armed) continue;
       armed = false;
-      const sel = clamp(state.menuSel + j.dy, 0, screen.items.length - 1);
+      const current = items.findIndex(it => it.index === state.menuSel);
+      const sel = items[clamp(current + j.dy, 0, items.length - 1)].index;
       if (sel === state.menuSel) continue;
       state.menuSel = sel;
       sfx(state, SFX.blip);
-      drawMainMenu(state, sel);
+      drawMainMenu(state, items, sel);
     }
-    switch (screen.items[state.menuSel].text.trim()) {
+    switch (items.find(it => it.index === state.menuSel).text.trim()) {
       case 'START GAME':
         if (yield* characterSelect(state)) return;
         break;
