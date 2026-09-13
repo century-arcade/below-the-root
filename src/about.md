@@ -15,18 +15,15 @@
 <div class="ad-copy">
 
 Below the Root is an underknown work of art. It shares the calm, thoughtful play of
-King’s Quest and Karateka, also released in 1984, but draws additional depth from the
-Green-Sky world of Zilpha Keatley Snyder’s trilogy ([*Below the Root*](https://openroadmedia.com/ebook/below-the-root/9781453271926), [*And All Between*](https://openroadmedia.com/ebook/and-all-between/9781453271933) and [*Until the Celebration*](https://openroadmedia.com/ebook/until-the-celebration/9781453271940)).
+[King’s Quest](https://www.youtube.com/watch?v=NEG-am4guWk) (1983) and [Karateka](https://www.youtube.com/watch?v=_Dyo6jghUk8) (1984), but also draws additional depth from the
+world of Zilpha Keatley Snyder’s Green-Sky trilogy of books ([*Below the Root*](https://openroadmedia.com/ebook/below-the-root/9781453271926), [*And All Between*](https://openroadmedia.com/ebook/and-all-between/9781453271933) and [*Until the Celebration*](https://openroadmedia.com/ebook/until-the-celebration/9781453271940)).
 
-The game world is remarkably open and huge for the time, with a hundred characters you
-can talk with and whose feelings and thoughts you can pense.
-There are platform challenges and thoughtful puzzles and an intricate plot to uncover within the world.
-You glide from branch to branch with your shuba and sleep in a nid and gather
-wissenberries to survive and explore the unfolding quest.
+The game world is remarkably open and huge for its time, with hundreds of sections of the map to visit, and a hundred characters whose feelings and thoughts you can pense.
+There are platform challenges and thoughtful puzzles and an intricate plot to uncover within the world as you glide from branch to branch with your shuba, sleep in a nid, and gather wissenberries in order to explore and learn and cajole.
 
-This project brings the Commodore 64 game to the browser through largely automated
+This project brings the original Commodore 64 game to the browser through largely automated
 analysis and reconstruction of its original program. Its art, words, and music are
-preserved, with modern controls, autosave, and a built-in map that make Green-Sky easier to
+preserved with complete fidelity, but with modern controls, autosave, and an in-game map that make Green-Sky easier to
 visit and explore.
 
 <figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="The original box back. The world of Green-Sky—lush and verdant, rich with wildlife, covered with gigantic trees. Here live the Kindar, high in the interwoven branches; here too live the Erdling, once banished to the tunnels below the root. Yet the peace that has existed between these peoples is now threatened. Green-Sky seems headed for certain disaster—unless someone can discover the secret of its survival. In this adventure game, you’ll set off on a fantastic and challenging quest for the secret of Green-Sky. You’ll explore its vast tree-world, and you’ll venture below the root to probe its maze of mysterious tunnels. You’ll talk with the inhabitants of Green-Sky, whose advice will help you in your quest. But be careful, for some are not as friendly as they seem. BELOW THE ROOT combines the story-building aspects of a text adventure with hundreds of colorful graphics. It also combines fast-paced excitement with a unique text menu—a first in the field of adventure games. And it lets you play as one of five characters—each with different abilities and strengths. Based on Zilpha Snyder’s recently published Green-Sky Trilogy, BELOW THE ROOT begins where the final book leaves off. The program is by Dale Disharoon, Inc., specialists in educational software. Designed for ages 10–Adult."></a><figcaption>The original box back</figcaption></figure>
@@ -37,7 +34,9 @@ beak. Perhaps you’ve just read the novels and are curious about what happens n
 Perhaps you’re a pixel artist or a chiptune musician and are inspired to enhance the
 art or music. Perhaps you just want to experience a piece of computer gaming history.
 
-Whoever you are, enjoy.
+Whoever you are, please enjoy this restoration of a beloved game from my childhood.
+
+[Saul Pwanson]() (curator of the [Century Arcade]())
 
 </div>
 <div class="ad-action">
