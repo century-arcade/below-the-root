@@ -53,7 +53,7 @@ export function roomKind(room) {
   return room.tileset === 'outdoor' ? 'grund' : 'sky';
 }
 
-// Authored with the developer map editor; exploration adds to these defaults.
+// Exploration adds to the authored starting map.
 export function defaultMapRooms(data) {
   return new Set(data.initialMap.rooms.filter(code => data.roomByCode.get(code)?.outdoor_bit));
 }

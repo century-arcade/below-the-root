@@ -55,21 +55,12 @@ Menus wait for the stick to centre between pushes, so holding a direction moves 
 Tab (or the Map icon in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
 The map is available from the menu and intro, even before starting a quest.
-It starts with the non-temple grund trunks, from their highest non-secret buildings
-through their roots, plus the current character's home exterior. Branch-only rooms,
-the ground between trunks, secret treetops, Temple Grunds and caverns appear as you
-visit them. Interiors stay blank. The white marker stays at your last outdoor
+It starts with the exterior rooms selected in `assets/initial-map.json`, plus the
+current character's home exterior. Other rooms appear as you visit them.
+Interiors stay blank. The white marker stays at your last outdoor
 location while indoors (or your nid's exit on a new quest); there is no marker before a quest.
 Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
 Drag or scroll to explore when zoomed, and use Your location to return to the marker.
-
-In developer mode, **Map editor** opens `/map-editor.html`. It shows all exterior
-rooms, including Temple Grund and underground, with all initially marked unseen.
-Click rooms to toggle whether they appear before exploration; **Load saved defaults**
-loads the current starting map, and **All unseen** clears the selection.
-**Save data file** opens a file picker: select `assets/initial-map.json`, then run
-`make build`. **Download JSON** exports the same file for browsers without direct
-file saving. Editing the selection does not change a quest or save file.
 
 ? (or H, or Help in the navbar) opens all controls inside the canvas area.
 

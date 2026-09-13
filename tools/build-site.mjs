@@ -26,5 +26,3 @@ for (const page of ['about', 'play', 'links']) {
       '<script type="module">import { enterSite } from "/site.js"; enterSite();</script>\n</body>'));
   }
 }
-
-writeFileSync(join(out, 'map-editor.html'), read('map-editor.html'));
