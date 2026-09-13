@@ -1,6 +1,6 @@
 // A versioned journal re-creates generator state by replaying the same ticks and input reads.
 // C64 saves remain interoperable checkpoints; this is the richer browser save format.
-import { newState, startQuest, startDemo, tick } from './game.js';
+import { newState, startQuest, startDemo, endDemo, tick } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
 import { IDLE, pressEdge } from './input.js';
@@ -143,7 +143,18 @@ export class Session {
   apply(action) {
     if (action.type === 'load') importSave(this.state, fromBase64(action.save));
     else if (action.type === 'skip') skipTune(this.state);
+    else if (action.type === 'menu') {
+      endDemo(this.state);
+      this.state.menuSel = 0;
+      openMenu(this.state);
+    }
     this.noteRoom();
+  }
+
+  menu() {
+    const action = { frame: this.frame, type: 'menu' };
+    this.apply(action);
+    this.record.actions.push(action);
   }
 
   skipTune() {
@@ -220,7 +231,7 @@ export function validateRecord(r, data) {
   }
   previous = 0;
   for (const action of r.actions) {
-    if (!['load', 'skip'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
+    if (!['load', 'skip', 'menu'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
         || action.frame > r.frames || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');
     previous = action.frame;
   }

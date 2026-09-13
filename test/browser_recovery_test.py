@@ -108,17 +108,16 @@ with sync_playwright() as p:
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') == unusable
     assert not errors, errors
 
-    # Reset retires a failed restore and allows the next quest to autosave.
-    page.locator('#reset').click()
-    expect(page.locator('#log')).to_contain_text('Game reset')
+    # Home leaves recovery copies intact; Start Game creates a quest that can autosave.
+    page.locator('#home').click()
     expect(page.locator('#map')).to_be_hidden()
-    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) is None
-    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
-    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') is None
+    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == unusable
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
+    assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') == unusable
     for _ in range(2):
         page.wait_for_timeout(150)
         page.keyboard.press('Space', delay=120)
-    page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
+    page.wait_for_function("JSON.parse(localStorage.getItem('btr.autosave.v1')).checkpoint?.quest === true")
     fresh = json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))
     assert fresh['initial'] == {'mode': 'menu'}
     assert fresh['checkpoint']['quest']
@@ -132,4 +131,4 @@ with sync_playwright() as p:
     expect(startup.locator('#log')).to_be_visible()
     expect(startup.locator('#log')).to_contain_text('500')
     browser.close()
-    print('browser_recovery_test: silent recovery, console-only failure at the menu, continued autosaving, reload, missing checkpoint, reset after failed restore, and startup error passed')
+    print('browser_recovery_test: silent recovery, console-only failure at the menu, continued autosaving, reload, missing checkpoint, Home and Start Game after failed restore, and startup error passed')

@@ -60,6 +60,5 @@ dialog {
   position: static; align-self: center; margin: 8px 0 0;
   background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
 }
-#reset { background: #5a1414; color: #ffd0d0; border-color: #a33; }
 textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
 #issue-result { overflow-wrap: anywhere; }

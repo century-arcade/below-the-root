@@ -33,7 +33,7 @@ with sync_playwright() as p:
     page.goto(BASE + '/?player=0&debug')
     page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
     for name in ['Download recording', 'Load recording', 'Report issue']:
-        assert page.locator('#top-controls').get_by_role('button', name=name, exact=True).is_visible(), name
+        assert page.locator('#debug-tools').get_by_role('button', name=name, exact=True).is_visible(), name
     box = page.locator('#screen').bounding_box()
     page.mouse.move(box['x'] + box['width'] * .9, box['y'] + box['height'] * .3)
     page.mouse.down()
@@ -201,36 +201,34 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
-    # Reset deletes the quest on one click, preserving slots and options.
-    saved = page.evaluate("localStorage.getItem('btr.autosave.v1')")
-    page.evaluate('''(save) => {
-        localStorage.setItem('btr.autosave.v1.recovery', save);
-        localStorage.setItem('btr.autosave.v1.recovery.1', save);
-    }''', saved)
-    # A failed deletion must not claim success or replace the running quest.
-    page.evaluate('''() => {
-        window.removeItem = Storage.prototype.removeItem;
-        Storage.prototype.removeItem = () => { throw new Error('Test storage failure'); };
-    }''')
-    page.locator('#reset').click()
-    expect(page.locator('#log')).to_contain_text('Reset failed: Test storage failure')
-    expect(page.locator('#map')).to_be_visible()
-    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == saved
-    page.evaluate('() => { Storage.prototype.removeItem = window.removeItem; }')
-    page.locator('#reset').click()
-    expect(page.locator('#log')).to_contain_text('Game reset')
-    expect(page.locator('#log')).to_contain_text('Reset failed: Test storage failure')
-    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
-    assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery')") is None
-    assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery.1')") is None
+    # Home keeps the running quest and returns to the native menu.
+    page.evaluate("dispatchEvent(new Event('pagehide'))")
+    saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+    page.get_by_role('navigation').get_by_role('link', name='Home', exact=True).click()
+    expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
+    expect(page.locator('#map')).to_be_hidden()
+    menu = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+    assert menu['checkpoint']['title']
+    assert menu['checkpoint']['quest']
+    assert menu['initial'] == saved['initial']
+    assert menu['checkpoint']['objects'] == saved['checkpoint']['objects']
     assert page.evaluate("localStorage.getItem('btr.quest2')") == record['c64']
     assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
-    expect(page.locator('#map')).to_be_hidden()
     page.reload()
-    page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
-    page.wait_for_timeout(300)
-    assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
-    expect(page.locator('#map')).to_be_hidden()
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
+    expect(page.locator('#help-screen')).to_be_hidden()
+    page.wait_for_timeout(150)
+    page.keyboard.press('ArrowDown', delay=120)
+    page.keyboard.press('Space', delay=120)
+    expect(page.locator('#map')).to_be_visible()
+    page.evaluate("dispatchEvent(new Event('pagehide'))")
+    continued = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+    assert continued['checkpoint']['quest']
+    assert not continued['checkpoint']['title']
+    assert continued['checkpoint']['shell']['character'] == menu['checkpoint']['shell']['character']
+    assert continued['checkpoint']['room'] == menu['checkpoint']['room']
+    assert continued['checkpoint']['objects'] == menu['checkpoint']['objects']
     assert not errors, errors
     # The demo schedules a tune on WebAudio; pausing must not cut or restart its notes.
     page.add_init_script('''
@@ -321,4 +319,4 @@ with sync_playwright() as p:
         assert offset >= 30, 'debug log reports the skip offset from the tune start'
     assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, one-click reset/deletion/reload, pause/resume with continuing music, held/tapped keyboard and mouse reward tunes, fresh-press skip and debug offset, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: autosave/resume, Home/menu/reload/Continue, pause/resume with continuing music, held/tapped keyboard and mouse reward tunes, fresh-press skip and debug offset, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')

@@ -19,6 +19,7 @@ export function enterSite() {
   // Same storage key as record.js; do not load the game on the reading pages.
   try { hasAutosave = localStorage.getItem('btr.autosave.v1') !== null; } catch {}
   const page = startPage(location.search, location.hash, hasAutosave);
+  if (page === 'help') return location.replace(`/play${location.search}#help`);
   const hash = pageForHash(location.hash) ? '' : location.hash;
   location.replace(`/${page}${location.search}${hash}`);
 }

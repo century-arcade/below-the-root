@@ -3,7 +3,7 @@ import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, clearAutosave } from './record.js';
+import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale, crtVars } from './fit.js';
@@ -185,6 +185,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const helpScreen = document.getElementById('help-screen');
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
+  const helpButton = document.getElementById('help');
+  const homeButton = document.getElementById('home');
+  const playButton = document.getElementById('play-tab');
+  mapButton.setAttribute('aria-controls', 'map-screen');
+  helpButton.setAttribute('aria-controls', 'help-screen');
+  let currentTab = document.querySelector('#site-header nav [aria-current]');
   const mapGrid = document.getElementById('map-grid');
   const mapViewport = document.getElementById('map-viewport');
   let mapZoom = 1;
@@ -276,7 +282,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function openHelp(startup = false) {
     if (paused) return;
     if (overlay?.screen === helpScreen) return release();
-    openOverlay(helpScreen);
+    openOverlay(helpScreen, helpButton);
     const closeHelp = document.getElementById('close-help');
     closeHelp.textContent = startup ? 'Continue to intro' : 'Close';
     helpScreen.scrollTop = 0;
@@ -289,7 +295,26 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     openOverlay(mapScreen, mapButton);
     centerMap();
   }
-  mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
+  function showView(view) {
+    if (paused) return;
+    release();
+    if (view === 'home') {
+      session.menu();
+      speaker.silence();
+      saveNow();
+    } else if (view === 'map') openMap();
+    else if (view === 'help') openHelp();
+    if (!overlay) canvas.focus({ preventScroll: true });
+  }
+  for (const [button, view] of [[homeButton, 'home'], [playButton, 'play'], [mapButton, 'map'], [helpButton, 'help']]) {
+    button.onclick = e => {
+      if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      showView(view);
+    };
+  }
+  addEventListener('hashchange', () => showView(location.hash.slice(1)));
+
   const developerButton = document.getElementById('developer-mode');
   const debugTools = document.getElementById('debug-tools');
   let debugReady = false;
@@ -297,6 +322,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     debug = on;
     where.hidden = !on;
     debugTools.hidden = !on;
+    document.querySelector('.github-link').hidden = !on;
     developerButton.setAttribute('aria-pressed', String(on));
     if (on && !debugReady) {
       debugReady = true;
@@ -330,20 +356,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       if (!['Escape', 'Tab', '?', 'h', 'H'].includes(e.key)) e.stopPropagation();
     });
   }
-  document.getElementById('reset').onclick = () => {
-    if (paused) return;
-    try { clearAutosave(localStorage); }
-    catch (err) { log(`Reset failed: ${err.message}`); return; }
-    session = new Session(data, stick, { initial: { mode: 'menu' },
-      seed: crypto.getRandomValues(new Uint32Array(1))[0] });
-    state = session.state;
-    autosave.key = null;
-    speaker.silence();
-    release();
-    canvas.focus({ preventScroll: true });
-    fit();
-    log('Game reset');
-  };
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
     if (type === 'pointerdown') seenInput = true;
@@ -418,6 +430,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const mapUnavailable = !!(state.demo || state.title || !state.room);
     if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
     if (overlay?.screen === mapScreen && mapUnavailable) release();
+    const activeTab = overlay?.screen === mapScreen ? mapButton
+      : overlay?.screen === helpScreen ? helpButton : state.title ? homeButton : playButton;
+    if (currentTab !== activeTab) {
+      currentTab?.removeAttribute('aria-current');
+      activeTab.setAttribute('aria-current', 'page');
+      currentTab = activeTab;
+    }
     const showBasics = basicsVisible(state, seenInput) && !overlay;
     if (basics.hidden === showBasics) { basics.hidden = !showBasics; fit(); }
   }
@@ -446,7 +465,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
-  if (freshStart) openHelp(true);
+  if (['home', 'map', 'help'].includes(location.hash.slice(1))) showView(location.hash.slice(1));
+  else if (freshStart) openHelp(true);
   fit();
   draw();
   requestAnimationFrame(frame);
