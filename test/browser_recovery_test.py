@@ -38,7 +38,7 @@ with sync_playwright() as p:
     expect(page.locator('#about')).to_be_visible()
     page.evaluate('([key, value]) => localStorage.setItem(key, value)', [KEY, original])
     page.goto(URL)
-    page.wait_for_selector('#mute[aria-pressed]', state='attached')
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     assert page.locator('#log').text_content() == ''
     assert any('could not be restored' in msg and 'Test quota' in msg for msg in warnings), warnings
@@ -62,7 +62,7 @@ with sync_playwright() as p:
         sessionStorage.setItem('recoverySeeded', 'true');
     }}""")
     page.reload()
-    page.wait_for_selector('#mute[aria-pressed]', state='attached')
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     expect(page.locator('#save-recovery')).to_have_count(0)
     expect(page.locator('#map')).to_be_visible()
@@ -78,7 +78,7 @@ with sync_playwright() as p:
         return JSON.parse(localStorage.getItem('btr.autosave.v1')).frames > frames;
     }""", arg=recovered['frames'])
     page.reload()
-    page.wait_for_selector('#mute[aria-pressed]', state='attached')
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     expect(page.locator('#map')).to_be_visible()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
@@ -91,7 +91,7 @@ with sync_playwright() as p:
     unusable = json.dumps({**record, 'c64': None, 'engine': 'old'})
     page.add_init_script(f'localStorage.setItem({json.dumps(KEY)}, {json.dumps(unusable)})')
     page.goto(URL + '?debug')
-    page.wait_for_selector('#mute[aria-pressed]', state='attached')
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
     assert page.locator('#log').text_content() == ''
     assert any('could not be restored' in msg for msg in warnings), warnings
@@ -109,8 +109,7 @@ with sync_playwright() as p:
     assert not errors, errors
 
     # Reset retires a failed restore and allows the next quest to autosave.
-    page.keyboard.press('o')
-    page.locator('#opt-reset').click()
+    page.locator('#reset').click()
     expect(page.locator('#log')).to_contain_text('Game reset')
     expect(page.locator('#map')).to_be_hidden()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) is None

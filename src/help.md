@@ -6,7 +6,6 @@
 - **P**: Pause (Move to resume)
 - **Tab**: Open/close map
 - **?**: Help
-- **O**: Options
 - **F**: Fullscreen
 - **M**: Mute/Unmute
 - **+/-**: Adjust Volume

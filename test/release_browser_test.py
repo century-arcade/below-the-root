@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             before = page.evaluate("localStorage.getItem('btr.autosave.v1')")
             page.goto(address)
             expect(page).to_have_url(address + '/play')
-            page.wait_for_selector('#mute[aria-pressed]', state='attached')
+            page.wait_for_selector('#volume[aria-valuetext]', state='attached')
             page.evaluate("dispatchEvent(new Event('pagehide'))")
             after = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
             assert after['initial'] == json.loads(before)['initial'], 'saved quest restored'

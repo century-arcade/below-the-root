@@ -106,7 +106,7 @@ with sync_playwright() as p:
         page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
         expect(page.locator('#map')).to_be_visible()
         page.reload()
-        page.wait_for_selector('#mute[aria-pressed]', state='attached')
+        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(help_screen).to_be_hidden()  # a saved quest resumes directly
         expect(page.locator('#screen')).to_be_focused()
         expect(basics).to_be_hidden()

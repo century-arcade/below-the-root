@@ -83,7 +83,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   };
   addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'r' && !e.repeat && !e.metaKey && !e.altKey && !e.ctrlKey
-        && !isEditing(e.target) && !dialog.open) {
+        && !isEditing(e.target) && !dialog.open && !document.getElementById('debug-tools').hidden) {
       report.focus();
       report.click();
       e.preventDefault();

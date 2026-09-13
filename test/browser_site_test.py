@@ -29,7 +29,7 @@ with sync_playwright() as p:
         page.go_back()
         page.locator('.play-button').click()
         expect(page).to_have_url(BASE + '/play')
-        page.wait_for_selector('#mute[aria-pressed]', state='attached')
+        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(page.get_by_role('button', name='Continue to intro')).to_be_focused()
         page.keyboard.press('Enter')
         expect(page.locator('#screen')).to_be_focused()
@@ -40,7 +40,7 @@ with sync_playwright() as p:
         for query in ['?demo', '?room=T1']:
             page.goto(BASE + '/' + query)
             expect(page).to_have_url(BASE + '/play' + query)
-            page.wait_for_selector('#mute[aria-pressed]', state='attached')
+            page.wait_for_selector('#volume[aria-valuetext]', state='attached')
             expect(page.locator('#screen')).to_be_focused()
         page.keyboard.press('ArrowRight')
         page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
@@ -54,7 +54,7 @@ with sync_playwright() as p:
             assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == before
         page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).focus()
         page.keyboard.press('Enter')
-        page.wait_for_selector('#mute[aria-pressed]', state='attached')
+        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(page.locator('#screen')).to_be_focused()
         page.evaluate("dispatchEvent(new Event('pagehide'))")
         restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")

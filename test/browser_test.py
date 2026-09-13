@@ -140,23 +140,60 @@ with sync_playwright() as p:
     page.screenshot(path='/tmp/btr-debug.png')
     page.evaluate('(save) => localStorage.setItem("btr.quest2", save)', record['c64'])
     page.goto(BASE + '/')
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
     assert not page.locator('#debug-tools').is_visible()
     assert not page.locator('#file-issue').is_visible()
     assert page.locator('#where').text_content() == ''
     assert not page.locator('#where').is_visible()
     assert page.locator('#top-controls #fullscreen').count() == 1
-    mute = page.get_by_role('button', name='Mute', exact=True)
-    assert mute.inner_text() == '🔊'
-    assert mute.get_attribute('aria-pressed') == 'false'
-    mute.click()
-    unmute = page.get_by_role('button', name='Unmute', exact=True)
-    assert unmute.inner_text() == '🔇'
-    assert unmute.get_attribute('aria-pressed') == 'true'
+    volume = page.get_by_role('slider', name='Volume', exact=True)
+    expect(volume).to_have_value('50')
+    page.keyboard.press('m')
+    expect(volume).to_have_value('0')
     assert page.evaluate("localStorage.getItem('btr.muted')") == '1'
     page.keyboard.press('m')
-    assert mute.get_attribute('aria-pressed') == 'false'
+    expect(volume).to_have_value('50')
     assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
+    page.keyboard.press('-')
+    expect(volume).to_have_value('40')
+    page.keyboard.press('+')
+    expect(volume).to_have_value('50')
+    page.keyboard.press('m')
+    volume.press('Home')
+    for _ in range(3):
+        volume.press('ArrowRight')
+    assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
+    assert page.evaluate("localStorage.getItem('btr.volume.v2')") == '0.3'
+    volume.press('Home')
+    expect(volume).to_have_value('0')
+    volume.press('ArrowRight')
+    expect(volume).to_have_value('10')
+    volume.press('Home')
+    for _ in range(3):
+        volume.press('ArrowRight')
+    page.reload()
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    expect(volume).to_have_value('30')
+    # Developer mode toggles directly, persists, and gates the report shortcut.
+    developer = page.get_by_role('button', name='Developer mode', exact=True)
+    expect(developer).to_have_attribute('aria-pressed', 'false')
+    developer.click()
+    expect(developer).to_have_attribute('aria-pressed', 'true')
+    expect(page.locator('#file-issue')).to_be_visible()
+    crt = page.get_by_role('button', name='CRT effect', exact=True)
+    crt.click()
+    expect(crt).to_have_attribute('aria-pressed', 'true')
+    assert page.evaluate("localStorage.getItem('btr.crt')") == '1'
+    page.reload()
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    expect(developer).to_have_attribute('aria-pressed', 'true')
+    expect(crt).to_have_attribute('aria-pressed', 'true')
+    crt.click()
+    developer.click()
+    expect(page.locator('#debug-tools')).to_be_hidden()
+    page.keyboard.press('r')
+    expect(page.locator('#issue-dialog')).to_be_hidden()
+    assert page.evaluate("localStorage.getItem('btr.debug')") == '0'
     page.get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement !== null')
     page.keyboard.press('f')
@@ -165,7 +202,6 @@ with sync_playwright() as p:
     page.wait_for_timeout(200)
     assert not errors, errors
     # Reset deletes the quest on one click, preserving slots and options.
-    page.keyboard.press('o')
     saved = page.evaluate("localStorage.getItem('btr.autosave.v1')")
     page.evaluate('''(save) => {
         localStorage.setItem('btr.autosave.v1.recovery', save);
@@ -176,13 +212,12 @@ with sync_playwright() as p:
         window.removeItem = Storage.prototype.removeItem;
         Storage.prototype.removeItem = () => { throw new Error('Test storage failure'); };
     }''')
-    page.locator('#opt-reset').click()
+    page.locator('#reset').click()
     expect(page.locator('#log')).to_contain_text('Reset failed: Test storage failure')
-    expect(page.locator('#options-dialog')).to_be_visible()
     expect(page.locator('#map')).to_be_visible()
     assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == saved
     page.evaluate('() => { Storage.prototype.removeItem = window.removeItem; }')
-    page.locator('#opt-reset').click()
+    page.locator('#reset').click()
     expect(page.locator('#log')).to_contain_text('Game reset')
     expect(page.locator('#log')).to_contain_text('Reset failed: Test storage failure')
     assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
@@ -190,10 +225,9 @@ with sync_playwright() as p:
     assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery.1')") is None
     assert page.evaluate("localStorage.getItem('btr.quest2')") == record['c64']
     assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
-    expect(page.locator('#options-dialog')).to_be_hidden()
     expect(page.locator('#map')).to_be_hidden()
     page.reload()
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
     page.wait_for_timeout(300)
     assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
     expect(page.locator('#map')).to_be_hidden()
@@ -208,7 +242,7 @@ with sync_playwright() as p:
         };
     ''')
     page.goto(BASE + '/?demo=quest')
-    page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+    page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
     page.keyboard.press('-')  # Unlock audio without aborting the demo.
     expect(page.locator('#log')).to_be_hidden()
     page.wait_for_function('window.audioStops > 10')
@@ -225,7 +259,7 @@ with sync_playwright() as p:
     page.add_init_script('crypto.getRandomValues = array => { array.fill(1); return array; };')
     for source in ['keyboard held', 'keyboard tap', 'mouse tap']:
         page.goto(BASE + '/?room=U3&player=3&debug')
-        page.wait_for_function("document.getElementById('mute').hasAttribute('aria-pressed')")
+        page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
         page.evaluate('''async () => {
             window.facingCreature = (await import('./creatures.js')).facingCreature;
             window.readQuest = () => {

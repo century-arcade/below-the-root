@@ -140,18 +140,17 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const speaker = new Speaker(data.music);
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
-  const muteButton = document.getElementById('mute');
-  function syncMuteButton() {
-    muteButton.textContent = speaker.muted ? '🔇' : '🔊';
-    muteButton.setAttribute('aria-label', speaker.muted ? 'Unmute' : 'Mute');
-    muteButton.title = speaker.muted ? 'Unmute' : 'Mute';
-    muteButton.setAttribute('aria-pressed', String(speaker.muted));
+  const volume = document.getElementById('volume');
+  function syncVolume() {
+    const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
+    volume.value = level;
+    volume.setAttribute('aria-valuetext', `${level}%`);
   }
   const persist = (name, value) => storeOption(localStorage, name, value);
   function setMuted(on) {
     speaker.mute(on);
     persist('muted', speaker.muted);
-    syncMuteButton();
+    syncVolume();
   }
   const toggleMute = () => setMuted(!speaker.muted);
   const canFullscreen = !!(game.requestFullscreen && document.exitFullscreen);
@@ -164,12 +163,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     speaker.setVolume(Math.round(level * 1e10) / 1e10);
     if (speaker.muted) setMuted(false);
     persist('volume', speaker.volume);
+    syncVolume();
   }
   function stepVolume(delta) {
     setVolume(speaker.volume + delta);
   }
-  syncMuteButton();
-  muteButton.onclick = e => { toggleMute(); e.currentTarget.blur(); };
+  syncVolume();
+  volume.oninput = () => setVolume(volume.valueAsNumber / 100);
   const fullscreenButton = document.getElementById('fullscreen');
   fullscreenButton.hidden = !canFullscreen;
   fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
@@ -188,8 +188,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const mapButton = document.getElementById('map');
   const mapGrid = document.getElementById('map-grid');
   const mapViewport = document.getElementById('map-viewport');
-  const optionsDialog = document.getElementById('options-dialog');
-  const optionsButton = document.getElementById('options');
   let mapZoom = 1;
   const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
     ?.scrollIntoView({ block: 'center', inline: 'center' });
@@ -267,7 +265,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       overlay.button.setAttribute('aria-expanded', 'false');
       overlay = null;
     }
-    if (optionsDialog.open) optionsDialog.close();
     dropInput(); held = false;
   };
   function openOverlay(screen, button) {
@@ -294,14 +291,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     centerMap();
   }
   mapButton.onclick = e => { overlay?.screen === mapScreen ? release() : openMap(); e.currentTarget.blur(); };
-  const opt = Object.fromEntries(['volume', 'volume-out', 'crt', 'classic', 'debug', 'reset']
-    .map(name => [name, document.getElementById(`opt-${name}`)]));
+  const developerButton = document.getElementById('developer-mode');
   const debugTools = document.getElementById('debug-tools');
   let debugReady = false;
   function setDebug(on) {
     debug = on;
     where.hidden = !on;
     debugTools.hidden = !on;
+    developerButton.setAttribute('aria-pressed', String(on));
     if (on && !debugReady) {
       debugReady = true;
       setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, log,
@@ -313,31 +310,19 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     options.crt = on;
     crtBox.hidden = !on;
     canvas.parentElement.classList.toggle('crt', on);
+    document.getElementById('toggle-crt').setAttribute('aria-pressed', String(on));
   }
-  function syncOptions() {
-    const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
-    opt.volume.value = level;
-    opt['volume-out'].value = `${level}%`;
-    opt.crt.checked = options.crt;
-    opt.classic.checked = options.classic;
-    opt.debug.checked = debug;
-  }
-  function openOptions() {
+  document.getElementById('toggle-crt').onclick = e => {
+    setCrt(!options.crt);
+    persist('crt', options.crt);
+    e.currentTarget.blur();
+  };
+  developerButton.onclick = e => {
     if (paused) return;
-    if (optionsDialog.open) return release();
-    if (overlay) release();
-    hold();
-    syncOptions();
-    optionsDialog.show();
-    opt.volume.focus();
-  }
-  opt.volume.oninput = () => { setVolume(opt.volume.valueAsNumber / 100); syncOptions(); };
-  opt.crt.onchange = () => { setCrt(opt.crt.checked); persist('crt', options.crt); };
-  opt.classic.onchange = () => { options.classic = opt.classic.checked; persist('classic', options.classic); };
-  opt.debug.onchange = () => { setDebug(opt.debug.checked); persist('debug', debug); };
-  optionsDialog.addEventListener('keydown', e => { if (e.key === 'Escape') { release(); e.preventDefault(); } });
-  optionsDialog.addEventListener('close', () => { if (held) release(); canvas.focus({ preventScroll: true }); });
-  optionsButton.onclick = e => { openOptions(); e.currentTarget.blur(); };
+    setDebug(!debug);
+    persist('debug', debug);
+    e.currentTarget.blur();
+  };
   document.getElementById('close-map').onclick = release;
   helpButton.onclick = e => { openHelp(); e.currentTarget.blur(); };
   document.getElementById('close-help').onclick = release;
@@ -347,7 +332,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       if (!['Escape', 'Tab', '?', 'h', 'H'].includes(e.key)) e.stopPropagation();
     });
   }
-  opt.reset.onclick = () => {
+  document.getElementById('reset').onclick = () => {
+    if (paused) return;
     try { clearAutosave(localStorage); }
     catch (err) { log(`Reset failed: ${err.message}`); return; }
     session = new Session(data, stick, { initial: { mode: 'menu' },
@@ -356,6 +342,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     autosave.key = null;
     speaker.silence();
     release();
+    canvas.focus({ preventScroll: true });
     fit();
     log('Game reset');
   };
@@ -383,7 +370,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       return;
     }
     if (e.key === '?' || (e.key.toLowerCase() === 'h' && !e.shiftKey)) { openHelp(); e.preventDefault(); return; }
-    if (e.key.toLowerCase() === 'o' && !e.shiftKey) { openOptions(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'f' && !e.shiftKey) { toggleFullscreen(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'm') { toggleMute(); e.preventDefault(); return; }
     if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
@@ -417,7 +403,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { saveNow(); hold(); } else { dropInput(); }
   });
-  if (debug) setDebug(true);
+  setDebug(debug);
   setCrt(options.crt);
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
