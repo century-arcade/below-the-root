@@ -36,7 +36,7 @@ art or music. Perhaps you just want to experience a piece of computer gaming his
 
 Whoever you are, please enjoy this restoration of a beloved game from my childhood.
 
-[Saul Pwanson]() (curator of the [Century Arcade]())
+[Saul Pwanson](https://saul.pw) (curator of the [Century Arcade](https://github.com/century-arcade))
 
 </div>
 <div class="ad-action">
