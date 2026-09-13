@@ -402,7 +402,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         returnSession ||= session;
         session = restored; state = session.state;
         replayControls.hidden = false;
-        log(`Replaying ${file.name}. Space advances to the next room change.`);
+        log(`Replaying ${file.name} from the beginning at recorded speed. Space skips to the next room.`);
       } else {
         if (session.playback) stopReplay();
         session.load(bytes);
@@ -459,7 +459,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const duration = steps ? elapsedAcc / steps : STEP_MS;
     if (steps) elapsedAcc = 0;
     let budget = 2000;
-    while (running && budget-- > 0 && (acc >= STEP_MS || seekRoom != null)) {
+    while (running && budget-- > 0) {
+      const delay = session.playback ? session.playbackDelay : STEP_MS;
+      if (seekRoom == null && acc < delay) break;
       session.skippable = !options.classic;
       session.onSkip = offset => { if (debug) log(`Tune skipped after ${offset} frames`); };
       const previousRoom = state.room;
@@ -474,7 +476,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       autosave.save(session);
       if (seekRoom != null) state.events.length = 0;
       else speaker.frame(state);
-      acc = Math.max(0, acc - STEP_MS);
+      acc = Math.max(0, acc - delay);
       if (session.playbackDone) {
         seekRoom = null; acc = 0;
         replayStatus.textContent = session.playbackError ? 'Replay failed' : 'Replay finished';

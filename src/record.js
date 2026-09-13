@@ -219,6 +219,16 @@ export class Session {
     return session;
   }
 
+  get playbackDelay() {
+    if (this.frame === this.record.frames) return 0;
+    let duration = this.duration;
+    for (let i = this.durationIndex; this.record.durations?.[i]?.[0] === this.frame; i++) {
+      duration = this.record.durations[i][1];
+    }
+    // Keep even zero-duration frames visible; old journals play at 60 Hz.
+    return Math.max(1000 / 60, duration / 1000);
+  }
+
   nextRoom() {
     if (!this.playback) return;
     const room = this.state.room;
