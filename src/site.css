@@ -13,7 +13,7 @@ a { color: #c7f5ae; }
 #site-header nav a[aria-current], #site-header nav a:not([aria-current]):hover { color: #0b130d; background-color: #f2ead8; }
 #site-header .github-link { display: grid; place-items: center; flex-shrink: 0; padding: 8px; }
 #developer-mode { flex-shrink: 0; }
-#top-controls { flex: 0 0 auto; }
+#top-controls { flex: 0 0 auto; margin-inline: auto; }
 #top-controls button { flex-shrink: 0; }
 #top-controls, .control-group, #debug-tools { display: flex; align-items: center; gap: 4px; }
 #top-controls { padding: 4px 0; }
