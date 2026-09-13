@@ -6,14 +6,14 @@ html, body { margin: 0; min-height: 100%; background: #0b130d; color: #9ad284; f
 body { min-height: 100dvh; box-sizing: border-box; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 [hidden] { display: none !important; }
 a { color: #c7f5ae; }
-#site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: grid; grid-template-columns: auto minmax(128px, 1fr) auto auto; grid-template-areas: "nav controls tools developer"; overflow-x: auto; align-items: center; column-gap: 8px; padding: 8px 12px; border-bottom: 1px solid #354537; }
-#site-header nav { grid-area: nav; display: flex; align-self: stretch; white-space: nowrap; font: var(--game-font-size)/1.5 'Green-Sky', monospace; text-transform: uppercase; }
-#site-header nav a { display: grid; place-items: center; padding: 12px; text-decoration: none; border-bottom: 2px solid transparent; }
-#site-header nav a[aria-current] { color: #f2ead8; border-color: #f2ead8; }
+#site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #354537; }
+#navigation-controls { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; overflow-x: auto; }
+#site-header nav { display: flex; flex-shrink: 0; align-self: stretch; white-space: nowrap; font: var(--game-font-size)/1.5 'Green-Sky', monospace; text-transform: uppercase; }
+#site-header nav a { display: grid; place-items: center; padding: 12px; text-decoration: none; transition: color 150ms ease, background-color 150ms ease; }
+#site-header nav a[aria-current], #site-header nav a:not([aria-current]):hover { color: #0b130d; background-color: #f2ead8; }
 #site-header .github-link { display: grid; place-items: center; flex-shrink: 0; padding: 8px; }
-#developer-mode { grid-area: developer; }
-#debug-tools { grid-area: tools; }
-#top-controls { grid-area: controls; min-width: 0; }
+#developer-mode { flex-shrink: 0; }
+#top-controls { flex: 1 0 128px; }
 #top-controls button { flex-shrink: 0; }
 .reading-page [id] { scroll-margin-top: 120px; }
 #play { max-width: 100%; }
