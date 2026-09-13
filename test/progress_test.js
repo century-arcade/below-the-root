@@ -28,11 +28,8 @@ for (const ms of [20, 20, 80, 1000, 10]) timed.step(ms);
 const restored = Session.replay(data, live, timed.snapshot());
 assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
 const watched = Session.watch(data, live, timed.snapshot());
-for (const delay of [20, 20, 80, 1000, 1000 / 60]) {
-  assert.equal(watched.playbackDelay, delay, 'playback schedules the upcoming recorded frame');
-  assert.equal(watched.playbackDelay, delay, 'reading the delay does not consume timing entries');
-  watched.step();
-}
+assert.equal(watched.playbackDelay, 1000 / 60, 'recorded duration does not delay visible playback');
+for (let i = 0; i < timed.frame; i++) watched.step();
 assert.equal(watched.playbackDelay, 0, 'EOF verification needs no extra delay');
 watched.step();
 assert.ok(watched.playbackDone);

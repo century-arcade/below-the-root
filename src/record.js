@@ -3,7 +3,7 @@
 import { newState, startQuest, startDemo, endDemo, tick } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
-import { IDLE, pressEdge } from './input.js';
+import { IDLE, isIdle, pressEdge } from './input.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
 
@@ -221,12 +221,14 @@ export class Session {
 
   get playbackDelay() {
     if (this.frame === this.record.frames) return 0;
-    let duration = this.duration;
-    for (let i = this.durationIndex; this.record.durations?.[i]?.[0] === this.frame; i++) {
-      duration = this.record.durations[i][1];
-    }
-    // Keep even zero-duration frames visible; old journals play at 60 Hz.
-    return Math.max(1000 / 60, duration / 1000);
+    const p = this.state.player;
+    const nextInput = this.record.inputs[this.readIndex];
+    // Replay the simulation unchanged, but spend no viewing time on released input.
+    // Finish ongoing movement (including falling) before skipping an idle gap.
+    const idle = this.frame > 0 && isIdle(this.lastJoy) && !this.state.demo
+      && (!nextInput || nextInput[0] > this.frame)
+      && !p.stride && !p.leaping && !p.gliding && !p.fallen && !p.knockdown && !p.pose;
+    return idle ? 0 : 1000 / 60;
   }
 
   nextRoom() {

@@ -94,13 +94,16 @@ with sync_playwright() as p:
     ''')
     page.goto(URL + '/play.html?player=0&debug')
     page.wait_for_function('document.getElementById("record-file").onchange !== null', polling=100)
-    timed = page.evaluate('''async () => {
+    recordings = page.evaluate('''async () => {
         const { loadData } = await import('/data.js');
         const { Session } = await import('/record.js');
         const { exportSave } = await import('/save.js');
         const { IDLE } = await import('/input.js');
         const data = await loadData(path => fetch('/' + path).then(r => r.json()));
-        const live = { read: () => IDLE };
+        const watch = Session.watch;
+        Session.watch = (...args) => window.watchedReplay = watch(...args);
+        const down = { dx: 0, dy: 1, fire: false };
+        const live = { joy: down, read() { return this.joy; } };
         const room = code => new Session(data, live, {
             initial: { mode: 'quest', room: data.roomByCode.get(code).room }, seed: 1,
         });
@@ -111,39 +114,59 @@ with sync_playwright() as p:
             session.step(i < 60 ? 50 : i < 120 ? 100 : 20);
             session.state.events.length = 0;
         }
-        return session.snapshot();
+        const idle = new Session(data, live, { initial: { mode: 'quest' }, seed: 1 });
+        for (let i = 0; i < 1920; i++) {
+            live.joy = i >= 60 && i < 1860 ? IDLE : down;
+            idle.step(500);
+            idle.state.events.length = 0;
+        }
+        return { timed: session.snapshot(), idle: idle.snapshot() };
     }''')
+    timed = recordings['timed']
     page.locator('#record-file').set_input_files({
         'name': 'timed.json', 'mimeType': 'application/json', 'buffer': json.dumps(timed).encode(),
     })
     expect(page.locator('#replay-controls')).to_be_visible()
 
     def current_frame():
-        with page.expect_download() as result:
-            page.locator('#download-record').evaluate('(button) => button.click()')
-        return int(result.value.suggested_filename.removeprefix('btr-playthrough-').removesuffix('.json'))
+        return page.evaluate('watchedReplay.frame')
 
     assert current_frame() == 0, 'upload shows the beginning before advancing'
-    page.evaluate('advancePlayback(1000)')
-    assert current_frame() == 20, 'one second plays one second of recorded moves'
+    page.evaluate('advancePlayback(510)')
+    first_frame = current_frame()
+    assert 30 <= first_frame < 40, f'movement plays at 60 Hz regardless of recorded duration: {first_frame}'
     expect(page.locator('#replay-status')).to_have_text('Replaying: 16')
-    page.evaluate('advancePlayback(2100)')
-    assert current_frame() == 61, 'playback crosses rooms automatically and uses the new timing'
+    page.evaluate('advancePlayback(600)')
+    assert current_frame() == first_frame + 36, 'playback crosses rooms automatically without recorded delays'
     expect(page.locator('#replay-status')).to_have_text('Replaying: 26')
     page.keyboard.press('Space')
     page.evaluate('advancePlayback(10)')
     assert current_frame() == 121, 'Space skips exactly one room transition'
     expect(page.locator('#replay-status')).to_have_text('Replaying: 25')
     page.evaluate('advancePlayback(200)')
-    assert current_frame() == 131, 'normal playback continues immediately after seeking'
+    assert 132 <= current_frame() <= 133, 'continuous playback resumes immediately after seeking'
+    before_pause = current_frame()
     page.keyboard.press('Escape')
     page.evaluate('advancePlayback(1000)')
-    assert current_frame() == 131, 'pause does not consume replay time'
+    assert current_frame() == before_pause, 'pause does not consume replay time'
     page.keyboard.press('Escape')
     page.evaluate('advancePlayback(980)')
     assert current_frame() == timed['frames']
     expect(page.locator('#replay-status')).to_have_text('Replay finished')
     assert snapshot() == timed, 'timed playback preserves and verifies the original journal'
+
+    page.locator('#record-file').set_input_files({
+        'name': 'idle.json', 'mimeType': 'application/json', 'buffer': json.dumps(recordings['idle']).encode(),
+    })
+    page.wait_for_function('document.activeElement.id === "screen"', polling=100)
+    assert current_frame() == 0
+    page.evaluate('advancePlayback(1500)')
+    after_idle = current_frame()
+    assert 1860 < after_idle < 1920, f'the next input plays without waiting through 30 idle seconds: {after_idle}'
+    expect(page.locator('#replay-status')).to_contain_text('Replaying:')
+    page.evaluate('advancePlayback(1000)')
+    expect(page.locator('#replay-status')).to_have_text('Replay finished')
+    assert snapshot() == recordings['idle'], 'skipping idle time preserves deterministic playback'
     assert not errors, errors
     browser.close()
-print('browser_replay_test: upload, recorded speed, automatic playback, room seeking, EOF, verification, pause timing and live quest preservation passed')
+print('browser_replay_test: upload, continuous playback, idle skipping, room seeking, EOF, verification, pause timing and live quest preservation passed')

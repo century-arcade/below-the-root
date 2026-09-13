@@ -14,8 +14,8 @@ Leaving the tab or window pauses too. Music continues while game time is paused.
 Mouse/touch input remains hold-to-steer, tap-for-button, and double-tap
 to walk. The port omits DISK STORAGE; the autosave is the save.
 Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
-JSON uploads play automatically from the beginning at recorded speed (60 Hz
-for older journals), without pausing between moves or rooms. Space skips to
+JSON uploads play continuously from the beginning, skipping recorded delays
+and idle gaps while showing movement at 60 Hz. Space skips to
 the next room change, then playback continues at normal speed;
 the replay stops and verifies the checkpoint at the file's end. Return to game
 restores the live quest, whose autosave is untouched while watching.

@@ -3,7 +3,7 @@ import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave } from './record.js';
+import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale, crtVars } from './fit.js';
@@ -402,7 +402,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         returnSession ||= session;
         session = restored; state = session.state;
         replayControls.hidden = false;
-        log(`Replaying ${file.name} from the beginning at recorded speed. Space skips to the next room.`);
+        log(`Replaying ${file.name} from the beginning, skipping idle time. Space skips to the next room.`);
       } else {
         if (session.playback) stopReplay();
         session.load(bytes);
@@ -462,6 +462,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     while (running && budget-- > 0) {
       const delay = session.playback ? session.playbackDelay : STEP_MS;
       if (seekRoom == null && acc < delay) break;
+      const idleScreen = session.playback && delay === 0 && seekRoom == null ? screenKey(state) : null;
       session.skippable = !options.classic;
       session.onSkip = offset => { if (debug) log(`Tune skipped after ${offset} frames`); };
       const previousRoom = state.room;
@@ -483,6 +484,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         break;
       }
       if (seekRoom != null && roomKey() !== seekRoom) { seekRoom = null; acc = 0; break; }
+      // Render screen changes encountered during an idle gap before advancing again.
+      if (idleScreen != null && screenKey(state) !== idleScreen) { acc = 0; break; }
     }
     if (session.playback && !session.playbackDone) replayStatus.textContent = `Replaying: ${state.room?.code || 'menu'}`;
     draw();
