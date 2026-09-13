@@ -5,6 +5,7 @@ import { render } from '../src/video.js';
 import { Session } from '../src/record.js';
 import { startQuest } from '../src/game.js';
 import { openMenu } from '../src/shell.js';
+import { enterRoom, leaveByEdge } from '../src/world.js';
 
 const data = await loadTestData();
 const defaults = visitedRooms([], data);
@@ -81,8 +82,37 @@ assert.equal(mapLocation(data, [entry('0C'), entry('01')], at('01')), '0C');
 assert.equal(mapLocation(data, [entry('M5')], at('P2')), 'P2');
 assert.equal(mapLocation(data, [entry('P2'), entry('T1', { questStart: true })], at('T1')), 'M5',
   'starting indoors uses its exit, never an outdoor visit from the previous quest');
-assert.equal(mapLocation(data, [entry('M5'), entry('02', { blank: true }), entry('T1')], at('T1')), 'M5',
-  'passing through open air over an interior does not mark the interior');
+assert.equal(mapLocation(data, [entry('M5'), entry('02', { blank: true }), entry('T1')], at('T1')), '02',
+  'being carried indoors from open air preserves that exterior location');
+
+// Crossing empty sky must move the marker as well as reveal the destination,
+// including sky in a grid slot also used by an unrelated interior.
+for (const [origin, route] of [
+  ['49', [['south', '4A', true], ['east', '5A', true], ['south', '5B', false]]],
+  ['12', [['west', '02', true]]],
+]) {
+  const flight = new Session(data, { read: () => J.idle },
+    { initial: { mode: 'quest', room: at(origin).room } });
+  flight.state.player.indoors = false;
+  for (const [direction, code, blank] of route) {
+    assert.ok(leaveByEdge(flight.state, direction));
+    flight.noteRoom();
+    assert.equal(flight.state.room.code, code);
+    // The live room remains authoritative even before its visit is recorded.
+    assert.equal(mapLocation(data, [], flight.state.room), code);
+    const location = mapLocation(data, flight.record.path, flight.state.room);
+    const markers = mapCells(data, visitedRooms(flight.record.path, data), location,
+      visitedEmptyRooms(flight.record.path)).flat().filter(c => c?.current);
+    assert.equal(markers.length, 1, `exactly one location marker after entering ${code}`);
+    assert.equal(markers[0].code, code, `marker follows the player from ${origin} to ${code}`);
+    assert.equal(!!markers[0].empty, blank, 'empty sky never reveals a parked interior');
+  }
+  const exterior = flight.state.room.code;
+  enterRoom(flight.state, at('T1'), 22, 9);
+  flight.noteRoom();
+  assert.equal(mapLocation(data, flight.record.path, flight.state.room), exterior,
+    'returning indoors retains the most recent exterior, including empty sky');
+}
 
 const live = { joy: J.idle, read() { return this.joy; } };
 const session = new Session(data, live,

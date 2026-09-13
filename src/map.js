@@ -80,15 +80,15 @@ function collectVisits(path, defaults, blank) {
 }
 
 // Interiors occupy unrelated grid slots. Keep the last actual exterior,
-// including cavern passages, across doors, teleports and being carried home.
+// including empty sky and cavern passages, across doors, teleports and being carried home.
 export function mapLocation(data, path, room) {
   let last = null;
   for (const entry of path) {
     if (entry.quest === false || entry.questStart) last = null;
-    if (entry.quest && !entry.title && !entry.blank
-        && data.roomByCode.get(entry.room)?.outdoor_bit) last = entry.room;
+    if (entry.quest && !entry.title
+        && (entry.blank || data.roomByCode.get(entry.room)?.outdoor_bit)) last = entry.room;
   }
-  if (room.outdoor_bit && !room.blank) return room.code;
+  if (room.blank || room.outdoor_bit) return room.code;
   if (last) return last;
   // A new quest starts inside a nid, before there is any outdoor history.
   for (const door of room.doors) {
@@ -108,7 +108,7 @@ export function mapCells(data, visited, current, empty = new Set()) {
     const code = data.map.codes[y][x] ?? (x.toString(32) + y.toString(32)).toUpperCase();
     // Empty exterior space can share a grid slot with a hidden interior.
     if (empty.has(code) && (room == null || !data.roomById.get(room).outdoor_bit)) {
-      return { code, empty: true, kind: 'empty', visited: true, current: false, signs: [] };
+      return { code, empty: true, kind: 'empty', visited: true, current: code === current, signs: [] };
     }
     if (room == null) return null;
     if (!data.roomById.get(room).outdoor_bit || !visited.has(code)) return null;
