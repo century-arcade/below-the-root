@@ -17,6 +17,7 @@ if (!file) {
 try {
   const data = await loadData(async p => JSON.parse(readFileSync(new URL('../' + (p.startsWith('data/') ? 'docs/spec/' + p : p), import.meta.url))));
   const record = JSON.parse(readFileSync(file, 'utf8'));
+  if (record.recoveredFrom) console.log('This file includes earlier recording segments in recoveredFrom. Verifying the segment after checkpoint recovery only.');
   const live = { read: () => IDLE };
   let session = Session.replay(data, live, record);
   const cutIndex = args.indexOf('--cut');

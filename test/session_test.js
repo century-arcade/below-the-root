@@ -12,7 +12,7 @@ import { neighbour, enterRoom, leaveByEdge } from '../src/world.js';
 import { IDLE, Keyboard, Gamepad } from '../src/input.js';
 import { facingCreature } from '../src/creatures.js';
 import { TICKS_PER_HOUR } from '../src/clock.js';
-import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, clearAutosave, validateRecord } from '../src/record.js';
+import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, restoreRecordingHistory, clearAutosave, validateRecord } from '../src/record.js';
 
 const data = await loadTestData();
 const fresh = () => { const s = newState(data, { read: () => IDLE }); startQuest(s, data.characters[0]); return s; };
@@ -89,12 +89,50 @@ assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original);
 const expected = fresh(); importSave(expected, Uint8Array.from(atob(recorded.c64), c => c.charCodeAt(0)));
 assert.deepEqual(exportSave(recovered.state), exportSave(expected), 'quest progress comes from the saved checkpoint');
 const recoveredRecord = JSON.parse(recoveryStore.get(AUTOSAVE_KEY));
+assert.deepEqual(recoveredRecord.recoveredFrom, JSON.parse(original), 'recovery embeds the entire original journal');
 const recoveredReload = Session.replay(freshData, values, recoveredRecord);
+assert.deepEqual(recoveredReload.snapshot().recoveredFrom, JSON.parse(original), 'reload preserves earlier turns');
+assert.deepEqual(Session.watch(freshData, values, recoveredRecord).snapshot(), recoveredRecord,
+  'downloads during playback include earlier segments');
 assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state), 'the recovered save reloads exactly');
 values.joy = IDLE;
 for (let i = 0; i < 100; i++) { recovered.step(); recoveredReload.step(); }
 assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state));
 assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(recovered.snapshot())).state), checkpoint(recovered.state));
+{
+  const nextOriginal = JSON.stringify({ ...recovered.snapshot(), engine: 'future-engine' });
+  const chainStore = new Map();
+  const chainStorage = { getItem: key => chainStore.get(key) ?? null, setItem: (key, value) => chainStore.set(key, value) };
+  const next = recoverAutosave(freshData, values, nextOriginal, chainStorage);
+  assert.deepEqual(next.snapshot().recoveredFrom, JSON.parse(nextOriginal), 'repeated recovery keeps every preceding segment');
+  const resumed = Session.replay(freshData, values, copy(next.snapshot()));
+  resumed.step();
+  assert.deepEqual(resumed.snapshot().recoveredFrom.recoveredFrom, JSON.parse(original));
+}
+{
+  const oldDownload = copy(recoveredRecord);
+  delete oldDownload.recoveredFrom;
+  const migrated = Session.replay(freshData, values, oldDownload);
+  restoreRecordingHistory(migrated, storage);
+  assert.deepEqual(migrated.snapshot().recoveredFrom, JSON.parse(original), 'legacy recovery reattaches the matching backup');
+  const before = copy(migrated.snapshot());
+  restoreRecordingHistory(migrated, storage);
+  assert.deepEqual(migrated.snapshot(), before, 'reattaching history is idempotent');
+  const unrelated = new Session(freshData, values, { initial: { mode: 'menu' } });
+  unrelated.load(bytes);
+  restoreRecordingHistory(unrelated, storage);
+  assert.equal(unrelated.snapshot().recoveredFrom, undefined, 'unrelated checkpoints do not acquire another quest history');
+  const oldBackups = new Map([
+    [`${AUTOSAVE_KEY}.recovery`, original],
+    [`${AUTOSAVE_KEY}.recovery.1`, 'invalid JSON'],
+    [`${AUTOSAVE_KEY}.recovery.2`, JSON.stringify(oldDownload)],
+  ]);
+  const latest = new Session(freshData, values, { initial: { mode: 'menu' }, seed: 456 });
+  latest.load(Uint8Array.from(atob(oldDownload.c64), c => c.charCodeAt(0)));
+  restoreRecordingHistory(latest, { getItem: key => oldBackups.get(key) ?? null });
+  assert.deepEqual(latest.snapshot().recoveredFrom.recoveredFrom, JSON.parse(original),
+    'migration follows multiple checkpoint recoveries past unreadable backups');
+}
 recoverAutosave(freshData, values, JSON.stringify(broken), storage);
 assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original, 'later recovery keeps earlier backups');
 assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery.1`), JSON.stringify(broken));
@@ -127,7 +165,8 @@ assert.equal(resetStore.size, 1, 'reset also works without an autosave');
 
 const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
 for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);
-assert.equal(chatty.record.gestures.length, 500, 'gestures are capped');
+assert.equal(chatty.record.gestures.length, 600, 'all gestures are retained');
+assert.deepEqual(chatty.record.gestures[0], [0, 'keydown', 'k0'], 'the earliest gestures survive');
 assert.deepEqual(chatty.record.gestures.at(-1), [0, 'keydown', 'k599'], 'the newest gestures are the ones kept');
 
 const store = new Map(); let writes = 0;
@@ -174,7 +213,7 @@ try {
   assert.equal(cut.checkpoint.stats.milliseconds, 2000, 'route cuts preserve the durations of surviving frames');
   execFileSync(process.execPath, [tool, timedCut]);
 } finally { rmSync(dir, { recursive: true }); }
-console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, gesture cap, autosave and failure handling passed');
+console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, full history, autosave and failure handling passed');
 
 {
   const session = new Session(data, { read: () => IDLE, pace: 0 }, { initial: { mode: 'quest', character: 0 }, seed: 3 });

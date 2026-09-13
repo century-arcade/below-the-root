@@ -11,7 +11,6 @@ export const RECORD_VERSION = 1;
 export const ENGINE_VERSION = 'btr-session-4';
 export const AUTOSAVE_KEY = 'btr.autosave.v1';
 const MAX_FRAMES = 60 * 60 * 60 * 24;
-const MAX_GESTURES = 500;
 const copy = value => JSON.parse(JSON.stringify(value));
 const same = (a, b) => a.dx === b.dx && a.dy === b.dy && a.fire === b.fire;
 
@@ -203,7 +202,6 @@ export class Session {
   gesture(kind, ...details) {
     // UI events: diagnostic annotations only; replay uses the sampled joystick
     this.record.gestures.push([this.frame, kind, ...details]);
-    if (this.record.gestures.length > MAX_GESTURES) this.record.gestures.splice(0, this.record.gestures.length - MAX_GESTURES);
   }
 
   snapshot() {
@@ -338,6 +336,29 @@ export function clearAutosave(storage) {
   }
 }
 
+// Older recovery code left the preceding journal only in localStorage. Match
+// its final checkpoint to the new journal's initial load, newest backup first.
+export function restoreRecordingHistory(session, storage) {
+  if (session.record.recoveredFrom) return;
+  const backups = [];
+  for (let n = 0; ; n++) {
+    const text = storage.getItem(`${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`);
+    if (text == null) break;
+    try { backups.push(JSON.parse(text)); } catch {}
+  }
+  let segment = session.record;
+  for (const previous of backups.reverse()) {
+    const start = segment.actions?.[0];
+    if (segment.initial?.mode !== 'menu' || start?.frame !== 0 || start.type !== 'load'
+        || previous?.format !== 'below-the-root-record' || previous.c64 !== start.save
+        || (previous.created === segment.created && previous.seed === segment.seed
+          && previous.frames === segment.frames)) continue;
+    segment.recoveredFrom = previous;
+    segment = previous;
+    if (segment.recoveredFrom) break;
+  }
+}
+
 export function recoverAutosave(data, live, original, storage, options = {}) {
   const record = JSON.parse(original);
   // interoperable save: independent of the journal's engine version
@@ -348,6 +369,9 @@ export function recoverAutosave(data, live, original, storage, options = {}) {
   const session = new Session(data, live, { ...options, initial: { mode: 'menu' }, record: null });
   session.load(fromBase64(record.c64));
   if (!session.state.quest) throw new Error('This checkpoint has no active quest.');
+  // The checkpoint starts a replayable segment, never a replacement history.
+  restoreRecordingHistory({ record }, storage);
+  session.record.recoveredFrom = record;
   const replacement = JSON.stringify(session.snapshot());
   preserveAutosave(storage, original);
   storage.setItem(AUTOSAVE_KEY, replacement);

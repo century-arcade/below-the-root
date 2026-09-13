@@ -43,6 +43,10 @@ restores the live quest, whose autosave is untouched while watching.
 - Won/timeout outcomes, retained even after the shell returns to its menu.
 - A final state checkpoint and, while a quest is active, a base64 C64
   QUEST image for interoperability.
+- After checkpoint recovery, `recoveredFrom` contains the complete preceding
+  recording, including any earlier recovery segments. Each segment retains its
+  own engine, seed, frame numbers, inputs, and checkpoint. UI gestures are
+  retained for the entire session too.
 
 This is intentionally separate from the original 1410-byte C64 file.
 A raw C64 file cannot store a running JavaScript generator, input history,
@@ -55,8 +59,13 @@ Keep `ENGINE_VERSION` in sync when changing simulation rules or data in a
 way that breaks existing recordings. An unsupported or diverging autosave
 is recovered automatically at startup from its C64 checkpoint. The game
 backs up the original under `btr.autosave.v1.recovery` keys and starts a
-new recording from the recovered quest silently. Later
-recoveries retain earlier backups. An action in progress may restart;
+new segment from the recovered quest, with a message in the game log.
+The preceding recording is embedded in autosaves and downloads rather than
+discarded. Older recovery backups still in this browser are reattached when
+their final C64 checkpoint matches a segment's initial load. Missing backups
+cannot be reconstructed from a checkpoint alone. Later recoveries retain the
+whole chain. Playback verifies the current segment; preceding segments may
+need their original engine to replay. An action in progress may restart;
 transient animation, creature timing, tile edits, and the visited-room
 map are not restored by the C64 checkpoint.
 

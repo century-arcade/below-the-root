@@ -3,7 +3,7 @@ import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, screenKey } from './record.js';
+import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, restoreRecordingHistory, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { fitScale, crtVars } from './fit.js';
@@ -120,7 +120,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     catch (err) {
       let reason = err;
       if (typeof stored?.c64 === 'string') {
-        try { session = recoverAutosave(data, stick, existing, localStorage, { seed }); }
+        try {
+          session = recoverAutosave(data, stick, existing, localStorage, { seed });
+          log('Saved game resumed from a checkpoint because its recording could not replay. Earlier turns are preserved in recording downloads.');
+        }
         catch (recoveryErr) { reason = recoveryErr; }
       }
       if (!session) {
@@ -132,6 +135,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   const freshStart = !session && initial.mode === 'cold';
   session ||= new Session(data, stick, { initial, seed });
+  try { restoreRecordingHistory(session, localStorage); }
+  catch (err) { log(`Could not retrieve earlier recording history: ${err.message}`); }
   let state = session.state;
   let returnSession = null;
   let seekRoom = null;
@@ -403,6 +408,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         session = restored; state = session.state;
         replayControls.hidden = false;
         log(`Replaying ${file.name} from the beginning, skipping idle time. Space skips to the next room.`);
+        if (restored.record.recoveredFrom) log('Playback starts at the recovered checkpoint. Earlier recording segments are included in downloads but may require an older game version to replay.');
       } else {
         if (session.playback) stopReplay();
         session.load(bytes);

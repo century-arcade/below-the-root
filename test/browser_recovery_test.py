@@ -55,15 +55,15 @@ with sync_playwright() as p:
     expect(page.locator('#map')).to_be_visible()
     page.wait_for_function("(original) => localStorage.getItem('btr.autosave.v1') !== original", arg=original)
 
-    # Recovery on cold startup is silent and keeps the original before replacing it.
+    # Recovery keeps the original in both browser storage and downloaded history.
     page.evaluate("sessionStorage.setItem('failBackup', 'false')")
     page.add_init_script(f"""if (!sessionStorage.getItem('recoverySeeded')) {{
         localStorage.setItem({json.dumps(KEY)}, {json.dumps(original)});
         sessionStorage.setItem('recoverySeeded', 'true');
     }}""")
-    page.reload()
+    page.goto(URL + '?debug')
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-    expect(page.locator('#log')).to_be_hidden()
+    expect(page.locator('#log')).to_contain_text('Earlier turns are preserved')
     expect(page.locator('#save-recovery')).to_have_count(0)
     expect(page.locator('#map')).to_be_visible()
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
@@ -72,11 +72,23 @@ with sync_playwright() as p:
     assert recovered['checkpoint']['room'] == record['checkpoint']['room']
     assert recovered['checkpoint']['quest']
     assert recovered['checkpoint']['objects'] == record['checkpoint']['objects']
+    assert recovered['recoveredFrom'] == record
+    with page.expect_download() as download:
+        page.locator('#download-record').click()
+    downloaded = json.loads(open(download.value.path()).read())
+    assert downloaded['recoveredFrom'] == record, 'download includes the original inputs, actions and checkpoint'
     # Flush snapshots without sending input: recovered play advances on its own.
     page.wait_for_function("""(frames) => {
         dispatchEvent(new Event('pagehide'));
         return JSON.parse(localStorage.getItem('btr.autosave.v1')).frames > frames;
     }""", arg=recovered['frames'])
+    # Upgrade a save from the old recovery implementation: reattach its backup.
+    legacy = json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))
+    del legacy['recoveredFrom']
+    page.add_init_script(f"""if (!sessionStorage.getItem('historyMigrationSeeded')) {{
+        localStorage.setItem({json.dumps(KEY)}, {json.dumps(json.dumps(legacy))});
+        sessionStorage.setItem('historyMigrationSeeded', 'true');
+    }}""")
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(page.locator('#log')).to_be_hidden()
@@ -85,6 +97,9 @@ with sync_playwright() as p:
     assert json.loads(page.evaluate('(key) => localStorage.getItem(key)', KEY))['checkpoint']['room'] == record['checkpoint']['room']
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') is None
+    with page.expect_download() as download:
+        page.locator('#download-record').click()
+    assert json.loads(open(download.value.path()).read())['recoveredFrom'] == record
 
     # Without a checkpoint, preserve the text and start at the menu, console only.
     warnings.clear()
@@ -131,4 +146,4 @@ with sync_playwright() as p:
     expect(startup.locator('#log')).to_be_visible()
     expect(startup.locator('#log')).to_contain_text('500')
     browser.close()
-    print('browser_recovery_test: silent recovery, console-only failure at the menu, continued autosaving, reload, missing checkpoint, Home and Start Game after failed restore, and startup error passed')
+    print('browser_recovery_test: recovery history downloads and migration, console-only failure at the menu, continued autosaving, reload, missing checkpoint, Home and Start Game after failed restore, and startup error passed')
