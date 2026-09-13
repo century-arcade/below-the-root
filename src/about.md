@@ -1,15 +1,15 @@
 <article class="ad" aria-labelledby="ad-title">
 <div class="ad-heading">
 <h1 id="ad-title">Below the Root</h1>
-<p class="computer-line">Published in 1984 for the Commodore 64.<br>Ported in 2026 to JavaScript.</p>
+<p class="computer-line">Commodore 64, © 1984 Windham Classics<br>Javascript port, 2026 <a href="https://saul.pw">Saul Pwanson</a></p>
 </div>
 <div class="ad-images">
 <figure class="box-front">
 <img src="/assets/box/front.jpg" width="454" height="599" alt="The original box: William Groetzinger’s painting of treetop houses, bridges and a gliding figure above a hidden underground city.">
+<figcaption>Box art by William Groetzinger.</figcaption>
 </figure>
 <figure>
 <div class="monitor"><img src="/assets/box/screen.png" width="960" height="672" alt="A screenshot of the shops of Broad Grund"></div>
-<figcaption>The shops of Broad Grund</figcaption>
 </figure>
 </div>
 <div class="ad-copy">
@@ -47,10 +47,3 @@ Whoever you are, enjoy.
 <a href="/play?demo">Watch the demo</a>
 </div>
 </article>
-<div class="fine-print">
-
-BELOW THE ROOT is a trademark of Windham Classics Corp., a division of Spinnaker Software.
-Box art by William Groetzinger. The original program is © 1984 Windham Classics; this port
-is an independent port by [saul.pw](https://saul.pw).
-
-</div>

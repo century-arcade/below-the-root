@@ -1,5 +1,5 @@
 #!/home/saul/.venvs/claude/bin/python
-"""shot.py [--url URL] [--width 900 --height 750] [--keys k,k,...] [--wait MS] [--select CSS] OUT.png [PATH...]; multiple paths produce OUT-slug.png files."""
+"""shot.py [--url URL] [--width 900 --height 750] [--keys k,k,...] [--wait MS] [--select CSS] [--crt] OUT.png [PATH...]; multiple paths produce OUT-slug.png files."""
 
 import argparse
 import os
@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--keys', default='', help='comma-separated Playwright key names')
     parser.add_argument('--wait', type=int, default=0, metavar='MS', help='extra delay in milliseconds after keys and before capture (default: 0)')
     parser.add_argument('--select', help='CSS selector to capture instead of the viewport')
+    parser.add_argument('--crt', action='store_true', help='enable the CRT effect before capture')
     parser.add_argument('out', type=Path)
     parser.add_argument('path', nargs='*', help='paths appended to URL; multiple paths add filename slugs')
     args = parser.parse_args()
@@ -42,12 +43,14 @@ def main():
                     number += 1
             outputs.add(out)
             page = browser.new_page(viewport={'width': args.width, 'height': args.height})
+            if args.crt:
+                page.add_init_script("localStorage.setItem('btr.crt', '1')")
             page_errors = []
             page.on('pageerror', lambda error: page_errors.append(str(error)))
             page.on('console', lambda msg: page_errors.append(msg.text) if msg.type == 'error' else None)
             try:
                 page.goto(url)
-                page.wait_for_selector('#mute[aria-pressed]', state='attached', timeout=15000)
+                page.wait_for_selector('#volume[aria-valuetext]', state='attached', timeout=15000)
                 for key in args.keys.split(',') if args.keys else []:
                     page.keyboard.press(key)
                     page.wait_for_timeout(200)
