@@ -31,7 +31,7 @@ function fit() {
     game.style.width = '';
     availableHeight = game.clientHeight;
   } else {
-    const chrome = ['site-header', 'where', 'replay-controls', 'log']
+    const chrome = ['site-header', 'where', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
@@ -141,8 +141,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let returnSession = null;
   let seekRoom = null;
   const roomKey = () => `${state.room?.code}:${!!state.room?.blank}`;
-  const replayControls = document.getElementById('replay-controls');
-  const replayStatus = document.getElementById('replay-status');
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
@@ -364,11 +362,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (!returnSession) return;
     session = returnSession; state = session.state; returnSession = null;
     seekRoom = null; acc = 0; elapsedAcc = 0;
-    replayControls.hidden = true;
     speaker.silence(); release(); fit();
   }
-  document.getElementById('next-replay-room').onclick = seekNextRoom;
-  document.getElementById('stop-replay').onclick = stopReplay;
   addEventListener('keydown', e => {
     if (!session.playback || paused || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey
         || e.code !== 'Space' || (e.target !== canvas && e.target !== document.body)) return;
@@ -406,7 +401,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         saveNow();
         returnSession ||= session;
         session = restored; state = session.state;
-        replayControls.hidden = false;
         log(`Replaying ${file.name} from the beginning, skipping idle time. Space skips to the next room.`);
         if (restored.record.recoveredFrom) log('Playback starts at the recovered checkpoint. Earlier recording segments are included in downloads but may require an older game version to replay.');
       } else {
@@ -486,14 +480,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       acc = Math.max(0, acc - delay);
       if (session.playbackDone) {
         seekRoom = null; acc = 0;
-        replayStatus.textContent = session.playbackError ? 'Replay failed' : 'Replay finished';
         break;
       }
       if (seekRoom != null && roomKey() !== seekRoom) { seekRoom = null; acc = 0; break; }
       // Render screen changes encountered during an idle gap before advancing again.
       if (idleScreen != null && screenKey(state) !== idleScreen) { acc = 0; break; }
     }
-    if (session.playback && !session.playbackDone) replayStatus.textContent = `Replaying: ${state.room?.code || 'menu'}`;
     draw();
     requestAnimationFrame(frame);
   }

@@ -17,6 +17,11 @@ with sync_playwright() as p:
     page.goto(URL + '/play.html?player=0&debug')
     page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
     page.locator('#screen').focus()
+    page.evaluate('''async () => {
+        const { Session } = await import('/record.js');
+        const watch = Session.watch;
+        Session.watch = (...args) => window.watchedReplay = watch(...args);
+    }''')
 
     def snapshot():
         with page.expect_download() as result:
@@ -32,20 +37,18 @@ with sync_playwright() as p:
     assert snapshot()['checkpoint']['stats']['milliseconds'] > paused['checkpoint']['stats']['milliseconds']
 
     page.locator('#record-file').set_input_files(FIXTURE)
-    expect(page.locator('#replay-controls')).to_be_visible()
-    expect(page.locator('#replay-status')).to_contain_text('Replaying:')
+    page.wait_for_function('window.watchedReplay?.playback')
     saved = page.evaluate('(key) => localStorage.getItem(key)', KEY)
     # Each press seeks one transition, leaving recorded input in control.
     for _ in range(2):
-        before = page.locator('#replay-status').text_content()
+        before = page.evaluate('watchedReplay.state.room?.code')
         page.keyboard.press('Space')
-        page.wait_for_function('(before) => document.getElementById("replay-status").textContent !== before', arg=before)
+        page.wait_for_function('(before) => watchedReplay.state.room?.code !== before', arg=before)
     assert snapshot() == json.loads(FIXTURE.read_text()), 'download preserves the full uploaded journal'
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == saved
 
-    page.locator('#stop-replay').click()
-    expect(page.locator('#replay-controls')).to_be_hidden()
+    page.locator('#home').click()
     page.keyboard.press('Escape')
     returned = snapshot()
     assert returned['seed'] == paused['seed']
@@ -55,20 +58,21 @@ with sync_playwright() as p:
     page.locator('#record-file').set_input_files({
         'name': 'short.json', 'mimeType': 'application/json', 'buffer': json.dumps(returned).encode(),
     })
-    expect(page.locator('#replay-controls')).to_be_visible()
+    page.wait_for_function('document.activeElement.id === "screen"', polling=100)
     page.locator('#screen').focus()
     page.keyboard.press('Space')
-    expect(page.locator('#replay-status')).to_have_text('Replay finished')
+    page.wait_for_function('watchedReplay.playbackDone')
     page.keyboard.press('Space')
-    expect(page.locator('#replay-status')).to_have_text('Replay finished')
-    page.locator('#stop-replay').click()
+    page.wait_for_function('watchedReplay.playbackDone')
+    page.locator('#home').click()
 
     broken = {**returned, 'checkpoint': {**returned['checkpoint'], 'quest': False}}
     page.locator('#record-file').set_input_files({
         'name': 'broken.json', 'mimeType': 'application/json', 'buffer': json.dumps(broken).encode(),
     })
-    page.locator('#next-replay-room').click()
-    expect(page.locator('#replay-status')).to_have_text('Replay failed')
+    page.wait_for_function('watchedReplay.sourceRecord.checkpoint.quest === false')
+    page.keyboard.press('Space')
+    page.wait_for_function('watchedReplay.playbackError')
     expect(page.locator('#log')).to_contain_text('does not replay')
     assert not errors, errors
     page.close()
@@ -126,7 +130,7 @@ with sync_playwright() as p:
     page.locator('#record-file').set_input_files({
         'name': 'timed.json', 'mimeType': 'application/json', 'buffer': json.dumps(timed).encode(),
     })
-    expect(page.locator('#replay-controls')).to_be_visible()
+    page.wait_for_function('document.activeElement.id === "screen"', polling=100)
 
     def current_frame():
         return page.evaluate('watchedReplay.frame')
@@ -135,14 +139,14 @@ with sync_playwright() as p:
     page.evaluate('advancePlayback(510)')
     first_frame = current_frame()
     assert 30 <= first_frame < 40, f'movement plays at 60 Hz regardless of recorded duration: {first_frame}'
-    expect(page.locator('#replay-status')).to_have_text('Replaying: 16')
+    assert page.evaluate('watchedReplay.state.room.code') == '16'
     page.evaluate('advancePlayback(600)')
     assert current_frame() == first_frame + 36, 'playback crosses rooms automatically without recorded delays'
-    expect(page.locator('#replay-status')).to_have_text('Replaying: 26')
+    assert page.evaluate('watchedReplay.state.room.code') == '26'
     page.keyboard.press('Space')
     page.evaluate('advancePlayback(10)')
     assert current_frame() == 121, 'Space skips exactly one room transition'
-    expect(page.locator('#replay-status')).to_have_text('Replaying: 25')
+    assert page.evaluate('watchedReplay.state.room.code') == '25'
     page.evaluate('advancePlayback(200)')
     assert 132 <= current_frame() <= 133, 'continuous playback resumes immediately after seeking'
     before_pause = current_frame()
@@ -152,7 +156,7 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.evaluate('advancePlayback(980)')
     assert current_frame() == timed['frames']
-    expect(page.locator('#replay-status')).to_have_text('Replay finished')
+    page.wait_for_function('watchedReplay.playbackDone')
     assert snapshot() == timed, 'timed playback preserves and verifies the original journal'
 
     page.locator('#record-file').set_input_files({
@@ -163,9 +167,9 @@ with sync_playwright() as p:
     page.evaluate('advancePlayback(1500)')
     after_idle = current_frame()
     assert 1860 < after_idle < 1920, f'the next input plays without waiting through 30 idle seconds: {after_idle}'
-    expect(page.locator('#replay-status')).to_contain_text('Replaying:')
+    assert not page.evaluate('watchedReplay.playbackDone')
     page.evaluate('advancePlayback(1000)')
-    expect(page.locator('#replay-status')).to_have_text('Replay finished')
+    page.wait_for_function('watchedReplay.playbackDone')
     assert snapshot() == recordings['idle'], 'skipping idle time preserves deterministic playback'
     assert not errors, errors
     browser.close()

@@ -17,8 +17,9 @@ Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
 JSON uploads play continuously from the beginning, skipping recorded delays
 and idle gaps while showing movement at 60 Hz. Space skips to
 the next room change, then playback continues at normal speed;
-the replay stops and verifies the checkpoint at the file's end. Return to game
-restores the live quest, whose autosave is untouched while watching.
+the replay stops and verifies the checkpoint at the file's end. Home exits
+replay to the menu, where CONTINUE resumes the live quest. Its autosave is
+untouched while watching.
 
 ## What a recording contains
 
