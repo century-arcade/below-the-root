@@ -17,7 +17,6 @@ export function setupDeveloper({ options, onDebug = () => {}, canChangeDebug = (
   }
   function setCrt(on) {
     options.crt = on;
-    document.getElementById('site-header').classList.toggle('crt', on);
     document.getElementById('canvas-box')?.classList.toggle('crt', on);
     const overlay = document.getElementById('crt');
     if (overlay) overlay.hidden = !on;
