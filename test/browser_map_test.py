@@ -8,12 +8,15 @@ with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     for width in [900, 390]:
         page = browser.new_page(viewport={"width": width, "height": 750})
+        # Keep authored-map experiments independent of the exploration scenarios.
+        page.route('**/assets/initial-map.json', lambda route: route.fulfill(
+            json={'rooms': ['M5', 'M8', 'B8']}))
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.goto(BASE + '/play#map')
         page.locator('#map-screen').wait_for()
         assert page.locator('#map').is_visible()
-        assert page.locator('#map-grid > [role="img"]').count() == 63
+        assert page.locator('#map-grid > [role="img"]').count() == 3
         assert page.locator('#map-grid [aria-current="location"]').count() == 0
         page.locator('#home').click()
         assert page.locator('#map').is_visible()
@@ -29,12 +32,12 @@ with sync_playwright() as p:
 
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid > [role="img"]').count() == 63
-        assert page.locator('#map-grid > span > canvas').count() == 63
+        assert page.locator('#map-grid > [role="img"]').count() == 3
+        assert page.locator('#map-grid > span > canvas').count() == 3
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
         assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
         assert page.locator('#map-grid > span').count() == 32 * 16
-        assert page.locator('#map-grid .unseen').count() == 32 * 16 - 63
+        assert page.locator('#map-grid .unseen').count() == 32 * 16 - 3
         assert page.locator('#map-grid button, #map-grid [tabindex]').count() == 0
         assert page.locator('#close-map').text_content() == 'Close'
         for code in ['T1', 'T4', 'U5', 'P2', '0C', 'O7', '0B', 'B3', 'F0']:
@@ -146,7 +149,7 @@ with sync_playwright() as p:
             assert page.locator('#map').is_visible()
             page.keyboard.press('Tab')
             page.locator('#map-screen').wait_for()
-            assert page.locator('#map-grid > [role="img"]').count() == 63
+            assert page.locator('#map-grid > [role="img"]').count() == 3
             assert page.locator('#map-grid [aria-current="location"]').count() == 0
             page.keyboard.press('Tab')
             page.locator('#map-screen').wait_for(state='hidden')
@@ -154,7 +157,7 @@ with sync_playwright() as p:
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid > [role="img"]').count() == 64
+        assert page.locator('#map-grid > [role="img"]').count() == 4
         assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
         assert page.locator('#map-grid [aria-label^="I5 ·"]').count() == 0
         assert not errors, errors

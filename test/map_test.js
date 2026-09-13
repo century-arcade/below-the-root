@@ -8,17 +8,15 @@ import { openMenu } from '../src/shell.js';
 import { enterRoom, leaveByEdge } from '../src/world.js';
 
 const data = await loadTestData();
+// A fixed authored selection keeps exploration tests independent of map experiments.
+data.initialMap = { rooms: ['M5', 'B8'] };
 const defaults = visitedRooms([], data);
 assert.deepEqual(defaults, defaultMapRooms(data));
-assert.equal(defaults.size, 63);
-for (const code of ['25', '2B', '64', '6B', '74', '7B', 'A5', 'AB', 'B5', 'BB',
-  'F3', 'FB', 'J5', 'JB', 'M5', 'MB', 'N8', 'N9', 'NB']) {
-  assert.ok(defaults.has(code), `${code} contains a known grund trunk`);
-}
-for (const code of ['24', '23', '12', 'B3', 'B4', 'A4', 'F0', 'F2', 'N5', 'N6', 'N7',
-  'E6', 'I5', '16', 'O7', '0B', '9B', 'PB', 'P2', 'T1', '0C']) {
-  assert.ok(!defaults.has(code), `${code} starts unseen`);
-}
+assert.deepEqual(defaultMapRooms({ ...data, initialMap: { rooms: [] } }), new Set(),
+  'an empty authored map starts with no rooms revealed');
+assert.deepEqual(visitedRooms([], { ...data, initialMap: { rooms: ['12', 'P2', '0C', 'T1', 'invalid'] } }),
+  new Set(['12', 'P2', '0C']), 'authored defaults reveal selected exteriors and exclude interiors and invalid codes');
+assert.deepEqual(defaults, new Set(['M5', 'B8']));
 const grid = mapCells(data, visitedRooms([], data), 'M5');
 assert.equal(grid.length, 16);
 for (const [y, row] of grid.entries()) {
@@ -69,9 +67,9 @@ path.push(entry('D', { questStart: true }));
 assert.deepEqual(visitedRooms(path), new Set(['D']));
 
 assert.deepEqual(visitedRooms([entry('0C'), entry('T1', { questStart: true })], data),
-  new Set([...defaults, 'T1', 'M5']), 'new quests restore the trunk map and home but forget exploration');
+  new Set([...defaults, 'T1', 'M5']), 'new quests restore the authored map and home but forget exploration');
 assert.deepEqual(visitedRooms([entry('0C'), entry(null, { quest: false })], data), defaults);
-// Each character knows only their own home exterior, including homes away from a trunk.
+// Each character knows their own home exterior in addition to the authored map.
 const homes = ['M5', 'E6', 'A6', '16', 'I5'];
 for (const [character, home] of homes.entries()) {
   const quest = new Session(data, { read: () => J.idle }, { initial: { mode: 'quest', character } });
@@ -81,7 +79,7 @@ for (const [character, home] of homes.entries()) {
     assert.ok(!known.has(other), `${other} is not this character's home`);
   }
   assert.deepEqual(new Set(mapCells(data, known, home).flat().filter(Boolean).map(c => c.code)),
-    new Set([...defaults, home]), 'only trunks and the home exterior are initially shown');
+    new Set([...defaults, home]), 'only authored defaults and the home exterior are initially shown');
 }
 const newHome = data.roomById.get(data.characters[1].nid_place.room).code;
 assert.deepEqual(visitedRooms([entry('16', { questStart: true }), entry('0C'),
@@ -183,4 +181,4 @@ const cave = data.rooms.find(r => r.underground);
 assert.deepEqual(mapRoom({ ...state, room: cave, screen: cave.screen, lamp: null }, cave),
   render({ data, room: cave, tick: state.tick }).subarray(0, art.length),
   'underground map rooms are visible without a lamp');
-console.log('map_test: trunk map, hidden interiors, exploration, outdoor location, quest reset, replay and live asset rendering passed');
+console.log('map_test: authored map, hidden interiors, exploration, outdoor location, quest reset, replay and live asset rendering passed');

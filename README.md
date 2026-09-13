@@ -63,6 +63,14 @@ location while indoors (or your nid's exit on a new quest); there is no marker b
 Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
 Drag or scroll to explore when zoomed, and use Your location to return to the marker.
 
+In developer mode, **Map editor** opens `/map-editor.html`. It shows all exterior
+rooms, including Temple Grund and underground, with all initially marked unseen.
+Click rooms to toggle whether they appear before exploration; **Load saved defaults**
+loads the current starting map, and **All unseen** clears the selection.
+**Save data file** opens a file picker: select `assets/initial-map.json`, then run
+`make build`. **Download JSON** exports the same file for browsers without direct
+file saving. Editing the selection does not change a quest or save file.
+
 ? (or H, or Help in the navbar) opens all controls inside the canvas area.
 
 The top bar has an unlabelled volume slider (starts at 50%; gain is squared for quiet low levels). M toggles mute, shown as 0% on the slider; adjusting it unmutes. The red `[!]` button resets the game in one click, deleting the autosave and returning to the main menu while preserving preferences. The `</>` button toggles developer mode: recording tools, issue reporting and a CRT effect toggle (scanlines, phosphor stripes, vignette and colour bleed; off by default). Preferences persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.

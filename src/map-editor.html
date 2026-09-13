@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starting map editor</title>
+<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/map-editor.css">
+</head>
+<body>
+<header id="editor-tools">
+  <a href="/play?debug#map">Back to game</a>
+  <strong>Starting map</strong>
+  <button id="load-defaults">Load saved defaults</button>
+  <button id="clear-map">All unseen</button>
+  <button id="save-map">Save data file</button>
+  <button id="download-map">Download JSON</button>
+  <label>Zoom <select id="editor-zoom"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
+  <output id="selection-count" aria-live="polite">0 rooms seen</output>
+</header>
+<p>Click a room to toggle seen/unseen. Bright rooms start seen; dim rooms wait for exploration. Interiors stay hidden. Save to <code>assets/initial-map.json</code>, then run <code>make build</code>.</p>
+<p id="editor-status" role="status"></p>
+<main id="editor-viewport" aria-label="Starting map editor"><div id="editor-grid"></div></main>
+<script type="module" src="/map-editor.js"></script>
+</body>
+</html>

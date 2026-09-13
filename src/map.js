@@ -53,16 +53,9 @@ export function roomKind(room) {
   return room.tileset === 'outdoor' ? 'grund' : 'sky';
 }
 
-// Trunk columns, from the highest public building down to the roots.
-// Broad spans A/B; Garden spans 6/7. Star's trunk also clips N8, N9 and NB.
-const TRUNKS = { 2: 5, 6: 4, 7: 4, A: 5, B: 5, F: 3, J: 5, M: 5 };
-const TRUNK_EDGES = new Set(['N8', 'N9', 'NB']);
-
+// Authored with the developer map editor; exploration adds to these defaults.
 export function defaultMapRooms(data) {
-  return new Set(data.rooms
-    .filter(r => r.outdoor_bit && !r.underground && r.y <= 11
-      && (r.y >= TRUNKS[r.code[0]] || TRUNK_EDGES.has(r.code)))
-    .map(r => r.code));
+  return new Set(data.initialMap.rooms.filter(code => data.roomByCode.get(code)?.outdoor_bit));
 }
 
 export function visitedRooms(path, data) {
