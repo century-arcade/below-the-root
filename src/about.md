@@ -21,18 +21,18 @@ world of Zilpha Keatley Snyder’s Green-Sky trilogy of books ([*Below the Root*
 The game world is remarkably open and huge for its time, with hundreds of sections of the map to visit, and a hundred characters whose feelings and thoughts you can pense.
 There are platform challenges and thoughtful puzzles and an intricate plot to uncover within the world as you glide from branch to branch with your shuba, sleep in a nid, and gather wissenberries in order to explore and learn and cajole.
 
-This project brings the original Commodore 64 game to the browser through largely automated
-analysis and reconstruction of its original program. Its art, words, and music are
-preserved with complete fidelity, but with modern controls, autosave, and an in-game map that make Green-Sky easier to
-visit and explore.
+This project brings the original Commodore 64 game to the browser through automated
+deconstruction, analysis, and reconstruction of its original program. The art, words, and music were extracted
+preserved with complete fidelity, but the code has been updated with modern controls, autosave, and an in-game map that make Green-Sky easier to visit and explore.
 
 <figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="The original box back. The world of Green-Sky—lush and verdant, rich with wildlife, covered with gigantic trees. Here live the Kindar, high in the interwoven branches; here too live the Erdling, once banished to the tunnels below the root. Yet the peace that has existed between these peoples is now threatened. Green-Sky seems headed for certain disaster—unless someone can discover the secret of its survival. In this adventure game, you’ll set off on a fantastic and challenging quest for the secret of Green-Sky. You’ll explore its vast tree-world, and you’ll venture below the root to probe its maze of mysterious tunnels. You’ll talk with the inhabitants of Green-Sky, whose advice will help you in your quest. But be careful, for some are not as friendly as they seem. BELOW THE ROOT combines the story-building aspects of a text adventure with hundreds of colorful graphics. It also combines fast-paced excitement with a unique text menu—a first in the field of adventure games. And it lets you play as one of five characters—each with different abilities and strengths. Based on Zilpha Snyder’s recently published Green-Sky Trilogy, BELOW THE ROOT begins where the final book leaves off. The program is by Dale Disharoon, Inc., specialists in educational software. Designed for ages 10–Adult."></a><figcaption>The original box back</figcaption></figure>
 
-The game’s creators put a lot of love into it, and it deserves to be remembered and
-appreciated. Perhaps you played this game as a kid and remember looking for a trencher
-beak. Perhaps you’ve just read the novels and are curious about what happens next.
-Perhaps you’re a pixel artist or a chiptune musician and are inspired to enhance the
-art or music. Perhaps you just want to experience a piece of computer gaming history.
+The creators of the Below the Root game put a lot of love into it, and it
+deserves to be remembered and appreciated. Perhaps you played this game as a
+kid and remember looking for a trencher beak. Perhaps you’ve just read the
+novels and are curious about what happens next.  Perhaps you’re a pixel artist
+or a chiptune musician and are inspired to enhance the art or music. Perhaps
+you just want to experience a piece of computer gaming history.
 
 Whoever you are, please enjoy this restoration of a beloved game from my childhood.
 
