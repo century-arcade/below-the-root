@@ -67,6 +67,10 @@ confirmation, and the quest stays in progress, so CONTINUE picks it up
 in the same room, the same cell, with the same clock.  SAVE GAME writes
 that room, not the title room.
 
+In the port, CONTINUE resumes the live room without reloading it. Tile
+edits (including grunspreking), creature state, permissions earned during
+the visit, and lamp fuel survive the trip through the menu.
+
 ## Character select
 
 START GAME replaces the panel with one character at a time: the prompt
@@ -206,7 +210,8 @@ Walking off a room edge burns one unit off a lit honeylamp, and a lamp
 that runs out is destroyed on the spot with its weight coming off what
 you carry (`player.md`).  Doorways, the cloud-world teleport and being
 sent home cost it nothing: a honeylamp counts edges crossed, not time.
-CONTINUE from the main menu burns one too.
+In the original, CONTINUE from the main menu burns one too; the port
+preserves the lamp fuel because the player has not left the room.
 
 Two things skip the loop and go straight to the main menu: the MENU cell
 of the command menu, which leaves the quest in progress, and offering

@@ -8,7 +8,7 @@ import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
 
 export const RECORD_VERSION = 1;
-export const ENGINE_VERSION = 'btr-session-2';
+export const ENGINE_VERSION = 'btr-session-3';
 export const AUTOSAVE_KEY = 'btr.autosave.v1';
 const MAX_FRAMES = 60 * 60 * 60 * 24;
 const MAX_GESTURES = 500;

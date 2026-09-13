@@ -5,7 +5,6 @@ import { newObjects, startQuest, startDemo, startVerb, endDemo } from './game.js
 import { newFlags } from './creatures.js';
 import { fireUp } from './input.js';
 import { print, clearPanel } from './panel.js';
-import { enterRoom, burnLamp } from './world.js';
 import { SFX, sfx } from './audio.js';
 
 const RETURN_TO_MENU = 5;
@@ -112,11 +111,9 @@ export function* characterSelect(state) {
   return true;
 }
 
-// CONTINUE: the quest's room is loaded again at the cell you left, and a lit lamp pays for it
+// CONTINUE resumes the live room, including tile edits and per-visit state.
 function resume(state) {
-  const p = state.player;
-  burnLamp(state);
-  enterRoom(state, state.room, p.col, p.row);
+  clearPanel(state);
   state.title = false;
   state.active = true;
 }

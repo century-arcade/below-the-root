@@ -317,7 +317,8 @@ for (const source of ['keyboard held', 'keyboard tap', 'mouse tap', 'mouse hold'
 
 // Home is journaled so the menu and its resumable quest survive an immediate save.
 for (const initial of [{ mode: 'quest', character: 3 }, { mode: 'cold' }, { mode: 'demo', demo: 'quest' }]) {
-  const current = new Session(data, { read: () => IDLE }, { initial, seed: 123 });
+  let joy = IDLE;
+  const current = new Session(data, { read: () => joy }, { initial, seed: 123 });
   for (let i = 0; i < 120; i++) current.step();
   const before = checkpoint(current.state);
   current.menu();
@@ -332,5 +333,24 @@ for (const initial of [{ mode: 'quest', character: 3 }, { mode: 'cold' }, { mode
   for (let i = 0; i < 30; i++) current.step();
   const settled = current.snapshot();
   assert.deepEqual(checkpoint(Session.replay(data, { read: () => IDLE }, settled).state), settled.checkpoint);
+  if (before.quest) {
+    joy = { ...IDLE, dy: 1 };
+    for (let i = 0; i < 6; i++) current.step();
+    assert.equal(current.state.menuSel, 1);
+    joy = { ...IDLE, fire: true };
+    for (let i = 0; i < 6 && current.state.title; i++) current.step();
+    assert.equal(current.state.title, false);
+    assert.equal(current.state.active, true);
+    const after = checkpoint(current.state);
+    for (const field of ['room', 'screen', 'player', 'creature', 'objects', 'flags', 'clock', 'progress']) {
+      assert.deepEqual(after[field], before[field], `Home and CONTINUE preserve ${field}`);
+    }
+    const continued = current.snapshot();
+    const replay = Session.replay(data, { read: () => joy }, copy(continued));
+    assert.deepEqual(checkpoint(replay.state), continued.checkpoint);
+    joy = IDLE;
+    for (let i = 0; i < 120; i++) { current.step(); replay.step(); }
+    assert.deepEqual(checkpoint(replay.state), checkpoint(current.state));
+  }
 }
-console.log('session_test: Home preserves the quest, stops demos and replays before and after the next tick');
+console.log('session_test: Home preserves the quest, stops demos and replays through CONTINUE');

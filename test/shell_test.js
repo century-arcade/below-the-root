@@ -1,11 +1,12 @@
 // M6.4: the main menu, character select, SAMPLE QUEST, the attract flow
 import assert from 'node:assert/strict';
 
-import { loadTestData, J } from './helpers.js';
-import { newState, startQuest, tick } from '../src/game.js';
+import { loadTestData, J, menuReads, place, give } from './helpers.js';
+import { newState, startQuest, startVerb, tick } from '../src/game.js';
 import { shellFrame, coldStart, openMenu } from '../src/shell.js';
 import { panelLines as lines } from '../src/panel.js';
-import { MENU } from '../src/verbs.js';
+import { MENU, runMenu } from '../src/verbs.js';
+import { cell, role } from '../src/world.js';
 import { pressEdge } from '../src/input.js';
 import { CLASS } from '../src/data.js';
 
@@ -211,6 +212,44 @@ test('the menu verb leaves the quest in progress and CONTINUE puts you back on t
   assert.equal(s.title, false);
   assert.equal(s.room, room);
   assert.deepEqual([s.player.col, s.player.row], [col + 2, row]);
+});
+
+test('CONTINUE preserves grunspreking, creatures, permissions and the last lamp fuel', (s) => {
+  startQuest(s, data.characters[0]);
+  place(s, 2, 28, 15);
+  s.player.spiritLimit = s.player.spiritEnergy = 20;
+  startVerb(s, runMenu(s));
+  s.stick.feed(...menuReads('GRUNSPREKE'), J.idle, J.fire);
+  settle(s);
+  const target = { col: s.player.col + 1, row: s.player.row + 1 };
+  assert.equal(role(s, cell(s, target.col, target.row)), 'grown_limb');
+  assert.equal(s.player.spiritEnergy, 18);
+
+  const lamp = give(s, CLASS.HONEYLAMP);
+  s.lamp = { object: lamp.object, fuel: 1 };
+  s.offered = CLASS.TOKEN;
+  s.paid = true;
+  assert.ok(s.creature);
+  s.creature.countdown = 9;
+  s.creature.turned = true;
+  const preserved = () => structuredClone({
+    screen: s.screen, player: s.player, creature: s.creature,
+    objects: s.objects, flags: s.flags, clock: s.clock,
+    offered: s.offered, paid: s.paid, lamp: s.lamp,
+  });
+  const before = preserved();
+  s.active = false;
+  startVerb(s, runMenu(s));
+  s.stick.feed(...menuReads('MENU'), J.idle);
+  settle(s);
+  assert.equal(s.title, true);
+  s.stick.feed(...tap(J.down), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.title, false);
+  assert.equal(s.active, true);
+  assert.equal(role(s, cell(s, target.col, target.row)), 'grown_limb');
+  assert.deepEqual(preserved(), before);
+  assert.ok(lines(s).every(line => !line.trim()), 'the menu text is cleared');
 });
 
 test('character select opens on whoever is loaded', (s) => {
