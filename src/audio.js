@@ -66,6 +66,7 @@ export class Speaker {
     this.volume = 1;
     this.muted = false;
     this.ringing = [];
+    this.notes = [];
     this.effect = null;
     this.tuneEnd = 0;
     this.pending = null;
@@ -133,12 +134,20 @@ export class Speaker {
     const { attack_ms, decay_ms } = this.music.driver;
     for (const note of planTune(this.music, n)) {
       if (note.start < offsetTicks) continue;
+      this.notes.push({ ...note, at: t0 + note.start * TICK_S });
       this.ringing.push(this.voice({
         wave: this.pulse, hz: note.hz, at: t0 + note.start * TICK_S,
         attack: attack_ms / 1000, decay: decay_ms / 1000, cut: t0 + note.stop * TICK_S,
       }));
     }
     this.tuneEnd = t0 + tune.frames * TICK_S;
+  }
+
+  // Follow the audio clock, including while game ticks wait or the volume is zero.
+  recentNotes(seconds) {
+    if (!this.ready) return [];
+    const now = this.ctx.currentTime;
+    return this.notes.filter(note => note.at <= now && now - note.at < seconds);
   }
 
   // one voice, muted under a tune, a new effect cuts the old one
@@ -225,6 +234,7 @@ export class Speaker {
   cutAll(when) {
     for (const v of this.ringing) this.cut(v, when);
     this.ringing.length = 0;
+    this.notes.length = 0;
     this.tuneEnd = 0;
     this.playing = null;
   }

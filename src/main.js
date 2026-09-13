@@ -6,6 +6,7 @@ import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, restoreRecordingHistory, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
+import { createMusicTrail } from './music-trail.js';
 import { fitScale, crtVars } from './fit.js';
 import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
 import { loadOptions, storeOption } from './options.js';
@@ -145,6 +146,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
+  const musicTrail = createMusicTrail(document.getElementById('music-notes'));
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
@@ -486,6 +488,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       // Render screen changes encountered during an idle gap before advancing again.
       if (idleScreen != null && screenKey(state) !== idleScreen) { acc = 0; break; }
     }
+    musicTrail(speaker);
     draw();
     requestAnimationFrame(frame);
   }

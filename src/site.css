@@ -23,6 +23,16 @@ a { color: #c7f5ae; }
 #site-header button { box-sizing: border-box; width: 32px; height: 32px; font-size: 16px; line-height: 1; padding: 0; }
 #site-header button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: middle; }
 #volume { width: 80px; min-width: 48px; margin: 0 4px; accent-color: #9ad284; }
+#music-notes { position: relative; display: block; width: 64px; height: 32px; overflow: hidden; pointer-events: none; }
+#music-notes span { position: absolute; left: 0; top: calc(var(--voice) * 14px - 3px); font: 20px/1.1 Georgia, serif; color: #d6f897; animation: music-note-drift linear both; }
+@keyframes music-note-drift {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(50px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #music-notes span { left: calc(var(--voice) * 18px); animation-name: music-note-fade; }
+  @keyframes music-note-fade { from { opacity: 1; } to { opacity: 0; } }
+}
 #site-header button[aria-pressed="true"] { background: #354537; border-color: #d6f897; }
 button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
 button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }

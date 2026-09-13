@@ -210,4 +210,50 @@ test('silence discards a paused tune', () => {
   assert.equal(speaker.ringing.length, 0);
 });
 
+test('recent notes follow actual scheduled onsets across voices and rests', () => {
+  const speaker = new Speaker(music);
+  assert.deepEqual(speaker.recentNotes(1.8), []);
+  unlock(speaker);
+  speaker.playTune(3, 0);
+  assert.deepEqual(speaker.recentNotes(0.1).map(n => n.voice), [0, 1]);
+  speaker.ctx.currentTime = 47 / 60;
+  assert.deepEqual(speaker.recentNotes(0.1), []);
+  speaker.ctx.currentTime = 48 / 60;
+  assert.deepEqual(speaker.recentNotes(0.1).map(n => [n.voice, n.start]), [[0, 48]]);
+  speaker.ctx.currentTime = 72 / 60;
+  assert.deepEqual(speaker.recentNotes(0.1).map(n => [n.voice, n.start]), [[0, 72], [1, 72]]);
+  speaker.ctx.currentTime = 100;
+  assert.deepEqual(speaker.recentNotes(1.8), []);
+});
+
+test('muting preserves the visual rhythm; silence and suspension clear it', () => {
+  const speaker = new Speaker(music);
+  unlock(speaker);
+  speaker.playTune(3, 0);
+  const notes = speaker.recentNotes(1.8);
+  assert.ok(notes.length);
+  speaker.mute(true);
+  speaker.setVolume(0);
+  assert.deepEqual(speaker.recentNotes(1.8), notes);
+  speaker.ctx.state = 'suspended';
+  assert.deepEqual(speaker.recentNotes(1.8), []);
+  speaker.ctx.state = 'running';
+  speaker.suspend();
+  assert.deepEqual(speaker.recentNotes(1.8), []);
+  speaker.resume();
+  assert.ok(speaker.recentNotes(1.8).length);
+  speaker.silence();
+  assert.deepEqual(speaker.recentNotes(1.8), []);
+});
+
+test('joining a tune late and replacing it never show unscheduled notes', () => {
+  const speaker = new Speaker(music);
+  speaker.tune(3, 0);
+  unlock(speaker, 60);
+  assert.deepEqual(speaker.recentNotes(1.8).map(n => [n.voice, n.start]), [[0, 60]]);
+  const previous = speaker.recentNotes(1.8);
+  speaker.playTune(2, 0);
+  assert.ok(speaker.recentNotes(1.8).every(n => !previous.includes(n)));
+});
+
 console.log(`audio_test: ${passed} passed`);
