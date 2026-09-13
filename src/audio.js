@@ -1,4 +1,5 @@
 // docs/spec/assets.md, Music and Sound effects: the music-box tunes and the one-shot effects on WebAudio, no SID
+import { noteRhythm } from './music-notation.js';
 
 const TICK_S = 1 / 60;
 const RELEASE_S = 0.006;
@@ -42,7 +43,7 @@ export function skipTune(state) {
   return true;
 }
 
-// every sounding note as {voice, hz, start, stop} in ticks; a voice's next note or rest cuts the one ringing
+// A voice's next note or rest cuts the ringing; notation uses the original duration.
 export function planTune(music, n) {
   const tune = music.tunes[n];
   const decay = Math.round(music.driver.decay_ms / 1000 / TICK_S);
@@ -52,7 +53,8 @@ export function planTune(music, n) {
       const note = music.notes[e.index];
       if (note.rest) return;
       const next = events[i + 1];
-      out.push({ voice, hz: note.hz_ntsc, start: e.t, stop: Math.min(e.t + decay, next ? next.t : Infinity) });
+      out.push({ voice, hz: note.hz_ntsc, start: e.t, stop: Math.min(e.t + decay, next ? next.t : Infinity),
+        rhythm: noteRhythm(n, e.dur) });
     });
   });
   return out;

@@ -18,7 +18,7 @@ with sync_playwright() as p:
         window.seenSymbols = [];
         new MutationObserver(records => {
             for (const record of records) {
-                for (const node of record.addedNodes) seenSymbols.push(node.textContent);
+                for (const node of record.addedNodes) seenSymbols.push(node.dataset.rhythm);
             }
         }).observe(document.getElementById('music-notes'), {childList: true});
     }''')
@@ -34,11 +34,13 @@ with sync_playwright() as p:
     # Isolate the renderer to check chords, stable glyphs and expiry without timers.
     page.evaluate('''async () => {
         const { createMusicTrail } = await import('/music-trail.js');
+        const { noteRhythm } = await import('/music-notation.js');
         const element = document.createElement('span');
         element.id = 'test-notes';
         document.body.append(element);
         window.noteBatch = [
-            {voice: 0, hz: 440, at: 0}, {voice: 1, hz: 523.25, at: 0},
+            {voice: 0, rhythm: noteRhythm(0, 36), at: 0},
+            {voice: 1, rhythm: noteRhythm(0, 72), at: 0},
         ];
         window.noteSpeaker = {ctx: {currentTime: 0}, recentNotes: () => noteBatch};
         window.updateNotes = createMusicTrail(element);
@@ -47,6 +49,9 @@ with sync_playwright() as p:
     }''')
     glyphs = page.locator('#test-notes span')
     expect(glyphs).to_have_count(2)
+    expect(glyphs.nth(0)).to_have_attribute('data-rhythm', 'quarter')
+    expect(glyphs.nth(1)).to_have_attribute('data-rhythm', 'half')
+    expect(glyphs.locator('svg')).to_have_count(2)
     page.evaluate('updateNotes(noteSpeaker)')
     expect(glyphs).to_have_count(2)
     assert page.evaluate("document.getElementById('test-notes').firstChild === firstGlyph")

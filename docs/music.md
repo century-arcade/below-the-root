@@ -78,6 +78,18 @@ harmony (voice 2), mostly F major / D minor.
 `tools/music.py --json assets/music` writes `assets/music/tuneNN.json`
 (per voice: start frame, duration in frames, note index, MIDI note, name).
 
+The port's header scrolls one rhythm symbol per sounding event, using the
+original duration byte rather than pitch or the audio envelope's decay.
+The [transcriptions of all 11 tunes](music-rhythms.md) use 36 frames per
+quarter for tunes 0-2, 4-6 and 8-10, and 24 for tunes 3 and 7. These are
+notation choices inferred from the duration patterns, not stored tempos
+or time signatures. The latter two avoid writing their regular 24/48/72
+patterns as tuplets. Tunes 1 and 10 retain their actual dotted-eighth /
+sixteenth and triplet-eighth figures; tune 7's final 120 frames become a
+whole tied to a quarter, still one attack. Rests leave gaps in the stream.
+Regenerate the transcription with
+`node tools/music-notation.mjs > docs/music-rhythms.md`.
+
 Verified in VICE: hand-starting tune 0 the way $2806 does and sampling
 $D400/$D401/$D407/$D408 gives exactly the decoded note sequence, in order,
 ending on the 144-frame G4 unison and clearing $0A95.

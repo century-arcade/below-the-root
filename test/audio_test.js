@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { planTune, pickTune, startTune, Speaker } from '../src/audio.js';
+import { noteRhythm, QUARTER_FRAMES } from '../src/music-notation.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const music = JSON.parse(readFileSync(join(ROOT, 'docs', 'spec', 'data', 'music.json'), 'utf8'));
@@ -33,6 +34,33 @@ test('a voice cuts its ringing note when its next note or rest starts', () => {
     [[0, 48], [48, 60], [60, 72], [72, 96], [96, 120], [120, 144], [144, 216]]);
   const v1 = plan.filter((n) => n.voice === 1);
   assert.deepEqual(v1.map((n) => [n.start, n.stop]), [[0, 72], [72, 120], [120, 144], [144, 216]]);
+});
+
+test('notation preserves every original note duration in all eleven tunes', () => {
+  for (const tune of music.tunes) {
+    const events = tune.voices.flatMap(voice => voice.filter(e => !music.notes[e.index].rest));
+    const plan = planTune(music, tune.tune);
+    plan.forEach((note, i) => {
+      const beats = note.rhythm.reduce((sum, value) => sum + 4 / value.denominator
+        * (value.dotted ? 1.5 : 1) * (value.triplet ? 2 / 3 : 1), 0);
+      assert.equal(beats * QUARTER_FRAMES[tune.tune], events[i].dur,
+        `tune ${tune.tune}, voice ${note.voice}, frame ${note.start}`);
+    });
+  }
+});
+
+test('rhythm uses the tune pulse, retaining dots, triplets and tied long notes', () => {
+  const names = (tune, duration) => noteRhythm(tune, duration).map(value => value.name);
+  assert.deepEqual(names(0, 36), ['quarter']);
+  assert.deepEqual(names(0, 18), ['eighth']);
+  assert.deepEqual(names(3, 24), ['quarter']);
+  assert.deepEqual(names(3, 48), ['half']);
+  assert.deepEqual(names(3, 72), ['dotted half']);
+  assert.deepEqual(names(1, 27), ['dotted eighth']);
+  assert.deepEqual(names(1, 9), ['sixteenth']);
+  assert.deepEqual(names(1, 12), ['triplet eighth']);
+  assert.deepEqual(names(7, 120), ['whole', 'quarter']);
+  assert.throws(() => noteRhythm(0, 13), /Unmapped rhythm/);
 });
 
 test('the last note may ring past the end byte, up to its decay', () => {

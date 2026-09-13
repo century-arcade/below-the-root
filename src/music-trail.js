@@ -1,5 +1,6 @@
+import { rhythmSVG } from './music-notation.js';
+
 const LIFETIME = 1.8;
-const SYMBOLS = ['♩', '♪', '♫', '♬'];
 
 export function createMusicTrail(element) {
   const visible = new Map();
@@ -13,8 +14,8 @@ export function createMusicTrail(element) {
     for (const note of notes) {
       if (visible.has(note)) continue;
       const glyph = element.ownerDocument.createElement('span');
-      const pitch = Math.round(69 + 12 * Math.log2(note.hz / 440));
-      glyph.textContent = SYMBOLS[((pitch % SYMBOLS.length) + SYMBOLS.length) % SYMBOLS.length];
+      glyph.dataset.rhythm = note.rhythm.map(value => value.name).join(' tied to ');
+      glyph.innerHTML = rhythmSVG(note.rhythm);
       glyph.style.setProperty('--voice', note.voice);
       glyph.style.animationDuration = `${LIFETIME}s`;
       glyph.style.animationDelay = `${note.at - speaker.ctx.currentTime}s`;
