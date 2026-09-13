@@ -13,7 +13,6 @@ a { color: #c7f5ae; }
 #developer-mode { grid-area: developer; }
 #debug-tools { grid-area: tools; flex-wrap: wrap; justify-content: flex-end; padding-bottom: 4px; }
 #top-controls { grid-area: controls; min-width: 0; }
-#top-controls .control-group { flex: 1; justify-content: space-evenly; }
 #top-controls button { flex-shrink: 0; }
 .reading-page [id] { scroll-margin-top: 55px; }
 #play { max-width: 100%; }
