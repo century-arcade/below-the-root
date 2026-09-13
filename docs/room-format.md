@@ -200,3 +200,37 @@ tools/room.py 61 --png --text
 tools/room.py --ts 5 7
 tools/room.py --all --png        # 438 PNGs into build/rooms/
 ```
+
+## AB artwork investigation (2026-09-12)
+
+The apparent swapped tiles at the vine's foot and the notch high on the
+trunk's left edge are present in the supplied C64 disk image. They survive
+room re-entry because they are part of the decoded room, not transient
+rendering state. AB is room 362, disk 2 track 22 sector 2. Coordinates here
+are zero-based character cells, as in the spec.
+
+- At row 16, columns 27-28 contain `$12 $B7`: a diagonal trunk edge followed
+  by the left vine tile. Payload `$BF-$C0` (`$92 $03`) first paints four
+  diagonal tiles across columns 27-30. Then `$D6-$D8` (`$51 $1C $C0`)
+  paints a 17-row vine at columns 28-30, overwriting three of those tiles.
+  The remaining diagonal wedge beside the vine looks misplaced, but the
+  vine itself stays continuous through its bottom row. Swapping these two
+  cells would also move a climbable tile, changing gameplay.
+- At row 4, columns 34-35 contain `$1D $30`: foliage and a trunk-edge
+  fragment. These are literal bytes at payload `$27-$28`; the vine and
+  door overlays do not touch them. The notch is likewise in the source art.
+
+Verification: decoded G64 track 22 has no reported GCR/header/data checksum
+anomalies, and sector 2 matches the D64 used by the extractor. In VICE,
+restored `build/dumps/ingame.vsf`, wrote the AB payload to `$0900`, and ran
+`SEI; JSR $8D34` from `$0200` with a breakpoint at `$8D9B` (before objects
+and the screen blit). All 800 bytes of the original decoder's `$0400`
+buffer matched both `Room(read_block(362)[0]).tiles` and committed
+`rooms.json`. AB has no initial objects. The outdoor charset matches
+`build/raw/outdoor.bin`; the five relevant glyphs (`$12/$B7/$1D/$30/$0E`)
+also match the outdoor bank at `$B800` in `ingame.bin` (T1 uses the indoor
+bank). `node test/world_test.js` passes.
+
+No tile correction was applied: this establishes fidelity to the supplied
+image, not whether its original artist intended these shapes. Reproduce
+the extracted picture with `python3 tools/room.py 362 --text --png`.
