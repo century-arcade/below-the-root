@@ -53,7 +53,7 @@ export function planTune(music, n) {
       const note = music.notes[e.index];
       if (note.rest) return;
       const next = events[i + 1];
-      out.push({ voice, hz: note.hz_ntsc, start: e.t, stop: Math.min(e.t + decay, next ? next.t : Infinity),
+      out.push({ voice, midi: note.midi, hz: note.hz_ntsc, start: e.t, stop: Math.min(e.t + decay, next ? next.t : Infinity),
         rhythm: noteRhythm(n, e.dur) });
     });
   });
@@ -70,6 +70,7 @@ export class Speaker {
     this.ringing = [];
     this.notes = [];
     this.effect = null;
+    this.effectEnd = 0;
     this.tuneEnd = 0;
     this.pending = null;
     this.playing = null;
@@ -97,6 +98,10 @@ export class Speaker {
       this.master = this.ctx.createGain();
       this.applyGain();
       this.master.connect(this.ctx.destination);
+      this.effectAnalyser = this.ctx.createAnalyser();
+      this.effectAnalyser.fftSize = 512;
+      this.effectSamples = new Float32Array(this.effectAnalyser.fftSize);
+      this.effectAnalyser.connect(this.master);
       this.pulse = this.makePulse(this.music.driver.duty);
       this.square = this.makePulse(0.5);
       this.noise = this.makeNoise();
@@ -152,6 +157,13 @@ export class Speaker {
     return this.notes.filter(note => note.at <= now && now - note.at < seconds);
   }
 
+  // Read only effects, before the volume control, so muted sounds remain visible.
+  effectWaveform() {
+    if (!this.ready || !this.effect || this.ctx.currentTime >= this.effectEnd) return null;
+    this.effectAnalyser.getFloatTimeDomainData(this.effectSamples);
+    return this.effectSamples;
+  }
+
   // one voice, muted under a tune, a new effect cuts the old one
   sfx(id) {
     if (!this.ready) return;
@@ -162,11 +174,13 @@ export class Speaker {
     this.effect = this.voice({
       wave: s.waveform === 'noise' ? null : this.square, hz: s.hz_ntsc, at: now,
       attack: s.attack_ms / 1000, decay: s.decay_ms / 1000, cut: Infinity,
+      output: this.effectAnalyser,
     });
+    this.effectEnd = now + (s.attack_ms + s.decay_ms) / 1000 + RELEASE_S;
   }
 
   // gate on at `at`: linear attack to full, exponential decay to the 8-bit floor; `cut` is the gate going off
-  voice({ wave, hz, at, attack, decay, cut }) {
+  voice({ wave, hz, at, attack, decay, cut, output = this.master }) {
     const ctx = this.ctx;
     let src;
     if (wave) {
@@ -194,7 +208,7 @@ export class Speaker {
       g.exponentialRampToValueAtTime(FLOOR ** ((last - peak) / decay), last);
     }
     g.linearRampToValueAtTime(0, last + RELEASE_S);
-    src.connect(gain).connect(this.master);
+    src.connect(gain).connect(output);
     src.start(at);
     src.stop(last + RELEASE_S + 0.01);
     return { src, gain };
@@ -234,6 +248,9 @@ export class Speaker {
   }
 
   cutAll(when) {
+    if (this.effect) this.cut(this.effect, when);
+    this.effect = null;
+    this.effectEnd = 0;
     for (const v of this.ringing) this.cut(v, when);
     this.ringing.length = 0;
     this.notes.length = 0;

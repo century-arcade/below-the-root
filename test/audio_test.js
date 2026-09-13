@@ -36,11 +36,12 @@ test('a voice cuts its ringing note when its next note or rest starts', () => {
   assert.deepEqual(v1.map((n) => [n.start, n.stop]), [[0, 72], [72, 120], [120, 144], [144, 216]]);
 });
 
-test('notation preserves every original note duration in all eleven tunes', () => {
+test('notation preserves every original pitch and duration in all eleven tunes', () => {
   for (const tune of music.tunes) {
     const events = tune.voices.flatMap(voice => voice.filter(e => !music.notes[e.index].rest));
     const plan = planTune(music, tune.tune);
     plan.forEach((note, i) => {
+      assert.equal(note.midi, music.notes[events[i].index].midi);
       const beats = note.rhythm.reduce((sum, value) => sum + 4 / value.denominator
         * (value.dotted ? 1.5 : 1) * (value.triplet ? 2 / 3 : 1), 0);
       assert.equal(beats * QUARTER_FRAMES[tune.tune], events[i].dur,
@@ -107,6 +108,18 @@ class AudioContextStub {
     };
   }
   createPeriodicWave() { return {}; }
+  createAnalyser() {
+    return {
+      connect(target) { this.output = target; },
+      getFloatTimeDomainData(samples) { samples.fill(0.25); },
+    };
+  }
+  createBufferSource() {
+    return {
+      playbackRate: {}, connect(gain) { return gain; },
+      start(at) { this.startedAt = at; }, stop(at) { this.stoppedAt = at; },
+    };
+  }
   createBuffer(channels, n) { return { getChannelData: () => new Float32Array(n) }; }
   resume() { this.resumeCalls++; return Promise.resolve(); }
 }
@@ -244,6 +257,7 @@ test('recent notes follow actual scheduled onsets across voices and rests', () =
   unlock(speaker);
   speaker.playTune(3, 0);
   assert.deepEqual(speaker.recentNotes(0.1).map(n => n.voice), [0, 1]);
+  assert.deepEqual(speaker.recentNotes(0.1).map(n => n.midi), [70, 67]);
   speaker.ctx.currentTime = 47 / 60;
   assert.deepEqual(speaker.recentNotes(0.1), []);
   speaker.ctx.currentTime = 48 / 60;
@@ -282,6 +296,47 @@ test('joining a tune late and replacing it never show unscheduled notes', () => 
   const previous = speaker.recentNotes(1.8);
   speaker.playTune(2, 0);
   assert.ok(speaker.recentNotes(1.8).every(n => !previous.includes(n)));
+});
+
+test('tone and noise waveforms follow effect playback, including mute and expiry', () => {
+  const speaker = new Speaker(music);
+  assert.equal(speaker.effectWaveform(), null);
+  unlock(speaker);
+  assert.equal(speaker.effectWaveform(), null);
+  for (const id of [1, 8]) {
+    speaker.sfx(id);
+    assert.ok(speaker.effectWaveform().some(sample => sample !== 0));
+    assert.equal(speaker.effectAnalyser.output, speaker.master);
+    speaker.mute(true);
+    speaker.setVolume(0);
+    assert.ok(speaker.effectWaveform().some(sample => sample !== 0));
+    speaker.ctx.state = 'suspended';
+    assert.equal(speaker.effectWaveform(), null);
+    speaker.ctx.state = 'running';
+    speaker.ctx.currentTime = speaker.effectEnd;
+    assert.equal(speaker.effectWaveform(), null);
+  }
+});
+
+test('new effects replace old ones; music and silence stop the effect trace', () => {
+  const speaker = new Speaker(music);
+  unlock(speaker);
+  speaker.sfx(8);
+  const previous = speaker.effect;
+  speaker.ctx.currentTime = 0.1;
+  speaker.sfx(1);
+  assert.notEqual(speaker.effect, previous);
+  assert.ok(previous.src.stoppedAt < 0.12);
+  speaker.playTune(0, 0);
+  assert.equal(speaker.effectWaveform(), null);
+  speaker.sfx(1);
+  assert.equal(speaker.effectWaveform(), null, 'effects suppressed during music have no trace');
+  speaker.silence();
+  speaker.sfx(8);
+  const effect = speaker.effect;
+  speaker.silence();
+  assert.equal(speaker.effectWaveform(), null);
+  assert.ok(effect.src.stoppedAt < 0.12);
 });
 
 console.log(`audio_test: ${passed} passed`);

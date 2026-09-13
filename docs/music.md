@@ -87,6 +87,14 @@ or time signatures. The latter two avoid writing their regular 24/48/72
 patterns as tuplets. Tunes 1 and 10 retain their actual dotted-eighth /
 sixteenth and triplet-eighth figures; tune 7's final 120 frames become a
 whole tied to a quarter, still one attack. Rests leave gaps in the stream.
+The upper row holds pitches at or above middle C (MIDI 60); the lower row
+holds pitches below it, regardless of which voice plays them. Reduced-motion
+mode keeps the same two rows without animated scrolling.
+Sound effects use that area for a waveform sampled from their audio before
+the volume control: tonal effects produce regular traces and noise effects
+produce jagged ones. The trace follows the effect's envelope, works while
+muted, and disappears when the effect ends. Reduced-motion mode holds a
+still trace for each effect. Starting music or silencing audio cuts the effect.
 Regenerate the transcription with
 `node tools/music-notation.mjs > docs/music-rhythms.md`.
 
