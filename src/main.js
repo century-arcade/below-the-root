@@ -37,7 +37,6 @@ function fit() {
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
   const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
-  canvas.parentElement.style.setProperty('--available-height', `${Math.max(0, availableHeight)}px`);
   canvas.parentElement.style.setProperty('--canvas-padding', `${CANVAS_PADDING * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
@@ -313,7 +312,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setCrt(on) {
     options.crt = on;
     crtBox.hidden = !on;
-    canvas.classList.toggle('crt', on);
+    canvas.parentElement.classList.toggle('crt', on);
   }
   function syncOptions() {
     const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);

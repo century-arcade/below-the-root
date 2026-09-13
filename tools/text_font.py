@@ -1,9 +1,10 @@
-"""Package the game's extracted 8x8 text glyphs as a web font (requires fonttools)."""
+"""Package the game's extracted 8x8 text glyphs (requires fonttools and skia-pathops)."""
 import json
 from pathlib import Path
 
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.ttGlyphPen import TTGlyphPen
+from fontTools.ttLib.removeOverlaps import removeOverlaps
 
 ROOT = Path(__file__).resolve().parent.parent
 chars = json.loads((ROOT / 'assets/charset_text.json').read_text())['chars']
@@ -50,6 +51,9 @@ font.setupNameTable({
 })
 font.setupOS2(sTypoAscender=800, sTypoDescender=0, usWinAscent=800, usWinDescent=0)
 font.setupPost(isFixedPitch=1)
+# Join touching row rectangles so browser antialiasing cannot leave seams
+# inside otherwise solid strokes.
+removeOverlaps(font.font)
 # Stable timestamps make regeneration reproducible.
 font.font['head'].created = font.font['head'].modified = 2082844800
 font.font.recalcTimestamp = False
