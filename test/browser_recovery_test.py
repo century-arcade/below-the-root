@@ -43,7 +43,7 @@ with sync_playwright() as p:
     assert page.locator('#log').text_content() == ''
     assert any('could not be restored' in msg and 'Test quota' in msg for msg in warnings), warnings
     expect(page.locator('#save-recovery')).to_have_count(0)
-    expect(page.locator('#map')).to_be_hidden()
+    expect(page.locator('#map')).to_be_visible()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) is None
@@ -102,7 +102,7 @@ with sync_playwright() as p:
     assert snapshot['checkpoint']['title']
     assert not snapshot['checkpoint']['quest']
     expect(page.locator('#save-recovery')).to_have_count(0)
-    expect(page.locator('#map')).to_be_hidden()
+    expect(page.locator('#map')).to_be_visible()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == unusable
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') == unusable
@@ -110,7 +110,7 @@ with sync_playwright() as p:
 
     # Home leaves recovery copies intact; Start Game creates a quest that can autosave.
     page.locator('#home').click()
-    expect(page.locator('#map')).to_be_hidden()
+    expect(page.locator('#map')).to_be_visible()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == unusable
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP) == original
     assert page.evaluate('(key) => localStorage.getItem(key)', BACKUP + '.1') == unusable

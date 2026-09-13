@@ -207,7 +207,7 @@ with sync_playwright() as p:
     saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
     page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).click()
     expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
-    expect(page.locator('#map')).to_be_hidden()
+    expect(page.locator('#map')).to_be_visible()
     menu = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
     assert menu['checkpoint']['title']
     assert menu['checkpoint']['quest']

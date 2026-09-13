@@ -10,8 +10,18 @@ with sync_playwright() as p:
         page = browser.new_page(viewport={"width": width, "height": 750})
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
+        page.goto(BASE + '/play#map')
+        page.locator('#map-screen').wait_for()
+        assert page.locator('#map').is_visible()
+        assert page.locator('#map-grid > [role="img"]').count() == 63
+        assert page.locator('#map-grid [aria-current="location"]').count() == 0
+        page.locator('#home').click()
+        assert page.locator('#map').is_visible()
+        page.locator('#map').press('Enter')
+        page.locator('#map-screen').wait_for()
+        page.locator('#close-map').click()
         page.goto(BASE + '/?player=0')
-        page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
+        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
 
         def record():
             page.evaluate("dispatchEvent(new Event('pagehide'))")
@@ -19,15 +29,15 @@ with sync_playwright() as p:
 
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid > [role="img"]').count() == 169
-        assert page.locator('#map-grid > span > canvas').count() == 169
+        assert page.locator('#map-grid > [role="img"]').count() == 63
+        assert page.locator('#map-grid > span > canvas').count() == 63
         assert page.locator('#map-grid [aria-current="location"]').count() == 1
         assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
         assert page.locator('#map-grid > span').count() == 32 * 16
-        assert page.locator('#map-grid .unseen').count() == 32 * 16 - 169
+        assert page.locator('#map-grid .unseen').count() == 32 * 16 - 63
         assert page.locator('#map-grid button, #map-grid [tabindex]').count() == 0
         assert page.locator('#close-map').text_content() == 'Close'
-        for code in ['T1', 'T4', 'U5', 'P2', '0C']:
+        for code in ['T1', 'T4', 'U5', 'P2', '0C', 'O7', '0B', 'B3', 'F0']:
             assert page.locator(f'#map-grid [role="img"][aria-label^="{code} ·"]').count() == 0
         assert page.get_by_role('button', name='Zoom out', exact=True).is_disabled()
         page.get_by_role('button', name='Zoom in', exact=True).click()
@@ -68,7 +78,7 @@ with sync_playwright() as p:
         page.locator('#map-screen').wait_for(state='hidden')
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        room = page.get_by_role('img', name='TO TEMPLE GRUND', exact=False)
+        room = page.get_by_role('img', name='STAR GRUND SHOPS', exact=False)
         room.click()
         assert page.locator('#map-grid .selected').count() == 0
         room.dblclick()
@@ -106,6 +116,11 @@ with sync_playwright() as p:
         page.locator('#map-screen').wait_for(state='hidden')
         page.evaluate('document.exitFullscreen()')
 
+        page.locator('#home').click()
+        page.locator('#map').click()
+        page.locator('#map-screen').wait_for()
+        assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
+
         # Visiting an area omitted from the paper map reveals it, including
         # after restoring the quest, without revealing its neighbours.
         for code, room_id, hidden_neighbour in [('0C', 384, '1C'), ('P2', 89, 'Q2')]:
@@ -127,9 +142,21 @@ with sync_playwright() as p:
 
         for query in ['?menu', '?demo']:
             page.goto(BASE + '/' + query)
-            page.wait_for_function("document.getElementById('map').hidden")
+            page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+            assert page.locator('#map').is_visible()
             page.keyboard.press('Tab')
-            assert not page.locator('#map-screen').is_visible()
+            page.locator('#map-screen').wait_for()
+            assert page.locator('#map-grid > [role="img"]').count() == 63
+            assert page.locator('#map-grid [aria-current="location"]').count() == 0
+            page.keyboard.press('Tab')
+            page.locator('#map-screen').wait_for(state='hidden')
+        page.goto(BASE + '/?player=1')
+        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+        page.keyboard.press('Tab')
+        page.locator('#map-screen').wait_for()
+        assert page.locator('#map-grid > [role="img"]').count() == 64
+        assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
+        assert page.locator('#map-grid [aria-label^="I5 ·"]').count() == 0
         assert not errors, errors
         page.close()
     browser.close()

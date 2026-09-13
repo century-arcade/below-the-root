@@ -53,28 +53,37 @@ export function roomKind(room) {
   return room.tileset === 'outdoor' ? 'grund' : 'sky';
 }
 
-// Start with the boxed poster's drawn cells (poster.json), keeping row B as the ground baseline.
-export function paperMapRooms(data) {
-  const blank = new Set(data.poster.blank);
+// Trunk columns, from the highest public building down to the roots.
+// Broad spans A/B; Garden spans 6/7. Star's trunk also clips N8, N9 and NB.
+const TRUNKS = { 2: 5, 6: 4, 7: 4, A: 5, B: 5, F: 3, J: 5, M: 5 };
+const TRUNK_EDGES = new Set(['N8', 'N9', 'NB']);
+
+export function defaultMapRooms(data) {
   return new Set(data.rooms
-    .filter(r => r.outdoor_bit && !r.underground && r.y >= 3 && r.y <= 11 && r.x < 25 && !blank.has(r.code))
+    .filter(r => r.outdoor_bit && !r.underground && r.y <= 11
+      && (r.y >= TRUNKS[r.code[0]] || TRUNK_EDGES.has(r.code)))
     .map(r => r.code));
 }
 
 export function visitedRooms(path, data) {
-  const defaults = data ? paperMapRooms(data) : new Set();
-  return collectVisits(path, defaults, false);
+  const defaults = data ? defaultMapRooms(data) : new Set();
+  return collectVisits(path, defaults, false, data);
 }
 
 export function visitedEmptyRooms(path) {
   return collectVisits(path, new Set(), true);
 }
 
-function collectVisits(path, defaults, blank) {
+function collectVisits(path, defaults, blank, data) {
   let visited = new Set(defaults);
   for (const entry of path) {
     if (entry.quest === false || entry.questStart) visited = new Set(defaults);
     if (entry.quest && !entry.title && !!entry.blank === blank && entry.room != null) visited.add(entry.room);
+    if (data && entry.questStart && entry.quest && !entry.title && !entry.blank) {
+      const home = data.roomByCode.get(entry.room);
+      const exterior = home && mapLocation(data, [], home);
+      if (exterior) visited.add(exterior);
+    }
   }
   return visited;
 }
@@ -85,9 +94,14 @@ export function mapLocation(data, path, room) {
   let last = null;
   for (const entry of path) {
     if (entry.quest === false || entry.questStart) last = null;
+    if (entry.questStart && entry.quest && !entry.title && !entry.blank) {
+      const home = data.roomByCode.get(entry.room);
+      if (home) last = mapLocation(data, [], home);
+    }
     if (entry.quest && !entry.title
         && (entry.blank || data.roomByCode.get(entry.room)?.outdoor_bit)) last = entry.room;
   }
+  if (!room) return last;
   if (room.blank || room.outdoor_bit) return room.code;
   if (last) return last;
   // A new quest starts inside a nid, before there is any outdoor history.

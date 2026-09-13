@@ -288,9 +288,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     (startup ? closeHelp : helpScreen).focus({ preventScroll: true });
   }
   function openMap() {
-    if (state.demo || state.title || !state.room || paused) return;
-    drawMap(state, visitedRooms(session.record.path, data),
-      mapLocation(data, session.record.path, state.room), mapGrid, visitedEmptyRooms(session.record.path));
+    if (paused) return;
+    const path = state.quest ? session.record.path : [];
+    const view = state.quest ? state : { ...state, room: null, objects: data.objects };
+    drawMap(view, visitedRooms(path, data),
+      state.quest ? mapLocation(data, path, state.room) : null, mapGrid, visitedEmptyRooms(path));
     openOverlay(mapScreen, mapButton);
     centerMap();
   }
@@ -370,8 +372,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
     if (e.key === 'Tab') {
       const mapOpen = overlay?.screen === mapScreen;
-      if (mapOpen || (e.target === document.body || e.target === canvas)
-          && !state.demo && !state.title && state.room) {
+      if (mapOpen || e.target === document.body || e.target === canvas) {
         if (mapOpen) release(); else openMap();
         e.preventDefault();
       }
@@ -425,9 +426,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const line = debug ? whereLabel(state) : '';
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
-    const mapUnavailable = !!(state.demo || state.title || !state.room);
-    if (mapButton.hidden !== mapUnavailable) { mapButton.hidden = mapUnavailable; fit(); }
-    if (overlay?.screen === mapScreen && mapUnavailable) release();
     const activeTab = overlay?.screen === mapScreen ? mapButton
       : overlay?.screen === helpScreen ? helpButton : homeButton;
     if (currentTab !== activeTab) {

@@ -93,7 +93,7 @@ test('CONTINUE with no quest does nothing', (s) => {
   assert.equal(lines(s)[1], '                CONTINUE');
 });
 
-test('character select opens on Neric, up cycles through RETURN TO MENU and back', (s) => {
+test('character select opens on Neric, down cycles through RETURN TO MENU and back', (s) => {
   openMenu(s);
   settle(s);
   s.stick.feed(...tap(J.fire));
@@ -101,7 +101,7 @@ test('character select opens on Neric, up cycles through RETURN TO MENU and back
   assert.deepEqual(lines(s), ['       CHOOSE YOUR PLAYER:  NERIC', '', ' A KINDAR-BORN YOUNG MAN', ' STRONG--IMPULSIVE--MODERATE SPIRIT']);
   const names = ['NERIC'];
   for (let i = 0; i < 6; i++) {
-    s.stick.feed(...tap(J.up));
+    s.stick.feed(...tap(J.down));
     settle(s);
     names.push(lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim());
   }
@@ -112,34 +112,34 @@ test('character select opens on Neric, up cycles through RETURN TO MENU and back
 test('character select waits for release and a held stick advances one record', (s) => {
   openMenu(s);
   settle(s);
-  s.stick.feed(J.fire, J.fire, J.up, J.up, J.idle);
+  s.stick.feed(J.fire, J.fire, J.down, J.down, J.idle);
   settle(s);
   assert.match(lines(s)[0], /NERIC$/);
   assert.equal(s.quest, false);
-  s.stick.feed(...Array(4).fill(J.up), J.idle);
+  s.stick.feed(...Array(4).fill(J.down), J.idle);
   settle(s);
   assert.match(lines(s)[0], /GENAA$/);
-  s.stick.feed(...tap(J.up));
+  s.stick.feed(...tap(J.down));
   settle(s);
   assert.match(lines(s)[0], /HERD$/);
 });
 
-test('down cycles backward, wraps, and waits for release before changing direction', (s) => {
+test('up cycles backward, wraps, and waits for release before changing direction', (s) => {
   openMenu(s);
   settle(s);
   s.stick.feed(...tap(J.fire));
   settle(s);
-  s.stick.feed(J.down, J.down, J.up, J.idle);
+  s.stick.feed(J.up, J.up, J.down, J.idle);
   settle(s);
   assert.equal(lines(s)[0].trim(), 'RETURN TO MENU');
   const names = [];
   for (let i = 0; i < 5; i++) {
-    s.stick.feed(...tap(J.down));
+    s.stick.feed(...tap(J.up));
     settle(s);
     names.push(lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim());
   }
   assert.deepEqual(names, ['CHARN', 'POMMA', 'HERD', 'GENAA', 'NERIC']);
-  s.stick.feed(...tap(J.up), ...tap(J.fire));
+  s.stick.feed(...tap(J.down), ...tap(J.fire));
   settle(s);
   assert.equal(s.character, 1, 'the trigger chooses Genaa after changing direction');
   assert.equal(s.active, true);
@@ -148,7 +148,7 @@ test('down cycles backward, wraps, and waits for release before changing directi
 test('RETURN TO MENU goes back with the character unchanged', (s) => {
   openMenu(s);
   settle(s);
-  s.stick.feed(...tap(J.fire), ...push(J.up, 5), ...tap(J.fire));
+  s.stick.feed(...tap(J.fire), ...push(J.down, 5), ...tap(J.fire));
   settle(s);
   assert.equal(lines(s)[0], '               START GAME');
   assert.equal(s.character, null);
@@ -158,7 +158,7 @@ test('RETURN TO MENU goes back with the character unchanged', (s) => {
 test('choosing Pomma starts her quest in her nid with the three tokens on the floor', (s) => {
   openMenu(s);
   settle(s);
-  s.stick.feed(...tap(J.fire), ...push(J.up, 3), ...tap(J.fire));
+  s.stick.feed(...tap(J.fire), ...push(J.down, 3), ...tap(J.fire));
   settle(s);
   const pomma = data.characters[3];
   assert.equal(s.character, 3);
@@ -200,7 +200,7 @@ test('the menu verb leaves the quest in progress and CONTINUE puts you back on t
 test('character select opens on whoever is loaded', (s) => {
   openMenu(s);
   settle(s);
-  s.stick.feed(...tap(J.fire), ...push(J.up, 2), ...tap(J.fire));
+  s.stick.feed(...tap(J.fire), ...push(J.down, 2), ...tap(J.fire));
   settle(s);
   assert.equal(s.character, 2);
   openMenu(s);

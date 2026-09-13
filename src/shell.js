@@ -91,7 +91,7 @@ function drawRecord(state, index) {
   print(state, s.traits.row, s.traits.col, c.traits);
 }
 
-// One record at a time, opening on whoever is loaded; down reverses the original up cycle.
+// One record at a time, opening on whoever is loaded; down advances and up goes back.
 export function* characterSelect(state) {
   const count = RETURN_TO_MENU + 1;
   let index = state.character ?? 0;
@@ -100,7 +100,7 @@ export function* characterSelect(state) {
     sfx(state, SFX.blip);
     const j = yield* nextPush((j) => j.dy !== 0);
     if (j.fire) break;
-    index = (index + (j.dy < 0 ? 1 : -1) + count) % count;
+    index = (index + (j.dy > 0 ? 1 : -1) + count) % count;
   }
   if (index === RETURN_TO_MENU) return false;
   startQuest(state, state.data.characters[index]);

@@ -77,7 +77,7 @@ a sixth entry that reads only RETURN TO MENU, and then back to Neric.
 Nothing is highlighted; the record on screen is the choice, and the
 button takes it.
 
-The port also accepts down to cycle backward through these six entries.
+The port uses down to advance through these six entries and up to cycle backward.
 
 Each record blips and, in the port, the screen waits for the stick to
 centre and the button to be up, then for the next push or the button;

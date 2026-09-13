@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { loadTestData, J } from './helpers.js';
-import { mapCells, visitedRooms, visitedEmptyRooms, mapRoom, paperMapRooms, mapLocation } from '../src/map.js';
+import { mapCells, visitedRooms, visitedEmptyRooms, mapRoom, defaultMapRooms, mapLocation } from '../src/map.js';
 import { render } from '../src/video.js';
 import { Session } from '../src/record.js';
 import { startQuest } from '../src/game.js';
@@ -9,14 +9,15 @@ import { enterRoom, leaveByEdge } from '../src/world.js';
 
 const data = await loadTestData();
 const defaults = visitedRooms([], data);
-assert.deepEqual(defaults, paperMapRooms(data));
-assert.equal(defaults.size, 169);
-for (const code of ['78', 'B8', 'F8', 'J7', 'M8', 'O7', 'F3', '29', '0B', '9B', 'C3', '95', 'C5', 'A7', 'C7']) {
-  assert.ok(defaults.has(code), `${code} is on the boxed map`);
+assert.deepEqual(defaults, defaultMapRooms(data));
+assert.equal(defaults.size, 63);
+for (const code of ['25', '2B', '64', '6B', '74', '7B', 'A5', 'AB', 'B5', 'BB',
+  'F3', 'FB', 'J5', 'JB', 'M5', 'MB', 'N8', 'N9', 'NB']) {
+  assert.ok(defaults.has(code), `${code} contains a known grund trunk`);
 }
-for (const code of ['T1', 'T4', 'U5', 'P2', 'PB', '0C', 'AF', 'F0', '10', '12',
-  '04', '07', '19', '37', '39', '49', '58', '85', '99', 'B3']) {
-  assert.ok(!defaults.has(code), `${code} is not on the boxed map`);
+for (const code of ['24', '23', '12', 'B3', 'B4', 'A4', 'F0', 'F2', 'N5', 'N6', 'N7',
+  'E6', 'I5', '16', 'O7', '0B', '9B', 'PB', 'P2', 'T1', '0C']) {
+  assert.ok(!defaults.has(code), `${code} starts unseen`);
 }
 const grid = mapCells(data, visitedRooms([], data), 'M5');
 assert.equal(grid.length, 16);
@@ -34,7 +35,7 @@ for (const [y, row] of grid.entries()) {
 const cells = grid.flat().filter(Boolean);
 assert.equal(cells.length, defaults.size);
 assert.equal(cells.filter(c => c.current).length, 1);
-assert.deepEqual(cells.find(c => c.code === 'O7').signs, ['TO TEMPLE GRUND']);
+assert.deepEqual(cells.find(c => c.code === 'B8').signs, ['BROAD GRUND', 'SHOPS']);
 const explored = new Set([...defaults, '0C', 'P2', 'T1', 'U5', 'AC']);
 const revealed = mapCells(data, explored, '0C').flat().filter(Boolean);
 assert.ok(revealed.some(c => c.code === '0C' && c.current && c.kind === 'underground'),
@@ -68,10 +69,28 @@ path.push(entry('D', { questStart: true }));
 assert.deepEqual(visitedRooms(path), new Set(['D']));
 
 assert.deepEqual(visitedRooms([entry('0C'), entry('T1', { questStart: true })], data),
-  new Set([...defaults, 'T1']), 'new quests restore the paper map but forget exploration');
+  new Set([...defaults, 'T1', 'M5']), 'new quests restore the trunk map and home but forget exploration');
 assert.deepEqual(visitedRooms([entry('0C'), entry(null, { quest: false })], data), defaults);
+// Each character knows only their own home exterior, including homes away from a trunk.
+const homes = ['M5', 'E6', 'A6', '16', 'I5'];
+for (const [character, home] of homes.entries()) {
+  const quest = new Session(data, { read: () => J.idle }, { initial: { mode: 'quest', character } });
+  const known = visitedRooms(quest.record.path, data);
+  assert.ok(known.has(home), `${data.characters[character].name} knows their home`);
+  for (const other of homes.filter(code => code !== home && !defaults.has(code))) {
+    assert.ok(!known.has(other), `${other} is not this character's home`);
+  }
+  assert.deepEqual(new Set(mapCells(data, known, home).flat().filter(Boolean).map(c => c.code)),
+    new Set([...defaults, home]), 'only trunks and the home exterior are initially shown');
+}
+const newHome = data.roomById.get(data.characters[1].nid_place.room).code;
+assert.deepEqual(visitedRooms([entry('16', { questStart: true }), entry('0C'),
+  entry(newHome, { questStart: true })], data), new Set([...defaults, newHome, 'E6']),
+  'a new character forgets the previous home and exploration');
 const at = code => data.roomByCode.get(code);
 assert.equal(mapLocation(data, [entry('M5'), entry('T1')], at('T1')), 'M5');
+assert.equal(mapLocation(data, [entry('C1', { questStart: true }), entry('T4', { title: true })], at('T4')), 'E6',
+  'opening the menu before leaving home keeps the home marker');
 assert.equal(mapLocation(data, [entry('0B'), entry('00'), entry('01')], at('01')), '0B',
   'moving between interiors keeps the last outdoor location');
 assert.equal(mapLocation(data, [entry('12'), entry('90'), entry('U5')], at('U5')), '12',
@@ -164,4 +183,4 @@ const cave = data.rooms.find(r => r.underground);
 assert.deepEqual(mapRoom({ ...state, room: cave, screen: cave.screen, lamp: null }, cave),
   render({ data, room: cave, tick: state.tick }).subarray(0, art.length),
   'underground map rooms are visible without a lamp');
-console.log('map_test: paper map, hidden interiors, exploration, outdoor location, quest reset, replay and live asset rendering passed');
+console.log('map_test: trunk map, hidden interiors, exploration, outdoor location, quest reset, replay and live asset rendering passed');

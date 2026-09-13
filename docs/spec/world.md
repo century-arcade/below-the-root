@@ -240,11 +240,16 @@ with column pitch 45.52 px and row pitch 39.7 px. Insetting each cell by
 120, stored as integer percentages. The raw fraction is exactly zero
 for these outdoor cells in rows `3`-`A` west of column `P`:
 `04 07 19 37 39 49 58 85 99 B3` (`B3` is Broad Grund's hideout; the rest
-are leaf tips). The port starts with outdoor rows `3`-`B` west of `P`
-explored except these blanks; faint branch lines still count. Rows
-`0`-`2`, including the grund tops, appear when visited. Row `B` stays
-whole as the baseline, including shops: the poster draws trunks there
-but no ground, so its blank cells say nothing about the ground.
+are leaf tips).
+
+The port's starting map shows only the non-temple trunks, cut off at their
+highest non-secret buildings. These are columns `2` from row `5`, `6` and
+`7` from row `4`, `A` and `B` from row `5`, `F` from row `3`, and `J` and
+`M` from row `5`, each through row `B`. Star Grund's trunk edges in `N8`,
+`N9` and `NB` are also visible. The player's own home exterior is added at
+quest start. Branch-only rooms, the ground between trunks, secret tops,
+Temple Grunds and caverns remain unseen until visited. Before a quest,
+Map shows the trunk map without a location marker.
 
 ### The seven grunds
 
