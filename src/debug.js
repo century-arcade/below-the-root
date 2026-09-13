@@ -98,9 +98,10 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     result.textContent = 'Uploading playthrough and filing issue…';
     try {
       const session = getSession();
+      const recording = session.snapshot();
       const response = await fetch(`${API}?op=issue`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message.value, context, recording: JSON.stringify(session.snapshot()),
-          meta: { frame: session.frame, room: session.state.room?.code } }) });
+        body: JSON.stringify({ message: message.value, context, recording: JSON.stringify(recording),
+          meta: { frame: recording.frames, room: recording.checkpoint.room } }) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Could not file the issue.');
       if (!/^https:\/\/github\.com\/century-arcade\/below-the-root\/issues\/\d+$/.test(body.url)) throw new Error('Unexpected issue response');

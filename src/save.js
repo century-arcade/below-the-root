@@ -4,6 +4,7 @@ import { enterRoom, openAir } from './world.js';
 import { newPlayer, idleFrame } from './player.js';
 import { weightCarried, carryLimit } from './inventory.js';
 import { TICKS_PER_HOUR, DREAM } from './clock.js';
+import { progressFromSave } from './progress.js';
 
 const FLAG = { carried: 0x20, exists: 0x40, roomHi: 0x80 };
 const PRESCALE_WRAP = 256;
@@ -174,6 +175,7 @@ export function importSave(state, bytes) {
   draft.offered = get('take_permission') ? offeredBy(def) : null;
   draft.paid = !!get('door_permission');
   draft.active = true;
+  progressFromSave(draft);
   Object.assign(state, draft);
 }
 

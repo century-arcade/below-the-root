@@ -1,8 +1,12 @@
 import { timeOfDay } from './clock.js';
 import { PANEL_COLS } from './panel.js';
+import { completion, playTime } from './progress.js';
 
 // the modern display's two text rows under the picture: the status sheet, live, during a quest
 export function statusRows(state) {
+  if (state.progress?.won && !state.title && !state.demo) {
+    return [`PLAY TIME ${playTime(state)}`, `${completion(state)}% GAME COMPLETE`];
+  }
   if (!state.quest || state.title || state.demo || !state.room) return [];
   const p = state.player;
   const top = place(place('', 0, `DAY ${state.clock.day}`), 8, timeOfDay(state));

@@ -6,6 +6,7 @@ import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem, weightOf, C
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
 import { startTune, TUNE } from './audio.js';
+import { completion, playTime } from './progress.js';
 
 const STANDING = { standing_kindar: 'standingKindar', standing_erdling: 'standingErdling' };
 const GIFT_KINDS = new Set(['gift_giver', 'blesser', 'key_revealer']);
@@ -79,6 +80,7 @@ export function* pense(state) {
     flags.gift = true;
     state.animalsPensed += 1;
     p.spiritLimit += def.params.pense_message_gain;
+    state.progress.spirit += def.params.pense_message_gain;
     p.spiritEnergy = p.spiritLimit;
     if (state.animalsPensed === 5) yield* announce(state);
     else startTune(state, 'random');
@@ -147,6 +149,7 @@ export function* offer(state) {
 
 // time.md, The endings: the whole score
 function* win(state) {
+  state.progress.won = true;
   const day = state.clock.day;
   say(state, 'I AM RAAMO, THE SPIRIT GIFTED.',
     'YOU HAVE SAVED MY LIFE AND FULFILLED THE PROPHESY.  THE QUEST IS COMPLETE.  GREEN-SKY IS SAVED.');
@@ -154,6 +157,7 @@ function* win(state) {
   yield* buttonPress();
   const rank = day < 15 ? 'MASTER QUESTER.' : day < 30 ? 'HIGHLY GIFTED QUESTER.' : 'GIFTED QUESTER.';
   say(state, `YOU HAVE FINISHED THE QUEST IN ${day} DAYS. YOU ARE A`, '', rank);
+  print(state, PANEL_ROW + 3, 1, `${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
   startTune(state, TUNE.rank);
   yield* buttonPress();
   state.ended = 'won';
@@ -163,6 +167,7 @@ function* win(state) {
 export function* gainSpirit(state, amount) {
   const p = state.player;
   p.spiritLimit += amount;
+  state.progress.spirit += amount;
   p.spiritEnergy = p.spiritLimit;
   yield* announce(state);
 }
@@ -186,4 +191,3 @@ function* announce(state) {
     yield* buttonPress();
   }
 }
-

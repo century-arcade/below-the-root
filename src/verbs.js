@@ -10,6 +10,7 @@ import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';
 import { advanceHour, loseDay, timeOfDay, kidnap, DREAM } from './clock.js';
 import { startTune, SFX, sfx } from './audio.js';
+import { acquired } from './progress.js';
 
 export const MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS'],
@@ -100,6 +101,7 @@ function* take(state) {
   if (!mayTake(state, o)) return say(state, 'IT WAS NOT OFFERED TO YOU');
   if (!canCarry(state, weightOf(state, o))) return say(state, 'YOU CAN CARRY NO MORE');
   o.carried = true;
+  acquired(state, o);
   state.offered = null;
   say(state, 'YOU FIND');
   print(state, PANEL_ROW, 10, o.name);
@@ -249,6 +251,7 @@ function* eat(state) {
       p.spiritEnergy = Math.max(0, p.spiritEnergy - 15);
       return;
     case CLASS.ELIXER:
+      state.progress.elixirs += 1;
       say(state, 'YOU FEEL MUCH STRONGER');
       p.stamina += 5;
       p.foodCap = p.restCap = Math.floor(p.stamina / 2);
@@ -441,4 +444,3 @@ const VERBS = {
   PENSE: pense, USE: use, HEAL: heal, GRUNSPREKE: grunspreke, MENU: menu,
   OFFER: offer, EAT: eat, REST: rest, KINIPORT: kiniport,
 };
-

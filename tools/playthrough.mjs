@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { loadData } from '../src/data.js';
 import { Session } from '../src/record.js';
 import { IDLE } from '../src/input.js';
+import { completion, playTime } from '../src/progress.js';
 
 const args = process.argv.slice(2);
 const file = args[0];
@@ -40,6 +41,17 @@ try {
     if (end === record.frames) edited.inputs = edited.inputs.filter(input => input[0] < start);
     edited.actions = record.actions.filter(action => keep(action.frame)).map(action => ({ ...action, frame: shift(action.frame) }));
     edited.gestures = record.gestures.filter(event => keep(event[0])).map(event => [shift(event[0]), ...event.slice(1)]);
+    if (record.durations) {
+      let rate = 16667;
+      for (const [frame, value] of record.durations) { if (frame >= end) break; rate = value; }
+      edited.durations = record.durations.filter(entry => entry[0] < start).concat(
+        end < record.frames ? [[start, rate]] : [],
+        record.durations.filter(entry => entry[0] >= end).map(([frame, value]) => [shift(frame), value]));
+    }
+    if (record.legacyContinueUntil != null) {
+      edited.legacyContinueUntil = record.legacyContinueUntil < start ? record.legacyContinueUntil
+        : Math.max(start, record.legacyContinueUntil - duration);
+    }
     edited.frames -= duration;
     edited.edits = [...(record.edits || []), { cut: [start, end], sourceFrames: record.frames }];
     session = Session.replay(data, live, edited, false);
@@ -49,9 +61,10 @@ try {
   const s = session.state;
   console.log(`${session.frame} frames (${(session.frame / 3600).toFixed(1)} minutes), ${session.record.inputs.length} input changes, ${session.record.gestures.length} UI events`);
   console.log(`Room ${s.room?.code || 'menu'}, day ${s.clock.day}, cell ${s.player.col},${s.player.row}, ending ${s.ended || 'none'}`);
+  console.log(`Quest play time: ${playTime(s)}; ${completion(s)}% complete${s.progress.won ? '; Raamo saved' : ''}`);
   console.log('Route: ' + session.record.path.filter(p => p.quest && !p.title).map(p => `${p.room}@${p.frame}`).join(' → '));
   if (session.record.outcomes.length) console.log('Outcomes: ' + JSON.stringify(session.record.outcomes));
-  if (args.includes('--expect-win') && !session.record.outcomes.some(outcome => outcome.kind === 'won')) {
+  if (args.includes('--expect-win') && !s.progress.won && !session.record.outcomes.some(outcome => outcome.kind === 'won')) {
     throw new Error('Recording did not reach the winning ending');
   }
   console.log('Checkpoint verified.');

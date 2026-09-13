@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { loadTestData, J } from './helpers.js';
+import { newState, startQuest, startDemo } from '../src/game.js';
+import { Session, checkpoint, validateRecord } from '../src/record.js';
+import { CLASS } from '../src/data.js';
+import { acquired, completion, playTime } from '../src/progress.js';
+import { exportSave, importSave } from '../src/save.js';
+import { gainSpirit } from '../src/dialog.js';
+
+const data = await loadTestData();
+const live = { read: () => J.idle };
+const session = new Session(data, live, { initial: { mode: 'quest', character: 3 } });
+const s = session.state;
+assert.equal(completion(s), 0, 'starting spirit is not earned progress');
+session.step(200);
+session.step(125);
+assert.equal(s.progress.milliseconds, 325, 'wall time need not match simulation frames');
+s.stall = 10;
+session.step(75);
+assert.equal(s.progress.milliseconds, 400, 'music waits count');
+const beforePause = s.progress.milliseconds;
+// Browser pause omits steps entirely; snapshots must not advance the clock.
+session.snapshot(); session.snapshot();
+assert.equal(s.progress.milliseconds, beforePause);
+// Use a separate valid journal to exercise timing restore and continuation.
+const timed = new Session(data, live, { initial: { mode: 'quest' } });
+for (const ms of [20, 20, 80, 1000, 10]) timed.step(ms);
+const restored = Session.replay(data, live, timed.snapshot());
+assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
+timed.step(50); restored.step(50);
+assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
+const invalid = timed.snapshot(); invalid.durations = [[0, -1]];
+assert.throws(() => validateRecord(invalid, data), /timing/);
+
+gainSpirit(s, 5).next();
+assert.equal(completion(s), 5);
+s.player.spiritLimit -= 5;
+assert.equal(completion(s), 5, 'spending spirit cannot erase earned progress');
+const bell = s.objects.find(o => o.class === CLASS.BELL);
+acquired(s, bell); acquired(s, bell);
+assert.equal(completion(s), 10, 'picking up the same quest item twice awards it once');
+bell.carried = false;
+assert.equal(completion(s), 10, 'dropping a quest item keeps its milestone');
+s.progress.spirit = 35;
+s.progress.elixirs = 5;
+for (const cls of [CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY]) acquired(s, { class: cls });
+s.progress.won = true;
+assert.equal(completion(s), 100, 'all milestones total exactly 100%');
+session.step(999);
+assert.equal(s.progress.milliseconds, beforePause, 'victory freezes the timer');
+s.progress.milliseconds = 3723000;
+assert.equal(playTime(s), '1H 2M 3S');
+startQuest(s, data.characters[0]);
+assert.equal(completion(s), 0);
+assert.equal(s.progress.milliseconds, 0);
+startDemo(s, 'intro'); session.step(100);
+assert.equal(s.progress.milliseconds, 0, 'attract demos do not count');
+
+const loaded = newState(data, live);
+startQuest(loaded, data.characters[0]);
+importSave(loaded, exportSave(loaded));
+assert.equal(loaded.progress.partialTime, true);
+assert.equal(playTime(loaded), '>=0M 0S');
+console.log('progress_test: elapsed time, persistence, milestones, reset and legacy save limits passed');

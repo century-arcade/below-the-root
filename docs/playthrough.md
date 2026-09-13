@@ -14,6 +14,9 @@ Leaving the tab or window pauses too. Music continues while game time is paused.
 Mouse/touch input remains hold-to-steer, tap-for-button, and double-tap
 to walk. The port omits DISK STORAGE; the autosave is the save.
 Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
+JSON uploads start visual playback. Space seeks to the next room change;
+the replay stops and verifies the checkpoint at the file's end. Return to game
+restores the live quest, whose autosave is untouched while watching.
 
 ## What a recording contains
 
@@ -22,6 +25,10 @@ Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
 - Format and engine version, initial startup mode, character/optional
   room override, and a seeded game RNG.
 - A monotonic 60 Hz frame counter, independent of the room's tick.
+- Run-length encoded frame durations, in microseconds, preserve unpaused wall
+  time independently of rendering speed. Older journals imply 60 Hz timing.
+- Per-quest elapsed time and earned completion milestones, reset on START GAME
+  and frozen when Raamo is saved. C64 imports mark elapsed time as partial.
 - Joystick changes at the frames where the game reads them. Holds are
   represented by a change followed later by a release, not thousands
   of duplicate reads. Keyboard and pointer use this same stream.
@@ -88,7 +95,9 @@ node tools/playthrough.mjs run.json --expect-win
 ```
 
 This verifies deterministic replay and that the run reached a winning
-outcome. It does not establish the provenance of externally imported
+outcome, including a recording stopped during Raamo's victory speech.
+`node test/win_replay_test.js` runs the checked-in Pomma victory through both
+acknowledgements; it is part of `make test`. It does not establish the provenance of externally imported
 C64 saves or prove that a route is the original game's intended one.
 
 ## Cleaning a route

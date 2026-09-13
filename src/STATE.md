@@ -21,6 +21,7 @@ state = {
   demo,            // null or the running demo script: startDemo sets it and replaces input
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
+  progress,        // elapsed milliseconds, partialTime, earned spirit, elixirs, unique quest items, won
   events,          // [{sfx: id}|{music: tune}] since the last drain; main.js's Speaker.frame plays and empties them
   panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (panel.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read
@@ -129,7 +130,8 @@ same verb driver: `shellFrame(state)` once a frame (before `tick`)
 opens the main menu whenever the room loop is idle and no demo is
 running, and ends a demo on the button.  `openMenu` sets `title`, which
 makes `video.js` draw room `T4` with no figures over whatever `room`
-the quest is in; CONTINUE re-enters that room at the cell you left.
+the quest is in; CONTINUE preserves the live room. Only version 2 replay
+prefixes use the old room reload, bounded by `legacyContinueUntil` once resumed.
 Every screen waits for input rather than counting ticks: the main menu
 moves once per push and re-arms when the stick centres; every other
 screen waits for the stick to centre and the button to be up, then for

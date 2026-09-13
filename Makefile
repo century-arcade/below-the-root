@@ -50,6 +50,8 @@ test:
 	node test/input_test.js
 	node test/gamepad_test.js
 	node test/session_test.js
+	node test/progress_test.js
+	node test/win_replay_test.js
 	node test/github_test.mjs
 	node test/replay_test.js intro
 	node test/replay_test.js quest

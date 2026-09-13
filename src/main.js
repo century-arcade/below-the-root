@@ -31,7 +31,7 @@ function fit() {
     game.style.width = '';
     availableHeight = game.clientHeight;
   } else {
-    const chrome = ['site-header', 'where', 'log']
+    const chrome = ['site-header', 'where', 'replay-controls', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
@@ -133,6 +133,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const freshStart = !session && initial.mode === 'cold';
   session ||= new Session(data, stick, { initial, seed });
   let state = session.state;
+  let returnSession = null;
+  let seekRoom = null;
+  const roomKey = () => `${state.room?.code}:${!!state.room?.blank}`;
+  const replayControls = document.getElementById('replay-controls');
+  const replayStatus = document.getElementById('replay-status');
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
@@ -257,7 +262,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
   addEventListener('hashchange', dropInput);
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
-  const resume = () => { dropInput(); paused = false; };
+  const resume = () => { dropInput(); paused = false; last = performance.now(); };
   const hold = () => { held = true; dropInput(); };
   const release = () => {
     if (overlay) {
@@ -266,7 +271,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       overlay.button?.setAttribute('aria-expanded', 'false');
       overlay = null;
     }
-    dropInput(); held = false;
+    dropInput(); held = false; last = performance.now();
   };
   function openOverlay(screen, button) {
     if (overlay) release();
@@ -297,6 +302,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (paused) return;
     release();
     if (view === 'home') {
+      if (session.playback) stopReplay();
       session.menu();
       speaker.silence();
       saveNow();
@@ -342,6 +348,28 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (held) { if (type === 'keydown') release(); return; }
     session.gesture(type, source);
   };
+  function seekNextRoom() {
+    if (!session.playback || session.playbackDone) return;
+    release();
+    seekRoom = roomKey();
+    speaker.silence();
+    canvas.focus({ preventScroll: true });
+  }
+  function stopReplay() {
+    if (!returnSession) return;
+    session = returnSession; state = session.state; returnSession = null;
+    seekRoom = null; acc = 0; elapsedAcc = 0;
+    replayControls.hidden = true;
+    speaker.silence(); release(); fit();
+  }
+  document.getElementById('next-replay-room').onclick = seekNextRoom;
+  document.getElementById('stop-replay').onclick = stopReplay;
+  addEventListener('keydown', e => {
+    if (!session.playback || paused || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey
+        || e.code !== 'Space' || (e.target !== canvas && e.target !== document.body)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (!e.repeat) seekNextRoom();
+  }, true);
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
     if (e.key === 'Tab') {
@@ -369,14 +397,21 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');
       const bytes = new Uint8Array(await file.arrayBuffer());
       if (bytes[0] === 123 || file.name.endsWith('.json')) {
-        const restored = Session.replay(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
+        const restored = Session.watch(data, stick, JSON.parse(new TextDecoder().decode(bytes)));
+        saveNow();
+        returnSession ||= session;
         session = restored; state = session.state;
+        replayControls.hidden = false;
+        log(`Replaying ${file.name}. Space advances to the next room change.`);
       } else {
+        if (session.playback) stopReplay();
         session.load(bytes);
+        if (saveNow()) log(`Loaded ${file.name}`);
       }
+      held = false; acc = 0; elapsedAcc = 0; seekRoom = null;
+      dropInput(); canvas.focus({ preventScroll: true });
       fit();
       speaker.silence();
-      if (saveNow()) log(`Loaded ${file.name}`);
     } catch (err) { log(err.message); }
     finally { resume(); }
   }
@@ -411,21 +446,43 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const STEP_MS = 1000 / 60;
   let last = performance.now();
   let acc = 0;
+  let elapsedAcc = 0;
   function frame(now) {
-    acc += paused || held || document.hidden ? 0 : Math.min(now - last, 250);
+    const running = !paused && !held && !document.hidden && !session.playbackDone;
+    const elapsed = running ? Math.max(0, now - last) : 0;
+    acc += Math.min(elapsed, 250);
+    elapsedAcc += elapsed;
     last = now;
     gamepad.poll();
-    while (acc >= STEP_MS) {
+    const steps = Math.floor(acc / STEP_MS);
+    // Preserve wall time even when rendering cannot keep up with the 60 Hz simulation.
+    const duration = steps ? elapsedAcc / steps : STEP_MS;
+    if (steps) elapsedAcc = 0;
+    let budget = 2000;
+    while (running && budget-- > 0 && (acc >= STEP_MS || seekRoom != null)) {
       session.skippable = !options.classic;
       session.onSkip = offset => { if (debug) log(`Tune skipped after ${offset} frames`); };
       const previousRoom = state.room;
       const previousTitle = state.title;
-      session.step();
+      try { session.step(duration); }
+      catch (err) {
+        session.playbackDone = true;
+        session.playbackError = err.message;
+        seekRoom = null; log(err.message);
+      }
       if (previousRoom !== state.room || previousTitle !== state.title) pointer.cancel();
       autosave.save(session);
-      speaker.frame(state);
-      acc -= STEP_MS;
+      if (seekRoom != null) state.events.length = 0;
+      else speaker.frame(state);
+      acc = Math.max(0, acc - STEP_MS);
+      if (session.playbackDone) {
+        seekRoom = null; acc = 0;
+        replayStatus.textContent = session.playbackError ? 'Replay failed' : 'Replay finished';
+        break;
+      }
+      if (seekRoom != null && roomKey() !== seekRoom) { seekRoom = null; acc = 0; break; }
     }
+    if (session.playback && !session.playbackDone) replayStatus.textContent = `Replaying: ${state.room?.code || 'menu'}`;
     draw();
     requestAnimationFrame(frame);
   }

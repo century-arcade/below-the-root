@@ -164,6 +164,15 @@ try {
   execFileSync(process.execPath, [tool, edited]);
   assert.notEqual(spawnSync(process.execPath, [tool, original, '--cut', '100:200', '--out', edited]).status, 0);
   assert.notEqual(spawnSync(process.execPath, [tool, original, '--expect-win']).status, 0);
+  const timed = new Session(data, { read: () => IDLE }, { initial: { mode: 'quest' } });
+  for (let i = 0; i < 300; i++) timed.step(i < 100 ? 10 : i < 200 ? 20 : 30);
+  const timedFile = join(dir, 'timed.json');
+  const timedCut = join(dir, 'timed-cut.json');
+  writeFileSync(timedFile, JSON.stringify(timed.snapshot()));
+  execFileSync(process.execPath, [tool, timedFile, '--cut', '50:250', '--out', timedCut]);
+  const cut = JSON.parse(readFileSync(timedCut));
+  assert.equal(cut.checkpoint.stats.milliseconds, 2000, 'route cuts preserve the durations of surviving frames');
+  execFileSync(process.execPath, [tool, timedCut]);
 } finally { rmSync(dir, { recursive: true }); }
 console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, gesture cap, autosave and failure handling passed');
 

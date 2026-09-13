@@ -10,6 +10,7 @@ import { newFlags, creatureTick, creatureFigure } from './creatures.js';
 import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
 import { tell } from './dialog.js';
 import { startTune, TUNE } from './audio.js';
+import { newProgress } from './progress.js';
 
 const ATTACK = { attack_salaat: 'attacked_salaat', attack_nekom: 'attacked_nekom' };
 const COLLAPSE = { food: 'FOOD', rest: 'REST' };
@@ -73,6 +74,7 @@ export function newState(data, input, opts = {}) {
     attract: 'loop',
     stick: null,
     figures: [],
+    progress: newProgress(),
   };
 }
 
@@ -96,6 +98,7 @@ export function startQuest(state, character) {
     character: character.id, sample: false, fallaKey: false, berriesOffered: 0,
     visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null, quest: true,
     player: newPlayer(character.sprite_sheet, character.start.stamina),
+    progress: newProgress(),
   });
   const p = state.player;
   applyCharacter(state, character);
