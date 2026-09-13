@@ -29,6 +29,8 @@ analysis and reconstruction of its original program. Its art, words, and music a
 preserved, with modern controls, autosave, and a built-in map that make Green-Sky easier to
 visit and explore.
 
+<figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="The original box back. The world of Green-Sky—lush and verdant, rich with wildlife, covered with gigantic trees. Here live the Kindar, high in the interwoven branches; here too live the Erdling, once banished to the tunnels below the root. Yet the peace that has existed between these peoples is now threatened. Green-Sky seems headed for certain disaster—unless someone can discover the secret of its survival. In this adventure game, you’ll set off on a fantastic and challenging quest for the secret of Green-Sky. You’ll explore its vast tree-world, and you’ll venture below the root to probe its maze of mysterious tunnels. You’ll talk with the inhabitants of Green-Sky, whose advice will help you in your quest. But be careful, for some are not as friendly as they seem. BELOW THE ROOT combines the story-building aspects of a text adventure with hundreds of colorful graphics. It also combines fast-paced excitement with a unique text menu—a first in the field of adventure games. And it lets you play as one of five characters—each with different abilities and strengths. Based on Zilpha Snyder’s recently published Green-Sky Trilogy, BELOW THE ROOT begins where the final book leaves off. The program is by Dale Disharoon, Inc., specialists in educational software. Designed for ages 10–Adult."></a><figcaption>The original box back</figcaption></figure>
+
 The game’s creators put a lot of love into it, and it deserves to be remembered and
 appreciated. Perhaps you played this game as a kid and remember looking for a trencher
 beak. Perhaps you’ve just read the novels and are curious about what happens next.
@@ -38,39 +40,13 @@ art or music. Perhaps you just want to experience a piece of computer gaming his
 Whoever you are, enjoy.
 
 </div>
-<div class="ad-action"><a class="play-button" href="/play">Play</a><a href="/play?demo">Watch the demo</a></div>
-</article>
-<div class="about-details">
-<section aria-labelledby="the-game">
-<h2 id="the-game">The game</h2>
-<figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="Back of the cream, navy-bordered box, with the original description and screenshots of a shop and treetop platforms."></a><figcaption>The original box back</figcaption></figure>
-
-The world of Green-Sky—lush and verdant, rich with wildlife, covered with
-gigantic trees. Here live the Kindar, high in the interwoven branches; here too
-live the Erdling, once banished to the tunnels below the root. Yet the peace
-that has existed between these peoples is now threatened. Green-Sky seems
-headed for certain disaster—unless someone can discover the secret of its survival.
-
-In this adventure game, you’ll set off on a fantastic and challenging quest for
-the secret of Green-Sky. You’ll explore its vast tree-world, and you’ll venture
-below the root to probe its maze of mysterious tunnels. You’ll talk with the
-inhabitants of Green-Sky, whose advice will help you in your quest. But be
-careful, for some are not as friendly as they seem.
-
-BELOW THE ROOT combines the story-building aspects of a text adventure with
-hundreds of colorful graphics. It also combines fast-paced excitement with a
-unique text menu—a first in the field of adventure games. And it lets you play
-as one of five characters—each with different abilities and strengths.
-
-Based on Zilpha Snyder’s recently published Green-Sky Trilogy,
-BELOW THE ROOT begins where the final book leaves off. The program
-is by Dale Disharoon, Inc., specialists in educational software.
-
-Designed for ages 10–Adult.
-
-</section>
-
+<div class="ad-action">
+<a class="play-button" href="/play">Play</a>
+<!-- When released, add href="https://github.com/century-arcade/below-the-root/releases/latest/download/below-the-root-preservation.zip" and remove aria-disabled and the coming-soon label. -->
+<a class="archive-download" role="link" aria-disabled="true">Download archival ZIP (coming soon)</a>
+<a href="/play?demo">Watch the demo</a>
 </div>
+</article>
 <div class="fine-print">
 
 BELOW THE ROOT is a trademark of Windham Classics Corp., a division of Spinnaker Software.

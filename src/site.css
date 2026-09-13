@@ -32,17 +32,15 @@ a { color: #c7f5ae; }
 .monitor { padding: 3.5%; background: #000; }
 .monitor img { width: 100%; image-rendering: pixelated; }
 #about figcaption { margin-top: 14px; font-size: 14px; line-height: 1.35; font-variant: small-caps; }
-.ad-copy { max-width: 730px; margin: auto; }
+.ad-copy { display: flow-root; max-width: 730px; margin: auto; }
 .ad-copy p { margin: 0 0 16px; }
 .ad-action { text-align: center; margin: 26px 0; }
 #about .play-button { display: block; width: fit-content; margin: 0 auto 12px; padding: 10px 70px; background: #202b42; color: #f2ead8; font-size: 30px; font-weight: 700; letter-spacing: .12em; text-decoration: none; border: 4px double #f2ead8; outline: 2px solid #202b42; }
-.ad-action > a:last-child { font-size: 16px; }
+.ad-action > a:not(.play-button) { display: block; margin-top: 8px; font-size: 16px; }
+.archive-download[aria-disabled="true"] { opacity: .7; }
 #about .fine-print { font-size: 9px; line-height: 1.5; margin: 26px 0 32px; }
-.about-details { border-top: 1px solid #202b42; padding-top: 10px; }
 .reading-page h2 { font-size: 25px; margin: 24px 0 12px; }
-.about-details p { margin: 0 0 16px; }
 .box-back { float: right; width: 150px; margin: 0 0 18px 24px !important; }
-.about-details section { display: flow-root; }
 .extras, #links ul { list-style: none; padding: 0; }
 .extras li { margin: 5px 0; }
 #links li { margin: 0 0 14px; }
