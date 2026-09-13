@@ -1,9 +1,9 @@
-<article class="ad" aria-labelledby="ad-title">
-<div class="ad-heading">
-<h1 id="ad-title">Below the Root</h1>
+<article class="about-article" aria-labelledby="about-title">
+<div class="about-heading">
+<h1 id="about-title">Below the Root</h1>
 <p class="computer-line">Commodore 64, © 1984 Windham Classics<br>Javascript port, 2026 <a href="https://saul.pw">Saul Pwanson</a></p>
 </div>
-<div class="ad-images">
+<div class="about-images">
 <figure class="box-front">
 <img src="/assets/box/front.jpg" width="454" height="599" alt="The original box: William Groetzinger’s painting of treetop houses, bridges and a gliding figure above a hidden underground city.">
 <figcaption>Box and game art by William Groetzinger.</figcaption>
@@ -12,7 +12,7 @@
 <div class="monitor"><img src="/assets/box/screen.png" width="960" height="672" alt="A screenshot of the shops of Broad Grund"></div>
 </figure>
 </div>
-<div class="ad-copy">
+<div class="about-copy">
 
 Below the Root is an underknown work of art. It shares the calm, thoughtful play of
 [King’s Quest](https://www.youtube.com/watch?v=NEG-am4guWk) (1983) and [Karateka](https://www.youtube.com/watch?v=_Dyo6jghUk8) (1984), but also draws additional depth from the
@@ -39,7 +39,7 @@ Whoever you are, please enjoy this restoration of a beloved game from my childho
 -- [Saul Pwanson](mailto:btr@saul.pw)
 
 </div>
-<div class="ad-action">
+<div class="about-action">
 <a class="play-button" href="/play">Play</a>
 <!-- When released, add href="https://github.com/century-arcade/below-the-root/releases/latest/download/below-the-root-preservation.zip" and remove aria-disabled and the coming-soon label. -->
 <!--a class="archive-download" role="link" aria-disabled="true">Download archival ZIP (coming soon)</a-->

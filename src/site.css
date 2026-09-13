@@ -34,9 +34,9 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 .reading-page a:focus-visible, #site-header a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .reading-page h1, .reading-page h2, #about .play-button { font-family: 'Cinzel', Georgia, serif; }
 .reading-page h1 { margin: 0; font-size: clamp(36px, 5.5vw, 66px); line-height: 1.1; font-weight: 400; letter-spacing: -.035em; }
-.ad-heading { text-align: center; }
+.about-heading { text-align: center; }
 .computer-line { font: 12px/1.6 monospace; text-transform: uppercase; letter-spacing: .08em; }
-.ad-images { display: grid; grid-template-columns: .85fr 1.3fr; gap: 50px; align-items: center; margin: 38px 0; }
+.about-images { display: grid; grid-template-columns: .85fr 1.3fr; gap: 50px; align-items: center; margin: 38px 0; }
 #about figure { margin: 0; }
 #about img { display: block; max-width: 100%; height: auto; }
 .box-front img { width: 300px; margin: auto; transform: rotate(-4deg); box-shadow: 5px 9px 12px #202b4240; }
@@ -45,11 +45,11 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 .monitor { padding: 3.5%; background: #000; }
 .monitor img { width: 100%; image-rendering: pixelated; }
 #about figcaption { margin-top: 14px; font-size: 14px; line-height: 1.35; font-variant: small-caps; }
-.ad-copy { display: flow-root; max-width: 730px; margin: auto; }
-.ad-copy p { margin: 0 0 16px; }
-.ad-action { text-align: center; margin: 26px 0; }
+.about-copy { display: flow-root; max-width: 730px; margin: auto; }
+.about-copy p { margin: 0 0 16px; }
+.about-action { text-align: center; margin: 26px 0; }
 #about .play-button { display: block; width: fit-content; margin: 0 auto 12px; padding: 10px 70px; background: #202b42; color: #f2ead8; font-size: 30px; font-weight: 700; letter-spacing: .12em; text-decoration: none; border: 4px double #f2ead8; outline: 2px solid #202b42; }
-.ad-action > a:not(.play-button) { display: block; margin-top: 8px; font-size: 16px; }
+.about-action > a:not(.play-button) { display: block; margin-top: 8px; font-size: 16px; }
 .archive-download[aria-disabled="true"] { opacity: .7; }
 .reading-page h2 { font-size: 25px; margin: 24px 0 12px; }
 .box-back { float: right; width: 150px; margin: 0 0 18px 24px !important; }
@@ -58,7 +58,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 #links li { margin: 0 0 14px; }
 @media (max-width: 899px) {
   .reading-page { padding: 30px 26px; font-size: 17px; }
-  .ad-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
+  .about-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
   .box-front img { width: min(270px, 90%); }
   #site-header { padding: 8px 4px; column-gap: 4px; }
   #site-header nav a { padding: 0 6px; }
