@@ -101,7 +101,7 @@ test('character select opens on Neric, up cycles through RETURN TO MENU and back
   assert.deepEqual(lines(s), ['       CHOOSE YOUR PLAYER:  NERIC', '', ' A KINDAR-BORN YOUNG MAN', ' STRONG--IMPULSIVE--MODERATE SPIRIT']);
   const names = ['NERIC'];
   for (let i = 0; i < 6; i++) {
-    s.stick.feed(...tap(J.down), ...tap(J.up));
+    s.stick.feed(...tap(J.up));
     settle(s);
     names.push(lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim());
   }
@@ -122,6 +122,27 @@ test('character select waits for release and a held stick advances one record', 
   s.stick.feed(...tap(J.up));
   settle(s);
   assert.match(lines(s)[0], /HERD$/);
+});
+
+test('down cycles backward, wraps, and waits for release before changing direction', (s) => {
+  openMenu(s);
+  settle(s);
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  s.stick.feed(J.down, J.down, J.up, J.idle);
+  settle(s);
+  assert.equal(lines(s)[0].trim(), 'RETURN TO MENU');
+  const names = [];
+  for (let i = 0; i < 5; i++) {
+    s.stick.feed(...tap(J.down));
+    settle(s);
+    names.push(lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim());
+  }
+  assert.deepEqual(names, ['CHARN', 'POMMA', 'HERD', 'GENAA', 'NERIC']);
+  s.stick.feed(...tap(J.up), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.character, 1, 'the trigger chooses Genaa after changing direction');
+  assert.equal(s.active, true);
 });
 
 test('RETURN TO MENU goes back with the character unchanged', (s) => {
