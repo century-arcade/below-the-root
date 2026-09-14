@@ -109,7 +109,7 @@ with sync_playwright() as p:
         page.keyboard.press('ArrowRight')
         page.locator('#map-screen').wait_for(state='hidden')
         page.wait_for_timeout(200)
-        assert not record()['inputs'], 'resuming from the map drops the movement key'
+        assert all(r['j'] == [0, 0, 0] for r in record()['reads']), 'resuming from the map drops the movement key'
 
         page.locator('#map').press('Enter')
         page.keyboard.press('f')

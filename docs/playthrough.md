@@ -28,15 +28,24 @@ untouched while watching.
 - Format and engine version, initial startup mode, character/optional
   room override, and a seeded game RNG.
 - A monotonic 60 Hz frame counter, independent of the room's tick.
-- Run-length encoded frame durations, in microseconds, preserve unpaused wall
-  time independently of rendering speed. Older journals imply 60 Hz timing.
+- V2 `reads` entries: `{k, j: [dx, dy, fire], n, at: [room, col, row, facing], ms}`.
+  Each entry groups consecutive reads of the same kind and joystick value,
+  including idle. Kinds are `s` (state step), `g` (glide), `v` (verb/menu/shell),
+  `t` (tune wait), and `d` (demo end). Anchors use room codes, or null on title
+  and menu screens, at the first read of the entry.
+- `ms` stores unpaused wall time from the first read until the next entry,
+  an action, victory, or the recording's end. Actions and endpoints split
+  entries even if the next read has the same kind and value. Closing a quest
+  window adds its time to the timer; the displayed timer lags while a window
+  is open, and victory closes it before displaying final statistics. Frames
+  before the first read, and gaps from an action/end to the next read, are
+  outside these windows. Repeated snapshots during a pause add no time.
+  `inputs` and per-frame `durations` are absent.
 - Per-quest elapsed time and earned completion milestones, reset on START GAME
   and frozen when Raamo is saved. C64 imports mark elapsed time as partial.
-- Joystick changes at the frames where the game reads them. Holds are
-  represented by a change followed later by a release, not thousands
-  of duplicate reads. Keyboard and pointer use this same stream.
 - Game-canvas pointer down/up coordinates and game-key down/up events,
-  as diagnostic annotations. Mouse movement is represented through the
+  as `[frame, kind, consumingRead, ...details]` diagnostic annotations. Read
+  indices start at 1; an unconsumed gesture has null. Mouse movement is represented through the
   sampled joystick, not an event per pixel. Issue text and GitHub
   credentials are never recorded.
 - Imported C64 saves with their application frame, and the room/title/quest
@@ -46,15 +55,31 @@ untouched while watching.
   QUEST image for interoperability.
 - After checkpoint recovery, `recoveredFrom` contains the complete preceding
   recording, including any earlier recovery segments. Each segment retains its
-  own engine, seed, frame numbers, inputs, and checkpoint. UI gestures are
+  own engine, seed, journal, and checkpoint; these older segments stay opaque. UI gestures are
   retained for the entire session too.
 
 This is intentionally separate from the original 1410-byte C64 file.
 A raw C64 file cannot store a running JavaScript generator, input history,
 creature timing, or every transient tile edit. Replaying the journal
 re-creates those, including a menu/verb halfway through its input waits.
-Restoration compares the reconstructed state with the checkpoint before
+Replay checks the kind and player place at each entry start and reports the
+read index, expected place, and actual place on drift. Restoration also
+compares the reconstructed state with the checkpoint before
 replacing the live session. It does not execute code from the file.
+
+V1 files convert on load by replaying their old frame sampler once into the
+v2 recorder. The existing autosave key remains readable. To convert explicitly:
+
+```
+node tools/playthrough.mjs run.json --convert --out run2.json
+```
+
+The converter verifies gameplay against the old checkpoint and writes the
+checkpoint of its own replay, reporting old and new play time. Window rounding
+and gaps after actions can change the time: the converted Pomma fixture saves
+Raamo at 87%, 00:24:21 (v1: 00:24:23), and Genaa at 89%, 00:30:24
+(v1: 00:30:26). These two-second differences follow the window boundaries,
+including the gaps after tune skips.
 
 Keep `ENGINE_VERSION` in sync when changing simulation rules or data in a
 way that breaks existing recordings. An unsupported or diverging autosave
@@ -122,8 +147,11 @@ node tools/playthrough.mjs run.json --cut 1200:1800 --out shorter.json
 node tools/playthrough.mjs shorter.json --expect-win
 ```
 
-A cut removes the half-open frame range `[1200,1800)`, shifts later inputs
-and imports, and simulates a new route with a new checkpoint and path.
+A cut removes the half-open frame range `[1200,1800)`. Replay locates the
+consumed-read counts at both boundaries; straddling entries split by count,
+with `ms` apportioned by count because v2 no longer stores individual frame
+durations. Later actions and gestures shift by the cut's frame length.
+Re-simulation writes new anchors, a checkpoint, and a path in v2.
 It never overwrites the original or an existing output file. Removing a
 misstep can change creature encounters, food, positions, and all later
 input timing: the shorter run must be tested, not assumed equivalent.

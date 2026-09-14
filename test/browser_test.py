@@ -41,7 +41,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(350)
     page.mouse.up()
     page.evaluate("dispatchEvent(new Event('pagehide'))")
-    assert not page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).inputs"), 'cancelled pointer must not produce input'
+    assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).reads.every(r => r.j.every(v => v === 0))"), 'cancelled pointer must not produce input'
     page.keyboard.down('ArrowRight')
     page.wait_for_timeout(350)
     page.keyboard.up('ArrowRight')
@@ -85,7 +85,7 @@ with sync_playwright() as p:
     page.locator('#log').filter(has_text='Issue #123 filed with playthrough').wait_for()
     assert len(posted) == 2
     context = json.loads(posted[0]['context'])
-    assert 'recentInputs' in context
+    assert 'recentReads' in context
     assert 'player' in context
     assert context['frame'] == json.loads(posted[0]['recording'])['frames']
     assert posted[1] == posted[0], 'retry must retain the message and captured context'
@@ -98,7 +98,7 @@ with sync_playwright() as p:
     page.keyboard.press('ArrowRight')
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     recorded = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).gestures")
-    assert [g[1:] for g in recorded[gestures:]] == [['keydown', 'ArrowRight'], ['keyup', 'ArrowRight']], 'filing an issue must return keyboard input to the game without another click'
+    assert [[g[1], *g[3:]] for g in recorded[gestures:]] == [['keydown', 'ArrowRight'], ['keyup', 'ArrowRight']], 'filing an issue must return keyboard input to the game without another click'
     page.keyboard.press('r')
     assert page.locator('#issue-message').input_value() == ''
     stopped = frames()
@@ -128,14 +128,15 @@ with sync_playwright() as p:
     page.locator('#log').filter(has_text='Replaying btr-browser-record.json').wait_for()
     # Imports display timestamps while the console retains the original text.
     logged.clear()
+    replay_message = 'from the beginning, skipping idle time. Left/Right goes back/forward one room, Shift+Left/Right ten; hold to keep skipping.'
     for n in range(101):
         page.locator('#record-file').set_input_files({
             'name': f'log-{n}.json', 'mimeType': 'application/json',
             'buffer': json.dumps(record).encode(),
         })
-        expect(page.locator('#log')).to_contain_text(f'Replaying log-{n}.json. Space advances to the next room change.')
-    expect(page.locator('#log > div').last).to_have_text(re.compile(r'^\d\d:\d\d:\d\d Replaying log-100.json\. Space advances to the next room change\.$'))
-    assert logged == [f'Replaying log-{n}.json. Space advances to the next room change.' for n in range(101)]
+        expect(page.locator('#log')).to_contain_text(f'Replaying log-{n}.json {replay_message}')
+    expect(page.locator('#log > div').last).to_have_text(re.compile(r'^\d\d:\d\d:\d\d ' + re.escape(f'Replaying log-100.json {replay_message}') + '$'))
+    assert logged == [f'Replaying log-{n}.json {replay_message}' for n in range(101)]
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
     page.evaluate('(save) => localStorage.setItem("btr.quest2", save)', record['c64'])

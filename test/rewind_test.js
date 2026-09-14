@@ -65,7 +65,7 @@ assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), 
   'the truncated journal reloads immediately');
 for (let i = 0; i < 100; i++) step(game);
 assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state),
-  'new turns, durations and actions replay after branching');
+  'new read windows and actions replay after branching');
 game = game.backDay();
 assert.deepEqual(checkpoint(game.state), initial, 'repeated day rewind reaches the quest start');
 assert.equal(game.backDay(), game);
@@ -77,4 +77,22 @@ game = game.backDay();
 assert.equal(game.playback, false);
 assert.ok(game.record.legacyContinueUntil <= game.frame);
 assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state));
+// A held input can straddle a cached day boundary. Restoring that boundary
+// retains the consumed prefix and remaining count, including repeated seeks.
+const held = new Session(data, live, { initial: { mode: 'quest' } });
+const nearDay = new Session(data, live, { initial: { mode: 'quest' } });
+Object.assign(nearDay.state.clock, { day: 1, hour: 7, ticks: TICKS_PER_HOUR - 40 });
+held.load(exportSave(nearDay.state));
+for (let i = 0; i < 120; i++) step(held);
+const heldRecord = held.snapshot();
+const heldReplay = Session.watch(data, live, heldRecord);
+while (!heldReplay.playbackDone) step(heldReplay);
+const dayBoundary = heldReplay.history.find(e => e.day === 2);
+assert.ok(dayBoundary.saved.remaining > 0, 'the day cache is inside an entry');
+let partial = heldReplay.restoreFrame(dayBoundary.frame);
+assert.equal(partial.entryIndex, dayBoundary.saved.entryIndex);
+assert.equal(partial.remaining, dayBoundary.saved.remaining);
+partial = partial.restoreFrame(dayBoundary.frame + 8);
+while (!partial.playbackDone) step(partial);
+assert.deepEqual(partial.snapshot(), heldRecord);
 console.log('rewind_test: room checkpoints, generator continuation, day rewind and branched recordings passed');

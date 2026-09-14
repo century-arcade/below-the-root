@@ -14,7 +14,7 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // once a frame: the button ends a demo, and an idle room loop hands the screen to the menu
 export function shellFrame(state) {
-  if (state.demo && state.stick?.read().press) endDemo(state);
+  if (state.demo && state.stick?.read('d').press) endDemo(state);
   if (!state.active && !state.verb && !state.stall && !state.demo) openMenu(state);
 }
 

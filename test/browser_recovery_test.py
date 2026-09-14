@@ -15,6 +15,7 @@ with sync_playwright() as p:
     source.keyboard.press('Escape')
     source.evaluate("dispatchEvent(new Event('pagehide'))")
     record = json.loads(source.evaluate('(key) => localStorage.getItem(key)', KEY))
+    assert record['version'] == 2 and 'reads' in record and 'inputs' not in record
     source.close()
     record['checkpoint']['player']['col'] += 1
     original = json.dumps(record)

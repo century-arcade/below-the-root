@@ -4,12 +4,22 @@ import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadTestData, J } from './helpers.js';
-import { Session, checkpoint, Autosave } from '../src/record.js';
+import { Session, checkpoint, Autosave, convertRecording } from '../src/record.js';
 import { completion, playTime } from '../src/progress.js';
 import { panelLines, print, PANEL_ROW, PANEL_COLS } from '../src/panel.js';
 
 const data = await loadTestData();
 const record = JSON.parse(readFileSync(new URL('./fixtures/pomma-win.json', import.meta.url)));
+const v1 = JSON.parse(readFileSync(new URL('./fixtures/pomma-win.v1.json', import.meta.url)));
+let timing;
+assert.deepEqual(convertRecording(data, v1, { onTiming: value => { timing = value; } }), record,
+  'the retained v1 fixture converts to the checked-in v2 recording');
+assert.equal(Math.floor(timing.old / 1000), 1463);
+assert.equal(Math.floor(timing.new / 1000), 1461, 'action-to-read gaps do not belong to any v2 window');
+assert.deepEqual(checkpoint(Session.replay(data, { read: () => J.idle }, v1).state), record.checkpoint,
+  'v1 autosaves and dropped files use the converter before v2 replay');
+const badV1 = structuredClone(v1); badV1.checkpoint.player.food++;
+assert.throws(() => convertRecording(data, badV1), /does not replay/);
 let joy = J.idle;
 const live = { read: () => joy };
 const replay = Session.watch(data, live, record);
@@ -38,7 +48,7 @@ assert.equal(replay.state.progress.spirit, 30);
 assert.equal(replay.state.progress.tokens.length, 3, 'recorded TAKEs reconstruct collected tokens');
 assert.equal(replay.state.progress.elixirs, 2);
 assert.equal(replay.state.progress.partialTime, false, 'new quest resets the imported timer');
-assert.equal(playTime(replay.state), '00:24:23');
+assert.equal(playTime(replay.state), '00:24:21');
 
 // The upload ends during the first victory tune. Acknowledge both ending pages
 // using only normal input; never alter the player, room, inventory, or win flag.
@@ -62,7 +72,7 @@ delete legacy.checkpoint.stats.wand;
 delete legacy.checkpoint.stats.tokens;
 delete legacy.checkpoint.stats.tokenTotal;
 legacy.checkpoint.panel.fill(0, legacy.checkpoint.panel.length - PANEL_COLS);
-print(legacy.checkpoint, PANEL_ROW + 3, 1, '24M 23S PLAY / 92% COMPLETE');
+print(legacy.checkpoint, PANEL_ROW + 3, 1, '24M 21S PLAY / 92% COMPLETE');
 const upgraded = Session.replay(data, live, legacy);
 assert.equal(completion(upgraded.state), 87);
 assert.equal(upgraded.state.progress.tokens.length, 3);
@@ -71,7 +81,7 @@ const worldTotal = continued.snapshot();
 delete worldTotal.checkpoint.stats.wand;
 delete worldTotal.checkpoint.stats.tokenTotal;
 worldTotal.checkpoint.panel.fill(0, worldTotal.checkpoint.panel.length - PANEL_COLS);
-print(worldTotal.checkpoint, PANEL_ROW + 3, 1, '00:24:23 PLAY / 82% COMPLETE');
+print(worldTotal.checkpoint, PANEL_ROW + 3, 1, '00:24:21 PLAY / 82% COMPLETE');
 assert.equal(Session.replay(data, live, worldTotal).state.progress.tokenTotal, 48,
   'recordings scored against all 62 tokens upgrade to the character maximum');
 const characterTotal = structuredClone(worldTotal);

@@ -173,7 +173,7 @@ function driveVerb(state) {
     state.verbWait -= 1;
     return;
   }
-  advanceVerb(state, state.verb.next(state.input.read()));
+  advanceVerb(state, state.verb.next(state.input.read('v')));
 }
 
 function advanceVerb(state, r) {

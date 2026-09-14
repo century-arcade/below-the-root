@@ -190,9 +190,10 @@ Return to `/` or `/?debug` to resume. The permanent footer is gone.
 `?debug` adds recording download/import and GitHub login/issue filing with automatic playthrough uploads to secret gists.
 The latter needs the one-time OAuth setup in [docs/github-issues.md](docs/github-issues.md).
 
-A recording contains the timed joystick stream, game-canvas/key event
-annotations, seeded randomness, room path, and a state checkpoint, separate
-from the original C64 save format. Verify or shorten a copy with
+A v2 recording groups joystick reads by kind and value, with read counts,
+player-place anchors, and unpaused window time. It also contains canvas/key
+events, seeded randomness, the room path, and a state checkpoint, separate
+from the original C64 save format. Old v1 recordings convert on load. Verify or shorten a copy with
 `node tools/playthrough.mjs run.json`; see [docs/playthrough.md](docs/playthrough.md).
 
 Next is a complete ordinary quest, not another attract-demo replay.

@@ -149,6 +149,7 @@ export function* offer(state) {
 
 // time.md, The endings: the whole score
 function* win(state) {
+  state.stick?.closeWindow?.();
   state.progress.won = true;
   const day = state.clock.day;
   say(state, 'I AM RAAMO, THE SPIRIT GIFTED.',

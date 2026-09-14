@@ -48,7 +48,7 @@ with sync_playwright() as p:
         intro = snapshot()
         assert intro['frames'] > 0
         assert intro['checkpoint']['shell']['demo'] == 'intro', 'Continue starts the intro without skipping it'
-        assert intro['inputs'] == [], 'Continue does not send a joystick press'
+        assert all(r['j'] == [0, 0, 0] for r in intro['reads']), 'Continue does not send a joystick press'
         page.locator('#screen').focus()
         expect(page.locator('#screen')).to_have_attribute('aria-label', re.compile(r'Press \? for all controls'))
         page.keyboard.press('h')
@@ -93,7 +93,7 @@ with sync_playwright() as p:
         page.keyboard.press('ArrowRight')
         page.wait_for_timeout(200)
         assert record()['frames'] == stopped['frames'], 'help must hold game time'
-        assert record()['inputs'] == stopped['inputs'], 'help must block joystick input'
+        assert record()['reads'] == stopped['reads'], 'help must block joystick input'
         page.keyboard.press('Escape')
         page.wait_for_timeout(200)
         assert record()['frames'] > stopped['frames'], 'closing help resumes game time'

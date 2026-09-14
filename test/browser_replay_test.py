@@ -30,6 +30,7 @@ with sync_playwright() as p:
 
     page.keyboard.press('Escape')
     paused = snapshot()
+    assert paused['version'] == 2 and 'reads' in paused and 'durations' not in paused
     page.wait_for_timeout(250)
     assert snapshot()['checkpoint']['stats']['milliseconds'] == paused['checkpoint']['stats']['milliseconds']
     page.keyboard.press('Escape')

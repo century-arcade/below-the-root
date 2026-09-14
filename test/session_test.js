@@ -180,8 +180,8 @@ assert.equal(resetStore.size, 1, 'reset also works without an autosave');
 const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
 for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);
 assert.equal(chatty.record.gestures.length, 600, 'all gestures are retained');
-assert.deepEqual(chatty.record.gestures[0], [0, 'keydown', 'k0'], 'the earliest gestures survive');
-assert.deepEqual(chatty.record.gestures.at(-1), [0, 'keydown', 'k599'], 'the newest gestures are the ones kept');
+assert.deepEqual(chatty.record.gestures[0], [0, 'keydown', null, 'k0'], 'the earliest gestures survive');
+assert.deepEqual(chatty.record.gestures.at(-1), [0, 'keydown', null, 'k599'], 'the newest gestures are the ones kept');
 
 const store = new Map(); let writes = 0;
 const autosave = new Autosave({ setItem: (k, v) => { store.set(k, v); writes++; } });
@@ -189,7 +189,7 @@ assert.deepEqual(autosave.save(session), { written: true });
 assert.deepEqual(autosave.save(session), { written: false, reason: 'unchanged' }); assert.equal(writes, 1);
 session.state.panel[0] = 65;
 assert.deepEqual(autosave.save(session), { written: true }); assert.equal(writes, 2);
-assert.ok(JSON.parse(store.get(AUTOSAVE_KEY)).inputs.length > 0);
+assert.ok(JSON.parse(store.get(AUTOSAVE_KEY)).reads.length > 0);
 const previous = store.get(AUTOSAVE_KEY);
 startDemo(session.state, 'intro');
 assert.deepEqual(autosave.save(session, true), { written: false, reason: 'skipped' }); assert.equal(store.get(AUTOSAVE_KEY), previous);
@@ -219,12 +219,20 @@ try {
   assert.notEqual(spawnSync(process.execPath, [tool, original, '--expect-win']).status, 0);
   const timed = new Session(data, { read: () => IDLE }, { initial: { mode: 'quest' } });
   for (let i = 0; i < 300; i++) timed.step(i < 100 ? 10 : i < 200 ? 20 : 30);
+  const convertedFile = join(dir, 'converted.json');
+  const v1Fixture = fileURLToPath(new URL('fixtures/pomma-win.v1.json', import.meta.url));
+  const convertedReport = execFileSync(process.execPath, [tool, v1Fixture, '--convert', '--out', convertedFile], { encoding: 'utf8' });
+  assert.match(convertedReport, /Converted v1 play time: [\d.]+ -> [\d.]+ ms/);
+  assert.deepEqual(JSON.parse(readFileSync(convertedFile)),
+    JSON.parse(readFileSync(new URL('fixtures/pomma-win.json', import.meta.url))));
   const timedFile = join(dir, 'timed.json');
   const timedCut = join(dir, 'timed-cut.json');
   writeFileSync(timedFile, JSON.stringify(timed.snapshot()));
   execFileSync(process.execPath, [tool, timedFile, '--cut', '50:250', '--out', timedCut]);
   const cut = JSON.parse(readFileSync(timedCut));
-  assert.equal(cut.checkpoint.stats.milliseconds, 2000, 'route cuts preserve the durations of surviving frames');
+  assert.deepEqual(cut.reads.map(r => r.n), [6, 6], 'a cut splits the 37-read hold at both frame boundaries');
+  assert.equal(cut.checkpoint.stats.milliseconds, 5930 * (12 / 37),
+    'route cuts apportion window time by surviving read counts');
   execFileSync(process.execPath, [tool, timedCut]);
 } finally { rmSync(dir, { recursive: true }); }
 console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, full history, autosave and failure handling passed');
@@ -314,11 +322,14 @@ for (const source of ['keyboard held', 'keyboard tap', 'mouse tap', 'mouse hold'
     assert.ok(session.state.stall > 0);
     frames(session.state.stall);
     assert.equal(session.state.tuneWait, null);
-    assert.equal(session.read().fire, false, 'classic also consumes taps during its wait');
+    assert.equal(keys.read().fire, false, 'classic also consumes taps during its wait');
   } else {
     assert.equal(session.state.tuneWait, null);
     assert.equal(session.state.stall, 0);
-    assert.deepEqual(session.record.actions, [{ frame: start + 32, type: 'skip' }]);
+    assert.deepEqual(session.record.actions, [{ frame: start + 32, type: 'skip', read: session.record.actions[0].read }]);
+    const skipRead = session.record.reads.flatMap(r => Array(r.n).fill(r))[session.record.actions[0].read - 1];
+    assert.equal(skipRead.k, 't');
+    assert.equal(skipRead.j[2], 1, 'the skip action identifies its consuming tune press');
     assert.deepEqual(offsets, [32]);
     // Verify both the saved wait and continuation after the consumed skip tap.
     const replay = Session.replay(data, keys, copy(session.snapshot()));
@@ -368,13 +379,13 @@ for (const source of ['keyboard held', 'keyboard tap', 'mouse tap', 'mouse hold'
   const keys = new Keyboard({ addEventListener() {} });
   const session = new Session(data, keys, { initial: { mode: 'menu' } });
   keys.tap('fire');
-  assert.equal(session.read().press, true);
-  assert.equal(session.read().press, false);
-  assert.deepEqual(session.record.inputs.map(i => [i[0], i[3]]), [[0, 1], [0, 0]],
+  assert.equal(session.read('v').press, true);
+  assert.equal(session.read('v').press, false);
+  assert.deepEqual(session.record.reads.map(i => [i.k, i.j[2]]), [['v', 1], ['v', 0]],
     'a tap and release can be recorded in separate reads in the same frame');
   const replay = new Session(data, keys, { record: session.snapshot() });
-  assert.equal(replay.read().press, true);
-  assert.equal(replay.read().press, false);
+  assert.equal(replay.read('v').press, true);
+  assert.equal(replay.read('v').press, false);
 }
 
 // Home is journaled so the menu and its resumable quest survive an immediate save.

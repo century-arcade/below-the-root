@@ -64,7 +64,7 @@ with sync_playwright() as p:
         restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
         saved = json.loads(before)
         assert restored['initial'] == saved['initial'], 'Play restores the previous session'
-        assert restored['inputs'][:len(saved['inputs'])] == saved['inputs']
+        assert restored['reads'][:len(saved['reads'])] == saved['reads']
         page.goto(BASE + '/')
         expect(page).to_have_url(BASE + '/play')
         # Explicit pages take precedence over an autosave and game parameters.

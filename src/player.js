@@ -92,7 +92,7 @@ export function step(state) {
   if (p.knockdown) return knockdownStep(state);
   if (p.leaping) return leapStep(state, s);
   if (p.gliding) return glideStep(state, s);
-  const input = state.input.read();
+  const input = state.input.read('s');
   if (input.fire) return fireHeld(state, s, input);
   return fireFree(state, s, input);
 }
@@ -252,7 +252,7 @@ function glideStep(state, s) {
     return endGlide(state);
   }
   if (isSolid(state, s.floor)) return endGlide(state);
-  const input = state.input.read();
+  const input = state.input.read('g');
   if (input.dx !== 0 && input.dx !== p.facing) {
     p.facing = input.dx;
     sfx(state, SFX.glideTurn);

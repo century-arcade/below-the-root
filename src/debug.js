@@ -21,7 +21,7 @@ export function downloadRecordingText(text, filename) {
 
 export function formatIssueDetails(details) {
   return '{\n' + Object.entries(details).filter(([, value]) => value !== undefined).map(([key, value]) => {
-    const json = ['recentPath', 'recentInputs'].includes(key) && value.length
+    const json = ['recentPath', 'recentReads'].includes(key) && value.length
       ? '[\n' + value.map(entry => '    ' + JSON.stringify(entry)).join(',\n') + '\n  ]'
       : JSON.stringify(value, null, 2).replace(/\n/g, '\n  ');
     return `  ${JSON.stringify(key)}: ${json}`;
@@ -33,7 +33,7 @@ export function issueContext(session) {
   const s = session.state;
   const details = { engine: ENGINE_VERSION, frame: session.frame, room: s.room?.code,
     player: s.player, clock: s.clock, panel: panelLines(s),
-    recentPath: record.path.slice(-30), recentInputs: record.inputs.slice(-50) };
+    recentPath: record.path.slice(-30), recentReads: record.reads.slice(-50) };
   return formatIssueDetails(details);
 }
 

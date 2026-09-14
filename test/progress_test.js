@@ -58,18 +58,21 @@ for (const character of data.characters) {
 const session = new Session(data, live, { initial: { mode: 'quest', character: 3 } });
 const s = session.state;
 assert.equal(completion(s), 0, 'starting spirit is not earned progress');
+for (let i = 0; i < 7; i++) session.step(0);
 session.step(200);
 session.step(125);
-assert.equal(s.progress.milliseconds, 325, 'wall time need not match simulation frames');
+assert.equal(s.progress.milliseconds, 0, 'an open read window does not advance the displayed timer');
 s.stall = 10;
 session.step(75);
-assert.equal(s.progress.milliseconds, 400, 'music waits count');
+session.snapshot();
+assert.equal(s.progress.milliseconds, 400, 'closing a window accrues unpaused time, including waits');
 const beforePause = s.progress.milliseconds;
 // Browser pause omits steps entirely; snapshots must not advance the clock.
 session.snapshot(); session.snapshot();
 assert.equal(s.progress.milliseconds, beforePause);
 // Use a separate valid journal to exercise timing restore and continuation.
 const timed = new Session(data, live, { initial: { mode: 'quest' } });
+for (let i = 0; i < 7; i++) timed.step(0);
 for (const ms of [20, 20, 80, 1000, 10]) timed.step(ms);
 const restored = Session.replay(data, live, timed.snapshot());
 assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
@@ -82,7 +85,7 @@ assert.ok(watched.playbackDone);
 assert.deepEqual(checkpoint(watched.state), checkpoint(timed.state));
 timed.step(50); restored.step(50);
 assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
-const invalid = timed.snapshot(); invalid.durations = [[0, -1]];
+const invalid = timed.snapshot(); invalid.reads[0].ms = -1;
 assert.throws(() => validateRecord(invalid, data), /timing/);
 
 gainSpirit(s, 5).next();

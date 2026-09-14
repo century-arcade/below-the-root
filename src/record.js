@@ -10,8 +10,8 @@ import { panelLines, print, PANEL_ROW, PANEL_COLS } from './panel.js';
 import { playTime } from './progress.js';
 import { CLASS } from './data.js';
 
-export const RECORD_VERSION = 1;
-export const ENGINE_VERSION = 'btr-session-4';
+export const RECORD_VERSION = 2;
+export const ENGINE_VERSION = 'btr-session-5';
 export const AUTOSAVE_KEY = 'btr.autosave.v1';
 const MAX_FRAMES = 60 * 60 * 60 * 24;
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -61,30 +61,27 @@ export class Session {
     this.verify = true;
     this.readIndex = 0;
     this.actionIndex = 0;
-    this.durationIndex = 0;
-    this.duration = 16667; // microseconds; older journals imply a 60 Hz clock
+    this.gestureIndex = 0;
+    this.entryIndex = 0;
+    this.remaining = 0;
+    this.elapsed = 0;
+    this.window = null;
     this.playbackDone = false;
     this.lastJoy = IDLE;
     this.skippable = false;
     this.record = record ? copy(record) : {
       format: 'below-the-root-record', version: RECORD_VERSION, engine: ENGINE_VERSION,
       created: new Date().toISOString(), seed, initial, frames: 0,
-      inputs: [], actions: [], path: [], gestures: [], outcomes: [], durations: [],
+      reads: [], actions: [], path: [], gestures: [], outcomes: [],
     };
     // Discard obsolete slot fields when continuing an older recording.
     delete this.record.slots;
     delete this.record.storageErrors;
     // Cold start swallows a held startup button until the first released sample.
     this.previousFire = this.record.initial.mode === 'cold';
-    this.read = () => {
-      const joy = this.sample();
-      const press = joy.fire && !this.previousFire;
-      this.previousFire = joy.fire;
-      return { ...joy, press };
-    };
-    // replay route and endings: derived from the replayed frames
-    if (record) { this.record.path = []; this.record.outcomes = []; }
-    const stick = { pace: 5, read: () => this.read() };
+    // Replay derives a new journal, including anchors, from the simulated reads.
+    if (record) { this.record.reads = []; this.record.path = []; this.record.outcomes = []; }
+    const stick = { pace: 5, read: kind => this.read(kind), closeWindow: () => this.closeWindow() };
     this.state = newState(data, stick, { rng: random(this.record.seed) });
     this.state.stick = stick;
     const start = this.record.initial;
@@ -101,22 +98,58 @@ export class Session {
     this.cacheBoundary();
   }
 
-  sample() {
+  place() {
+    const s = this.state;
+    return [s.title ? null : s.room?.code ?? null, s.player.col, s.player.row, s.player.facing];
+  }
+
+  read(kind) {
+    if (!['s', 'g', 'v', 't', 'd'].includes(kind)) throw new Error('Invalid read kind');
+    let joy;
     if (this.playback) {
-      // Keep separate reads within one frame (a tap can be followed by its release).
-      const input = this.record.inputs[this.readIndex];
-      if (input && input[0] <= this.frame) {
-        this.lastJoy = { dx: input[1], dy: input[2], fire: !!input[3] };
-        this.readIndex++;
+      if (!this.remaining) {
+        this.closeWindow();
+        const entry = this.sourceRecord.reads[this.entryIndex++];
+        if (!entry) throw new Error(`Read ${this.readIndex + 1} (${kind}): recording exhausted at ${this.place()}`);
+        const at = this.place();
+        if (this.verify && (entry.k !== kind || JSON.stringify(entry.at) !== JSON.stringify(at))) {
+          const place = p => `room ${p[0]} cell ${p[1]},${p[2]} facing ${p[3]}`;
+          throw new Error(`Read ${this.readIndex + 1}, ${kind} read: expected ${entry.k} read, ${place(entry.at)}, got ${place(at)}`);
+        }
+        this.remaining = entry.n;
       }
-      return this.lastJoy;
+      const entry = this.sourceRecord.reads[this.entryIndex - 1];
+      joy = { dx: entry.j[0], dy: entry.j[1], fire: !!entry.j[2] };
+      this.remaining--;
+    } else joy = this.live.read(kind);
+    if (this.window && (this.window.kind !== kind || !same(joy, this.lastJoy))) this.closeWindow();
+    if (!this.window) {
+      const s = this.state;
+      this.record.reads.push({ k: kind, j: [joy.dx, joy.dy, +joy.fire], n: 0, at: this.place(), ms: 0 });
+      this.window = { start: this.elapsed, kind,
+        eligible: !!(s.quest && !s.demo && !s.progress.won && !s.timeUp), quest: s.questNumber };
     }
-    const joy = this.live.read();
-    if (!same(joy, this.lastJoy)) {
-      this.record.inputs.push([this.frame, joy.dx, joy.dy, +joy.fire]);
-      this.lastJoy = { dx: joy.dx, dy: joy.dy, fire: joy.fire };
+    this.record.reads.at(-1).n++;
+    // Gestures retain their frame and details; index 2 is the consuming read (1 based).
+    while (this.record.gestures[this.gestureIndex]?.[0] <= this.frame) {
+      this.record.gestures[this.gestureIndex++][2] = this.readIndex + 1;
     }
-    return joy;
+    this.readIndex++;
+    this.lastJoy = { dx: joy.dx, dy: joy.dy, fire: !!joy.fire };
+    const press = joy.fire && !this.previousFire;
+    this.previousFire = !!joy.fire;
+    return { ...this.lastJoy, press };
+  }
+
+  closeWindow() {
+    if (!this.window) return;
+    const entry = this.record.reads.at(-1);
+    const source = this.sourceRecord?.reads[this.entryIndex - 1];
+    entry.ms = this.playback ? source.ms * (entry.n / source.n) : this.elapsed - this.window.start;
+    if (this.window.eligible && this.window.quest === this.state.questNumber) {
+      this.state.progress.milliseconds += entry.ms;
+    }
+    this.window = null;
   }
 
   step(milliseconds = 1000 / 60) {
@@ -125,36 +158,26 @@ export class Session {
       this.finishPlayback();
       return false;
     }
-    this.state.legacyContinue = this.playback && this.record.engine === 'btr-session-2'
+    this.state.legacyContinue = this.record.legacyContinueUntil != null
       && this.frame < (this.record.legacyContinueUntil ?? Infinity);
+    if (!Number.isFinite(milliseconds) || milliseconds < 0) throw new Error('Invalid frame duration');
+    if (this.window?.eligible && this.state.progress.won) this.closeWindow();
     if (this.playback) {
       while (this.record.actions[this.actionIndex]?.frame === this.frame) {
         const action = this.record.actions[this.actionIndex++];
-        // A live skip consumes its press before clearing the wait; replay must too.
-        if (action.type === 'skip' && this.state.tuneWait != null) this.read();
+        // Only a skip triggered by a tune read consumes that press before applying.
+        if (action.type === 'skip' && action.read != null) this.read('t');
         this.apply(action);
       }
-      while (this.record.durations?.[this.durationIndex]?.[0] === this.frame) {
-        this.duration = this.record.durations[this.durationIndex++][1];
-      }
-    } else {
-      const duration = Math.round(milliseconds * 1000);
-      if (!Number.isSafeInteger(duration) || duration < 0) throw new Error('Invalid frame duration');
-      if (duration !== this.duration) {
-        (this.record.durations ||= []).push([this.frame, duration]);
-        this.duration = duration;
-      }
-    }
-    if (this.state.quest && !this.state.demo && !this.state.progress.won && !this.state.timeUp) {
-      this.state.progress.milliseconds += this.duration / 1000;
     }
     // Demos already read the real stick in shellFrame to end on any press.
     if (this.state.tuneWait != null && !this.state.demo) {
-      const joy = this.read();
-      if (joy.press && this.skippable && !this.playback) this.skipTune();
+      const joy = this.read('t');
+      if (joy.press && this.skippable && !this.playback) this.skipTune(true);
     }
     shellFrame(this.state);
     tick(this.state);
+    this.elapsed += milliseconds;
     this.frame++;
     if (['won', 'timeout'].includes(this.state.ended) && this.state.ended !== this.lastEnding) {
       this.record.outcomes.push({ frame: this.frame,
@@ -182,10 +205,10 @@ export class Session {
       entry.saved = {
         state: structuredClone({ ...state, events: [] }), rng: rng.snapshot(),
         previousFire: this.previousFire, lastJoy: { ...this.lastJoy },
-        readIndex: this.playback ? this.readIndex : this.record.inputs.length,
+        readIndex: this.readIndex, gestureIndex: this.gestureIndex, entryIndex: this.entryIndex, remaining: this.remaining,
+        elapsed: this.elapsed, window: copy(this.window), reads: copy(this.record.reads),
         actionIndex: this.playback ? this.actionIndex : this.record.actions.length,
-        durationIndex: this.playback ? this.durationIndex : (this.record.durations?.length ?? 0),
-        duration: this.duration, lastEnding: this.lastEnding,
+        lastEnding: this.lastEnding,
         lastRoom: this.lastRoom, lastRoomChange: this.lastRoomChange,
         lastQuestNumber: this.lastQuestNumber,
         path: copy(this.record.path), outcomes: copy(this.record.outcomes),
@@ -196,13 +219,22 @@ export class Session {
 
   restoreFrame(frame) {
     if (!Number.isInteger(frame) || frame < 0 || frame > this.record.frames) throw new Error('Invalid rewind frame');
-    const restored = Session.watch(this.state.data, this.live, this.snapshot(), this.verify);
+    const restored = Session.watch(this.state.data, this.live, this.playback ? this.sourceRecord : this.snapshot(), this.verify);
     const boundary = this.history.findLast(entry => entry.frame <= frame && entry.saved);
     if (boundary) {
-      const { state, rng, path, outcomes, ...cursor } = boundary.saved;
+      const { state, rng, path, outcomes, reads, ...cursor } = boundary.saved;
       Object.assign(restored, cursor, { frame: boundary.frame, roomChanges: boundary.roomChanges });
       Object.assign(restored.state, structuredClone(state), { rng: random(rng), input: restored.state.stick });
       if (state.room && !state.room.blank) restored.state.room = this.state.data.roomById.get(state.room.room);
+      restored.record.reads = copy(reads);
+      // A live cache has no playback cursor: locate its consumed prefix in the source.
+      let consumed = restored.readIndex;
+      restored.entryIndex = 0;
+      while (consumed > 0) {
+        const entry = restored.sourceRecord.reads[restored.entryIndex++];
+        restored.remaining = Math.max(0, entry.n - consumed);
+        consumed -= entry.n;
+      }
       restored.record.path = copy(path);
       restored.record.outcomes = copy(outcomes);
     }
@@ -235,9 +267,7 @@ export class Session {
     const start = this.history.find(e => e.quest === entry.quest && e.day === entry.day);
     const restored = this.restoreFrame(start.frame);
     const r = restored.record;
-    r.inputs.length = restored.readIndex;
     r.actions.length = restored.actionIndex;
-    if (r.durations) r.durations.length = restored.durationIndex;
     r.gestures = r.gestures.filter(g => g[0] < restored.frame);
     r.frames = restored.frame;
     if (r.legacyContinueUntil != null) r.legacyContinueUntil = Math.min(r.legacyContinueUntil, restored.frame);
@@ -248,10 +278,11 @@ export class Session {
   }
 
   continueLive() {
+    this.closeWindow();
+    this.record.frames = this.frame;
     this.playback = false;
     this.playbackDone = false;
     this.sourceRecord = null;
-    if (this.record.engine === 'btr-session-2') this.record.legacyContinueUntil ??= this.frame;
     this.state.legacyContinue = false;
   }
 
@@ -274,6 +305,7 @@ export class Session {
   }
 
   apply(action) {
+    this.closeWindow();
     if (action.type === 'load') importSave(this.state, fromBase64(action.save));
     else if (action.type === 'skip') skipTune(this.state);
     else if (action.type === 'menu') {
@@ -290,10 +322,10 @@ export class Session {
     this.record.actions.push(action);
   }
 
-  skipTune() {
+  skipTune(fromRead = false) {
     if (this.state.tuneWait == null) return;
     const offset = this.state.data.music.tunes[this.state.tuneWait].frames - this.state.stall;
-    const action = { frame: this.frame, type: 'skip' };
+    const action = { frame: this.frame, type: 'skip', ...(fromRead ? { read: this.readIndex } : {}) };
     this.apply(action);
     this.record.actions.push(action);
     this.onSkip?.(offset);
@@ -307,17 +339,29 @@ export class Session {
   }
 
   gesture(kind, ...details) {
+    if (this.playback) return;
     // UI events: diagnostic annotations only; replay uses the sampled joystick
-    this.record.gestures.push([this.frame, kind, ...details]);
+    this.record.gestures.push([this.frame, kind, null, ...details]);
   }
 
   snapshot() {
-    if (this.playback) return copy(this.sourceRecord);
-    return { ...this.record, frames: this.frame, checkpoint: checkpoint(this.state),
-      c64: this.state.quest && !this.state.demo ? toBase64(exportSave(this.state)) : null };
+    if (this.playback && !this.playbackDone) {
+      const full = this.restoreFrame(this.sourceRecord.frames);
+      full.finishPlayback();
+      return full.snapshot();
+    }
+    // A live save closes the represented endpoint. Repeated saves add no time;
+    // continuation starts a new entry, even if the stick is still held.
+    if (!this.playback) this.closeWindow();
+    const result = copy({ ...this.record, frames: this.frame, checkpoint: checkpoint(this.state),
+      c64: this.state.quest && !this.state.demo ? toBase64(exportSave(this.state)) : null });
+    result.actions = result.actions.slice(0, this.playback ? this.actionIndex : undefined);
+    result.gestures = result.gestures.filter(g => g[0] <= this.frame && (g[2] == null || g[2] <= this.readIndex));
+    return result;
   }
 
   static watch(data, live, record, verify = true) {
+    if (record?.version === 1) record = convertRecording(data, record);
     validateRecord(record, data);
     const session = new Session(data, live, { record });
     session.verify = verify;
@@ -329,11 +373,10 @@ export class Session {
   get playbackDelay() {
     if (this.frame === this.record.frames) return 0;
     const p = this.state.player;
-    const nextInput = this.record.inputs[this.readIndex];
     // Replay the simulation unchanged, but spend no viewing time on released input.
     // Finish ongoing movement (including falling) before skipping an idle gap.
     const idle = this.frame > 0 && isIdle(this.lastJoy) && !this.state.demo
-      && (!nextInput || nextInput[0] > this.frame)
+      && this.remaining > 0
       && !p.stride && !p.leaping && !p.gliding && !p.fallen && !p.knockdown && !p.pose;
     return idle ? 0 : 1000 / 60;
   }
@@ -352,6 +395,10 @@ export class Session {
     this.playbackDone = true;
     while (this.record.actions[this.actionIndex]?.frame === this.frame) {
       this.apply(this.record.actions[this.actionIndex++]);
+    }
+    this.closeWindow();
+    if (this.remaining || this.entryIndex !== this.sourceRecord.reads.length) {
+      throw new Error(`Read ${this.readIndex + 1}: recording has leftover read counts at ${this.place()}`);
     }
     if (this.verify) {
       const expected = copy(this.sourceRecord.checkpoint);
@@ -398,7 +445,7 @@ export class Session {
 
   static replay(data, live, record, verify = true) {
     const session = Session.watch(data, live, record, verify);
-    for (let i = 0; i < record.frames; i++) {
+    for (let i = 0; i < session.record.frames; i++) {
       session.step();
       session.state.events.length = 0;
     }
@@ -410,7 +457,7 @@ export class Session {
 
 export function validateRecord(r, data) {
   if (r?.format !== 'below-the-root-record' || r.version !== RECORD_VERSION
-      || ![ENGINE_VERSION, 'btr-session-2', 'btr-session-3'].includes(r.engine)) {
+      || r.engine !== ENGINE_VERSION) {
     throw new Error('Unsupported playthrough recording version');
   }
   if (!Number.isInteger(r.frames) || r.frames < 0 || r.frames > MAX_FRAMES
@@ -422,32 +469,112 @@ export function validateRecord(r, data) {
       || (r.initial.mode === 'quest' && !data.characters[r.initial.character || 0])
       || (r.initial.room != null && !data.roomById.has(r.initial.room))
       || (r.initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === r.initial.demo))) throw new Error('Invalid recording start');
-  for (const key of ['inputs', 'actions', 'path', 'gestures', 'outcomes']) {
+  for (const key of ['reads', 'actions', 'path', 'gestures', 'outcomes']) {
     if (!Array.isArray(r[key])) throw new Error('Invalid recording journal');
   }
+  if ('inputs' in r || 'durations' in r) throw new Error('Invalid v2 recording journal');
+  for (const entry of r.reads) {
+    if (!entry || !['s', 'g', 'v', 't', 'd'].includes(entry.k)
+        || !Array.isArray(entry.j) || entry.j.length !== 3
+        || ![-1, 0, 1].includes(entry.j[0]) || ![-1, 0, 1].includes(entry.j[1]) || ![0, 1].includes(entry.j[2])
+        || !Number.isSafeInteger(entry.n) || entry.n <= 0
+        || !Array.isArray(entry.at) || entry.at.length !== 4
+        || !(entry.at[0] === null || typeof entry.at[0] === 'string')
+        || !Number.isInteger(entry.at[1]) || !Number.isInteger(entry.at[2]) || ![-1, 1].includes(entry.at[3])) {
+      throw new Error('Invalid recorded read');
+    }
+    if (!Number.isFinite(entry.ms) || entry.ms < 0) throw new Error('Invalid recorded timing');
+  }
   let previous = 0;
-  for (const input of r.inputs) {
+  for (const action of r.actions) {
+    if (!['load', 'skip', 'menu'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
+        || action.frame > r.frames
+        || (action.read != null && (action.type !== 'skip' || !Number.isSafeInteger(action.read) || action.read < 1))
+        || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');
+    previous = action.frame;
+  }
+}
+
+// The only frame-keyed sampler: v1 is simulated once into the live v2 recorder.
+export function convertRecording(data, record, { onTiming = () => {} } = {}) {
+  if (record?.format !== 'below-the-root-record' || record.version !== 1
+      || !['btr-session-2', 'btr-session-3', 'btr-session-4'].includes(record.engine)) {
+    throw new Error('Unsupported playthrough recording version');
+  }
+  const converted = { ...copy(record), version: RECORD_VERSION, engine: ENGINE_VERSION, reads: [] };
+  delete converted.inputs;
+  delete converted.durations;
+  delete converted.slots;
+  delete converted.storageErrors;
+  validateRecord(converted, data);
+  let previous = 0;
+  if (!Array.isArray(record.inputs)) throw new Error('Invalid recorded input');
+  for (const input of record.inputs) {
     if (!Array.isArray(input) || input.length !== 4 || !Number.isInteger(input[0])
-        || input[0] < previous || input[0] > r.frames || ![-1, 0, 1].includes(input[1])
+        || input[0] < previous || input[0] > record.frames || ![-1, 0, 1].includes(input[1])
         || ![-1, 0, 1].includes(input[2]) || ![0, 1].includes(input[3])) throw new Error('Invalid recorded input');
     previous = input[0];
   }
   previous = 0;
-  if (r.durations != null) {
-    if (!Array.isArray(r.durations)) throw new Error('Invalid recorded timing');
-    for (const entry of r.durations) {
-      if (!Array.isArray(entry) || entry.length !== 2 || !Number.isInteger(entry[0])
-          || entry[0] < previous || entry[0] > r.frames || !Number.isSafeInteger(entry[1])
-          || entry[1] < 0) throw new Error('Invalid recorded timing');
-      previous = entry[0];
+  if (record.durations != null && !Array.isArray(record.durations)) throw new Error('Invalid recorded timing');
+  for (const entry of record.durations || []) {
+    if (!Array.isArray(entry) || entry.length !== 2 || !Number.isInteger(entry[0])
+        || entry[0] < previous || entry[0] > record.frames || !Number.isSafeInteger(entry[1])
+        || entry[1] < 0) throw new Error('Invalid recorded timing');
+    previous = entry[0];
+  }
+  let inputIndex = 0, durationIndex = 0, duration = 16667, joy = IDLE;
+  const session = new Session(data, { read() {
+    const input = record.inputs[inputIndex];
+    if (input && input[0] <= session.frame) {
+      joy = { dx: input[1], dy: input[2], fire: !!input[3] };
+      inputIndex++;
+    }
+    return joy;
+  } }, { seed: record.seed, initial: record.initial });
+  Object.assign(session.record, converted, { actions: [], path: session.record.path, outcomes: [],
+    gestures: record.gestures.map(g => [g[0], g[1], null, ...g.slice(2)]) });
+  if (record.engine === 'btr-session-2') session.record.legacyContinueUntil = record.legacyContinueUntil ?? record.frames;
+  let actionIndex = 0, oldTime = 0, progress = session.state.progress;
+  for (;;) {
+    while (record.actions[actionIndex]?.frame === session.frame) {
+      const action = copy(record.actions[actionIndex++]);
+      if (action.type === 'skip' && session.state.tuneWait != null && session.frame < record.frames) {
+        session.read('t');
+        action.read = session.readIndex;
+      }
+      session.apply(action);
+      session.record.actions.push(action);
+    }
+    if (progress !== session.state.progress) { oldTime = 0; progress = session.state.progress; }
+    if (session.frame === record.frames) break;
+    while (record.durations?.[durationIndex]?.[0] === session.frame) duration = record.durations[durationIndex++][1];
+    const s = session.state;
+    if (s.quest && !s.demo && !s.progress.won && !s.timeUp) oldTime += duration / 1000;
+    session.step(duration / 1000);
+    if (progress !== s.progress) { oldTime = 0; progress = s.progress; }
+    session.state.events.length = 0;
+  }
+  const result = session.snapshot();
+  // Timing is intentionally re-accrued; all other checkpoint fields still verify,
+  // including compatibility with old scoring and victory text.
+  const expected = copy(record.checkpoint);
+  if (expected.stats) expected.stats.milliseconds = result.checkpoint.stats.milliseconds;
+  if (session.state.progress.won && Array.isArray(expected.panel)) {
+    const row = panelLines(expected)[3];
+    const updated = row.replace(/(?:\d+:\d+:\d+|(?:(?:\d+)H )?\d+M \d+S)(?= PLAY \/)/, playTime(session.state));
+    if (updated !== row) {
+      expected.panel.fill(0, expected.panel.length - PANEL_COLS);
+      print(expected, PANEL_ROW + 3, 1, updated.trimStart());
     }
   }
-  previous = 0;
-  for (const action of r.actions) {
-    if (!['load', 'skip', 'menu'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
-        || action.frame > r.frames || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');
-    previous = action.frame;
-  }
+  session.sourceRecord = { ...result, checkpoint: expected };
+  session.entryIndex = result.reads.length;
+  // The older engine permits the formerly blank victory statistics row.
+  session.record.engine = record.engine;
+  session.finishPlayback();
+  onTiming({ old: record.checkpoint.stats?.milliseconds ?? oldTime, new: result.checkpoint.stats.milliseconds });
+  return result;
 }
 
 // failed originals: preserved before each replacement, including repeated recoveries
