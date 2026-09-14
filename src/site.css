@@ -37,7 +37,7 @@ a { color: #c7f5ae; }
   #music-notes > [data-register] { display: flex; justify-content: end; align-items: center; }
   #music-notes [data-rhythm] { position: static; flex-shrink: 0; animation: none; }
 }
-#site-header button[aria-pressed="true"] { background: #354537; border-color: #d6f897; }
+#site-header button[aria-pressed="true"], #site-header #help[aria-expanded="true"] { background: #354537; border-color: #d6f897; }
 button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
 button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 .reading-page [id] { scroll-margin-top: 120px; }

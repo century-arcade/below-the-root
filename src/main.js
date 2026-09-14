@@ -312,10 +312,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     else dropInput();
     helpScreen.hidden = false;
     helpButton.setAttribute('aria-expanded', 'true');
-    const closeButton = document.getElementById('close-help');
-    closeButton.textContent = startup ? 'Continue to intro' : 'Close';
     helpScreen.scrollTop = 0;
-    (startup ? closeButton : helpScreen).focus({ preventScroll: true });
+    if (startup) helpButton.focus({ preventScroll: true });
+    else if (document.activeElement !== helpButton) helpScreen.focus({ preventScroll: true });
     fit();
   }
   function closeHelp() {
@@ -369,7 +368,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     fit();
   }
   document.getElementById('close-map').onclick = release;
-  document.getElementById('close-help').onclick = closeHelp;
   function commandMenu(close = false) {
     if (paused || overlay || startupHelp || !session.commandMenu(close)) return;
     release();
@@ -399,7 +397,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     e.stopImmediatePropagation();
     if (type === 'keydown') mapViewport.scrollBy({ left: direction[0] * 80, top: direction[1] * 80, behavior: 'instant' });
   }, true);
-  // Help permits play while its buttons and the startup intro keep native activation.
+  // Help permits play while its links and the startup intro keep native activation.
   for (const screen of [mapScreen, helpScreen]) {
     for (const type of ['keydown', 'keyup']) screen.addEventListener(type, e => {
       if (screen === helpScreen && !startupHelp) {

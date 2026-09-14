@@ -34,7 +34,7 @@ with sync_playwright() as p:
         help_screen = page.locator('#help-screen')
         expect(help_screen).to_be_visible()
         expect(page.locator('#developer-help')).to_be_visible()
-        expect(page.get_by_role('button', name='Continue to intro')).to_be_focused()
+        expect(page.get_by_role('button', name='Help', exact=True)).to_be_focused()
         stopped = snapshot()
         assert stopped['frames'] == 0, 'Help precedes the first intro frame'
         help_screen.focus()
@@ -42,14 +42,14 @@ with sync_playwright() as p:
         page.keyboard.press('Space')
         page.wait_for_timeout(200)
         assert snapshot()['frames'] == 0, 'reading startup Help holds the intro'
-        page.get_by_role('button', name='Continue to intro').tap()
+        page.get_by_role('button', name='Help', exact=True).tap()
         expect(help_screen).to_be_hidden()
-        expect(page.locator('#screen')).to_be_focused()
+        expect(page.locator('#help')).to_be_focused()
         page.wait_for_timeout(200)
         intro = snapshot()
         assert intro['frames'] > 0
-        assert intro['checkpoint']['shell']['demo'] == 'intro', 'Continue starts the intro without skipping it'
-        assert all(r['j'] == [0, 0, 0] for r in intro['reads']), 'Continue does not send a joystick press'
+        assert intro['checkpoint']['shell']['demo'] == 'intro', 'Closing startup help starts the intro without skipping it'
+        assert all(r['j'] == [0, 0, 0] for r in intro['reads']), 'Toggling help does not send a joystick press'
         page.locator('#screen').focus()
         expect(page.locator('#screen')).to_have_attribute('aria-label', re.compile(r'Press \? for all controls'))
         page.keyboard.press('h')
@@ -57,8 +57,7 @@ with sync_playwright() as p:
         page.keyboard.press('Space')
         page.keyboard.press('ArrowRight')
         expect(help_screen).to_be_visible()
-        page.keyboard.press('Tab')
-        expect(page.locator('#close-help')).to_be_focused()
+        expect(help_screen.get_by_role('button')).to_have_count(0)
         question_mark()
         expect(help_screen).to_be_hidden()
         expect(page.locator('#screen')).to_be_focused()
@@ -76,6 +75,15 @@ with sync_playwright() as p:
         expect(page.locator('#help')).to_have_attribute('aria-expanded', 'true')
         page.get_by_role('button', name='Help', exact=True).tap()
         expect(help_screen).to_be_hidden()
+        for key in ['Enter', 'Space']:
+            page.locator('#help').press(key)
+            expect(help_screen).to_be_visible()
+            expect(page.locator('#help')).to_be_focused()
+            expect(page.locator('#help')).to_have_attribute('aria-expanded', 'true')
+            page.keyboard.press(key)
+            expect(help_screen).to_be_hidden()
+            expect(page.locator('#help')).to_be_focused()
+            expect(page.locator('#help')).to_have_attribute('aria-expanded', 'false')
         page.get_by_role('button', name='Help', exact=True).tap()
         page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).tap()
         expect(help_screen).to_be_hidden()

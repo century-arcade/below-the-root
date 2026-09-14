@@ -79,9 +79,9 @@ with sync_playwright() as p:
     page.goto(BASE + '/about')
     page.evaluate('localStorage.clear()')
     page.goto(BASE + '/play')
-    expect(page.get_by_role('button', name='Continue to intro')).to_be_visible()
+    expect(page.get_by_role('button', name='Help', exact=True)).to_be_visible()
     expect(indicator).to_have_attribute('hidden', '')
-    page.get_by_role('button', name='Continue to intro').click()
+    page.get_by_role('button', name='Help', exact=True).click()
     expect(indicator).not_to_have_attribute('hidden', '')
     assert not errors, errors
     browser.close()

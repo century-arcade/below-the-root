@@ -10,14 +10,11 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #screen-focus { display: block; position: absolute; inset: calc(-1 * var(--canvas-padding, 0px)); width: calc(100% + 2 * var(--canvas-padding, 0px)); height: calc(100% + 2 * var(--canvas-padding, 0px)); fill: none; stroke: #56734e; stroke-width: 6px; filter: blur(1.5px); pointer-events: none; }
 #game:fullscreen #canvas-box { flex: none; }
 #map-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
-#map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
+#map-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
 #map-screen { font: clamp(12px, 2cqw, 20px)/1.2 'Green-Sky', monospace; text-transform: uppercase; }
 #map-screen button { text-transform: inherit; }
 #help-screen { box-sizing: border-box; width: 33.333%; min-width: min(240px, 100%); align-self: center; color: #fff; font: 10px/1.5 'Green-Sky', monospace; text-transform: uppercase; }
-#help-heading { flex-wrap: wrap; gap: 1em; padding: .75em; }
-#help-heading h2 { flex: 1; margin: 0; padding: 0 .25em; background: #fff; color: #000; font: inherit; }
-#help-heading button { color: #fff; background: #000; border-color: #fff; text-transform: inherit; }
-#help-heading button:hover, #help-heading button:focus-visible { color: #000; background: #fff; outline-color: #fff; }
+#help-heading { margin: .75em .75em 0; padding: 0 .25em; background: #fff; color: #000; font: inherit; }
 #help-content { padding: 0 .75em 1em; min-width: 0; overflow-wrap: anywhere; }
 #help-content h1, #help-content h2, #help-content h3 { font: inherit; text-transform: uppercase; margin: 1.5em 0 .75em; }
 #help-content h2 { background: #fff; color: #000; padding: 0 .25em; }
