@@ -18,6 +18,7 @@ import { setupDeveloper, GAME_TOOLS } from './header.js';
 const log = createLog(document.getElementById('log'), { onToggle: () => fit() });
 
 const canvas = document.getElementById('screen');
+const screenFocus = document.getElementById('screen-focus');
 const game = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
@@ -196,6 +197,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
+  const isRunning = () => !paused && !held && !document.hidden && !session.playbackDone;
   let overlay = null;
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');
@@ -411,6 +413,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
+    // Pointer steering prevents the browser's default focus transfer.
+    if (type === 'pointerdown' && e.button === 0) canvas.focus({ preventScroll: true });
     if (held) { if (type === 'pointerdown') release(); return; }
     session.gesture(type, ...pointer.pixel(e).map(Math.round));
   });
@@ -521,6 +525,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
+    screenFocus.toggleAttribute('hidden', !isRunning());
     menuButton.hidden = session.playback || !canOpenCommandMenu(state);
     if (replayHelp) replayHelp.hidden = !session.playback;
     backDayButton.hidden = !debug || session.playback;
@@ -553,7 +558,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       seekReplayRoom(seekKey === 'ArrowRight' ? seekAmount : -seekAmount);
       seekRepeatAt = now + 100;
     }
-    const running = !paused && !held && !document.hidden && !session.playbackDone;
+    const running = isRunning();
     const elapsed = running ? Math.max(0, now - last) : 0;
     acc += Math.min(elapsed, 250);
     elapsedAcc += elapsed;
