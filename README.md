@@ -66,13 +66,14 @@ a partial timer, marked `>=`, because the save has no elapsed-time history.
 
 Completion totals 100%:
 
-| Milestone | Completion |
-|-----------|------------|
-| Spirit earned | 1% per point, up to 35% |
-| Elixirs consumed | 1% each, up to 5% |
-| Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 5% each, up to 20% |
-| World tokens collected | 10% × unique tokens collected / 62, rounded down |
-| Raamo saved | 30% |
+| Milestone | Max | Completion |
+|-----------|-----|------------|
+| Animals pensed for spirit | 10 animals | 1% each, up to 10% |
+| Leaders spoken to for spirit (blessers) | 5 leaders | 5% each, up to 25% |
+| Elixirs consumed | 5 elixirs | 1% each, up to 5% |
+| Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 4 items | 5% each, up to 20% |
+| World tokens collected | 62 tokens | 10% × unique tokens collected / 62, rounded down |
+| Raamo saved | 1 rescue | 30% |
 
 Starting spirit does not count. Dropping items, spending spirit, or spending
 or losing tokens does not remove earned points. Each world token counts once;
