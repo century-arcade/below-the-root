@@ -64,16 +64,26 @@ and stops when Raamo is saved. New recordings retain actual elapsed wall time;
 older recordings estimate it at 60 frames per second. Loading a C64 save starts
 a partial timer, marked `>=`, because the save has no elapsed-time history.
 
-Completion awards 1% per spirit point earned (35 available), 1% per elixir
-consumed (five available), 5% each for acquiring the spirit bell, spirit lamp,
-temple key and D'ol Falla's key, and 40% for saving Raamo. Starting spirit does
-not count; dropping items or spending spirit does not remove earned points.
-Room exploration is not scored. C64 imports recover spirit gifts, consumed
-elixirs and currently carried quest items; earlier dropped-item history is unknown.
+Completion totals 100%:
+
+| Milestone | Completion |
+|-----------|------------|
+| Spirit earned | 1% per point, up to 35% |
+| Elixirs consumed | 1% each, up to 5% |
+| Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 5% each, up to 20% |
+| World tokens collected | 10% × unique tokens collected / 62, rounded down |
+| Raamo saved | 30% |
+
+Starting spirit does not count. Dropping items, spending spirit, or spending
+or losing tokens does not remove earned points. Each world token counts once;
+selling items does not create extra collectible tokens. Room exploration is
+not scored. JSON recordings reconstruct collection history by replaying it.
+C64 imports recover spirit gifts, consumed elixirs and currently carried quest
+items and world tokens; earlier dropped-item and spent-token history is unknown.
 
 `node test/win_replay_test.js` replays `test/fixtures/pomma-win.json` in Node,
 verifies its checkpoint, then acknowledges the ending with normal button input.
-The recording includes a fresh Pomma quest that wins on day 3 (92% completion,
+The recording includes a fresh Pomma quest that wins on day 3 (82% completion,
 about 24m 23s unpaused). This regression also runs under `make test`.
 
 Tab (or the Map icon in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.

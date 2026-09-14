@@ -6,6 +6,8 @@ import { enterRoom } from './world.js';
 import { IDLE, isIdle, pressEdge } from './input.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
+import { panelLines, print, PANEL_ROW } from './panel.js';
+import { playTime } from './progress.js';
 
 export const RECORD_VERSION = 1;
 export const ENGINE_VERSION = 'btr-session-4';
@@ -249,6 +251,15 @@ export class Session {
       const actual = checkpoint(this.state);
       delete expected.shell?.disk;
       if (!expected.stats) delete actual.stats;
+      else if (!('tokens' in expected.stats)) {
+        delete actual.stats.tokens;
+        // Old recordings used the pre-token score on the final victory page.
+        if (this.state.progress.won && panelLines(this.state)[3].includes('% COMPLETE')) {
+          const p = this.state.progress;
+          const score = Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5 + 40;
+          print(actual, PANEL_ROW + 3, 1, `${playTime(this.state)} PLAY / ${score}% COMPLETE`);
+        }
+      }
       // New win statistics occupy only the formerly blank final row.
       if (this.record.engine !== ENGINE_VERSION && this.state.progress.won && Array.isArray(expected.panel)
           && expected.panel.slice(120).every(value => value === 0)) {

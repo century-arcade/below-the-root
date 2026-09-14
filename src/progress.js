@@ -3,10 +3,14 @@ import { CLASS } from './data.js';
 export const QUEST_ITEMS = [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY];
 
 export function newProgress() {
-  return { milliseconds: 0, partialTime: false, spirit: 0, elixirs: 0, items: [], won: false };
+  return { milliseconds: 0, partialTime: false, spirit: 0, elixirs: 0, items: [], won: false, tokens: [] };
 }
 
 export function acquired(state, item) {
+  if (item.class === CLASS.TOKEN && !state.progress.tokens.includes(item.object)
+      && state.data.objects.some(o => o.class === CLASS.TOKEN && o.object === item.object)) {
+    state.progress.tokens.push(item.object);
+  }
   if (QUEST_ITEMS.includes(item.class) && !state.progress.items.includes(item.class)) {
     state.progress.items.push(item.class);
   }
@@ -26,7 +30,10 @@ export function progressFromSave(state) {
 
 export function completion(state) {
   const p = state.progress;
-  return Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5 + (p.won ? 40 : 0);
+  const totalTokens = state.data.objects.filter(o => o.class === CLASS.TOKEN).length;
+  const tokens = totalTokens ? Math.floor(10 * p.tokens.length / totalTokens) : 0;
+  return Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5
+    + Math.min(10, tokens) + (p.won ? 30 : 0);
 }
 
 export function playTime(state) {
