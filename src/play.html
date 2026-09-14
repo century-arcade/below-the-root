@@ -1,22 +1,25 @@
 <section id="play" aria-label="Play Below the Root">
 <div id="game">
-  <div id="canvas-box">
-    <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; Space or Enter is the joystick button; Escape or P pauses; Tab shows the map. Press ? for all controls."></canvas>
-    <div id="crt" aria-hidden="true" hidden><div id="scanlines"></div><div id="stripes"></div></div>
-    <svg id="screen-focus" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true" focusable="false"><use href="#screen-curve"/></svg>
-    <div id="map-screen" hidden role="dialog" aria-label="World map">
-      <div id="map-heading"><span>World map</span><button id="close-map">Close</button></div>
-      <div id="map-tools">
-        <button id="map-zoom-out" aria-label="Zoom out" disabled>−</button>
-        <output id="map-zoom" aria-live="polite">1×</output>
-        <button id="map-zoom-in" aria-label="Zoom in">+</button>
+  <div id="play-area">
+    <div id="canvas-box">
+      <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; Space or Enter is the joystick button; F opens the command menu; Escape closes it or pauses; P pauses; M or Tab shows the map. Press ? for all controls."></canvas>
+      <button id="command-menu" hidden aria-label="Open command menu" aria-keyshortcuts="F" title="Open command menu (F)"></button>
+      <div id="crt" aria-hidden="true" hidden><div id="scanlines"></div><div id="stripes"></div></div>
+      <svg id="screen-focus" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true" focusable="false"><use href="#screen-curve"/></svg>
+      <div id="map-screen" hidden role="dialog" aria-label="World map">
+        <div id="map-heading"><span>World map</span><button id="close-map">Close</button></div>
+        <div id="map-tools">
+          <button id="map-zoom-out" aria-label="Zoom out" disabled>−</button>
+          <output id="map-zoom" aria-live="polite">1×</output>
+          <button id="map-zoom-in" aria-label="Zoom in">+</button>
+        </div>
+        <div id="map-viewport"><div id="map-grid"></div></div>
       </div>
-      <div id="map-viewport"><div id="map-grid"></div></div>
     </div>
-    <div id="help-screen" hidden role="dialog" aria-label="How to play" tabindex="-1">
+    <aside id="help-screen" hidden aria-label="How to play" tabindex="-1">
       <div id="help-heading"><span>How to play</span><button id="close-help">Close</button></div>
       <div id="help-content">{{help}}</div>
-    </div>
+    </aside>
   </div>
   <div id="where" role="status"></div>
   <div id="log" role="log" aria-live="polite" hidden></div>

@@ -1,20 +1,20 @@
 canvas { image-rendering: pixelated; display: block; background: #000; }
 #game { display: flex; flex-direction: column; align-items: stretch; margin-top: var(--header-gap); }
 #game:fullscreen { background: #000; justify-content: center; align-items: center; margin-top: 0; }
-#game:fullscreen > :not(#canvas-box) { display: none; }
+#game:fullscreen > :not(#play-area) { display: none; }
 /* Opaque backing keeps the CRT blur's transparent edges from revealing its overlay. */
 #canvas-box { position: relative; container-type: inline-size; background: #000; border: var(--canvas-padding, 0px) solid #000; }
 #screen:focus-visible { outline: none; }
 /* Keep the game from showing through the blurred edges of an open overlay. */
-#canvas-box:has(> :is(#map-screen, #help-screen):not([hidden])) > #screen { opacity: 0; }
+#canvas-box:has(> #map-screen:not([hidden])) > #screen { opacity: 0; }
 #screen-focus { display: none; position: absolute; inset: calc(-1 * var(--canvas-padding, 0px)); width: calc(100% + 2 * var(--canvas-padding, 0px)); height: calc(100% + 2 * var(--canvas-padding, 0px)); fill: none; stroke: #56734e; stroke-width: 6px; filter: blur(1.5px); pointer-events: none; }
 #screen:focus-visible ~ #screen-focus { display: block; }
 #game:fullscreen #canvas-box { flex: none; }
-#map-screen, #help-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
+#map-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
 #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
 #map-screen { font: clamp(12px, 2cqw, 20px)/1.2 'Green-Sky', monospace; text-transform: uppercase; }
 #map-screen button { text-transform: inherit; }
-#help-screen { overflow: auto; font: var(--game-font-size)/1.5 'Green-Sky', monospace; text-transform: uppercase; }
+#help-screen { box-sizing: border-box; width: 320px; flex: 0 0 320px; max-height: var(--play-height); background: #000; color: #fff; overflow: auto; font: var(--game-font-size)/1.5 'Green-Sky', monospace; text-transform: uppercase; }
 #help-heading { position: sticky; top: 0; gap: 1em; padding: .75em; background: #000; border-bottom: 1px solid #fff; }
 #help-heading button { color: #fff; background: #000; border-color: #fff; text-transform: inherit; }
 #help-heading button:hover, #help-heading button:focus-visible { color: #000; background: #fff; outline-color: #fff; }
@@ -41,7 +41,7 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #scanlines { background: repeating-linear-gradient(to bottom, #fff 0, #fff calc(var(--row) * .5), #9e9e9e calc(var(--row) * .75), #fff var(--row)); }
 #stripes { background: repeating-linear-gradient(to right, #ffdbdb 0, #ffdbdb calc(var(--stripe) / 3), #dbffdb calc(var(--stripe) / 3), #dbffdb calc(var(--stripe) * 2 / 3), #dbdbff calc(var(--stripe) * 2 / 3), #dbdbff var(--stripe)); }
 #canvas-box:not(.stripes) #stripes { display: none; }
-#canvas-box.crt > :is(#screen, #map-screen, #help-screen) { filter: brightness(1.3) blur(var(--blur)); }
+#canvas-box.crt > :is(#screen, #map-screen) { filter: brightness(1.3) blur(var(--blur)); }
 #where { min-height: 32px; font-size: 24px; line-height: 32px; letter-spacing: 2px; text-align: center; }
 #log { height: calc(3 * 1.6em); overflow-y: auto; text-align: left; color: #9ad284; font: inherit; white-space: pre-wrap; }
 dialog {
@@ -50,3 +50,12 @@ dialog {
 }
 textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
 #issue-result { overflow-wrap: anywhere; }
+
+#play-area { display: flex; align-items: flex-start; gap: 16px; }
+#canvas-box { flex: none; }
+#command-menu { position: absolute; left: 0; top: var(--menu-top); width: 100%; height: var(--menu-height); padding: 0; border: 0; background: transparent; }
+#command-menu:focus-visible { outline-offset: -2px; }
+@media (max-width: 759px) {
+  #play-area { flex-direction: column; }
+  #help-screen { width: 100%; flex: auto; max-height: 60dvh; }
+}

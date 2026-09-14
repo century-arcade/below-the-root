@@ -46,6 +46,7 @@ function drawMenu(state, selCol, selRow) {
 
 // read counts are the demo replay contract (player.md, How often the stick is read)
 export function* runMenu(state) {
+  state.commandMenuOpen = true;
   let col = 0, row = 0;
   yield* fireUp();
   drawMenu(state, col, row);
@@ -57,6 +58,7 @@ export function* runMenu(state) {
     drawMenu(state, col, row);
   }
   const verb = MENU[row][col];
+  state.commandMenuOpen = false;
   sfx(state, SFX.confirm);
   clearPanel(state);
   const fn = VERBS[verb];

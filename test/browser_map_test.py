@@ -112,7 +112,7 @@ with sync_playwright() as p:
         assert all(r['j'] == [0, 0, 0] for r in record()['reads']), 'resuming from the map drops the movement key'
 
         page.locator('#map').press('Enter')
-        page.keyboard.press('f')
+        page.get_by_role('button', name='Fullscreen', exact=True).click()
         page.wait_for_function('document.fullscreenElement !== null')
         assert page.locator('#map-screen').is_visible(), 'the map is available in fullscreen'
         page.keyboard.press('Tab')

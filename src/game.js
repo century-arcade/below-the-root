@@ -65,6 +65,7 @@ export function newState(data, input, opts = {}) {
     character: null,
     pointer: null,
     verb: null,
+    commandMenuOpen: false,
     verbWait: 0,
     restDelayCut: false,
     ended: null,
@@ -163,6 +164,7 @@ export function endDemo(state) {
 
 // a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait
 export function startVerb(state, gen) {
+  state.commandMenuOpen = false;
   state.verb = gen;
   state.verbWait = 0;
   advanceVerb(state, gen.next());
@@ -186,6 +188,27 @@ function endVerb(state) {
   if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);
   if (!state.ended) state.active = true;
+}
+
+export function canOpenCommandMenu(state) {
+  return state.quest && !state.title && !state.demo && state.active && !state.verb
+    && !state.stop && !state.stall && !state.ended;
+}
+
+export function openCommandMenu(state) {
+  if (!canOpenCommandMenu(state)) return false;
+  startVerb(state, runMenu(state));
+  return true;
+}
+
+export function closeCommandMenu(state) {
+  if (!state.commandMenuOpen) return false;
+  state.verb.return();
+  state.commandMenuOpen = false;
+  state.verbWait = 0;
+  clearPanel(state);
+  endVerb(state);
+  return true;
 }
 
 function resolveStop(state) {

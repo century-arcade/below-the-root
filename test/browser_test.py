@@ -150,20 +150,17 @@ with sync_playwright() as p:
     volume = page.get_by_role('slider', name='Volume', exact=True)
     expect(volume).to_have_value('50')
     page.keyboard.press('m')
-    expect(volume).to_have_value('0')
-    assert page.evaluate("localStorage.getItem('btr.muted')") == '1'
-    page.keyboard.press('m')
     expect(volume).to_have_value('50')
-    assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
+    expect(page.locator('#map-screen')).to_be_visible()
+    page.keyboard.press('m')
+    expect(page.locator('#map-screen')).to_be_hidden()
     page.keyboard.press('-')
     expect(volume).to_have_value('40')
     page.keyboard.press('+')
     expect(volume).to_have_value('50')
-    page.keyboard.press('m')
     volume.press('Home')
     for _ in range(3):
         volume.press('ArrowRight')
-    assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
     assert page.evaluate("localStorage.getItem('btr.volume.v2')") == '0.3'
     volume.press('Home')
     expect(volume).to_have_value('0')
@@ -199,6 +196,8 @@ with sync_playwright() as p:
     page.get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement !== null')
     page.keyboard.press('f')
+    assert page.evaluate('document.fullscreenElement !== null'), 'F does not toggle fullscreen'
+    page.evaluate('document.exitFullscreen()')
     page.wait_for_function('document.fullscreenElement === null')
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
@@ -215,7 +214,6 @@ with sync_playwright() as p:
     assert menu['initial'] == saved['initial']
     assert menu['checkpoint']['objects'] == saved['checkpoint']['objects']
     assert page.evaluate("localStorage.getItem('btr.quest2')") == record['c64']
-    assert page.evaluate("localStorage.getItem('btr.muted')") == '0'
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(page.locator('#home')).to_have_attribute('aria-current', 'page')

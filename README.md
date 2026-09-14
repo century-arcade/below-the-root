@@ -30,7 +30,7 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
 | M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider and keyboard mute, the ? help overlay; top-bar reset and developer tools with CRT effect (CSS overlay); modern status rows and tune skipping; palette choice parked | done |
+| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider, the ? help panel; top-bar reset and developer tools with CRT effect (CSS overlay); modern status rows and tune skipping; palette choice parked | done |
 | M6.5 ship -- normal walkthrough recording and cleanup tools ready; speedrun playthroughs per character in progress; GitHub OAuth configured; user authorization still to verify | **in progress** |
 
 The spec has 10 unknowns, listed under "Unknowns" at the end of most area files;
@@ -48,18 +48,18 @@ script, `?room=T1` to start somewhere else).
 About introduces the game; Play opens it, and Links collects interviews, reviews, guides and original materials.
 Returning players with an autosave land on Play; an explicit tab link takes precedence.
 
-Keys: arrows/WASD move, space is the button, Escape or P pauses, M toggles mute, - and = (or _ and +) step the volume, F toggles fullscreen.
+Keys: arrows/WASD move; Space or Enter is the button; F opens the command menu; Escape closes the command menu, map or help, otherwise it pauses. P pauses; M or Tab toggles the map; ? or H toggles help. - and = (or _ and +) step the volume. Use the volume slider to mute and the fullscreen button to expand the game. Clicking or tapping the menu area below the scene also opens the command menu.
 
 Menus wait for the stick to centre between pushes, so holding a direction moves once.
 
 Uploading a JSON recording in developer tools plays it from the beginning.
-Space or **Next room** fast-forwards to the next room change; playback stops at
-the end of the file and verifies its checkpoint. **Return to game** restores
-your live quest. Watching never replaces your autosave. C64 `.prg` uploads
+Left/Right skips back/forward one room change; add Shift to skip ten or hold
+the arrow to keep skipping. Playback stops at the end of the file and verifies
+its checkpoint. **Game** returns to the title menu; **Continue** resumes your live quest. Watching never replaces your autosave. C64 `.prg` uploads
 still load a saved position.
 
 Winning shows unpaused play time and game completion. Time includes dialogs,
-music and the in-game menus, excludes browser pauses, map/help and hidden tabs,
+music and the in-game menus, excludes browser pauses, the map and hidden tabs,
 and stops when Raamo is saved. New recordings retain actual elapsed wall time;
 older recordings estimate it at 60 frames per second. Loading a C64 save starts
 a partial timer, marked `>=`, because the save has no elapsed-time history.
@@ -94,7 +94,7 @@ verifies its checkpoint, then acknowledges the ending with normal button input.
 The recording includes a fresh Pomma quest that wins on day 3 (87% completion,
 about 24m 23s unpaused). This regression also runs under `make test`.
 
-Tab (or the Map icon in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
+M or Tab (or Map in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
 The map is available from the menu and intro, even before starting a quest.
 It starts with the exterior rooms selected in `assets/initial-map.json`, plus the
@@ -104,13 +104,13 @@ location while indoors (or your nid's exit on a new quest); there is no marker b
 Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
 Drag or scroll to explore when zoomed, and use Your location to return to the marker.
 
-? (or H, or Help in the navbar) opens all controls inside the canvas area.
+? (or H, or Help in the navbar) toggles help beside the canvas, or below it on narrow screens. The game keeps running while help is open; focus the canvas to keep playing. Recording playback adds replay commands to help.
 
-The top bar has an unlabelled volume slider (starts at 50%; gain is squared for quiet low levels). M toggles mute, shown as 0% on the slider; adjusting it unmutes. The red `[!]` button resets the game in one click, deleting the autosave and returning to the main menu while preserving preferences. The `</>` button toggles developer mode: recording tools, issue reporting and a CRT effect toggle (scanlines, phosphor stripes, vignette and colour bleed; off by default). Preferences persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
+The top bar has an unlabelled volume slider (starts at 50%; gain is squared for quiet low levels). Zero volume mutes; raising it restores sound. The red `[!]` button resets the game in one click, deleting the autosave and returning to the main menu while preserving preferences. The `</>` button toggles developer mode: recording tools, issue reporting and a CRT effect toggle (scanlines, phosphor stripes, vignette and colour bleed; off by default). Preferences persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
 
 Classic display is retired from the UI. Its implementation and saved `btr.classic` preference remain supported, but there is no control to select it. The default modern display adds two rows in the game's own font under the picture with the status sheet's day, time, name and numbers, live during a quest (in fullscreen too), and lets the button skip any tune the game would wait for (a recorded action, so playthroughs replay).
 
-There is no options dialog. Any future options panel should appear inside the canvas area, like the Help screen.
+There is no options dialog.
 
 The header controls appear on Game, About, and Links. Developer mode, CRT and volume preferences carry across pages. Recording and issue controls on About or Links open Game and focus the requested control.
 
@@ -175,6 +175,7 @@ saves the game, and returning restores it.
 
 Edit `src/help.md` for the in-game **?** Help screen, then run `make build`.
 Help appears before the intro on a fresh launch; saved games resume directly.
+The `Recording playback` section appears only while watching a recording.
 Its web font comes from the game's extracted `assets/charset_text.json` glyphs.
 To regenerate `assets/game-text.woff`, install Python's `fonttools` and `skia-pathops` packages and run
 `python tools/text_font.py`. The generated font is committed, so normal builds

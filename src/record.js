@@ -1,6 +1,6 @@
 // A versioned journal re-creates generator state by replaying the same ticks and input reads.
 // C64 saves remain interoperable checkpoints; this is the richer browser save format.
-import { newState, startQuest, startDemo, endDemo, tick } from './game.js';
+import { newState, startQuest, startDemo, endDemo, tick, canOpenCommandMenu, openCommandMenu, closeCommandMenu } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
 import { IDLE, isIdle } from './input.js';
@@ -308,6 +308,8 @@ export class Session {
     this.closeWindow();
     if (action.type === 'load') importSave(this.state, fromBase64(action.save));
     else if (action.type === 'skip') skipTune(this.state);
+    else if (action.type === 'command') openCommandMenu(this.state);
+    else if (action.type === 'cancel-command') closeCommandMenu(this.state);
     else if (action.type === 'menu') {
       endDemo(this.state);
       this.state.menuSel = 0;
@@ -320,6 +322,14 @@ export class Session {
     const action = { frame: this.frame, type: 'menu' };
     this.apply(action);
     this.record.actions.push(action);
+  }
+
+  commandMenu(close = false) {
+    if (this.playback || !(close ? this.state.commandMenuOpen : canOpenCommandMenu(this.state))) return false;
+    const action = { frame: this.frame, type: close ? 'cancel-command' : 'command' };
+    this.apply(action);
+    this.record.actions.push(action);
+    return true;
   }
 
   skipTune(fromRead = false) {
@@ -487,7 +497,7 @@ export function validateRecord(r, data) {
   }
   let previous = 0;
   for (const action of r.actions) {
-    if (!['load', 'skip', 'menu'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
+    if (!['load', 'skip', 'menu', 'command', 'cancel-command'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
         || action.frame > r.frames
         || (action.read != null && (action.type !== 'skip' || !Number.isSafeInteger(action.read) || action.read < 1))
         || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');

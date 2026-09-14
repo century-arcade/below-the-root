@@ -9,14 +9,18 @@ leaving the page saves the current frame too. Returning to `/` or
 
 The permanent footer and manual digit/X shortcuts have been removed.
 Keyboard movement remains arrows/WASD plus space, Shift, or Control.
-Escape or P pauses; any movement key or a tap on the screen resumes.
+F or a click/tap in the command area opens the command menu; Escape dismisses it.
+Opening and dismissing the menu are recorded actions, so reload and replay
+restore the same interaction. Otherwise Escape or P pauses; any movement key
+or a tap on the screen resumes. Help stays available beside the running game.
 Leaving the tab or window pauses too. Music continues while game time is paused.
 Mouse/touch input remains hold-to-steer, tap-for-button, and double-tap
 to walk. The port omits DISK STORAGE; the autosave is the save.
 Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
 JSON uploads play continuously from the beginning, skipping recorded delays
-and idle gaps while showing movement at 60 Hz. Space skips to
-the next room change, then playback continues at normal speed;
+and idle gaps while showing movement at 60 Hz. Left/Right skips back/forward
+one room change; Shift skips ten, and holding the arrow repeats. Then playback
+continues at normal speed;
 the replay stops and verifies the checkpoint at the file's end. Home exits
 replay to the menu, where CONTINUE resumes the live quest. Its autosave is
 untouched while watching.

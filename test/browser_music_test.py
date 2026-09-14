@@ -26,7 +26,7 @@ with sync_playwright() as p:
     }''')
     page.keyboard.press('-')  # Unlock sound without leaving the demo.
     page.wait_for_function('new Set(seenSymbols).size > 1')
-    page.keyboard.press('m')
+    page.locator('#volume').fill('0')
     expect(page.locator('#volume')).to_have_value('0')
     seen = page.evaluate('seenSymbols.length')
     page.wait_for_function('(seen) => seenSymbols.length > seen', arg=seen)
@@ -87,7 +87,26 @@ with sync_playwright() as p:
             expect(trail.locator('[data-register="bass"]')).to_be_hidden()
             page.wait_for_function('effectSpeaker.effectWaveform() === null')
             page.evaluate('updateNotes(effectSpeaker)')
-            expect(waveform).to_be_hidden()
+            expect(waveform).to_be_visible()
+            page.evaluate("window.idleTrace = document.querySelector('.sound-waveform').toDataURL()")
+            page.evaluate('updateNotes(effectSpeaker)')
+            assert page.evaluate("document.querySelector('.sound-waveform').toDataURL() === idleTrace"), 'silence keeps the trace still'
+        # A known signal makes the transition independent of short real-time effects.
+        page.evaluate("""() => {
+            window.traceSpeaker = {muted: true, effect: {}, ctx: {currentTime: 0},
+                effectWaveform: () => new Float32Array([0, 0.5, -0.5, 0]), recentNotes: () => []};
+            updateNotes(traceSpeaker);
+            window.activeTrace = document.querySelector('.sound-waveform').toDataURL();
+            traceSpeaker.effectWaveform = () => null;
+            updateNotes(traceSpeaker);
+        }""")
+        assert page.evaluate("document.querySelector('.sound-waveform').toDataURL() === idleTrace"), 'silence restores the same flatline'
+        assert page.evaluate('activeTrace !== idleTrace'), 'effects depart from the flatline'
+        page.evaluate('effectSpeaker.mute(false); effectSpeaker.sfx(11); updateNotes(effectSpeaker)')
+        expect(waveform).to_be_hidden()
+        page.evaluate('effectSpeaker.setVolume(0); updateNotes(effectSpeaker)')
+        expect(waveform).to_be_visible()
+        page.evaluate('effectSpeaker.mute(true)')
         page.evaluate('effectSpeaker.sfx(11); updateNotes(effectSpeaker)')
         expect(waveform).to_be_visible()
         page.evaluate('effectSpeaker.playTune(0, 0); updateNotes(effectSpeaker)')

@@ -39,6 +39,10 @@ with sync_playwright() as p:
 
     page.locator('#record-file').set_input_files(FIXTURE)
     page.wait_for_function('window.watchedReplay?.playback')
+    page.keyboard.press('h')
+    expect(page.locator('#replay-help')).to_be_visible()
+    expect(page.locator('#replay-help')).to_contain_text('Left/Right')
+    page.locator('#screen').focus()
     saved = page.evaluate('(key) => localStorage.getItem(key)', KEY)
     # Each press seeks one transition, leaving recorded input in control.
     for _ in range(2):
@@ -50,6 +54,7 @@ with sync_playwright() as p:
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == saved
 
     page.locator('#home').click()
+    expect(page.locator('#replay-help')).to_be_hidden()
     page.keyboard.press('Escape')
     returned = snapshot()
     assert returned['seed'] == paused['seed']

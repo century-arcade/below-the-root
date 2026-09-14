@@ -1,4 +1,4 @@
-"""Markdown Help, startup intro hold, controls; run against make serve."""
+"""Help beside live play, startup intro hold, toggles and keyboard/touch controls."""
 import json
 import os
 import re
@@ -72,7 +72,10 @@ with sync_playwright() as p:
         expect(help_screen).to_be_hidden()
         page.get_by_role('navigation').get_by_role('link', name='Help', exact=True).tap()
         expect(help_screen).to_be_visible()
-        expect(page.locator('#help')).to_have_attribute('aria-current', 'page')
+        expect(page.locator('#help')).to_have_attribute('aria-expanded', 'true')
+        page.get_by_role('navigation').get_by_role('link', name='Help', exact=True).tap()
+        expect(help_screen).to_be_hidden()
+        page.get_by_role('navigation').get_by_role('link', name='Help', exact=True).tap()
         page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).tap()
         expect(help_screen).to_be_hidden()
         page.keyboard.press('h')
@@ -86,14 +89,39 @@ with sync_playwright() as p:
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(help_screen).to_be_hidden()  # a saved quest resumes directly
         expect(page.locator('#screen')).to_be_focused()
+        menu_button = page.get_by_role('button', name='Open command menu', exact=True)
+        expect(menu_button).to_be_visible()
+        for action in ['f', 'click', 'tap', 'Space', 'Enter']:
+            if action == 'f':
+                page.keyboard.press('f')
+            elif action in ['Space', 'Enter']:
+                menu_button.press(action)
+            else:
+                getattr(menu_button, action)()
+            expect(menu_button).to_be_hidden()
+            page.wait_for_timeout(150)
+            panel = ''.join(chr(value & 127) for value in record()['checkpoint']['panel'])
+            assert 'PAUSE' in panel and 'GRUNSPREKE' in panel, 'command menu opens'
+            page.keyboard.press('Escape')
+            expect(menu_button).to_be_visible()
+            resumed = record()['frames']
+            page.wait_for_timeout(100)
+            assert record()['frames'] > resumed, 'Escape dismisses the menu and leaves play running'
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
+        expect(page.locator('#replay-help')).to_be_hidden()
         stopped = record()
         page.keyboard.press('Space')
         page.keyboard.press('ArrowRight')
         page.wait_for_timeout(200)
-        assert record()['frames'] == stopped['frames'], 'help must hold game time'
-        assert record()['reads'] == stopped['reads'], 'help must block joystick input'
+        assert record()['frames'] > stopped['frames'], 'game time continues with help open'
+        assert all(entry['j'] == [0, 0, 0] for entry in record()['reads']), 'reading help does not steer the game'
+        page.locator('#screen').focus()
+        page.keyboard.down('ArrowRight')
+        page.wait_for_timeout(200)
+        page.keyboard.up('ArrowRight')
+        assert any(entry['j'][0] == 1 for entry in record()['reads']), 'canvas controls work while help stays open'
+        expect(help_screen).to_be_visible()
         page.keyboard.press('Escape')
         page.wait_for_timeout(200)
         assert record()['frames'] > stopped['frames'], 'closing help resumes game time'
@@ -101,11 +129,11 @@ with sync_playwright() as p:
         expect(page.locator('#map-screen')).to_be_visible()
         page.locator('#close-map').focus()
         question_mark()
-        expect(page.locator('#map-screen')).to_be_hidden()
+        expect(page.locator('#map-screen')).to_be_visible()
         expect(help_screen).to_be_visible()
-        expect(page.locator('#map')).to_have_attribute('aria-expanded', 'false')
+        expect(page.locator('#map')).to_have_attribute('aria-expanded', 'true')
         page.locator('#map').click()
-        expect(help_screen).to_be_hidden()
+        expect(help_screen).to_be_visible()
         expect(page.locator('#map-screen')).to_be_visible()
         expect(page.locator('#map')).to_have_attribute('aria-current', 'page')
         page.keyboard.press('Escape')
@@ -132,4 +160,4 @@ with sync_playwright() as p:
         assert not errors, errors
         page.close()
     browser.close()
-    print('browser_help_test: Markdown Help before intro, saved-game resume, keyboard/touch, focus, hold and map switching passed')
+    print('browser_help_test: startup help, live play with help, keyboard/touch toggles, focus and map coexistence passed')

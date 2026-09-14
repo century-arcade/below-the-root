@@ -92,8 +92,9 @@ holds pitches below it, regardless of which voice plays them. Reduced-motion
 mode keeps the same two rows without animated scrolling.
 Sound effects use that area for a waveform sampled from their audio before
 the volume control: tonal effects produce regular traces and noise effects
-produce jagged ones. The trace follows the effect's envelope, works while
-muted, and disappears when the effect ends. Reduced-motion mode holds a
+produce jagged ones. The trace is visible only when muted (including zero
+volume), follows the effect's envelope, and returns to a flatline when no sound
+is playing. Music uses the note symbols instead. Reduced-motion mode holds a
 still trace for each effect. Starting music or silencing audio cuts the effect.
 Regenerate the transcription with
 `node tools/music-notation.mjs > docs/music-rhythms.md`.

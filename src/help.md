@@ -2,34 +2,15 @@
 ## Keyboard
 
 - **WASD or Arrows**: Move
-- **Space or Enter**: Trigger (select/skip/jump/menu)
-- **P**: Pause (Move to resume)
-- **Tab**: Open/close map
-- **?**: Help
-- **F**: Fullscreen
-- **M**: Mute/Unmute
-- **+/-**: Adjust Volume
-
-## Touch/Mouse
-
-Press and hold or double-tap on a location to move your character there.
-
-Tap on your character to open the menu.
-
-Tap on a door to go through it.
-
-On the map, scroll the mouse wheel to zoom in or out, double-click to zoom in,
-and drag or swipe to pan.
+- **Space or Enter**: Select/skip/jump
+- **F**: Open menu
+- **M**: Open/close map
 
 ## Recording playback
 
-During playback, press **Left/Right** to go back/forward one room change.
-Add **Shift** to skip ten room changes. Hold either arrow to keep skipping rooms.
-The counter above the permanent status shows room changes completed / total,
-including visits back to earlier rooms.
+- **Left/Right**: back/forward one room change.
+- **Shift+Left/Right**: back/forward ten room changes.
 
-Choose **STATUS** from the game menu to see elapsed play time and completion.
+## Developer mode
 
-In developer mode, **Go back a day** (↶), **Backspace**, or **Delete** restores
-the start of the previous in-game day. Continuing replaces the turns after that
-point. The control is available during regular play when an earlier day exists.
+- **Delete** (dev mode): Go back a day

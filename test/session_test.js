@@ -31,6 +31,28 @@ assert.throws(() => importSave(s, badHeader), /header/);
 openMenu(s); importSave(s, bytes);
 assert.equal(s.title, false); assert.equal(s.verb, null); assert.ok(s.active);
 const live = { read: () => IDLE }; s.stick = live;
+// Direct command controls preserve the journal and can resume an open menu after reload.
+{
+  const game = new Session(data, live, { initial: { mode: 'quest', character: 0 } });
+  assert.equal(game.commandMenu(true), false, 'no menu to dismiss');
+  assert.equal(game.commandMenu(), true);
+  assert.equal(game.commandMenu(), false, 'opening twice cannot reset the menu');
+  for (let i = 0; i < 12; i++) game.step();
+  const open = Session.replay(data, live, game.snapshot());
+  assert.equal(open.state.commandMenuOpen, true, 'reload restores the open menu');
+  assert.equal(open.commandMenu(true), true, 'restored menu can be dismissed');
+  const clock = copy(game.state.clock);
+  assert.equal(game.commandMenu(true), true);
+  assert.equal(game.state.verb, null);
+  assert.ok(game.state.panel.every(value => value === 0), 'dismissal clears menu text');
+  assert.deepEqual(game.state.clock, clock, 'dismissal does not advance time or choose a command');
+  for (let i = 0; i < 12; i++) game.step();
+  assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state));
+  const watch = Session.watch(data, live, game.snapshot());
+  assert.equal(watch.commandMenu(), false, 'live command controls do not alter playback');
+  game.menu();
+  assert.equal(game.commandMenu(), false, 'title menu has no command menu');
+}
 startDemo(s, 'intro'); s.stall = 99; s.pointer = { col: 1, row: 1 };
 importSave(s, bytes);
 assert.equal(s.demo, null); assert.equal(s.input, live); assert.equal(s.stall, 0); assert.equal(s.pointer, null);

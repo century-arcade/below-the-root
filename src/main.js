@@ -1,6 +1,7 @@
 import { loadData } from './data.js';
 import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, statusHeight } from './video.js';
-import { figures } from './game.js';
+import { figures, canOpenCommandMenu } from './game.js';
+import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, restoreRecordingHistory, screenKey } from './record.js';
@@ -36,12 +37,17 @@ function fit() {
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
-  const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
+  const helpBeside = !document.getElementById('help-screen').hidden && window.innerWidth >= 760;
+  const helpWidth = helpBeside ? 336 : 0;
+  const scale = fitScale((full ? game.clientWidth : window.innerWidth) - helpWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
   canvas.parentElement.style.setProperty('--canvas-padding', `${CANVAS_PADDING * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
-  if (!full) game.style.width = (WIDTH + 2 * CANVAS_PADDING) * scale + 'px';
+  game.style.setProperty('--play-height', `${(HEIGHT + band + 2 * CANVAS_PADDING) * scale}px`);
+  canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
+  canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
+  if (!full) game.style.width = (WIDTH + 2 * CANVAS_PADDING) * scale + helpWidth + 'px';
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
@@ -163,7 +169,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     persist('muted', speaker.muted);
     syncVolume();
   }
-  const toggleMute = () => setMuted(!speaker.muted);
   const canFullscreen = !!(game.requestFullscreen && document.exitFullscreen);
   function toggleFullscreen() {
     if (!canFullscreen) return;
@@ -192,6 +197,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let held = false;
   let overlay = null;
   const helpScreen = document.getElementById('help-screen');
+  const replayHelp = document.getElementById('replay-help');
+  const menuButton = document.getElementById('command-menu');
+  let startupHelp = false;
   const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
   const helpButton = document.getElementById('help');
@@ -206,6 +214,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   };
   mapButton.setAttribute('aria-controls', 'map-screen');
   helpButton.setAttribute('aria-controls', 'help-screen');
+  helpButton.setAttribute('aria-expanded', 'false');
   let currentTab = document.querySelector('#site-header nav [aria-current]');
   const mapGrid = document.getElementById('map-grid');
   const mapViewport = document.getElementById('map-viewport');
@@ -297,12 +306,24 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   function openHelp(startup = false) {
     if (paused) return;
-    if (overlay?.screen === helpScreen) return release();
-    openOverlay(helpScreen, helpButton);
-    const closeHelp = document.getElementById('close-help');
-    closeHelp.textContent = startup ? 'Continue to intro' : 'Close';
+    if (!helpScreen.hidden) return closeHelp();
+    startupHelp = startup;
+    if (startup) hold();
+    else dropInput();
+    helpScreen.hidden = false;
+    helpButton.setAttribute('aria-expanded', 'true');
+    const closeButton = document.getElementById('close-help');
+    closeButton.textContent = startup ? 'Continue to intro' : 'Close';
     helpScreen.scrollTop = 0;
-    (startup ? closeHelp : helpScreen).focus({ preventScroll: true });
+    (startup ? closeButton : helpScreen).focus({ preventScroll: true });
+    fit();
+  }
+  function closeHelp() {
+    if (helpScreen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
+    helpScreen.hidden = true;
+    helpButton.setAttribute('aria-expanded', 'false');
+    if (startupHelp) { startupHelp = false; release(); }
+    fit();
   }
   function openMap() {
     if (paused) return;
@@ -315,14 +336,15 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   function showView(view) {
     if (paused) return;
+    if (view === 'help') return openHelp();
     release();
     if (view === 'home') {
+      closeHelp();
       if (session.playback) stopReplay();
       session.menu();
       speaker.silence();
       saveNow();
     } else if (view === 'map') openMap();
-    else if (view === 'help') openHelp();
     if (!overlay) canvas.focus({ preventScroll: true });
   }
   for (const [button, view] of [[homeButton, 'home'], [mapButton, 'map'], [helpButton, 'help']]) {
@@ -346,11 +368,22 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     fit();
   }
   document.getElementById('close-map').onclick = release;
-  document.getElementById('close-help').onclick = release;
+  document.getElementById('close-help').onclick = closeHelp;
+  function commandMenu(close = false) {
+    if (paused || overlay || startupHelp || !session.commandMenu(close)) return;
+    release();
+    canvas.focus({ preventScroll: true });
+    saveNow();
+    draw();
+  }
+  menuButton.onclick = () => commandMenu();
+  for (const type of ['keydown', 'keyup']) menuButton.addEventListener(type, e => {
+    if (e.key === ' ') e.stopPropagation();
+  });
   // Overlay controls keep native keyboard activation without sending joystick input.
   for (const screen of [mapScreen, helpScreen]) {
     for (const type of ['keydown', 'keyup']) screen.addEventListener(type, e => {
-      if (!['Escape', 'Tab', '?', 'h', 'H'].includes(e.key)) e.stopPropagation();
+      if (!['Escape', 'Tab', '?', 'h', 'H', 'm', 'M'].includes(e.key)) e.stopPropagation();
     });
   }
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
@@ -406,20 +439,24 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         && (e.target === canvas || e.target === document.body)) {
       e.preventDefault(); backDayButton.click(); return;
     }
-    if (e.key === 'Tab') {
+    if (e.key === 'Tab' || e.key.toLowerCase() === 'm') {
       const mapOpen = overlay?.screen === mapScreen;
-      if (mapOpen || e.target === document.body || e.target === canvas) {
+      if (e.key !== 'Tab' || mapOpen || e.target === document.body || e.target === canvas) {
         if (mapOpen) release(); else openMap();
         e.preventDefault();
       }
       return;
     }
     if (e.key === '?' || (e.key.toLowerCase() === 'h' && !e.shiftKey)) { openHelp(); e.preventDefault(); return; }
-    if (e.key.toLowerCase() === 'f' && !e.shiftKey) { toggleFullscreen(); e.preventDefault(); return; }
-    if (e.key.toLowerCase() === 'm') { toggleMute(); e.preventDefault(); return; }
+    if (e.key.toLowerCase() === 'f' && !e.shiftKey) { commandMenu(); e.preventDefault(); return; }
     if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
     if (e.key === '=' || e.key === '+') { stepVolume(0.1); e.preventDefault(); return; }
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;
+    if (e.key === 'Escape') {
+      if (overlay) { release(); e.preventDefault(); return; }
+      if (state.commandMenuOpen && !session.playback) { commandMenu(true); e.preventDefault(); return; }
+      if (!helpScreen.hidden) { closeHelp(); e.preventDefault(); return; }
+    }
     if (held) release(); else hold();
     e.preventDefault();
   });
@@ -458,6 +495,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
+    menuButton.hidden = session.playback || !canOpenCommandMenu(state);
+    if (replayHelp) replayHelp.hidden = !session.playback;
     backDayButton.hidden = !debug || session.playback;
     backDayButton.disabled = !session.previousDay;
     state.figures = figures(state);
@@ -471,8 +510,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const line = debug ? whereLabel(state) : '';
     // #where is a live region: rewriting the same text re-announces it
     if (where.textContent !== line) where.textContent = line;
-    const activeTab = overlay?.screen === mapScreen ? mapButton
-      : overlay?.screen === helpScreen ? helpButton : homeButton;
+    const activeTab = overlay?.screen === mapScreen ? mapButton : homeButton;
     if (currentTab !== activeTab) {
       currentTab?.removeAttribute('aria-current');
       activeTab.setAttribute('aria-current', 'page');

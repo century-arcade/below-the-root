@@ -5,6 +5,9 @@ import { marked } from 'marked';
 const out = process.argv[2] || '_build';
 const read = name => readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8');
 const template = read('page.html');
+const help = marked.parse(read('help.md')).replace(
+  /<h2>Recording playback<\/h2>[\s\S]*?(?=<h2>|$)/,
+  section => `<section id="replay-help" hidden>${section}</section>`);
 mkdirSync(out, { recursive: true });
 for (const page of ['about', 'play', 'links']) {
   const title = `${page[0].toUpperCase() + page.slice(1)} — Below the Root`;
@@ -14,7 +17,7 @@ for (const page of ['about', 'play', 'links']) {
     controls: read('controls.html'),
     developer: read('developer.html'),
     styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
-    content: page === 'play' ? read('play.html').replace('{{help}}', () => marked.parse(read('help.md')))
+    content: page === 'play' ? read('play.html').replace('{{help}}', () => help)
       : `<main id="${page}" class="reading-page">\n${marked.parse(read(`${page}.md`))}</main>`,
     scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>`,
   };

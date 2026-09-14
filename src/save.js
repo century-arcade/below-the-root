@@ -161,7 +161,7 @@ export function importSave(state, bytes) {
     berriesOffered: get('wissenberries_offered'),
     visions: get('vision_count'),
     animalsPensed: get('pense_message_count'),
-    sample: false, timeUp: false, ended: null, stop: null, verb: null, creature: null,
+    sample: false, timeUp: false, ended: null, stop: null, verb: null, commandMenuOpen: false, creature: null,
     title: false, demo: null, input: draft.stick || draft.input, stall: 0, tuneWait: null, verbWait: 0,
     pointer: null, restDelayCut: false, events: [{ music: null }],
     quest: !!get('quest_active'),
