@@ -142,6 +142,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let returnSession = null;
   let seekRoom = null;
   let seekKey = null;
+  let seekAmount = 1;
   let seekRepeatAt = 0;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
@@ -366,7 +367,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (!session.playback || seekRoom != null || (direction > 0 && session.playbackDone)) return;
     const target = Math.max(0, session.roomChanges + direction);
     if (direction < 0) {
-      session = session.previousRoom();
+      session = session.previousRoom(-direction);
       state = session.state;
     }
     seekRoom = target === session.roomChanges ? null : target;
@@ -382,6 +383,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     speaker.silence(); release(); fit();
   }
   addEventListener('keydown', e => {
+    if (e.key === 'Shift') seekAmount = 10;
     if (!session.playback || paused || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey
         || !['ArrowLeft', 'ArrowRight'].includes(e.code)
         || (e.target !== canvas && e.target !== document.body)) return;
@@ -389,11 +391,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (e.repeat) return;
     release();
     seekKey = e.code;
+    seekAmount = e.shiftKey ? 10 : 1;
     seekRepeatAt = performance.now() + 250;
-    seekReplayRoom(e.code === 'ArrowRight' ? 1 : -1);
+    seekReplayRoom(e.code === 'ArrowRight' ? seekAmount : -seekAmount);
     canvas.focus({ preventScroll: true });
   }, true);
   addEventListener('keyup', e => {
+    if (e.key === 'Shift') seekAmount = 1;
     if (e.code === seekKey) seekKey = null;
   }, true);
   addEventListener('keydown', e => {
@@ -431,7 +435,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         saveNow();
         returnSession ||= session;
         session = restored; state = session.state;
-        log(`Replaying ${file.name} from the beginning, skipping idle time. Left/Right goes back/forward one room; hold to keep skipping.`);
+        log(`Replaying ${file.name} from the beginning, skipping idle time. Left/Right goes back/forward one room, Shift+Left/Right ten; hold to keep skipping.`);
         if (restored.record.recoveredFrom) log('Playback starts at the recovered checkpoint. Earlier recording segments are included in downloads but may require an older game version to replay.');
       } else {
         if (session.playback) stopReplay();
@@ -482,7 +486,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let elapsedAcc = 0;
   function frame(now) {
     if (!paused && !held && !document.hidden && seekKey && now >= seekRepeatAt && seekRoom == null) {
-      seekReplayRoom(seekKey === 'ArrowRight' ? 1 : -1);
+      seekReplayRoom(seekKey === 'ArrowRight' ? seekAmount : -seekAmount);
       seekRepeatAt = now + 100;
     }
     const running = !paused && !held && !document.hidden && !session.playbackDone;

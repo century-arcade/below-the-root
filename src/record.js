@@ -215,9 +215,9 @@ export class Session {
     return restored;
   }
 
-  previousRoom() {
+  previousRoom(count = 1) {
     if (!this.playback) return this;
-    const target = Math.max(0, this.roomChanges - 1);
+    const target = Math.max(0, this.roomChanges - count);
     const entry = this.history.find(entry => entry.roomChanges === target);
     return this.restoreFrame(entry?.frame ?? 0);
   }

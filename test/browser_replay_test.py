@@ -132,7 +132,13 @@ with sync_playwright() as p:
             days.load(exportSave(late.state));
             while (days.state.clock.day === day) days.step();
         }
-        return { timed: session.snapshot(), idle: idle.snapshot(), days: days.snapshot() };
+        const jumps = room('16');
+        for (let i = 0; i < 1500; i++) {
+            if (i && i % 60 === 0) jumps.load(exportSave(room(i % 120 ? '26' : '16').state));
+            jumps.step();
+            jumps.state.events.length = 0;
+        }
+        return { timed: session.snapshot(), idle: idle.snapshot(), days: days.snapshot(), jumps: jumps.snapshot() };
     }''')
     timed = recordings['timed']
     page.locator('#record-file').set_input_files({
@@ -216,6 +222,43 @@ with sync_playwright() as p:
     page.wait_for_function('watchedReplay.playbackDone')
     assert snapshot() == recordings['idle'], 'skipping idle time preserves deterministic playback'
     assert not errors, errors
+
+    page.locator('#record-file').set_input_files({
+        'name': 'jumps.json', 'mimeType': 'application/json', 'buffer': json.dumps(recordings['jumps']).encode(),
+    })
+    page.wait_for_function('document.activeElement.id === "screen"', polling=100)
+    for target in [10, 20]:
+        page.keyboard.press('Shift+ArrowRight')
+        page.evaluate('advancePlayback(10)')
+        assert page.evaluate('watchedReplay.roomChanges') == target, 'Shift+Right skips ten transitions, including revisits'
+    page.keyboard.press('Shift+ArrowLeft')
+    assert page.evaluate('watchedReplay.roomChanges') == 10, 'Shift+Left restores ten rooms back immediately'
+    page.keyboard.press('Shift+ArrowRight')
+    page.evaluate('advancePlayback(10)')
+    page.keyboard.down('Shift')
+    page.keyboard.down('ArrowLeft')
+    page.evaluate('advancePlayback(260)')
+    assert page.evaluate('watchedReplay.roomChanges') == 0, 'holding Shift+Left repeats ten-room jumps'
+    page.keyboard.up('ArrowLeft')
+    page.keyboard.down('ArrowRight')
+    page.evaluate('advancePlayback(260)')
+    assert page.evaluate('watchedReplay.roomChanges') == 20, 'holding Shift+Right repeats ten-room jumps'
+    page.keyboard.up('Shift')
+    page.evaluate('advancePlayback(110)')
+    assert page.evaluate('watchedReplay.roomChanges') == 21, 'releasing Shift returns held navigation to one room'
+    page.keyboard.up('ArrowRight')
+    page.keyboard.press('Shift+ArrowRight')
+    page.evaluate('advancePlayback(10)')
+    assert page.evaluate('watchedReplay.playbackDone'), 'ten-room jumps stop at EOF when fewer rooms remain'
+    for target in [14, 4, 0]:
+        page.keyboard.press('Shift+ArrowLeft')
+        assert page.evaluate('watchedReplay.roomChanges') == target, 'ten-room rewind clamps at the beginning'
+    for _ in range(3):
+        page.keyboard.press('Shift+ArrowRight')
+        page.evaluate('advancePlayback(10)')
+    assert page.evaluate('watchedReplay.playbackDone')
+    assert not page.evaluate('watchedReplay.playbackError'), 'ten-room seeking still verifies at EOF'
+    assert snapshot() == recordings['jumps']
 
     page.close()
     page = browser.new_page()

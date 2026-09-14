@@ -22,12 +22,12 @@ a { color: #c7f5ae; }
 .control-group + .control-group { margin-left: 8px; padding-left: 12px; border-left: 1px solid #354537; }
 #site-header button { box-sizing: border-box; width: 32px; height: 32px; font-size: 16px; line-height: 1; padding: 0; }
 #site-header button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: middle; }
-#volume { width: 80px; min-width: 48px; margin: 0 4px; accent-color: #9ad284; }
+#volume { width: 80px; min-width: 48px; margin: 0; accent-color: #9ad284; }
 #music-notes { position: relative; display: block; width: 112px; height: 36px; overflow: hidden; pointer-events: none; }
 #music-notes > [data-register] { position: relative; display: block; height: 18px; overflow: hidden; }
 #music-notes [data-rhythm] { position: absolute; left: 76px; top: 0; color: #d6f897; animation: music-note-scroll linear both; }
 #music-notes svg { display: block; }
-#music-notes .sound-waveform { position: absolute; inset: 0; width: 50%; height: 100%; margin-inline: auto; background: transparent; image-rendering: auto; }
+#music-notes .sound-waveform { position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: transparent; image-rendering: auto; }
 @keyframes music-note-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-112px); }
