@@ -1,6 +1,4 @@
 
-## Keyboard
-
 - **WASD/Arrows**: Move
 - **Space/Enter**: Select/skip/jump
 - **F**: Open menu / select a choice
