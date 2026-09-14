@@ -1,5 +1,5 @@
 import { loadData } from './data.js';
-import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, STATUS_HEIGHT } from './video.js';
+import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, statusHeight } from './video.js';
 import { figures } from './game.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
@@ -21,7 +21,7 @@ const game = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
-const frames = { 0: ctx.createImageData(WIDTH, HEIGHT), [STATUS_HEIGHT]: ctx.createImageData(WIDTH, HEIGHT + STATUS_HEIGHT) };
+const frames = { 0: ctx.createImageData(WIDTH, HEIGHT) };
 let band = 0;
 const CANVAS_PADDING = 12; // Keep the full picture inside the bowed screen surround.
 
@@ -141,7 +141,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let state = session.state;
   let returnSession = null;
   let seekRoom = null;
-  const roomKey = () => `${state.room?.code}:${!!state.room?.blank}`;
+  let seekKey = null;
+  let seekRepeatAt = 0;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
@@ -264,7 +265,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     mapViewport.addEventListener(event, endMapDrag);
   }
   const saveNow = () => autosave.save(session, true).reason !== 'failed';
-  const dropInput = () => { pointer.cancel(); gamepad.cancel(); stick.reset(); };
+  const dropInput = () => { seekKey = null; pointer.cancel(); gamepad.cancel(); stick.reset(); };
   addEventListener('hashchange', dropInput);
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
@@ -353,12 +354,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (held) { if (type === 'keydown') release(); return; }
     session.gesture(type, source);
   };
-  function seekNextRoom() {
-    if (!session.playback || session.playbackDone) return;
-    release();
-    seekRoom = roomKey();
+  function seekReplayRoom(direction) {
+    if (!session.playback || seekRoom != null || (direction > 0 && session.playbackDone)) return;
+    const target = Math.max(0, session.roomChanges + direction);
+    if (direction < 0) {
+      session = Session.watch(data, stick, session.sourceRecord, session.verify);
+      state = session.state;
+    }
+    seekRoom = target === session.roomChanges ? null : target;
+    acc = 0; elapsedAcc = 0;
     speaker.silence();
-    canvas.focus({ preventScroll: true });
   }
   function stopReplay() {
     if (!returnSession) return;
@@ -368,9 +373,18 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   addEventListener('keydown', e => {
     if (!session.playback || paused || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey
-        || e.code !== 'Space' || (e.target !== canvas && e.target !== document.body)) return;
+        || !['ArrowLeft', 'ArrowRight'].includes(e.code)
+        || (e.target !== canvas && e.target !== document.body)) return;
     e.preventDefault(); e.stopImmediatePropagation();
-    if (!e.repeat) seekNextRoom();
+    if (e.repeat) return;
+    release();
+    seekKey = e.code;
+    seekRepeatAt = performance.now() + 250;
+    seekReplayRoom(e.code === 'ArrowRight' ? 1 : -1);
+    canvas.focus({ preventScroll: true });
+  }, true);
+  addEventListener('keyup', e => {
+    if (e.code === seekKey) seekKey = null;
   }, true);
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
@@ -403,7 +417,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         saveNow();
         returnSession ||= session;
         session = restored; state = session.state;
-        log(`Replaying ${file.name} from the beginning, skipping idle time. Space skips to the next room.`);
+        log(`Replaying ${file.name} from the beginning, skipping idle time. Left/Right goes back/forward one room; hold to keep skipping.`);
         if (restored.record.recoveredFrom) log('Playback starts at the recovered checkpoint. Earlier recording segments are included in downloads but may require an older game version to replay.');
       } else {
         if (session.playback) stopReplay();
@@ -427,9 +441,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     state.figures = figures(state);
-    const rows = options.classic ? [] : statusRows(state);
-    if (band !== (rows.length ? STATUS_HEIGHT : 0)) setBand(rows.length ? STATUS_HEIGHT : 0);
-    const image = frames[band];
+    const rows = statusRows(state, { classic: options.classic, playback: session.playback ? session : null });
+    const height = statusHeight(rows);
+    if (band !== height) setBand(height);
+    const image = frames[band] ||= ctx.createImageData(WIDTH, HEIGHT + band);
     image.data.set(render(state));
     if (band) image.data.set(renderStatus(state, rows), WIDTH * HEIGHT * 4);
     ctx.putImageData(image, 0, 0);
@@ -450,6 +465,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let acc = 0;
   let elapsedAcc = 0;
   function frame(now) {
+    if (!paused && !held && !document.hidden && seekKey && now >= seekRepeatAt && seekRoom == null) {
+      seekReplayRoom(seekKey === 'ArrowRight' ? 1 : -1);
+      seekRepeatAt = now + 100;
+    }
     const running = !paused && !held && !document.hidden && !session.playbackDone;
     const elapsed = running ? Math.max(0, now - last) : 0;
     acc += Math.min(elapsed, 250);
@@ -484,7 +503,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         seekRoom = null; acc = 0;
         break;
       }
-      if (seekRoom != null && roomKey() !== seekRoom) { seekRoom = null; acc = 0; break; }
+      if (seekRoom != null && session.roomChanges >= seekRoom) { seekRoom = null; acc = 0; break; }
       // Render screen changes encountered during an idle gap before advancing again.
       if (idleScreen != null && screenKey(state) !== idleScreen) { acc = 0; break; }
     }

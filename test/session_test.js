@@ -80,6 +80,20 @@ const broken = copy(recorded); broken.checkpoint.player.col++;
 assert.throws(() => Session.replay(freshData, values, broken), /does not replay/);
 assert.throws(() => Session.replay(freshData, values, { ...recorded, engine: 'old' }), /version/);
 
+// Count transitions, including revisits, without counting menu/title annotations.
+const route = new Session(data, live, { initial: { mode: 'quest', room: data.roomByCode.get('16').room } });
+for (const code of ['26', '16']) {
+  const destination = new Session(data, live, { initial: { mode: 'quest', room: data.roomByCode.get(code).room } });
+  route.load(exportSave(destination.state));
+  route.step();
+}
+route.menu();
+const routeReplay = Session.watch(data, live, route.snapshot());
+assert.equal(routeReplay.roomChanges, 0, 'the initial room is not a jump');
+assert.equal(routeReplay.totalRoomChanges, 2, 'revisits count but title changes in the same room do not');
+while (!routeReplay.playbackDone) routeReplay.step();
+assert.equal(routeReplay.roomChanges, 2, 'the replayed count reaches the recorded total');
+
 // Recover progress across incompatible engines without trusting or replaying the journal.
 const original = JSON.stringify({ ...broken, engine: 'old' });
 const recoveryStore = new Map([[AUTOSAVE_KEY, original]]);

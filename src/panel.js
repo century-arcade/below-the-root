@@ -11,6 +11,7 @@ export function newPanel() {
 
 export function clearPanel(state) {
   state.panel.fill(0);
+  state.statusVisible = false;
 }
 
 // a line longer than 39 runs on into column 0 of the next row

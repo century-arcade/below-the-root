@@ -20,3 +20,11 @@ Tap on a door to go through it.
 
 On the map, scroll the mouse wheel to zoom in or out, double-click to zoom in,
 and drag or swipe to pan.
+
+## Recording playback
+
+During playback, press **Left/Right** to go back/forward one room change.
+Hold either arrow to keep skipping rooms. The counter above the permanent status
+shows room changes completed / total, including visits back to earlier rooms.
+
+Choose **STATUS** from the game menu to see elapsed play time and completion.

@@ -21,11 +21,11 @@ export function render(state) {
 }
 
 // the status rows sit in their own band under the picture, never over it
-export const STATUS_HEIGHT = 24;
 const STATUS_MARGIN = 4;
+export const statusHeight = rows => rows.length ? rows.length * 8 + STATUS_MARGIN * 2 : 0;
 
 export function renderStatus(state, rows) {
-  const px = new Uint8Array(WIDTH * STATUS_HEIGHT);
+  const px = new Uint8Array(WIDTH * statusHeight(rows));
   const text = px.subarray(WIDTH * STATUS_MARGIN);
   rows.forEach((line, row) => {
     for (let col = 0; col < line.length; col++) {

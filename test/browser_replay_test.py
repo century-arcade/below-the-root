@@ -42,7 +42,7 @@ with sync_playwright() as p:
     # Each press seeks one transition, leaving recorded input in control.
     for _ in range(2):
         before = page.evaluate('watchedReplay.state.room?.code')
-        page.keyboard.press('Space')
+        page.keyboard.press('ArrowRight')
         page.wait_for_function('(before) => watchedReplay.state.room?.code !== before', arg=before)
     assert snapshot() == json.loads(FIXTURE.read_text()), 'download preserves the full uploaded journal'
     page.evaluate("dispatchEvent(new Event('pagehide'))")
@@ -54,15 +54,15 @@ with sync_playwright() as p:
     assert returned['seed'] == paused['seed']
     assert returned['checkpoint']['player']['name'] == 'NERIC'
 
-    # A short valid recording has no further room change: Space stops at EOF.
+    # A short valid recording has no further room change: Right stops at EOF.
     page.locator('#record-file').set_input_files({
         'name': 'short.json', 'mimeType': 'application/json', 'buffer': json.dumps(returned).encode(),
     })
     page.wait_for_function('document.activeElement.id === "screen"', polling=100)
     page.locator('#screen').focus()
-    page.keyboard.press('Space')
+    page.keyboard.press('ArrowRight')
     page.wait_for_function('watchedReplay.playbackDone')
-    page.keyboard.press('Space')
+    page.keyboard.press('ArrowRight')
     page.wait_for_function('watchedReplay.playbackDone')
     page.locator('#home').click()
 
@@ -71,7 +71,7 @@ with sync_playwright() as p:
         'name': 'broken.json', 'mimeType': 'application/json', 'buffer': json.dumps(broken).encode(),
     })
     page.wait_for_function('watchedReplay.sourceRecord.checkpoint.quest === false')
-    page.keyboard.press('Space')
+    page.keyboard.press('ArrowRight')
     page.wait_for_function('watchedReplay.playbackError')
     expect(page.locator('#log')).to_contain_text('does not replay')
     assert not errors, errors
@@ -136,6 +136,7 @@ with sync_playwright() as p:
         return page.evaluate('watchedReplay.frame')
 
     assert current_frame() == 0, 'upload shows the beginning before advancing'
+    assert page.evaluate('[watchedReplay.roomChanges, watchedReplay.totalRoomChanges]') == [0, 2]
     page.evaluate('advancePlayback(510)')
     first_frame = current_frame()
     assert 30 <= first_frame < 40, f'movement plays at 60 Hz regardless of recorded duration: {first_frame}'
@@ -145,7 +146,10 @@ with sync_playwright() as p:
     assert page.evaluate('watchedReplay.state.room.code') == '26'
     page.keyboard.press('Space')
     page.evaluate('advancePlayback(10)')
-    assert current_frame() == 121, 'Space skips exactly one room transition'
+    assert current_frame() < 120, 'Space no longer seeks rooms'
+    page.keyboard.press('ArrowRight')
+    page.evaluate('advancePlayback(10)')
+    assert current_frame() == 121, 'Right skips exactly one room transition'
     assert page.evaluate('watchedReplay.state.room.code') == '25'
     page.evaluate('advancePlayback(200)')
     assert 132 <= current_frame() <= 133, 'continuous playback resumes immediately after seeking'
@@ -158,6 +162,36 @@ with sync_playwright() as p:
     assert current_frame() == timed['frames']
     page.wait_for_function('watchedReplay.playbackDone')
     assert snapshot() == timed, 'timed playback preserves and verifies the original journal'
+
+    assert page.evaluate('[watchedReplay.roomChanges, watchedReplay.totalRoomChanges]') == [2, 2]
+    page.keyboard.press('ArrowRight')
+    page.evaluate('advancePlayback(10)')
+    assert page.evaluate('watchedReplay.playbackDone'), 'Right at EOF stays at EOF'
+    page.keyboard.press('ArrowLeft')
+    page.evaluate('advancePlayback(10)')
+    assert page.evaluate('watchedReplay.state.room.code') == '26', 'Left rewinds from EOF'
+    assert page.evaluate('watchedReplay.roomChanges') == 1
+    page.keyboard.press('ArrowLeft')
+    page.evaluate('advancePlayback(10)')
+    assert current_frame() == 0, 'Left reaches the initial room'
+    page.keyboard.press('ArrowLeft')
+    page.evaluate('advancePlayback(10)')
+    assert current_frame() == 0, 'Left at the beginning cannot rewind past it'
+    page.keyboard.down('ArrowRight')
+    page.evaluate('advancePlayback(350)')
+    page.keyboard.up('ArrowRight')
+    assert page.evaluate('watchedReplay.roomChanges') == 2, 'holding Right keeps seeking without OS key repeat'
+    page.keyboard.down('ArrowLeft')
+    page.evaluate('advancePlayback(350)')
+    page.keyboard.up('ArrowLeft')
+    assert page.evaluate('watchedReplay.roomChanges') == 0, 'holding Left keeps seeking backward'
+    page.evaluate('advancePlayback(200)')
+    assert current_frame() > 0, 'releasing the arrow resumes continuous playback'
+    assert page.evaluate('watchedReplay.roomChanges') == 0, 'release stops repeated room skips'
+    page.evaluate('advancePlayback(4000)')
+    assert page.evaluate('watchedReplay.playbackDone')
+    assert not page.evaluate('watchedReplay.playbackError'), 'rewound playback still verifies at EOF'
+    assert snapshot() == timed, 'rewinding preserves the uploaded journal'
 
     page.locator('#record-file').set_input_files({
         'name': 'idle.json', 'mimeType': 'application/json', 'buffer': json.dumps(recordings['idle']).encode(),

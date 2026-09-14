@@ -15,6 +15,7 @@ export const ENGINE_VERSION = 'btr-session-4';
 export const AUTOSAVE_KEY = 'btr.autosave.v1';
 const MAX_FRAMES = 60 * 60 * 60 * 24;
 const copy = value => JSON.parse(JSON.stringify(value));
+const roomKey = entry => `${entry.room ?? null}:${!!entry.blank}`;
 const same = (a, b) => a.dx === b.dx && a.dy === b.dy && a.fire === b.fire;
 
 function random(seed) {
@@ -85,6 +86,7 @@ export class Session {
     } else if (start.mode === 'menu') openMenu(this.state);
     else if (start.mode === 'demo') startDemo(this.state, start.demo);
     else coldStart(this.state);
+    this.roomChanges = 0;
     this.lastRoom = null;
     this.noteRoom();
   }
@@ -156,6 +158,9 @@ export class Session {
 
   noteRoom() {
     const s = this.state;
+    const currentRoom = roomKey({ room: s.room?.code, blank: s.room?.blank });
+    if (this.lastRoomChange != null && currentRoom !== this.lastRoomChange) this.roomChanges++;
+    this.lastRoomChange = currentRoom;
     // START GAME can replace an active quest without quest ever becoming false.
     const questStart = s.questNumber !== this.lastQuestNumber;
     const key = `${s.room?.code}:${!!s.room?.blank}:${s.title}:${s.quest}`;
@@ -217,6 +222,8 @@ export class Session {
     validateRecord(record, data);
     const session = new Session(data, live, { record });
     session.verify = verify;
+    session.totalRoomChanges = record.path.reduce((count, entry, i, path) =>
+      count + (i > 0 && roomKey(entry) !== roomKey(path[i - 1]) ? 1 : 0), 0);
     return session;
   }
 

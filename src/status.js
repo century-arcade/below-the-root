@@ -2,8 +2,15 @@ import { timeOfDay } from './clock.js';
 import { PANEL_COLS } from './panel.js';
 import { completion, playTime } from './progress.js';
 
-// the modern display's two text rows under the picture: the status sheet, live, during a quest
-export function statusRows(state) {
+// Extra STATUS and replay details appear above the permanent quest status.
+export function statusRows(state, { classic = false, playback = null } = {}) {
+  const rows = [];
+  if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
+  if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges} ROOM CHANGES`);
+  return rows.concat(classic ? [] : permanentRows(state));
+}
+
+function permanentRows(state) {
   if (state.progress?.won && !state.title && !state.demo) {
     return [`PLAY TIME ${playTime(state)}`, `${completion(state)}% GAME COMPLETE`];
   }

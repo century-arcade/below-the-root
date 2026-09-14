@@ -346,6 +346,7 @@ function* kiniport(state) {
 export function paintStatus(state) {
   const p = state.player;
   clearPanel(state);
+  state.statusVisible = true; // Display-only details keep recorded panel checkpoints compatible.
   print(state, PANEL_ROW, 1, `DAY ${state.clock.day}`);
   print(state, PANEL_ROW, 20, p.name);
   print(state, PANEL_ROW + 1, 1, timeOfDay(state));

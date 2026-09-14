@@ -9,6 +9,8 @@ import { gainSpirit, speak } from '../src/dialog.js';
 import { destroy, mintToken } from '../src/inventory.js';
 import { enterRoom } from '../src/world.js';
 import { runMenu } from '../src/verbs.js';
+import { clearPanel } from '../src/panel.js';
+import { statusRows } from '../src/status.js';
 
 const data = await loadTestData();
 const live = { read: () => J.idle };
@@ -117,6 +119,19 @@ session.step(999);
 assert.equal(s.progress.milliseconds, beforePause, 'victory freezes the timer');
 s.progress.milliseconds = 3723000;
 assert.equal(playTime(s), '1H 2M 3S');
+s.progress.won = false;
+// STATUS adds live progress without replacing the character's existing stats.
+const statusMenu = runMenu(s);
+statusMenu.next();
+for (const input of menuReads('STATUS')) statusMenu.next(input);
+assert.ok(statusRows(s).includes('1H 2M 3S PLAY / 70% COMPLETE'));
+s.progress.milliseconds += 1000;
+assert.ok(statusRows(s, { classic: true }).includes('1H 2M 4S PLAY / 70% COMPLETE'));
+clearPanel(s);
+assert.deepEqual(statusRows(s, { classic: true }), [], 'leaving STATUS clears its details');
+assert.ok(statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130 ROOM CHANGES'));
+assert.deepEqual(statusRows(s, { classic: true, playback: { roomChanges: 0, totalRoomChanges: 0 } }),
+  ['0/0 ROOM CHANGES'], 'playback progress remains available in classic mode');
 startQuest(s, data.characters[0]);
 assert.equal(completion(s), 0);
 assert.deepEqual(s.progress.tokens, [], 'a new quest resets token collection');
