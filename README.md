@@ -68,30 +68,18 @@ Completion totals 100%:
 
 | Milestone | Max | Completion |
 |-----------|-----|------------|
+| Raamo saved | 1 rescue | 30% |
+| Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 4 items | 5% each, up to 20% |
 | Animals pensed for spirit | 10 animals | 1% each, up to 10% |
 | Leaders spoken to for spirit (blessers) | 5 leaders | 5% each, up to 25% |
 | Elixirs consumed | 5 elixirs | 1% each, up to 5% |
-| Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 4 items | 5% each, up to 20% |
-| World tokens collected | 39–48 tokens, by character (below) | 10% × unique tokens collected / character maximum, rounded down |
-| Raamo saved | 1 rescue | 30% |
+| World tokens collected | 39–48 tokens | 1% for each 4 tokens. |
 
-The world starts with 62 currency tokens, but each character can take only some:
 
-| Character | Freely available | Own nid | Gifts allowed by standing | Max |
-|-----------|------------------|---------|---------------------------|-----|
-| Neric | 25 | 3 | 11 | 39 |
-| Genaa | 25 | 3 | 11 | 39 |
-| Herd | 25 | 3 | 13 | 41 |
-| Pomma | 25 | 3 | 20 | 48 |
-| Charn | 25 | 3 | 13 | 41 |
+The world has 62 currency tokens, but characters can take only some of them.  Pomma can get 48 while Neric and Genaa can only get 39 (and Herd/Charn 41) tokens.
 
 Everyone is barred from the 12 tokens in the other four characters' nids and
-the two in `I2`, whose resident never offers them. Of the 20 gift tokens,
-seven require Kindar standing 3 (`J1`, `O1`), nine require Erdling standing 3
-(`60`, `N1`), and four have no standing requirement (`B1`, `K1`). Standings
-are fixed by character. Gift-givers offer one token per day until their stock
-runs out. Completion uses the character's obtainable total, so forbidden
-tokens are never required for 100%.
+the two in `I2`, whose resident never offers them.
 
 Starting spirit does not count. Dropping items, spending spirit, or spending
 or losing tokens does not remove earned points. Each world token counts once;
