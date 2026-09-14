@@ -13,8 +13,8 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
 #map-screen { font: clamp(12px, 2cqw, 20px)/1.2 'Green-Sky', monospace; text-transform: uppercase; }
 #map-screen button { text-transform: inherit; }
-#help-screen { box-sizing: border-box; width: 100%; color: #fff; font: 10px/1.5 'Green-Sky', monospace; text-transform: uppercase; }
-#help-heading { gap: 1em; padding: .75em; }
+#help-screen { box-sizing: border-box; width: 33.333%; min-width: min(240px, 100%); align-self: center; color: #fff; font: 10px/1.5 'Green-Sky', monospace; text-transform: uppercase; }
+#help-heading { flex-wrap: wrap; gap: 1em; padding: .75em; }
 #help-heading button { color: #fff; background: #000; border-color: #fff; text-transform: inherit; }
 #help-heading button:hover, #help-heading button:focus-visible { color: #000; background: #fff; outline-color: #fff; }
 #help-content { padding: 0 .75em 1em; min-width: 0; overflow-wrap: anywhere; }

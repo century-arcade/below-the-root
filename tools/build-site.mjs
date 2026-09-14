@@ -18,7 +18,7 @@ for (const page of ['about', 'play', 'links']) {
     nav: read('nav.html').replace(`href="/${page}${page === 'play' ? '#home' : ''}"`, '$& aria-current="page"'),
     controls: read('controls.html'),
     developer: read('developer.html'),
-    helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)">[?]</button>' : '',
+    helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
     styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
     content: page === 'play' ? read('play.html').replace('{{help}}', () => help)
       : `<main id="${page}" class="reading-page">\n${marked.parse(read(`${page}.md`))}</main>`,
