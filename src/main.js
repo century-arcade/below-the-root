@@ -194,7 +194,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
-  const isRunning = () => !paused && !held && !document.hidden && !session.playbackDone;
+  let inactive = false;
+  const isRunning = () => !paused && !held && !inactive && !document.hidden && !session.playbackDone;
   let overlay = null;
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');
@@ -288,6 +289,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
   const hold = () => { held = true; dropInput(); };
+  const suspendFocus = () => { inactive = true; dropInput(); };
+  const restoreFocus = () => {
+    if (!inactive || document.hidden) return;
+    dropInput(); inactive = false; last = performance.now();
+  };
   const release = () => {
     if (overlay) {
       if (overlay.screen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
@@ -295,7 +301,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       overlay.button?.setAttribute('aria-expanded', 'false');
       overlay = null;
     }
-    dropInput(); held = false; last = performance.now();
+    dropInput(); held = false; inactive = false; last = performance.now();
   };
   function openOverlay(screen, button) {
     if (overlay) release();
@@ -485,7 +491,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (held) release(); else hold();
     e.preventDefault();
   });
-  addEventListener('blur', () => hold());
+  addEventListener('blur', suspendFocus);
+  addEventListener('focus', restoreFocus);
+  // Restore before Keyboard latches the first key, so resuming cannot erase it.
+  addEventListener('keydown', restoreFocus, true);
+  canvas.addEventListener('pointerenter', e => {
+    if (e.pointerType !== 'mouse' || paused || held) return;
+    canvas.focus({ preventScroll: true });
+    restoreFocus();
+  });
+  canvas.addEventListener('pointerdown', restoreFocus, true);
   async function importFile(file) {
     if (overlay) release();
     pause();
@@ -515,7 +530,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
   addEventListener('pagehide', () => saveNow());
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { saveNow(); hold(); } else { dropInput(); }
+    if (document.hidden) { saveNow(); suspendFocus(); }
+    else if (document.hasFocus()) restoreFocus();
   });
   setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');

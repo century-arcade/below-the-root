@@ -76,13 +76,58 @@ with sync_playwright() as p:
     expect(canvas).to_be_focused()
     running(True)
 
+    # Returning to the window resumes before any key or click is needed.
+    page.evaluate("dispatchEvent(new Event('blur'))")
+    running(False)
+    page.evaluate("dispatchEvent(new Event('focus'))")
+    running(True)
+
+    # Even without a window focus event, the first movement or fire tap counts.
+    for key, joystick in [('ArrowRight', [1, 0, 0]), ('Space', [0, 0, 1])]:
+        page.evaluate("dispatchEvent(new Event('blur'))")
+        running(False)
+        before = len(record()['reads'])
+        page.keyboard.press(key)
+        page.wait_for_timeout(200)
+        assert any(entry['j'] == joystick for entry in record()['reads'][before:]), 'first key after blur reaches play'
+        running(True)
+
+    # Hovering back onto the game returns keyboard control from a native slider.
+    volume.click()
+    volume.hover()
+    page.evaluate("dispatchEvent(new Event('blur'))")
+    running(False)
+    canvas.hover()
+    expect(canvas).to_be_focused()
+    running(True)
+
+    # Explicit pauses and the map survive both window focus and pointer return.
+    for key in ['p', 'm']:
+        page.keyboard.press(key)
+        running(False)
+        page.evaluate("dispatchEvent(new Event('blur')); dispatchEvent(new Event('focus'))")
+        canvas.dispatch_event('pointerenter', {'pointerType': 'mouse'})
+        running(False)
+        if key == 'm':
+            expect(page.locator('#map-screen')).to_be_visible()
+            page.locator('#close-map').click()
+        else:
+            page.keyboard.press('p')
+        running(True)
+
     page.goto(BASE + '/about')
     page.evaluate('localStorage.clear()')
     page.goto(BASE + '/play')
     expect(page.get_by_role('button', name='Help', exact=True)).to_be_visible()
+    expect(page.locator('#help-screen')).to_be_visible()
     expect(indicator).to_have_attribute('hidden', '')
+    page.evaluate("dispatchEvent(new Event('blur')); dispatchEvent(new Event('focus'))")
+    canvas.dispatch_event('pointerenter', {'pointerType': 'mouse'})
+    page.wait_for_timeout(150)
+    expect(indicator).to_have_attribute('hidden', '')
+    expect(page.locator('#help-screen')).to_be_visible()
     page.get_by_role('button', name='Help', exact=True).click()
     expect(indicator).not_to_have_attribute('hidden', '')
     assert not errors, errors
     browser.close()
-    print('browser_focus_test: slider isolation, click/tap focus and running indicator passed')
+    print('browser_focus_test: slider isolation, pointer/window focus, first-key input and explicit pauses passed')
