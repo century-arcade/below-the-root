@@ -59,11 +59,16 @@ assert.deepEqual(checkpoint(Session.replay(data, live, continued.snapshot()).sta
 // Recordings made before token scoring still verify, including their victory text.
 const legacy = continued.snapshot();
 delete legacy.checkpoint.stats.tokens;
+delete legacy.checkpoint.stats.tokenTotal;
 print(legacy.checkpoint, PANEL_ROW + 3, 1, '24M 23S PLAY / 92% COMPLETE');
 const upgraded = Session.replay(data, live, legacy);
 assert.equal(completion(upgraded.state), 82);
 assert.equal(upgraded.state.progress.tokens.length, 3);
 assert.deepEqual(checkpoint(Session.replay(data, live, upgraded.snapshot()).state), checkpoint(upgraded.state));
+const worldTotal = continued.snapshot();
+delete worldTotal.checkpoint.stats.tokenTotal;
+assert.equal(Session.replay(data, live, worldTotal).state.progress.tokenTotal, 48,
+  'recordings scored against all 62 tokens upgrade to the character maximum');
 const corrupt = structuredClone(legacy);
 corrupt.checkpoint.stats.spirit++;
 assert.throws(() => Session.replay(data, live, corrupt), /does not replay/);

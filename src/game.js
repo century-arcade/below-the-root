@@ -74,7 +74,7 @@ export function newState(data, input, opts = {}) {
     attract: 'loop',
     stick: null,
     figures: [],
-    progress: newProgress(),
+    progress: newProgress(data),
   };
 }
 
@@ -98,7 +98,7 @@ export function startQuest(state, character) {
     character: character.id, sample: false, fallaKey: false, berriesOffered: 0,
     visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null, quest: true,
     player: newPlayer(character.sprite_sheet, character.start.stamina),
-    progress: newProgress(),
+    progress: newProgress(state.data, character),
   });
   const p = state.player;
   applyCharacter(state, character);

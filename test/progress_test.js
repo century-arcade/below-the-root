@@ -1,15 +1,58 @@
 import assert from 'node:assert/strict';
-import { loadTestData, J } from './helpers.js';
+import { loadTestData, J, menuReads } from './helpers.js';
 import { newState, startQuest, startDemo } from '../src/game.js';
 import { Session, checkpoint, validateRecord } from '../src/record.js';
 import { CLASS } from '../src/data.js';
 import { acquired, completion, playTime } from '../src/progress.js';
 import { exportSave, importSave } from '../src/save.js';
-import { gainSpirit } from '../src/dialog.js';
+import { gainSpirit, speak } from '../src/dialog.js';
 import { destroy, mintToken } from '../src/inventory.js';
+import { enterRoom } from '../src/world.js';
+import { runMenu } from '../src/verbs.js';
 
 const data = await loadTestData();
 const live = { read: () => J.idle };
+// Exercise actual SPEAK/TAKE permissions at every token placement for each character.
+// Travel is omitted; these checks cover collection rules, not a timed walkthrough.
+const maxima = [39, 39, 41, 48, 41];
+for (const character of data.characters) {
+  const quest = newState(data, live);
+  startQuest(quest, character);
+  let collected = 0;
+  for (const token of quest.objects.filter(o => o.class === CLASS.TOKEN && o.exists)) {
+    const room = data.roomById.get(token.room);
+    enterRoom(quest, room, token.col, token.row);
+    quest.player.indoors = !room.outdoor_bit;
+    if (quest.creature) {
+      const c = quest.creature;
+      quest.player.col = c.col - 2;
+      quest.player.row = c.row;
+      quest.player.facing = 1;
+      c.facing = -1;
+      speak(quest).next();
+      quest.player.col = token.col;
+      quest.player.row = token.row;
+    }
+    const take = runMenu(quest);
+    take.next();
+    for (const input of menuReads('TAKE')) take.next(input);
+    if (token.carried) {
+      collected++;
+      destroy(token); // Spending keeps the pack light and the collection credit intact.
+    }
+    quest.clock.day = collected + 1; // Each gift-giver offers only one token per day.
+  }
+  assert.equal(collected, maxima[character.id], `${character.name}'s obtainable world tokens`);
+  assert.equal(quest.progress.tokenTotal, collected);
+  assert.equal(completion(quest), 10, 'all obtainable tokens earn the full token share');
+  quest.progress.spirit = 35;
+  quest.progress.elixirs = 5;
+  for (const cls of [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY]) acquired(quest, { class: cls });
+  quest.progress.won = true;
+  assert.equal(completion(quest), 100, `${character.name} needs no forbidden tokens for 100%`);
+  importSave(quest, exportSave(quest));
+  assert.equal(quest.progress.tokenTotal, maxima[character.id], 'C64 imports restore the character maximum');
+}
 const session = new Session(data, live, { initial: { mode: 'quest', character: 3 } });
 const s = session.state;
 assert.equal(completion(s), 0, 'starting spirit is not earned progress');

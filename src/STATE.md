@@ -21,7 +21,7 @@ state = {
   demo,            // null or the running demo script: startDemo sets it and replaces input
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
-  progress,        // elapsed milliseconds, partialTime, earned spirit, elixirs, unique quest items, won, collected token IDs
+  progress,        // elapsed milliseconds, partialTime, earned spirit, elixirs, unique quest items, won, collected token IDs, character's tokenTotal
   events,          // [{sfx: id}|{music: tune}] since the last drain; main.js's Speaker.frame plays and empties them
   panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (panel.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read

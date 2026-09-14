@@ -6,8 +6,9 @@ import { enterRoom } from './world.js';
 import { IDLE, isIdle, pressEdge } from './input.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
-import { panelLines, print, PANEL_ROW } from './panel.js';
+import { panelLines, print, PANEL_ROW, PANEL_COLS } from './panel.js';
 import { playTime } from './progress.js';
+import { CLASS } from './data.js';
 
 export const RECORD_VERSION = 1;
 export const ENGINE_VERSION = 'btr-session-4';
@@ -251,12 +252,17 @@ export class Session {
       const actual = checkpoint(this.state);
       delete expected.shell?.disk;
       if (!expected.stats) delete actual.stats;
-      else if (!('tokens' in expected.stats)) {
-        delete actual.stats.tokens;
-        // Old recordings used the pre-token score on the final victory page.
+      else if (!('tokenTotal' in expected.stats)) {
+        delete actual.stats.tokenTotal;
+        const beforeTokens = !('tokens' in expected.stats);
+        if (beforeTokens) delete actual.stats.tokens;
+        // Older victory pages used either no token score or all world tokens as the goal.
         if (this.state.progress.won && panelLines(this.state)[3].includes('% COMPLETE')) {
           const p = this.state.progress;
-          const score = Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5 + 40;
+          const total = this.state.data.objects.filter(o => o.class === CLASS.TOKEN).length;
+          const tokens = beforeTokens ? 10 : Math.min(10, Math.floor(10 * p.tokens.length / total));
+          const score = Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5 + 30 + tokens;
+          actual.panel.fill(0, actual.panel.length - PANEL_COLS);
           print(actual, PANEL_ROW + 3, 1, `${playTime(this.state)} PLAY / ${score}% COMPLETE`);
         }
       }
