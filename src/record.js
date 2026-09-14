@@ -368,15 +368,18 @@ export class Session {
       }
       delete expected.shell?.disk;
       if (!expected.stats) delete actual.stats;
-      else if (!('tokenTotal' in expected.stats)) {
-        delete actual.stats.tokenTotal;
+      else if (!('wand' in expected.stats)) {
+        delete actual.stats.wand;
+        const beforeTokenMaximum = !('tokenTotal' in expected.stats);
+        if (beforeTokenMaximum) delete actual.stats.tokenTotal;
         const beforeTokens = !('tokens' in expected.stats);
         if (beforeTokens) delete actual.stats.tokens;
-        // Older victory pages used either no token score or all world tokens as the goal.
+        // Preserve verification of victory text from before the wand and revised weights.
         if (this.state.progress.won && panelLines(this.state)[3].includes('% COMPLETE')) {
           const p = this.state.progress;
-          const total = this.state.data.objects.filter(o => o.class === CLASS.TOKEN).length;
-          const tokens = beforeTokens ? 10 : Math.min(10, Math.floor(10 * p.tokens.length / total));
+          const total = beforeTokenMaximum
+            ? this.state.data.objects.filter(o => o.class === CLASS.TOKEN).length : p.tokenTotal;
+          const tokens = beforeTokens ? 10 : total ? Math.min(10, Math.floor(10 * p.tokens.length / total)) : 0;
           const score = Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5 + 30 + tokens;
           actual.panel.fill(0, actual.panel.length - PANEL_COLS);
           print(actual, PANEL_ROW + 3, 1, `${playTime(this.state)} PLAY / ${score}% COMPLETE`);

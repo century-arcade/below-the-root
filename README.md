@@ -68,12 +68,13 @@ Completion totals 100%:
 
 | Milestone | Max | Completion |
 |-----------|-----|------------|
-| Raamo saved | 1 rescue | 30% |
+| Raamo saved | 1 rescue | 35% |
 | Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 4 items | 5% each, up to 20% |
 | Animals pensed for spirit | 10 animals | 1% each, up to 10% |
 | Leaders spoken to for spirit (blessers) | 5 leaders | 5% each, up to 25% |
 | Elixirs consumed | 5 elixirs | 1% each, up to 5% |
-| World tokens collected | 39–48 tokens | 1% for each 4 tokens. |
+| Wand of Befal acquired | 1 wand | 1% |
+| World tokens collected | 39–48 tokens | Up to 4%, proportional to the character’s obtainable tokens, rounded down |
 
 
 The world has 62 currency tokens, but characters can take only some of them.  Pomma can get 48 while Neric and Genaa can only get 39 (and Herd/Charn 41) tokens.
@@ -90,7 +91,7 @@ items and world tokens; earlier dropped-item and spent-token history is unknown.
 
 `node test/win_replay_test.js` replays `test/fixtures/pomma-win.json` in Node,
 verifies its checkpoint, then acknowledges the ending with normal button input.
-The recording includes a fresh Pomma quest that wins on day 3 (82% completion,
+The recording includes a fresh Pomma quest that wins on day 3 (87% completion,
 about 24m 23s unpaused). This regression also runs under `make test`.
 
 Tab (or the Map icon in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.

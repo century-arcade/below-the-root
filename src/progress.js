@@ -15,11 +15,12 @@ function tokenMaximum(data, character) {
 }
 
 export function newProgress(data, character = null) {
-  return { milliseconds: 0, partialTime: false, spirit: 0, elixirs: 0, items: [], won: false,
+  return { milliseconds: 0, partialTime: false, spirit: 0, elixirs: 0, items: [], won: false, wand: false,
     tokens: [], tokenTotal: tokenMaximum(data, character) };
 }
 
 export function acquired(state, item) {
+  if (item.class === CLASS.WAND) state.progress.wand = true;
   if (item.class === CLASS.TOKEN && !state.progress.tokens.includes(item.object)
       && state.data.objects.some(o => o.class === CLASS.TOKEN && o.object === item.object)) {
     state.progress.tokens.push(item.object);
@@ -43,9 +44,9 @@ export function progressFromSave(state) {
 
 export function completion(state) {
   const p = state.progress;
-  const tokens = p.tokenTotal ? Math.floor(10 * p.tokens.length / p.tokenTotal) : 0;
+  const tokens = p.tokenTotal ? Math.floor(4 * p.tokens.length / p.tokenTotal) : 0;
   return Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5
-    + Math.min(10, tokens) + (p.won ? 30 : 0);
+    + Math.min(4, tokens) + (p.wand ? 1 : 0) + (p.won ? 35 : 0);
 }
 
 export function playTime(state) {
