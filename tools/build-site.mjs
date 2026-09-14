@@ -7,7 +7,9 @@ const read = name => readFileSync(new URL(`../src/${name}`, import.meta.url), 'u
 const template = read('page.html');
 const help = marked.parse(read('help.md')).replace(
   /<h2>Recording playback<\/h2>[\s\S]*?(?=<h2>|$)/,
-  section => `<section id="replay-help" hidden>${section}</section>`);
+  section => `<section id="replay-help" hidden>${section}</section>`).replace(
+  /<h2>Developer mode<\/h2>[\s\S]*?(?=<h2>|$)/,
+  section => `<section id="developer-help" hidden>${section}</section>`);
 mkdirSync(out, { recursive: true });
 for (const page of ['about', 'play', 'links']) {
   const title = `${page[0].toUpperCase() + page.slice(1)} — Below the Root`;

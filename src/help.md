@@ -1,16 +1,18 @@
 
 ## Keyboard
 
-- **WASD or Arrows**: Move
-- **Space or Enter**: Select/skip/jump
+- **WASD/Arrows**: Move
+- **Space/Enter**: Select/skip/jump
 - **F**: Open menu
-- **M**: Open/close map
+- **M**: Map
 
 ## Recording playback
 
-- **Left/Right**: back/forward one room change.
-- **Shift+Left/Right**: back/forward ten room changes.
+Seek back/forward by room:
+
+- **Left/Right**: 1 room
+- **Shift+Left/Right**: 10 rooms
 
 ## Developer mode
 
-- **Delete** (dev mode): Go back a day
+- **Delete**: Go back a day

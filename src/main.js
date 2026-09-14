@@ -360,6 +360,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     where.hidden = !on;
+    document.getElementById('developer-help').hidden = !on;
     if (on && !debugReady) {
       debugReady = true;
       setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, log,
@@ -380,9 +381,30 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   for (const type of ['keydown', 'keyup']) menuButton.addEventListener(type, e => {
     if (e.key === ' ') e.stopPropagation();
   });
-  // Overlay controls keep native keyboard activation without sending joystick input.
+  for (const type of ['keydown', 'keyup']) helpButton.addEventListener(type, e => {
+    if (e.key === ' ') e.stopPropagation();
+  });
+  const mapDirections = {
+    ArrowLeft: [-1, 0], a: [-1, 0], ArrowRight: [1, 0], d: [1, 0],
+    ArrowUp: [0, -1], w: [0, -1], ArrowDown: [0, 1], s: [0, 1],
+  };
+  // Capture map movement before joystick input and recording playback shortcuts.
+  for (const type of ['keydown', 'keyup']) addEventListener(type, e => {
+    if (paused || overlay?.screen !== mapScreen || isEditing(e.target)) return;
+    if (e.key === 'Shift') { e.stopImmediatePropagation(); return; }
+    if (e.metaKey || e.altKey || e.ctrlKey) return;
+    const direction = mapDirections[e.key] || mapDirections[e.key.toLowerCase()];
+    if (!direction) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (type === 'keydown') mapViewport.scrollBy({ left: direction[0] * 80, top: direction[1] * 80, behavior: 'instant' });
+  }, true);
+  // Help permits play while its buttons and the startup intro keep native activation.
   for (const screen of [mapScreen, helpScreen]) {
     for (const type of ['keydown', 'keyup']) screen.addEventListener(type, e => {
+      if (screen === helpScreen && !startupHelp) {
+        if (e.key !== ' ' || !e.target.closest('button, a[href]')) return;
+      }
       if (!['Escape', 'Tab', '?', 'h', 'H', 'm', 'M'].includes(e.key)) e.stopPropagation();
     });
   }

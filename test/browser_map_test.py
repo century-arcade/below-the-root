@@ -106,7 +106,26 @@ with sync_playwright() as p:
         page.locator('#map-screen').wait_for(state='hidden')
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
-        page.keyboard.press('ArrowRight')
+        # Observe pan requests, without depending on CSS or viewport geometry.
+        page.evaluate('''() => {
+            window.mapPans = [];
+            const viewport = document.getElementById('map-viewport');
+            const scrollBy = viewport.scrollBy.bind(viewport);
+            viewport.scrollBy = options => {
+                window.mapPans.push([Math.sign(options.left), Math.sign(options.top)]);
+                scrollBy(options);
+            };
+        }''')
+        stopped = record()['frames']
+        for control in ['#screen', '#close-map', '#map-zoom-in']:
+            page.locator(control).focus()
+            for key in ['ArrowRight', 'd', 'ArrowLeft', 'a', 'ArrowUp', 'w', 'ArrowDown', 's', 'Shift+D']:
+                page.keyboard.press(key)
+            assert page.locator('#map-screen').is_visible(), 'movement pans without dismissing the map'
+        assert page.evaluate('window.mapPans') == [[1, 0], [1, 0], [-1, 0], [-1, 0],
+                                                   [0, -1], [0, -1], [0, 1], [0, 1], [1, 0]] * 3
+        assert record()['frames'] == stopped, 'map navigation keeps the game held'
+        page.keyboard.press('Escape')
         page.locator('#map-screen').wait_for(state='hidden')
         page.wait_for_timeout(200)
         assert all(r['j'] == [0, 0, 0] for r in record()['reads']), 'resuming from the map drops the movement key'
