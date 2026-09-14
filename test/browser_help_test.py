@@ -1,4 +1,4 @@
-"""Help beside live play, startup intro hold, toggles and keyboard/touch controls."""
+"""Input help, startup intro hold, toggles and keyboard/touch controls."""
 import json
 import os
 import re

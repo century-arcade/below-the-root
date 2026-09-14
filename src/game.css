@@ -13,8 +13,8 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #map-heading, #help-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
 #map-screen { font: clamp(12px, 2cqw, 20px)/1.2 'Green-Sky', monospace; text-transform: uppercase; }
 #map-screen button { text-transform: inherit; }
-#help-screen { box-sizing: border-box; width: 320px; flex: 0 0 320px; max-height: var(--play-height); background: #000; color: #fff; overflow: auto; font: 10px/1.5 'Green-Sky', monospace; text-transform: uppercase; }
-#help-heading { position: sticky; top: 0; gap: 1em; padding: .75em; background: #000; border-bottom: 1px solid #fff; }
+#help-screen { box-sizing: border-box; width: 100%; color: #fff; font: 10px/1.5 'Green-Sky', monospace; text-transform: uppercase; }
+#help-heading { gap: 1em; padding: .75em; }
 #help-heading button { color: #fff; background: #000; border-color: #fff; text-transform: inherit; }
 #help-heading button:hover, #help-heading button:focus-visible { color: #000; background: #fff; outline-color: #fff; }
 #help-content { padding: 0 .75em 1em; min-width: 0; overflow-wrap: anywhere; }
@@ -50,11 +50,7 @@ dialog {
 textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
 #issue-result { overflow-wrap: anywhere; }
 
-#play-area { display: flex; align-items: flex-start; gap: 16px; }
+#play-area { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 #canvas-box { flex: none; }
 #command-menu { position: absolute; left: 0; top: var(--menu-top); width: 100%; height: var(--menu-height); padding: 0; border: 0; background: transparent; }
 #command-menu:focus-visible { outline-offset: -2px; }
-@media (max-width: 759px) {
-  #play-area { flex-direction: column; }
-  #help-screen { width: 100%; flex: auto; max-height: 60dvh; }
-}

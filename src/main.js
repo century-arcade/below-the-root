@@ -38,17 +38,14 @@ function fit() {
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
-  const helpBeside = !document.getElementById('help-screen').hidden && window.innerWidth >= 760;
-  const helpWidth = helpBeside ? 336 : 0;
-  const scale = fitScale((full ? game.clientWidth : window.innerWidth) - helpWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
+  const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
   canvas.parentElement.style.setProperty('--canvas-padding', `${CANVAS_PADDING * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
-  game.style.setProperty('--play-height', `${(HEIGHT + band + 2 * CANVAS_PADDING) * scale}px`);
   canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
   canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
-  if (!full) game.style.width = (WIDTH + 2 * CANVAS_PADDING) * scale + helpWidth + 'px';
+  if (!full) game.style.width = (WIDTH + 2 * CANVAS_PADDING) * scale + 'px';
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
