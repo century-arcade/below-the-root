@@ -20,6 +20,8 @@ const log = createLog(document.getElementById('log'), { onToggle: () => fit() })
 const canvas = document.getElementById('screen');
 const screenFocus = document.getElementById('screen-focus');
 const game = document.getElementById('game');
+// Browser fullscreen (F11) does not set document.fullscreenElement.
+const fullscreenMode = matchMedia('(display-mode: fullscreen)');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
@@ -28,7 +30,8 @@ let band = 0;
 const CANVAS_PADDING = 12; // Keep the full picture inside the bowed screen surround.
 
 function fit() {
-  const full = document.fullscreenElement === game;
+  const full = fullscreenMode.matches || document.fullscreenElement !== null;
+  document.documentElement.classList.toggle('game-fullscreen', full);
   let availableHeight;
   if (full) {
     game.style.width = '';
@@ -168,10 +171,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     persist('muted', speaker.muted);
     syncVolume();
   }
-  const canFullscreen = !!(game.requestFullscreen && document.exitFullscreen);
+  const canFullscreen = !!(document.documentElement.requestFullscreen && document.exitFullscreen);
   function toggleFullscreen() {
     if (!canFullscreen) return;
-    const request = document.fullscreenElement ? document.exitFullscreen() : game.requestFullscreen();
+    const request = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
     request.catch(() => {});
   }
   function setVolume(level) {
@@ -612,6 +615,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     requestAnimationFrame(frame);
   }
   addEventListener('resize', fit);
+  fullscreenMode.addEventListener('change', fit);
   document.addEventListener('fullscreenchange', fit);
   if (['home', 'map', 'help'].includes(location.hash.slice(1))) showView(location.hash.slice(1));
   else if (debug && GAME_TOOLS.includes(location.hash.slice(1))) {

@@ -1,14 +1,16 @@
 canvas { image-rendering: pixelated; display: block; background: #000; }
 #game { display: flex; flex-direction: column; align-items: stretch; margin-top: var(--header-gap); }
-#game:fullscreen { background: #000; justify-content: center; align-items: center; margin-top: 0; }
-#game:fullscreen > :not(#play-area) { display: none; }
+.game-fullscreen, .game-fullscreen body { background: #000; overflow: hidden; }
+.game-fullscreen #site-header { display: none; }
+.game-fullscreen #play { width: 100%; }
+.game-fullscreen #game { height: 100dvh; justify-content: center; align-items: center; margin-top: 0; }
+.game-fullscreen #game > :not(#play-area) { display: none; }
 /* Opaque backing keeps the CRT blur's transparent edges from revealing its overlay. */
 #canvas-box { position: relative; container-type: inline-size; background: #000; border: var(--canvas-padding, 0px) solid #000; }
 #screen:focus-visible { outline: none; }
 /* Keep the game from showing through the blurred edges of an open overlay. */
 #canvas-box:has(> #map-screen:not([hidden])) > #screen { opacity: 0; }
 #screen-focus { display: block; position: absolute; inset: calc(-1 * var(--canvas-padding, 0px)); width: calc(100% + 2 * var(--canvas-padding, 0px)); height: calc(100% + 2 * var(--canvas-padding, 0px)); fill: none; stroke: #56734e; stroke-width: 6px; filter: blur(1.5px); pointer-events: none; }
-#game:fullscreen #canvas-box { flex: none; }
 #map-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; color: #fff; line-height: 1.2; }
 #map-heading { display: flex; justify-content: space-between; align-items: center; padding: 4px; }
 #map-screen { font: clamp(12px, 2cqw, 20px)/1.2 'Green-Sky', monospace; text-transform: uppercase; }

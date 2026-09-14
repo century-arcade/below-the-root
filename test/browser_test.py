@@ -194,7 +194,7 @@ with sync_playwright() as p:
     expect(page.locator('#issue-dialog')).to_be_hidden()
     assert page.evaluate("localStorage.getItem('btr.debug')") == '0'
     page.get_by_role('button', name='Fullscreen', exact=True).click()
-    page.wait_for_function('document.fullscreenElement !== null')
+    page.wait_for_function('document.fullscreenElement === document.documentElement')
     page.keyboard.press('f')
     assert page.evaluate('document.fullscreenElement !== null'), 'F does not toggle fullscreen'
     page.evaluate('document.exitFullscreen()')
