@@ -10,7 +10,7 @@ export function createMusicTrail(element) {
   }));
   const waveform = element.ownerDocument.createElement('canvas');
   waveform.className = 'sound-waveform';
-  waveform.width = 224;
+  waveform.width = 112;
   waveform.height = 72;
   waveform.hidden = true;
   const ctx = waveform.getContext('2d');

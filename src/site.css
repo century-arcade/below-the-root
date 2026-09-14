@@ -27,7 +27,7 @@ a { color: #c7f5ae; }
 #music-notes > [data-register] { position: relative; display: block; height: 18px; overflow: hidden; }
 #music-notes [data-rhythm] { position: absolute; left: 76px; top: 0; color: #d6f897; animation: music-note-scroll linear both; }
 #music-notes svg { display: block; }
-#music-notes .sound-waveform { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; image-rendering: auto; }
+#music-notes .sound-waveform { position: absolute; inset: 0; width: 50%; height: 100%; margin-inline: auto; background: transparent; image-rendering: auto; }
 @keyframes music-note-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-112px); }
