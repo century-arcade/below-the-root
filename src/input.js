@@ -23,7 +23,7 @@ export function pressEdge(read, last = IDLE) {
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   ' ': 'fire', Enter: 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
-  W: 'up', S: 'down', A: 'left', D: 'right',
+  W: 'up', S: 'down', A: 'left', D: 'right', f: 'fire', F: 'fire',
 };
 
 // a tap shorter than the read interval still counts once: keys latch until the next read
@@ -32,12 +32,14 @@ export class Keyboard {
     this.sources = new Map();
     this.pace = 5;
     this.onKey = null;
+    this.selectWithF = () => false;
     target.addEventListener('keydown', (e) => { if (this.map(e)) e.preventDefault(); });
     target.addEventListener('keyup', (e) => { this.map(e, true); });
     target.addEventListener('blur', () => this.reset());
   }
 
   map(e, up = false) {
+    if (!up && e.key.toLowerCase() === 'f' && !this.selectWithF()) return false;
     if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
     if (!up && e.key === 'Enter' && e.target?.closest?.('a[href], button, [role="button"]')) return false;
     const key = KEYS[e.key];
@@ -72,6 +74,16 @@ export class Keyboard {
       fire: d.has('fire'),
     };
   }
+}
+
+// Menus consume a direction once until that axis is released or changes direction.
+export function directionPress() {
+  let last = IDLE;
+  return joy => {
+    const move = { dx: joy.dx === last.dx ? 0 : joy.dx, dy: joy.dy === last.dy ? 0 : joy.dy };
+    last = joy;
+    return move;
+  };
 }
 
 const TAP_MS = 150;

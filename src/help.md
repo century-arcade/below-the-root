@@ -3,7 +3,8 @@
 
 - **WASD/Arrows**: Move
 - **Space/Enter**: Select/skip/jump
-- **F**: Open menu
+- **F**: Open menu / select a choice
+- **Up/Down**: Previous/next choice; release between moves
 - **M**: Map
 
 ## Recording playback

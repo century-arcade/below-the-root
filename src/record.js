@@ -72,6 +72,7 @@ export class Session {
     this.record = record ? copy(record) : {
       format: 'below-the-root-record', version: RECORD_VERSION, engine: ENGINE_VERSION,
       created: new Date().toISOString(), seed, initial, frames: 0,
+      menuNavigationFrom: 0,
       reads: [], actions: [], path: [], gestures: [], outcomes: [],
     };
     // Discard obsolete slot fields when continuing an older recording.
@@ -160,6 +161,8 @@ export class Session {
     }
     this.state.legacyContinue = this.record.legacyContinueUntil != null
       && this.frame < (this.record.legacyContinueUntil ?? Infinity);
+    // Journals without a boundary retain the original repeating, up-only choosers.
+    this.state.legacyNavigation = this.frame < (this.record.menuNavigationFrom ?? Infinity);
     if (!Number.isFinite(milliseconds) || milliseconds < 0) throw new Error('Invalid frame duration');
     if (this.window?.eligible && this.state.progress.won) this.closeWindow();
     if (this.playback) {
@@ -271,6 +274,7 @@ export class Session {
     r.gestures = r.gestures.filter(g => g[0] < restored.frame);
     r.frames = restored.frame;
     if (r.legacyContinueUntil != null) r.legacyContinueUntil = Math.min(r.legacyContinueUntil, restored.frame);
+    if (r.menuNavigationFrom != null) r.menuNavigationFrom = Math.min(r.menuNavigationFrom, restored.frame);
     delete r.checkpoint;
     delete r.c64;
     restored.continueLive();
@@ -284,6 +288,8 @@ export class Session {
     this.playbackDone = false;
     this.sourceRecord = null;
     this.state.legacyContinue = false;
+    this.record.menuNavigationFrom = Math.min(this.record.menuNavigationFrom ?? this.frame, this.frame);
+    this.state.legacyNavigation = false;
   }
 
   noteRoom() {
@@ -470,6 +476,8 @@ export function validateRecord(r, data) {
       || r.engine !== ENGINE_VERSION) {
     throw new Error('Unsupported playthrough recording version');
   }
+  if (r.menuNavigationFrom != null && (!Number.isInteger(r.menuNavigationFrom)
+      || r.menuNavigationFrom < 0 || r.menuNavigationFrom > r.frames)) throw new Error('Invalid menu navigation boundary');
   if (!Number.isInteger(r.frames) || r.frames < 0 || r.frames > MAX_FRAMES
       || !Number.isInteger(r.seed) || r.seed < 0 || r.seed > 0xffffffff
       || !r.initial || !r.checkpoint) throw new Error('Invalid recording');
@@ -544,6 +552,7 @@ export function convertRecording(data, record, { onTiming = () => {} } = {}) {
   } }, { seed: record.seed, initial: record.initial });
   Object.assign(session.record, converted, { actions: [], path: session.record.path, outcomes: [],
     gestures: record.gestures.map(g => [g[0], g[1], null, ...g.slice(2)]) });
+  delete session.record.menuNavigationFrom;
   if (record.engine === 'btr-session-2') session.record.legacyContinueUntil = record.legacyContinueUntil ?? record.frames;
   let actionIndex = 0, oldTime = 0, progress = session.state.progress;
   for (;;) {

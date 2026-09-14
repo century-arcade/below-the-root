@@ -145,6 +145,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   try { restoreRecordingHistory(session, localStorage); }
   catch (err) { log(`Could not retrieve earlier recording history: ${err.message}`); }
   let state = session.state;
+  stick.selectWithF = () => state.title || !!state.verb;
   let returnSession = null;
   let seekRoom = null;
   let seekKey = null;
@@ -470,7 +471,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       return;
     }
     if (e.key === '?' || (e.key.toLowerCase() === 'h' && !e.shiftKey)) { openHelp(); e.preventDefault(); return; }
-    if (e.key.toLowerCase() === 'f' && !e.shiftKey) { commandMenu(); e.preventDefault(); return; }
+    if (e.key.toLowerCase() === 'f' && !e.shiftKey) {
+      if (!stick.selectWithF()) commandMenu();
+      e.preventDefault(); return;
+    }
     if (e.key === '-' || e.key === '_') { stepVolume(-0.1); e.preventDefault(); return; }
     if (e.key === '=' || e.key === '+') { stepVolume(0.1); e.preventDefault(); return; }
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;

@@ -48,6 +48,7 @@ test:
 	node test/shell_test.js
 	node test/audio_test.js
 	node test/input_test.js
+	node test/menu_test.js
 	node test/gamepad_test.js
 	node test/session_test.js
 	node test/rewind_test.js

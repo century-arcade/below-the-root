@@ -245,13 +245,15 @@ try {
   const v1Fixture = fileURLToPath(new URL('fixtures/pomma-win.v1.json', import.meta.url));
   const convertedReport = execFileSync(process.execPath, [tool, v1Fixture, '--convert', '--out', convertedFile], { encoding: 'utf8' });
   assert.match(convertedReport, /Converted v1 play time: [\d.]+ -> [\d.]+ ms/);
+  const convertedFixture = JSON.parse(readFileSync(new URL('fixtures/pomma-win.json', import.meta.url)));
   assert.deepEqual(JSON.parse(readFileSync(convertedFile)),
-    JSON.parse(readFileSync(new URL('fixtures/pomma-win.json', import.meta.url))));
+    { ...convertedFixture, menuNavigationFrom: convertedFixture.frames });
   const timedFile = join(dir, 'timed.json');
   const timedCut = join(dir, 'timed-cut.json');
-  writeFileSync(timedFile, JSON.stringify(timed.snapshot()));
+  writeFileSync(timedFile, JSON.stringify({ ...timed.snapshot(), menuNavigationFrom: 150 }));
   execFileSync(process.execPath, [tool, timedFile, '--cut', '50:250', '--out', timedCut]);
   const cut = JSON.parse(readFileSync(timedCut));
+  assert.equal(cut.menuNavigationFrom, 50, 'a cut also moves the menu control transition');
   assert.deepEqual(cut.reads.map(r => r.n), [6, 6], 'a cut splits the 37-read hold at both frame boundaries');
   assert.equal(cut.checkpoint.stats.milliseconds, 5930 * (12 / 37),
     'route cuts apportion window time by surviving read counts');
@@ -314,6 +316,7 @@ for (const source of ['keyboard held', 'keyboard tap', 'mouse tap', 'mouse hold'
   keys.release('down'); keys.release('fire');
   until(() => selected() === 'PAUSE');
   keys.tap('down'); until(() => selected() === 'SPEAK');
+  until(() => session.lastJoy.dy === 0); // sample the release between menu presses
   keys.tap('down'); until(() => selected() === 'PENSE');
   if (source === 'mouse tap') keys.tap('fire');
   else if (source === 'mouse hold') keys.press('fire', 'pointer');

@@ -27,10 +27,10 @@ export const J = {
 export function menuReads(verb) {
   const row = MENU.findIndex((r) => r.includes(verb));
   const col = MENU[row].indexOf(verb);
-  return [J.idle, ...Array(col).fill(J.right), ...Array(row).fill(J.down), J.fire];
+  return [J.idle, ...Array(col).fill([J.right, J.idle]).flat(), ...Array(row).fill([J.down, J.idle]).flat(), J.fire];
 }
 
-export const page = (n) => [J.idle, ...Array(n).fill(J.up), J.fire];
+export const page = (n) => [J.idle, ...Array(n).fill([J.down, J.idle]).flat(), J.fire];
 
 // panel comparisons: skip the blank column 0
 export const lines = (state) => panelLines(state).map((l) => l.replace(/^ /, ''));

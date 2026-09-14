@@ -137,6 +137,13 @@ moves once per push and re-arms when the stick centres; every other
 screen waits for the stick to centre and the button to be up, then for
 the next push or the button.
 
+Command and item choosers consume each direction press once. Item choices
+use Down for next and Up for previous, wrapping through NOTHING. Demo scripts
+retain their original controls. Session journals mark `menuNavigationFrom`:
+earlier frames use repeating menu movement and up-only item paging; a missing
+boundary means the whole recording predates these controls. Resuming play sets
+the boundary to the current frame so old saves remain replayable.
+
 ## Saves
 
 `save.js` writes and reads the original's 1410-byte QUESTn image from

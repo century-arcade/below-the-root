@@ -40,6 +40,20 @@ for (const selector of ['input', 'dialog', 'a[href]', 'button', '[role="button"]
   assert.equal(keys.map({ key: 'Enter', code: 'Enter', target }), false);
   assert.deepEqual(keys.read(), IDLE, `Enter on ${selector} keeps native activation`);
 }
+assert.equal(keys.map({ key: 'f', code: 'KeyF' }), false, 'F outside a chooser is left to the menu shortcut');
+keys.selectWithF = () => true;
+for (const key of ['f', 'F']) {
+  keys.map({ key, code: 'KeyF' });
+  assert.equal(read().press, true, 'F selects a menu choice');
+  keys.map({ key, code: 'KeyF', repeat: true });
+  assert.equal(read().press, false, 'held F does not select again');
+  keys.selectWithF = () => false;
+  keys.map({ key, code: 'KeyF' }, true);
+  assert.deepEqual(read(), { ...IDLE, press: false }, 'F releases even after the choice closes');
+  keys.selectWithF = () => true;
+}
+assert.equal(keys.map({ key: 'f', code: 'KeyF', target: { closest: () => true } }), false,
+  'typing F in a form cannot select a choice');
 const demo = new DemoInput({ steps: [
   { op: 'hold', bytes: [15], steps: 3 }, { op: 'tap', bytes: [31] }, { op: 'tap', bytes: [15] },
 ] }, {});

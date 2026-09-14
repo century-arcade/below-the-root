@@ -108,6 +108,23 @@ with sync_playwright() as p:
             resumed = record()['frames']
             page.wait_for_timeout(100)
             assert record()['frames'] > resumed, 'Escape dismisses the menu and leaves play running'
+        page.keyboard.down('f')
+        expect(menu_button).to_be_hidden()
+        page.wait_for_timeout(250)
+        page.keyboard.down('f')  # browser repeat while held
+        page.wait_for_timeout(150)
+        expect(menu_button).to_be_hidden()
+        page.keyboard.up('f')
+        page.wait_for_timeout(100)
+        for key, choice in [('ArrowRight', 'TAKE'), ('ArrowDown', 'BUY'), ('ArrowUp', 'TAKE'), ('ArrowLeft', 'PAUSE')]:
+            page.keyboard.down(key)
+            page.wait_for_timeout(300)
+            selected = ''.join(chr(value & 127) for value in record()['checkpoint']['panel'] if value & 128).strip()
+            assert selected == choice, 'held directions move one command in either direction'
+            page.keyboard.up(key)
+            page.wait_for_timeout(100)
+        page.keyboard.press('f')
+        expect(menu_button).to_be_visible()  # F selects PAUSE and returns to play
         page.keyboard.press('h')
         expect(help_screen).to_be_visible()
         expect(page.locator('#replay-help')).to_be_hidden()
@@ -163,6 +180,15 @@ with sync_playwright() as p:
         expect(page.locator('#help-screen')).to_be_hidden()
         menu = record()
         assert menu['checkpoint']['title'] and menu['checkpoint']['quest']
+        page.wait_for_timeout(150)
+        page.keyboard.press('f')
+        page.wait_for_timeout(150)
+        panel = ''.join(chr(value & 127) for value in record()['checkpoint']['panel'])
+        assert 'CHOOSE YOUR PLAYER' in panel, 'F selects START GAME on the title menu'
+        page.wait_for_timeout(150)  # the character chooser samples the released trigger
+        page.keyboard.press('f')
+        expect(menu_button).to_be_visible()
+        assert not record()['checkpoint']['title'], 'F selects the character and starts play'
         assert not errors, errors
         page.close()
     browser.close()

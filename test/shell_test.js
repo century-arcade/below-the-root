@@ -200,7 +200,7 @@ test('the menu verb leaves the quest in progress and CONTINUE puts you back on t
   const menuCol = MENU[menuRow].indexOf('MENU');
   s.stop = { reason: 'menu' };
   s.active = true;
-  s.stick.feed(J.idle, ...Array(menuCol).fill(J.right), ...Array(menuRow).fill(J.down), J.fire, J.idle);
+  s.stick.feed(J.idle, ...push(J.right, menuCol), ...push(J.down, menuRow), J.fire, J.idle);
   settle(s);
   assert.equal(s.title, true);
   assert.equal(s.quest, true);

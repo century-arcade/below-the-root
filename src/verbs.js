@@ -3,7 +3,7 @@
 import { CLASS } from './data.js';
 import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world.js';
 import { lieDown, idleFrame } from './player.js';
-import { fireUp, anyInput, isIdle } from './input.js';
+import { fireUp, anyInput, isIdle, directionPress } from './input.js';
 import { say, print, clearPanel, PANEL_ROW } from './panel.js';
 import { objectUnder, pickItem, canCarry, weightOf, destroy, carried, CANCELLED } from './inventory.js';
 import { creatureInReach, banish, flagsOf } from './creatures.js';
@@ -48,13 +48,15 @@ function drawMenu(state, selCol, selRow) {
 export function* runMenu(state) {
   state.commandMenuOpen = true;
   let col = 0, row = 0;
+  const moved = directionPress();
   yield* fireUp();
   drawMenu(state, col, row);
   for (;;) {
     const j = yield;
     if (j.fire) break;
-    col = Math.max(0, Math.min(4, col + j.dx));
-    row = Math.max(0, Math.min(3, row + j.dy));
+    const move = state.demo || state.legacyNavigation ? j : moved(j);
+    col = Math.max(0, Math.min(4, col + move.dx));
+    row = Math.max(0, Math.min(3, row + move.dy));
     drawMenu(state, col, row);
   }
   const verb = MENU[row][col];

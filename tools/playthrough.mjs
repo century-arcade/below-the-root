@@ -63,9 +63,11 @@ try {
       frame: shift(action.frame), ...(action.read != null ? { read: action.read <= first ? action.read : action.read - (last - first) } : {}) }));
     edited.gestures = record.gestures.filter(event => keep(event[0])).map(event =>
       [shift(event[0]), event[1], null, ...event.slice(3)]);
-    if (record.legacyContinueUntil != null) {
-      edited.legacyContinueUntil = record.legacyContinueUntil < start ? record.legacyContinueUntil
-        : Math.max(start, record.legacyContinueUntil - duration);
+    for (const boundary of ['legacyContinueUntil', 'menuNavigationFrom']) {
+      if (record[boundary] != null) {
+        edited[boundary] = record[boundary] < start ? record[boundary]
+          : Math.max(start, record[boundary] - duration);
+      }
     }
     edited.frames -= duration;
     edited.edits = [...(record.edits || []), { cut: [start, end], sourceFrames: record.frames }];

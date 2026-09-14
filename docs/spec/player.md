@@ -439,6 +439,8 @@ the clock and the creatures are frozen until the verb returns.
 
 A grid of names is drawn over the text panel.  The stick walks it,
 clamped at the edges with no wrap; the button selects.
+In the port, each direction press moves once; holding it does not repeat.
+F opens the command menu during play and selects while a menu or prompt is open.
 
 | | | | | |
 |---|---|---|---|---|
@@ -459,6 +461,9 @@ one entry per class; DROP and INVENTORY show one entry per object.
 USE, EAT and SELL also skip the classes they cannot act on.
 In the port, confirming "NOTHING" clears the prompt and resumes play immediately,
 without a second press to acknowledge a result message.
+The port uses Down to page forward and Up to page backward, once per press,
+including INVENTORY. Both directions wrap through NOTHING. Original demo
+scripts and older recorded input retain the original paging behavior.
 
 **How often the stick is read.**  This matters only to the attract demo,
 which feeds one script entry per read (`time.md`).  The menu reads until

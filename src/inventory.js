@@ -2,7 +2,7 @@
 
 import { cell, role } from './world.js';
 import { print, PANEL_ROW } from './panel.js';
-import { fireUp } from './input.js';
+import { fireUp, directionPress } from './input.js';
 import { CLASS } from './data.js';
 
 export function carried(state) {
@@ -66,7 +66,7 @@ export function objectUnder(state) {
 const ENTRY_WIDTH = 16;
 export const CANCELLED = Symbol('item choice cancelled');
 
-// up pages forward round a cycle that ends in NOTHING; fire takes the entry showing
+// Down pages forward, up pages back, and fire takes the entry showing.
 export function* pickItem(state, { accept = () => true, perClass = false, col = 10, noFire = false } = {}) {
   const entries = [];
   const seen = new Set();
@@ -76,14 +76,19 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
     entries.push(o);
   }
   yield* fireUp();
-  for (let i = 0; ; i = (i + 1) % (entries.length + 1)) {
+  const moved = directionPress();
+  for (let i = 0; ;) {
     const entry = entries[i] || null;
     print(state, PANEL_ROW, col, (entry ? entry.name : 'NOTHING').padEnd(ENTRY_WIDTH));
     if (noFire && !entry) return null;
     for (;;) {
       const j = yield;
       if (j.fire && !noFire) return entry;
-      if (j.dy < 0) break;
+      const step = state.demo || state.legacyNavigation ? (j.dy < 0 ? 1 : 0) : moved(j).dy;
+      if (step) {
+        i = (i + step + entries.length + 1) % (entries.length + 1);
+        break;
+      }
     }
   }
 }
