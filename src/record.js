@@ -3,7 +3,7 @@
 import { newState, startQuest, startDemo, endDemo, tick } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
-import { IDLE, isIdle, pressEdge } from './input.js';
+import { IDLE, isIdle } from './input.js';
 import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
 import { panelLines, print, PANEL_ROW, PANEL_COLS } from './panel.js';
@@ -20,12 +20,14 @@ const same = (a, b) => a.dx === b.dx && a.dy === b.dy && a.fire === b.fire;
 
 function random(seed) {
   let n = seed >>> 0;
-  return () => {
+  const rng = () => {
     n = (n + 0x6d2b79f5) >>> 0;
     let t = Math.imul(n ^ n >>> 15, n | 1);
     t ^= t + Math.imul(t ^ t >>> 7, t | 61);
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
+  rng.snapshot = () => n;
+  return rng;
 }
 
 export function screenKey(s) {
@@ -73,7 +75,13 @@ export class Session {
     delete this.record.slots;
     delete this.record.storageErrors;
     // Cold start swallows a held startup button until the first released sample.
-    this.read = pressEdge(() => this.sample(), this.record.initial.mode === 'cold' ? { ...IDLE, fire: true } : IDLE);
+    this.previousFire = this.record.initial.mode === 'cold';
+    this.read = () => {
+      const joy = this.sample();
+      const press = joy.fire && !this.previousFire;
+      this.previousFire = joy.fire;
+      return { ...joy, press };
+    };
     // replay route and endings: derived from the replayed frames
     if (record) { this.record.path = []; this.record.outcomes = []; }
     const stick = { pace: 5, read: () => this.read() };
@@ -89,6 +97,8 @@ export class Session {
     this.roomChanges = 0;
     this.lastRoom = null;
     this.noteRoom();
+    this.history = [];
+    this.cacheBoundary();
   }
 
   sample() {
@@ -153,7 +163,96 @@ export class Session {
     this.lastEnding = this.state.ended;
     if (!this.playback) this.record.frames = this.frame;
     this.noteRoom();
+    this.cacheBoundary();
     return true;
+  }
+
+  cacheBoundary() {
+    const s = this.state;
+    const previous = this.history.at(-1);
+    const day = s.quest && !s.demo ? s.clock.day : null;
+    const quest = s.questNumber;
+    if (previous && previous.roomChanges === this.roomChanges
+        && previous.day === day && previous.quest === quest) return;
+    const entry = { frame: this.frame, roomChanges: this.roomChanges, day, quest };
+    // Generators close over live objects and cannot be cloned. Keep their frame
+    // as a destination; restore the closest plain state and rebuild silently.
+    if (!s.verb && !s.demo) {
+      const { data, input, stick, rng, ...state } = s;
+      entry.saved = {
+        state: structuredClone({ ...state, events: [] }), rng: rng.snapshot(),
+        previousFire: this.previousFire, lastJoy: { ...this.lastJoy },
+        readIndex: this.playback ? this.readIndex : this.record.inputs.length,
+        actionIndex: this.playback ? this.actionIndex : this.record.actions.length,
+        durationIndex: this.playback ? this.durationIndex : (this.record.durations?.length ?? 0),
+        duration: this.duration, lastEnding: this.lastEnding,
+        lastRoom: this.lastRoom, lastRoomChange: this.lastRoomChange,
+        lastQuestNumber: this.lastQuestNumber,
+        path: copy(this.record.path), outcomes: copy(this.record.outcomes),
+      };
+    }
+    this.history.push(entry);
+  }
+
+  restoreFrame(frame) {
+    if (!Number.isInteger(frame) || frame < 0 || frame > this.record.frames) throw new Error('Invalid rewind frame');
+    const restored = Session.watch(this.state.data, this.live, this.snapshot(), this.verify);
+    const boundary = this.history.findLast(entry => entry.frame <= frame && entry.saved);
+    if (boundary) {
+      const { state, rng, path, outcomes, ...cursor } = boundary.saved;
+      Object.assign(restored, cursor, { frame: boundary.frame, roomChanges: boundary.roomChanges });
+      Object.assign(restored.state, structuredClone(state), { rng: random(rng), input: restored.state.stick });
+      if (state.room && !state.room.blank) restored.state.room = this.state.data.roomById.get(state.room.room);
+      restored.record.path = copy(path);
+      restored.record.outcomes = copy(outcomes);
+    }
+    restored.history = this.history.filter(entry => entry.frame <= restored.frame);
+    while (restored.frame < frame) {
+      restored.step();
+      restored.state.events.length = 0;
+    }
+    restored.state.events.length = 0;
+    return restored;
+  }
+
+  previousRoom() {
+    if (!this.playback) return this;
+    const target = Math.max(0, this.roomChanges - 1);
+    const entry = this.history.find(entry => entry.roomChanges === target);
+    return this.restoreFrame(entry?.frame ?? 0);
+  }
+
+  get previousDay() {
+    if (this.playback || this.state.demo) return null;
+    return this.history.findLast(entry => entry.quest === this.state.questNumber
+      && entry.day != null && entry.day < this.state.clock.day) ?? null;
+  }
+
+  backDay() {
+    const entry = this.previousDay;
+    if (!entry) return this;
+    // The earliest boundary on the previous observed day is its start.
+    const start = this.history.find(e => e.quest === entry.quest && e.day === entry.day);
+    const restored = this.restoreFrame(start.frame);
+    const r = restored.record;
+    r.inputs.length = restored.readIndex;
+    r.actions.length = restored.actionIndex;
+    if (r.durations) r.durations.length = restored.durationIndex;
+    r.gestures = r.gestures.filter(g => g[0] < restored.frame);
+    r.frames = restored.frame;
+    if (r.legacyContinueUntil != null) r.legacyContinueUntil = Math.min(r.legacyContinueUntil, restored.frame);
+    delete r.checkpoint;
+    delete r.c64;
+    restored.continueLive();
+    return restored;
+  }
+
+  continueLive() {
+    this.playback = false;
+    this.playbackDone = false;
+    this.sourceRecord = null;
+    if (this.record.engine === 'btr-session-2') this.record.legacyContinueUntil ??= this.frame;
+    this.state.legacyContinue = false;
   }
 
   noteRoom() {
@@ -291,10 +390,7 @@ export class Session {
       session.state.events.length = 0;
     }
     session.finishPlayback();
-    session.playback = false;
-    session.playbackDone = false;
-    if (session.record.engine === 'btr-session-2') session.record.legacyContinueUntil ??= session.frame;
-    session.state.legacyContinue = false;
+    session.continueLive();
     return session;
   }
 }

@@ -153,6 +153,11 @@ recording reconstructs even running generators by replay and checks the
 result before adoption. `Autosave` persists it on screen changes and page
 hide; it does not change the C64 image layout. See `docs/playthrough.md`.
 
+Room and day boundaries also keep in-memory copies of plain game state, RNG and
+input cursors. Rewinding restores the nearest copy; a boundary inside a generator
+is rebuilt silently from there before drawing. Developer day rewind truncates the
+journal at the restored frame, so autosaves and downloads follow the new timeline.
+
 ## Text
 
 `panel.js` owns the panel: `say(state, ...lines)` clears it and prints

@@ -28,3 +28,7 @@ Hold either arrow to keep skipping rooms. The counter above the permanent status
 shows room changes completed / total, including visits back to earlier rooms.
 
 Choose **STATUS** from the game menu to see elapsed play time and completion.
+
+In developer mode, **Go back a day** (↶), **Backspace**, or **Delete** restores
+the start of the previous in-game day. Continuing replaces the turns after that
+point. The control is available during regular play when an earlier day exists.

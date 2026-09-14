@@ -195,6 +195,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const mapButton = document.getElementById('map');
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
+  const backDayButton = document.getElementById('back-day');
+  backDayButton.onclick = () => {
+    if (!debug || paused || session.playback || !session.previousDay) return;
+    session = session.backDay(); state = session.state;
+    acc = 0; elapsedAcc = 0;
+    speaker.silence(); release(); saveNow(); draw();
+    canvas.focus({ preventScroll: true });
+  };
   mapButton.setAttribute('aria-controls', 'map-screen');
   helpButton.setAttribute('aria-controls', 'help-screen');
   let currentTab = document.querySelector('#site-header nav [aria-current]');
@@ -358,12 +366,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (!session.playback || seekRoom != null || (direction > 0 && session.playbackDone)) return;
     const target = Math.max(0, session.roomChanges + direction);
     if (direction < 0) {
-      session = Session.watch(data, stick, session.sourceRecord, session.verify);
+      session = session.previousRoom();
       state = session.state;
     }
     seekRoom = target === session.roomChanges ? null : target;
     acc = 0; elapsedAcc = 0;
+    last = performance.now();
     speaker.silence();
+    if (direction < 0) draw();
   }
   function stopReplay() {
     if (!returnSession) return;
@@ -388,6 +398,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }, true);
   addEventListener('keydown', e => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
+        && (e.target === canvas || e.target === document.body)) {
+      e.preventDefault(); backDayButton.click(); return;
+    }
     if (e.key === 'Tab') {
       const mapOpen = overlay?.screen === mapScreen;
       if (mapOpen || e.target === document.body || e.target === canvas) {
@@ -440,6 +454,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
+    backDayButton.hidden = !debug || session.playback;
+    backDayButton.disabled = !session.previousDay;
     state.figures = figures(state);
     const rows = statusRows(state, { classic: options.classic, playback: session.playback ? session : null });
     const height = statusHeight(rows);

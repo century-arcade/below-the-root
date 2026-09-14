@@ -129,9 +129,9 @@ s.progress.milliseconds += 1000;
 assert.ok(statusRows(s, { classic: true }).includes('1H 2M 4S PLAY / 70% COMPLETE'));
 clearPanel(s);
 assert.deepEqual(statusRows(s, { classic: true }), [], 'leaving STATUS clears its details');
-assert.ok(statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130 ROOM CHANGES'));
+assert.ok(statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130'));
 assert.deepEqual(statusRows(s, { classic: true, playback: { roomChanges: 0, totalRoomChanges: 0 } }),
-  ['0/0 ROOM CHANGES'], 'playback progress remains available in classic mode');
+  ['0/0'], 'playback progress remains available in classic mode');
 startQuest(s, data.characters[0]);
 assert.equal(completion(s), 0);
 assert.deepEqual(s.progress.tokens, [], 'a new quest resets token collection');

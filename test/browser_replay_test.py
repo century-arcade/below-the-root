@@ -103,6 +103,7 @@ with sync_playwright() as p:
         const { Session } = await import('/record.js');
         const { exportSave } = await import('/save.js');
         const { IDLE } = await import('/input.js');
+        const { TICKS_PER_HOUR } = await import('/clock.js');
         const data = await loadData(path => fetch('/' + path).then(r => r.json()));
         const watch = Session.watch;
         Session.watch = (...args) => window.watchedReplay = watch(...args);
@@ -124,7 +125,14 @@ with sync_playwright() as p:
             idle.step(500);
             idle.state.events.length = 0;
         }
-        return { timed: session.snapshot(), idle: idle.snapshot() };
+        const days = room('16');
+        const late = room('16');
+        for (const day of [1, 2]) {
+            Object.assign(late.state.clock, { day, hour: 7, ticks: TICKS_PER_HOUR - 3 });
+            days.load(exportSave(late.state));
+            while (days.state.clock.day === day) days.step();
+        }
+        return { timed: session.snapshot(), idle: idle.snapshot(), days: days.snapshot() };
     }''')
     timed = recordings['timed']
     page.locator('#record-file').set_input_files({
@@ -168,6 +176,8 @@ with sync_playwright() as p:
     page.evaluate('advancePlayback(10)')
     assert page.evaluate('watchedReplay.playbackDone'), 'Right at EOF stays at EOF'
     page.keyboard.press('ArrowLeft')
+    assert page.evaluate('watchedReplay.state.room.code') == '26', 'Left restores its destination before any animation frame'
+    assert current_frame() == 61, 'rewind never exposes the recording start or intermediate rooms'
     page.evaluate('advancePlayback(10)')
     assert page.evaluate('watchedReplay.state.room.code') == '26', 'Left rewinds from EOF'
     assert page.evaluate('watchedReplay.roomChanges') == 1
@@ -206,5 +216,38 @@ with sync_playwright() as p:
     page.wait_for_function('watchedReplay.playbackDone')
     assert snapshot() == recordings['idle'], 'skipping idle time preserves deterministic playback'
     assert not errors, errors
+
+    page.close()
+    page = browser.new_page()
+    page.on('pageerror', lambda e: errors.append(str(e)))
+    page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': False}))
+    page.add_init_script(f'localStorage.setItem({json.dumps(KEY)}, {json.dumps(json.dumps(recordings["days"]))});')
+    page.goto(URL + '/play.html?debug')
+    page.wait_for_function('document.getElementById("record-file").onchange !== null', polling=100)
+    assert not errors, errors
+    expect(page.locator('#back-day')).to_be_visible()
+    expect(page.locator('#back-day')).to_be_enabled()
+    page.locator('#screen').focus()
+    page.keyboard.press('Backspace')
+    assert snapshot()['checkpoint']['clock']['day'] == 2, 'Backspace restores the previous day'
+    page.locator('#back-day').click()
+    assert snapshot()['checkpoint']['clock']['day'] == 1, 'the developer icon rewinds another day'
+    expect(page.locator('#back-day')).to_be_disabled()
+    page.reload()
+    page.wait_for_function('document.getElementById("record-file").onchange !== null', polling=100)
+    expect(page.locator('#back-day')).to_be_enabled()
+    page.locator('#screen').focus()
+    page.keyboard.press('Delete')
+    assert snapshot()['checkpoint']['clock']['day'] == 2, 'Delete also rewinds a day'
+    page.locator('#volume').focus()
+    page.keyboard.press('Backspace')
+    assert snapshot()['checkpoint']['clock']['day'] == 2, 'editing controls do not rewind the game'
+    page.locator('#developer-mode').click()
+    expect(page.locator('#back-day')).to_be_hidden()
+    page.locator('#screen').focus()
+    page.keyboard.press('Delete')
+    page.locator('#developer-mode').click()
+    assert snapshot()['checkpoint']['clock']['day'] == 2, 'day rewind is restricted to developer mode'
+    assert not errors, errors
     browser.close()
-print('browser_replay_test: upload, continuous playback, idle skipping, room seeking, EOF, verification, pause timing and live quest preservation passed')
+print('browser_replay_test: playback, immediate rewind, day controls, verification, pause timing and live quest preservation passed')
