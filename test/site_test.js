@@ -1,27 +1,22 @@
 import assert from 'node:assert/strict';
-import { startPage } from '../src/site.js';
+import { startPage, enterSite } from '../src/site.js';
 
-assert.equal(startPage('', '', false), 'about');
-assert.equal(startPage('', '#about', false), 'about');
-assert.equal(startPage('', '#play', false), 'play');
-assert.equal(startPage('?room=B8', '#help', true), 'help');
-assert.equal(startPage('', '#links', false), 'links');
-assert.equal(startPage('', '#links', true), 'links');
-assert.equal(startPage('', '#resources', false), 'links');
-assert.equal(startPage('', '#resources', true), 'links');
-assert.equal(startPage('', '', true), 'play');
-for (const param of ['demo', 'room', 'player', 'menu', 'debug', 'github']) {
-  for (const search of [`?${param}`, `?${param}=T1`, `?unrelated=1&${param}=`]) {
-    assert.equal(startPage(search, '', false), 'play', search);
-    assert.equal(startPage(search, '#about', true), 'about', 'explicit About wins');
-    assert.equal(startPage(search, '#links', true), 'links', 'explicit Links wins');
-    assert.equal(startPage(search, '#resources', true), 'links', 'legacy Resources wins');
+for (const hash of ['', '#play', '#home', '#map', '#unknown']) {
+  assert.equal(startPage(hash), 'play');
+}
+assert.equal(startPage('#help'), 'help');
+assert.equal(startPage('#about'), 'about');
+assert.equal(startPage('#links'), 'links');
+assert.equal(startPage('#resources'), 'links');
+
+for (const hash of ['', '#play', '#home', '#map', '#help', '#unknown', '#about', '#links', '#resources']) {
+  for (const search of ['', '?room=B8', '?demo', '?unrelated=1']) {
+    const redirects = [];
+    globalThis.location = { hash, search, replace: url => redirects.push(url) };
+    const target = { '#about': 'about', '#links': 'links', '#resources': 'links' }[hash];
+    assert.equal(enterSite(), !target);
+    assert.deepEqual(redirects, target ? [`/${target}${search}`] : []);
   }
 }
-assert.equal(startPage('?unrelated=1', '', false), 'about');
-assert.equal(startPage('?notdemo=1', '#unknown', false), 'about');
-assert.equal(startPage('?demo', '#unknown', false), 'play');
-assert.equal(startPage('', '#unknown', true), 'play');
-assert.equal(startPage('', '#about', true), 'about');
-assert.equal(startPage('?unrelated=1', '#play', false), 'play');
-console.log('site_test: default, hashes, query parameters, autosave and precedence passed');
+delete globalThis.location;
+console.log('site_test: Play entry without redirects and legacy reading-page links passed');

@@ -15,7 +15,7 @@ for (const page of ['about', 'play', 'links']) {
   const title = `${page[0].toUpperCase() + page.slice(1)} — Below the Root`;
   const values = {
     title,
-    nav: read('nav.html').replace(`href="/${page}${page === 'play' ? '#home' : ''}"`, '$& aria-current="page"'),
+    nav: read('nav.html').replace(`href="/${page === 'play' ? '' : page}"`, '$& aria-current="page"'),
     controls: read('controls.html'),
     developer: read('developer.html'),
     helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
@@ -26,9 +26,9 @@ for (const page of ['about', 'play', 'links']) {
   };
   const html = template.replace(/{{(\w+)}}/g, (_, key) => values[key]);
   writeFileSync(join(out, `${page}.html`), html);
-  if (page === 'about') {
-    // Static About fallback; the homepage script preserves old links and returning-player entry.
-    writeFileSync(join(out, 'index.html'), html.replace('</body>',
-      '<script type="module">import { enterSite } from "/site.js"; enterSite();</script>\n</body>'));
+  if (page === 'play') {
+    // Serve Play directly, preserving legacy reading-page hashes before starting the game.
+    writeFileSync(join(out, 'index.html'), html.replace(values.scripts,
+      '<script type="module">import { enterSite } from "/site.js"; if (enterSite()) import("/main.js");</script>'));
   }
 }

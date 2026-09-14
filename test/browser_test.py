@@ -202,10 +202,10 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
-    # Game keeps the running quest and returns to the native menu.
+    # Play keeps the running quest and returns to the native menu.
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
-    page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).click()
+    page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
     expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
     expect(page.locator('#map')).to_be_visible()
     menu = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")

@@ -85,7 +85,7 @@ with sync_playwright() as p:
             expect(page.locator('#help')).to_be_focused()
             expect(page.locator('#help')).to_have_attribute('aria-expanded', 'false')
         page.get_by_role('button', name='Help', exact=True).tap()
-        page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).tap()
+        page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).tap()
         expect(help_screen).to_be_hidden()
         page.keyboard.press('h')
         page.keyboard.press('Escape')
@@ -182,10 +182,12 @@ with sync_playwright() as p:
         expect(page.locator('#debug-tools')).to_be_visible()
         expect(page.locator('.github-link')).to_be_visible()
         page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
-        page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).click()
+        page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
         expect(page.locator('#screen')).to_be_focused()
         expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
         expect(page.locator('#help-screen')).to_be_hidden()
+        assert record()['checkpoint']['quest'], 'Play restores the saved quest at /'
+        page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
         menu = record()
         assert menu['checkpoint']['title'] and menu['checkpoint']['quest']
         page.wait_for_timeout(150)

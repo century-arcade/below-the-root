@@ -30,7 +30,7 @@ with sync_playwright() as p:
     expect(page.locator('#volume')).to_have_value('0')
     seen = page.evaluate('seenSymbols.length')
     page.wait_for_function('(seen) => seenSymbols.length > seen', arg=seen)
-    page.get_by_role('navigation').get_by_role('link', name='Game', exact=True).click()
+    page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
     expect(trail.locator('[data-rhythm]')).to_have_count(0)
 
     # Check register membership around middle C, crossing voices and chords in both modes.

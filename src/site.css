@@ -8,7 +8,7 @@ body { min-height: 100dvh; box-sizing: border-box; padding: 0; display: flex; fl
 a { color: #c7f5ae; }
 #site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #354537; }
 #navigation-controls { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; overflow-x: auto; }
-#site-header nav { display: flex; flex-shrink: 0; align-self: stretch; white-space: nowrap; font: var(--game-font-size)/1 'Green-Sky', monospace; text-transform: uppercase; }
+#site-header nav { display: flex; gap: .5ch; flex-shrink: 0; align-self: stretch; white-space: nowrap; font: var(--game-font-size)/1 'Green-Sky', monospace; text-transform: uppercase; }
 #site-header nav a { display: grid; place-items: center; padding: 0 12px; text-decoration: none; transition: color 150ms ease, background-color 150ms ease; }
 #site-header nav a[aria-current], #site-header nav a[aria-expanded="true"], #site-header nav a:not([aria-current]):hover { color: #0b130d; background-color: #f2ead8; }
 #site-header .github-link { display: grid; place-items: center; flex-shrink: 0; padding: 8px; }
