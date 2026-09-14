@@ -1,13 +1,8 @@
 
 - **WASD/Arrows**: Move
 - **Space/Enter**: Select/skip/jump
-- **F**: Open menu / select a choice
-- **Up/Down**: Previous/next choice; release between moves
+- **F**: Open menu / Choose
 - **M**: Map
-- **P/Escape**: Pause; press a game key or click/tap the game to resume
-
-The green border means the game is running. Click or tap the game to return
-keyboard control after adjusting the volume.
 
 ## Recording playback
 
