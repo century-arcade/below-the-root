@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { loadTestData, J } from './helpers.js';
 import { Session, checkpoint, Autosave } from '../src/record.js';
 import { completion, playTime } from '../src/progress.js';
-import { panelLines, print, PANEL_ROW } from '../src/panel.js';
+import { panelLines, print, PANEL_ROW, PANEL_COLS } from '../src/panel.js';
 
 const data = await loadTestData();
 const record = JSON.parse(readFileSync(new URL('./fixtures/pomma-win.json', import.meta.url)));
@@ -38,7 +38,7 @@ assert.equal(replay.state.progress.spirit, 30);
 assert.equal(replay.state.progress.tokens.length, 3, 'recorded TAKEs reconstruct collected tokens');
 assert.equal(replay.state.progress.elixirs, 2);
 assert.equal(replay.state.progress.partialTime, false, 'new quest resets the imported timer');
-assert.equal(playTime(replay.state), '24M 23S');
+assert.equal(playTime(replay.state), '00:24:23');
 
 // The upload ends during the first victory tune. Acknowledge both ending pages
 // using only normal input; never alter the player, room, inventory, or win flag.
@@ -60,6 +60,7 @@ assert.deepEqual(checkpoint(Session.replay(data, live, continued.snapshot()).sta
 const legacy = continued.snapshot();
 delete legacy.checkpoint.stats.tokens;
 delete legacy.checkpoint.stats.tokenTotal;
+legacy.checkpoint.panel.fill(0, legacy.checkpoint.panel.length - PANEL_COLS);
 print(legacy.checkpoint, PANEL_ROW + 3, 1, '24M 23S PLAY / 92% COMPLETE');
 const upgraded = Session.replay(data, live, legacy);
 assert.equal(completion(upgraded.state), 82);

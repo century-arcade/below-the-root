@@ -356,6 +356,16 @@ export class Session {
     if (this.verify) {
       const expected = copy(this.sourceRecord.checkpoint);
       const actual = checkpoint(this.state);
+      // Older recordings stored the victory timer with H/M/S suffixes.
+      if (this.state.progress.won && Array.isArray(expected.panel)) {
+        const row = panelLines(expected)[3];
+        const formatted = row.replace(/(?:(\d+)H )?(\d+)M (\d+)S(?= PLAY \/)/,
+          (_, h = '0', m, s) => [h, m, s].map(n => n.padStart(2, '0')).join(':'));
+        if (formatted !== row) {
+          expected.panel.fill(0, expected.panel.length - PANEL_COLS);
+          print(expected, PANEL_ROW + 3, 1, formatted.trimStart());
+        }
+      }
       delete expected.shell?.disk;
       if (!expected.stats) delete actual.stats;
       else if (!('tokenTotal' in expected.stats)) {

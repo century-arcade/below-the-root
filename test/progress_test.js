@@ -117,16 +117,20 @@ for (const token of tokens) acquired(s, token);
 assert.equal(completion(s), 100, 'all milestones total exactly 100%');
 session.step(999);
 assert.equal(s.progress.milliseconds, beforePause, 'victory freezes the timer');
-s.progress.milliseconds = 3723000;
-assert.equal(playTime(s), '1H 2M 3S');
+for (const [milliseconds, display] of [[0, '00:00:00'], [1826999, '00:30:26'],
+  [3600000, '01:00:00'], [360000000, '100:00:00'], [3723000, '01:02:03']]) {
+  s.progress.milliseconds = milliseconds;
+  assert.equal(playTime(s), display);
+  assert.ok(statusRows(s).includes(`PLAY TIME ${display}`));
+}
 s.progress.won = false;
 // STATUS adds live progress without replacing the character's existing stats.
 const statusMenu = runMenu(s);
 statusMenu.next();
 for (const input of menuReads('STATUS')) statusMenu.next(input);
-assert.ok(statusRows(s).includes('1H 2M 3S PLAY / 70% COMPLETE'));
+assert.ok(statusRows(s).includes('01:02:03 PLAY / 70% COMPLETE'));
 s.progress.milliseconds += 1000;
-assert.ok(statusRows(s, { classic: true }).includes('1H 2M 4S PLAY / 70% COMPLETE'));
+assert.ok(statusRows(s, { classic: true }).includes('01:02:04 PLAY / 70% COMPLETE'));
 clearPanel(s);
 assert.deepEqual(statusRows(s, { classic: true }), [], 'leaving STATUS clears its details');
 assert.ok(statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130'));
@@ -148,5 +152,5 @@ destroy(spentToken);
 importSave(loaded, exportSave(loaded));
 assert.deepEqual(loaded.progress.tokens, [carriedToken.object], 'C64 saves recover carried tokens only');
 assert.equal(loaded.progress.partialTime, true);
-assert.equal(playTime(loaded), '>=0M 0S');
+assert.equal(playTime(loaded), '>=00:00:00');
 console.log('progress_test: elapsed time, persistence, milestones, reset and legacy save limits passed');
