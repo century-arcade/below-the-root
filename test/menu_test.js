@@ -4,6 +4,7 @@ import { newState, startQuest } from '../src/game.js';
 import { pickItem } from '../src/inventory.js';
 import { CLASS } from '../src/data.js';
 import { Session, checkpoint, validateRecord } from '../src/record.js';
+import { MENU, menuChoiceAt } from '../src/verbs.js';
 
 const data = await loadTestData();
 const selected = state => Array.from(state.panel).filter(c => c & 128)
@@ -32,6 +33,10 @@ hold(game, J.left);
 assert.equal(selected(game.state), 'SPEAK', 'left navigates back');
 assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state),
   'menu navigation leaves the saved quest unchanged');
+
+assert.deepEqual(menuChoiceAt(14, 2), { col: 2, row: 2 });
+assert.equal(MENU[menuChoiceAt(14, 2).row][menuChoiceAt(14, 2).col], 'HEAL');
+assert.equal(menuChoiceAt(39, 3), null, 'the blank action is not clickable');
 
 for (const options of [{}, { perClass: true }, { accept: o => o.class !== CLASS.TOKEN }, { noFire: true }]) {
   const state = newState(data, null);

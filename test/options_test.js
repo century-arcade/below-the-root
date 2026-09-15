@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { DEFAULTS, loadOptions, storeOption } from '../src/options.js';
 import { statusRows } from '../src/status.js';
 import { PANEL_COLS } from '../src/panel.js';
-import { loadTestData } from './helpers.js';
+import { give, loadTestData } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
 import { IDLE } from '../src/input.js';
+import { CLASS } from '../src/data.js';
 
 const memory = () => {
   const map = new Map();
@@ -47,6 +48,12 @@ assert.ok(rows.every(r => r.length <= PANEL_COLS), rows);
 assert.match(rows[0], /^DAY 1 {3}EARLY MORNING/);
 assert.ok(rows[0].endsWith(p.name), rows[0]);
 assert.match(rows[1], new RegExp(`^STAMINA ${p.stamina} +FOOD ${p.food} +REST ${p.rest} +SPIRIT ${p.spiritEnergy}/${p.spiritLimit}$`));
+const bread = give(state, CLASS.BREAD);
+assert.ok(statusRows(state).some(row => row.includes(bread.name)), 'carried items appear above status');
+assert.ok(statusRows(state).every(row => !row.includes('NOTHING')), 'an empty inventory entry is never shown');
+state.commandMenuOpen = true;
+assert.ok(statusRows(state).every(row => !row.includes(bread.name)), 'inventory is hidden behind the action menu');
+state.commandMenuOpen = false;
 Object.assign(p, { stamina: 30, food: 30, rest: 30, spiritEnergy: 30, spiritLimit: 30 });
 state.clock.day = 51;
 state.clock.hour = 2;

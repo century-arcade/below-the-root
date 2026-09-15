@@ -21,6 +21,13 @@ export const MENU = [
 const MENU_COLS = [0, 7, 13, 19, 31];
 const MENU_WIDTHS = [7, 6, 6, 12, 8];
 
+export function menuChoiceAt(col, row) {
+  if (row < 0 || row >= MENU.length || col < 0) return null;
+  const menuCol = MENU_COLS.findIndex((start, i) => col >= start && col < start + MENU_WIDTHS[i]);
+  if (menuCol < 0 || !MENU[row][menuCol]) return null;
+  return { col: menuCol, row };
+}
+
 const VINE_ROPE_TILE = 224;
 const GROWN_LIMB_TILE = 223;
 const TAKE_ANYWHERE = new Set([28, 59, 75, 81]);
@@ -53,6 +60,11 @@ export function* runMenu(state) {
   drawMenu(state, col, row);
   for (;;) {
     const j = yield;
+    if (state.commandMenuClick) {
+      ({ col, row } = state.commandMenuClick);
+      state.commandMenuClick = null;
+      drawMenu(state, col, row);
+    }
     if (j.fire) break;
     const move = state.demo ? j : moved(j);
     col = Math.max(0, Math.min(4, col + move.dx));
