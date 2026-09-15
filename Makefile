@@ -8,6 +8,9 @@ ISO ?= iso
 RELEASE ?= dist/below-the-root-preservation.zip
 NETLIFY_BIN := $(shell p=$$(command -v netlify 2>/dev/null); if [ -f "$$p" ] && [ -x "$$p" ]; then printf '%s' "$$p"; fi)
 NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27.5.0 netlify)
+# Poll by default: shared Linux users can exhaust their inotify instance limit.
+CHOKIDAR_USEPOLLING ?= 1
+CHOKIDAR_INTERVAL ?= 500
 
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
@@ -31,6 +34,7 @@ release:
 
 serve: build
 	@if curl -sf -o /dev/null $(BTR_URL)/; then echo "already serving $(BUILD) at $(BTR_URL); a new build is picked up as is"; else \
+	CHOKIDAR_USEPOLLING=$(CHOKIDAR_USEPOLLING) CHOKIDAR_INTERVAL=$(CHOKIDAR_INTERVAL) \
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
