@@ -197,10 +197,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const mapButton = document.getElementById('map');
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
-  const backDayButton = document.getElementById('back-day');
-  backDayButton.onclick = () => {
-    if (!debug || paused || session.playback || !session.previousDay) return;
-    session = session.backDay(); state = session.state;
+  const rewindRoomButton = document.getElementById('rewind-room');
+  rewindRoomButton.onclick = () => {
+    if (!debug || paused || !session.canBackRoom) return;
+    session = session.backRoom(); state = session.state;
     acc = 0;
     speaker.silence(); release(); saveNow(); draw();
     canvas.focus({ preventScroll: true });
@@ -466,7 +466,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
     if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
         && (e.target === canvas || e.target === document.body)) {
-      e.preventDefault(); backDayButton.click(); return;
+      e.preventDefault(); rewindRoomButton.click(); return;
     }
     if (e.key === 'Tab' || e.key.toLowerCase() === 'm') {
       const mapOpen = overlay?.screen === mapScreen;
@@ -539,8 +539,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     menuButton.hidden = session.playback || !canOpenCommandMenu(state);
     if (replayHelp) replayHelp.hidden = !session.playback;
     playFromReplay.hidden = !session.playback;
-    backDayButton.hidden = !debug || session.playback;
-    backDayButton.disabled = !session.previousDay;
+    rewindRoomButton.hidden = !debug || session.playback;
+    rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
     const rows = statusRows(state, { classic: options.classic, playback: session.playback ? session : null });
     const height = statusHeight(rows);

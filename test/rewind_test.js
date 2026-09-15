@@ -15,12 +15,20 @@ watched.nextRoom();assert.deepEqual(checkpoint(watched.state),second);
 while(!watched.playbackDone)watched.nextRoom();
 assert.deepEqual(checkpoint(watched.state),recording.checkpoint);
 assert.deepEqual(watched.snapshot(),recording);
-// Day rewind reconstructs the simulation, truncates future commands, and branches.
-s=s.backDay();assert.equal(s.state.clock.day,3);assert.equal(s.playback,false);
+for (const rooms of [0, 1, 3]) {
+  const takeover=Session.watch(data,idle,recording);
+  for (let i=0;i<rooms;i++) takeover.nextRoom();
+  const at=checkpoint(takeover.state);
+  takeover.continueLive();
+  assert.equal(takeover.playback,false);
+  assert.deepEqual(checkpoint(takeover.state),at);
+}
+// Live room rewind reconstructs the simulation, truncates future commands, and branches.
+s=s.backRoom();assert.equal(s.state.clock.day,3);assert.equal(s.playback,false);
 assert.deepEqual(checkpoint(s.state),second);
 step(s,24);s.command('RENEW');
 assert.deepEqual(checkpoint(Session.replay(data,idle,s.snapshot()).state),checkpoint(s.state));
-s=s.backDay();assert.deepEqual(checkpoint(s.state),second);
-s=s.backDay();assert.deepEqual(checkpoint(s.state),first);
-s=s.backDay();assert.equal(s.simticks,0);assert.equal(s.backDay(),s);
-console.log('rewind_test: repeated room visits, runtime history and branched day rewind passed');
+s=s.backRoom();assert.deepEqual(checkpoint(s.state),second);
+s=s.backRoom();assert.deepEqual(checkpoint(s.state),first);
+s=s.backRoom();assert.equal(s.simticks,0);assert.equal(s.backRoom(),s);
+console.log('rewind_test: repeated room visits, replay seeking and branched live room rewind passed');

@@ -40,6 +40,8 @@ with sync_playwright() as p:
     page.wait_for_function('questSession().playbackDone')
     assert not page.evaluate('questSession().playbackError')
     assert page.evaluate('questSession().roomChanges') == 24
+    expect(page.locator('#play-from-replay')).to_be_visible()
+    expect(page.locator('#play-from-replay')).to_be_enabled()
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == before
     assert download() == records
     page.locator('#screen').focus()
@@ -54,6 +56,7 @@ with sync_playwright() as p:
     assert page.evaluate('questSession().roomChanges') == 14
     replay_tick = page.evaluate('questSession().simticks')
     expect(page.locator('#play-from-replay')).to_be_visible()
+    expect(page.locator('#play-from-replay')).to_be_enabled()
     page.locator('#play-from-replay').click()
     assert not page.evaluate('questSession().playback')
     expect(page.locator('#play-from-replay')).to_be_hidden()
@@ -65,15 +68,15 @@ with sync_playwright() as p:
     assert resumed['checkpoint']['character'] == 2
     assert resumed['checkpoint']['simticks'] <= replay_tick
     assert download() == resumed
-    # Day rewind branches the runtime history; its next save remains replayable.
-    resumed_day = observe(page)['checkpoint']['clock']['day']
+    # Room rewind branches the runtime history; its next save remains replayable.
+    resumed_visit = observe(page)['checkpoint']['visit']
     page.evaluate('''() => {
       const s=questSession(); s.command('RENEW'); s.command('RENEW');
     }''')
-    page.locator('#back-day').click()
-    assert observe(page)['checkpoint']['clock']['day'] == resumed_day + 1
-    page.locator('#back-day').click()
-    assert observe(page)['checkpoint']['clock']['day'] == resumed_day
+    page.locator('#rewind-room').click()
+    assert observe(page)['checkpoint']['visit'] == resumed_visit + 1
+    page.keyboard.press('Backspace')
+    assert observe(page)['checkpoint']['visit'] == resumed_visit
     assert not errors, errors
     browser.close()
-print('browser_replay_test: verification, room/day rewind, downloads and live autosave isolation passed')
+print('browser_replay_test: verification, room rewind, downloads and live autosave isolation passed')

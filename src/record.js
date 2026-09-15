@@ -328,6 +328,17 @@ export class Session {
     const boundary = this.history.find(e => e.roomChanges === target);
     return this.restoreAt(boundary ?? { simticks: 0, eventIndex: 0 });
   }
+  get canBackRoom() {
+    return !this.playback && !this.state.demo && this.roomChanges > 0;
+  }
+  backRoom() {
+    if (!this.canBackRoom) return this;
+    const boundary = this.history.find(e => e.roomChanges === this.roomChanges - 1);
+    if (!boundary) return this;
+    const restored = this.restoreAt(boundary);
+    restored.continueLive();
+    return restored;
+  }
   get previousDay() {
     if (this.playback || this.state.demo) return null;
     return this.history.findLast(e => e.day < this.state.clock.day) ?? null;
