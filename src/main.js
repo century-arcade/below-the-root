@@ -359,6 +359,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     seekRoom = null; acc = 0;
     speaker.silence();
     saveNow(); draw();
+    log('Playing from here. Progress will be saved.');
     canvas.focus({ preventScroll: true });
   };
   addEventListener('hashchange', () => showView(location.hash.slice(1)));

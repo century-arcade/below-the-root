@@ -57,6 +57,7 @@ with sync_playwright() as p:
     page.locator('#play-from-replay').click()
     assert not page.evaluate('questSession().playback')
     expect(page.locator('#play-from-replay')).to_be_hidden()
+    expect(page.locator('#log > div').last).to_contain_text('Playing from here. Progress will be saved.')
     assert page.evaluate('questSession().roomChanges') == 14
     assert observe(page)['checkpoint']['character'] == 2
     assert page.evaluate('questSession().simticks') >= replay_tick
