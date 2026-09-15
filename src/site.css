@@ -28,9 +28,6 @@ a { color: #c7f5ae; }
 #music-notes:has(> :not([hidden])) { height: 60px; }
 #music-notes > [data-register] { position: relative; display: block; height: 30px; overflow: hidden; }
 #music-notes > [data-register]::after { content: ""; position: absolute; inset: 8px 0 auto; height: 13px; background: repeating-linear-gradient(to bottom, #66815d 0 1px, transparent 1px 3px); }
-#music-notes > [data-register]::before { position: absolute; z-index: 2; left: 1px; top: 2px; color: #d6f897; font: 23px/1 Georgia, serif; text-shadow: 2px 0 #0b130d; }
-#music-notes > [data-register="treble"]::before { content: "\1D11E"; }
-#music-notes > [data-register="bass"]::before { content: "\1D122"; }
 #music-notes [data-rhythm] { position: absolute; z-index: 1; left: 76px; top: 0; color: #d6f897; animation: music-note-scroll linear both; }
 #music-notes svg { display: block; }
 #music-notes .sound-waveform { position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: transparent; image-rendering: auto; }
