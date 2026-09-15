@@ -1,5 +1,5 @@
 import { loadData } from './data.js';
-import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, statusHeight } from './video.js';
+import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, statusHeight, statusLayout } from './video.js';
 import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt } from './verbs.js';
@@ -549,11 +549,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
     const rows = statusRows(state, { classic: options.classic, playback: session.playback ? session : null });
-    const height = statusHeight(rows);
+    const { panelRows, bandRows } = statusLayout(state, rows);
+    const height = statusHeight(bandRows);
     if (band !== height) setBand(height);
     const image = frames[band] ||= ctx.createImageData(WIDTH, HEIGHT + band);
-    image.data.set(render(state));
-    if (band) image.data.set(renderStatus(state, rows), WIDTH * HEIGHT * 4);
+    image.data.set(render(state, panelRows));
+    if (band) image.data.set(renderStatus(state, bandRows), WIDTH * HEIGHT * 4);
     ctx.putImageData(image, 0, 0);
     const activeTab = overlay?.screen === mapScreen ? mapButton : homeButton;
     if (currentTab !== activeTab) {

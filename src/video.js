@@ -1,6 +1,6 @@
 import { colorOf } from './data.js';
 import { isLit } from './world.js';
-import { PANEL_ROW, PANEL_COLS } from './panel.js';
+import { PANEL_ROW, PANEL_ROWS, PANEL_COLS } from './panel.js';
 
 const TITLE_ROOM = 'T4';
 
@@ -8,31 +8,41 @@ export const WIDTH = 320;
 export const HEIGHT = 200;
 export const PLAYFIELD_ROWS = 20;
 
-export function renderIndexed(state) {
+export function renderIndexed(state, panelRows = []) {
   const px = new Uint8Array(WIDTH * HEIGHT);
   drawRoom(px, state);
   drawText(px, state);
+  drawRows(px, state, panelRows, PANEL_ROW);
   for (const f of state.figures || []) drawFigure(px, state, f);
   return px;
 }
 
-export function render(state) {
-  return toRGBA(renderIndexed(state), state.data.palette);
+export function render(state, panelRows = []) {
+  return toRGBA(renderIndexed(state, panelRows), state.data.palette);
 }
 
-// the status rows sit in their own band under the picture, never over it
+// Static rows fill the idle text panel first; only overflow extends the picture.
 const STATUS_MARGIN = 4;
 export const statusHeight = rows => rows.length ? rows.length * 8 + STATUS_MARGIN * 2 : 0;
 
 export function renderStatus(state, rows) {
   const px = new Uint8Array(WIDTH * statusHeight(rows));
   const text = px.subarray(WIDTH * STATUS_MARGIN);
+  drawRows(text, state, rows, 0);
+  return toRGBA(px, state.data.palette);
+}
+
+export function statusLayout(state, rows) {
+  const available = state.panel && !state.panel.some(Boolean) ? PANEL_ROWS : 0;
+  return { panelRows: rows.slice(0, available), bandRows: rows.slice(available) };
+}
+
+function drawRows(px, state, rows, firstRow) {
   rows.forEach((line, row) => {
     for (let col = 0; col < line.length; col++) {
-      blitCell(text, col, row, state.data.charsets.text.glyphs, line.charCodeAt(col) & 0x7f, 1);
+      blitCell(px, col, firstRow + row, state.data.charsets.text.glyphs, line.charCodeAt(col) & 0x7f, 1);
     }
   });
-  return toRGBA(px, state.data.palette);
 }
 
 function toRGBA(px, pal) {
