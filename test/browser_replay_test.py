@@ -52,23 +52,25 @@ with sync_playwright() as p:
       canvas.dispatchEvent(new KeyboardEvent('keydown', {key:'p',code:'KeyP',bubbles:true}));
     }""")
     assert page.evaluate('questSession().roomChanges') == 14
-    page.keyboard.press('p')
-    page.keyboard.press('Shift+ArrowRight')
-    page.wait_for_function('questSession().playbackDone')
-    assert not page.evaluate('questSession().playbackError')
-    assert download() == records
+    replay_tick = page.evaluate('questSession().simticks')
     page.locator('#home').click()
     assert not page.evaluate('questSession().playback')
-    assert observe(page)['checkpoint']['character'] == 0
-    assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == before
+    assert page.evaluate('questSession().roomChanges') == 14
+    assert observe(page)['checkpoint']['character'] == 2
+    assert page.evaluate('questSession().simticks') >= replay_tick
+    resumed = page.evaluate('(key) => JSON.parse(localStorage.getItem(key))', KEY)
+    assert resumed['checkpoint']['character'] == 2
+    assert resumed['checkpoint']['simticks'] <= replay_tick
+    assert download() == resumed
     # Day rewind branches the runtime history; its next save remains replayable.
+    resumed_day = observe(page)['checkpoint']['clock']['day']
     page.evaluate('''() => {
       const s=questSession(); s.command('RENEW'); s.command('RENEW');
     }''')
     page.locator('#back-day').click()
-    assert observe(page)['checkpoint']['clock']['day'] == 2
+    assert observe(page)['checkpoint']['clock']['day'] == resumed_day + 1
     page.locator('#back-day').click()
-    assert observe(page)['checkpoint']['clock']['day'] == 1
+    assert observe(page)['checkpoint']['clock']['day'] == resumed_day
     assert not errors, errors
     browser.close()
 print('browser_replay_test: verification, room/day rewind, downloads and live autosave isolation passed')

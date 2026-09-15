@@ -336,8 +336,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     release();
     if (view === 'home') {
       closeHelp();
-      if (session.playback) stopReplay();
-      session.menu();
+      if (session.playback) {
+        session.continueLive();
+        returnSession = null;
+      } else session.menu();
       speaker.silence();
       saveNow();
     } else if (view === 'map') openMap();
