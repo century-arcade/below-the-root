@@ -12,8 +12,12 @@ with sync_playwright() as p:
     page.goto(BASE + '/play?demo=quest')
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     trail = page.locator('#music-notes')
+    treble_staff = trail.locator('[data-register="treble"]')
+    bass_staff = trail.locator('[data-register="bass"]')
     expect(trail).to_have_attribute('aria-hidden', 'true')
     expect(trail.locator('[data-rhythm]')).to_have_count(0)
+    expect(treble_staff).to_be_hidden()
+    expect(bass_staff).to_be_hidden()
     page.evaluate('''() => {
         window.seenSymbols = [];
         new MutationObserver(records => {
@@ -46,7 +50,8 @@ with sync_playwright() as p:
                 {voice: 0, midi: 61, rhythm: noteRhythm(0, 18), at: 0},
                 {voice: 1, midi: 48, rhythm: noteRhythm(0, 144), at: 0},
             ];
-            window.noteSpeaker = {ctx: {currentTime: 0}, recentNotes: () => noteBatch, effectWaveform: () => null};
+            window.noteSpeaker = {playing: {}, tuneEnd: 1, ctx: {currentTime: 0},
+                recentNotes: () => noteBatch, effectWaveform: () => null};
             window.updateNotes = createMusicTrail(element);
             updateNotes(noteSpeaker);
             window.firstGlyph = element.querySelector('[data-rhythm="quarter"]');
@@ -70,7 +75,11 @@ with sync_playwright() as p:
         expect(treble).to_have_count(2)
         page.evaluate('noteBatch = []; updateNotes(noteSpeaker)')
         expect(glyphs).to_have_count(0)
-        expect(trail.locator('[data-register]')).to_have_count(2)
+        expect(treble_staff).to_be_visible()
+        expect(bass_staff).to_be_visible()
+        page.evaluate('noteSpeaker.playing = null; updateNotes(noteSpeaker)')
+        expect(treble_staff).to_be_hidden()
+        expect(bass_staff).to_be_hidden()
 
         # Use actual WebAudio samples to check both tonal and noise effects while muted.
         page.evaluate('''async () => {

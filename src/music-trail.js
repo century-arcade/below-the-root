@@ -25,7 +25,7 @@ export function createMusicTrail(element) {
     const samples = silent ? speaker.effectWaveform() : null;
     const tunePlaying = speaker.playing && speaker.ctx.currentTime < speaker.tuneEnd;
     waveform.hidden = !silent || !!tunePlaying;
-    rows.treble.hidden = rows.bass.hidden = !waveform.hidden;
+    rows.treble.hidden = rows.bass.hidden = !tunePlaying;
     const flatline = !samples;
     if (waveform.hidden) { drawnEffect = null; drawnFlatline = false; }
     else if (flatline ? !drawnFlatline : drawnFlatline || !reducedMotion.matches || drawnEffect !== speaker.effect) {
