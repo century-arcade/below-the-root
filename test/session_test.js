@@ -12,6 +12,13 @@ const data = await loadTestData();
 const idle = { read: () => IDLE };
 const fresh = (live = idle, initial = { mode: 'quest', character: 0 }) => new Session(data, live, { initial, seed: 123 });
 const advance = (s, n) => { for (let i = 0; i < n; i++) { s.step(); s.state.events.length = 0; } };
+// advanceUntil: a live session has no engine work ceiling, unlike playback
+const advanceUntil = (s, done, what, limit = 500) => {
+  for (let i = 0; i < limit && !done(s); i++) advance(s, 1);
+  if (done(s)) return s;
+  const at = s.place();
+  return assert.fail(`never ${what} in ${limit} steps; tick ${s.simticks} ${at.screen} ${at.pos}, last event ${JSON.stringify(s.record?.events.at(-1))}`);
+};
 const roundtrip = s => {
   const record = s.snapshot();
   validateRecord(record, data);
@@ -69,7 +76,7 @@ const imported = edit => {
 {
   let joy = J.right;
   const s = fresh({ read: () => joy }, { mode: 'quest', room: data.roomByCode.get('T4').room });
-  while (s.roomChanges < 1) advance(s, 1);
+  advanceUntil(s, x => x.roomChanges >= 1, 'left the starting room');
   assert.equal(s.record.events.length, 1);
   const record = s.snapshot();
   assert.deepEqual(record.events[0].stick, [1, 0, 0]);
@@ -77,8 +84,9 @@ const imported = edit => {
   assert.deepEqual(watched.lastJoy, J.right, 'endpoint stops even with input held');
   advance(s, 40);
   assert.deepEqual(s.record.events.filter(e => e.stick), record.events);
-  const resumed = Session.replay(data, { read: () => J.right, reset() { joy = IDLE; } }, record);
-  while (!resumed.record.events.at(-1).stick?.every(x => x === 0)) advance(resumed, 1);
+  let held = J.right;
+  const resumed = Session.replay(data, { read: () => held, handoff() { held = IDLE; } }, record);
+  advanceUntil(resumed, x => x.record.events.at(-1).stick?.every(v => v === 0), 'recorded a neutral sample after takeover');
   assert.equal(record.events.length, 1, 'continuation cannot edit the preserved prefix');
   assert.deepEqual(resumed.record.events.at(-1).stick, [0, 0, 0]);
   saveHere(resumed);

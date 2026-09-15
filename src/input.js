@@ -30,6 +30,7 @@ const KEYS = {
 export class Keyboard {
   constructor(target = window) {
     this.sources = new Map();
+    this.devices = new Set();
     this.pace = 5;
     this.onKey = null;
     this.selectWithF = () => false;
@@ -65,6 +66,11 @@ export class Keyboard {
   release(key, source = 'keyboard') { const s = this.source(source); s.down.delete(key); s.blocked.delete(key); }
   tap(key, source = 'pointer') { this.source(source).tapped.add(key); }
   reset(source) { if (source) this.sources.delete(source); else this.sources.clear(); }
+  attach(device) { this.devices.add(device); }
+  handoff() {
+    this.blockFireUntilRelease();
+    for (const device of this.devices) device.cancel(true);
+  }
   blockFireUntilRelease() {
     for (const s of this.sources.values()) {
       s.tapped.delete('fire');
@@ -114,6 +120,7 @@ export class Pointer {
   constructor(canvas, keys, anchor, doors, target = window) {
     this.canvas = canvas;
     this.keys = keys;
+    keys.attach(this);
     this.anchor = anchor;
     this.doors = doors;
     this.held = new Set();
@@ -268,6 +275,7 @@ const PAD_DPAD = { 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
 export class Gamepad {
   constructor(keys, nav = navigator) {
     this.keys = keys;
+    keys.attach(this);
     this.nav = nav;
     this.held = new Set();
   }

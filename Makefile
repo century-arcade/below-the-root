@@ -12,6 +12,9 @@ NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27
 CHOKIDAR_USEPOLLING ?= 1
 CHOKIDAR_INTERVAL ?= 500
 
+TEST_TIMEOUT ?= 60
+NODE_TEST := timeout $(TEST_TIMEOUT) node
+
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
@@ -38,30 +41,30 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
-	$(PYTHON) -m unittest discover -s test -p 'release_test.py'
-	node test/site_test.js
-	node test/log_test.js
-	node test/fit_test.js
-	node test/render_test.js
-	node test/world_test.js
-	node test/map_test.js
-	node test/options_test.js
-	node test/player_test.js
-	node test/talk_test.js
-	node test/time_test.js
-	node test/shell_test.js
-	node test/audio_test.js
-	node test/input_test.js
-	node test/menu_test.js
-	node test/gamepad_test.js
-	node test/session_test.js
-	node test/rewind_test.js
-	node test/progress_test.js
-	node tools/record-fixtures.mjs --check
-	node test/win_replay_test.js
-	node test/github_test.mjs
-	node test/replay_test.js intro
-	node test/replay_test.js quest
+	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'release_test.py'
+	$(NODE_TEST) test/site_test.js
+	$(NODE_TEST) test/log_test.js
+	$(NODE_TEST) test/fit_test.js
+	$(NODE_TEST) test/render_test.js
+	$(NODE_TEST) test/world_test.js
+	$(NODE_TEST) test/map_test.js
+	$(NODE_TEST) test/options_test.js
+	$(NODE_TEST) test/player_test.js
+	$(NODE_TEST) test/talk_test.js
+	$(NODE_TEST) test/time_test.js
+	$(NODE_TEST) test/shell_test.js
+	$(NODE_TEST) test/audio_test.js
+	$(NODE_TEST) test/input_test.js
+	$(NODE_TEST) test/menu_test.js
+	$(NODE_TEST) test/gamepad_test.js
+	$(NODE_TEST) test/session_test.js
+	$(NODE_TEST) test/rewind_test.js
+	$(NODE_TEST) test/progress_test.js
+	$(NODE_TEST) tools/record-fixtures.mjs --check
+	$(NODE_TEST) test/win_replay_test.js
+	$(NODE_TEST) test/github_test.mjs
+	$(NODE_TEST) test/replay_test.js intro
+	$(NODE_TEST) test/replay_test.js quest
 	@echo "make test: all passed"
 
 screenshot: build

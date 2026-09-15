@@ -161,8 +161,7 @@ export class Session {
 
   handoff() {
     if (this.playback) return;
-    this.live.blockFireUntilRelease?.();
-    this.onReset?.();
+    this.live.handoff?.();
   }
 
   command(name, choices = {}, { presented = false } = {}) {

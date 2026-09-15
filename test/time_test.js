@@ -67,7 +67,7 @@ function useDoor(state) {
   state.stop = { reason: 'door', n };
   state.active = true;
   tick(state);
-  while (state.stall) tick(state);
+  for (let i = 0; state.stall; i++) { assert.ok(i < 1000, 'door stall clears'); tick(state); }
 }
 
 const data = await loadTestData();

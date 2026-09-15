@@ -592,7 +592,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       if (seekRoom == null && acc < delay) break;
       const idleScreen = session.playback && delay === 0 && seekRoom == null ? screenKey(state) : null;
       session.skippable = !options.classic;
-      session.onReset = () => { pointer.cancel(); gamepad.cancel(true); };
       const previousRoom = state.room;
       const previousTitle = state.title;
       try { session.step(); }
