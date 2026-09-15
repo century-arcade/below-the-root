@@ -14,6 +14,7 @@ export function statusRows(state, { classic = false, playback = null } = {}) {
     for (let i = 0; i < inventory.length; i += 2) {
       rows.push(place(inventory[i], PANEL_COLS / 2, inventory[i + 1] || ''));
     }
+    if (inventory.length) rows.push('');
   }
   return rows.concat(classic ? [] : permanentRows(state));
 }
@@ -21,8 +22,9 @@ export function statusRows(state, { classic = false, playback = null } = {}) {
 function inventoryEntries(state) {
   const items = carried(state);
   const tokens = items.filter(o => o.class === CLASS.TOKEN);
-  return items.filter(o => o.class !== CLASS.TOKEN).map(o => o.name)
-    .concat(tokens.length ? [`${tokens[0].name} ×${tokens.length}`] : []);
+  const withoutArticle = name => name.replace(/^(?:A|AN|THE) /, '');
+  return items.filter(o => o.class !== CLASS.TOKEN).map(o => withoutArticle(o.name))
+    .concat(tokens.length ? [`${tokens.length} ${withoutArticle(tokens[0].name)}`] : []);
 }
 
 function permanentRows(state) {

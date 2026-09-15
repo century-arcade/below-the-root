@@ -49,16 +49,17 @@ assert.match(rows[0], /^DAY 1 {3}EARLY MORNING/);
 assert.ok(rows[0].endsWith(p.name), rows[0]);
 assert.match(rows[1], new RegExp(`^STAMINA ${p.stamina} +FOOD ${p.food} +REST ${p.rest} +SPIRIT ${p.spiritEnergy}/${p.spiritLimit}$`));
 const bread = give(state, CLASS.BREAD);
-assert.ok(statusRows(state).some(row => row.includes(bread.name)), 'carried items appear above status');
-const token = give(state, CLASS.TOKEN);
+assert.ok(statusRows(state).some(row => row.includes('PAN BREAD')), 'carried items appear above status without articles');
+give(state, CLASS.TOKEN);
+give(state, CLASS.TOKEN);
 give(state, CLASS.TOKEN);
 const inventoryRows = statusRows(state).slice(0, -2);
-assert.deepEqual(inventoryRows, [`${bread.name}`.padEnd(PANEL_COLS / 2) + `${token.name} ×2`],
-  'inventory uses columns and combines tokens');
+assert.deepEqual(inventoryRows, ['PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN', ''],
+  'inventory uses columns, drops articles, combines tokens and leaves a gap before status');
 assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));
 assert.ok(statusRows(state).every(row => !row.includes('NOTHING')), 'an empty inventory entry is never shown');
 state.commandMenuOpen = true;
-assert.ok(statusRows(state).every(row => !row.includes(bread.name)), 'inventory is hidden behind the action menu');
+assert.ok(statusRows(state).every(row => !row.includes('PAN BREAD')), 'inventory is hidden behind the action menu');
 state.commandMenuOpen = false;
 Object.assign(p, { stamina: 30, food: 30, rest: 30, spiritEnergy: 30, spiritLimit: 30 });
 state.clock.day = 51;
