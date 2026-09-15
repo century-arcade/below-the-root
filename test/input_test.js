@@ -26,6 +26,14 @@ assert.equal(read().press, false);
 keys.tap('fire');
 assert.equal(read().press, true, 'a pointer tap counts once');
 assert.equal(read().press, false);
+keys.map({ key: ' ', code: 'Space' });
+keys.blockFireUntilRelease();
+assert.equal(read().press, false, 'a menu confirmation cannot leak into play');
+keys.map({ key: ' ', code: 'Space' }, true);
+keys.map({ key: ' ', code: 'Space' });
+keys.map({ key: ' ', code: 'Space' }, true);
+assert.equal(read().press, true, 'the first button after the menu is preserved');
+assert.equal(read().press, false);
 for (const code of ['Enter', 'NumpadEnter']) {
   let prevented = false;
   target.send('keydown', { key: 'Enter', code, preventDefault() { prevented = true; } });

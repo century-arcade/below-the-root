@@ -308,6 +308,25 @@ for(const [code,cls] of [['K0',CLASS.TOKEN],['H1',CLASS.SHUBA]]) {
   saveHere(s);
 }
 
+// Returning from the command menu does not consume the first play input.
+{
+  const keys = new Keyboard({ addEventListener() {} });
+  const s = new Session(data, keys, { initial: { mode: 'quest' } });
+  s.commandMenu();
+  advance(s, 10);
+  keys.tap('fire');
+  advance(s, 10);
+  assert.equal(s.state.verb, null);
+  let before = s.record.events.length;
+  keys.tap('right');
+  advance(s, 10);
+  assert.ok(s.record.events.slice(before).some(e => String(e.stick) === '1,0,0'), 'first input after the menu reaches play');
+  before = s.record.events.length;
+  keys.tap('fire');
+  advance(s, 10);
+  assert.ok(s.record.events.slice(before).some(e => String(e.stick) === '0,0,1'), 'first button after the menu reaches play');
+}
+
 // A REST kidnap records the room boundary after all host and hour effects.
 {
   const s=imported(state=>{

@@ -66,7 +66,6 @@ export class Session {
     this.lastJoy = IDLE;
     this.previousFire = false;
     this.uiFire = true;
-    this.resetPending = false;
     this.history = [];
     this.path = [];
     this.record = null;
@@ -146,8 +145,7 @@ export class Session {
         this.eventIndex++;
       }
     } else {
-      joy = this.resetPending ? IDLE : this.live.read(kind);
-      this.resetPending = false;
+      joy = this.live.read(kind);
       // Fire+down opens UI after this update. Its gameplay effect is neutral.
       if (kind === 's' && joy.fire && joy.dy > 0 && joy.dx === 0) {
         this.openAfterUpdate = true;
@@ -163,9 +161,8 @@ export class Session {
 
   handoff() {
     if (this.playback) return;
-    this.live.reset?.();
+    this.live.blockFireUntilRelease?.();
     this.onReset?.();
-    this.resetPending = true;
   }
 
   command(name, choices = {}, { presented = false } = {}) {

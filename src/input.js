@@ -53,14 +53,24 @@ export class Keyboard {
   }
 
   source(name) {
-    if (!this.sources.has(name)) this.sources.set(name, { down: new Set(), tapped: new Set() });
+    if (!this.sources.has(name)) this.sources.set(name, { down: new Set(), tapped: new Set(), blocked: new Set() });
     return this.sources.get(name);
   }
 
-  press(key, source = 'keyboard') { const s = this.source(source); s.down.add(key); s.tapped.add(key); }
-  release(key, source = 'keyboard') { this.source(source).down.delete(key); }
+  press(key, source = 'keyboard') {
+    const s = this.source(source);
+    if (s.blocked.has(key)) return;
+    s.down.add(key); s.tapped.add(key);
+  }
+  release(key, source = 'keyboard') { const s = this.source(source); s.down.delete(key); s.blocked.delete(key); }
   tap(key, source = 'pointer') { this.source(source).tapped.add(key); }
   reset(source) { if (source) this.sources.delete(source); else this.sources.clear(); }
+  blockFireUntilRelease() {
+    for (const s of this.sources.values()) {
+      s.tapped.delete('fire');
+      if (s.down.delete('fire')) s.blocked.add('fire');
+    }
+  }
 
   read() {
     const d = new Set();

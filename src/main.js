@@ -142,7 +142,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekRepeatAt = 0;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
-  if (session.resetPending) gamepad.cancel(true);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
   const musicTrail = createMusicTrail(document.getElementById('music-notes'));
