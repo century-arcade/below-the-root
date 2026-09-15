@@ -13,4 +13,4 @@ Seek back/forward by room:
 
 ## Developer mode
 
-- **Delete**: Go back a day
+- **Backspace**: Undo the last room.
