@@ -9,3 +9,4 @@ iso/
 .netlify/
 .env.local
 node_modules/
+deno.lock
