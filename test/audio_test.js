@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { planTune, pickTune, startTune, Speaker } from '../src/audio.js';
-import { noteRhythm, QUARTER_FRAMES } from '../src/music-notation.js';
+import { noteRhythm, QUARTER_FRAMES, staffPitch } from '../src/music-notation.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const music = JSON.parse(readFileSync(join(ROOT, 'docs', 'spec', 'data', 'music.json'), 'utf8'));
@@ -62,6 +62,14 @@ test('rhythm uses the tune pulse, retaining dots, triplets and tied long notes',
   assert.deepEqual(names(1, 12), ['triplet eighth']);
   assert.deepEqual(names(7, 120), ['whole', 'quarter']);
   assert.throws(() => noteRhythm(0, 13), /Unmapped rhythm/);
+});
+
+test('staff pitch uses conventional clefs, sharp spelling and ledger lines', () => {
+  assert.deepEqual(staffPitch(64), { register: 'treble', step: 0, accidental: null, ledgerSteps: [] }); // E4
+  assert.deepEqual(staffPitch(60), { register: 'treble', step: -2, accidental: null, ledgerSteps: [-2] }); // middle C
+  assert.deepEqual(staffPitch(66), { register: 'treble', step: 1, accidental: 'sharp', ledgerSteps: [] });
+  assert.deepEqual(staffPitch(50), { register: 'bass', step: 4, accidental: null, ledgerSteps: [] }); // D3
+  assert.deepEqual(staffPitch(88), { register: 'treble', step: 14, accidental: null, ledgerSteps: [10, 12, 14] });
 });
 
 test('the last note may ring past the end byte, up to its decay', () => {

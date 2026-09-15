@@ -58,6 +58,10 @@ with sync_playwright() as p:
         expect(glyphs.locator('svg')).to_have_count(4)
         assert treble.evaluate_all('(nodes) => nodes.map(n => n.dataset.rhythm)') == ['half', 'eighth']
         assert bass.evaluate_all('(nodes) => nodes.map(n => n.dataset.rhythm)') == ['quarter', 'whole']
+        assert glyphs.evaluate_all('(nodes) => nodes.map(n => [n.dataset.midi, n.dataset.staffStep])') == [
+            ['60', '-2'], ['61', '-2'], ['59', '9'], ['48', '3']]
+        expect(trail.locator('[data-midi="61"]')).to_have_attribute('data-accidental', 'sharp')
+        expect(trail.locator('[data-midi="60"]')).to_have_attribute('data-ledger-lines', '1')
         page.evaluate('updateNotes(noteSpeaker)')
         expect(glyphs).to_have_count(4)
         assert page.evaluate("document.querySelector('#music-notes [data-rhythm=quarter]') === firstGlyph")

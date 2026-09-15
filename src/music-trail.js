@@ -1,4 +1,4 @@
-import { rhythmSVG } from './music-notation.js';
+import { rhythmSVG, staffPitch } from './music-notation.js';
 
 const LIFETIME = 1.8;
 
@@ -53,11 +53,17 @@ export function createMusicTrail(element) {
     for (const note of notes) {
       if (visible.has(note)) continue;
       const glyph = element.ownerDocument.createElement('span');
+      const register = note.midi < 60 ? 'bass' : 'treble';
+      const pitch = staffPitch(note.midi, register);
       glyph.dataset.rhythm = note.rhythm.map(value => value.name).join(' tied to ');
-      glyph.innerHTML = rhythmSVG(note.rhythm);
+      glyph.dataset.midi = note.midi;
+      glyph.dataset.staffStep = pitch.step;
+      if (pitch.accidental) glyph.dataset.accidental = pitch.accidental;
+      if (pitch.ledgerSteps.length) glyph.dataset.ledgerLines = pitch.ledgerSteps.length;
+      glyph.innerHTML = rhythmSVG(note.rhythm, pitch);
       glyph.style.animationDuration = `${LIFETIME}s`;
       glyph.style.animationDelay = `${note.at - speaker.ctx.currentTime}s`;
-      rows[note.midi < 60 ? 'bass' : 'treble'].append(glyph);
+      rows[register].append(glyph);
       visible.set(note, glyph);
     }
   };
