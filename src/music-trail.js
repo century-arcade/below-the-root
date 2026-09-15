@@ -1,12 +1,19 @@
-import { rhythmSVG, staffPitch } from './music-notation.js';
+import { rhythmSVG } from './music-notation.js';
 
-const LIFETIME = 1.8;
+const TICK_S = 1 / 60;
+const HISTORY = 5;
+
+function noteOpacity(note, now) {
+  const measure = note.measureFrames * TICK_S;
+  const measureStart = note.at - note.measureOffset * TICK_S;
+  return Math.min(1, 2 - (now - measureStart) / measure);
+}
 
 export function createMusicTrail(element) {
-  const rows = Object.fromEntries(['treble', 'bass'].map(register => {
+  const rows = Object.fromEntries([0, 1].map(voice => {
     const row = element.ownerDocument.createElement('span');
-    row.dataset.register = register;
-    return [register, row];
+    row.dataset.voice = voice;
+    return [voice, row];
   }));
   const waveform = element.ownerDocument.createElement('canvas');
   waveform.className = 'sound-waveform';
@@ -17,15 +24,16 @@ export function createMusicTrail(element) {
   const reducedMotion = element.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)');
   let drawnEffect = null;
   let drawnFlatline = false;
-  element.replaceChildren(rows.treble, rows.bass, waveform);
+  element.replaceChildren(rows[0], rows[1], waveform);
   const visible = new Map();
   return speaker => {
-    const notes = new Set(speaker.recentNotes(LIFETIME));
+    const notes = new Set(speaker.recentNotes(HISTORY)
+      .filter(note => noteOpacity(note, speaker.ctx.currentTime) > 0));
     const silent = speaker.muted || speaker.volume === 0;
     const samples = silent ? speaker.effectWaveform() : null;
     const tunePlaying = speaker.playing && speaker.ctx.currentTime < speaker.tuneEnd;
     waveform.hidden = !silent || !!tunePlaying;
-    rows.treble.hidden = rows.bass.hidden = !tunePlaying;
+    rows[0].hidden = rows[1].hidden = !tunePlaying;
     const flatline = !samples;
     if (waveform.hidden) { drawnEffect = null; drawnFlatline = false; }
     else if (flatline ? !drawnFlatline : drawnFlatline || !reducedMotion.matches || drawnEffect !== speaker.effect) {
@@ -46,24 +54,24 @@ export function createMusicTrail(element) {
       else if (samples.some(sample => Math.abs(sample) > 0.001)) drawnEffect = speaker.effect;
     }
     for (const [note, glyph] of visible) {
-      if (notes.has(note)) continue;
+      const opacity = noteOpacity(note, speaker.ctx.currentTime);
+      if (notes.has(note) && opacity > 0) {
+        glyph.style.opacity = opacity;
+        continue;
+      }
       glyph.remove();
       visible.delete(note);
     }
     for (const note of notes) {
       if (visible.has(note)) continue;
       const glyph = element.ownerDocument.createElement('span');
-      const register = note.midi < 60 ? 'bass' : 'treble';
-      const pitch = staffPitch(note.midi, register);
       glyph.dataset.rhythm = note.rhythm.map(value => value.name).join(' tied to ');
       glyph.dataset.midi = note.midi;
-      glyph.dataset.staffStep = pitch.step;
-      if (pitch.accidental) glyph.dataset.accidental = pitch.accidental;
-      if (pitch.ledgerSteps.length) glyph.dataset.ledgerLines = pitch.ledgerSteps.length;
-      glyph.innerHTML = rhythmSVG(note.rhythm, pitch);
-      glyph.style.animationDuration = `${LIFETIME}s`;
-      glyph.style.animationDelay = `${note.at - speaker.ctx.currentTime}s`;
-      rows[register].append(glyph);
+      glyph.dataset.measurePosition = note.measureOffset / note.measureFrames;
+      glyph.innerHTML = rhythmSVG(note.rhythm);
+      glyph.style.left = `${note.measureOffset / note.measureFrames * 100}%`;
+      glyph.style.opacity = noteOpacity(note, speaker.ctx.currentTime);
+      rows[note.voice].append(glyph);
       visible.set(note, glyph);
     }
   };
