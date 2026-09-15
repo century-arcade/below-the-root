@@ -52,5 +52,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 #play-area { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 #canvas-box { flex: none; }
+#play-from-replay { align-self: center; font: var(--game-font-size)/1 'Green-Sky', monospace; text-transform: uppercase; }
 #command-menu { position: absolute; left: 0; top: var(--menu-top); width: 100%; height: var(--menu-height); padding: 0; border: 0; background: transparent; }
 #command-menu:focus-visible { outline-offset: -2px; }

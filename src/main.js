@@ -190,6 +190,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let overlay = null;
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');
+  const playFromReplay = document.getElementById('play-from-replay');
   const menuButton = document.getElementById('command-menu');
   let startupHelp = false;
   const mapScreen = document.getElementById('map-screen');
@@ -336,10 +337,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     release();
     if (view === 'home') {
       closeHelp();
-      if (session.playback) {
-        session.continueLive();
-        returnSession = null;
-      } else session.menu();
+      if (session.playback) stopReplay();
+      session.menu();
       speaker.silence();
       saveNow();
     } else if (view === 'map') openMap();
@@ -352,6 +351,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       showView(view);
     };
   }
+  playFromReplay.onclick = () => {
+    if (paused || !session.playback) return;
+    release();
+    session.continueLive();
+    returnSession = null;
+    seekRoom = null; acc = 0;
+    speaker.silence();
+    saveNow(); draw();
+    canvas.focus({ preventScroll: true });
+  };
   addEventListener('hashchange', () => showView(location.hash.slice(1)));
 
   let debugReady = false;
@@ -528,6 +537,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     screenFocus.toggleAttribute('hidden', !isRunning());
     menuButton.hidden = session.playback || !canOpenCommandMenu(state);
     if (replayHelp) replayHelp.hidden = !session.playback;
+    playFromReplay.hidden = !session.playback;
     backDayButton.hidden = !debug || session.playback;
     backDayButton.disabled = !session.previousDay;
     state.figures = figures(state);
