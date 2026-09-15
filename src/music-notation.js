@@ -48,29 +48,30 @@ export function rhythmSVG(rhythm, pitch = null) {
   const stemDown = pitch && pitch.step >= 4;
   const parts = rhythm.map((value, i) => {
     const hollow = value.denominator <= 2;
-    const x = 8;
+    const x = 5;
     const stem = stemDown
-      ? `<path d="M${x - 3} ${y}v11"/>`
-      : `<path d="M${x + 3} ${y}v-11"/>`;
+      ? `<path d="M${x - 1.6} ${y}v7"/>`
+      : `<path d="M${x + 1.6} ${y}v-7"/>`;
     const flag = stemDown
-      ? `<path d="M${x - 3} ${y + 11}q7 -3 3 -8"/>`
-      : `<path d="M${x + 3} ${y - 11}q7 3 3 8"/>`;
-    return `<g transform="translate(${i * 18} 0)">
-      ${pitch?.accidental ? `<path d="M1 ${y - 5}v10m4 -11v10m-6 -6h8m-8 3h8"/>` : ''}
-      <ellipse cx="8" cy="${y}" rx="3" ry="2" transform="rotate(-20 8 ${y})" fill="${hollow ? 'none' : 'currentColor'}" stroke="currentColor"/>
+      ? `<path d="M${x - 1.6} ${y + 7}q4 -2 2 -5"/>`
+      : `<path d="M${x + 1.6} ${y - 7}q4 2 2 5"/>`;
+    return `<g transform="translate(${i * 12} 0)">
+      ${pitch?.accidental ? `<path d="M1 ${y - 3}v6m2 -6.5v6m-3 -4h4m-4 2h4"/>` : ''}
+      <ellipse cx="5" cy="${y}" rx="1.6" ry="1.1" transform="rotate(-20 5 ${y})" fill="${hollow ? 'none' : 'currentColor'}" stroke="currentColor"/>
       ${value.denominator > 1 ? stem : ''}
       ${value.denominator >= 8 ? flag : ''}
-      ${value.denominator >= 16 ? flag.replaceAll(String(y + 11), String(y + 8)).replaceAll(String(y - 11), String(y - 8)) : ''}
-      ${value.dotted ? `<circle cx="14" cy="${y - 1}" r="1" fill="currentColor" stroke="none"/>` : ''}
-      ${value.triplet ? `<text x="14" y="${stemDown ? y + 10 : y - 7}" fill="currentColor" stroke="none" font-size="7">3</text>` : ''}
+      ${value.denominator >= 16 ? flag.replaceAll(String(y + 7), String(y + 5)).replaceAll(String(y - 7), String(y - 5)) : ''}
+      ${value.dotted ? `<circle cx="8" cy="${y - 0.5}" r="0.55" fill="currentColor" stroke="none"/>` : ''}
+      ${value.triplet ? `<text x="8" y="${stemDown ? y + 7 : y - 5}" fill="currentColor" stroke="none" font-size="4">3</text>` : ''}
     </g>`;
   });
-  const width = rhythm.length * 18 + 8;
+  const width = rhythm.length * 12 + 5;
   const ledgers = pitch ? pitch.ledgerSteps.map(step => {
     const lineY = 21 - step * 1.5;
-    return `<path d="M3 ${lineY}h10"/>`;
+    return `<path d="M2 ${lineY}h6"/>`;
   }).join('') : '';
-  if (rhythm.length > 1) parts.push(`<path d="M8 ${y + 3}q9 5 18 0"/>`);
+  if (rhythm.length > 1) parts.push(`<path d="M5 ${y + 2}q6 3 12 0"/>`);
   const height = pitch ? 30 : 18;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">${ledgers}${parts.join('')}</svg>`;
+  const strokeWidth = pitch ? 0.75 : 1.2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" aria-hidden="true">${ledgers}${parts.join('')}</svg>`;
 }
