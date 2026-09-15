@@ -115,7 +115,7 @@ with sync_playwright() as p:
     page.locator('#file-issue').wait_for()
     page.wait_for_timeout(200)
     expect(page.locator('#log')).to_be_hidden()
-    assert page.locator('#where').inner_text() == record['checkpoint']['room']
+    assert page.locator('#where').count() == 0
     page.locator('#record-file').set_input_files('/tmp/btr-browser-record.json')
     page.locator('#log').filter(has_text='Replaying btr-browser-record.json').wait_for()
     # Imports display timestamps while the console retains the original text.
@@ -135,8 +135,6 @@ with sync_playwright() as p:
     page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
     assert not page.locator('#debug-tools').is_visible()
     assert not page.locator('#file-issue').is_visible()
-    assert page.locator('#where').text_content() == ''
-    assert not page.locator('#where').is_visible()
     assert page.locator('#top-controls #fullscreen').count() == 1
     volume = page.get_by_role('slider', name='Volume', exact=True)
     expect(volume).to_have_value('50')

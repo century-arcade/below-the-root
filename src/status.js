@@ -2,6 +2,7 @@ import { timeOfDay } from './clock.js';
 import { PANEL_COLS } from './panel.js';
 import { completion, playTime } from './progress.js';
 import { carried } from './inventory.js';
+import { CLASS } from './data.js';
 
 // Extra STATUS and replay details appear above the permanent quest status.
 export function statusRows(state, { classic = false, playback = null } = {}) {
@@ -9,20 +10,19 @@ export function statusRows(state, { classic = false, playback = null } = {}) {
   if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
   if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges ?? '?'}`);
   if (!classic && state.quest && !state.title && !state.demo && state.room && !state.commandMenuOpen) {
-    const inventory = carried(state).map(o => o.name);
-    if (inventory.length) rows.push(...wrapItems('YOU HAVE ', inventory));
+    const inventory = inventoryEntries(state);
+    for (let i = 0; i < inventory.length; i += 2) {
+      rows.push(place(inventory[i], PANEL_COLS / 2, inventory[i + 1] || ''));
+    }
   }
   return rows.concat(classic ? [] : permanentRows(state));
 }
 
-function wrapItems(prefix, items) {
-  const rows = [prefix];
-  for (const item of items) {
-    const separator = rows.at(-1) === prefix ? '' : ', ';
-    if (rows.at(-1) !== prefix && rows.at(-1).length + separator.length + item.length > PANEL_COLS) rows.push(item);
-    else rows[rows.length - 1] += separator + item;
-  }
-  return rows;
+function inventoryEntries(state) {
+  const items = carried(state);
+  const tokens = items.filter(o => o.class === CLASS.TOKEN);
+  return items.filter(o => o.class !== CLASS.TOKEN).map(o => o.name)
+    .concat(tokens.length ? [`${tokens[0].name} ×${tokens.length}`] : []);
 }
 
 function permanentRows(state) {

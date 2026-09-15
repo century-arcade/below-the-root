@@ -56,7 +56,6 @@ with sync_playwright() as p:
             page.mouse.wheel(0, delta)
             page.wait_for_function("expected => document.getElementById('map-zoom').textContent === expected", arg=expected)
         assert page.locator('#map-grid > span').count() == 32 * 16
-        assert 'PAUSED' not in page.locator('#where').inner_text()
         stopped = record()['frame']
         page.wait_for_timeout(300)
         assert record()['frame'] == stopped, 'the map must hold game time'

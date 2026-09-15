@@ -50,6 +50,12 @@ assert.ok(rows[0].endsWith(p.name), rows[0]);
 assert.match(rows[1], new RegExp(`^STAMINA ${p.stamina} +FOOD ${p.food} +REST ${p.rest} +SPIRIT ${p.spiritEnergy}/${p.spiritLimit}$`));
 const bread = give(state, CLASS.BREAD);
 assert.ok(statusRows(state).some(row => row.includes(bread.name)), 'carried items appear above status');
+const token = give(state, CLASS.TOKEN);
+give(state, CLASS.TOKEN);
+const inventoryRows = statusRows(state).slice(0, -2);
+assert.deepEqual(inventoryRows, [`${bread.name}`.padEnd(PANEL_COLS / 2) + `${token.name} ×2`],
+  'inventory uses columns and combines tokens');
+assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));
 assert.ok(statusRows(state).every(row => !row.includes('NOTHING')), 'an empty inventory entry is never shown');
 state.commandMenuOpen = true;
 assert.ok(statusRows(state).every(row => !row.includes(bread.name)), 'inventory is hidden behind the action menu');

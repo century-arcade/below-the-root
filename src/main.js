@@ -38,7 +38,7 @@ function fit() {
     game.style.width = '';
     availableHeight = game.clientHeight;
   } else {
-    const chrome = ['site-header', 'where', 'log']
+    const chrome = ['site-header', 'log']
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
@@ -85,10 +85,6 @@ function doorsAt(state, col, row) {
     own: doorNumber(state, cell(state, p.col, p.row)),
     side: Math.sign(col - p.col),
   };
-}
-
-function whereLabel(state) {
-  return state.room && !state.title ? state.room.code : '';
 }
 
 canvas.focus({ preventScroll: true });
@@ -193,8 +189,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   fullscreenButton.hidden = !canFullscreen;
   fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
-  const where = document.getElementById('where');
-  where.hidden = !debug;
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -380,7 +374,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let debugReady = false;
   function setDebug(on) {
     debug = on;
-    where.hidden = !on;
     document.getElementById('developer-help').hidden = !on;
     if (on && !debugReady) {
       debugReady = true;
@@ -562,9 +555,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     image.data.set(render(state));
     if (band) image.data.set(renderStatus(state, rows), WIDTH * HEIGHT * 4);
     ctx.putImageData(image, 0, 0);
-    const line = debug ? whereLabel(state) : '';
-    // #where is a live region: rewriting the same text re-announces it
-    if (where.textContent !== line) where.textContent = line;
     const activeTab = overlay?.screen === mapScreen ? mapButton : homeButton;
     if (currentTab !== activeTab) {
       currentTab?.removeAttribute('aria-current');

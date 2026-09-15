@@ -339,11 +339,22 @@ test('an ambusher kidnaps you to the Nekom', (s) => {
   assert.equal(c.def.kind, 'ambusher_kidnap_nekom');
   s.player.col = c.col - 1;
   s.player.row = c.row;
-  s.input = { read: () => J.idle, pace: 0 };
+  let joy = { dx: 1, dy: 0, fire: true };
+  s.input = { read: () => joy, pace: 0 };
   for (let i = 0; i < 8 && s.room.room === 363; i++) tick(s);
   assert.equal(s.room.code, 'R1');
   assert.equal(lines(s)[0], 'YOU WERE KIDNAPPED BY THE NEKOM');
   assert.equal(s.clock.day, 1);
+  joy = J.right;
+  for (let i = 0; i < 4; i++) tick(s);
+  assert.ok(s.verb, 'input held before the kidnap does not dismiss its message');
+  assert.equal(lines(s)[0], 'YOU WERE KIDNAPPED BY THE NEKOM');
+  joy = J.idle;
+  tick(s);
+  assert.ok(s.verb, 'releasing the seized input only arms acknowledgement');
+  joy = J.right;
+  for (let i = 0; i < 4 && s.verb; i++) tick(s);
+  assert.equal(s.verb, null, 'a fresh input dismisses the message');
 });
 
 test('STATUS paints the six numbers', (s) => {

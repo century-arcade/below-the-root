@@ -4,7 +4,7 @@ import { CLASS } from './data.js';
 import { newPlayer, step, figureOf, haltAtEdge, idleFrame } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
 import { runMenu, restTick } from './verbs.js';
-import { DemoInput, buttonPress, anyInput } from './input.js';
+import { DemoInput, buttonPress, anyInput, isIdle } from './input.js';
 import { newPanel, say, clearPanel } from './panel.js';
 import { newFlags, creatureTick, creatureFigure } from './creatures.js';
 import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
@@ -273,6 +273,7 @@ function showPage(state, page) {
 // shell.md: every message the shell prints waits for the button or the stick, then clears
 function* message(state, print) {
   print();
+  while (!isIdle(yield));
   yield* anyInput();
   clearPanel(state);
 }

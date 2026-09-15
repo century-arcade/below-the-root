@@ -22,24 +22,55 @@ export function noteRhythm(tune, duration) {
   throw new Error(`Unmapped rhythm: tune ${tune}, ${duration} frames`);
 }
 
+const PITCHES = [
+  { letter: 0 }, { letter: 0, accidental: 'sharp' },
+  { letter: 1 }, { letter: 1, accidental: 'sharp' },
+  { letter: 2 }, { letter: 3 }, { letter: 3, accidental: 'sharp' },
+  { letter: 4 }, { letter: 4, accidental: 'sharp' },
+  { letter: 5 }, { letter: 5, accidental: 'sharp' }, { letter: 6 },
+];
+
+export function staffPitch(midi, register = midi < 60 ? 'bass' : 'treble') {
+  const pitch = PITCHES[midi % 12];
+  const octave = Math.floor(midi / 12) - 1;
+  const diatonic = octave * 7 + pitch.letter;
+  const step = diatonic - (register === 'bass' ? 18 : 30);
+  const ledgerSteps = [];
+  for (let line = -2; line >= step; line -= 2) ledgerSteps.push(line);
+  for (let line = 10; line <= step; line += 2) ledgerSteps.push(line);
+  return { register, step, accidental: pitch.accidental || null, ledgerSteps };
+}
+
 // Small, consistent notation without depending on a platform's music-symbol font.
-export function rhythmSVG(rhythm) {
-  const y = 12;
+export function rhythmSVG(rhythm, pitch = null) {
+  const y = pitch ? 21 - pitch.step * 1.5 : 12;
+  const stemDown = pitch && pitch.step >= 4;
   const parts = rhythm.map((value, i) => {
     const hollow = value.denominator <= 2;
     const x = 5;
-    const stem = `<path d="M${x + 1.6} ${y}v-7"/>`;
-    const flag = `<path d="M${x + 1.6} ${y - 7}q4 2 2 5"/>`;
+    const stem = stemDown
+      ? `<path d="M${x - 1.6} ${y}v7"/>`
+      : `<path d="M${x + 1.6} ${y}v-7"/>`;
+    const flag = stemDown
+      ? `<path d="M${x - 1.6} ${y + 7}q4 -2 2 -5"/>`
+      : `<path d="M${x + 1.6} ${y - 7}q4 2 2 5"/>`;
     return `<g transform="translate(${i * 12} 0)">
+      ${pitch?.accidental ? `<path d="M1 ${y - 3}v6m2 -6.5v6m-3 -4h4m-4 2h4"/>` : ''}
       <ellipse cx="5" cy="${y}" rx="1.6" ry="1.1" transform="rotate(-20 5 ${y})" fill="${hollow ? 'none' : 'currentColor'}" stroke="currentColor"/>
       ${value.denominator > 1 ? stem : ''}
       ${value.denominator >= 8 ? flag : ''}
       ${value.denominator >= 16 ? flag.replaceAll(String(y + 7), String(y + 5)).replaceAll(String(y - 7), String(y - 5)) : ''}
       ${value.dotted ? `<circle cx="8" cy="${y - 0.5}" r="0.55" fill="currentColor" stroke="none"/>` : ''}
-      ${value.triplet ? `<text x="8" y="${y - 5}" fill="currentColor" stroke="none" font-size="4">3</text>` : ''}
+      ${value.triplet ? `<text x="8" y="${stemDown ? y + 7 : y - 5}" fill="currentColor" stroke="none" font-size="4">3</text>` : ''}
     </g>`;
   });
   const width = rhythm.length * 12 + 5;
+  const ledgers = pitch ? pitch.ledgerSteps.map(step => {
+    const lineY = 21 - step * 1.5;
+    return `<path d="M2 ${lineY}h6"/>`;
+  }).join('') : '';
   if (rhythm.length > 1) parts.push(`<path d="M5 ${y + 2}q6 3 12 0"/>`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="18" viewBox="0 0 ${width} 18" fill="none" stroke="currentColor" stroke-width="0.75" aria-hidden="true">${parts.join('')}</svg>`;
+  const height = pitch ? 30 : 18;
+  const strokeWidth = pitch ? 0.75 : 1.2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" aria-hidden="true">${ledgers}${parts.join('')}</svg>`;
 }
