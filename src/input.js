@@ -97,7 +97,7 @@ export function directionPress() {
 }
 
 const TAP_MS = 150;
-const DOUBLE_MS = 300;
+const DOUBLE_MS = 200;
 const WALK_POLL_MS = 50;
 const WALK_MAX_MS = 15000;
 const WALK_STALL_MS = 1200;
