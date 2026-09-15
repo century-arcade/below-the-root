@@ -15,7 +15,7 @@ function tokenMaximum(data, character) {
 }
 
 export function newProgress(data, character = null) {
-  return { milliseconds: 0, partialTime: false, spirit: 0, elixirs: 0, items: [], won: false, wand: false,
+  return { partialTime: false, spirit: 0, elixirs: 0, items: [], won: false, wand: false,
     tokens: [], tokenTotal: tokenMaximum(data, character) };
 }
 
@@ -50,7 +50,7 @@ export function completion(state) {
 }
 
 export function playTime(state) {
-  const seconds = Math.floor(state.progress.milliseconds / 1000);
+  const seconds = Math.floor((state.progress.finishedAt ?? state.simticks ?? 0) / 60);
   const h = Math.floor(seconds / 3600);
   const m = Math.floor(seconds / 60) % 60;
   const s = seconds % 60;

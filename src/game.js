@@ -3,7 +3,7 @@
 import { CLASS } from './data.js';
 import { newPlayer, step, figureOf, haltAtEdge, idleFrame } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
-import { runMenu } from './verbs.js';
+import { runMenu, restTick } from './verbs.js';
 import { DemoInput, buttonPress, anyInput } from './input.js';
 import { newPanel, say, clearPanel } from './panel.js';
 import { newFlags, creatureTick, creatureFigure } from './creatures.js';
@@ -38,7 +38,7 @@ export function newState(data, input, opts = {}) {
     room: null,
     screen: null,
     objects: newObjects(data),
-    tick: 0,
+    tick: 0, simticks: 0, visit: 0, resting: null,
     stall: 0, tuneWait: null,
     active: false,
     stop: null,
@@ -69,7 +69,7 @@ export function newState(data, input, opts = {}) {
     verbWait: 0,
     restDelayCut: false,
     ended: null,
-    quest: false,
+    quest: false, questNumber: 0,
     title: false,
     menuSel: 0,
     attract: 'loop',
@@ -96,6 +96,8 @@ export function startQuest(state, character) {
   state.questNumber = (state.questNumber || 0) + 1;
   Object.assign(state, {
     objects: newObjects(state.data), flags: newFlags(), clock: newClock(),
+    simticks: 0, visit: 0, resting: null, title: false, stop: null,
+    stall: 0, tuneWait: null, verbWait: 0, commandMenuOpen: false,
     character: character.id, sample: false, fallaKey: false, berriesOffered: 0,
     visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null, quest: true,
     player: newPlayer(character.sprite_sheet, character.start.stamina),
@@ -138,9 +140,23 @@ export function tick(state) {
     if (!state.stall) state.tuneWait = null;
     return;
   }
-  state.tick += 1;
+  if (state.demo) state.tick += 1;
   if (state.verb) return driveVerb(state);
-  if (!state.active) return;
+  if (!state.active || (!state.demo && (state.progress.won || state.timeUp))) return;
+  if (!state.demo) state.tick += 1;
+  // Events consumed in this update use its starting tick. Increment only after
+  // every gameplay effect, including room transitions, has finished.
+  const quest = state.quest && !state.demo;
+  try { gameplayUpdate(state); }
+  finally { if (quest) state.simticks += 1; }
+}
+
+function gameplayUpdate(state) {
+  if (state.resting) {
+    restTick(state);
+    if (state.stop) stopped(state);
+    return;
+  }
   clockTick(state);
   creatureTick(state);
   if (state.stop) return stopped(state);
@@ -185,6 +201,7 @@ function advanceVerb(state, r) {
 
 function endVerb(state) {
   state.verb = null;
+  state.commands?.handoff();
   if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);
   if (!state.ended) state.active = true;
@@ -192,7 +209,7 @@ function endVerb(state) {
 
 export function canOpenCommandMenu(state) {
   return state.quest && !state.title && !state.demo && state.active && !state.verb
-    && !state.stop && !state.stall && !state.ended;
+    && !state.stop && !state.stall && !state.ended && !state.resting;
 }
 
 export function openCommandMenu(state) {

@@ -5,7 +5,6 @@ import { newObjects, startQuest, startDemo, startVerb, endDemo } from './game.js
 import { newFlags } from './creatures.js';
 import { fireUp } from './input.js';
 import { print, clearPanel } from './panel.js';
-import { enterRoom, burnLamp } from './world.js';
 import { SFX, sfx } from './audio.js';
 
 const RETURN_TO_MENU = 5;
@@ -114,11 +113,7 @@ export function* characterSelect(state) {
 
 // CONTINUE resumes the live room, including tile edits and per-visit state.
 function resume(state) {
-  if (state.legacyContinue) {
-    // Version 2 journals sampled subsequent input against a freshly loaded room.
-    burnLamp(state);
-    enterRoom(state, state.room, state.player.col, state.player.row);
-  } else clearPanel(state);
+  clearPanel(state);
   state.title = false;
   state.active = true;
 }

@@ -1,5 +1,6 @@
 """Pointer focus returns arrows to play; the screen indicator follows game time."""
 import os
+from browser_helpers import install_probe, observe
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -7,6 +8,7 @@ BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     page = browser.new_page(has_touch=True)
+    install_probe(page)
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': False}))
@@ -17,18 +19,17 @@ with sync_playwright() as p:
     indicator = page.locator('#screen-focus')
 
     def record():
-        page.evaluate("dispatchEvent(new Event('pagehide'))")
-        return page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+        return observe(page)
 
     for action in ['click', 'tap']:
         volume.click()
         expect(volume).to_be_focused()
         volume.press('Home')
-        before = len(record()['reads'])
+        before = len(record()['events'])
         page.keyboard.press('ArrowRight')
         expect(volume).to_have_value('10')
         page.wait_for_timeout(150)
-        assert all(entry['j'] == [0, 0, 0] for entry in record()['reads'][before:]), 'slider arrows do not steer'
+        assert all(entry['stick'] == [0, 0, 0] for entry in record()['events'][before:]), 'slider arrows do not steer'
         # Clicking while paused resumes without also sending a pointer gesture.
         getattr(canvas, action)()
         expect(canvas).to_be_focused()
@@ -37,11 +38,11 @@ with sync_playwright() as p:
         level = volume.input_value()
         getattr(canvas, action)()
         expect(canvas).to_be_focused()
-        before = len(record()['reads'])
+        before = len(record()['events'])
         page.keyboard.down('ArrowRight')
         page.wait_for_timeout(200)
         page.keyboard.up('ArrowRight')
-        assert any(entry['j'][0] == 1 for entry in record()['reads'][before:]), 'canvas returns arrows to play'
+        assert any(entry['stick'][0] == 1 for entry in record()['events'][before:]), 'canvas returns arrows to play'
         expect(volume).to_have_value(level)
         page.wait_for_timeout(100)
 
@@ -50,9 +51,9 @@ with sync_playwright() as p:
             expect(indicator).not_to_have_attribute('hidden', '')
         else:
             expect(indicator).to_have_attribute('hidden', '')
-        before = record()['frames']
+        before = record()['frame']
         page.wait_for_timeout(150)
-        after = record()['frames']
+        after = record()['frame']
         assert (after > before) if on else (after == before), 'indicator follows game time'
 
     running(True)
@@ -86,10 +87,10 @@ with sync_playwright() as p:
     for key, joystick in [('ArrowRight', [1, 0, 0]), ('Space', [0, 0, 1])]:
         page.evaluate("dispatchEvent(new Event('blur'))")
         running(False)
-        before = len(record()['reads'])
+        before = len(record()['events'])
         page.keyboard.press(key)
         page.wait_for_timeout(200)
-        assert any(entry['j'] == joystick for entry in record()['reads'][before:]), 'first key after blur reaches play'
+        assert any(entry['stick'] == joystick for entry in record()['events'][before:]), 'first key after blur reaches play'
         running(True)
 
     # Hovering back onto the game returns keyboard control from a native slider.

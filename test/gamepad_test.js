@@ -76,3 +76,14 @@ assert.deepEqual(keys.read(), IDLE, 'cancellation clears unread gamepad input');
 assert.deepEqual(read(), { dx: 1, dy: 0, fire: true }, 'held pad is detected again after input is dropped');
 
 console.log('gamepad_test: d-pad, stick dead zone, diagonals, fire, holds, release, disconnect and source isolation passed');
+
+// A continuation cancels the physical hold until the controller is centred.
+{
+  const keys = new Keyboard({ addEventListener() {} });
+  const pad = { connected: true, axes: [1, 0], buttons: [] };
+  const adapter = new Gamepad(keys, { getGamepads: () => [pad] });
+  adapter.poll(); assert.equal(keys.read().dx, 1);
+  adapter.cancel(true); adapter.poll(); assert.equal(keys.read().dx, 0);
+  pad.axes = [0, 0]; adapter.poll();
+  pad.axes = [-1, 0]; adapter.poll(); assert.equal(keys.read().dx, -1);
+}

@@ -77,7 +77,7 @@ test('pickTune: numbers pass through, random draws from the pool', () => {
 });
 
 test('startTune stalls for the tune, except when told not to', () => {
-  const state = { data: { music }, events: [], stall: 0, rng: () => 0 };
+  const state = { data: { music }, events: [], stall: 0, presentationRng: () => 0 };
   startTune(state, 0);
   assert.deepEqual(state.events, [{ music: 0 }]);
   assert.equal(state.stall, 1441);

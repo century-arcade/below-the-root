@@ -38,66 +38,6 @@ function trace(data, name, maxReads = 5000) {
 
 const name = process.argv[2] || 'intro';
 const data = await loadTestData();
-// Sessions journal every game read, including the initial idle run.
-const { Session, checkpoint, validateRecord } = await import('../src/record.js');
-const { IDLE } = await import('../src/input.js');
-const { default: assert } = await import('node:assert/strict');
-const live = { joy: IDLE, read() { return this.joy; } };
-const session = new Session(data, live, { initial: { mode: 'quest' } });
-for (let i = 0; i < 100; i++) session.step(10);
-assert.equal(session.record.reads.length, 1);
-assert.equal(session.record.reads[0].k, 's');
-assert.deepEqual(session.record.reads[0].j, [0, 0, 0]);
-assert.ok(session.record.reads[0].n > 1);
-assert.deepEqual(session.record.reads[0].at, ['T1', 22, 9, 1]);
-assert.equal(session.state.progress.milliseconds, 0, 'a held read leaves its window open');
-const record = session.snapshot();
-assert.equal(record.version, 2);
-assert.ok(!('inputs' in record) && !('durations' in record));
-assert.equal(record.reads[0].ms, 930, 'the seven frames before the first read are excluded');
-assert.equal(record.checkpoint.stats.milliseconds, 930);
-assert.deepEqual(session.snapshot(), record, 'repeated endpoints do not accrue twice');
-for (let i = 0; i < 16; i++) session.step(10);
-assert.equal(session.record.reads.length, 2, 'continuation opens a new window with the same value');
-Session.replay(data, live, session.snapshot());
-assert.equal(record.reads.length, 1, 'a snapshot owns its data after continuation');
-for (const change of [r => r.reads[0].at[1]++, r => { r.reads[0].k = 'g'; }]) {
-  const drift = structuredClone(record); change(drift);
-  assert.throws(() => Session.replay(data, live, drift), /Read 1, s read: expected .*room T1 cell .*got room T1 cell/);
-  assert.deepEqual(Session.replay(data, live, drift, false).snapshot().reads, record.reads,
-    'edited snapshots rebuild anchors and kinds from the simulated run');
-}
-const exhausted = structuredClone(record); exhausted.reads = [];
-assert.throws(() => Session.replay(data, live, exhausted), /Read 1 .*exhausted/);
-const leftover = structuredClone(record); leftover.reads[0].n++;
-assert.throws(() => Session.replay(data, live, leftover), /leftover read counts/);
-for (const change of [r => { r.reads[0].n = 0; }, r => { r.reads[0].ms = -1; },
-  r => { r.reads[0].j[0] = 2; }, r => { r.reads[0].at[3] = 0; }]) {
-  const invalid = structuredClone(record); change(invalid);
-  assert.throws(() => validateRecord(invalid, data), /Invalid recorded/);
-}
-const playback = Session.watch(data, live, record);
-for (let i = 0; i < 35; i++) playback.step();
-assert.ok(playback.remaining > 0);
-const position = [playback.frame, playback.entryIndex, playback.remaining, playback.readIndex];
-assert.deepEqual(playback.snapshot(), record);
-assert.deepEqual([playback.frame, playback.entryIndex, playback.remaining, playback.readIndex], position,
-  'downloading the resimulated journal does not move the viewer');
-const rewind = playback.restoreFrame(20);
-assert.ok(rewind.remaining > 0);
-while (!rewind.playbackDone) rewind.step();
-assert.deepEqual(checkpoint(rewind.state), record.checkpoint);
-const menu = new Session(data, live, { initial: { mode: 'menu' } });
-menu.gesture('keydown', 'Space');
-live.joy = { ...IDLE, fire: true };
-menu.read('v'); menu.read('t');
-assert.deepEqual(menu.record.reads.map(r => [r.k, r.n, r.at[0]]), [['v', 1, null], ['t', 1, null]],
-  'kind changes split identical joystick values and menu anchors have no room');
-assert.equal(menu.record.gestures[0][2], 1, 'gestures name their consuming read');
-menu.menu(); menu.read('t');
-assert.deepEqual(menu.record.reads.map(r => [r.k, r.n]), [['v', 1], ['t', 1], ['t', 1]],
-  'actions close a window even when the next read has the same kind and value');
-
 const { lines, state, ticks } = trace(data, name);
 const vice = join(ROOT, 'build', 'traces', `vice_${name}.txt`);
 if (existsSync(vice)) {

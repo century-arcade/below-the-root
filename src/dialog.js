@@ -149,8 +149,8 @@ export function* offer(state) {
 
 // time.md, The endings: the whole score
 function* win(state) {
-  state.stick?.closeWindow?.();
   state.progress.won = true;
+  state.progress.finishedAt = state.simticks;
   const day = state.clock.day;
   say(state, 'I AM RAAMO, THE SPIRIT GIFTED.',
     'YOU HAVE SAVED MY LIFE AND FULFILLED THE PROPHESY.  THE QUEST IS COMPLETE.  GREEN-SKY IS SAVED.');

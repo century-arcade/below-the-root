@@ -1,454 +1,369 @@
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { loadTestData } from './helpers.js';
-import { newState, startQuest, startDemo } from '../src/game.js';
-import { openMenu } from '../src/shell.js';
+import { loadTestData, J, menuReads, page } from './helpers.js';
+import { Session, Autosave, AUTOSAVE_KEY, checkpoint, validateRecord, discardObsoleteAutosaves } from '../src/record.js';
+import { newState, startQuest } from '../src/game.js';
+import { enterRoom } from '../src/world.js';
 import { exportSave, importSave } from '../src/save.js';
-import { neighbour, enterRoom, leaveByEdge } from '../src/world.js';
-import { IDLE, Keyboard, Gamepad } from '../src/input.js';
-import { facingCreature } from '../src/creatures.js';
-import { TICKS_PER_HOUR } from '../src/clock.js';
-import { Session, Autosave, AUTOSAVE_KEY, checkpoint, recoverAutosave, restoreRecordingHistory, clearAutosave, validateRecord } from '../src/record.js';
+import { Keyboard, Gamepad, IDLE } from '../src/input.js';
+import { CLASS } from '../src/data.js';
+import { playTime } from '../src/progress.js';
 
 const data = await loadTestData();
-const fresh = () => { const s = newState(data, { read: () => IDLE }); startQuest(s, data.characters[0]); return s; };
-const copy = x => JSON.parse(JSON.stringify(x));
-const s = fresh();
-const bytes = exportSave(s);
-const at = Object.fromEntries([...data.save.variables, ...data.save.zero_page].map(v => [v.name, v.offset]));
-for (const field of ['saved_room_hi', 'character', 'player_col', 'time_of_day', 'clock_period']) {
-  const bad = bytes.slice(); bad[at[field]] = 255;
-  const before = checkpoint(s);
-  assert.throws(() => importSave(s, bad));
-  assert.deepEqual(checkpoint(s), before, `${field} must fail atomically`);
-}
-const badHeader = bytes.slice(); badHeader[0] = 1;
-assert.throws(() => importSave(s, badHeader), /header/);
-openMenu(s); importSave(s, bytes);
-assert.equal(s.title, false); assert.equal(s.verb, null); assert.ok(s.active);
-const live = { read: () => IDLE }; s.stick = live;
-// Direct command controls preserve the journal and can resume an open menu after reload.
+const idle = { read: () => IDLE };
+const fresh = (live = idle, initial = { mode: 'quest', character: 0 }) => new Session(data, live, { initial, seed: 123 });
+const advance = (s, n) => { for (let i = 0; i < n; i++) { s.step(); s.state.events.length = 0; } };
+const roundtrip = s => {
+  const record = s.snapshot();
+  validateRecord(record, data);
+  const watched = Session.watch(data, idle, record);
+  while (!watched.playbackDone) { watched.step(); watched.state.events.length = 0; }
+  assert.deepEqual(checkpoint(watched.state), record.checkpoint);
+  assert.deepEqual(watched.snapshot(), record);
+  return watched;
+};
+const saveHere = s => { s.command('RENEW'); return roundtrip(s); };
+const imported = edit => {
+  const s = newState(data, idle); startQuest(s, data.characters[0]); edit(s);
+  const session = fresh(); session.load(exportSave(s)); return session;
+};
+
+// Imports validate atomically, preserving standalone C64 interoperability.
 {
-  const game = new Session(data, live, { initial: { mode: 'quest', character: 0 } });
-  assert.equal(game.commandMenu(true), false, 'no menu to dismiss');
-  assert.equal(game.commandMenu(), true);
-  assert.equal(game.commandMenu(), false, 'opening twice cannot reset the menu');
-  for (let i = 0; i < 12; i++) game.step();
-  const open = Session.replay(data, live, game.snapshot());
-  assert.equal(open.state.commandMenuOpen, true, 'reload restores the open menu');
-  assert.equal(open.commandMenu(true), true, 'restored menu can be dismissed');
-  const clock = copy(game.state.clock);
-  assert.equal(game.commandMenu(true), true);
-  assert.equal(game.state.verb, null);
-  assert.ok(game.state.panel.every(value => value === 0), 'dismissal clears menu text');
-  assert.deepEqual(game.state.clock, clock, 'dismissal does not advance time or choose a command');
-  for (let i = 0; i < 12; i++) game.step();
-  assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state));
-  const watch = Session.watch(data, live, game.snapshot());
-  assert.equal(watch.commandMenu(), false, 'live command controls do not alter playback');
-  game.menu();
-  assert.equal(game.commandMenu(), false, 'title menu has no command menu');
+  const s = fresh(); const bytes = exportSave(s.state);
+  for (const field of ['saved_room_hi', 'character', 'player_col', 'time_of_day', 'clock_period']) {
+    const bad = bytes.slice(); bad[data.saveLayout.at[field]] = 255;
+    const before = checkpoint(s.state), record = s.snapshot();
+    assert.throws(() => s.load(bad));
+    assert.deepEqual(checkpoint(s.state), before); assert.deepEqual(s.snapshot(), record);
+  }
+  const state = s.state;
+  s.load(bytes);
+  assert.equal(s.state, state, 'browser references survive import');
+  assert.equal(s.snapshot().initial.mode, 'import');
+  assert.equal(playTime(s.state), '>=00:00:00');
+  assert.deepEqual(exportSave(roundtrip(s).state), bytes);
 }
-startDemo(s, 'intro'); s.stall = 99; s.pointer = { col: 1, row: 1 };
-importSave(s, bytes);
-assert.equal(s.demo, null); assert.equal(s.input, live); assert.equal(s.stall, 0); assert.equal(s.pointer, null);
-const empty = neighbour(data, { x: 3, y: 10 }, 'east');
-enterRoom(s, empty, 10, 5);
-const freshData = await loadTestData();
-const other = newState(freshData, live); startQuest(other, freshData.characters[0]);
-importSave(other, exportSave(s));
-assert.equal(other.room.code, '4A'); assert.ok(other.room.blank);
-// Outdoors over a parked interior must also survive a reload.
-enterRoom(s, data.roomByCode.get('12'), 0, 5); s.player.indoors = false;
-leaveByEdge(s, 'west');
-assert.ok(s.room.blank);
-importSave(other, exportSave(s)); assert.ok(other.room.blank);
 
-const values = { joy: IDLE, read() { return this.joy; } };
-const session = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 123 });
-for (let i = 0; i < 1000; i++) {
-  values.joy = i < 90 ? { dx: 1, dy: 0, fire: false } : i < 95 ? { dx: 0, dy: 1, fire: true } : IDLE;
-  session.step(); session.state.events.length = 0;
-}
-const recorded = copy(session.snapshot());
-assert.ok(!('slots' in recorded));
-assert.ok(!('storageErrors' in recorded));
-assert.ok(!('disk' in recorded.checkpoint.shell));
-const legacy = copy(recorded);
-legacy.slots = { 1: recorded.c64 };
-legacy.storageErrors = [];
-legacy.checkpoint.shell.disk = { op: 0, slot: 0 };
-const legacyBefore = copy(legacy);
-const legacyRestored = Session.replay(freshData, values, legacy);
-assert.deepEqual(checkpoint(legacyRestored.state), recorded.checkpoint, 'obsolete slot fields do not invalidate replay');
-assert.deepEqual(legacy, legacyBefore, 'replay leaves the imported recording untouched');
-assert.ok(!('slots' in legacyRestored.snapshot()));
-assert.ok(!('storageErrors' in legacyRestored.snapshot()));
-assert.ok(!('disk' in legacyRestored.snapshot().checkpoint.shell));
-const legacyBroken = copy(legacy); legacyBroken.checkpoint.player.food++;
-assert.throws(() => Session.replay(freshData, values, legacyBroken), /does not replay/);
-const restored = Session.replay(freshData, values, recorded);
-assert.deepEqual(checkpoint(restored.state), checkpoint(session.state));
-for (let i = 0; i < 200; i++) { session.step(); restored.step(); }
-assert.deepEqual(checkpoint(restored.state), checkpoint(session.state), 'RNG and generator continuation survive restoration');
-// Direct file loads are recorded, including one made after the last completed frame.
-session.load(bytes);
-assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(session.snapshot())).state), checkpoint(session.state));
-const broken = copy(recorded); broken.checkpoint.player.col++;
-assert.throws(() => Session.replay(freshData, values, broken), /does not replay/);
-assert.throws(() => Session.replay(freshData, values, { ...recorded, engine: 'old' }), /version/);
-
-// Count transitions, including revisits, without counting menu/title annotations.
-const route = new Session(data, live, { initial: { mode: 'quest', room: data.roomByCode.get('16').room } });
-for (const code of ['26', '16']) {
-  const destination = new Session(data, live, { initial: { mode: 'quest', room: data.roomByCode.get(code).room } });
-  route.load(exportSave(destination.state));
-  route.step();
-}
-route.menu();
-const routeReplay = Session.watch(data, live, route.snapshot());
-assert.equal(routeReplay.roomChanges, 0, 'the initial room is not a jump');
-assert.equal(routeReplay.totalRoomChanges, 2, 'revisits count but title changes in the same room do not');
-while (!routeReplay.playbackDone) routeReplay.step();
-assert.equal(routeReplay.roomChanges, 2, 'the replayed count reaches the recorded total');
-
-// Recover progress across incompatible engines without trusting or replaying the journal.
-const original = JSON.stringify({ ...broken, engine: 'old' });
-const recoveryStore = new Map([[AUTOSAVE_KEY, original]]);
-const storage = { getItem: key => recoveryStore.get(key) ?? null, setItem: (key, value) => recoveryStore.set(key, value) };
-const recovered = recoverAutosave(freshData, values, original, storage, { seed: 77 });
-assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original);
-const expected = fresh(); importSave(expected, Uint8Array.from(atob(recorded.c64), c => c.charCodeAt(0)));
-assert.deepEqual(exportSave(recovered.state), exportSave(expected), 'quest progress comes from the saved checkpoint');
-const recoveredRecord = JSON.parse(recoveryStore.get(AUTOSAVE_KEY));
-assert.deepEqual(recoveredRecord.recoveredFrom, JSON.parse(original), 'recovery embeds the entire original journal');
-const recoveredReload = Session.replay(freshData, values, recoveredRecord);
-assert.deepEqual(recoveredReload.snapshot().recoveredFrom, JSON.parse(original), 'reload preserves earlier turns');
-assert.deepEqual(Session.watch(freshData, values, recoveredRecord).snapshot(), recoveredRecord,
-  'downloads during playback include earlier segments');
-assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state), 'the recovered save reloads exactly');
-values.joy = IDLE;
-for (let i = 0; i < 100; i++) { recovered.step(); recoveredReload.step(); }
-assert.deepEqual(checkpoint(recoveredReload.state), checkpoint(recovered.state));
-assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(recovered.snapshot())).state), checkpoint(recovered.state));
+// No-input starts and mid-room downloads retain the last coherent boundary.
 {
-  const nextOriginal = JSON.stringify({ ...recovered.snapshot(), engine: 'future-engine' });
-  const chainStore = new Map();
-  const chainStorage = { getItem: key => chainStore.get(key) ?? null, setItem: (key, value) => chainStore.set(key, value) };
-  const next = recoverAutosave(freshData, values, nextOriginal, chainStorage);
-  assert.deepEqual(next.snapshot().recoveredFrom, JSON.parse(nextOriginal), 'repeated recovery keeps every preceding segment');
-  const resumed = Session.replay(freshData, values, copy(next.snapshot()));
-  resumed.step();
-  assert.deepEqual(resumed.snapshot().recoveredFrom.recoveredFrom, JSON.parse(original));
+  const s = fresh(); const start = s.snapshot();
+  const writes = []; const autosave = new Autosave({ setItem: (k, v) => writes.push([k, JSON.parse(v)]) });
+  assert.equal(autosave.save(s).written, true);
+  advance(s, 800);
+  assert.equal(s.simticks, 800);
+  assert.deepEqual(s.snapshot(), start);
+  assert.equal(autosave.save(s, true).reason, 'unchanged');
+  assert.equal(roundtrip(s).simticks, 0);
+  s.command('RENEW');
+  assert.equal(autosave.save(s).written, true);
+  assert.equal(writes.length, 2);
+  assert.deepEqual(writes.at(-1)[1].checkpoint, checkpoint(s.state));
+  assert.equal(writes[0][0], AUTOSAVE_KEY);
+  const watch = roundtrip(s);
+  assert.equal(autosave.save(watch).reason, 'skipped');
+  s.command('RENEW'); roundtrip(s);
+  assert.equal(s.snapshot().endpoint.visit, 3, 'same room re-entry is a distinct visit');
 }
+
+// A long hold produces one event; a boundary never adds a duplicate sample.
 {
-  const oldDownload = copy(recoveredRecord);
-  delete oldDownload.recoveredFrom;
-  const migrated = Session.replay(freshData, values, oldDownload);
-  restoreRecordingHistory(migrated, storage);
-  assert.deepEqual(migrated.snapshot().recoveredFrom, JSON.parse(original), 'legacy recovery reattaches the matching backup');
-  const before = copy(migrated.snapshot());
-  restoreRecordingHistory(migrated, storage);
-  assert.deepEqual(migrated.snapshot(), before, 'reattaching history is idempotent');
-  const unrelated = new Session(freshData, values, { initial: { mode: 'menu' } });
-  unrelated.load(bytes);
-  restoreRecordingHistory(unrelated, storage);
-  assert.equal(unrelated.snapshot().recoveredFrom, undefined, 'unrelated checkpoints do not acquire another quest history');
-  const oldBackups = new Map([
-    [`${AUTOSAVE_KEY}.recovery`, original],
-    [`${AUTOSAVE_KEY}.recovery.1`, 'invalid JSON'],
-    [`${AUTOSAVE_KEY}.recovery.2`, JSON.stringify(oldDownload)],
-  ]);
-  const latest = new Session(freshData, values, { initial: { mode: 'menu' }, seed: 456 });
-  latest.load(Uint8Array.from(atob(oldDownload.c64), c => c.charCodeAt(0)));
-  restoreRecordingHistory(latest, { getItem: key => oldBackups.get(key) ?? null });
-  assert.deepEqual(latest.snapshot().recoveredFrom.recoveredFrom, JSON.parse(original),
-    'migration follows multiple checkpoint recoveries past unreadable backups');
-}
-recoverAutosave(freshData, values, JSON.stringify(broken), storage);
-assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery`), original, 'later recovery keeps earlier backups');
-assert.equal(recoveryStore.get(`${AUTOSAVE_KEY}.recovery.1`), JSON.stringify(broken));
-for (const c64 of [null, 'broken']) {
-  const before = [...recoveryStore];
-  assert.throws(() => recoverAutosave(freshData, values, JSON.stringify({ ...broken, c64 }), storage));
-  assert.deepEqual([...recoveryStore], before, 'invalid checkpoints leave storage untouched');
-}
-for (const failAt of [1, 2]) {
-  const saved = new Map([[AUTOSAVE_KEY, original]]);
-  let writes = 0;
-  assert.throws(() => recoverAutosave(freshData, values, original, {
-    getItem: key => saved.get(key) ?? null,
-    setItem: (key, value) => { if (++writes === failAt) throw new Error('quota'); saved.set(key, value); },
-  }), /quota/);
-  assert.equal(saved.get(AUTOSAVE_KEY), original, 'a failed backup or replacement preserves the autosave');
+  let joy = J.right;
+  const s = fresh({ read: () => joy }, { mode: 'quest', room: data.roomByCode.get('T4').room });
+  while (s.roomChanges < 1) advance(s, 1);
+  assert.equal(s.record.events.length, 1);
+  const record = s.snapshot();
+  assert.deepEqual(record.events[0].stick, [1, 0, 0]);
+  const watched = roundtrip(s);
+  assert.deepEqual(watched.lastJoy, J.right, 'endpoint stops even with input held');
+  advance(s, 40);
+  assert.deepEqual(s.record.events.filter(e => e.stick), record.events);
+  const resumed = Session.replay(data, { read: () => J.right, reset() { joy = IDLE; } }, record);
+  while (!resumed.record.events.at(-1).stick?.every(x => x === 0)) advance(resumed, 1);
+  assert.equal(record.events.length, 1, 'continuation cannot edit the preserved prefix');
+  assert.deepEqual(resumed.record.events.at(-1).stick, [0, 0, 0]);
+  saveHere(resumed);
 }
 
-// Reset deletes the autosave and every preserved copy, leaving options.
-const resetStore = new Map([
-  [AUTOSAVE_KEY, original], [`${AUTOSAVE_KEY}.recovery`, original],
-  [`${AUTOSAVE_KEY}.recovery.1`, JSON.stringify(broken)],
-  ['btr.muted', '1'],
-]);
-const resetStorage = { getItem: key => resetStore.get(key) ?? null, removeItem: key => resetStore.delete(key) };
-clearAutosave(resetStorage);
-assert.deepEqual([...resetStore], [['btr.muted', '1']]);
-clearAutosave(resetStorage);
-assert.equal(resetStore.size, 1, 'reset also works without an autosave');
-
-const chatty = new Session(data, values, { initial: { mode: 'quest', character: 0 }, seed: 3 });
-for (let i = 0; i < 600; i++) chatty.gesture('keydown', `k${i}`);
-assert.equal(chatty.record.gestures.length, 600, 'all gestures are retained');
-assert.deepEqual(chatty.record.gestures[0], [0, 'keydown', null, 'k0'], 'the earliest gestures survive');
-assert.deepEqual(chatty.record.gestures.at(-1), [0, 'keydown', null, 'k599'], 'the newest gestures are the ones kept');
-
-const store = new Map(); let writes = 0;
-const autosave = new Autosave({ setItem: (k, v) => { store.set(k, v); writes++; } });
-assert.deepEqual(autosave.save(session), { written: true });
-assert.deepEqual(autosave.save(session), { written: false, reason: 'unchanged' }); assert.equal(writes, 1);
-session.state.panel[0] = 65;
-assert.deepEqual(autosave.save(session), { written: true }); assert.equal(writes, 2);
-assert.ok(JSON.parse(store.get(AUTOSAVE_KEY)).reads.length > 0);
-const previous = store.get(AUTOSAVE_KEY);
-startDemo(session.state, 'intro');
-assert.deepEqual(autosave.save(session, true), { written: false, reason: 'skipped' }); assert.equal(store.get(AUTOSAVE_KEY), previous);
-let error = '';
-const failing = new Autosave({ setItem: () => { throw new Error('quota'); } }, text => { error = text; });
-assert.deepEqual(failing.save(restored), { written: false, reason: 'failed' }); assert.match(error, /quota/);
-// Restore a real shell generator waiting inside character selection.
-const menu = new Session(data, values, { initial: { mode: 'menu' }, seed: 2 });
-for (let i = 0; i < 50; i++) {
-  values.joy = i >= 8 && i < 16 ? { dx: 0, dy: 0, fire: true } : IDLE;
-  menu.step();
-}
-assert.ok(menu.state.verb);
-assert.deepEqual(checkpoint(Session.replay(freshData, values, copy(menu.snapshot())).state), checkpoint(menu.state));
-const dir = mkdtempSync(join(tmpdir(), 'btr-record-test-'));
-try {
-  const original = join(dir, 'original.json');
-  const edited = join(dir, 'edited.json');
-  const tool = fileURLToPath(new URL('../tools/playthrough.mjs', import.meta.url));
-  writeFileSync(original, JSON.stringify(recorded));
-  const before = readFileSync(original, 'utf8');
-  execFileSync(process.execPath, [tool, original, '--cut', '100:200', '--out', edited]);
-  assert.equal(readFileSync(original, 'utf8'), before);
-  assert.equal(JSON.parse(readFileSync(edited)).frames, recorded.frames - 100);
-  execFileSync(process.execPath, [tool, edited]);
-  assert.notEqual(spawnSync(process.execPath, [tool, original, '--cut', '100:200', '--out', edited]).status, 0);
-  assert.notEqual(spawnSync(process.execPath, [tool, original, '--expect-win']).status, 0);
-  const timed = new Session(data, { read: () => IDLE }, { initial: { mode: 'quest' } });
-  for (let i = 0; i < 300; i++) timed.step(i < 100 ? 10 : i < 200 ? 20 : 30);
-  const convertedFile = join(dir, 'converted.json');
-  const v1Fixture = fileURLToPath(new URL('fixtures/pomma-win.v1.json', import.meta.url));
-  const convertedReport = execFileSync(process.execPath, [tool, v1Fixture, '--convert', '--out', convertedFile], { encoding: 'utf8' });
-  assert.match(convertedReport, /Converted v1 play time: [\d.]+ -> [\d.]+ ms/);
-  const convertedFixture = JSON.parse(readFileSync(new URL('fixtures/pomma-win.json', import.meta.url)));
-  assert.deepEqual(JSON.parse(readFileSync(convertedFile)),
-    { ...convertedFixture, menuNavigationFrom: convertedFixture.frames });
-  const timedFile = join(dir, 'timed.json');
-  const timedCut = join(dir, 'timed-cut.json');
-  writeFileSync(timedFile, JSON.stringify({ ...timed.snapshot(), menuNavigationFrom: 150 }));
-  execFileSync(process.execPath, [tool, timedFile, '--cut', '50:250', '--out', timedCut]);
-  const cut = JSON.parse(readFileSync(timedCut));
-  assert.equal(cut.menuNavigationFrom, 50, 'a cut also moves the menu control transition');
-  assert.deepEqual(cut.reads.map(r => r.n), [6, 6], 'a cut splits the 37-read hold at both frame boundaries');
-  assert.equal(cut.checkpoint.stats.milliseconds, 5930 * (12 / 37),
-    'route cuts apportion window time by surviving read counts');
-  execFileSync(process.execPath, [tool, timedCut]);
-} finally { rmSync(dir, { recursive: true }); }
-console.log('session_test: atomic saves, mode reset, blank rooms, exact replay, generator continuation, full history, autosave and failure handling passed');
-
-{
-  const session = new Session(data, { read: () => IDLE, pace: 0 }, { initial: { mode: 'quest', character: 0 }, seed: 3 });
-  const s = session.state;
-  session.step();
-  assert.equal(s.tuneWait, null);
-  session.skipTune();
-  assert.deepEqual(session.record.actions, [], 'nothing to skip: nothing recorded');
-  // the timeout ending waits for its tune: a save three ticks short of day 52 gets there
-  const late = fresh();
-  Object.assign(late.clock, { day: 51, hour: 7, ticks: TICKS_PER_HOUR - 3 });
-  session.load(exportSave(late));
-  while (s.tuneWait == null) session.step();
-  s.events.length = 0;
-  session.step();
-  const before = s.stall;
-  session.skipTune();
-  assert.equal(s.stall, 0);
-  assert.equal(s.tuneWait, null);
-  assert.deepEqual(s.events, [{ music: null }], 'the speaker is told to stop');
-  assert.deepEqual(session.record.actions.map(a => a.type), ['load', 'skip']);
-  for (let i = 0; i < 5; i++) session.step();
-  assert.ok(s.verb, 'the ending text is waiting for the button');
-  const snapshot = session.snapshot();
-  validateRecord(snapshot, data);
-  assert.ok(before > 5, 'the tune outlasts the frames stepped: without the skip the replay would still be stalled');
-  const again = Session.replay(data, { read: () => IDLE, pace: 0 }, copy(snapshot), true);
-  assert.equal(again.state.stall, 0);
-  assert.equal(again.state.tick, s.tick);
-  console.log('ok    a waited tune is skipped by a recorded action that replays');
-}
-
-// Use the real menu and input adapters so the press starting PENSE primes the edge.
-for (const source of ['keyboard held', 'keyboard tap', 'mouse tap', 'mouse hold', 'gamepad held', 'classic']) {
+// Latched keyboard/gamepad taps are consumed once; unchanged neutral creates no event.
+for (const device of ['keyboard', 'gamepad']) {
   const keys = new Keyboard({ addEventListener() {} });
-  const pad = { connected: true, axes: [0, 0], buttons: [{ pressed: false }] };
-  const gamepad = new Gamepad(keys, { getGamepads: () => [pad] });
-  const session = new Session(data, keys, {
-    initial: { mode: 'quest', character: 3, room: data.roomByCode.get('U3').room }, seed: 1,
-  });
-  session.skippable = source !== 'classic';
-  const offsets = [];
-  session.onSkip = offset => offsets.push(offset);
-  const step = () => { gamepad.poll(); session.step(); session.state.events.length = 0; };
-  const frames = n => { for (let i = 0; i < n; i++) step(); };
-  const until = predicate => {
-    for (let i = 0; i < 2000; i++) { if (predicate()) return; step(); }
-    assert.fail(`${source}: input flow did not finish`);
-  };
-  const selected = () => String.fromCharCode(...session.state.panel.filter(c => c & 128).map(c => c & 127)).trim();
-  until(() => !session.state.player.fallen && !session.state.player.knockdown && facingCreature(session.state));
-  keys.press('down'); keys.press('fire');
-  until(() => session.state.verb);
-  keys.release('down'); keys.release('fire');
-  until(() => selected() === 'PAUSE');
-  keys.tap('down'); until(() => selected() === 'SPEAK');
-  until(() => session.lastJoy.dy === 0); // sample the release between menu presses
-  keys.tap('down'); until(() => selected() === 'PENSE');
-  if (source === 'mouse tap') keys.tap('fire');
-  else if (source === 'mouse hold') keys.press('fire', 'pointer');
-  else if (source === 'gamepad held') pad.buttons[0].pressed = true;
+  const s = fresh(keys);
+  if (device === 'keyboard') { keys.press('left'); keys.release('left'); }
   else {
-    keys.map({ key: ' ', code: 'Space' });
-    if (source === 'keyboard tap') keys.map({ key: ' ', code: 'Space' }, true);
+    const pad = { connected: true, axes: [-1, 0], buttons: [] };
+    const adapter = new Gamepad(keys, { getGamepads: () => [pad] });
+    adapter.poll(); pad.axes = [0, 0]; adapter.poll();
   }
-  until(() => session.state.tuneWait != null);
-  assert.equal(session.state.animalsPensed, 1);
-  const start = session.frame;
-  const duration = session.state.stall;
-  for (let i = 0; i < 30; i++) {
-    if (source === 'keyboard held') keys.map({ key: ' ', code: 'Space', repeat: true });
-    step();
-    assert.equal(session.state.stall, duration - i - 1, `${source}: reward plays through frame ${i + 1}`);
-    assert.deepEqual(session.record.actions, [], `${source}: the selecting press cannot skip`);
-  }
-  Session.replay(data, keys, copy(session.snapshot()));
-  keys.map({ key: ' ', code: 'Space' }, true);
-  keys.release('fire', 'pointer');
-  pad.buttons[0].pressed = false;
-  frames(2);
-  keys.tap('fire'); // a tap between frames must be consumed by the tune wait
-  step();
-  if (source === 'classic') {
-    assert.deepEqual(session.record.actions, []);
-    assert.ok(session.state.stall > 0);
-    frames(session.state.stall);
-    assert.equal(session.state.tuneWait, null);
-    assert.equal(keys.read().fire, false, 'classic also consumes taps during its wait');
-  } else {
-    assert.equal(session.state.tuneWait, null);
-    assert.equal(session.state.stall, 0);
-    assert.deepEqual(session.record.actions, [{ frame: start + 32, type: 'skip', read: session.record.actions[0].read }]);
-    const skipRead = session.record.reads.flatMap(r => Array(r.n).fill(r))[session.record.actions[0].read - 1];
-    assert.equal(skipRead.k, 't');
-    assert.equal(skipRead.j[2], 1, 'the skip action identifies its consuming tune press');
-    assert.deepEqual(offsets, [32]);
-    // Verify both the saved wait and continuation after the consumed skip tap.
-    const replay = Session.replay(data, keys, copy(session.snapshot()));
-    frames(30);
-    for (let i = 0; i < 30; i++) replay.step();
-    assert.deepEqual(checkpoint(replay.state), checkpoint(session.state));
-    assert.equal(session.record.actions.length, 1);
-  }
-  Session.replay(data, keys, copy(session.snapshot()));
-  console.log(`ok    ${source}: reward survives 30 frames, fresh press and replay agree`);
+  advance(s, 40);
+  assert.deepEqual(s.record.events.map(e => e.stick), [[-1, 0, 0], [0, 0, 0]]);
+  saveHere(s);
 }
 
+// Ordered commands can share a tick with each other and a joystick consumption.
 {
-  let joy = { ...IDLE, fire: true };
-  const session = new Session(data, { read: () => joy });
-  for (let i = 0; i < 30; i++) session.step();
-  assert.equal(session.state.demo.name, 'intro', 'startup press is consumed through Session');
-  joy = IDLE; session.step();
-  joy = { ...IDLE, fire: true }; session.step();
-  assert.equal(session.state.demo, null);
-  Session.replay(data, { read: () => IDLE }, copy(session.snapshot()));
+  const s = fresh({ read: () => J.left });
+  advance(s, 7); s.command('HEAL'); s.command('EXAMINE'); advance(s, 1);
+  assert.deepEqual(s.record.events.map(e => e.simticks), [7, 7, 7]);
+  saveHere(s);
 }
 
+// Neutral waits execute creatures, clock, RNG and movement at any playback pace.
 {
   let joy = IDLE;
-  const session = new Session(data, { read: () => joy }, { initial: { mode: 'quest' } });
-  const saved = fresh();
-  enterRoom(saved, data.roomById.get(1), 18, 14);
-  session.load(exportSave(saved));
-  joy = { ...IDLE, fire: true };
-  const rooms = [session.state.room.room];
-  for (let i = 0; i < 400; i++) {
-    session.step();
-    if (session.state.room.room !== rooms.at(-1)) rooms.push(session.state.room.room);
-  }
-  assert.deepEqual(rooms, [1, 9]);
-  joy = IDLE;
-  for (let i = 0; i < 20; i++) session.step();
-  joy = { ...IDLE, fire: true };
-  for (let i = 0; i < 400 && session.state.room.room === 9; i++) session.step();
-  assert.equal(session.state.room.room, 1);
-  Session.replay(data, { read: () => IDLE }, copy(session.snapshot()));
-  console.log('ok    demo end and doorway transit use Session press edges and replay');
+  const s = fresh({ read: () => joy }, { mode: 'quest', room: data.roomByCode.get('B8').room });
+  advance(s, 1000); joy = J.left; advance(s, 80); joy = IDLE; advance(s, 100);
+  s.command('RENEW');
+  const a = roundtrip(s), b = Session.watch(data, idle, s.snapshot());
+  while (!b.playbackDone) b.nextRoom();
+  assert.deepEqual(checkpoint(a.state), checkpoint(b.state));
+  assert.equal(playTime(a.state), playTime(b.state));
 }
 
+// UI choices produce stable object IDs and keep cursor travel out of the stream.
 {
-  const keys = new Keyboard({ addEventListener() {} });
-  const session = new Session(data, keys, { initial: { mode: 'menu' } });
-  keys.tap('fire');
-  assert.equal(session.read('v').press, true);
-  assert.equal(session.read('v').press, false);
-  assert.deepEqual(session.record.reads.map(i => [i.k, i.j[2]]), [['v', 1], ['v', 0]],
-    'a tap and release can be recorded in separate reads in the same frame');
-  const replay = new Session(data, keys, { record: session.snapshot() });
-  assert.equal(replay.read('v').press, true);
-  assert.equal(replay.read('v').press, false);
+  let queue = [];
+  const live = { read: () => queue.shift() ?? IDLE, reset() { queue = []; } };
+  const s = imported(state => {
+    state.objects.filter(o => o.class === CLASS.ELIXER).slice(0, 2).forEach(o => { o.exists = o.carried = true; });
+  });
+  s.live = live;
+  const item = s.state.objects.find(o => o.exists && o.carried && o.class === CLASS.ELIXER);
+  s.commandMenu(); queue.push(...menuReads('EAT'), ...page(0), IDLE, J.fire, IDLE);
+  for (let i = 0; i < 500 && s.state.verb; i++) s.step();
+  assert.equal(s.simticks, 0, 'selection and acknowledgements freeze gameplay');
+  assert.deepEqual(s.record.events.map(e => [e.command, e.item]), [['EAT', item.object]]);
+  assert.equal(s.state.progress.elixirs, 1);
+  assert.equal(s.state.objects.find(o => o.object === item.object).exists, false);
+  saveHere(s);
+  const cancel = fresh(live); cancel.commandMenu(); queue = [...menuReads('USE'), ...page(0)];
+  for (let i = 0; i < 500 && cancel.state.verb; i++) cancel.step();
+  assert.equal(cancel.record.events.length, 0, 'NOTHING cancels without a command');
+  cancel.command('HEAL');
+  assert.equal(cancel.record.events.at(-1).command, 'HEAL', 'a failed command remains recorded');
+  saveHere(cancel);
 }
 
-// Home is journaled so the menu and its resumable quest survive an immediate save.
-for (const initial of [{ mode: 'quest', character: 3 }, { mode: 'cold' }, { mode: 'demo', demo: 'quest' }]) {
-  let joy = IDLE;
-  const current = new Session(data, { read: () => joy }, { initial, seed: 123 });
-  for (let i = 0; i < 120; i++) current.step();
-  const before = checkpoint(current.state);
-  current.menu();
-  assert.equal(current.state.title, true);
-  assert.equal(current.state.demo, null);
-  assert.equal(current.state.stall, 0);
-  assert.equal(current.state.quest, before.quest);
-  assert.deepEqual(current.state.player, before.player);
-  assert.deepEqual(current.state.objects, before.objects);
-  const immediate = current.snapshot();
-  assert.deepEqual(checkpoint(Session.replay(data, { read: () => IDLE }, immediate).state), immediate.checkpoint);
-  for (let i = 0; i < 30; i++) current.step();
-  const settled = current.snapshot();
-  assert.deepEqual(checkpoint(Session.replay(data, { read: () => IDLE }, settled).state), settled.checkpoint);
-  if (before.quest) {
-    joy = { ...IDLE, dy: 1 };
-    for (let i = 0; i < 6; i++) current.step();
-    assert.equal(current.state.menuSel, 1);
-    joy = { ...IDLE, fire: true };
-    for (let i = 0; i < 6 && current.state.title; i++) current.step();
-    assert.equal(current.state.title, false);
-    assert.equal(current.state.active, true);
-    const after = checkpoint(current.state);
-    for (const field of ['room', 'screen', 'player', 'creature', 'objects', 'flags', 'clock', 'progress']) {
-      assert.deepEqual(after[field], before[field], `Home and CONTINUE preserve ${field}`);
-    }
-    const continued = current.snapshot();
-    const replay = Session.replay(data, { read: () => joy }, copy(continued));
-    assert.deepEqual(checkpoint(replay.state), continued.checkpoint);
-    joy = IDLE;
-    for (let i = 0; i < 120; i++) { current.step(); replay.step(); }
-    assert.deepEqual(checkpoint(replay.state), checkpoint(current.state));
-  }
+// REST has no duration arguments: a separately timed movement wakes it.
+{
+  const s = imported(state => {
+    const room = data.roomByCode.get('T1');
+    const tile = data.tiles.find(t => t?.role === 'nid_left').code;
+    const idx = room.screen.indexOf(tile);
+    enterRoom(state, room, idx % 40, Math.floor(idx / 40) + 1);
+    state.player.indoors = true;
+  });
+  let joy = IDLE; s.live = { read: () => joy };
+  s.command('REST');
+  assert.ok(s.state.resting);
+  const hour = s.state.clock.hour, rest = s.state.player.rest;
+  advance(s, 320);
+  assert.equal(s.state.clock.hour, hour + 2);
+  assert.equal(s.state.player.rest, Math.min(s.state.player.restCap, rest + 6));
+  joy = J.left; advance(s, 1);
+  assert.equal(s.state.resting, null);
+  assert.deepEqual(s.record.events[0], { simticks: 0, screen: 'T1', pos: s.record.events[0].pos, command: 'REST' });
+  assert.equal(s.record.events[1].simticks, 320);
+  assert.deepEqual(s.record.events[1].stick, [-1, 0, 0]);
+  saveHere(s);
 }
-console.log('session_test: Home preserves the quest, stops demos and replays through CONTINUE');
+
+// Bad files fail on a private quest with useful location diagnostics.
+{
+  const s = fresh({ read: () => J.left }); advance(s, 60); s.command('RENEW');
+  const original = s.snapshot();
+  for (const mutate of [r => r.version = 2, r => r.path = [], r => r.events[0].stick[0] = 2,
+    r => r.events[0].simticks = -1, r => r.events.reverse(), r => r.initial.character = 20,
+    r => r.endpoint.kind = 'arbitrary', r => r.events[0].item = 1]) {
+    const bad = structuredClone(original); mutate(bad); assert.throws(() => Session.watch(data, idle, bad));
+  }
+  const bad = structuredClone(original); bad.events[0].pos[0]++;
+  assert.throws(() => Session.replay(data, idle, bad), /Event 1, tick 7:.*expected T1.*actual tick 7 T1/);
+  const missed = structuredClone(original); missed.events[0].simticks++;
+  assert.throws(() => Session.replay(data, idle, missed), /Event 1, tick 8:.*consumption.*actual tick 9/);
+  assert.deepEqual(s.snapshot(), original);
+  const drift = structuredClone(original); drift.checkpoint.player.food++;
+  assert.throws(() => Session.replay(data, idle, drift), /Gameplay checkpoint mismatch/);
+}
+
+// Storage failures remain retryable, and obsolete keys are discarded selectively.
+{
+  const s = fresh(); let fails = true; const errors = [];
+  const autosave = new Autosave({ setItem() { if (fails) throw Error('quota'); } }, x => errors.push(x));
+  assert.equal(autosave.save(s).reason, 'failed'); fails = false;
+  assert.equal(autosave.save(s).written, true); assert.match(errors[0], /quota/);
+  const values = new Map([['btr.autosave.v1', 'old'], ['btr.autosave.v1.recovery.9', 'old'],
+    ['btr.autosave.v2', 'old'], ['btr.options', 'keep'], ['unrelated', 'keep'], [AUTOSAVE_KEY, 'new']]);
+  discardObsoleteAutosaves({ get length() { return values.size; }, key: i => [...values.keys()][i], removeItem: k => values.delete(k) });
+  assert.deepEqual([...values.keys()], ['btr.options', 'unrelated', AUTOSAVE_KEY]);
+}
+
+// Semantic KINIPORT keeps source/destination and the selected object's identity.
+{
+  const s = imported(state => { state.player.spiritLimit = state.player.spiritEnergy = 35; });
+  const before = s.state.player.spiritEnergy;
+  const { cell, isSupport, role } = await import('../src/world.js');
+  const destinations = [];
+  for (let row=3;row<19;row++) for(let col=1;col<38;col++) {
+    if (isSupport(s.state,cell(s.state,col,row+1)) && !['wall','bramble','object'].includes(role(s.state,cell(s.state,col,row)))) destinations.push([col,row]);
+  }
+  const destination = destinations.find(([col,row])=>col!==s.state.player.col && row!==s.state.player.row);
+  const source = [s.state.player.col,s.state.player.row];
+  s.command('KINIPORT',{source,destination});
+  assert.deepEqual([s.state.player.col,s.state.player.row],destination);
+  assert.equal(s.state.player.spiritEnergy,before-10);
+  saveHere(s);
+  const bad = imported(state=>{state.player.spiritLimit=state.player.spiritEnergy=35;});
+  const prior = checkpoint(bad.state);
+  assert.throws(()=>bad.command('KINIPORT',{source:[22,9],destination:[0,19]}));
+  assert.deepEqual(checkpoint(bad.state),prior);
+  assert.throws(()=>bad.command('HEAL',{item:1}),/Invalid command item/);
+}
+
+// REST host effects run once per completed hour, before a separately recorded wake.
+for(const [code,cls] of [['K0',CLASS.TOKEN],['H1',CLASS.SHUBA]]) {
+  const s=imported(state=>{
+    const room=data.roomByCode.get(code);
+    const tile=data.tiles.find(t=>t?.role==='nid_left').code;
+    const index=room.screen.indexOf(tile);
+    state.nidPlace={room:room.room,col:index%40,row:Math.floor(index/40)+1};
+    enterRoom(state,room,state.nidPlace.col,state.nidPlace.row);
+    state.player.indoors=true;
+    state.objects.filter(o=>o.class===cls&&o.exists).slice(0,2).forEach(o=>o.carried=true);
+  });
+  s.command('REST');assert.ok(s.state.resting);
+  advance(s,159);assert.equal(s.state.objects.filter(o=>o.exists&&o.carried&&o.class===cls).length,2);
+  advance(s,1);assert.equal(s.state.objects.filter(o=>o.exists&&o.carried&&o.class===cls).length,0);
+  advance(s,160);assert.equal(s.state.clock.hour,2);
+  s.live={read:()=>J.fire};advance(s,1);assert.equal(s.state.resting,null);
+  saveHere(s);
+}
+
+// Completion persists even without any room change, including timeout.
+{
+  const {TICKS_PER_HOUR}=await import('../src/clock.js');
+  const s=imported(state=>Object.assign(state.clock,{day:50,hour:7,ticks:TICKS_PER_HOUR-1}));
+  const visit=s.state.visit;advance(s,1);
+  assert.equal(s.snapshot().endpoint.kind,'complete');
+  assert.equal(s.state.visit,visit);
+  assert.equal(s.simticks,1);
+  roundtrip(s);
+}
+
+// Music selection and waiting consume no gameplay RNG or simulation time.
+{
+  const {startTune}=await import('../src/audio.js');
+  const a=fresh(),b=fresh();
+  a.state.presentationRng=()=>0;b.state.presentationRng=()=>.999;
+  startTune(a.state,'random');startTune(b.state,'random');
+  assert.notEqual(a.state.tuneWait,b.state.tuneWait);
+  advance(a,50);b.skipTune();
+  assert.equal(a.simticks,0);assert.equal(b.simticks,0);
+  a.skipTune();advance(a,300);advance(b,300);
+  assert.deepEqual(checkpoint(a.state),checkpoint(b.state));
+  saveHere(a);saveHere(b);
+}
+
+// Selecting the winning offer commits completion before any victory acknowledgement.
+{
+  const s=imported(state=>{
+    enterRoom(state,data.roomByCode.get('GE'),5,6);
+    state.objects.find(o=>o.class===CLASS.SHUBA&&o.exists).carried=true;
+  });
+  const c=s.state.creature;
+  Object.assign(s.state.player,{col:c.col+c.facing*2,row:c.row,facing:-c.facing});
+  s.load(exportSave(s.state));
+  let queue=[];s.live={read:()=>queue.shift()??IDLE,reset(){queue=[];}};
+  s.commandMenu();queue.push(...menuReads('OFFER'),...page(0));
+  for(let i=0;i<500&&!s.state.progress.won;i++)s.step();
+  assert.ok(s.state.progress.won);
+  assert.ok(s.state.verb,'victory messages are still waiting for acknowledgement');
+  assert.equal(s.snapshot().endpoint.kind,'complete');
+  const final=s.snapshot();
+  advance(s,100);
+  assert.deepEqual(s.snapshot(),final);
+  roundtrip(s);
+  let fire = false;
+  s.live = { read: () => ({ ...IDLE, fire: fire = !fire }) };
+  s.skippable = true;
+  for (let i = 0; i < 3000 && !s.state.title; i++) advance(s, 1);
+  assert.ok(s.state.title, 'acknowledging victory returns to the main menu');
+  assert.deepEqual(s.snapshot(), final, 'ending presentation preserves the completion save');
+}
+
+// A short fire tap while falling starts a glide and releases on the next update.
+// Live physics consumes the stick once per update, including glide entry;
+// the original scripted demos keep their separate read sequence.
+{
+  const {openAir}=await import('../src/world.js');
+  const s=imported(state=>{
+    enterRoom(state,openAir(data,4,10),10,1);state.player.indoors=false;
+    state.objects.find(o=>o.exists&&o.class===CLASS.SHUBA).carried=true;
+  });
+  const keys=new Keyboard({addEventListener(){}});s.live=keys;
+  advance(s,12);assert.equal(s.state.player.fallen,2);
+  keys.tap('fire');advance(s,20);
+  assert.ok(s.state.player.gliding);
+  assert.deepEqual(s.record.events.map(e=>e.stick),[[0,0,1],[0,0,0]]);
+  assert.equal(s.record.events[0].screen,'4A:air');
+  saveHere(s);
+}
+
+// A REST kidnap records the room boundary after all host and hour effects.
+{
+  const s=imported(state=>{
+    const room=data.roomByCode.get('T0');
+    const tile=data.tiles.find(t=>t?.role==='nid_left').code;
+    const index=room.screen.indexOf(tile);
+    state.nidPlace={room:room.room,col:index%40,row:Math.floor(index/40)+1};
+    enterRoom(state,room,state.nidPlace.col,state.nidPlace.row);state.player.indoors=true;
+  });
+  s.command('REST');advance(s,160);
+  assert.equal(s.state.room.code,'S0');
+  assert.equal(s.state.resting,null);
+  assert.equal(s.snapshot().endpoint.kind,'room');
+  assert.equal(s.state.clock.hour,1);
+  roundtrip(s);
+}
+
+// Object KINIPORT records identity even when the right half is selected.
+{
+  const s = imported(state => { state.player.spiritLimit = state.player.spiritEnergy = 25; });
+  const object = s.state.objects.find(o => o.exists && !o.carried && o.room === s.state.room.room);
+  const { cell, role, isSupport } = await import('../src/world.js');
+  let destination;
+  for (let row = 1; row < 19 && !destination; row++) for (let col = 0; col < 39; col++) {
+    if ([col, col + 1].every(x => !['wall', 'object'].includes(role(s.state, cell(s.state, x, row))))
+        && isSupport(s.state, cell(s.state, col, row + 1))) { destination = [col, row]; break; }
+  }
+  const source = [object.col + 1, object.row];
+  const before = checkpoint(s.state);
+  assert.throws(() => s.command('KINIPORT', { source, destination, item: object.object + 1 }), /object mismatch/);
+  assert.deepEqual(checkpoint(s.state), before);
+  s.command('KINIPORT', { source, destination, item: object.object });
+  assert.deepEqual([object.col, object.row], destination);
+  assert.equal(s.state.player.spiritEnergy, 20);
+  assert.deepEqual(s.record.events[0].source, source);
+  saveHere(s);
+}
+
+// File limits and unreachable endpoints fail without advancing the live quest.
+{
+  const { MAX_SIMTICKS, MAX_RECORD_BYTES } = await import('../src/record.js');
+  const s = fresh(); advance(s, 8); s.command('RENEW');
+  const original = s.snapshot();
+  for (const alter of [r => r.checkpoint.simticks = MAX_SIMTICKS + 1,
+    r => r.checkpoint.padding = 'x'.repeat(MAX_RECORD_BYTES),
+    r => r.events[0].duration = 100,
+    r => r.endpoint.visit++,
+    r => r.initial.character = null]) {
+    const bad = structuredClone(original); alter(bad);
+    assert.throws(() => Session.watch(data, idle, bad));
+  }
+  const unreachable = structuredClone(original);
+  unreachable.endpoint.visit++; unreachable.checkpoint.visit++;
+  unreachable.checkpoint.simticks += 16;
+  assert.throws(() => Session.replay(data, idle, unreachable), /endpoint unreachable/);
+  assert.deepEqual(s.snapshot(), original);
+}
+
+console.log('session_test: quest events, semantic choices, REST, boundaries, input handoff, validation and storage passed');

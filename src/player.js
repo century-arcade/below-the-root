@@ -101,7 +101,7 @@ function fireHeld(state, s, input) {
   const p = state.player;
   const supported = isSupport(state, s.floor);
   if (p.fallen >= 2 && !supported && !p.glideInhibited) {
-    if (tryGlide(state, s)) return glideStep(state, s);
+    if (tryGlide(state, s)) return glideStep(state, s, state.demo ? undefined : input);
     return fireFree(state, s, input);
   }
   if (input.dx !== 0 && !supported) return fireFree(state, s, input);
@@ -126,7 +126,7 @@ function fireHeld(state, s, input) {
 
 function fireFree(state, s, input) {
   const p = state.player;
-  if (input.dx !== 0 && tryGlide(state, s)) return glideStep(state, s);
+  if (input.dx !== 0 && tryGlide(state, s)) return glideStep(state, s, state.demo ? undefined : input);
   if (!isSupport(state, s.floor)) {
     p.row += 1;
     p.period = 4;
@@ -245,14 +245,14 @@ function tryGlide(state, s) {
   return true;
 }
 
-function glideStep(state, s) {
+function glideStep(state, s, consumed) {
   const p = state.player;
   if (isSolid(state, s.own)) {
     p.row -= 1;
     return endGlide(state);
   }
   if (isSolid(state, s.floor)) return endGlide(state);
-  const input = state.input.read('g');
+  const input = consumed || state.input.read('g');
   if (input.dx !== 0 && input.dx !== p.facing) {
     p.facing = input.dx;
     sfx(state, SFX.glideTurn);

@@ -221,7 +221,7 @@ test('a blesser adds 5, announces the skill and shows a vision', (s) => {
 for (const reward of ['spirit', 'fifth animal']) {
   for (const limit of [25, 35, 40]) {
     for (const exhausted of [false, true]) test(`${reward} at limit ${limit}, visions exhausted: ${exhausted}`, (s) => {
-      s.rng = () => (data.music.random_pool.indexOf(3) + 0.5) / data.music.random_pool.length;
+      s.presentationRng = () => (data.music.random_pool.indexOf(3) + 0.5) / data.music.random_pool.length;
       s.visions = exhausted ? data.quest.visions.length : 0;
       let gen;
       if (reward === 'spirit') {

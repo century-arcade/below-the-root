@@ -52,8 +52,8 @@ const cookie = await sessionCookie();
 const info = await handler(req('session', { Cookie: cookie }));
 assert.deepEqual(await info.json(), { configured: true, login: 'tester' });
 const headers = { Cookie: cookie, Origin: origin, 'Content-Type': 'application/json' };
-const recording = JSON.stringify({ frames: 5, checkpoint: { room: 'P2' }, inputs: [[0, 1, 0, false]] });
-const report = { message: 'Door failed\nI tapped it.', context: '{"room":"P2"}', recording, meta: { frame: 5, room: 'P2' } };
+const recording = JSON.stringify({ version: 3, checkpoint: { room: 'P2', simticks: 5 }, events: [] });
+const report = { message: 'Door failed\nI tapped it.', context: '{"room":"P2"}', recording, meta: { simticks: 5, room: 'P2' } };
 const body = JSON.stringify(report);
 const post = (changes = {}) => handler(req('issue', headers, JSON.stringify({ ...report, ...changes })));
 assert.equal((await handler(req('issue', { ...headers, Origin: 'https://other.example' }, body))).status, 403);
@@ -71,7 +71,7 @@ assert.deepEqual(await result.json(), { url: issue.html_url, number: 123, gist: 
 assert.equal(calls.length, 2);
 assert.equal(calls[0].url, 'https://api.github.com/gists');
 assert.deepEqual(JSON.parse(calls[0].options.body), {
-  public: false, description: 'below-the-root playthrough, frame 5, room P2',
+  public: false, description: 'below-the-root playthrough, tick 5, room P2',
   files: { 'btr-playthrough-5.json': { content: recording } },
 });
 const stateBlock = '<details><summary>State at filing</summary>\n\n```json\n' + report.context + '\n```\n</details>';
@@ -80,10 +80,10 @@ assert.deepEqual(JSON.parse(calls[1].options.body), { title: 'Door failed',
 // Recordings also provide metadata when a client omits the optional meta object.
 calls = [];
 assert.equal((await post({ meta: undefined })).status, 200);
-assert.equal(JSON.parse(calls[0].options.body).description, 'below-the-root playthrough, frame 5, room P2');
+assert.equal(JSON.parse(calls[0].options.body).description, 'below-the-root playthrough, tick 5, room P2');
 // The recording cap counts UTF-8 bytes, independently of JSON escaping overhead.
 const maxBytes = 4 * 1024 * 1024;
-const largeRecording = JSON.stringify({ frames: 5, checkpoint: { room: 'P2' }, padding: '' });
+const largeRecording = JSON.stringify({ checkpoint: { room: 'P2', simticks: 5 }, padding: '' });
 const atLimit = largeRecording.replace('"padding":""', '"padding":"' + 'é'.repeat(Math.floor((maxBytes - Buffer.byteLength(largeRecording)) / 2)) + '"');
 const exactLimit = atLimit + ' '.repeat(maxBytes - Buffer.byteLength(atLimit));
 assert.equal(Buffer.byteLength(exactLimit), maxBytes);

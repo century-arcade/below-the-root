@@ -17,6 +17,8 @@ while playing; press Ctrl+C there to stop. Use --port 8888 if port 8000 is busy,
 or --no-browser to open the address yourself. Use the same address and port each
 time to return to your browser's autosave. Saves are stored in that browser,
 not in this ZIP; debug tools can export/import a playthrough recording.
+Autosaves and downloads end at quest start, room entry, or completion. Reloading
+mid-room returns to the last boundary. Old browser recording formats are unsupported.
 
 Opening site/index.html directly with file:// will not work: the game loads
 JavaScript modules and JSON over HTTP. The included server listens only on your
@@ -48,6 +50,12 @@ See source/README.md for development and source/docs/tooling.md for rebuilding
 the original-game analysis. To rebuild the browser site, run make build in
 source/ (requires Make, Node.js, and npm; installing Marked may need internet).
 For tools that expect source/iso/, copy the preserved iso/ directory there.
+The fresh quest fixtures and their provenance are in source/test/fixtures/.
+From source/, verify the completed normal quest with:
+
+    node tools/playthrough.mjs test/fixtures/herd-win.json --expect-win
+
+Reproduce both fixtures from live controls with node tools/record-fixtures.mjs.
 
 The original game and materials retain their original copyrights and notices;
 see iso/LEGAL and iso/readme.txt. Cinzel's SIL Open Font License is included in

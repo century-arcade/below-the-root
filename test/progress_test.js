@@ -58,35 +58,15 @@ for (const character of data.characters) {
 const session = new Session(data, live, { initial: { mode: 'quest', character: 3 } });
 const s = session.state;
 assert.equal(completion(s), 0, 'starting spirit is not earned progress');
-for (let i = 0; i < 7; i++) session.step(0);
-session.step(200);
-session.step(125);
-assert.equal(s.progress.milliseconds, 0, 'an open read window does not advance the displayed timer');
-s.stall = 10;
-session.step(75);
-session.snapshot();
-assert.equal(s.progress.milliseconds, 400, 'closing a window accrues unpaused time, including waits');
-const beforePause = s.progress.milliseconds;
-// Browser pause omits steps entirely; snapshots must not advance the clock.
+for (let i = 0; i < 60; i++) session.step();
+assert.equal(playTime(s), '00:00:01');
+session.commandMenu();
+for (let i = 0; i < 100; i++) session.step();
+assert.equal(playTime(s), '00:00:01', 'menu waits do not count');
+session.commandMenu(true);
+const beforePause = s.simticks;
 session.snapshot(); session.snapshot();
-assert.equal(s.progress.milliseconds, beforePause);
-// Use a separate valid journal to exercise timing restore and continuation.
-const timed = new Session(data, live, { initial: { mode: 'quest' } });
-for (let i = 0; i < 7; i++) timed.step(0);
-for (const ms of [20, 20, 80, 1000, 10]) timed.step(ms);
-const restored = Session.replay(data, live, timed.snapshot());
-assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
-const watched = Session.watch(data, live, timed.snapshot());
-assert.equal(watched.playbackDelay, 1000 / 60, 'recorded duration does not delay visible playback');
-for (let i = 0; i < timed.frame; i++) watched.step();
-assert.equal(watched.playbackDelay, 0, 'EOF verification needs no extra delay');
-watched.step();
-assert.ok(watched.playbackDone);
-assert.deepEqual(checkpoint(watched.state), checkpoint(timed.state));
-timed.step(50); restored.step(50);
-assert.deepEqual(checkpoint(restored.state), checkpoint(timed.state));
-const invalid = timed.snapshot(); invalid.reads[0].ms = -1;
-assert.throws(() => validateRecord(invalid, data), /timing/);
+assert.equal(s.simticks, beforePause);
 
 gainSpirit(s, 5).next();
 assert.equal(completion(s), 5);
@@ -123,11 +103,11 @@ for (const cls of [CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY]) acquir
 s.progress.won = true;
 for (const token of tokens) acquired(s, token);
 assert.equal(completion(s), 100, 'all milestones total exactly 100%');
-session.step(999);
-assert.equal(s.progress.milliseconds, beforePause, 'victory freezes the timer');
-for (const [milliseconds, display] of [[0, '00:00:00'], [1826999, '00:30:26'],
-  [3600000, '01:00:00'], [360000000, '100:00:00'], [3723000, '01:02:03']]) {
-  s.progress.milliseconds = milliseconds;
+session.step();
+assert.equal(s.simticks, beforePause, 'victory freezes the timer');
+for (const [simticks, display] of [[0, '00:00:00'], [109619, '00:30:26'],
+  [216000, '01:00:00'], [21600000, '100:00:00'], [223380, '01:02:03']]) {
+  s.simticks = simticks;
   assert.equal(playTime(s), display);
   assert.ok(statusRows(s).includes(`PLAY TIME ${display}`));
 }
@@ -137,7 +117,7 @@ const statusMenu = runMenu(s);
 statusMenu.next();
 for (const input of menuReads('STATUS')) statusMenu.next(input);
 assert.ok(statusRows(s).includes('01:02:03 PLAY / 65% COMPLETE'));
-s.progress.milliseconds += 1000;
+s.simticks += 60;
 assert.ok(statusRows(s, { classic: true }).includes('01:02:04 PLAY / 65% COMPLETE'));
 clearPanel(s);
 assert.deepEqual(statusRows(s, { classic: true }), [], 'leaving STATUS clears its details');
@@ -148,9 +128,9 @@ startQuest(s, data.characters[0]);
 assert.equal(completion(s), 0);
 assert.equal(s.progress.wand, false, 'a new quest resets the wand milestone');
 assert.deepEqual(s.progress.tokens, [], 'a new quest resets token collection');
-assert.equal(s.progress.milliseconds, 0);
-startDemo(s, 'intro'); session.step(100);
-assert.equal(s.progress.milliseconds, 0, 'attract demos do not count');
+assert.equal(s.simticks, 0);
+startDemo(s, 'intro'); session.step();
+assert.equal(s.simticks, 0, 'attract demos do not count');
 
 const loaded = newState(data, live);
 startQuest(loaded, data.characters[0]);

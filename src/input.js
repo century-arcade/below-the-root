@@ -10,7 +10,7 @@ export function isIdle(j) {
   return j.dx === 0 && j.dy === 0 && !j.fire;
 }
 
-// One edge per read stream; journals and device adapters keep level samples.
+// One edge per read stream; sessions and device adapters keep level samples.
 export function pressEdge(read, last = IDLE) {
   return () => {
     const joy = read();
@@ -282,12 +282,17 @@ export class Gamepad {
     const pad = this.pad();
     if (!pad) { this.cancel(); return; }
     const keys = this.wanted(pad);
+    if (this.blocked) {
+      if (!keys.size) this.blocked = false;
+      return;
+    }
     for (const key of this.held) if (!keys.has(key)) this.keys.release(key, 'gamepad');
     for (const key of keys) if (!this.held.has(key)) this.keys.press(key, 'gamepad');
     this.held = keys;
   }
 
-  cancel() {
+  cancel(untilRelease = false) {
+    this.blocked ||= untilRelease;
     this.held.clear();
     this.keys.reset('gamepad');
   }

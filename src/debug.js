@@ -6,7 +6,7 @@ const API = '/.netlify/functions/github';
 const DRAFT_KEY = 'btr.issue-draft';
 
 export function downloadRecord(session) {
-  downloadRecordingText(JSON.stringify(session.snapshot()), `btr-playthrough-${session.frame}.json`);
+  downloadRecordingText(JSON.stringify(session.snapshot()), `btr-playthrough-${session.simticks}.json`);
 }
 
 export function downloadRecordingText(text, filename) {
@@ -21,7 +21,7 @@ export function downloadRecordingText(text, filename) {
 
 export function formatIssueDetails(details) {
   return '{\n' + Object.entries(details).filter(([, value]) => value !== undefined).map(([key, value]) => {
-    const json = ['recentPath', 'recentReads'].includes(key) && value.length
+    const json = ['recentPath', 'recentEvents'].includes(key) && value.length
       ? '[\n' + value.map(entry => '    ' + JSON.stringify(entry)).join(',\n') + '\n  ]'
       : JSON.stringify(value, null, 2).replace(/\n/g, '\n  ');
     return `  ${JSON.stringify(key)}: ${json}`;
@@ -31,9 +31,9 @@ export function formatIssueDetails(details) {
 export function issueContext(session) {
   const record = session.record;
   const s = session.state;
-  const details = { engine: ENGINE_VERSION, frame: session.frame, room: s.room?.code,
+  const details = { engine: ENGINE_VERSION, simticks: session.simticks, room: s.room?.code,
     player: s.player, clock: s.clock, panel: panelLines(s),
-    recentPath: record.path.slice(-30), recentReads: record.reads.slice(-50) };
+    recentPath: session.path.slice(-30), recentEvents: record?.events.slice(-50) ?? [] };
   return formatIssueDetails(details);
 }
 
@@ -50,7 +50,9 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   let authenticated = false;
   let context = '';
 
-  document.getElementById('download-record').onclick = downloadRecording;
+  document.getElementById('download-record').onclick = () => {
+    try { downloadRecording(); } catch (err) { log(err.message); }
+  };
   const recordFile = document.getElementById('record-file');
   document.getElementById('load-record').onclick = () => recordFile.click();
   recordFile.onchange = async e => {
@@ -101,7 +103,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
       const recording = session.snapshot();
       const response = await fetch(`${API}?op=issue`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: message.value, context, recording: JSON.stringify(recording),
-          meta: { frame: recording.frames, room: recording.checkpoint.room } }) });
+          meta: { simticks: recording.checkpoint.simticks, room: recording.checkpoint.room } }) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || 'Could not file the issue.');
       if (!/^https:\/\/github\.com\/century-arcade\/below-the-root\/issues\/\d+$/.test(body.url)) throw new Error('Unexpected issue response');

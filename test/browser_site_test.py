@@ -49,24 +49,24 @@ with sync_playwright() as p:
             expect(page.locator('#screen')).to_be_focused()
         page.keyboard.press('ArrowRight')
         page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
-        before = page.evaluate("localStorage.getItem('btr.autosave.v1')")
+        before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
         assert before, 'Leaving Play saves the quest'
         for name in ['About', 'Links']:
             page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
             expect(page.locator('#screen')).to_have_count(0)
             for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
                 page.keyboard.press(key)
-            assert page.evaluate("localStorage.getItem('btr.autosave.v1')") == before
+            assert page.evaluate("localStorage.getItem('btr.autosave.v3')") == before
         page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).focus()
         page.keyboard.press('Enter')
         expect(page).to_have_url(BASE + '/')
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
         expect(page.locator('#screen')).to_be_focused()
         page.evaluate("dispatchEvent(new Event('pagehide'))")
-        restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+        restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3'))")
         saved = json.loads(before)
         assert restored['initial'] == saved['initial'], 'Play restores the previous session'
-        assert restored['reads'][:len(saved['reads'])] == saved['reads']
+        assert restored['events'][:len(saved['events'])] == saved['events']
         page.goto(BASE + '/')
         expect(page).to_have_url(BASE + '/')
         # Explicit pages take precedence over an autosave and game parameters.

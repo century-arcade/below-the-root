@@ -27,7 +27,7 @@ export function pickTune(music, want, rng) {
 // The game waits for every tune it starts itself; the session still reads for a skip.
 export function startTune(state, want, wait = true) {
   const music = state.data.music;
-  const tune = pickTune(music, want, state.rng);
+  const tune = pickTune(music, want, state.presentationRng || Math.random);
   state.events.push({ music: tune });
   if (!wait) return;
   state.stall += music.tunes[tune].frames;

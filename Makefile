@@ -53,6 +53,7 @@ test:
 	node test/session_test.js
 	node test/rewind_test.js
 	node test/progress_test.js
+	node tools/record-fixtures.mjs --check
 	node test/win_replay_test.js
 	node test/github_test.mjs
 	node test/replay_test.js intro

@@ -31,25 +31,7 @@ assert.equal(selected(game.state), 'BUY', 'up navigates back');
 hold(game, J.left);
 assert.equal(selected(game.state), 'SPEAK', 'left navigates back');
 assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state),
-  'new menu controls replay and restore the selected command');
-
-// Old recordings keep their original input interpretation until play resumes.
-const old = new Session(data, live, { initial: { mode: 'quest' } });
-delete old.record.menuNavigationFrom;
-old.commandMenu();
-hold(old, J.idle);
-hold(old, J.right);
-assert.equal(selected(old.state), 'STATUS');
-const restored = Session.replay(data, live, old.snapshot());
-assert.equal(selected(restored.state), 'STATUS', 'old held directions still replay');
-hold(restored, J.idle);
-hold(restored, J.left);
-assert.equal(selected(restored.state), 'EXAMINE', 'continued play uses one move per press');
-assert.deepEqual(checkpoint(Session.replay(data, live, restored.snapshot()).state), checkpoint(restored.state),
-  'the transition to new controls survives another reload');
-const invalid = restored.snapshot();
-invalid.menuNavigationFrom = invalid.frames + 1;
-assert.throws(() => validateRecord(invalid, data), /menu navigation boundary/);
+  'menu navigation leaves the saved quest unchanged');
 
 for (const options of [{}, { perClass: true }, { accept: o => o.class !== CLASS.TOKEN }, { noFire: true }]) {
   const state = newState(data, null);
@@ -76,4 +58,4 @@ for (const options of [{}, { perClass: true }, { accept: o => o.class !== CLASS.
     assert.deepEqual(gen.next(J.fire), { value: bread, done: true }, 'fire chooses the displayed item');
   }
 }
-console.log('menu_test: single-press navigation, bidirectional item choices and recording compatibility passed');
+console.log('menu_test: single-press navigation, bidirectional item choices and presentation isolation passed');

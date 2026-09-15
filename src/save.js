@@ -147,7 +147,7 @@ export function importSave(state, bytes) {
   const dream = get('dream_state');
   const wraps = data.quest.clock.prescaler_wraps_per_time_slot;
   Object.assign(draft, {
-    player: p,
+    player: p, simticks: 0, visit: 0, resting: null,
     character: character.id,
     nidPlace: { room: nidId, col: get('nid_col'), row: get('nid_row') },
     clock: {

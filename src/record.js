@@ -1,22 +1,26 @@
-// A versioned journal re-creates generator state by replaying the same ticks and input reads.
-// C64 saves remain interoperable checkpoints; this is the richer browser save format.
+// One quest: effective input changes, semantic commands, and a verified boundary.
 import { newState, startQuest, startDemo, endDemo, tick, canOpenCommandMenu, openCommandMenu, closeCommandMenu } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
 import { enterRoom } from './world.js';
 import { IDLE, isIdle } from './input.js';
-import { exportSave, importSave, toBase64, fromBase64 } from './save.js';
+import { importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
-import { panelLines, print, PANEL_ROW, PANEL_COLS } from './panel.js';
-import { playTime } from './progress.js';
-import { CLASS } from './data.js';
+import { COMMANDS, commandDraft, executeCommand } from './verbs.js';
 
-export const RECORD_VERSION = 2;
-export const ENGINE_VERSION = 'btr-session-5';
-export const AUTOSAVE_KEY = 'btr.autosave.v1';
-const MAX_FRAMES = 60 * 60 * 60 * 24;
+export const RECORD_VERSION = 3;
+export const ENGINE_VERSION = 'btr-quest-1';
+export const AUTOSAVE_KEY = 'btr.autosave.v3';
+export const MAX_SIMTICKS = 60 * 60 * 60 * 24;
+export const MAX_RECORD_BYTES = 5 * 1024 * 1024;
+const MAX_WORK = MAX_SIMTICKS + 100000;
 const copy = value => JSON.parse(JSON.stringify(value));
-const roomKey = entry => `${entry.room ?? null}:${!!entry.blank}`;
-const same = (a, b) => a.dx === b.dx && a.dy === b.dy && a.fire === b.fire;
+const same = (a, b) => a.dx === b.dx && a.dy === b.dy && !!a.fire === !!b.fire;
+function equal(a, b) {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(k => Object.hasOwn(b, k) && equal(a[k], b[k]));
+}
 
 function random(seed) {
   let n = seed >>> 0;
@@ -27,647 +31,416 @@ function random(seed) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
   rng.snapshot = () => n;
+  rng.clone = () => random(n);
   return rng;
 }
 
+// Rendering invalidation only; never a persistence boundary.
 export function screenKey(s) {
-  // screen changes: room edits and text/menu changes, excluding figure and water animation
-  return `${s.room?.room}:${!!s.room?.blank}:${s.title}:${s.quest}:`
-    + Array.from(s.panel).join(',') + ':' + (s.screen ? Array.from(s.screen).join(',') : '');
+  return `${s.room?.code}:${!!s.room?.blank}:${s.title}:${s.quest}:`
+    + Array.from(s.panel).join(',') + ':' + Array.from(s.screen || []).join(',');
 }
 
 export function checkpoint(s) {
-  return {
-    room: s.room?.code ?? null, blank: !!s.room?.blank, title: s.title, quest: s.quest,
-    player: copy(s.player), clock: copy(s.clock), screen: Array.from(s.screen || []),
-    panel: Array.from(s.panel), objects: copy(s.objects), flags: copy(s.flags),
-    creature: s.creature ? copy(s.creature) : null,
-    shell: { character: s.character, nidPlace: s.nidPlace, cursor: s.pointer,
-      demo: s.demo?.name || null, sample: s.sample, attract: s.attract,
-      menuSel: s.menuSel, stop: s.stop,
-      restDelayCut: s.restDelayCut },
-    progress: [s.fallaKey, s.berriesOffered, s.visions, s.animalsPensed, s.dream, s.lamp, s.offered, s.paid],
-    timing: [s.tick, s.stall, s.verbWait, s.active, s.ended, s.timeUp, !!s.verb],
-    stats: copy(s.progress),
-  };
+  return copy({
+    simticks: s.simticks, visit: s.visit, room: s.room?.code ?? null, blank: !!s.room?.blank,
+    player: s.player, clock: s.clock, screen: Array.from(s.screen || []),
+    objects: s.objects, flags: s.flags, creature: s.creature, character: s.character,
+    nidPlace: s.nidPlace, fallaKey: s.fallaKey, berriesOffered: s.berriesOffered,
+    visions: s.visions, animalsPensed: s.animalsPensed, dream: s.dream,
+    lamp: s.lamp, offered: s.offered, paid: s.paid, resting: s.resting,
+    timeUp: s.timeUp || s.ended === 'timeout', progress: s.progress, rng: s.rng.snapshot?.(),
+  });
 }
 
 export class Session {
   constructor(data, live, { initial = { mode: 'cold' }, seed = 1, record = null } = {}) {
     this.live = live;
-    this.frame = 0;
+    this.seed = seed = record?.seed ?? seed;
     this.playback = !!record;
     this.sourceRecord = record ? copy(record) : null;
-    this.verify = true;
-    this.readIndex = 0;
-    this.actionIndex = 0;
-    this.gestureIndex = 0;
-    this.entryIndex = 0;
-    this.remaining = 0;
-    this.elapsed = 0;
-    this.window = null;
     this.playbackDone = false;
+    this.frame = 0; // presentation/debug counter, never serialized
+    this.work = 0;
+    this.eventIndex = 0;
     this.lastJoy = IDLE;
-    this.skippable = false;
-    this.record = record ? copy(record) : {
-      format: 'below-the-root-record', version: RECORD_VERSION, engine: ENGINE_VERSION,
-      created: new Date().toISOString(), seed, initial, frames: 0,
-      menuNavigationFrom: 0,
-      reads: [], actions: [], path: [], gestures: [], outcomes: [],
-    };
-    // Discard obsolete slot fields when continuing an older recording.
-    delete this.record.slots;
-    delete this.record.storageErrors;
-    // Cold start swallows a held startup button until the first released sample.
-    this.previousFire = this.record.initial.mode === 'cold';
-    // Replay derives a new journal, including anchors, from the simulated reads.
-    if (record) { this.record.reads = []; this.record.path = []; this.record.outcomes = []; }
-    const stick = { pace: 5, read: kind => this.read(kind), closeWindow: () => this.closeWindow() };
-    this.state = newState(data, stick, { rng: random(this.record.seed) });
+    this.previousFire = false;
+    this.uiFire = true;
+    this.resetPending = false;
+    this.history = [];
+    this.path = [];
+    this.record = null;
+    this.boundary = null;
+    const stick = { pace: 5, read: kind => this.read(kind) };
+    this.state = newState(data, stick, { rng: random(seed) });
     this.state.stick = stick;
-    const start = this.record.initial;
+    this.state.commands = {
+      execute: (name, choices, options) => this.command(name, choices, options),
+      handoff: () => this.handoff(),
+    };
+    const start = record?.initial ?? initial;
     if (start.mode === 'quest') {
-      startQuest(this.state, data.characters[start.character || 0]);
+      startQuest(this.state, data.characters[start.character ?? 0]);
       if (start.room != null) enterRoom(this.state, data.roomById.get(start.room), this.state.player.col, this.state.player.row);
+      this.begin(start);
+    } else if (start.mode === 'import') {
+      importSave(this.state, fromBase64(start.state));
+      if (!this.state.quest) throw new Error('Imported save has no active quest');
+      this.begin(start);
     } else if (start.mode === 'menu') openMenu(this.state);
     else if (start.mode === 'demo') startDemo(this.state, start.demo);
     else coldStart(this.state);
-    this.roomChanges = 0;
-    this.lastRoom = null;
-    this.noteRoom();
-    this.history = [];
-    this.cacheBoundary();
+    this.totalRoomChanges = record ? record.checkpoint.visit - this.startVisit : null;
+    if (record) this.checkEndpoint();
   }
 
-  place() {
+  begin(initial) {
     const s = this.state;
-    return [s.title ? null : s.room?.code ?? null, s.player.col, s.player.row, s.player.facing];
+    this.record = { format: 'below-the-root-record', version: RECORD_VERSION, engine: ENGINE_VERSION,
+      seed: this.seed, initial: copy(initial), events: [] };
+    this.questNumber = s.questNumber;
+    this.startVisit = s.visit;
+    this.lastJoy = IDLE;
+    this.previousFire = false;
+    this.eventIndex = 0;
+    this.path = [];
+    this.history = [];
+    this.lastVisit = null;
+    this.lastDay = null;
+    this.completed = false;
+    this.boundary = null;
+    this.noteBoundary();
+  }
+
+  get roomChanges() { return this.state.visit - (this.startVisit ?? this.state.visit); }
+  get simticks() { return this.state.simticks; }
+  place() { return { screen: this.state.room ? this.state.room.code + (this.state.room.blank ? ':air' : '') : null, pos: [this.state.player.col, this.state.player.row] }; }
+  anchor() { return { simticks: this.simticks, ...this.place() }; }
+
+  mismatch(event, reason = 'location mismatch') {
+    throw new Error(`Event ${this.eventIndex + 1}, tick ${event.simticks}: ${reason}; expected ${event.screen} ${event.pos}, actual tick ${this.simticks} ${this.place().screen} ${this.place().pos}`);
+  }
+
+  verifyEvent(event) {
+    const at = this.place();
+    if (event.simticks !== this.simticks || event.screen !== at.screen || String(event.pos) !== String(at.pos)) this.mismatch(event);
   }
 
   read(kind) {
-    if (!['s', 'g', 'v', 't', 'd'].includes(kind)) throw new Error('Invalid read kind');
-    let joy;
+    const gameplay = ['s', 'g', 'r'].includes(kind) && this.state.quest && !this.state.demo;
+    if (!gameplay) {
+      // Presentation reads have their own fire edge and never touch held gameplay input.
+      const joy = this.playback ? { ...IDLE, fire: !this.uiFire } : this.live.read(kind);
+      const press = joy.fire && !this.uiFire;
+      this.uiFire = !!joy.fire;
+      return { ...joy, press };
+    }
+    let joy = this.lastJoy;
     if (this.playback) {
-      if (!this.remaining) {
-        this.closeWindow();
-        const entry = this.sourceRecord.reads[this.entryIndex++];
-        if (!entry) throw new Error(`Read ${this.readIndex + 1} (${kind}): recording exhausted at ${this.place()}`);
-        const at = this.place();
-        if (this.verify && (entry.k !== kind || JSON.stringify(entry.at) !== JSON.stringify(at))) {
-          const place = p => `room ${p[0]} cell ${p[1]},${p[2]} facing ${p[3]}`;
-          throw new Error(`Read ${this.readIndex + 1}, ${kind} read: expected ${entry.k} read, ${place(entry.at)}, got ${place(at)}`);
-        }
-        this.remaining = entry.n;
+      const event = this.sourceRecord.events[this.eventIndex];
+      if (event && event.simticks < this.simticks) this.mismatch(event, 'missed consumption opportunity');
+      if (event?.stick && event.simticks === this.simticks) {
+        this.verifyEvent(event);
+        joy = { dx: event.stick[0], dy: event.stick[1], fire: !!event.stick[2] };
+        this.record.events.push(copy(event));
+        this.eventIndex++;
       }
-      const entry = this.sourceRecord.reads[this.entryIndex - 1];
-      joy = { dx: entry.j[0], dy: entry.j[1], fire: !!entry.j[2] };
-      this.remaining--;
-    } else joy = this.live.read(kind);
-    if (this.window && (this.window.kind !== kind || !same(joy, this.lastJoy))) this.closeWindow();
-    if (!this.window) {
-      const s = this.state;
-      this.record.reads.push({ k: kind, j: [joy.dx, joy.dy, +joy.fire], n: 0, at: this.place(), ms: 0 });
-      this.window = { start: this.elapsed, kind,
-        eligible: !!(s.quest && !s.demo && !s.progress.won && !s.timeUp), quest: s.questNumber };
+    } else {
+      joy = this.resetPending ? IDLE : this.live.read(kind);
+      this.resetPending = false;
+      // Fire+down opens UI after this update. Its gameplay effect is neutral.
+      if (kind === 's' && joy.fire && joy.dy > 0 && joy.dx === 0) {
+        this.openAfterUpdate = true;
+        joy = IDLE;
+      }
+      if (!same(joy, this.lastJoy)) this.record.events.push({ ...this.anchor(), stick: [joy.dx, joy.dy, +!!joy.fire] });
     }
-    this.record.reads.at(-1).n++;
-    // Gestures retain their frame and details; index 2 is the consuming read (1 based).
-    while (this.record.gestures[this.gestureIndex]?.[0] <= this.frame) {
-      this.record.gestures[this.gestureIndex++][2] = this.readIndex + 1;
-    }
-    this.readIndex++;
-    this.lastJoy = { dx: joy.dx, dy: joy.dy, fire: !!joy.fire };
     const press = joy.fire && !this.previousFire;
     this.previousFire = !!joy.fire;
+    this.lastJoy = { dx: joy.dx, dy: joy.dy, fire: !!joy.fire };
     return { ...this.lastJoy, press };
   }
 
-  closeWindow() {
-    if (!this.window) return;
-    const entry = this.record.reads.at(-1);
-    const source = this.sourceRecord?.reads[this.entryIndex - 1];
-    entry.ms = this.playback ? source.ms * (entry.n / source.n) : this.elapsed - this.window.start;
-    if (this.window.eligible && this.window.quest === this.state.questNumber) {
-      this.state.progress.milliseconds += entry.ms;
-    }
-    this.window = null;
+  handoff() {
+    if (this.playback) return;
+    this.live.reset?.();
+    this.onReset?.();
+    this.resetPending = true;
   }
 
-  step(milliseconds = 1000 / 60) {
-    if (this.playbackDone) return false;
-    if (this.playback && this.frame === this.record.frames) {
-      this.finishPlayback();
-      return false;
-    }
-    this.state.legacyContinue = this.record.legacyContinueUntil != null
-      && this.frame < (this.record.legacyContinueUntil ?? Infinity);
-    // Journals without a boundary retain the original repeating, up-only choosers.
-    this.state.legacyNavigation = this.frame < (this.record.menuNavigationFrom ?? Infinity);
-    if (!Number.isFinite(milliseconds) || milliseconds < 0) throw new Error('Invalid frame duration');
-    if (this.window?.eligible && this.state.progress.won) this.closeWindow();
+  command(name, choices = {}, { presented = false } = {}) {
+    if (!this.record || !this.state.quest || this.state.demo || this.state.progress.won || this.state.timeUp || this.state.resting) throw new Error('No active quest for command');
+    const event = { ...this.anchor(), command: name, ...choices };
+    validateEvent(event, this.state.data);
+    // Check choices and failures on an isolated world before touching the quest.
+    executeCommand(commandDraft(this.state), name, choices);
     if (this.playback) {
-      while (this.record.actions[this.actionIndex]?.frame === this.frame) {
-        const action = this.record.actions[this.actionIndex++];
-        // Only a skip triggered by a tune read consumes that press before applying.
-        if (action.type === 'skip' && action.read != null) this.read('t');
-        this.apply(action);
+      const expected = this.sourceRecord.events[this.eventIndex];
+      this.verifyEvent(expected);
+      this.eventIndex++;
+    }
+    this.record.events.push(copy(event));
+    const presentation = { stall: this.state.stall, tuneWait: this.state.tuneWait, events: this.state.events.length };
+    executeCommand(this.state, name, choices);
+    if (presented) {
+      this.state.stall = presentation.stall;
+      this.state.tuneWait = presentation.tuneWait;
+      this.state.events.length = presentation.events;
+    }
+    this.noteBoundary();
+    this.checkEndpoint();
+  }
+
+  step() {
+    if (this.playbackDone) return false;
+    if (this.playback && (++this.work > MAX_WORK || this.simticks > MAX_SIMTICKS)) throw new Error('Recording simulation work limit exceeded; endpoint unreachable');
+    const s = this.state;
+    if (this.playback) {
+      const event = this.sourceRecord.events[this.eventIndex];
+      if (event && event.simticks < this.simticks) this.mismatch(event, 'missed scheduled tick');
+      // Commands run between gameplay updates. Same-tick commands keep array order.
+      if (!s.verb && event?.command && event.simticks === this.simticks) {
+        this.verifyEvent(event);
+        const { simticks, screen, pos, command, ...choices } = event;
+        this.command(command, choices);
+        this.frame++;
+        return !this.playbackDone;
       }
     }
-    // Demos already read the real stick in shellFrame to end on any press.
-    if (this.state.tuneWait != null && !this.state.demo) {
-      const joy = this.read('t');
-      if (joy.press && this.skippable && !this.playback) this.skipTune(true);
+    if (s.tuneWait != null && !s.demo) {
+      if (this.playback) skipTune(s);
+      else if (this.read('t').press && this.skippable) this.skipTune();
     }
-    shellFrame(this.state);
-    tick(this.state);
-    this.elapsed += milliseconds;
+    const tune = s.tuneWait;
+    shellFrame(s);
+    tick(s);
+    if (tune != null && s.tuneWait == null) this.handoff();
     this.frame++;
-    if (['won', 'timeout'].includes(this.state.ended) && this.state.ended !== this.lastEnding) {
-      this.record.outcomes.push({ frame: this.frame,
-        kind: this.state.ended, day: this.state.clock.day, character: this.state.character });
+    // A menu creates a separate quest, with RNG restarted at the recorded seed.
+    if (s.quest && !s.demo && s.questNumber !== this.questNumber) {
+      s.rng = random(this.seed);
+      const character = s.character;
+      startQuest(s, s.data.characters[character]);
+      this.begin({ mode: 'quest', character });
     }
-    this.lastEnding = this.state.ended;
-    if (!this.playback) this.record.frames = this.frame;
-    this.noteRoom();
-    this.cacheBoundary();
+    this.noteBoundary();
+    if (this.openAfterUpdate) { this.openAfterUpdate = false; this.commandMenu(); }
+    this.checkEndpoint();
+    if (this.playback && !this.playbackDone) {
+      const next = this.sourceRecord.events[this.eventIndex];
+      if (next && next.simticks < this.simticks) this.mismatch(next, 'no remaining consumption opportunity at scheduled tick');
+      if (this.completed) throw new Error('Recording endpoint is unreachable after quest completion');
+    }
     return true;
   }
 
-  cacheBoundary() {
+  noteBoundary() {
+    if (!this.record || this.state.demo) return;
     const s = this.state;
-    const previous = this.history.at(-1);
-    const day = s.quest && !s.demo ? s.clock.day : null;
-    const quest = s.questNumber;
-    if (previous && previous.roomChanges === this.roomChanges
-        && previous.day === day && previous.quest === quest) return;
-    const entry = { frame: this.frame, roomChanges: this.roomChanges, day, quest };
-    // Generators close over live objects and cannot be cloned. Keep their frame
-    // as a destination; restore the closest plain state and rebuild silently.
-    if (!s.verb && !s.demo) {
-      const { data, input, stick, rng, ...state } = s;
-      entry.saved = {
-        state: structuredClone({ ...state, events: [] }), rng: rng.snapshot(),
-        previousFire: this.previousFire, lastJoy: { ...this.lastJoy },
-        readIndex: this.readIndex, gestureIndex: this.gestureIndex, entryIndex: this.entryIndex, remaining: this.remaining,
-        elapsed: this.elapsed, window: copy(this.window), reads: copy(this.record.reads),
-        actionIndex: this.playback ? this.actionIndex : this.record.actions.length,
-        lastEnding: this.lastEnding,
-        lastRoom: this.lastRoom, lastRoomChange: this.lastRoomChange,
-        lastQuestNumber: this.lastQuestNumber,
-        path: copy(this.record.path), outcomes: copy(this.record.outcomes),
-      };
-    }
-    this.history.push(entry);
-  }
-
-  restoreFrame(frame) {
-    if (!Number.isInteger(frame) || frame < 0 || frame > this.record.frames) throw new Error('Invalid rewind frame');
-    const restored = Session.watch(this.state.data, this.live, this.playback ? this.sourceRecord : this.snapshot(), this.verify);
-    const boundary = this.history.findLast(entry => entry.frame <= frame && entry.saved);
-    if (boundary) {
-      const { state, rng, path, outcomes, reads, ...cursor } = boundary.saved;
-      Object.assign(restored, cursor, { frame: boundary.frame, roomChanges: boundary.roomChanges });
-      Object.assign(restored.state, structuredClone(state), { rng: random(rng), input: restored.state.stick });
-      if (state.room && !state.room.blank) restored.state.room = this.state.data.roomById.get(state.room.room);
-      restored.record.reads = copy(reads);
-      // A live cache has no playback cursor: locate its consumed prefix in the source.
-      let consumed = restored.readIndex;
-      restored.entryIndex = 0;
-      while (consumed > 0) {
-        const entry = restored.sourceRecord.reads[restored.entryIndex++];
-        restored.remaining = Math.max(0, entry.n - consumed);
-        consumed -= entry.n;
-      }
-      restored.record.path = copy(path);
-      restored.record.outcomes = copy(outcomes);
-    }
-    restored.history = this.history.filter(entry => entry.frame <= restored.frame);
-    while (restored.frame < frame) {
-      restored.step();
-      restored.state.events.length = 0;
-    }
-    restored.state.events.length = 0;
-    return restored;
-  }
-
-  previousRoom(count = 1) {
-    if (!this.playback) return this;
-    const target = Math.max(0, this.roomChanges - count);
-    const entry = this.history.find(entry => entry.roomChanges === target);
-    return this.restoreFrame(entry?.frame ?? 0);
-  }
-
-  get previousDay() {
-    if (this.playback || this.state.demo) return null;
-    return this.history.findLast(entry => entry.quest === this.state.questNumber
-      && entry.day != null && entry.day < this.state.clock.day) ?? null;
-  }
-
-  backDay() {
-    const entry = this.previousDay;
-    if (!entry) return this;
-    // The earliest boundary on the previous observed day is its start.
-    const start = this.history.find(e => e.quest === entry.quest && e.day === entry.day);
-    const restored = this.restoreFrame(start.frame);
-    const r = restored.record;
-    r.actions.length = restored.actionIndex;
-    r.gestures = r.gestures.filter(g => g[0] < restored.frame);
-    r.frames = restored.frame;
-    if (r.legacyContinueUntil != null) r.legacyContinueUntil = Math.min(r.legacyContinueUntil, restored.frame);
-    if (r.menuNavigationFrom != null) r.menuNavigationFrom = Math.min(r.menuNavigationFrom, restored.frame);
-    delete r.checkpoint;
-    delete r.c64;
-    restored.continueLive();
-    return restored;
-  }
-
-  continueLive() {
-    this.closeWindow();
-    this.record.frames = this.frame;
-    this.playback = false;
-    this.playbackDone = false;
-    this.sourceRecord = null;
-    this.state.legacyContinue = false;
-    this.record.menuNavigationFrom = Math.min(this.record.menuNavigationFrom ?? this.frame, this.frame);
-    this.state.legacyNavigation = false;
-  }
-
-  noteRoom() {
-    const s = this.state;
-    const currentRoom = roomKey({ room: s.room?.code, blank: s.room?.blank });
-    if (this.lastRoomChange != null && currentRoom !== this.lastRoomChange) this.roomChanges++;
-    this.lastRoomChange = currentRoom;
-    // START GAME can replace an active quest without quest ever becoming false.
-    const questStart = s.questNumber !== this.lastQuestNumber;
-    const key = `${s.room?.code}:${!!s.room?.blank}:${s.title}:${s.quest}`;
-    if (key !== this.lastRoom || questStart) {
-      this.record.path.push({ frame: this.frame, room: s.room?.code ?? null,
-        blank: !!s.room?.blank, title: s.title, quest: s.quest,
-        ...(questStart ? { questStart: true } : {}),
+    const start = this.lastVisit === null;
+    const room = s.visit !== this.lastVisit;
+    const complete = !!(s.progress.won || s.timeUp || s.ended === 'timeout');
+    if (room) {
+      this.path.push({ simticks: this.simticks, visit: s.visit, room: s.room.code,
+        blank: !!s.room.blank, quest: true, title: false, questStart: start,
         col: s.player.col, row: s.player.row, day: s.clock.day, hour: s.clock.hour });
     }
-    this.lastRoom = key;
-    this.lastQuestNumber = s.questNumber;
-  }
-
-  apply(action) {
-    this.closeWindow();
-    if (action.type === 'load') importSave(this.state, fromBase64(action.save));
-    else if (action.type === 'skip') skipTune(this.state);
-    else if (action.type === 'command') openCommandMenu(this.state);
-    else if (action.type === 'cancel-command') closeCommandMenu(this.state);
-    else if (action.type === 'menu') {
-      endDemo(this.state);
-      this.state.menuSel = 0;
-      openMenu(this.state);
+    if (room || s.clock.day !== this.lastDay || complete !== this.completed) {
+      this.history.push({ simticks: this.simticks, eventIndex: this.record.events.length,
+        roomChanges: this.roomChanges, day: s.clock.day, visit: s.visit });
     }
-    this.noteRoom();
+    if (room || (complete && !this.completed)) {
+      const endpoint = complete ? { kind: 'complete' } : start ? { kind: 'start' } : { kind: 'room', visit: s.visit };
+      const record = this.record, count = record.events.length;
+      this.boundary = { ...record, endpoint, checkpoint: checkpoint(s),
+        // Events are immutable once applied. Materialize the preserved prefix
+        // only on export; replaying many boundaries must not copy every prefix.
+        get events() { return record.events.slice(0, count); } };
+    }
+    this.lastVisit = s.visit;
+    this.lastDay = s.clock.day;
+    this.completed = complete;
   }
 
-  menu() {
-    const action = { frame: this.frame, type: 'menu' };
-    this.apply(action);
-    this.record.actions.push(action);
-  }
-
-  commandMenu(close = false) {
-    if (this.playback || !(close ? this.state.commandMenuOpen : canOpenCommandMenu(this.state))) return false;
-    const action = { frame: this.frame, type: close ? 'cancel-command' : 'command' };
-    this.apply(action);
-    this.record.actions.push(action);
-    return true;
-  }
-
-  skipTune(fromRead = false) {
-    if (this.state.tuneWait == null) return;
-    const offset = this.state.data.music.tunes[this.state.tuneWait].frames - this.state.stall;
-    const action = { frame: this.frame, type: 'skip', ...(fromRead ? { read: this.readIndex } : {}) };
-    this.apply(action);
-    this.record.actions.push(action);
-    this.onSkip?.(offset);
-    return offset;
-  }
-
-  load(bytes) {
-    const action = { frame: this.frame, type: 'load', save: toBase64(bytes) };
-    this.apply(action);
-    this.record.actions.push(action);
-  }
-
-  gesture(kind, ...details) {
-    if (this.playback) return;
-    // UI events: diagnostic annotations only; replay uses the sampled joystick
-    this.record.gestures.push([this.frame, kind, null, ...details]);
+  checkEndpoint() {
+    if (!this.playback || this.playbackDone) return;
+    const end = this.sourceRecord.endpoint;
+    const reached = end.kind === 'start' ? this.state.visit === this.startVisit && this.simticks === 0
+      : end.kind === 'room' ? this.state.visit === end.visit : this.completed;
+    if (!reached) {
+      if (this.simticks > this.sourceRecord.checkpoint.simticks) throw new Error(`Recording endpoint unreachable at tick ${this.simticks}`);
+      if (end.kind === 'room' && this.state.visit > end.visit) throw new Error('Recording room endpoint was passed');
+      return;
+    }
+    if (this.eventIndex !== this.sourceRecord.events.length) throw new Error('Recording has events beyond its endpoint');
+    if (!equal(checkpoint(this.state), this.sourceRecord.checkpoint)) {
+      throw new Error(`Gameplay checkpoint mismatch at tick ${this.simticks}, ${this.place().screen} ${this.place().pos}`);
+    }
+    this.playbackDone = true;
+    this.totalRoomChanges = this.roomChanges;
   }
 
   snapshot() {
-    if (this.playback && !this.playbackDone) {
-      const full = this.restoreFrame(this.sourceRecord.frames);
-      full.finishPlayback();
-      return full.snapshot();
-    }
-    // A live save closes the represented endpoint. Repeated saves add no time;
-    // continuation starts a new entry, even if the stick is still held.
-    if (!this.playback) this.closeWindow();
-    const result = copy({ ...this.record, frames: this.frame, checkpoint: checkpoint(this.state),
-      c64: this.state.quest && !this.state.demo ? toBase64(exportSave(this.state)) : null });
-    result.actions = result.actions.slice(0, this.playback ? this.actionIndex : undefined);
-    result.gestures = result.gestures.filter(g => g[0] <= this.frame && (g[2] == null || g[2] <= this.readIndex));
-    return result;
+    if (this.playback) return copy(this.sourceRecord);
+    if (!this.boundary) throw new Error('No quest recording to download');
+    return copy(this.boundary);
   }
 
-  static watch(data, live, record, verify = true) {
-    if (record?.version === 1) record = convertRecording(data, record);
-    validateRecord(record, data);
-    const session = new Session(data, live, { record });
-    session.verify = verify;
-    session.totalRoomChanges = record.path.reduce((count, entry, i, path) =>
-      count + (i > 0 && roomKey(entry) !== roomKey(path[i - 1]) ? 1 : 0), 0);
-    return session;
+  continueLive() {
+    this.playback = false;
+    this.playbackDone = false;
+    this.sourceRecord = null;
+    this.work = 0;
+    this.handoff();
   }
 
-  get playbackDelay() {
-    if (this.frame === this.record.frames) return 0;
-    const p = this.state.player;
-    // Replay the simulation unchanged, but spend no viewing time on released input.
-    // Finish ongoing movement (including falling) before skipping an idle gap.
-    const idle = this.frame > 0 && isIdle(this.lastJoy) && !this.state.demo
-      && this.remaining > 0
-      && !p.stride && !p.leaping && !p.gliding && !p.fallen && !p.knockdown && !p.pose;
-    return idle ? 0 : 1000 / 60;
+  menu() { endDemo(this.state); this.state.menuSel = 0; openMenu(this.state); }
+  commandMenu(close = false) {
+    if (this.playback || !(close ? this.state.commandMenuOpen : canOpenCommandMenu(this.state))) return false;
+    return close ? closeCommandMenu(this.state) : openCommandMenu(this.state);
+  }
+  skipTune() {
+    if (this.state.tuneWait == null) return;
+    const offset = this.state.data.music.tunes[this.state.tuneWait].frames - this.state.stall;
+    skipTune(this.state);
+    this.handoff();
+    this.onSkip?.(offset);
+    return offset;
+  }
+  load(bytes) {
+    const initial = { mode: 'import', state: toBase64(bytes) };
+    const imported = new Session(this.state.data, this.live, { seed: this.seed, initial });
+    const state = this.state;
+    Object.assign(this, imported);
+    Object.assign(state, imported.state);
+    this.state = state;
+    state.stick = state.input = { pace: 5, read: kind => this.read(kind) };
+    state.commands = { execute: (name, choices, options) => this.command(name, choices, options), handoff: () => this.handoff() };
+    this.handoff();
   }
 
+  get playbackDelay() { return this.playback && (isIdle(this.lastJoy) || this.state.verb || this.state.stall) ? 0 : 1000 / 60; }
   nextRoom() {
     if (!this.playback) return;
-    const room = this.state.room;
-    while (!this.playbackDone) {
-      this.step();
-      this.state.events.length = 0;
-      if (this.state.room?.code !== room?.code || !!this.state.room?.blank !== !!room?.blank) break;
+    const visit = this.state.visit;
+    while (!this.playbackDone && this.state.visit === visit) { this.step(); this.state.events.length = 0; }
+  }
+  previousRoom(count = 1) {
+    if (!this.playback) return this;
+    const target = Math.max(0, this.roomChanges - count);
+    const boundary = this.history.find(e => e.roomChanges === target);
+    return this.restoreAt(boundary ?? { simticks: 0, eventIndex: 0 });
+  }
+  get previousDay() {
+    if (this.playback || this.state.demo) return null;
+    return this.history.findLast(e => e.day < this.state.clock.day) ?? null;
+  }
+  backDay() {
+    const day = this.previousDay?.day;
+    if (day == null) return this;
+    const restored = this.restoreAt(this.history.find(e => e.day === day));
+    restored.continueLive();
+    return restored;
+  }
+  restoreAt(target) {
+    // Runtime day history may end inside a room. Rebuild against an internal
+    // target, retaining the last real save boundary for downloads/autosave.
+    const source = this.playback ? this.sourceRecord : { ...this.record, ...this.boundary, events: this.record.events };
+    const restored = new Session(this.state.data, this.live, { initial: source.initial, seed: source.seed });
+    restored.playback = true;
+    restored.sourceRecord = copy(source);
+    restored.checkEndpoint = () => {};
+    while (restored.simticks < target.simticks || restored.eventIndex < target.eventIndex) {
+      restored.step();
+      restored.state.events.length = 0;
     }
+    delete restored.checkEndpoint;
+    return restored;
   }
 
-  finishPlayback() {
-    this.playbackDone = true;
-    while (this.record.actions[this.actionIndex]?.frame === this.frame) {
-      this.apply(this.record.actions[this.actionIndex++]);
-    }
-    this.closeWindow();
-    if (this.remaining || this.entryIndex !== this.sourceRecord.reads.length) {
-      throw new Error(`Read ${this.readIndex + 1}: recording has leftover read counts at ${this.place()}`);
-    }
-    if (this.verify) {
-      const expected = copy(this.sourceRecord.checkpoint);
-      const actual = checkpoint(this.state);
-      // Older recordings stored the victory timer with H/M/S suffixes.
-      if (this.state.progress.won && Array.isArray(expected.panel)) {
-        const row = panelLines(expected)[3];
-        const formatted = row.replace(/(?:(\d+)H )?(\d+)M (\d+)S(?= PLAY \/)/,
-          (_, h = '0', m, s) => [h, m, s].map(n => n.padStart(2, '0')).join(':'));
-        if (formatted !== row) {
-          expected.panel.fill(0, expected.panel.length - PANEL_COLS);
-          print(expected, PANEL_ROW + 3, 1, formatted.trimStart());
-        }
-      }
-      delete expected.shell?.disk;
-      if (!expected.stats) delete actual.stats;
-      else if (!('wand' in expected.stats)) {
-        delete actual.stats.wand;
-        const beforeTokenMaximum = !('tokenTotal' in expected.stats);
-        if (beforeTokenMaximum) delete actual.stats.tokenTotal;
-        const beforeTokens = !('tokens' in expected.stats);
-        if (beforeTokens) delete actual.stats.tokens;
-        // Preserve verification of victory text from before the wand and revised weights.
-        if (this.state.progress.won && panelLines(this.state)[3].includes('% COMPLETE')) {
-          const p = this.state.progress;
-          const total = beforeTokenMaximum
-            ? this.state.data.objects.filter(o => o.class === CLASS.TOKEN).length : p.tokenTotal;
-          const tokens = beforeTokens ? 10 : total ? Math.min(10, Math.floor(10 * p.tokens.length / total)) : 0;
-          const score = Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5 + 30 + tokens;
-          actual.panel.fill(0, actual.panel.length - PANEL_COLS);
-          print(actual, PANEL_ROW + 3, 1, `${playTime(this.state)} PLAY / ${score}% COMPLETE`);
-        }
-      }
-      // New win statistics occupy only the formerly blank final row.
-      if (this.record.engine !== ENGINE_VERSION && this.state.progress.won && Array.isArray(expected.panel)
-          && expected.panel.slice(120).every(value => value === 0)) {
-        actual.panel.splice(120, 40, ...expected.panel.slice(120));
-      }
-      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-        throw new Error('This recording does not replay in this version of the game.');
-      }
-    }
+  static watch(data, live, record) {
+    validateRecord(record, data);
+    return new Session(data, live, { record });
   }
-
-  static replay(data, live, record, verify = true) {
-    const session = Session.watch(data, live, record, verify);
-    for (let i = 0; i < session.record.frames; i++) {
-      session.step();
-      session.state.events.length = 0;
-    }
-    session.finishPlayback();
+  static replay(data, live, record) {
+    const session = Session.watch(data, live, record);
+    while (!session.playbackDone) { session.step(); session.state.events.length = 0; }
     session.continueLive();
     return session;
   }
 }
 
+const integer = (n, min, max) => Number.isSafeInteger(n) && n >= min && n <= max;
+function keys(value, allowed) { return value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).every(k => allowed.includes(k)); }
+function position(pos) { return Array.isArray(pos) && pos.length === 2 && integer(pos[0], -1, 40) && integer(pos[1], -3, 20); }
+function screen(code, data) { return typeof code === 'string' && /^[0-9A-V]{2}(?::air)?$/.test(code) && parseInt(code[0], 32) < data.grid.width && parseInt(code[1], 32) < data.grid.height; }
+function validateEvent(e, data) {
+  if (!keys(e, ['simticks', 'screen', 'pos', 'stick', 'command', 'item', 'source', 'destination'])
+      || !integer(e.simticks, 0, MAX_SIMTICKS) || !screen(e.screen, data) || !position(e.pos)) throw new Error('Invalid recording event anchor');
+  if ('stick' in e) {
+    if ('command' in e || Object.keys(e).length !== 4 || !Array.isArray(e.stick) || e.stick.length !== 3
+        || ![-1, 0, 1].includes(e.stick[0]) || ![-1, 0, 1].includes(e.stick[1]) || ![0, 1].includes(e.stick[2])) throw new Error('Invalid joystick event');
+  } else {
+    if (!COMMANDS.includes(e.command)) throw new Error('Invalid gameplay command');
+    if ('item' in e && (!['USE', 'DROP', 'EAT', 'OFFER', 'SELL', 'KINIPORT'].includes(e.command)
+        || !data.items.some(cls => integer(e.item, ...cls.object_ids)))) throw new Error('Invalid command item');
+    for (const key of ['source', 'destination']) {
+      if (key in e && (e.command !== 'KINIPORT' || !position(e[key])
+          || !integer(e[key][0], 0, 39) || !integer(e[key][1], 0, 19))) throw new Error('Invalid KINIPORT choice');
+    }
+  }
+}
+
 export function validateRecord(r, data) {
-  if (r?.format !== 'below-the-root-record' || r.version !== RECORD_VERSION
-      || r.engine !== ENGINE_VERSION) {
-    throw new Error('Unsupported playthrough recording version');
-  }
-  if (r.menuNavigationFrom != null && (!Number.isInteger(r.menuNavigationFrom)
-      || r.menuNavigationFrom < 0 || r.menuNavigationFrom > r.frames)) throw new Error('Invalid menu navigation boundary');
-  if (!Number.isInteger(r.frames) || r.frames < 0 || r.frames > MAX_FRAMES
-      || !Number.isInteger(r.seed) || r.seed < 0 || r.seed > 0xffffffff
-      || !r.initial || !r.checkpoint) throw new Error('Invalid recording');
-  if (r.legacyContinueUntil != null && (!Number.isInteger(r.legacyContinueUntil)
-      || r.legacyContinueUntil < 0 || r.legacyContinueUntil > r.frames)) throw new Error('Invalid compatibility boundary');
-  if (!['cold', 'menu', 'quest', 'demo'].includes(r.initial.mode)
-      || (r.initial.mode === 'quest' && !data.characters[r.initial.character || 0])
-      || (r.initial.room != null && !data.roomById.has(r.initial.room))
-      || (r.initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === r.initial.demo))) throw new Error('Invalid recording start');
-  for (const key of ['reads', 'actions', 'path', 'gestures', 'outcomes']) {
-    if (!Array.isArray(r[key])) throw new Error('Invalid recording journal');
-  }
-  if ('inputs' in r || 'durations' in r) throw new Error('Invalid v2 recording journal');
-  for (const entry of r.reads) {
-    if (!entry || !['s', 'g', 'v', 't', 'd'].includes(entry.k)
-        || !Array.isArray(entry.j) || entry.j.length !== 3
-        || ![-1, 0, 1].includes(entry.j[0]) || ![-1, 0, 1].includes(entry.j[1]) || ![0, 1].includes(entry.j[2])
-        || !Number.isSafeInteger(entry.n) || entry.n <= 0
-        || !Array.isArray(entry.at) || entry.at.length !== 4
-        || !(entry.at[0] === null || typeof entry.at[0] === 'string')
-        || !Number.isInteger(entry.at[1]) || !Number.isInteger(entry.at[2]) || ![-1, 1].includes(entry.at[3])) {
-      throw new Error('Invalid recorded read');
-    }
-    if (!Number.isFinite(entry.ms) || entry.ms < 0) throw new Error('Invalid recorded timing');
-  }
+  if (r?.format !== 'below-the-root-record' || r.version !== RECORD_VERSION || r.engine !== ENGINE_VERSION) throw new Error('Unsupported playthrough recording version');
+  if (JSON.stringify(r).length > MAX_RECORD_BYTES) throw new Error('Recording is too large (maximum 5 MiB)');
+  if (!keys(r, ['format', 'version', 'engine', 'seed', 'initial', 'events', 'endpoint', 'checkpoint'])
+      || !integer(r.seed, 0, 0xffffffff) || !Array.isArray(r.events) || r.events.length > 100000
+      || !r.checkpoint || !integer(r.checkpoint.simticks, 0, MAX_SIMTICKS)
+      || !integer(r.checkpoint.visit, 1, MAX_SIMTICKS)) throw new Error('Invalid quest recording');
+  const start = r.initial;
+  if (start?.mode === 'quest') {
+    if (!keys(start, ['mode', 'character', 'room']) || ('character' in start && !integer(start.character, 0, data.characters.length - 1))
+        || ('room' in start && !data.roomById.has(start.room))) throw new Error('Invalid quest initial state');
+  } else if (start?.mode === 'import') {
+    if (!keys(start, ['mode', 'state']) || typeof start.state !== 'string' || start.state.length > 4096) throw new Error('Invalid imported initial state');
+    const draft = newState(data, { read: () => IDLE }, { rng: random(r.seed) });
+    importSave(draft, fromBase64(start.state));
+    if (!draft.quest) throw new Error('Imported save has no active quest');
+  } else throw new Error('Invalid quest initial mode');
   let previous = 0;
-  for (const action of r.actions) {
-    if (!['load', 'skip', 'menu', 'command', 'cancel-command'].includes(action.type) || !Number.isInteger(action.frame) || action.frame < previous
-        || action.frame > r.frames
-        || (action.read != null && (action.type !== 'skip' || !Number.isSafeInteger(action.read) || action.read < 1))
-        || (action.type === 'load' && typeof action.save !== 'string')) throw new Error('Invalid recorded action');
-    previous = action.frame;
+  for (const e of r.events) {
+    validateEvent(e, data);
+    if (e.simticks < previous || e.simticks > r.checkpoint.simticks) throw new Error('Invalid event order/times');
+    previous = e.simticks;
   }
+  const end = r.endpoint;
+  if (!keys(end, ['kind', 'visit']) || !['start', 'room', 'complete'].includes(end.kind)
+      || (end.kind === 'room' ? !integer(end.visit, 2, MAX_SIMTICKS) : 'visit' in end)
+      || (end.kind === 'start' && (r.events.length || r.checkpoint.simticks !== 0))
+      || (end.kind === 'room' && end.visit !== r.checkpoint.visit)
+      || (end.kind === 'complete' && !r.checkpoint.progress?.won && !r.checkpoint.timeUp)) throw new Error('Invalid recording endpoint');
 }
 
-// The only frame-keyed sampler: v1 is simulated once into the live v2 recorder.
-export function convertRecording(data, record, { onTiming = () => {} } = {}) {
-  if (record?.format !== 'below-the-root-record' || record.version !== 1
-      || !['btr-session-2', 'btr-session-3', 'btr-session-4'].includes(record.engine)) {
-    throw new Error('Unsupported playthrough recording version');
+// Discard obsolete browser journals deliberately; preserve preferences and other apps.
+export function discardObsoleteAutosaves(storage) {
+  const obsolete = [];
+  for (let i = 0; i < storage.length; i++) {
+    const key = storage.key(i);
+    if (/^btr\.autosave\.v[12](?:\.recovery(?:\.\d+)?)?$/.test(key)) obsolete.push(key);
   }
-  const converted = { ...copy(record), version: RECORD_VERSION, engine: ENGINE_VERSION, reads: [] };
-  delete converted.inputs;
-  delete converted.durations;
-  delete converted.slots;
-  delete converted.storageErrors;
-  validateRecord(converted, data);
-  let previous = 0;
-  if (!Array.isArray(record.inputs)) throw new Error('Invalid recorded input');
-  for (const input of record.inputs) {
-    if (!Array.isArray(input) || input.length !== 4 || !Number.isInteger(input[0])
-        || input[0] < previous || input[0] > record.frames || ![-1, 0, 1].includes(input[1])
-        || ![-1, 0, 1].includes(input[2]) || ![0, 1].includes(input[3])) throw new Error('Invalid recorded input');
-    previous = input[0];
-  }
-  previous = 0;
-  if (record.durations != null && !Array.isArray(record.durations)) throw new Error('Invalid recorded timing');
-  for (const entry of record.durations || []) {
-    if (!Array.isArray(entry) || entry.length !== 2 || !Number.isInteger(entry[0])
-        || entry[0] < previous || entry[0] > record.frames || !Number.isSafeInteger(entry[1])
-        || entry[1] < 0) throw new Error('Invalid recorded timing');
-    previous = entry[0];
-  }
-  let inputIndex = 0, durationIndex = 0, duration = 16667, joy = IDLE;
-  const session = new Session(data, { read() {
-    const input = record.inputs[inputIndex];
-    if (input && input[0] <= session.frame) {
-      joy = { dx: input[1], dy: input[2], fire: !!input[3] };
-      inputIndex++;
-    }
-    return joy;
-  } }, { seed: record.seed, initial: record.initial });
-  Object.assign(session.record, converted, { actions: [], path: session.record.path, outcomes: [],
-    gestures: record.gestures.map(g => [g[0], g[1], null, ...g.slice(2)]) });
-  delete session.record.menuNavigationFrom;
-  if (record.engine === 'btr-session-2') session.record.legacyContinueUntil = record.legacyContinueUntil ?? record.frames;
-  let actionIndex = 0, oldTime = 0, progress = session.state.progress;
-  for (;;) {
-    while (record.actions[actionIndex]?.frame === session.frame) {
-      const action = copy(record.actions[actionIndex++]);
-      if (action.type === 'skip' && session.state.tuneWait != null && session.frame < record.frames) {
-        session.read('t');
-        action.read = session.readIndex;
-      }
-      session.apply(action);
-      session.record.actions.push(action);
-    }
-    if (progress !== session.state.progress) { oldTime = 0; progress = session.state.progress; }
-    if (session.frame === record.frames) break;
-    while (record.durations?.[durationIndex]?.[0] === session.frame) duration = record.durations[durationIndex++][1];
-    const s = session.state;
-    if (s.quest && !s.demo && !s.progress.won && !s.timeUp) oldTime += duration / 1000;
-    session.step(duration / 1000);
-    if (progress !== s.progress) { oldTime = 0; progress = s.progress; }
-    session.state.events.length = 0;
-  }
-  const result = session.snapshot();
-  // Timing is intentionally re-accrued; all other checkpoint fields still verify,
-  // including compatibility with old scoring and victory text.
-  const expected = copy(record.checkpoint);
-  if (expected.stats) expected.stats.milliseconds = result.checkpoint.stats.milliseconds;
-  if (session.state.progress.won && Array.isArray(expected.panel)) {
-    const row = panelLines(expected)[3];
-    const updated = row.replace(/(?:\d+:\d+:\d+|(?:(?:\d+)H )?\d+M \d+S)(?= PLAY \/)/, playTime(session.state));
-    if (updated !== row) {
-      expected.panel.fill(0, expected.panel.length - PANEL_COLS);
-      print(expected, PANEL_ROW + 3, 1, updated.trimStart());
-    }
-  }
-  session.sourceRecord = { ...result, checkpoint: expected };
-  session.entryIndex = result.reads.length;
-  // The older engine permits the formerly blank victory statistics row.
-  session.record.engine = record.engine;
-  session.finishPlayback();
-  onTiming({ old: record.checkpoint.stats?.milliseconds ?? oldTime, new: result.checkpoint.stats.milliseconds });
-  return result;
+  for (const key of obsolete) storage.removeItem(key);
 }
-
-// failed originals: preserved before each replacement, including repeated recoveries
-export function preserveAutosave(storage, original) {
-  for (let n = 0; ; n++) {
-    const key = `${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`;
-    const previous = storage.getItem(key);
-    if (previous === original) return;
-    if (previous == null) { storage.setItem(key, original); return; }
-  }
-}
-
-export function clearAutosave(storage) {
-  storage.removeItem(AUTOSAVE_KEY);
-  for (let n = 0; ; n++) {
-    const key = `${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`;
-    if (storage.getItem(key) == null) return;
-    storage.removeItem(key);
-  }
-}
-
-// Older recovery code left the preceding journal only in localStorage. Match
-// its final checkpoint to the new journal's initial load, newest backup first.
-export function restoreRecordingHistory(session, storage) {
-  if (session.record.recoveredFrom) return;
-  const backups = [];
-  for (let n = 0; ; n++) {
-    const text = storage.getItem(`${AUTOSAVE_KEY}.recovery${n ? `.${n}` : ''}`);
-    if (text == null) break;
-    try { backups.push(JSON.parse(text)); } catch {}
-  }
-  let segment = session.record;
-  for (const previous of backups.reverse()) {
-    const start = segment.actions?.[0];
-    if (segment.initial?.mode !== 'menu' || start?.frame !== 0 || start.type !== 'load'
-        || previous?.format !== 'below-the-root-record' || previous.c64 !== start.save
-        || (previous.created === segment.created && previous.seed === segment.seed
-          && previous.frames === segment.frames)) continue;
-    segment.recoveredFrom = previous;
-    segment = previous;
-    if (segment.recoveredFrom) break;
-  }
-}
-
-export function recoverAutosave(data, live, original, storage, options = {}) {
-  const record = JSON.parse(original);
-  // interoperable save: independent of the journal's engine version
-  if (record?.format !== 'below-the-root-record' || typeof record.c64 !== 'string'
-      || !record.c64.length || record.c64.length > 4096) {
-    throw new Error('This autosave has no recoverable quest checkpoint.');
-  }
-  const session = new Session(data, live, { ...options, initial: { mode: 'menu' }, record: null });
-  session.load(fromBase64(record.c64));
-  if (!session.state.quest) throw new Error('This checkpoint has no active quest.');
-  // The checkpoint starts a replayable segment, never a replacement history.
-  restoreRecordingHistory({ record }, storage);
-  session.record.recoveredFrom = record;
-  const replacement = JSON.stringify(session.snapshot());
-  preserveAutosave(storage, original);
-  storage.setItem(AUTOSAVE_KEY, replacement);
-  return session;
-}
+export function clearAutosave(storage) { storage.removeItem(AUTOSAVE_KEY); }
 
 export class Autosave {
-  constructor(storage, onError = () => {}) { this.storage = storage; this.onError = onError; this.key = null; }
-  save(session, force = false) {
-    const state = session.state;
-    // attract screens: must never overwrite the player's quest
-    if (session.playback || state.demo || (!state.quest && !session.record.path.some(p => p.quest))) return { written: false, reason: 'skipped' };
-    const key = screenKey(state);
-    if (!force && key === this.key) return { written: false, reason: 'unchanged' };
+  constructor(storage, onError = () => {}) { this.storage = storage; this.onError = onError; this.boundary = null; }
+  save(session) {
+    if (session.playback || session.state.demo || !session.boundary) return { written: false, reason: 'skipped' };
+    if (session.boundary === this.boundary) return { written: false, reason: 'unchanged' };
     try {
-      this.storage.setItem(AUTOSAVE_KEY, JSON.stringify(session.snapshot()));
-      this.key = key;
+      this.storage.setItem(AUTOSAVE_KEY, JSON.stringify(session.boundary));
+      this.boundary = session.boundary;
       return { written: true };
     } catch (err) { this.onError(`Autosave failed: ${err.message}`); return { written: false, reason: 'failed' }; }
   }

@@ -4,7 +4,7 @@ import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { Session, Autosave, AUTOSAVE_KEY, recoverAutosave, preserveAutosave, restoreRecordingHistory, screenKey } from './record.js';
+import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
@@ -117,6 +117,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   if (initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === initial.demo)) initial.demo = 'quest';
   let existing = null;
   try {
+    discardObsoleteAutosaves(localStorage);
     existing = localStorage.getItem(AUTOSAVE_KEY);
   } catch {}
   let session;
@@ -126,25 +127,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     try { stored = JSON.parse(existing); } catch {}
     try { session = Session.replay(data, stick, stored); }
     catch (err) {
-      let reason = err;
-      if (typeof stored?.c64 === 'string') {
-        try {
-          session = recoverAutosave(data, stick, existing, localStorage, { seed });
-          log('Saved game resumed from a checkpoint because its recording could not replay. Earlier turns are preserved in recording downloads.');
-        }
-        catch (recoveryErr) { reason = recoveryErr; }
-      }
-      if (!session) {
-        console.warn('Saved game could not be restored', reason);
-        try { preserveAutosave(localStorage, existing); } catch {}
-        initial = { mode: 'menu' };
-      }
+      log(`Saved game could not be restored: ${err.message}`);
+      initial = { mode: 'menu' };
     }
   }
   const freshStart = !session && initial.mode === 'cold';
   session ||= new Session(data, stick, { initial, seed });
-  try { restoreRecordingHistory(session, localStorage); }
-  catch (err) { log(`Could not retrieve earlier recording history: ${err.message}`); }
   let state = session.state;
   stick.selectWithF = () => state.title || !!state.verb;
   let returnSession = null;
@@ -154,6 +142,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekRepeatAt = 0;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
   const gamepad = new Gamepad(stick);
+  if (session.resetPending) gamepad.cancel(true);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
   const musicTrail = createMusicTrail(document.getElementById('music-notes'));
@@ -212,7 +201,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   backDayButton.onclick = () => {
     if (!debug || paused || session.playback || !session.previousDay) return;
     session = session.backDay(); state = session.state;
-    acc = 0; elapsedAcc = 0;
+    acc = 0;
     speaker.silence(); release(); saveNow(); draw();
     canvas.focus({ preventScroll: true });
   };
@@ -286,8 +275,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
     mapViewport.addEventListener(event, endMapDrag);
   }
-  const saveNow = () => autosave.save(session, true).reason !== 'failed';
-  const dropInput = () => { seekKey = null; pointer.cancel(); gamepad.cancel(); stick.reset(); };
+  const saveNow = () => autosave.save(session).reason !== 'failed';
+  const dropInput = () => { seekKey = null; pointer.cancel(); gamepad.cancel(true); stick.reset(); };
   addEventListener('hashchange', dropInput);
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
@@ -335,7 +324,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   function openMap() {
     if (paused) return;
-    const path = state.quest ? session.record.path : [];
+    const path = state.quest ? session.path : [];
     const view = state.quest ? state : { ...state, room: null, objects: data.objects };
     drawMap(view, visitedRooms(path, data),
       state.quest ? mapLocation(data, path, state.room) : null, mapGrid, visitedEmptyRooms(path));
@@ -420,12 +409,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     // Pointer steering prevents the browser's default focus transfer.
     if (type === 'pointerdown' && e.button === 0) canvas.focus({ preventScroll: true });
     if (held) { if (type === 'pointerdown') release(); return; }
-    session.gesture(type, ...pointer.pixel(e).map(Math.round));
   });
   stick.onKey = (type, source) => {
     if (paused) return;
     if (held) { if (type === 'keydown') release(); return; }
-    session.gesture(type, source);
   };
   function seekReplayRoom(direction) {
     if (!session.playback || seekRoom != null || (direction > 0 && session.playbackDone)) return;
@@ -435,7 +422,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       state = session.state;
     }
     seekRoom = target === session.roomChanges ? null : target;
-    acc = 0; elapsedAcc = 0;
+    acc = 0;
     last = performance.now();
     speaker.silence();
     if (direction < 0) draw();
@@ -443,7 +430,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function stopReplay() {
     if (!returnSession) return;
     session = returnSession; state = session.state; returnSession = null;
-    seekRoom = null; acc = 0; elapsedAcc = 0;
+    seekRoom = null; acc = 0;
     speaker.silence(); release(); fit();
   }
   addEventListener('keydown', e => {
@@ -516,13 +503,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         returnSession ||= session;
         session = restored; state = session.state;
         log(`Replaying ${file.name} from the beginning, skipping idle time. Left/Right goes back/forward one room, Shift+Left/Right ten; hold to keep skipping.`);
-        if (restored.record.recoveredFrom) log('Playback starts at the recovered checkpoint. Earlier recording segments are included in downloads but may require an older game version to replay.');
       } else {
         if (session.playback) stopReplay();
         session.load(bytes);
         if (saveNow()) log(`Loaded ${file.name}`);
       }
-      held = false; acc = 0; elapsedAcc = 0; seekRoom = null;
+      held = false; acc = 0; seekRoom = null;
       dropInput(); canvas.focus({ preventScroll: true });
       fit();
       speaker.silence();
@@ -531,9 +517,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   addEventListener('dragover', e => e.preventDefault());
   addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
-  addEventListener('pagehide', () => saveNow());
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { saveNow(); suspendFocus(); }
+    if (document.hidden) suspendFocus();
     else if (document.hasFocus()) restoreFocus();
   });
   setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
@@ -566,7 +551,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const STEP_MS = 1000 / 60;
   let last = performance.now();
   let acc = 0;
-  let elapsedAcc = 0;
   function frame(now) {
     if (!paused && !held && !document.hidden && seekKey && now >= seekRepeatAt && seekRoom == null) {
       seekReplayRoom(seekKey === 'ArrowRight' ? seekAmount : -seekAmount);
@@ -575,23 +559,19 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const running = isRunning();
     const elapsed = running ? Math.max(0, now - last) : 0;
     acc += Math.min(elapsed, 250);
-    elapsedAcc += elapsed;
     last = now;
     gamepad.poll();
-    const steps = Math.floor(acc / STEP_MS);
-    // Preserve wall time even when rendering cannot keep up with the 60 Hz simulation.
-    const duration = steps ? elapsedAcc / steps : STEP_MS;
-    if (steps) elapsedAcc = 0;
     let budget = 2000;
     while (running && budget-- > 0) {
       const delay = session.playback ? session.playbackDelay : STEP_MS;
       if (seekRoom == null && acc < delay) break;
       const idleScreen = session.playback && delay === 0 && seekRoom == null ? screenKey(state) : null;
       session.skippable = !options.classic;
+      session.onReset = () => { pointer.cancel(); gamepad.cancel(true); };
       session.onSkip = offset => { if (debug) log(`Tune skipped after ${offset} frames`); };
       const previousRoom = state.room;
       const previousTitle = state.title;
-      try { session.step(duration); }
+      try { session.step(); }
       catch (err) {
         session.playbackDone = true;
         session.playbackError = err.message;

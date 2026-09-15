@@ -100,12 +100,12 @@ export function createHandler(env = process.env, request = fetch) {
           || typeof body.context !== 'string' || body.context.length > 40000) return json({ error: 'Enter a message of at most 8,000 characters.' }, 400);
       if (typeof body.recording !== 'string') return json({ error: 'Include the playthrough recording as JSON text.' }, 400);
       if (Buffer.byteLength(body.recording) > MAX_RECORDING_BYTES) return tooLarge();
-      const record = body.meta?.frame == null || body.meta?.room == null ? JSON.parse(body.recording) : null;
-      const frame = body.meta?.frame ?? record?.frames;
+      const record = body.meta?.simticks == null || body.meta?.room == null ? JSON.parse(body.recording) : null;
+      const simticks = body.meta?.simticks ?? record?.checkpoint?.simticks;
       const room = body.meta?.room ?? record?.checkpoint?.room;
-      const filename = `btr-playthrough-${frame}.json`;
+      const filename = `btr-playthrough-${simticks}.json`;
       const upload = await github('/gists', { method: 'POST', body: JSON.stringify({
-        public: false, description: `below-the-root playthrough, frame ${frame}, room ${room}`,
+        public: false, description: `below-the-root playthrough, tick ${simticks}, room ${room}`,
         files: { [filename]: { content: body.recording } },
       }) });
       if (upload.ok) gist = await upload.json();

@@ -73,7 +73,7 @@ assert.deepEqual(visitedRooms([entry('0C'), entry(null, { quest: false })], data
 const homes = ['M5', 'E6', 'A6', '16', 'I5'];
 for (const [character, home] of homes.entries()) {
   const quest = new Session(data, { read: () => J.idle }, { initial: { mode: 'quest', character } });
-  const known = visitedRooms(quest.record.path, data);
+  const known = visitedRooms(quest.path, data);
   assert.ok(known.has(home), `${data.characters[character].name} knows their home`);
   for (const other of homes.filter(code => code !== home && !defaults.has(code))) {
     assert.ok(!known.has(other), `${other} is not this character's home`);
@@ -113,21 +113,21 @@ for (const [origin, route] of [
   flight.state.player.indoors = false;
   for (const [direction, code, blank] of route) {
     assert.ok(leaveByEdge(flight.state, direction));
-    flight.noteRoom();
+    flight.noteBoundary();
     assert.equal(flight.state.room.code, code);
     // The live room remains authoritative even before its visit is recorded.
     assert.equal(mapLocation(data, [], flight.state.room), code);
-    const location = mapLocation(data, flight.record.path, flight.state.room);
-    const markers = mapCells(data, visitedRooms(flight.record.path, data), location,
-      visitedEmptyRooms(flight.record.path)).flat().filter(c => c?.current);
+    const location = mapLocation(data, flight.path, flight.state.room);
+    const markers = mapCells(data, visitedRooms(flight.path, data), location,
+      visitedEmptyRooms(flight.path)).flat().filter(c => c?.current);
     assert.equal(markers.length, 1, `exactly one location marker after entering ${code}`);
     assert.equal(markers[0].code, code, `marker follows the player from ${origin} to ${code}`);
     assert.equal(!!markers[0].empty, blank, 'empty sky never reveals a parked interior');
   }
   const exterior = flight.state.room.code;
   enterRoom(flight.state, at('T1'), 22, 9);
-  flight.noteRoom();
-  assert.equal(mapLocation(data, flight.record.path, flight.state.room), exterior,
+  flight.noteBoundary();
+  assert.equal(mapLocation(data, flight.path, flight.state.room), exterior,
     'returning indoors retains the most recent exterior, including empty sky');
 }
 
@@ -139,30 +139,30 @@ for (let i = 0; i < 1000; i++) {
   session.step();
   session.state.events.length = 0;
 }
-const visited = visitedRooms(session.record.path);
+const visited = visitedRooms(session.path);
 assert.ok(visited.size > 1, 'the live quest must visit multiple rooms');
 const record = JSON.parse(JSON.stringify(session.snapshot()));
-record.path = [entry('invented')];
+
 const restored = Session.replay(data, live, record);
-assert.deepEqual(visitedRooms(restored.record.path), visited, 'reload derives visits from replay, not stored path');
-assert.deepEqual(visitedRooms(restored.record.path, data), visitedRooms(session.record.path, data));
-assert.equal(mapLocation(data, restored.record.path, restored.state.room),
-  mapLocation(data, session.record.path, session.state.room), 'replay restores the outdoor marker');
+assert.deepEqual(visitedRooms(restored.path), visited, 'reload derives visits from replay, not stored path');
+assert.deepEqual(visitedRooms(restored.path, data), visitedRooms(session.path, data));
+assert.equal(mapLocation(data, restored.path, restored.state.room),
+  mapLocation(data, session.path, session.state.room), 'replay restores the outdoor marker');
 
 // The menu preserves quest=true; a replacement quest still needs a fresh map.
 openMenu(session.state);
-session.noteRoom();
+session.noteBoundary();
 assert.equal(session.state.quest, true);
-assert.deepEqual(visitedRooms(session.record.path), visited, 'opening the menu preserves visits');
+assert.deepEqual(visitedRooms(session.path), visited, 'opening the menu preserves visits');
 startQuest(session.state, data.characters[0]);
 session.state.title = false;
-session.noteRoom();
-assert.deepEqual(visitedRooms(session.record.path), new Set([session.state.room.code]));
-const count = session.record.path.length;
+session.begin({ mode: 'quest', character: 0 });
+assert.deepEqual(visitedRooms(session.path), new Set([session.state.room.code]));
+const count = session.path.length;
 startQuest(session.state, data.characters[0]);
-session.noteRoom();
-assert.equal(session.record.path.length, count + 1, 'restarting in the same room still marks a new quest');
-assert.equal(session.record.path.at(-1).questStart, true);
+session.begin({ mode: 'quest', character: 0 });
+assert.equal(session.path.length, 1, 'restarting in the same room creates a fresh quest history');
+assert.equal(session.path.at(-1).questStart, true);
 
 const state = session.state;
 const remote = data.rooms.find(r => r !== state.room && r.objects.length && !r.underground);

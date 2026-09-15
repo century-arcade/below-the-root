@@ -113,6 +113,7 @@ export function paintScreen(state) {
 export function enterRoom(state, room, col, row) {
   const p = state.player;
   state.room = room;
+  state.visit = (state.visit || 0) + 1;
   p.col = col;
   p.row = row;
   p.lastGood = { col, row };

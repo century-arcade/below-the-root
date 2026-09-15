@@ -6,7 +6,7 @@ import { completion, playTime } from './progress.js';
 export function statusRows(state, { classic = false, playback = null } = {}) {
   const rows = [];
   if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
-  if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges}`);
+  if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges ?? '?'}`);
   return rows.concat(classic ? [] : permanentRows(state));
 }
 

@@ -1,5 +1,6 @@
 """World map controls and game hold; run against make serve."""
 import os
+from browser_helpers import install_probe, observe
 from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -11,6 +12,7 @@ with sync_playwright() as p:
         # Keep authored-map experiments independent of the exploration scenarios.
         page.route('**/assets/initial-map.json', lambda route: route.fulfill(
             json={'rooms': ['M5', 'M8', 'B8']}))
+        install_probe(page)
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.goto(BASE + '/play#map')
@@ -27,8 +29,7 @@ with sync_playwright() as p:
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
 
         def record():
-            page.evaluate("dispatchEvent(new Event('pagehide'))")
-            return page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+            return observe(page)
 
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
@@ -56,13 +57,13 @@ with sync_playwright() as p:
             page.wait_for_function("expected => document.getElementById('map-zoom').textContent === expected", arg=expected)
         assert page.locator('#map-grid > span').count() == 32 * 16
         assert 'PAUSED' not in page.locator('#where').inner_text()
-        stopped = record()['frames']
+        stopped = record()['frame']
         page.wait_for_timeout(300)
-        assert record()['frames'] == stopped, 'the map must hold game time'
+        assert record()['frame'] == stopped, 'the map must hold game time'
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for(state='hidden')
         page.wait_for_timeout(200)
-        assert record()['frames'] > stopped
+        assert record()['frame'] > stopped
 
         # Outside the map, Tab on a control keeps browser focus navigation.
         page.locator('#map').focus()
@@ -93,10 +94,10 @@ with sync_playwright() as p:
         page.get_by_role('button', name='Zoom out', exact=True).click()
         assert page.locator('#map-zoom').inner_text() == '1×'
         page.locator('#map-zoom-in').focus()
-        stopped = record()['frames']
+        stopped = record()['frame']
         page.keyboard.press('Space')
         page.wait_for_timeout(200)
-        assert record()['frames'] == stopped, 'map controls must not send game input'
+        assert record()['frame'] == stopped, 'map controls must not send game input'
         page.keyboard.press('Escape')
         page.locator('#map-screen').wait_for(state='hidden')
 
@@ -116,7 +117,7 @@ with sync_playwright() as p:
                 scrollBy(options);
             };
         }''')
-        stopped = record()['frames']
+        stopped = record()['frame']
         for control in ['#screen', '#close-map', '#map-zoom-in']:
             page.locator(control).focus()
             for key in ['ArrowRight', 'd', 'ArrowLeft', 'a', 'ArrowUp', 'w', 'ArrowDown', 's', 'Shift+D']:
@@ -124,11 +125,11 @@ with sync_playwright() as p:
             assert page.locator('#map-screen').is_visible(), 'movement pans without dismissing the map'
         assert page.evaluate('window.mapPans') == [[1, 0], [1, 0], [-1, 0], [-1, 0],
                                                    [0, -1], [0, -1], [0, 1], [0, 1], [1, 0]] * 3
-        assert record()['frames'] == stopped, 'map navigation keeps the game held'
+        assert record()['frame'] == stopped, 'map navigation keeps the game held'
         page.keyboard.press('Escape')
         page.locator('#map-screen').wait_for(state='hidden')
         page.wait_for_timeout(200)
-        assert all(r['j'] == [0, 0, 0] for r in record()['reads']), 'resuming from the map drops the movement key'
+        assert all(r['stick'] == [0, 0, 0] for r in record()['events']), 'resuming from the map drops the movement key'
 
         page.locator('#map').press('Enter')
         page.get_by_role('button', name='Fullscreen', exact=True).click()
@@ -148,7 +149,7 @@ with sync_playwright() as p:
         for code, room_id, hidden_neighbour in [('0C', 384, '1C'), ('P2', 89, 'Q2')]:
             page.goto(BASE + '/?room=' + code)
             page.wait_for_function("""room => {
-                const saved = JSON.parse(localStorage.getItem('btr.autosave.v1'));
+                const saved = JSON.parse(localStorage.getItem('btr.autosave.v3'));
                 return saved?.initial.room === room;
             }""", arg=room_id)
             page.keyboard.press('Tab')

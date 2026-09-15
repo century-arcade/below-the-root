@@ -49,7 +49,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.locator('nav a[href="/links"]').click()
             expect(page).to_have_url(address + '/links')
             page.goto(address + '/?player=0&debug')
-            page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
+            page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
             expect(page.locator('#file-issue')).to_be_disabled()
             page.keyboard.press('ArrowRight')
             page.locator('#map').click()
@@ -68,14 +68,14 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             assert checkpoint['player'], checkpoint
             page.locator('#record-file').set_input_files({
                 'name': 'playthrough.json', 'mimeType': 'application/json', 'buffer': recording.encode()})
-            expect(page.locator('#log')).to_contain_text('Loaded')
+            expect(page.locator('#log')).to_contain_text('Replaying')
             page.locator('nav a[href="/about"]').click()
-            before = page.evaluate("localStorage.getItem('btr.autosave.v1')")
+            before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
             page.goto(address)
             expect(page).to_have_url(address + '/')
             page.wait_for_selector('#volume[aria-valuetext]', state='attached')
             page.evaluate("dispatchEvent(new Event('pagehide'))")
-            after = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+            after = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3'))")
             assert after['initial'] == json.loads(before)['initial'], 'saved quest restored'
             assert not external, external
             assert not failed, failed

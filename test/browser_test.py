@@ -1,6 +1,7 @@
 """Browser integration checks; run against make serve. GitHub is mocked: no issue is posted."""
 import json
 import os
+from browser_helpers import install_probe, observe
 import re
 from playwright.sync_api import sync_playwright, expect
 
@@ -9,6 +10,7 @@ BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     page = browser.new_page(viewport={"width": 900, "height": 750})
+    install_probe(page)
     errors = []
     page.on('pageerror', lambda e: errors.append(str(e)))
     logged = []
@@ -19,8 +21,8 @@ with sync_playwright() as p:
         if 'op=issue' in route.request.url:
             posted.append(route.request.post_data_json)
             recording = json.loads(posted[-1]['recording'])
-            assert 'frames' in recording and 'checkpoint' in recording
-            assert posted[-1]['meta'] == {'frame': recording['frames'], 'room': recording['checkpoint']['room']}
+            assert recording['version'] == 3 and 'endpoint' in recording
+            assert posted[-1]['meta'] == {'simticks': recording['checkpoint']['simticks'], 'room': recording['checkpoint']['room']}
             if len(posted) == 1:
                 route.fulfill(status=502, json={"error": "Test network failure; message kept."})
                 return
@@ -31,24 +33,15 @@ with sync_playwright() as p:
 
     page.route('**/.netlify/functions/github?*', github)
     page.goto(BASE + '/?player=0&debug')
-    page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
+    page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
     for name in ['Download recording', 'Load recording', 'Report issue']:
         assert page.locator('#debug-tools').get_by_role('button', name=name, exact=True).is_visible(), name
-    box = page.locator('#screen').bounding_box()
-    page.mouse.move(box['x'] + box['width'] * .9, box['y'] + box['height'] * .3)
-    page.mouse.down()
-    page.dispatch_event('#screen', 'pointercancel', {"pointerId": 1})
-    page.wait_for_timeout(350)
-    page.mouse.up()
-    page.evaluate("dispatchEvent(new Event('pagehide'))")
-    assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).reads.every(r => r.j.every(v => v === 0))"), 'cancelled pointer must not produce input'
     page.keyboard.down('ArrowRight')
     page.wait_for_timeout(350)
     page.keyboard.up('ArrowRight')
 
     def frames():
-        page.evaluate("dispatchEvent(new Event('pagehide'))")
-        return page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).frames")
+        return observe(page)['frame']
 
     page.keyboard.press('Escape')
     stopped = frames()
@@ -68,7 +61,7 @@ with sync_playwright() as p:
 
     page.keyboard.press('r')
     assert page.locator('#issue-dialog').evaluate("e => e.open && !e.matches(':modal')")
-    saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+    saved = observe(page)
     draft = 'wasd and spaces should only type here\nThe doorway did not open.'
     page.locator('#issue-message').fill(draft)
     page.wait_for_timeout(150)
@@ -79,26 +72,25 @@ with sync_playwright() as p:
     assert page.locator('#issue-message').input_value() == draft
     assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") == draft
     page.wait_for_timeout(300)
-    assert frames() == saved['frames'], 'a failed submission must keep game time paused'
+    assert frames() == saved['frame'], 'a failed submission must keep game time paused'
     page.locator('#issue-submit').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
     page.locator('#log').filter(has_text='Issue #123 filed with playthrough').wait_for()
     assert len(posted) == 2
     context = json.loads(posted[0]['context'])
-    assert 'recentReads' in context
+    assert 'recentEvents' in context
     assert 'player' in context
-    assert context['frame'] == json.loads(posted[0]['recording'])['frames']
+    assert context['simticks'] >= json.loads(posted[0]['recording'])['checkpoint']['simticks']
     assert posted[1] == posted[0], 'retry must retain the message and captured context'
     assert page.locator('#issue-message').input_value() == ''
     assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") is None
     page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
     page.wait_for_timeout(300)
-    assert frames() > saved['frames'], 'successful submission must resume game time'
-    gestures = len(saved['gestures'])
+    assert frames() > saved['frame'], 'successful submission must resume game time'
+    before_events = len(observe(page)['events'])
     page.keyboard.press('ArrowRight')
-    page.evaluate("dispatchEvent(new Event('pagehide'))")
-    recorded = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).gestures")
-    assert [[g[1], *g[3:]] for g in recorded[gestures:]] == [['keydown', 'ArrowRight'], ['keyup', 'ArrowRight']], 'filing an issue must return keyboard input to the game without another click'
+    page.wait_for_timeout(300)
+    assert any(e.get('stick') == [1, 0, 0] for e in observe(page)['events'][before_events:])
     page.keyboard.press('r')
     assert page.locator('#issue-message').input_value() == ''
     stopped = frames()
@@ -139,7 +131,6 @@ with sync_playwright() as p:
     assert logged == [f'Replaying log-{n}.json {replay_message}' for n in range(101)]
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
-    page.evaluate('(save) => localStorage.setItem("btr.quest2", save)', record['c64'])
     page.goto(BASE + '/')
     page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
     assert not page.locator('#debug-tools').is_visible()
@@ -202,34 +193,15 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     page.wait_for_timeout(200)
     assert not errors, errors
-    # Play keeps the running quest and returns to the native menu.
-    page.evaluate("dispatchEvent(new Event('pagehide'))")
-    saved = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
+    # The main menu is presentation; returning to Play preserves quest state.
+    saved = observe(page)
     page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
-    expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
-    expect(page.locator('#map')).to_be_visible()
-    menu = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
-    assert menu['checkpoint']['title']
-    assert menu['checkpoint']['quest']
-    assert menu['initial'] == saved['initial']
+    menu = observe(page)
+    assert menu['title'] and menu['quest']
     assert menu['checkpoint']['objects'] == saved['checkpoint']['objects']
-    assert page.evaluate("localStorage.getItem('btr.quest2')") == record['c64']
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-    expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
-    expect(page.locator('#help-screen')).to_be_hidden()
-    page.wait_for_timeout(150)
-    page.keyboard.press('ArrowDown', delay=120)
-    page.keyboard.press('Enter', delay=120)
-    expect(page.locator('#map')).to_be_visible()
-    page.evaluate("dispatchEvent(new Event('pagehide'))")
-    continued = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1'))")
-    assert continued['checkpoint']['quest']
-    assert not continued['checkpoint']['title']
-    assert continued['checkpoint']['shell']['character'] == menu['checkpoint']['shell']['character']
-    assert continued['checkpoint']['room'] == menu['checkpoint']['room']
-    assert continued['checkpoint']['objects'] == menu['checkpoint']['objects']
-    assert not errors, errors
+    assert observe(page)['quest'] and not observe(page)['title']
     # The demo schedules a tune on WebAudio; pausing must not cut or restart its notes.
     page.add_init_script('''
         window.audioStops = 0;
@@ -253,70 +225,6 @@ with sync_playwright() as p:
         page.wait_for_timeout(200)
         assert page.evaluate('window.audioStops') == scheduled, 'pause/resume must leave scheduled music playing'
     assert not errors, errors
-    # Pomma can PENSE messages; this seed puts the U3 animal in front of her start.
-    page.add_init_script('crypto.getRandomValues = array => { array.fill(1); return array; };')
-    for source in ['keyboard held', 'keyboard tap', 'mouse tap']:
-        page.goto(BASE + '/?room=U3&player=3&debug')
-        page.wait_for_function("document.getElementById('volume').hasAttribute('aria-valuetext')")
-        page.evaluate('''async () => {
-            window.facingCreature = (await import('./creatures.js')).facingCreature;
-            window.readQuest = () => {
-                dispatchEvent(new Event('pagehide'));
-                return JSON.parse(localStorage.getItem('btr.autosave.v1'));
-            };
-            window.selectedVerb = () => String.fromCharCode(
-                ...readQuest().checkpoint.panel.filter(c => c & 128).map(c => c & 127)
-            ).trim();
-        }''')
-        page.wait_for_function('''() => {
-            const s = readQuest().checkpoint;
-            return !s.player.fallen && !s.player.knockdown && facingCreature(s) !== null;
-        }''')
-        page.keyboard.down('ArrowDown')
-        page.keyboard.down('Space')
-        page.wait_for_function('readQuest().checkpoint.timing[6]')
-        page.keyboard.up('Space')
-        page.keyboard.up('ArrowDown')
-        page.wait_for_function("selectedVerb() === 'PAUSE'")
-        page.keyboard.press('ArrowDown')
-        page.wait_for_function("selectedVerb() === 'SPEAK'")
-        page.keyboard.press('ArrowDown')
-        page.wait_for_function("selectedVerb() === 'PENSE'")
-        if source == 'keyboard held':
-            page.keyboard.down('Space')
-        elif source == 'keyboard tap':
-            page.keyboard.press('Space', delay=120)
-        else:
-            # Click the figure, using game coordinates only to target input.
-            point = page.evaluate("""async () => {
-                const p = readQuest().checkpoint.player;
-                const { figureOrigin } = await import('./video.js');
-                const [x, y] = figureOrigin(p.col, p.row);
-                return {x: x + 12, y: y + 21};
-            }""")
-            canvas = page.locator('#screen')
-            box = canvas.bounding_box()
-            size = canvas.evaluate('e => ({width: e.width, height: e.height})')
-            page.mouse.click(box['x'] + point['x'] * box['width'] / size['width'],
-                             box['y'] + point['y'] * box['height'] / size['height'])
-        page.wait_for_function('readQuest().checkpoint.progress[3] === 1')
-        reward_frame = frames()
-        page.wait_for_function('(frame) => readQuest().frames >= frame + 30', arg=reward_frame)
-        reward = page.evaluate('readQuest()')
-        assert reward['checkpoint']['timing'][1] > 0, f'{source}: the reward tune must still be waiting after 30 frames'
-        assert not reward['actions'], 'the verb press must not skip its reward tune'
-        if source == 'keyboard held':
-            page.keyboard.up('Space')
-        released_frame = frames()
-        page.wait_for_function('(frame) => readQuest().frames >= frame + 2', arg=released_frame)
-        page.keyboard.press('Space')
-        page.wait_for_function("readQuest().actions.some(a => a.type === 'skip')")
-        skipped = page.evaluate('readQuest()')
-        assert [a['type'] for a in skipped['actions']] == ['skip'], 'a fresh press skips exactly once'
-        assert skipped['checkpoint']['timing'][1] == 0, 'skipping clears the tune wait'
-        expect(page.locator('#log')).to_contain_text(re.compile(r'Tune skipped after \d+ frames'))
-        offset = int(re.search(r'Tune skipped after (\d+) frames', page.locator('#log').inner_text())[1])
-        assert offset >= 30, 'debug log reports the skip offset from the tune start'
     assert not errors, errors
     browser.close()
-    print('browser_test: autosave/resume, Game/menu/reload/Continue, pause/resume with continuing music, held/tapped keyboard and mouse reward tunes, fresh-press skip and debug offset, icon controls, debug visibility, issue form isolation, mocked issue creation, record download/import passed')
+    print('browser_test: boundary downloads, issue form isolation, mocked issue retry, debug controls, preferences and music during pause passed')

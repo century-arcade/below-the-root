@@ -75,6 +75,12 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
     seen.add(o.class);
     entries.push(o);
   }
+  if (state.commandChoice?.applying && !noFire) {
+    state.commandChoice.used.add('item');
+    const entry = entries.find(o => o.object === state.commandChoice.item);
+    if (!entry) throw new Error('Command item is not an available choice');
+    return entry;
+  }
   yield* fireUp();
   const moved = directionPress();
   for (let i = 0; ;) {
@@ -83,8 +89,11 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
     if (noFire && !entry) return null;
     for (;;) {
       const j = yield;
-      if (j.fire && !noFire) return entry;
-      const step = state.demo || state.legacyNavigation ? (j.dy < 0 ? 1 : 0) : moved(j).dy;
+      if (j.fire && !noFire) {
+        if (state.commandChoice && entry) state.commandChoice.item = entry.object;
+        return entry;
+      }
+      const step = state.demo ? (j.dy < 0 ? 1 : 0) : moved(j).dy;
       if (step) {
         i = (i + step + entries.length + 1) % (entries.length + 1);
         break;

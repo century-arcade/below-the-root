@@ -25,7 +25,7 @@ with sync_playwright() as p:
             page.route('**/.netlify/functions/github?op=login', lambda route: route.fulfill(
                 content_type='text/html', body='<p>Reached login endpoint</p>'))
             page.goto(BASE + '/?debug&player=0')
-            page.wait_for_function("localStorage.getItem('btr.autosave.v1') !== null")
+            page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
             if mode == 'logout':
                 page.wait_for_function("!document.getElementById('github-logout').hidden")
                 page.locator('#file-issue').click()
@@ -33,14 +33,12 @@ with sync_playwright() as p:
                 page.locator('#issue-dialog').wait_for(state='hidden')
                 assert page.locator('#github-logout').get_attribute('hidden') is not None
             assert page.locator('#file-issue').is_visible(), mode
-            # Remove the initial autosave to verify the action itself saves the quest.
-            page.evaluate("localStorage.removeItem('btr.autosave.v1')")
             if action == 'shortcut':
                 page.keyboard.press('r')
             else:
                 page.locator('#file-issue').click()
             page.get_by_text('Reached login endpoint').wait_for()
-            assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v1')).checkpoint.quest")
+            assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3')).initial.mode")
             context.close()
     browser.close()
     print('browser_login_test: report/R save and start login with pending, failed, logged-out, and cleared sessions')
