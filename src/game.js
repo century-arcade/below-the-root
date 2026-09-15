@@ -247,7 +247,7 @@ function resolveStop(state) {
     case 'collapse':
       return startVerb(state, message(state, () => loseDay(state, 'YOU SPENT A DAY RECOVERING', 'FROM A LACK OF', COLLAPSE[stop.cause])));
     case 'bell':
-      return startVerb(state, message(state, () => say(state, 'THE SPIRIT BELL RINGS')));
+      return startVerb(state, message(state, () => say(state, 'THE SPIRIT BELL RINGS'), false));
     case 'timeout':
       return startVerb(state, timeOver(state));
     case 'demo_room':
@@ -271,9 +271,9 @@ function showPage(state, page) {
 }
 
 // shell.md: every message the shell prints waits for the button or the stick, then clears
-function* message(state, print) {
+function* message(state, print, waitForRelease = true) {
   print();
-  while (!isIdle(yield));
+  if (waitForRelease) while (!isIdle(yield));
   yield* anyInput();
   clearPanel(state);
 }

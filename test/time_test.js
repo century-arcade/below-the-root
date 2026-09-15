@@ -255,13 +255,13 @@ test('stepping in water: a day lost, home in the nid', (s) => {
   assert.equal(s.room.room, s.nidPlace.room);
 });
 
-test('the bell stops the loop for a message', (s) => {
+test('holding a direction dismisses the spirit bell message without requiring release', (s) => {
   place(s, 26, 5, 5);
   s.stop = { reason: 'bell' };
   s.active = true;
   tick(s);
   assert.equal(lines(s)[0], 'THE SPIRIT BELL RINGS');
-  settle(s, [J.idle, J.left]);
+  settle(s, [J.left, J.left]);
   assert.ok(s.active);
 });
 
