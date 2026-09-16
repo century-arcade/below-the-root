@@ -61,7 +61,7 @@ export function rhythmSVG(rhythm, pitch = null, stemDown = pitch && pitch.step >
     ? `<path d="M${x - 1.6} ${y + 7}q2.8 -1.4 1.4 -3.5"/>`
     : `<path d="M${x + 1.6} ${y - 7}q2.8 1.4 1.4 3.5"/>`;
   const note = `<g>
-      ${pitch?.accidental ? `<path d="M1 ${y - 3}v6m2 -6.5v6m-3 -4h4m-4 2h4"/>` : ''}
+      ${pitch?.accidental ? `<path transform="translate(0.6 ${y}) scale(0.7)" d="M1 -3v6m2 -6.5v6m-3 -4h4m-4 2h4"/>` : ''}
       <ellipse cx="5" cy="${y}" rx="1.6" ry="1.1" transform="rotate(-20 5 ${y})" fill="${hollow ? 'none' : 'currentColor'}" stroke="currentColor"/>
       ${value.denominator > 1 ? stem : ''}
       ${value.denominator >= 8 ? flag : ''}
