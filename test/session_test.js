@@ -7,6 +7,7 @@ import { exportSave, importSave } from '../src/save.js';
 import { Keyboard, Gamepad, IDLE } from '../src/input.js';
 import { CLASS } from '../src/data.js';
 import { playTime } from '../src/progress.js';
+import { SFX } from '../src/audio.js';
 
 const data = await loadTestData();
 const idle = { read: () => IDLE };
@@ -173,6 +174,29 @@ for (const device of ['keyboard', 'gamepad']) {
   assert.equal(s.record.events[1].simticks, 320);
   assert.deepEqual(s.record.events[1].stick, [-1, 0, 0]);
   saveHere(s);
+}
+
+// REST preserves the original tick-tock sequence around each completed hour.
+{
+  const s = imported(state => {
+    const room = data.roomByCode.get('T1');
+    const tile = data.tiles.find(t => t?.role === 'nid_left').code;
+    const idx = room.screen.indexOf(tile);
+    enterRoom(state, room, idx % 40, Math.floor(idx / 40) + 1);
+    state.player.indoors = true;
+  });
+  s.command('REST');
+  s.state.events.length = 0;
+  const sounds = [];
+  for (let tick = 1; tick <= 160; tick++) {
+    s.step();
+    sounds.push(...s.state.events.filter(e => 'sfx' in e).map(e => [tick, e.sfx]));
+    s.state.events.length = 0;
+  }
+  assert.deepEqual(sounds, [
+    [40, SFX.chime], [60, SFX.blip], [80, SFX.chime], [100, SFX.blip],
+    [120, SFX.chime], [140, SFX.blip], [160, SFX.confirm],
+  ]);
 }
 
 // Bad files fail on a private quest with useful location diagnostics.

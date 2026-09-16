@@ -582,8 +582,14 @@ export function restTick(state) {
     clearPanel(state);
     return;
   }
-  if (++state.resting.ticks < 8 * REST_DELAY_TICKS) return;
+  const ticks = ++state.resting.ticks;
+  if (ticks >= 2 * REST_DELAY_TICKS && ticks < 8 * REST_DELAY_TICKS
+      && ticks % REST_DELAY_TICKS === 0) {
+    sfx(state, (ticks / REST_DELAY_TICKS) % 2 === 0 ? SFX.chime : SFX.blip);
+  }
+  if (ticks < 8 * REST_DELAY_TICKS) return;
   state.resting.ticks = 0;
+  sfx(state, SFX.confirm);
   const active = state.active;
   state.active = false;
   advanceHour(state);
