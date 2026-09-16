@@ -157,7 +157,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
-  document.getElementById('monitor-volume').append(volume);
   monitor.dataset.surround = options.surround;
   function syncVolume() {
     const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);

@@ -11,7 +11,9 @@
     <div id="monitor-controls" role="group" aria-label="Monitor controls">
       <span id="monitor-waveform" aria-hidden="true"></span>
       <span id="music-notes" class="monitor-speaker" aria-hidden="true" title="Music"></span>
-      <label id="monitor-volume">VOLUME</label>
+      <label id="monitor-volume">VOLUME
+        <input id="volume" type="range" min="0" max="100" step="10" aria-label="Volume" title="Volume">
+      </label>
       <button id="monitor-power" type="button" aria-label="Monitor power" aria-pressed="true" title="Turn off — reset game"><span class="power-switch" aria-hidden="true"><span class="power-light"></span></span><span>POWER</span></button>
     </div>
     </div>
