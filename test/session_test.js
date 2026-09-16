@@ -271,6 +271,18 @@ for(const [code,cls] of [['K0',CLASS.TOKEN],['H1',CLASS.SHUBA]]) {
   saveHere(a);saveHere(b);
 }
 
+// Replay presents tunes at normal speed; only a fresh viewer press skips one.
+{
+  const {startTune}=await import('../src/audio.js');
+  let fire=false;
+  const s=fresh();s.live={read:()=>({...IDLE,fire})};
+  startTune(s.state,0);const stall=s.state.stall;
+  s.playback=true;s.sourceRecord={events:[]};s.checkEndpoint=()=>{};s.skippable=true;
+  assert.equal(s.playbackDelay,1000/60);
+  advance(s,1);assert.equal(s.state.stall,stall-1);assert.equal(s.state.tuneWait,0);
+  fire=true;advance(s,1);assert.equal(s.state.tuneWait,null);
+}
+
 // Selecting the winning offer commits completion before any victory acknowledgement.
 {
   const s=imported(state=>{

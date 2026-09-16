@@ -66,6 +66,7 @@ export class Session {
     this.eventIndex = 0;
     this.lastJoy = IDLE;
     this.previousFire = false;
+    this.viewerFire = false;
     this.uiFire = true;
     this.history = [];
     this.path = [];
@@ -205,8 +206,12 @@ export class Session {
       }
     }
     if (s.tuneWait != null && !s.demo) {
-      if (this.playback) skipTune(s);
-      else if (this.read('t').press && this.skippable) this.skipTune();
+      if (this.playback) {
+        const fire = !!this.live.read('t').fire;
+        const press = fire && !this.viewerFire;
+        this.viewerFire = fire;
+        if (press && this.skippable) this.skipTune();
+      } else if (this.read('t').press && this.skippable) this.skipTune();
     }
     const tune = s.tuneWait;
     shellFrame(s);
@@ -316,7 +321,10 @@ export class Session {
     this.handoff();
   }
 
-  get playbackDelay() { return this.playback && (isIdle(this.lastJoy) || this.state.verb || this.state.stall) ? 0 : 1000 / 60; }
+  get playbackDelay() {
+    if (this.playback && this.state.tuneWait != null) return 1000 / 60;
+    return this.playback && (isIdle(this.lastJoy) || this.state.verb || this.state.stall) ? 0 : 1000 / 60;
+  }
   nextRoom() {
     if (!this.playback) return;
     const visit = this.state.visit;
