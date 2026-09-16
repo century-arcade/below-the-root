@@ -324,7 +324,9 @@ export class Session {
 
   get playbackDelay() {
     if (this.playback && this.state.tuneWait != null) return 1000 / 60;
-    return this.playback && (isIdle(this.lastJoy) || this.state.verb || this.state.stall) ? 0 : 1000 / 60;
+    // A glide continues moving after the controls are released.
+    const idle = isIdle(this.lastJoy) && !this.state.player.gliding;
+    return this.playback && (idle || this.state.verb || this.state.stall) ? 0 : 1000 / 60;
   }
   nextRoom() {
     if (!this.playback) return;

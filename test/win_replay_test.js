@@ -15,6 +15,29 @@ assert.equal(record.endpoint.kind, 'complete');
 assert.deepEqual(Object.keys(record).sort(),
   ['format', 'version', 'engine', 'seed', 'initial', 'events', 'endpoint', 'checkpoint'].sort());
 const idle = { read: () => J.idle };
+
+// Releasing the controls during a glide must not fast-forward its presentation.
+const pommaRecord = fixture('pomma-win');
+const pomma = Session.watch(data, idle, pommaRecord);
+let neutralGlideTicks = 0, idleTicks = 0;
+while (!pomma.playbackDone) {
+  if (!pomma.state.verb && !pomma.state.stall && pomma.state.tuneWait == null
+      && pomma.lastJoy.dx === 0 && pomma.lastJoy.dy === 0 && !pomma.lastJoy.fire) {
+    if (pomma.state.player.gliding) {
+      assert.equal(pomma.playbackDelay, 1000 / 60, `glide plays at normal speed at tick ${pomma.simticks}`);
+      neutralGlideTicks++;
+    } else {
+      assert.equal(pomma.playbackDelay, 0, 'idle gaps still fast-forward');
+      idleTicks++;
+    }
+  }
+  pomma.step();
+  pomma.state.events.length = 0;
+}
+assert.ok(neutralGlideTicks > 0, 'fixture exercises gliding with released controls');
+assert.ok(idleTicks > 0, 'fixture exercises idle skipping');
+assert.deepEqual(checkpoint(pomma.state), pommaRecord.checkpoint);
+
 const replay = Session.watch(data, idle, record);
 const autosave = new Autosave({ setItem() { assert.fail('watching cannot replace the live quest'); } });
 autosave.save(replay);
