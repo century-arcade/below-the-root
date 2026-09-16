@@ -49,9 +49,8 @@ export function displayRhythm(rhythm) {
 }
 
 // Small, consistent notation without depending on a platform's music-symbol font.
-export function rhythmSVG(rhythm, pitch = null) {
-  const y = pitch ? 21 - pitch.step * 1.5 : 12;
-  const stemDown = pitch && pitch.step >= 4;
+export function rhythmSVG(rhythm, pitch = null, stemDown = pitch && pitch.step >= 4) {
+  const y = pitch ? 21 - pitch.step * 1.2 : 12;
   const value = displayRhythm(rhythm);
   const hollow = value.denominator <= 2;
   const x = 5;
@@ -59,8 +58,8 @@ export function rhythmSVG(rhythm, pitch = null) {
     ? `<path d="M${x - 1.6} ${y}v7"/>`
     : `<path d="M${x + 1.6} ${y}v-7"/>`;
   const flag = stemDown
-    ? `<path d="M${x - 1.6} ${y + 7}q4 -2 2 -5"/>`
-    : `<path d="M${x + 1.6} ${y - 7}q4 2 2 5"/>`;
+    ? `<path d="M${x - 1.6} ${y + 7}q2.8 -1.4 1.4 -3.5"/>`
+    : `<path d="M${x + 1.6} ${y - 7}q2.8 1.4 1.4 3.5"/>`;
   const note = `<g>
       ${pitch?.accidental ? `<path d="M1 ${y - 3}v6m2 -6.5v6m-3 -4h4m-4 2h4"/>` : ''}
       <ellipse cx="5" cy="${y}" rx="1.6" ry="1.1" transform="rotate(-20 5 ${y})" fill="${hollow ? 'none' : 'currentColor'}" stroke="currentColor"/>
@@ -72,7 +71,7 @@ export function rhythmSVG(rhythm, pitch = null) {
     </g>`;
   const width = 17;
   const ledgers = pitch ? pitch.ledgerSteps.map(step => {
-    const lineY = 21 - step * 1.5;
+    const lineY = 21 - step * 1.2;
     return `<path d="M2 ${lineY}h6"/>`;
   }).join('') : '';
   const height = pitch ? 60 : 18;

@@ -263,6 +263,25 @@ test('silence discards a paused tune', () => {
   assert.equal(speaker.ringing.length, 0);
 });
 
+test('the upcoming score exists immediately and expires at its scheduled audio attacks', () => {
+  const speaker = new Speaker(music);
+  assert.deepEqual(speaker.upcomingNotes(), []);
+  unlock(speaker);
+  speaker.playTune(3, 0);
+  const future = speaker.notes.filter(note => note.start > 0);
+  assert.deepEqual(speaker.upcomingNotes(), future);
+  assert.ok(future.some(note => note.start === 144), 'the end is already present');
+  speaker.mute(true);
+  speaker.setVolume(0);
+  assert.deepEqual(speaker.upcomingNotes(), future);
+  speaker.ctx.currentTime = 48 / 60;
+  assert.ok(speaker.upcomingNotes().every(note => note.start > 48));
+  speaker.ctx.currentTime = 72 / 60;
+  assert.ok(speaker.upcomingNotes().every(note => note.start > 72), 'both chord voices expire together');
+  speaker.silence();
+  assert.deepEqual(speaker.upcomingNotes(), []);
+});
+
 test('recent notes follow actual scheduled onsets across voices and rests', () => {
   const speaker = new Speaker(music);
   assert.deepEqual(speaker.recentNotes(1.8), []);

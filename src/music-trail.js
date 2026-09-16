@@ -1,7 +1,6 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
 export function createMusicTrail(element, waveformElement, settings = { lifetime: 2.4 }) {
-  let lifetime = settings.lifetime;
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
   const waveform = element.ownerDocument.createElement('canvas');
@@ -18,21 +17,13 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
   const visible = new Map();
   const bars = new Map();
   let currentTune = null;
-  function insert(glyph, at, now, lead = 0) {
+  function insert(glyph, at) {
     glyph.dataset.at = at;
-    glyph.style.animationDuration = `${lifetime + lead}s`;
-    glyph.style.animationDelay = `${at - now - lead}s`;
     const next = [...staff.children].find(child => Number(child.dataset.at) > at);
     staff.insertBefore(glyph, next || null);
   }
   return speaker => {
-    if (lifetime !== settings.lifetime) {
-      lifetime = settings.lifetime;
-      staff.replaceChildren();
-      visible.clear();
-      bars.clear();
-    }
-    const notes = new Set(speaker.recentNotes(lifetime));
+    const notes = new Set(speaker.upcomingNotes());
     const silent = speaker.muted || speaker.volume === 0;
     const samples = silent ? speaker.effectWaveform() : null;
     const tunePlaying = speaker.playing && speaker.ctx.currentTime < speaker.tuneEnd;
@@ -43,8 +34,8 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       bars.clear();
       currentTune = speaker.playing;
     }
-    // Bars enter from the right before their onset, then travel alongside the notes.
-    const measures = speaker.recentMeasures(lifetime, lifetime);
+    // Mount the remaining score immediately; the audio clock moves it to each onset.
+    const measures = speaker.recentMeasures(0, Infinity);
     const recent = new Set(measures.map(({ measure }) => measure));
     for (const [measure, bar] of bars) {
       if (recent.has(measure)) continue;
@@ -55,7 +46,7 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       if (bars.has(measure)) continue;
       const bar = element.ownerDocument.createElement('span');
       bar.dataset.measure = measure;
-      insert(bar, at, speaker.ctx.currentTime, lifetime);
+      insert(bar, at);
       bars.set(measure, bar);
     }
     const flatline = !samples;
@@ -82,6 +73,12 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       glyph.remove();
       visible.delete(note);
     }
+    const chords = new Map();
+    for (const note of notes) {
+      const steps = chords.get(note.at) || [];
+      steps.push(staffPitch(note.midi).step);
+      chords.set(note.at, steps);
+    }
     for (const note of notes) {
       if (visible.has(note)) continue;
       const glyph = element.ownerDocument.createElement('span');
@@ -91,9 +88,16 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       glyph.dataset.staffStep = pitch.step;
       if (pitch.accidental) glyph.dataset.accidental = pitch.accidental;
       if (pitch.ledgerSteps.length) glyph.dataset.ledgerLines = pitch.ledgerSteps.length;
-      glyph.innerHTML = rhythmSVG(note.rhythm, pitch);
-      insert(glyph, note.at, speaker.ctx.currentTime);
+      const steps = chords.get(note.at);
+      const stemDown = Math.min(...steps) + Math.max(...steps) >= 8;
+      glyph.dataset.stem = stemDown ? 'down' : 'up';
+      glyph.innerHTML = rhythmSVG(note.rhythm, pitch, stemDown);
+      insert(glyph, note.at);
       visible.set(note, glyph);
+    }
+    for (const glyph of staff.children) {
+      const remaining = Number(glyph.dataset.at) - speaker.ctx.currentTime;
+      glyph.style.transform = `translateX(calc(${remaining / settings.lifetime * 100}cqw - 30px))`;
     }
   };
 }

@@ -1,4 +1,4 @@
-"""Music symbols scroll by onset time, including muted playback and tune cancellation."""
+"""Upcoming music symbols disappear at onset time, including muted playback and tune cancellation."""
 import os
 from playwright.sync_api import sync_playwright, expect
 
@@ -16,7 +16,7 @@ with sync_playwright() as p:
     expect(trail.locator('[data-register="bass"]')).to_have_count(0)
     expect(trail).to_have_attribute('aria-hidden', 'true')
     expect(trail.locator('[data-rhythm]')).to_have_count(0)
-    # Notes retain pitch and their onset offsets become animation delays.
+    # The whole upcoming score retains its pitch and rhythm.
     for motion in ['no-preference', 'reduce']:
         page.emulate_media(reduced_motion=motion)
         page.evaluate('''async () => {
@@ -30,7 +30,7 @@ with sync_playwright() as p:
                 {voice: 1, midi: 48, rhythm: noteRhythm(0, 144), at: 3.8},
             ];
             window.noteSpeaker = {playing: {}, tuneEnd: 20, ctx: {currentTime: 2},
-                recentNotes: () => noteBatch, recentMeasures: () => [], effectWaveform: () => null};
+                upcomingNotes: () => noteBatch, recentMeasures: () => [], effectWaveform: () => null};
             window.updateNotes = createMusicTrail(element, document.getElementById('monitor-waveform'));
             updateNotes(noteSpeaker);
             window.firstGlyph = element.querySelector('[data-rhythm="quarter"]');
@@ -41,7 +41,6 @@ with sync_playwright() as p:
         expect(glyphs.locator('svg')).to_have_count(4)
         assert treble.evaluate_all('(nodes) => nodes.map(n => n.dataset.rhythm)') == ['quarter', 'half', 'eighth', 'whole']
         expect(treble_staff.locator('[data-midi="48"]')).to_have_attribute('data-ledger-lines', '4')
-        assert glyphs.evaluate_all('(nodes) => nodes.map(n => n.style.animationDelay)') == ['0s', '0.3s', '0.9s', '1.8s']
         page.evaluate('updateNotes(noteSpeaker)')
         expect(glyphs).to_have_count(4)
         assert page.evaluate("document.querySelector('#music-notes [data-rhythm=quarter]') === firstGlyph")
@@ -98,7 +97,7 @@ with sync_playwright() as p:
         page.evaluate("""() => {
             window.traceSpeaker = {muted: true, effect: {}, ctx: {currentTime: 0},
                 effectWaveform: () => new Float32Array([0, 0.5, -0.5, 0]),
-                recentNotes: () => [], recentMeasures: () => []};
+                upcomingNotes: () => [], recentMeasures: () => []};
             updateNotes(traceSpeaker);
             window.activeTrace = document.querySelector('.sound-waveform').toDataURL();
             traceSpeaker.effectWaveform = () => null;
@@ -116,7 +115,8 @@ with sync_playwright() as p:
         page.evaluate('effectSpeaker.playTune(0, 0); updateNotes(effectSpeaker)')
         expect(waveform).to_be_hidden()
         expect(treble_staff).to_be_visible()
-        expect(glyphs).to_have_count(1)
+        assert glyphs.count() == page.evaluate('effectSpeaker.upcomingNotes().length')
+        assert glyphs.count() > 1
         # The next measure exists before playback reaches it, even while muted.
         page.evaluate('effectSpeaker.ctx.suspend()')
         page.evaluate('''() => {
@@ -125,9 +125,18 @@ with sync_playwright() as p:
             Object.defineProperty(effectSpeaker, 'ready', {value: true});
             updateNotes(effectSpeaker);
         }''')
-        expect(bars).to_have_count(2)
-        assert bars.evaluate_all('(nodes) => nodes.map(n => Number(n.dataset.measure))') == [0, 1]
+        assert bars.count() == page.evaluate('effectSpeaker.recentMeasures(0, Infinity).length')
+        assert bars.count() > 2
+        assert glyphs.count() == page.evaluate('effectSpeaker.upcomingNotes().length')
         assert page.evaluate("Number(document.querySelector('#music-notes [data-measure=\"1\"]').dataset.at) > effectSpeaker.ctx.currentTime")
+        # Every simultaneous attack uses one stem direction, even across the middle line.
+        page.evaluate('''async () => {
+            const { noteRhythm } = await import('/music-notation.js');
+            noteBatch = [60, 77].map(midi => ({midi, at: 5, rhythm: noteRhythm(0, 18)}));
+            noteSpeaker.playing = {};
+            updateNotes(noteSpeaker);
+        }''')
+        assert glyphs.evaluate_all('(nodes) => new Set(nodes.map(n => n.dataset.stem)).size') == 1
         page.evaluate('effectSpeaker.silence(); updateNotes(effectSpeaker); effectSpeaker.ctx.close()')
         expect(glyphs).to_have_count(0)
     assert not errors, errors

@@ -152,6 +152,11 @@ export class Speaker {
   }
 
   // Follow the audio clock, including while game ticks wait or the volume is zero.
+  upcomingNotes() {
+    if (!this.ready) return [];
+    return this.notes.filter(note => note.at > this.ctx.currentTime);
+  }
+
   recentNotes(seconds) {
     if (!this.ready) return [];
     const now = this.ctx.currentTime;
