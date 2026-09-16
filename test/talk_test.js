@@ -114,19 +114,19 @@ test('BUY needs a token, then grants TAKE of the stock', (s) => {
   assert.equal(carriedOf(s, CLASS.TOKEN), null);
 });
 
-test('BUY reserves the stock weight less the token it spends', (s) => {
+test('BUY reserves the full stock weight because spending tokens frees no capacity', (s) => {
   const c = faceCreature(s, 26);
   const stock = c.def.params.stock_item_class;
   assert.equal(s.data.items[stock].weight, 5);
   const token = give(s, CLASS.TOKEN);
   for (let i = 0; i < 5; i++) give(s, CLASS.SHUBA);
   s.player.stamina = 4;
-  assert.equal(weightCarried(s), carryLimit(s) - 4);
+  assert.equal(weightCarried(s), carryLimit(s) - 5);
   assert.equal(run(s, menu('BUY'))[0], "SORRY, YOU'RE CARRYING TOO MUCH");
   assert.equal(carriedOf(s, CLASS.TOKEN), token);
   assert.equal(s.offered, null);
   s.player.stamina = 5;
-  assert.equal(weightCarried(s), carryLimit(s) - 5);
+  assert.equal(weightCarried(s), carryLimit(s) - 6);
   assert.equal(run(s, menu('BUY'))[0], 'TAKE WHICHEVER ONE PLEASES YOU');
   assert.equal(carriedOf(s, CLASS.TOKEN), null);
   assert.equal(s.offered, stock);
@@ -135,6 +135,22 @@ test('BUY reserves the stock weight less the token it spends', (s) => {
   s.player.row = item.row;
   assert.equal(run(s, menu('TAKE'))[0], `YOU FIND ${s.data.items[stock].name}`);
   assert.ok(item.carried);
+});
+
+for (const stamina of [4, 3]) test(`TAKE tokens with a full or overloaded pack (stamina ${stamina})`, (s) => {
+  for (let i = 0; i < 6; i++) give(s, CLASS.SHUBA);
+  s.player.stamina = stamina;
+  assert.ok(weightCarried(s) >= carryLimit(s));
+  const tokens = s.objects.filter(o => o.exists && !o.carried && o.class === CLASS.TOKEN
+    && o.room === s.nidPlace.room);
+  assert.ok(tokens.length > 0);
+  for (const token of tokens) {
+    s.player.col = token.col;
+    s.player.row = token.row;
+    assert.equal(run(s, menu('TAKE'))[0], 'YOU FIND A TOKEN');
+    assert.ok(token.carried);
+    assert.equal(weightCarried(s), 30, 'collecting tokens adds no weight');
+  }
 });
 
 test('SELL a shuba for a token', (s) => {

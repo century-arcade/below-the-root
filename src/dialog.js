@@ -106,7 +106,7 @@ export function* buy(state) {
   const token = carriedOf(state, CLASS.TOKEN);
   if (!token) return tell(state, 'buy_needs_tokens');
   const stock = c.def.params.stock_item_class;
-  // buy reserve: the token goes before the TAKE, so its weight is free
+  // Reserve room for the stock after payment.
   const reserve = state.data.items[stock].weight - weightOf(state, token);
   if (!canCarry(state, reserve)) return tell(state, 'buy_too_heavy');
   destroy(token);

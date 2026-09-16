@@ -6,7 +6,7 @@ import { CLASS } from '../src/data.js';
 import { acquired, completion, playTime } from '../src/progress.js';
 import { exportSave, importSave } from '../src/save.js';
 import { gainSpirit, speak } from '../src/dialog.js';
-import { destroy, mintToken } from '../src/inventory.js';
+import { carried, destroy, mintToken, weightCarried } from '../src/inventory.js';
 import { enterRoom } from '../src/world.js';
 import { runMenu } from '../src/verbs.js';
 import { clearPanel } from '../src/panel.js';
@@ -40,12 +40,13 @@ for (const character of data.characters) {
     for (const input of menuReads('TAKE')) take.next(input);
     if (token.carried) {
       collected++;
-      destroy(token); // Spending keeps the pack light and the collection credit intact.
     }
     quest.clock.day = collected + 1; // Each gift-giver offers only one token per day.
   }
   assert.equal(collected, maxima[character.id], `${character.name}'s obtainable world tokens`);
   assert.equal(quest.progress.tokenTotal, collected);
+  assert.equal(carried(quest).length, collected, 'all obtainable tokens fit in the pack together');
+  assert.equal(weightCarried(quest), 0, 'tokens do not count toward carrying capacity');
   assert.equal(completion(quest), 4, 'all obtainable tokens earn the full token share');
   quest.progress.spirit = 35;
   quest.progress.elixirs = 5;

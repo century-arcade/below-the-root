@@ -30,7 +30,7 @@ export function onFloor(state) {
 }
 
 export function weightOf(state, o) {
-  return state.data.items[o.class].weight;
+  return o.class === CLASS.TOKEN ? 0 : state.data.items[o.class].weight;
 }
 
 export function weightCarried(state) {
@@ -41,9 +41,9 @@ export function carryLimit(state) {
   return state.player.stamina + 26;
 }
 
-// refused when what you carry plus the new item would reach the limit
+// Weightless items can always be carried; weighted items must stay below the limit.
 export function canCarry(state, weight) {
-  return weightCarried(state) + weight < carryLimit(state);
+  return weight === 0 || weightCarried(state) + weight < carryLimit(state);
 }
 
 export function destroy(o) {
