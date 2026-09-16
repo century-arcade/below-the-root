@@ -152,9 +152,23 @@ export class Speaker {
   }
 
   // Follow the audio clock, including while game ticks wait or the volume is zero.
+  notationTime() {
+    const now = this.ctx?.currentTime ?? 0;
+    if (!this.playing || now >= this.tuneEnd) return now;
+    const attacks = [...new Set(this.notes.map(note => note.at))].sort((a, b) => a - b);
+    const index = attacks.findLastIndex(at => at <= now);
+    if (index < 0) return attacks.length ? now - ((attacks[1] ?? this.tuneEnd) - attacks[0]) : now;
+    const current = attacks[index];
+    const next = attacks[index + 1] ?? this.tuneEnd;
+    const previous = attacks[index - 1] ?? current - (next - current);
+    // Move the whole score continuously, one attack behind the sound.
+    return previous + (current - previous) * (now - current) / (next - current);
+  }
+
   upcomingNotes() {
     if (!this.ready) return [];
-    return this.notes.filter(note => note.at > this.ctx.currentTime);
+    const time = this.notationTime();
+    return this.notes.filter(note => note.at > time);
   }
 
   recentNotes(seconds) {

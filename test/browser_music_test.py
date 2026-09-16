@@ -1,4 +1,4 @@
-"""Upcoming music symbols disappear at onset time, including muted playback and tune cancellation."""
+"""Music symbols remain through their sounding attack, including muted playback and tune cancellation."""
 import os
 from playwright.sync_api import sync_playwright, expect
 
@@ -125,7 +125,7 @@ with sync_playwright() as p:
             Object.defineProperty(effectSpeaker, 'ready', {value: true});
             updateNotes(effectSpeaker);
         }''')
-        assert bars.count() == page.evaluate('effectSpeaker.recentMeasures(0, Infinity).length')
+        assert bars.count() == page.evaluate('effectSpeaker.recentMeasures(effectSpeaker.ctx.currentTime - effectSpeaker.notationTime(), Infinity).length')
         assert bars.count() > 2
         assert glyphs.count() == page.evaluate('effectSpeaker.upcomingNotes().length')
         assert page.evaluate("Number(document.querySelector('#music-notes [data-measure=\"1\"]').dataset.at) > effectSpeaker.ctx.currentTime")

@@ -24,6 +24,8 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
   }
   return speaker => {
     const notes = new Set(speaker.upcomingNotes());
+    const now = speaker.ctx?.currentTime ?? 0;
+    const notationTime = speaker.notationTime?.() ?? now;
     const silent = speaker.muted || speaker.volume === 0;
     const samples = silent ? speaker.effectWaveform() : null;
     const tunePlaying = speaker.playing && speaker.ctx.currentTime < speaker.tuneEnd;
@@ -34,8 +36,8 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       bars.clear();
       currentTune = speaker.playing;
     }
-    // Mount the remaining score immediately; the audio clock moves it to each onset.
-    const measures = speaker.recentMeasures(0, Infinity);
+    // Keep the sounding attack on the score until the following attack.
+    const measures = speaker.recentMeasures(now - notationTime, Infinity);
     const recent = new Set(measures.map(({ measure }) => measure));
     for (const [measure, bar] of bars) {
       if (recent.has(measure)) continue;
@@ -96,7 +98,7 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       visible.set(note, glyph);
     }
     for (const glyph of staff.children) {
-      const remaining = Number(glyph.dataset.at) - speaker.ctx.currentTime;
+      const remaining = Number(glyph.dataset.at) - notationTime;
       glyph.style.transform = `translateX(calc(${remaining / settings.lifetime * 100}cqw - 30px))`;
     }
   };
