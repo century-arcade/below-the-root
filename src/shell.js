@@ -13,7 +13,10 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // once a frame: the button ends a demo, and an idle room loop hands the screen to the menu
 export function shellFrame(state) {
-  if (state.demo && state.stick?.read('d').press) endDemo(state);
+  if (state.demo && state.stick?.read('d', 'trigger').press) {
+    state.commands?.handoff({ movement: true });
+    endDemo(state);
+  }
   if (!state.active && !state.verb && !state.stall && !state.demo) openMenu(state);
 }
 
@@ -76,8 +79,8 @@ export function* mainMenu(state) {
 // every screen but the main menu: wait for the stick to centre and the button up, then a push or fire
 function* nextPush(pushed) {
   let j = yield;
-  if (j.move) {
-    while (!j.menuPress && !pushed(j)) j = yield;
+  if (j.observed) {
+    while (!j.fire && !pushed(j)) j = yield;
     return j;
   }
   while (j.fire || pushed(j)) j = yield;

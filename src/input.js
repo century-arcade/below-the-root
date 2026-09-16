@@ -1,4 +1,9 @@
-// Joystick levels gain a press edge at each session or demo read.
+// Live consumers select delivery independently of recording/demo read kinds:
+// continuous: movement and held trigger (walking, jumping, gliding, REST);
+// steer: continuous movement with one trigger per press (pointing, spirit bell);
+// press: ordered gestures (menus, choosers, pages, dialogue);
+// trigger: ordered fire only, leaving movement owned by its consumer (music/demo).
+// Sampled demo and replay levels retain their original edge/read contracts.
 
 export function isEditing(target) {
   return !!target?.closest?.('input:not([type="file"]), textarea, select, [contenteditable], dialog');
@@ -26,13 +31,15 @@ const KEYS = {
   W: 'up', S: 'down', A: 'left', D: 'right', f: 'fire', F: 'fire',
 };
 
-// Gameplay latches short taps; presentation reads consume an ordered press queue.
+// Physical transitions and held state share one owner. Consumers choose a policy.
 export class Keyboard {
   constructor(target = window) {
     this.sources = new Map();
     this.devices = new Set();
     // Keep physical presses distinct even when release/repress happens between reads.
-    this.menuEvents = [];
+    this.events = [];
+    this.sequence = 0;
+    this.consumed = 0;
     this.pace = 5;
     this.onKey = null;
     this.selectWithF = () => false;
@@ -56,66 +63,117 @@ export class Keyboard {
   }
 
   source(name) {
-    if (!this.sources.has(name)) this.sources.set(name, { down: new Set(), tapped: new Set(), blocked: new Set() });
+    if (!this.sources.has(name)) this.sources.set(name, { down: new Map(), blocked: new Set() });
     return this.sources.get(name);
   }
 
   press(key, source = 'keyboard') {
     const s = this.source(source);
     if (s.blocked.has(key) || s.down.has(key)) return;
-    s.down.add(key); s.tapped.add(key);
-    this.queueMenu(key, source);
+    const id = ++this.sequence;
+    s.down.set(key, id);
+    this.events.push({ keys: [key], source, id, down: true });
   }
   release(key, source = 'keyboard') {
     const s = this.source(source);
     const released = s.down.delete(key);
     s.blocked.delete(key);
-    if (released && key === 'fire') this.queueMenu(null, source);
+    if (released) this.events.push({ keys: [key], source, id: ++this.sequence, down: false });
   }
-  tap(key, source = 'pointer') {
-    this.source(source).tapped.add(key);
-    this.queueMenu(key, source);
-  }
-  queueMenu(key, source) {
-    const move = { dx: +(key === 'right') - +(key === 'left'), dy: +(key === 'down') - +(key === 'up') };
-    const fire = key === 'fire' || [...this.sources.values()].some(s => s.down.has('fire'));
-    this.menuEvents.push({ ...move, fire, move, menuPress: key === 'fire', source });
+  tap(key, source = 'pointer') { this.gesture([key], source); }
+  gesture(keys, source = 'pointer') {
+    this.events.push({ keys: [...keys], source, id: ++this.sequence, down: true });
   }
   reset(source) {
+    if (!source) for (const device of this.devices) device.cancel(true);
     if (source) this.sources.delete(source); else this.sources.clear();
-    this.menuEvents = source ? this.menuEvents.filter(e => e.source !== source) : [];
+    this.events = source ? this.events.filter(e => e.source !== source) : [];
+    if (!source) this.deliveredFire = false;
   }
   attach(device) { this.devices.add(device); }
-  handoff() {
-    this.menuEvents = [];
-    this.blockFireUntilRelease();
+  handoff({ movement = false } = {}) {
+    this.blockFireUntilRelease(this.consumed);
+    if (movement) {
+      this.events = this.events.filter(e => e.id > this.consumed);
+      for (const s of this.sources.values()) {
+        for (const [key, id] of s.down) if (id <= this.consumed) s.blocked.add(key);
+      }
+    }
+  }
+  blockFireUntilRelease(through = this.sequence) {
+    this.events = this.events.filter(e => e.id > through || !e.keys.includes('fire'));
+    for (const s of this.sources.values()) {
+      if (s.down.has('fire') && s.down.get('fire') <= through) s.blocked.add('fire');
+    }
+  }
+  // A control-seizing message rejects input that predates its appearance.
+  fresh() {
     for (const device of this.devices) device.cancel(true);
+    this.events = [];
+    for (const s of this.sources.values()) for (const key of s.down.keys()) s.blocked.add(key);
+    return true;
   }
-  blockFireUntilRelease() {
+  held() {
+    const keys = new Set();
     for (const s of this.sources.values()) {
-      s.tapped.delete('fire');
-      if (s.down.delete('fire')) s.blocked.add('fire');
+      for (const key of s.down.keys()) if (!s.blocked.has(key)) keys.add(key);
     }
+    return keys;
   }
+  read(policy = 'continuous') {
+    const held = this.held();
+    let event;
+    if (policy === 'trigger') {
+      // Music/demo interruption owns only triggers, never queued movement.
+      const index = this.events.findIndex(e => e.down && e.keys.includes('fire'));
+      if (index >= 0) [event] = this.events.splice(index, 1);
+    } else {
+      while (this.events.length && !this.events[0].down) this.events.shift();
+      event = this.events[0];
+      if (policy === 'continuous') {
+        const keys = new Set(), presses = new Set();
+        while (this.events.length) {
+          const next = this.events[0];
+          if (!next.down && keys.size) break;
+          if (next.down && next.keys.some(k => presses.has(`${next.source}:${k}`))) break;
+          // A neutral effective sample separates rapid triggers in the existing
+          // level-based recording format. Physical holds remain in sources.
+          if (next.down && next.keys.includes('fire') && this.deliveredFire) break;
+          this.events.shift();
+          if (!next.down) continue;
+          for (const key of next.keys) { keys.add(key); presses.add(`${next.source}:${key}`); }
+          this.consumed = Math.max(this.consumed, next.id);
+          if (keys.has('fire')) break;
+        }
+        event = { keys: [...keys], id: this.consumed };
+      } else if (event) this.events.shift();
+    }
+    if (event) this.consumed = Math.max(this.consumed, event.id);
+    const pressed = new Set(event?.keys || []);
+    if (policy === 'press' || policy === 'trigger') {
+      const move = axes(pressed);
+      return { ...move, fire: pressed.has('fire'), move, observed: true };
+    }
+    // Direction holds remain continuous, while a completed tap gets one read.
+    const movement = new Set(held);
+    for (const axis of [['left', 'right'], ['up', 'down']]) {
+      if (!axis.some(k => pressed.has(k)) || axis.every(k => held.has(k))) continue;
+      for (const key of axis) {
+        movement.delete(key);
+        if (pressed.has(key)) movement.add(key);
+      }
+    }
+    if (pressed.has('fire')) movement.add('fire');
+    if (policy === 'continuous' && !pressed.has('fire')
+        && this.events.some(e => e.down && e.keys.includes('fire'))) movement.delete('fire');
+    const fire = policy === 'steer' ? pressed.has('fire') : movement.has('fire');
+    if (policy === 'continuous') this.deliveredFire = fire;
+    return { ...axes(movement), fire, ...(policy === 'steer' ? { observed: true } : {}) };
+  }
+}
 
-  read(kind) {
-    const event = kind === 'v' ? this.menuEvents.shift() : null;
-    if (kind !== 'v') this.menuEvents = [];
-    const d = new Set();
-    for (const s of this.sources.values()) {
-      for (const key of [...s.down, ...s.tapped]) d.add(key);
-      s.tapped.clear();
-    }
-    if (kind === 'v') {
-      if (event) { const { source, ...joy } = event; return joy; }
-      return { dx: 0, dy: 0, fire: d.has('fire'), move: { dx: 0, dy: 0 } };
-    }
-    return {
-      dx: (d.has('right') ? 1 : 0) - (d.has('left') ? 1 : 0),
-      dy: (d.has('down') ? 1 : 0) - (d.has('up') ? 1 : 0),
-      fire: d.has('fire'),
-    };
-  }
+function axes(keys) {
+  return { dx: +keys.has('right') - +keys.has('left'), dy: +keys.has('down') - +keys.has('up') };
 }
 
 // Menus consume a direction once until that axis is released or changes direction.
@@ -283,14 +341,16 @@ export class Pointer {
       this.pending = null;
       return this.walkTo(x, y);
     }
-    if (this.walk && keys.size) return this.walkTo(x, y);
+    if (this.walk) {
+      if (keys.size) return this.walkTo(x, y);
+      return this.stopWalk();
+    }
     this.stopWalk();
     if (d.here && d.own !== d.here) return this.walkTo(x, y);
     if (!keys.size || d.here) return this.keys.tap('fire');
     this.pending = setTimeout(() => {
       this.pending = null;
-      for (const k of keys) this.keys.tap(k);
-      this.keys.tap('fire');
+      this.keys.gesture([...keys, 'fire']);
     }, DOUBLE_MS);
   }
 
@@ -304,42 +364,47 @@ export class Gamepad {
     this.keys = keys;
     keys.attach(this);
     this.nav = nav;
-    this.held = new Set();
+    this.held = new Map();
+    this.blocked = new Map();
   }
 
   pad() {
     const pads = this.nav?.getGamepads?.() ?? [];
-    for (const pad of pads) if (pad?.connected) return pad;
+    for (let i = 0; i < pads.length; i++) if (pads[i]?.connected) return { pad: pads[i], index: i };
     return null;
   }
 
   wanted(pad) {
-    const keys = new Set();
-    for (const [i, key] of Object.entries(PAD_DPAD)) if (pad.buttons[i]?.pressed) keys.add(key);
+    const keys = new Map();
+    for (const [i, key] of Object.entries(PAD_DPAD)) if (pad.buttons[i]?.pressed) keys.set(`button${i}`, key);
     const [x = 0, y = 0] = pad.axes;
-    if (x <= -PAD_DEAD) keys.add('left'); else if (x >= PAD_DEAD) keys.add('right');
-    if (y <= -PAD_DEAD) keys.add('up'); else if (y >= PAD_DEAD) keys.add('down');
-    if ([0, 1, 2, 3].some(i => pad.buttons[i]?.pressed)) keys.add('fire');
+    if (x <= -PAD_DEAD) keys.set('axisX', 'left'); else if (x >= PAD_DEAD) keys.set('axisX', 'right');
+    if (y <= -PAD_DEAD) keys.set('axisY', 'up'); else if (y >= PAD_DEAD) keys.set('axisY', 'down');
+    for (let i = 0; i < 4; i++) if (pad.buttons[i]?.pressed) keys.set(`button${i}`, 'fire');
     return keys;
   }
 
   poll() {
-    const pad = this.pad();
-    if (!pad) { this.cancel(); return; }
+    const connected = this.pad();
+    if (!connected) { this.cancel(); this.index = null; return; }
+    const { pad, index } = connected;
+    if (this.index != null && this.index !== index) this.cancel();
+    this.index = index;
     const keys = this.wanted(pad);
-    if (this.blocked) {
-      if (!keys.size) this.blocked = false;
-      return;
+    for (const [source, key] of this.blocked) {
+      if (keys.get(source) === key) keys.delete(source);
+      else this.blocked.delete(source);
     }
-    for (const key of this.held) if (!keys.has(key)) this.keys.release(key, 'gamepad');
-    for (const key of keys) if (!this.held.has(key)) this.keys.press(key, 'gamepad');
+    for (const [source, key] of this.held) if (keys.get(source) !== key) this.keys.release(key, `gamepad:${source}`);
+    for (const [source, key] of keys) if (this.held.get(source) !== key) this.keys.press(key, `gamepad:${source}`);
     this.held = keys;
   }
 
   cancel(untilRelease = false) {
-    this.blocked ||= untilRelease;
+    const connected = untilRelease && this.pad();
+    this.blocked = connected ? this.wanted(connected.pad) : new Map();
     this.held.clear();
-    this.keys.reset('gamepad');
+    for (const source of this.keys.sources.keys()) if (source.startsWith('gamepad:')) this.keys.reset(source);
   }
 }
 
@@ -411,18 +476,20 @@ export class DemoInput {
 }
 
 // verbs are generators: each `yield` is one joystick read, handed in by the tick
-export function* fireUp() {
+export function* fireUp(policy = 'press') {
   let joy;
-  do { joy = yield; } while (joy.fire);
+  do { joy = yield { policy }; } while (!joy.observed && joy.fire);
   return joy;
 }
 
 export function* buttonPress() {
-  yield* fireUp();
-  while (!(yield).fire);
+  const first = yield* fireUp();
+  if (first.observed && first.fire) return;
+  while (!(yield { policy: 'press' }).fire);
 }
 
-export function* anyInput() {
-  yield* fireUp();
-  while (isIdle(yield));
+export function* anyInput(policy = 'press') {
+  const first = yield* fireUp(policy);
+  if (first.observed && !isIdle(first)) return;
+  while (isIdle(yield { policy }));
 }

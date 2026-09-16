@@ -179,7 +179,8 @@ export function endDemo(state) {
 }
 
 // a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait
-export function startVerb(state, gen) {
+export function startVerb(state, gen, carryMovement = false) {
+  state.verbCarryMovement = carryMovement;
   state.commandMenuOpen = false;
   state.verb = gen;
   state.verbWait = 0;
@@ -191,17 +192,18 @@ function driveVerb(state) {
     state.verbWait -= 1;
     return;
   }
-  advanceVerb(state, state.verb.next(state.input.read('v')));
+  advanceVerb(state, state.verb.next(state.input.read('v', state.verbPolicy)));
 }
 
 function advanceVerb(state, r) {
   if (r.done) return endVerb(state);
-  state.verbWait = r.value ?? (state.input.pace || 0);
+  state.verbPolicy = r.value?.policy || 'press';
+  state.verbWait = (typeof r.value === 'number' ? r.value : undefined) ?? (state.input.pace || 0);
 }
 
 function endVerb(state) {
   state.verb = null;
-  state.commands?.handoff();
+  state.commands?.handoff({ movement: !state.verbCarryMovement });
   if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);
   if (!state.ended) state.active = true;
@@ -247,7 +249,7 @@ function resolveStop(state) {
     case 'collapse':
       return startVerb(state, message(state, () => loseDay(state, 'YOU SPENT A DAY RECOVERING', 'FROM A LACK OF', COLLAPSE[stop.cause])));
     case 'bell':
-      return startVerb(state, message(state, () => say(state, 'THE SPIRIT BELL RINGS'), false));
+      return startVerb(state, message(state, () => say(state, 'THE SPIRIT BELL RINGS'), false), true);
     case 'timeout':
       return startVerb(state, timeOver(state));
     case 'demo_room':
@@ -273,8 +275,10 @@ function showPage(state, page) {
 // shell.md: every message the shell prints waits for the button or the stick, then clears
 function* message(state, print, waitForRelease = true) {
   print();
-  if (waitForRelease) while (!isIdle(yield));
-  yield* anyInput();
+  if (waitForRelease) {
+    if (!state.input.fresh?.()) while (!isIdle(yield));
+  }
+  yield* anyInput(waitForRelease ? 'press' : 'steer');
   clearPanel(state);
 }
 

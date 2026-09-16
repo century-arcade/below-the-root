@@ -73,7 +73,13 @@ gamepad.poll();
 gamepad.cancel();
 keys.reset();
 assert.deepEqual(keys.read(), IDLE, 'cancellation clears unread gamepad input');
-assert.deepEqual(read(), { dx: 1, dy: 0, fire: true }, 'held pad is detected again after input is dropped');
+assert.deepEqual(read(), IDLE, 'reset blocks stale gamepad holds');
+pads[0].buttons[15].pressed = false;
+pads[0].buttons[12].pressed = true;
+assert.deepEqual(read(), { ...IDLE, dy: -1 }, 'fresh direction works while an old trigger remains held');
+pads[0].buttons[0].pressed = false; read();
+pads[0].buttons[0].pressed = true;
+assert.deepEqual(read(), { ...IDLE, dy: -1, fire: true }, 'fresh trigger works without requiring all controls neutral');
 
 console.log('gamepad_test: d-pad, stick dead zone, diagonals, fire, holds, release, disconnect and source isolation passed');
 

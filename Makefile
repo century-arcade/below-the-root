@@ -59,6 +59,7 @@ test:
 	$(NODE_TEST) test/shell_test.js
 	$(NODE_TEST) test/audio_test.js
 	$(NODE_TEST) test/input_test.js
+	$(NODE_TEST) test/input_contract_test.js
 	$(NODE_TEST) test/menu_test.js
 	$(NODE_TEST) test/gamepad_test.js
 	$(NODE_TEST) test/session_test.js

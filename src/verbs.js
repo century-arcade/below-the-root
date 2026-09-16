@@ -313,9 +313,11 @@ function* point(state, choice) {
     return { col: at[0], row: at[1] };
   }
   const ptr = state.pointer;
-  yield* fireUp();
+  let first = yield* fireUp('steer');
+  if (!first.observed) first = null;
   for (;;) {
-    const j = yield;
+    const j = first ?? (yield { policy: 'steer' });
+    first = null;
     if (j.fire) {
       if (state.commandChoice) state.commandChoice[choice] = [ptr.col, ptr.row];
       return ptr;

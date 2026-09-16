@@ -132,12 +132,12 @@ const secondItem = give(itemState, CLASS.FRUIT);
 const chooser = pickItem(itemState);
 chooser.next();
 tapKey('ArrowDown');
-chooser.next(keyboard.read('v'));
+chooser.next(keyboard.read('press'));
 assert.match(lines(itemState)[0], new RegExp(`${secondItem.name}$`), 'item chooser keeps its opening press');
 tapKey('ArrowUp');
 tapKey('ArrowDown');
 tapKey('ArrowUp');
-for (let i = 0; i < 10; i++) chooser.next(keyboard.read('v'));
+for (let i = 0; i < 10; i++) chooser.next(keyboard.read('press'));
 assert.match(lines(itemState)[0], new RegExp(`${firstItem.name}$`), 'item chooser consumes rapid taps exactly once');
 
 keyboard.reset();

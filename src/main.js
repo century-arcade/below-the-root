@@ -293,7 +293,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     mapViewport.addEventListener(event, endMapDrag);
   }
   const saveNow = () => autosave.save(session).reason !== 'failed';
-  const dropInput = () => { seekKey = null; pointer.cancel(); gamepad.cancel(true); stick.reset(); };
+  const dropInput = () => { seekKey = null; stick.reset(); };
   addEventListener('hashchange', dropInput);
   const power = document.getElementById('monitor-power');
   power.onclick = () => {

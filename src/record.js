@@ -72,12 +72,12 @@ export class Session {
     this.path = [];
     this.record = null;
     this.boundary = null;
-    const stick = { pace: 5, read: kind => this.read(kind) };
+    const stick = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.() };
     this.state = newState(data, stick, { rng: random(seed) });
     this.state.stick = stick;
     this.state.commands = {
       execute: (name, choices, options) => this.command(name, choices, options),
-      handoff: () => this.handoff(),
+      handoff: options => this.handoff(options),
     };
     const start = record?.initial ?? initial;
     if (start.mode === 'quest') {
@@ -127,12 +127,12 @@ export class Session {
     if (event.simticks !== this.simticks || event.screen !== at.screen || String(event.pos) !== String(at.pos)) this.mismatch(event);
   }
 
-  read(kind) {
+  read(kind, policy = 'continuous') {
     const gameplay = ['s', 'g', 'r'].includes(kind) && this.state.quest && !this.state.demo;
     if (!gameplay) {
       // Presentation reads have their own fire edge and never touch held gameplay input.
-      const joy = this.playback ? { ...IDLE, fire: !this.uiFire } : this.live.read(kind);
-      const press = joy.fire && !this.uiFire;
+      const joy = this.playback ? { ...IDLE, fire: !this.uiFire } : this.live.read(policy);
+      const press = joy.observed ? joy.fire : joy.fire && !this.uiFire;
       this.uiFire = !!joy.fire;
       return { ...joy, press };
     }
@@ -147,7 +147,7 @@ export class Session {
         this.eventIndex++;
       }
     } else {
-      joy = this.live.read(kind);
+      joy = this.live.read(policy);
       // Fire+down opens UI after this update. Its gameplay effect is neutral.
       if (kind === 's' && joy.fire && joy.dy > 0 && joy.dx === 0) {
         this.openAfterUpdate = true;
@@ -161,9 +161,9 @@ export class Session {
     return { ...this.lastJoy, press };
   }
 
-  handoff() {
+  handoff(options) {
     if (this.playback) return;
-    this.live.handoff?.();
+    this.live.handoff?.(options);
   }
 
   command(name, choices = {}, { presented = false } = {}) {
@@ -207,11 +207,12 @@ export class Session {
     }
     if (s.tuneWait != null && !s.demo) {
       if (this.playback) {
-        const fire = !!this.live.read('t').fire;
-        const press = fire && !this.viewerFire;
+        const joy = this.live.read('trigger');
+        const fire = !!joy.fire;
+        const press = joy.observed ? fire : fire && !this.viewerFire;
         this.viewerFire = fire;
         if (press && this.skippable) this.skipTune();
-      } else if (this.read('t').press && this.skippable) this.skipTune();
+      } else if (this.read('t', 'trigger').press && this.skippable) this.skipTune();
     }
     const tune = s.tuneWait;
     shellFrame(s);
@@ -316,8 +317,8 @@ export class Session {
     Object.assign(this, imported);
     Object.assign(state, imported.state);
     this.state = state;
-    state.stick = state.input = { pace: 5, read: kind => this.read(kind) };
-    state.commands = { execute: (name, choices, options) => this.command(name, choices, options), handoff: () => this.handoff() };
+    state.stick = state.input = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.() };
+    state.commands = { execute: (name, choices, options) => this.command(name, choices, options), handoff: options => this.handoff(options) };
     this.handoff();
   }
 
