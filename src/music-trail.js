@@ -1,6 +1,6 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
-const LIFETIME = 1.8;
+const LIFETIME = 2.4;
 
 export function createMusicTrail(element, waveformElement) {
   const staff = element.ownerDocument.createElement('span');
