@@ -158,15 +158,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
   document.getElementById('monitor-volume').append(volume);
-  const surround = document.getElementById('monitor-style');
-  document.getElementById('surround-control').hidden = false;
-  surround.value = options.surround;
   monitor.dataset.surround = options.surround;
-  surround.onchange = () => {
-    monitor.dataset.surround = surround.value;
-    persist('surround', surround.value);
-    fit();
-  };
   function syncVolume() {
     const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
     volume.value = level;

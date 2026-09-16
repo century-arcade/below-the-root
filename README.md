@@ -112,7 +112,7 @@ Classic display is retired from the UI. Its implementation and saved `btr.classi
 
 There is no options dialog.
 
-“Monitor in darkness” is the default surround. Commodore desk monitor and Bedroom portable TV remain available in the developer mode Surround selector; the selection is saved. Volume and fullscreen controls appear only on Play. Developer mode and CRT preferences carry across pages. Recording and issue controls on About or Links open Game and focus the requested control.
+“Monitor in darkness” is the default surround. Volume and fullscreen controls appear only on Play. Developer mode and CRT preferences carry across pages. Recording and issue controls on About or Links open Game and focus the requested control.
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.

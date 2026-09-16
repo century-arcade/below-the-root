@@ -1,4 +1,4 @@
-"""Monitor selection persists, and power clears the game and restarts at the menu."""
+"""Saved monitor preferences apply, and power clears the game and restarts at the menu."""
 import os
 from browser_helpers import install_probe, observe
 from playwright.sync_api import sync_playwright, expect
@@ -13,11 +13,12 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE + '/play?room=B8&debug')
     surround = page.get_by_role('combobox', name='Monitor surround')
-    expect(surround).to_have_value('dark')
+    expect(surround).to_have_count(0)
+    expect(page.locator('#monitor')).to_have_attribute('data-surround', 'dark')
     for style in ['commodore', 'portable', 'dark']:
-        surround.select_option(style)
+        page.evaluate("style => localStorage.setItem('btr.surround', style)", style)
         page.reload()
-        expect(surround).to_have_value(style)
+        expect(page.locator('#monitor')).to_have_attribute('data-surround', style)
     power = page.get_by_role('button', name='Monitor power', exact=True)
     page.wait_for_function('window.questSession && questSession().state.quest')
     page.evaluate('window.oldSession = questSession()')
@@ -56,4 +57,4 @@ with sync_playwright() as p:
     expect(page.get_by_role('group', name='Monitor controls')).to_be_visible()
     assert not errors, errors
     browser.close()
-print('browser_monitor_test: selection, persistence, power and volume passed')
+print('browser_monitor_test: saved preferences, power and volume passed')
