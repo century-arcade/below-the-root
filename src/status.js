@@ -1,8 +1,7 @@
 import { timeOfDay } from './clock.js';
 import { PANEL_COLS } from './panel.js';
 import { completion, playTime } from './progress.js';
-import { carried } from './inventory.js';
-import { CLASS } from './data.js';
+import { inventoryEntries } from './inventory.js';
 
 // Extra STATUS and replay details appear above the permanent quest status.
 export function statusRows(state, { classic = false, playback = null } = {}) {
@@ -10,27 +9,13 @@ export function statusRows(state, { classic = false, playback = null } = {}) {
   if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
   if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges ?? '?'}`);
   if (!classic && state.quest && !state.title && !state.demo && state.room
-      && !state.commandMenuOpen && !state.verb) {
-    const inventory = inventoryEntries(state);
+      && !state.commandMenuOpen && !state.verb && !state.panel?.some(Boolean)) {
+    const inventory = inventoryEntries(state).map(entry => entry.label);
     for (let i = 0; i < inventory.length; i += 2) {
       rows.push(place(inventory[i], PANEL_COLS / 2, inventory[i + 1] || ''));
     }
   }
   return rows.concat(classic ? [] : permanentRows(state));
-}
-
-function inventoryEntries(state) {
-  const groups = new Map();
-  for (const item of carried(state)) {
-    const group = groups.get(item.class);
-    if (group) group.count++;
-    else groups.set(item.class, { item, count: 1 });
-  }
-  const withoutArticle = name => name.replace(/^(?:A|AN|THE) /, '');
-  return [...groups.values()].map(({ item, count }) => {
-    const name = withoutArticle(item.name);
-    return count > 1 || item.class === CLASS.TOKEN ? `${count} ${name}` : name;
-  });
 }
 
 function permanentRows(state) {

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { loadTestData, J, give, lines } from './helpers.js';
+import { loadTestData, J, give, lines, menuReads } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
 import { pickItem } from '../src/inventory.js';
 import { CLASS } from '../src/data.js';
 import { Session, checkpoint, validateRecord } from '../src/record.js';
-import { MENU, menuChoiceAt } from '../src/verbs.js';
+import { MENU, menuChoiceAt, runMenu } from '../src/verbs.js';
 
 const data = await loadTestData();
 const selected = state => Array.from(state.panel).filter(c => c & 128)
@@ -63,4 +63,25 @@ for (const options of [{}, { perClass: true }, { accept: o => o.class !== CLASS.
     assert.deepEqual(gen.next(J.fire), { value: bread, done: true }, 'fire chooses the displayed item');
   }
 }
-console.log('menu_test: single-press navigation, bidirectional item choices and presentation isolation passed');
+const pack = newState(data, null);
+startQuest(pack, data.characters[0]);
+give(pack, CLASS.BREAD);
+give(pack, CLASS.BREAD);
+give(pack, CLASS.TOKEN);
+give(pack, CLASS.TOKEN);
+give(pack, CLASS.ROPE);
+give(pack, CLASS.ROPE);
+const inventory = runMenu(pack);
+inventory.next();
+for (const input of menuReads('INVENTORY')) inventory.next(input);
+inventory.next(J.idle);
+assert.match(lines(pack)[0], /YOU HAVE +2 PAN BREAD$/);
+inventory.next(J.down);
+assert.match(lines(pack)[0], /YOU HAVE +2 TOKEN$/, 'duplicate bread is skipped');
+inventory.next(J.idle);
+inventory.next(J.down);
+assert.match(lines(pack)[0], /YOU HAVE +2 VINE ROPE$/, 'ropes are counted like tokens');
+inventory.next(J.idle);
+inventory.next(J.down);
+assert.match(lines(pack)[0], /NOTHING$/, 'duplicate rope is skipped');
+console.log('menu_test: single-press navigation, counted inventory, bidirectional item choices and presentation isolation passed');

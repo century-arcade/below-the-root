@@ -25,9 +25,9 @@ const game = document.getElementById('game');
 const fullscreenMode = matchMedia('(display-mode: fullscreen)');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
-canvas.height = HEIGHT;
-const frames = { 0: ctx.createImageData(WIDTH, HEIGHT) };
-let band = 0;
+const band = statusHeight();
+canvas.height = HEIGHT + band;
+const image = ctx.createImageData(WIDTH, HEIGHT + band);
 const CANVAS_PADDING = 12; // Keep the full picture inside the bowed screen surround.
 
 function fit() {
@@ -55,12 +55,6 @@ function fit() {
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
   canvas.parentElement.style.setProperty('--blur', `${blur}px`);
   canvas.parentElement.classList.toggle('stripes', stripes);
-}
-
-function setBand(height) {
-  band = height;
-  canvas.height = HEIGHT + band;
-  fit();
 }
 
 function pickRoom(data, want) {
@@ -549,12 +543,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
     const rows = statusRows(state, { classic: options.classic, playback: session.playback ? session : null });
-    const { panelRows, bandRows } = statusLayout(state, rows);
-    const height = statusHeight(bandRows);
-    if (band !== height) setBand(height);
-    const image = frames[band] ||= ctx.createImageData(WIDTH, HEIGHT + band);
+    const { panelRows, bandRows } = statusLayout(state, rows, { classic: options.classic });
     image.data.set(render(state, panelRows));
-    if (band) image.data.set(renderStatus(state, bandRows), WIDTH * HEIGHT * 4);
+    image.data.set(renderStatus(state, bandRows), WIDTH * HEIGHT * 4);
     ctx.putImageData(image, 0, 0);
     const activeTab = overlay?.screen === mapScreen ? mapButton : homeButton;
     if (currentTab !== activeTab) {

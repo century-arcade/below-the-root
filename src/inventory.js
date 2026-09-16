@@ -1,12 +1,24 @@
 // docs/spec/player.md, What you carry; and the item pager the five verbs share
 
 import { cell, role } from './world.js';
-import { print, PANEL_ROW } from './panel.js';
+import { print, PANEL_ROW, PANEL_COLS } from './panel.js';
 import { fireUp, directionPress } from './input.js';
 import { CLASS } from './data.js';
 
 export function carried(state) {
   return state.objects.filter((o) => o.exists && o.carried);
+}
+
+export function inventoryEntries(state) {
+  const groups = new Map();
+  for (const item of carried(state)) {
+    const group = groups.get(item.class);
+    if (group) group.count++;
+    else groups.set(item.class, { item, count: 1 });
+  }
+  return [...groups.values()].map(({ item, count }) => ({
+    item, label: `${count} ${item.name.replace(/^(?:A|AN|THE) /, '')}`,
+  }));
 }
 
 export function carriedOf(state, cls) {
@@ -67,11 +79,12 @@ const ENTRY_WIDTH = 16;
 export const CANCELLED = Symbol('item choice cancelled');
 
 // Down pages forward, up pages back, and fire takes the entry showing.
-export function* pickItem(state, { accept = () => true, perClass = false, col = 10, noFire = false } = {}) {
+export function* pickItem(state, { accept = () => true, perClass = false, col = 10, noFire = false, counted = false } = {}) {
   const entries = [];
   const seen = new Set();
+  const labels = counted ? new Map(inventoryEntries(state).map(({ item, label }) => [item.class, label])) : null;
   for (const o of carried(state)) {
-    if (!accept(o) || (perClass && seen.has(o.class))) continue;
+    if (!accept(o) || ((perClass || counted) && seen.has(o.class))) continue;
     seen.add(o.class);
     entries.push(o);
   }
@@ -85,7 +98,8 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
   const moved = directionPress();
   for (let i = 0; ;) {
     const entry = entries[i] || null;
-    print(state, PANEL_ROW, col, (entry ? entry.name : 'NOTHING').padEnd(ENTRY_WIDTH));
+    const label = entry ? labels?.get(entry.class) ?? entry.name : 'NOTHING';
+    print(state, PANEL_ROW, col, label.padEnd(counted ? PANEL_COLS - col : ENTRY_WIDTH));
     if (noFire && !entry) return null;
     for (;;) {
       const j = yield;

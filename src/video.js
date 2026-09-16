@@ -34,10 +34,11 @@ export function renderStatus(state, rows) {
   return toRGBA(px, state.data.palette);
 }
 
-export function statusLayout(state, rows) {
-  const permanent = state.quest && !state.title && !state.demo && state.room ? 2 : 0;
+export function statusLayout(state, rows, { classic = false } = {}) {
+  const permanent = !classic && state.quest && !state.title && !state.demo && state.room ? 2 : 0;
   const split = Math.max(0, rows.length - permanent);
-  const panelRows = state.panel && !state.panel.some(Boolean) ? rows.slice(0, split, PANEL_ROWS) : [];
+  const panelRows = !state.commandMenuOpen && state.panel && !state.panel.some(Boolean)
+    ? rows.slice(0, Math.min(split, PANEL_ROWS)) : [];
   const fixed = rows.slice(split);
   return { panelRows, bandRows: Array(STATUS_ROWS - fixed.length).fill('').concat(fixed) };
 }

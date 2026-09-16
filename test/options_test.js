@@ -58,7 +58,7 @@ give(state, CLASS.TOKEN);
 give(state, CLASS.TOKEN);
 const inventoryRows = statusRows(state).slice(0, -2);
 assert.deepEqual(inventoryRows, [
-  'PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN',
+  '1 PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN',
   '2 VINE ROPE'.padEnd(PANEL_COLS / 2),
 ], 'inventory uses columns, drops articles and combines every item class');
 assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));
@@ -72,10 +72,20 @@ state.verb = null;
 let layout = statusLayout(state, statusRows(state));
 assert.deepEqual(layout.panelRows, inventoryRows, 'inventory occupies the game text panel');
 say(state, 'A MESSAGE');
+assert.deepEqual(statusRows(state), rows, 'a message suppresses inventory even without an active verb');
 layout = statusLayout(state, statusRows(state));
 assert.deepEqual(layout.panelRows, [], 'a message owns the text panel');
 assert.deepEqual(layout.bandRows.slice(-2), statusRows(state).slice(-2), 'permanent status stays in its bottom rows');
 clearPanel(state);
+assert.deepEqual(statusLayout(state, statusRows(state)).panelRows, inventoryRows, 'inventory returns when the message clears');
+state.commandMenuOpen = true;
+assert.deepEqual(statusLayout(state, statusRows(state)).panelRows, [], 'the menu owns the panel before its first text is drawn');
+assert.deepEqual(statusLayout(state, statusRows(state)).bandRows, layout.bandRows, 'switching to the menu preserves status');
+state.commandMenuOpen = false;
+const playback = { roomChanges: 1, totalRoomChanges: 3 };
+const classicLayout = statusLayout(state, statusRows(state, { classic: true, playback }), { classic: true });
+assert.deepEqual(classicLayout.panelRows, ['1/3'], 'classic replay details belong to the shared panel');
+assert.ok(classicLayout.bandRows.every(row => row === ''), 'classic mode leaves permanent status empty');
 Object.assign(p, { stamina: 30, food: 30, rest: 30, spiritEnergy: 30, spiritLimit: 30 });
 state.clock.day = 51;
 state.clock.hour = 2;
