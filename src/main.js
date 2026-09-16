@@ -294,7 +294,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     monitor.classList.toggle('powered-off', !powered);
     canvas.parentElement.inert = !powered;
     power.setAttribute('aria-pressed', String(powered));
-    power.title = powered ? 'Turn off — reset game' : 'Turn on — start at menu';
+    power.title = powered ? 'Power off (reset game)' : 'Turn on — start at menu';
     if (powered) { speaker.unlock(state); speaker.resume(); }
     else {
       closeHelp(); release();

@@ -72,10 +72,9 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
   box-shadow: inset 0 2px 1px #f6ebd6, inset 0 -5px 2px #756b58, 0 10px 22px #0009;
 }
 #monitor #canvas-box { border-radius: 10px; box-shadow: 0 0 0 5px #49463d, 0 0 0 7px #817866, 0 3px 7px 7px #0005; }
-#monitor-controls { display: flex; align-items: center; gap: 20px; padding-top: 12px; font: 9px/1.4 Arial, sans-serif; letter-spacing: .12em; }
-#monitor-volume { display: flex; flex-direction: column; gap: 5px; }
+#monitor-controls { display: flex; align-items: center; gap: 20px; font: 9px/1.4 Arial, sans-serif; letter-spacing: .12em; }
 #monitor #volume { width: 88px; height: 16px; accent-color: #514c40; cursor: pointer; }
-#monitor-power { display: grid; grid-template-columns: 1fr; align-items: center; justify-items: center; gap: 4px 6px; padding: 5px; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; }
+#monitor-power { display: grid; place-items: center; padding: 5px; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; }
 .power-light { width: 5px; height: 5px; background: #ff543d; border-radius: 50%; box-shadow: 0 0 5px #ff543d99; }
 .power-switch { display: grid; place-items: center; width: 27px; height: 17px; background: linear-gradient(#6a6253, #514a3e); border: 1px solid #40392d; box-shadow: inset 0 2px 4px #0008; border-radius: 2px; }
 #monitor.powered-off .power-light { background: #562e25; box-shadow: none; }
