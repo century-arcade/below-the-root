@@ -9,7 +9,6 @@ import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosav
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
-import { setupMusicTuning } from './music-tuning.js';
 import { fitScale, crtVars } from './fit.js';
 import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
 import { loadOptions, storeOption } from './options.js';
@@ -154,7 +153,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
   const musicStaff = document.getElementById('music-notes');
-  const musicTrail = createMusicTrail(musicStaff, document.getElementById('monitor-waveform'), setupMusicTuning(musicStaff));
+  const musicTrail = createMusicTrail(musicStaff, document.getElementById('monitor-waveform'));
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');

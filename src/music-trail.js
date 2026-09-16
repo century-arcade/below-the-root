@@ -1,6 +1,6 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
-export function createMusicTrail(element, waveformElement, settings = { lifetime: 6 }) {
+export function createMusicTrail(element, waveformElement) {
   const lines = element.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
   lines.classList.add('staff-lines');
   lines.setAttribute('viewBox', '0 0 1 34');
@@ -105,7 +105,7 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
     }
     for (const glyph of staff.children) {
       const remaining = Number(glyph.dataset.at) - notationTime;
-      glyph.style.transform = `translateX(calc(${remaining / settings.lifetime * 100}cqw - 30px))`;
+      glyph.style.transform = `translateX(calc(${remaining / 6 * 100}cqw - 30px))`;
     }
   };
 }

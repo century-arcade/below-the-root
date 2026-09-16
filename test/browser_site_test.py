@@ -54,6 +54,8 @@ with sync_playwright() as p:
         for name in ['About', 'Links']:
             page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
             expect(page.locator('#screen')).to_have_count(0)
+            expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
+            expect(page.get_by_role('button', name='Fullscreen', exact=True)).to_have_count(0)
             for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
                 page.keyboard.press(key)
             assert page.evaluate("localStorage.getItem('btr.autosave.v3')") == before
@@ -73,6 +75,8 @@ with sync_playwright() as p:
         page.goto(BASE + '/about?room=B8')
         expect(page.locator('#about')).to_be_visible()
         expect(page.locator('#screen')).to_have_count(0)
+        expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
+        expect(page.get_by_role('button', name='Fullscreen', exact=True)).to_have_count(0)
         for legacy, target in [('/#about', '/about'), ('/#play', '/#play'), ('/#help', '/#help'),
                                ('/?room=B8#links', '/links?room=B8'),
                                ('/?room=B8#resources', '/links?room=B8'),
@@ -101,12 +105,12 @@ with sync_playwright() as p:
     expect(developer).to_have_attribute('aria-pressed', 'false')
     developer.click()
     crt.click()
-    page.get_by_role('slider', name='Volume').fill('30')
+    page.evaluate("localStorage.setItem('btr.volume.v2', '0.3')")
     page.get_by_role('navigation').get_by_role('link', name='Links').click()
     page.reload()
     expect(developer).to_have_attribute('aria-pressed', 'true')
     expect(crt).to_have_attribute('aria-pressed', 'true')
-    expect(page.get_by_role('slider', name='Volume')).to_have_value('30')
+    expect(page.get_by_role('slider', name='Volume')).to_have_count(0)
     expect(page.get_by_role('link', name='Source on GitHub')).to_be_visible()
     assert not data_requests, 'reading-page controls must not load or start the game'
     for source, tool in [('about', 'download-record'), ('links', 'load-record'), ('about', 'file-issue')]:

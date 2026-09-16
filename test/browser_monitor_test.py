@@ -13,6 +13,7 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE + '/play?room=B8&debug')
     surround = page.get_by_role('combobox', name='Monitor surround')
+    expect(surround).to_have_value('dark')
     for style in ['commodore', 'portable', 'dark']:
         surround.select_option(style)
         page.reload()

@@ -21,7 +21,7 @@ storage.setItem('btr.volume.v2', '0.8');
 storage.setItem('btr.muted', '1');
 storage.setItem('btr.crt', '1');
 storage.setItem('btr.debug', 'nonsense');
-assert.deepEqual(loadOptions(storage), { surround: 'commodore', volume: 0.8, muted: true, crt: true, classic: false, debug: false },
+assert.deepEqual(loadOptions(storage), { surround: 'dark', volume: 0.8, muted: true, crt: true, classic: false, debug: false },
   'stored values override the defaults; anything but 1 is off');
 
 for (const surround of ['commodore', 'portable', 'dark']) {
@@ -29,7 +29,7 @@ for (const surround of ['commodore', 'portable', 'dark']) {
   assert.equal(loadOptions(storage).surround, surround);
 }
 storage.setItem('btr.surround', 'unknown');
-assert.equal(loadOptions(storage).surround, 'commodore');
+assert.equal(loadOptions(storage).surround, 'dark');
 
 storage.setItem('btr.volume.v2', 'loud');
 assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');
@@ -65,7 +65,8 @@ give(state, CLASS.TOKEN);
 give(state, CLASS.TOKEN);
 const inventoryRows = statusRows(state).slice(0, -2);
 assert.deepEqual(inventoryRows, [
-  'PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN',
+  'PAN BREAD'.padEnd(PANEL_COLS / 2),
+  '3 TOKEN'.padEnd(PANEL_COLS / 2),
   '2 VINE ROPE'.padEnd(PANEL_COLS / 2),
 ], 'inventory uses columns, drops articles and combines every item class');
 assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));

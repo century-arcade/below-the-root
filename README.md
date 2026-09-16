@@ -106,13 +106,13 @@ Drag or scroll to explore when zoomed, and use Your location to return to the ma
 
 ? (or H, or Help in the navbar) toggles help beside the canvas, or below it on narrow screens. The game keeps running while help is open; focus the canvas to keep playing. Recording playback adds replay commands to help.
 
-The top bar has an unlabelled volume slider (starts at 50%; gain is squared for quiet low levels). Zero volume mutes; raising it restores sound. The red `[!]` button resets the game in one click, deleting the autosave and returning to the main menu while preserving preferences. The `</>` button toggles developer mode: recording tools, issue reporting and a CRT effect toggle (scanlines, phosphor stripes, vignette and colour bleed; off by default). Preferences persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
+The Play monitor has a volume slider (starts at 50%; gain is squared for quiet low levels). Zero volume mutes; raising it restores sound. The red `[!]` button resets the game in one click, deleting the autosave and returning to the main menu while preserving preferences. The `</>` button toggles developer mode: recording tools, issue reporting and a CRT effect toggle (scanlines, phosphor stripes, vignette and colour bleed; off by default). Preferences persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
 
 Classic display is retired from the UI. Its implementation and saved `btr.classic` preference remain supported, but there is no control to select it. The default modern display adds two rows in the game's own font under the picture with the status sheet's day, time, name and numbers, live during a quest (in fullscreen too), and lets the button skip any tune the game would wait for (a recorded action, so playthroughs replay).
 
 There is no options dialog.
 
-The header controls appear on Game, About, and Links. Developer mode, CRT and volume preferences carry across pages. Recording and issue controls on About or Links open Game and focus the requested control.
+“Monitor in darkness” is the default surround. Commodore desk monitor and Bedroom portable TV remain available in the developer mode Surround selector; the selection is saved. Volume and fullscreen controls appear only on Play. Developer mode and CRT preferences carry across pages. Recording and issue controls on About or Links open Game and focus the requested control.
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.
