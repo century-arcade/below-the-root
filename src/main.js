@@ -5,7 +5,7 @@ import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt } from './verbs.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
-import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, screenKey } from './record.js';
+import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
@@ -304,9 +304,21 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     monitor.classList.toggle('powered-off', !powered);
     canvas.parentElement.inert = !powered;
     power.setAttribute('aria-pressed', String(powered));
-    power.title = powered ? 'Turn off — pause and silence' : 'Turn on — resume';
+    power.title = powered ? 'Turn off — reset game' : 'Turn on — start at menu';
     if (powered) { speaker.unlock(state); speaker.resume(); }
-    else { speaker.suspend(); saveNow(); }
+    else {
+      closeHelp(); release();
+      paused = false;
+      returnSession = null; seekRoom = null;
+      session = new Session(data, stick, {
+        initial: { mode: 'menu' }, seed: crypto.getRandomValues(new Uint32Array(1))[0],
+      });
+      state = session.state;
+      speaker.silence(); speaker.suspend();
+      try { clearAutosave(localStorage); }
+      catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
+      draw();
+    }
   };
   for (const type of ['keydown', 'keyup']) power.addEventListener(type, e => e.stopPropagation());
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
