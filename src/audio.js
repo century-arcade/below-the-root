@@ -158,13 +158,13 @@ export class Speaker {
     return this.notes.filter(note => note.at <= now && now - note.at < seconds);
   }
 
-  recentMeasures(seconds) {
+  recentMeasures(seconds, lookahead = 0) {
     if (!this.ready || !this.playing) return [];
     const { tune, t0 } = this.playing;
     const duration = 4 * QUARTER_FRAMES[tune] * TICK_S;
     const now = this.ctx.currentTime;
-    const first = Math.max(1, Math.floor((now - seconds - t0) / duration) + 1);
-    const last = Math.floor((Math.min(now, this.tuneEnd) - t0) / duration);
+    const first = Math.max(0, Math.floor((now - seconds - t0) / duration) + 1);
+    const last = Math.floor((Math.min(now + lookahead, this.tuneEnd) - t0) / duration);
     const measures = [];
     for (let measure = first; measure <= last; measure++) {
       measures.push({ measure, at: t0 + measure * duration });

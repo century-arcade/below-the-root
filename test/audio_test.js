@@ -305,11 +305,14 @@ test('4/4 measures follow the audio clock through held notes, mute, seek and can
   assert.deepEqual(speaker.recentMeasures(1.8), []);
   unlock(speaker);
   speaker.playTune(7, 0);
-  assert.deepEqual(speaker.recentMeasures(1.8), [], 'no bar until four beats have elapsed');
+  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 0, at: 0 }], 'the opening bar appears immediately');
+  assert.deepEqual(speaker.recentMeasures(1.8, 1.8), [
+    { measure: 0, at: 0 }, { measure: 1, at: 1.6 },
+  ], 'upcoming bars are available before their notes play');
   speaker.ctx.currentTime = 1.59;
-  assert.deepEqual(speaker.recentMeasures(1.8), []);
+  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 0, at: 0 }]);
   speaker.ctx.currentTime = 1.6;
-  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 1, at: 1.6 }]);
+  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 0, at: 0 }, { measure: 1, at: 1.6 }]);
   speaker.ctx.currentTime = 11.21;
   assert.deepEqual(speaker.recentNotes(0.01), [], 'the ending sustains across the bar');
   assert.deepEqual(speaker.recentMeasures(0.1).map(bar => bar.measure), [7]);
@@ -319,7 +322,7 @@ test('4/4 measures follow the audio clock through held notes, mute, seek and can
   assert.deepEqual(speaker.recentMeasures(1.8), []);
   speaker.ctx.state = 'running';
   speaker.ctx.currentTime = speaker.tuneEnd + 2;
-  assert.deepEqual(speaker.recentMeasures(1.8), [], 'bars expire and never extend beyond the tune');
+  assert.deepEqual(speaker.recentMeasures(1.8, 1.8), [], 'bars expire and never extend beyond the tune');
   speaker.playTune(0, 150);
   assert.deepEqual(speaker.recentMeasures(0.2).map(bar => bar.measure), [1], 'late entry retains the measure phase');
   speaker.silence();

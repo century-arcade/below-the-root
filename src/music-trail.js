@@ -18,10 +18,10 @@ export function createMusicTrail(element) {
   const visible = new Map();
   const bars = new Map();
   let currentTune = null;
-  function insert(glyph, at, now) {
+  function insert(glyph, at, now, lead = 0) {
     glyph.dataset.at = at;
-    glyph.style.animationDuration = `${LIFETIME}s`;
-    glyph.style.animationDelay = `${at - now}s`;
+    glyph.style.animationDuration = `${LIFETIME + lead}s`;
+    glyph.style.animationDelay = `${at - now - lead}s`;
     const next = [...staff.children].find(child => Number(child.dataset.at) > at);
     staff.insertBefore(glyph, next || null);
   }
@@ -37,7 +37,8 @@ export function createMusicTrail(element) {
       bars.clear();
       currentTune = speaker.playing;
     }
-    const measures = speaker.recentMeasures(LIFETIME);
+    // Bars enter from the right before their onset, then travel alongside the notes.
+    const measures = speaker.recentMeasures(LIFETIME, LIFETIME);
     const recent = new Set(measures.map(({ measure }) => measure));
     for (const [measure, bar] of bars) {
       if (recent.has(measure)) continue;
@@ -48,7 +49,7 @@ export function createMusicTrail(element) {
       if (bars.has(measure)) continue;
       const bar = element.ownerDocument.createElement('span');
       bar.dataset.measure = measure;
-      insert(bar, at, speaker.ctx.currentTime);
+      insert(bar, at, speaker.ctx.currentTime, LIFETIME);
       bars.set(measure, bar);
     }
     const flatline = !samples;

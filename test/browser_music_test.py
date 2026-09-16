@@ -117,6 +117,17 @@ with sync_playwright() as p:
         expect(waveform).to_be_hidden()
         expect(treble_staff).to_be_visible()
         expect(glyphs).to_have_count(1)
+        # The next measure exists before playback reaches it, even while muted.
+        page.evaluate('effectSpeaker.ctx.suspend()')
+        page.evaluate('''() => {
+            effectSpeaker.playTune(7, 0);
+            // Keep the audio clock fixed while exercising the normal ready path.
+            Object.defineProperty(effectSpeaker, 'ready', {value: true});
+            updateNotes(effectSpeaker);
+        }''')
+        expect(bars).to_have_count(2)
+        assert bars.evaluate_all('(nodes) => nodes.map(n => Number(n.dataset.measure))') == [0, 1]
+        assert page.evaluate("Number(document.querySelector('#music-notes [data-measure=\"1\"]').dataset.at) > effectSpeaker.ctx.currentTime")
         page.evaluate('effectSpeaker.silence(); updateNotes(effectSpeaker); effectSpeaker.ctx.close()')
         expect(glyphs).to_have_count(0)
     assert not errors, errors
