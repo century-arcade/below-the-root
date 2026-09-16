@@ -114,6 +114,37 @@ test('handoff preserves the next queued press after a menu', () => {
   assert.ok(session.record.events.some(e => e.stick?.[0] === 1), 'first subsequent movement reaches gameplay');
 });
 
+for (const exhausted of [false, true]) for (const name of ['ArrowRight', 'Enter']) {
+  test(`spirit reward final passage dismisses once: ${name}, visions exhausted: ${exhausted}`, () => {
+    const { keys, session, state } = fixture(s => {
+      place(s, 19, 0, 0);
+      s.player.spiritLimit = s.player.spiritEnergy = 10;
+      s.visions = exhausted ? data.quest.visions.length : 0;
+    });
+    const c = state.creature;
+    assert.equal(c.def.kind, 'blesser');
+    c.facing = -1;
+    c.countdown = 1e9;
+    state.player.col = c.col - 2;
+    state.player.row = c.row;
+    state.player.facing = 1;
+    choose(session, keys, 0, 1); // SPEAK
+    until(session, () => lines(state)[0].startsWith('CONGRATULATIONS'), 'skill passage appears');
+    until(session, () => state.tuneWait == null, 'skill tune finishes');
+    if (!exhausted) {
+      tap(keys, 'Enter');
+      until(session, () => lines(state)[0] === 'A VISION COMES TO YOU:', 'one press advances to vision');
+      until(session, () => state.tuneWait == null, 'vision tune finishes');
+    }
+    tap(keys, name);
+    until(session, () => !state.verb, 'one input dismisses final passage', 30);
+    assert.ok(lines(state).every(line => !line.trim()), 'final passage clears');
+    const input = session.read('s');
+    assert.equal(input.dx, name === 'ArrowRight' ? 1 : 0);
+    assert.equal(input.press, name === 'Enter', 'dismissal reaches gameplay');
+  });
+}
+
 for (const held of [false, true]) for (const name of ['ArrowRight', 'Enter']) {
   test(`TAKE dismissal reaches gameplay: ${name}, ${held ? 'held' : 'tapped'}`, () => {
     const { keys, session, state } = fixture(s => {

@@ -183,12 +183,14 @@ function* announce(state) {
     const skill = state.data.skills[Math.floor(p.spiritLimit / 5) - 1];
     say(state, 'CONGRATULATIONS QUESTER, YOU HAVE', `GAINED THE POWER TO ${skill.display_name}`);
     startTune(state, 'random');
-    yield* buttonPress();
+    // Live commands leave the final passage to the menu's result dismissal.
+    // Standalone and demo scripts retain their original acknowledgement reads.
+    if (!state.commandChoice || state.visions < visions.length) yield* buttonPress();
   }
   if (state.visions < visions.length) {
     say(state, 'A VISION COMES TO YOU:', visions[state.visions].text);
     state.visions += 1;
     startTune(state, 'random');
-    yield* buttonPress();
+    if (!state.commandChoice) yield* buttonPress();
   }
 }
