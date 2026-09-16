@@ -56,10 +56,12 @@ export function* runMenu(state) {
   state.commandMenuOpen = true;
   let col = 0, row = 0;
   const moved = directionPress();
-  yield* fireUp();
+  let first = yield* fireUp();
+  if (state.demo) first = null;
   drawMenu(state, col, row);
   for (;;) {
-    const j = yield;
+    const j = first ?? (yield);
+    first = null;
     if (state.commandMenuClick) {
       ({ col, row } = state.commandMenuClick);
       state.commandMenuClick = null;

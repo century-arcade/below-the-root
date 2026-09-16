@@ -43,20 +43,18 @@ export function* mainMenu(state) {
     .filter(it => state.quest || it.text.trim() !== 'CONTINUE');
   if (!items.some(it => it.index === state.menuSel)) state.menuSel = items[0].index;
   for (;;) {
-    yield* fireUp();
+    let first = yield* fireUp();
     drawMainMenu(state, items, state.menuSel);
     let armed = true;
     for (;;) {
-      const j = yield;
+      const j = first ?? (yield);
+      first = null;
       if (j.fire) break;
-      if (j.dy === 0) {
-        armed = true;
-        continue;
-      }
-      if (!armed) continue;
-      armed = false;
+      const dy = j.move ? j.move.dy : armed ? j.dy : 0;
+      armed = j.dy === 0;
+      if (!dy) continue;
       const current = items.findIndex(it => it.index === state.menuSel);
-      const sel = items[clamp(current + j.dy, 0, items.length - 1)].index;
+      const sel = items[clamp(current + dy, 0, items.length - 1)].index;
       if (sel === state.menuSel) continue;
       state.menuSel = sel;
       sfx(state, SFX.blip);
@@ -78,6 +76,10 @@ export function* mainMenu(state) {
 // every screen but the main menu: wait for the stick to centre and the button up, then a push or fire
 function* nextPush(pushed) {
   let j = yield;
+  if (j.move) {
+    while (!j.menuPress && !pushed(j)) j = yield;
+    return j;
+  }
   while (j.fire || pushed(j)) j = yield;
   while (!j.fire && !pushed(j)) j = yield;
   return j;

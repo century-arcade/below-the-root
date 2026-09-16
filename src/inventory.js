@@ -94,7 +94,8 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
     if (!entry) throw new Error('Command item is not an available choice');
     return entry;
   }
-  yield* fireUp();
+  let first = yield* fireUp();
+  if (state.demo) first = null;
   const moved = directionPress();
   for (let i = 0; ;) {
     const entry = entries[i] || null;
@@ -102,7 +103,8 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
     print(state, PANEL_ROW, col, label.padEnd(counted ? PANEL_COLS - col : ENTRY_WIDTH));
     if (noFire && !entry) return null;
     for (;;) {
-      const j = yield;
+      const j = first ?? (yield);
+      first = null;
       if (j.fire && !noFire) {
         if (state.commandChoice && entry) state.commandChoice.item = entry.object;
         return entry;

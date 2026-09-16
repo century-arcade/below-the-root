@@ -26,11 +26,13 @@ const KEYS = {
   W: 'up', S: 'down', A: 'left', D: 'right', f: 'fire', F: 'fire',
 };
 
-// a tap shorter than the read interval still counts once: keys latch until the next read
+// Gameplay latches short taps; presentation reads consume an ordered press queue.
 export class Keyboard {
   constructor(target = window) {
     this.sources = new Map();
     this.devices = new Set();
+    // Keep physical presses distinct even when release/repress happens between reads.
+    this.menuEvents = [];
     this.pace = 5;
     this.onKey = null;
     this.selectWithF = () => false;
@@ -60,14 +62,32 @@ export class Keyboard {
 
   press(key, source = 'keyboard') {
     const s = this.source(source);
-    if (s.blocked.has(key)) return;
+    if (s.blocked.has(key) || s.down.has(key)) return;
     s.down.add(key); s.tapped.add(key);
+    this.queueMenu(key, source);
   }
-  release(key, source = 'keyboard') { const s = this.source(source); s.down.delete(key); s.blocked.delete(key); }
-  tap(key, source = 'pointer') { this.source(source).tapped.add(key); }
-  reset(source) { if (source) this.sources.delete(source); else this.sources.clear(); }
+  release(key, source = 'keyboard') {
+    const s = this.source(source);
+    const released = s.down.delete(key);
+    s.blocked.delete(key);
+    if (released && key === 'fire') this.queueMenu(null, source);
+  }
+  tap(key, source = 'pointer') {
+    this.source(source).tapped.add(key);
+    this.queueMenu(key, source);
+  }
+  queueMenu(key, source) {
+    const move = { dx: +(key === 'right') - +(key === 'left'), dy: +(key === 'down') - +(key === 'up') };
+    const fire = key === 'fire' || [...this.sources.values()].some(s => s.down.has('fire'));
+    this.menuEvents.push({ ...move, fire, move, menuPress: key === 'fire', source });
+  }
+  reset(source) {
+    if (source) this.sources.delete(source); else this.sources.clear();
+    this.menuEvents = source ? this.menuEvents.filter(e => e.source !== source) : [];
+  }
   attach(device) { this.devices.add(device); }
   handoff() {
+    this.menuEvents = [];
     this.blockFireUntilRelease();
     for (const device of this.devices) device.cancel(true);
   }
@@ -78,11 +98,17 @@ export class Keyboard {
     }
   }
 
-  read() {
+  read(kind) {
+    const event = kind === 'v' ? this.menuEvents.shift() : null;
+    if (kind !== 'v') this.menuEvents = [];
     const d = new Set();
     for (const s of this.sources.values()) {
       for (const key of [...s.down, ...s.tapped]) d.add(key);
       s.tapped.clear();
+    }
+    if (kind === 'v') {
+      if (event) { const { source, ...joy } = event; return joy; }
+      return { dx: 0, dy: 0, fire: d.has('fire'), move: { dx: 0, dy: 0 } };
     }
     return {
       dx: (d.has('right') ? 1 : 0) - (d.has('left') ? 1 : 0),
@@ -96,6 +122,7 @@ export class Keyboard {
 export function directionPress() {
   let last = IDLE;
   return joy => {
+    if (joy.move) return joy.move;
     const move = { dx: joy.dx === last.dx ? 0 : joy.dx, dy: joy.dy === last.dy ? 0 : joy.dy };
     last = joy;
     return move;
@@ -385,7 +412,9 @@ export class DemoInput {
 
 // verbs are generators: each `yield` is one joystick read, handed in by the tick
 export function* fireUp() {
-  while ((yield).fire);
+  let joy;
+  do { joy = yield; } while (joy.fire);
+  return joy;
 }
 
 export function* buttonPress() {
