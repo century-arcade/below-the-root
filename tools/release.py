@@ -54,6 +54,9 @@ def package(root, site, iso, output):
     for folder, directory in [('site', site), ('iso', iso)]:
         for name, path in files_under(directory):
             files[f'{folder}/{name}'] = path
+    for name in tuple(files):
+        if name.startswith('source/test/fixtures/') and name.endswith('-win.json'):
+            files['recordings/' + files[name].name] = files[name]
     files['serve.py'] = ROOT / 'tools/serve-release.py'
     files['README.txt'] = ROOT / 'tools/release-README.txt'
     changes = git(root, 'status', '--porcelain', '--untracked-files=no').decode().splitlines()

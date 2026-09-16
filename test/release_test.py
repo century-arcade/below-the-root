@@ -88,6 +88,26 @@ class ReleaseTest(unittest.TestCase):
             package(self.repo, self.site, self.iso, self.output)
         self.assertEqual(self.output.read_bytes(), b'previous release')
 
+    def test_winning_recordings_are_available_outside_source(self):
+        fixtures = self.repo / 'test/fixtures'
+        fixtures.mkdir(parents=True)
+        winners = ('genaa', 'herd', 'neric', 'pomma', 'future')
+        for character in winners:
+            (fixtures / f'{character}-win.json').write_text(character)
+        (fixtures / 'herd-caverns.json').write_text('unfinished quest')
+        self.git('add', 'test/fixtures')
+        (fixtures / 'untracked-win.json').write_text('untracked recording')
+        package(self.repo, self.site, self.iso, self.output)
+        with ZipFile(self.output) as archive:
+            recordings = {name for name in archive.namelist()
+                          if name.startswith(PREFIX + 'recordings/')}
+            self.assertEqual(recordings, {
+                PREFIX + f'recordings/{character}-win.json' for character in winners})
+            for character in winners:
+                name = f'{character}-win.json'
+                self.assertEqual(archive.read(PREFIX + 'recordings/' + name),
+                                 archive.read(PREFIX + 'source/test/fixtures/' + name))
+
     def test_symlink_does_not_pull_in_files_outside_inputs(self):
         (self.iso / 'external').symlink_to(self.repo / '.env.local')
         with self.assertRaisesRegex(ValueError, 'symlink'):

@@ -30,6 +30,7 @@ iso/             Everything supplied in the project's iso/ directory, unchanged:
                  both original G64 disks, the bootable C64 ISO, boot files, box
                  scans, manual, map, walkthrough, credits, and legal notices.
 site/            Ready-to-run HTML, CSS, JavaScript, data, art, music, and fonts.
+recordings/      All winning quest fixtures, ready to import as recordings.
 source/          Git-tracked project files as they were on disk when packaged:
                  port source, extracted assets, disassembly, research/specs,
                  build tools, tests, and dependency versions. No Git history.
@@ -50,12 +51,17 @@ See source/README.md for development and source/docs/tooling.md for rebuilding
 the original-game analysis. To rebuild the browser site, run make build in
 source/ (requires Make, Node.js, and npm; installing Marked may need internet).
 For tools that expect source/iso/, copy the preserved iso/ directory there.
-The fresh quest fixtures and their provenance are in source/test/fixtures/.
-From source/, verify the completed normal quest with:
+Winning recordings for Genaa, Herd, Neric, and Pomma are in recordings/.
+Import one with the debug tools' Load recording button to watch it offline.
+The source fixtures and quest provenance are in source/test/fixtures/.
+From source/, verify each winning recording with:
 
-    node tools/playthrough.mjs test/fixtures/herd-win.json --expect-win
+    node tools/playthrough.mjs ../recordings/genaa-win.json --expect-win
+    node tools/playthrough.mjs ../recordings/herd-win.json --expect-win
+    node tools/playthrough.mjs ../recordings/neric-win.json --expect-win
+    node tools/playthrough.mjs ../recordings/pomma-win.json --expect-win
 
-Reproduce both fixtures from live controls with node tools/record-fixtures.mjs.
+Reproduce the Herd fixtures from live controls with node tools/record-fixtures.mjs.
 
 The original game and materials retain their original copyrights and notices;
 see iso/LEGAL and iso/readme.txt. Cinzel's SIL Open Font License is included in
