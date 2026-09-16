@@ -1,4 +1,5 @@
 @font-face { font-family: 'Green-Sky'; src: url('/assets/game-text.woff') format('woff'); font-display: swap; }
+@font-face { font-family: 'Open Gorton'; src: url('/assets/open-gorton-regular.otf') format('opentype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Cinzel'; src: url('/assets/cinzel-regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Cinzel'; src: url('/assets/cinzel-bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 :root { --game-font-size: clamp(14px, 2vw, 20px); --header-gap: 24px; }
@@ -8,7 +9,7 @@ body { min-height: 100dvh; box-sizing: border-box; padding: 0; display: flex; fl
 a { color: #c7f5ae; }
 #site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; height: 85px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #354537; }
 #navigation-controls { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; overflow-x: auto; }
-#site-header nav { display: flex; gap: 6px; flex-shrink: 0; align-items: center; padding: 4px 3px 9px; white-space: nowrap; font: var(--game-font-size)/1 'Green-Sky', monospace; text-transform: uppercase; }
+#site-header nav { display: flex; gap: 6px; flex-shrink: 0; align-items: center; padding: 4px 3px 9px; white-space: nowrap; font: var(--game-font-size)/1 'Open Gorton', sans-serif; text-transform: uppercase; }
 #site-header nav a {
   display: grid; place-items: center; box-sizing: border-box; min-height: 44px; padding: 0 12px;
   color: #f2ead8; background: linear-gradient(#514b43, #39342e);
