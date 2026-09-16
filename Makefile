@@ -18,7 +18,10 @@ NODE_TEST := timeout $(TEST_TIMEOUT) node
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve release test browser-test poster screenshot clean
+.PHONY: build serve release test browser-test poster screenshot clean install-hooks
+
+install-hooks:
+	git config core.hooksPath .githooks
 
 node_modules/.package-lock.json: package.json package-lock.json
 	npm ci --ignore-scripts --no-audit --no-fund
@@ -41,6 +44,7 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
+	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'version_test.py'
 	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'release_test.py'
 	$(NODE_TEST) test/site_test.js
 	$(NODE_TEST) test/log_test.js
