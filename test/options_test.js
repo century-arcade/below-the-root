@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { DEFAULTS, loadOptions, storeOption } from '../src/options.js';
 import { statusRows } from '../src/status.js';
-import { PANEL_COLS } from '../src/panel.js';
+import { clearPanel, PANEL_COLS, say } from '../src/panel.js';
+import { statusLayout } from '../src/video.js';
 import { give, loadTestData } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
 import { IDLE } from '../src/input.js';
@@ -50,17 +51,31 @@ assert.ok(rows[0].endsWith(p.name), rows[0]);
 assert.match(rows[1], new RegExp(`^STAMINA ${p.stamina} +FOOD ${p.food} +REST ${p.rest} +SPIRIT ${p.spiritEnergy}/${p.spiritLimit}$`));
 const bread = give(state, CLASS.BREAD);
 assert.ok(statusRows(state).some(row => row.includes('PAN BREAD')), 'carried items appear above status without articles');
+give(state, CLASS.ROPE);
+give(state, CLASS.ROPE);
 give(state, CLASS.TOKEN);
 give(state, CLASS.TOKEN);
 give(state, CLASS.TOKEN);
 const inventoryRows = statusRows(state).slice(0, -2);
-assert.deepEqual(inventoryRows, ['PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN', ''],
-  'inventory uses columns, drops articles, combines tokens and leaves a gap before status');
+assert.deepEqual(inventoryRows, [
+  'PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN',
+  '2 VINE ROPE'.padEnd(PANEL_COLS / 2),
+], 'inventory uses columns, drops articles and combines every item class');
 assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));
 assert.ok(statusRows(state).every(row => !row.includes('NOTHING')), 'an empty inventory entry is never shown');
 state.commandMenuOpen = true;
 assert.ok(statusRows(state).every(row => !row.includes('PAN BREAD')), 'inventory is hidden behind the action menu');
 state.commandMenuOpen = false;
+state.verb = {};
+assert.ok(statusRows(state).every(row => !row.includes('PAN BREAD')), 'inventory is hidden while a message is active');
+state.verb = null;
+let layout = statusLayout(state, statusRows(state));
+assert.deepEqual(layout.panelRows, inventoryRows, 'inventory occupies the game text panel');
+say(state, 'A MESSAGE');
+layout = statusLayout(state, statusRows(state));
+assert.deepEqual(layout.panelRows, [], 'a message owns the text panel');
+assert.deepEqual(layout.bandRows.slice(-2), statusRows(state).slice(-2), 'permanent status stays in its bottom rows');
+clearPanel(state);
 Object.assign(p, { stamina: 30, food: 30, rest: 30, spiritEnergy: 30, spiritLimit: 30 });
 state.clock.day = 51;
 state.clock.hour = 2;

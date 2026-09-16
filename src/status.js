@@ -9,22 +9,28 @@ export function statusRows(state, { classic = false, playback = null } = {}) {
   const rows = [];
   if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
   if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges ?? '?'}`);
-  if (!classic && state.quest && !state.title && !state.demo && state.room && !state.commandMenuOpen) {
+  if (!classic && state.quest && !state.title && !state.demo && state.room
+      && !state.commandMenuOpen && !state.verb) {
     const inventory = inventoryEntries(state);
     for (let i = 0; i < inventory.length; i += 2) {
       rows.push(place(inventory[i], PANEL_COLS / 2, inventory[i + 1] || ''));
     }
-    if (inventory.length) rows.push('');
   }
   return rows.concat(classic ? [] : permanentRows(state));
 }
 
 function inventoryEntries(state) {
-  const items = carried(state);
-  const tokens = items.filter(o => o.class === CLASS.TOKEN);
+  const groups = new Map();
+  for (const item of carried(state)) {
+    const group = groups.get(item.class);
+    if (group) group.count++;
+    else groups.set(item.class, { item, count: 1 });
+  }
   const withoutArticle = name => name.replace(/^(?:A|AN|THE) /, '');
-  return items.filter(o => o.class !== CLASS.TOKEN).map(o => withoutArticle(o.name))
-    .concat(tokens.length ? [`${tokens.length} ${withoutArticle(tokens[0].name)}`] : []);
+  return [...groups.values()].map(({ item, count }) => {
+    const name = withoutArticle(item.name);
+    return count > 1 || item.class === CLASS.TOKEN ? `${count} ${name}` : name;
+  });
 }
 
 function permanentRows(state) {

@@ -21,20 +21,25 @@ export function render(state, panelRows = []) {
   return toRGBA(renderIndexed(state, panelRows), state.data.palette);
 }
 
-// Static rows fill the idle text panel first; only overflow extends the picture.
+// The modern status band is always present and its permanent rows are bottom-aligned.
+// Transient information uses the same four-row panel as messages and menus.
 const STATUS_MARGIN = 4;
-export const statusHeight = rows => rows.length ? rows.length * 8 + STATUS_MARGIN * 2 : 0;
+const STATUS_ROWS = 3;
+export const statusHeight = () => STATUS_ROWS * 8 + STATUS_MARGIN * 2;
 
 export function renderStatus(state, rows) {
-  const px = new Uint8Array(WIDTH * statusHeight(rows));
+  const px = new Uint8Array(WIDTH * statusHeight());
   const text = px.subarray(WIDTH * STATUS_MARGIN);
   drawRows(text, state, rows, 0);
   return toRGBA(px, state.data.palette);
 }
 
 export function statusLayout(state, rows) {
-  const available = state.panel && !state.panel.some(Boolean) ? PANEL_ROWS : 0;
-  return { panelRows: rows.slice(0, available), bandRows: rows.slice(available) };
+  const permanent = state.quest && !state.title && !state.demo && state.room ? 2 : 0;
+  const split = Math.max(0, rows.length - permanent);
+  const panelRows = state.panel && !state.panel.some(Boolean) ? rows.slice(0, split, PANEL_ROWS) : [];
+  const fixed = rows.slice(split);
+  return { panelRows, bandRows: Array(STATUS_ROWS - fixed.length).fill('').concat(fixed) };
 }
 
 function drawRows(px, state, rows, firstRow) {
