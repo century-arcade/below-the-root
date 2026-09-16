@@ -392,15 +392,17 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (e.key === ' ') e.stopPropagation();
   });
   const mapDirections = {
-    ArrowLeft: [-1, 0], a: [-1, 0], ArrowRight: [1, 0], d: [1, 0],
-    ArrowUp: [0, -1], w: [0, -1], ArrowDown: [0, 1], s: [0, 1],
+    ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0],
+    ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1],
   };
   // Capture map movement before joystick input and recording playback shortcuts.
   for (const type of ['keydown', 'keyup']) addEventListener(type, e => {
     if (paused || overlay?.screen !== mapScreen || isEditing(e.target)) return;
     if (e.key === 'Shift') { e.stopImmediatePropagation(); return; }
     if (e.metaKey || e.altKey || e.ctrlKey) return;
-    const direction = mapDirections[e.key] || mapDirections[e.key.toLowerCase()];
+    // Physical WASD positions stay stable across layout and modifier changes.
+    const code = e.code || (e.key.length === 1 ? `Key${e.key.toUpperCase()}` : e.key);
+    const direction = mapDirections[code];
     if (!direction) return;
     e.preventDefault();
     e.stopImmediatePropagation();

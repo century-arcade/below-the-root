@@ -124,6 +124,23 @@ with sync_playwright() as p:
             assert page.locator('#map-screen').is_visible(), 'movement pans without dismissing the map'
         assert page.evaluate('window.mapPans') == [[1, 0], [1, 0], [-1, 0], [-1, 0],
                                                    [0, -1], [0, -1], [0, 1], [0, 1], [1, 0]] * 3
+        # Physical keys retain their direction when the typed character changes,
+        # including repeats while focus moves among map controls.
+        page.evaluate('window.mapPans = []')
+        for control in ['#close-map', '#map-zoom-in', '#map-viewport']:
+            page.locator(control).evaluate("""target => {
+                for (const [code, key] of [['KeyD', 's'], ['KeyS', 'd']]) {
+                    for (const repeat of [false, true, true]) {
+                        target.dispatchEvent(new KeyboardEvent('keydown', {
+                            code, key, repeat, bubbles: true, cancelable: true,
+                        }));
+                    }
+                    target.dispatchEvent(new KeyboardEvent('keyup', {
+                        code, key, bubbles: true, cancelable: true,
+                    }));
+                }
+            }""")
+        assert page.evaluate('window.mapPans') == ([[1, 0]] * 3 + [[0, 1]] * 3) * 3
         assert record()['frame'] == stopped, 'map navigation keeps the game held'
         page.keyboard.press('Escape')
         page.locator('#map-screen').wait_for(state='hidden')
