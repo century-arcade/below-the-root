@@ -21,6 +21,7 @@ const log = createLog(document.getElementById('log'), { onToggle: () => fit() })
 const canvas = document.getElementById('screen');
 const screenFocus = document.getElementById('screen-focus');
 const game = document.getElementById('game');
+const monitor = document.getElementById('monitor');
 // Browser fullscreen (F11) does not set document.fullscreenElement.
 const fullscreenMode = matchMedia('(display-mode: fullscreen)');
 const ctx = canvas.getContext('2d');
@@ -42,14 +43,17 @@ function fit() {
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
-  const scale = fitScale(full ? game.clientWidth : window.innerWidth, availableHeight, HEIGHT + band, CANVAS_PADDING);
+  const shell = getComputedStyle(monitor);
+  const shellWidth = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
+  const shellHeight = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--chin'));
+  const scale = fitScale((full ? game.clientWidth : window.innerWidth) - shellWidth, availableHeight - shellHeight, HEIGHT + band, CANVAS_PADDING);
   canvas.parentElement.style.setProperty('--canvas-padding', `${CANVAS_PADDING * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
   canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
-  if (!full) game.style.width = (WIDTH + 2 * CANVAS_PADDING) * scale + 'px';
+  if (!full) game.style.width = ((WIDTH + 2 * CANVAS_PADDING) * scale + shellWidth) + 'px';
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
@@ -151,6 +155,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
+  document.getElementById('monitor-volume').append(volume);
+  const surround = document.getElementById('monitor-style');
+  document.getElementById('surround-control').hidden = false;
+  surround.value = options.surround;
+  monitor.dataset.surround = options.surround;
+  surround.onchange = () => {
+    monitor.dataset.surround = surround.value;
+    persist('surround', surround.value);
+    fit();
+  };
   function syncVolume() {
     const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
     volume.value = level;
@@ -182,12 +196,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const fullscreenButton = document.getElementById('fullscreen');
   fullscreenButton.hidden = !canFullscreen;
   fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
-  for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => speaker.unlock(state));
+  for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => { if (powered) speaker.unlock(state); });
+  let powered = true;
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
   let inactive = false;
-  const isRunning = () => !paused && !held && !inactive && !document.hidden && !session.playbackDone;
+  const isRunning = () => powered && !paused && !held && !inactive && !document.hidden && !session.playbackDone;
   let overlay = null;
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');
@@ -279,6 +294,18 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const saveNow = () => autosave.save(session).reason !== 'failed';
   const dropInput = () => { seekKey = null; pointer.cancel(); gamepad.cancel(true); stick.reset(); };
   addEventListener('hashchange', dropInput);
+  const power = document.getElementById('monitor-power');
+  power.onclick = () => {
+    powered = !powered;
+    dropInput(); acc = 0; last = performance.now();
+    monitor.classList.toggle('powered-off', !powered);
+    canvas.parentElement.inert = !powered;
+    power.setAttribute('aria-pressed', String(powered));
+    power.title = powered ? 'Turn off — pause and silence' : 'Turn on — resume';
+    if (powered) { speaker.unlock(state); speaker.resume(); }
+    else { speaker.suspend(); saveNow(); }
+  };
+  for (const type of ['keydown', 'keyup']) power.addEventListener(type, e => e.stopPropagation());
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
   const hold = () => { held = true; dropInput(); };
@@ -378,7 +405,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   document.getElementById('close-map').onclick = release;
   function commandMenu(close = false) {
-    if (paused || overlay || startupHelp || !session.commandMenu(close)) return;
+    if (!powered || paused || overlay || startupHelp || !session.commandMenu(close)) return;
     release();
     canvas.focus({ preventScroll: true });
     saveNow();
@@ -424,6 +451,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (held) { if (type === 'pointerdown') release(); return; }
   });
   stick.onKey = (type, source) => {
+    if (!powered) { dropInput(); return; }
     if (paused) return;
     if (held) { if (type === 'keydown') release(); return; }
   };
@@ -448,7 +476,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   addEventListener('keydown', e => {
     if (e.key === 'Shift') seekAmount = 10;
-    if (!session.playback || paused || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey
+    if (!powered || !session.playback || paused || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey
         || !['ArrowLeft', 'ArrowRight'].includes(e.code)
         || (e.target !== canvas && e.target !== document.body)) return;
     e.preventDefault(); e.stopImmediatePropagation();
@@ -465,7 +493,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (e.code === seekKey) seekKey = null;
   }, true);
   addEventListener('keydown', e => {
-    if (paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (!powered || paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
     if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
         && (e.target === canvas || e.target === document.body)) {
       e.preventDefault(); rewindRoomButton.click(); return;
@@ -561,7 +589,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let last = performance.now();
   let acc = 0;
   function frame(now) {
-    if (!paused && !held && !document.hidden && seekKey && now >= seekRepeatAt && seekRoom == null) {
+    if (powered && !paused && !held && !document.hidden && seekKey && now >= seekRepeatAt && seekRoom == null) {
       seekReplayRoom(seekKey === 'ArrowRight' ? seekAmount : -seekAmount);
       seekRepeatAt = now + 100;
     }

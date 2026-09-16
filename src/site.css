@@ -101,3 +101,8 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #site-header nav a { padding: 0 6px; }
   .box-back { width: 110px; margin-left: 16px !important; }
 }
+
+#surround-control { display: flex; flex-direction: column; gap: 2px; font: 10px/1.2 monospace; }
+#monitor-style { max-width: 180px; padding: 5px; color: #e0d5bc; background: #302d26; border: 1px solid #766d60; border-radius: 3px; font: 12px monospace; }
+#monitor-style:focus-visible { outline: 2px solid #d6f897; }
+#debug-tools { max-width: 55vw; overflow-x: auto; }

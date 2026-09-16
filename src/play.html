@@ -1,11 +1,19 @@
 <section id="play" aria-label="Play Below the Root">
 <div id="game">
   <div id="play-area">
+    <div id="monitor" data-surround="commodore">
     <div id="canvas-box">
       <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; Space or Enter is the joystick button; F opens the command menu or selects a choice; Up and Down browse choices once per press; Escape closes the menu or pauses; P pauses; M or Tab shows the map. Press ? for all controls."></canvas>
       <button id="command-menu" hidden aria-label="Open command menu" aria-keyshortcuts="F" title="Open command menu (F)"></button>
       <div id="crt" aria-hidden="true" hidden><div id="scanlines"></div><div id="stripes"></div></div>
       <svg id="screen-focus" hidden viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true" focusable="false"><use href="#screen-curve"/></svg>
+    </div>
+    <div id="monitor-controls" role="group" aria-label="Monitor controls">
+      <span class="monitor-badge" aria-hidden="true">COLOR MONITOR</span>
+      <span class="monitor-speaker" aria-hidden="true"></span>
+      <label id="monitor-volume">VOLUME</label>
+      <button id="monitor-power" type="button" aria-label="Monitor power" aria-pressed="true" title="Turn off — pause and silence"><span class="power-light" aria-hidden="true"></span><span class="power-switch" aria-hidden="true"></span>POWER</button>
+    </div>
     </div>
     <div id="map-screen" hidden role="dialog" aria-label="World map">
       <div id="map-heading">
