@@ -30,31 +30,38 @@ const PITCHES = [
   { letter: 5 }, { letter: 5, accidental: 'sharp' }, { letter: 6 },
 ];
 
-export function staffPitch(midi, register = midi < 60 ? 'bass' : 'treble') {
+export function staffPitch(midi) {
   const pitch = PITCHES[midi % 12];
   const octave = Math.floor(midi / 12) - 1;
   const diatonic = octave * 7 + pitch.letter;
-  const step = diatonic - (register === 'bass' ? 18 : 30);
+  const step = diatonic - 30;
   const ledgerSteps = [];
   for (let line = -2; line >= step; line -= 2) ledgerSteps.push(line);
   for (let line = 10; line <= step; line += 2) ledgerSteps.push(line);
-  return { register, step, accidental: pitch.accidental || null, ledgerSteps };
+  return { register: 'treble', step, accidental: pitch.accidental || null, ledgerSteps };
+}
+
+// The header uses one symbol per attack. Approximate the five-beat endings
+// with dotted wholes; the exact rhythm above still describes the source music.
+export function displayRhythm(rhythm) {
+  return rhythm.length === 1 ? rhythm[0]
+    : { denominator: 1, beats: 6, dotted: true, name: 'dotted whole' };
 }
 
 // Small, consistent notation without depending on a platform's music-symbol font.
 export function rhythmSVG(rhythm, pitch = null) {
   const y = pitch ? 21 - pitch.step * 1.5 : 12;
   const stemDown = pitch && pitch.step >= 4;
-  const parts = rhythm.map((value, i) => {
-    const hollow = value.denominator <= 2;
-    const x = 5;
-    const stem = stemDown
-      ? `<path d="M${x - 1.6} ${y}v7"/>`
-      : `<path d="M${x + 1.6} ${y}v-7"/>`;
-    const flag = stemDown
-      ? `<path d="M${x - 1.6} ${y + 7}q4 -2 2 -5"/>`
-      : `<path d="M${x + 1.6} ${y - 7}q4 2 2 5"/>`;
-    return `<g transform="translate(${i * 12} 0)">
+  const value = displayRhythm(rhythm);
+  const hollow = value.denominator <= 2;
+  const x = 5;
+  const stem = stemDown
+    ? `<path d="M${x - 1.6} ${y}v7"/>`
+    : `<path d="M${x + 1.6} ${y}v-7"/>`;
+  const flag = stemDown
+    ? `<path d="M${x - 1.6} ${y + 7}q4 -2 2 -5"/>`
+    : `<path d="M${x + 1.6} ${y - 7}q4 2 2 5"/>`;
+  const note = `<g>
       ${pitch?.accidental ? `<path d="M1 ${y - 3}v6m2 -6.5v6m-3 -4h4m-4 2h4"/>` : ''}
       <ellipse cx="5" cy="${y}" rx="1.6" ry="1.1" transform="rotate(-20 5 ${y})" fill="${hollow ? 'none' : 'currentColor'}" stroke="currentColor"/>
       ${value.denominator > 1 ? stem : ''}
@@ -63,14 +70,12 @@ export function rhythmSVG(rhythm, pitch = null) {
       ${value.dotted ? `<circle cx="8" cy="${y - 0.5}" r="0.55" fill="currentColor" stroke="none"/>` : ''}
       ${value.triplet ? `<text x="8" y="${stemDown ? y + 7 : y - 5}" fill="currentColor" stroke="none" font-size="4">3</text>` : ''}
     </g>`;
-  });
-  const width = rhythm.length * 12 + 5;
+  const width = 17;
   const ledgers = pitch ? pitch.ledgerSteps.map(step => {
     const lineY = 21 - step * 1.5;
     return `<path d="M2 ${lineY}h6"/>`;
   }).join('') : '';
-  if (rhythm.length > 1) parts.push(`<path d="M5 ${y + 2}q6 3 12 0"/>`);
-  const height = pitch ? 30 : 18;
+  const height = pitch ? 60 : 18;
   const strokeWidth = pitch ? 0.75 : 1.2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" aria-hidden="true">${ledgers}${parts.join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" aria-hidden="true">${ledgers}${note}</svg>`;
 }

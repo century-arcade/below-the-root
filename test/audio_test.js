@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { planTune, pickTune, startTune, Speaker } from '../src/audio.js';
-import { noteRhythm, QUARTER_FRAMES } from '../src/music-notation.js';
+import { displayRhythm, noteRhythm, staffPitch, QUARTER_FRAMES } from '../src/music-notation.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const music = JSON.parse(readFileSync(join(ROOT, 'docs', 'spec', 'data', 'music.json'), 'utf8'));
@@ -70,6 +70,16 @@ test('the last note may ring past the end byte, up to its decay', () => {
   const plan = planTune(music, 0);
   const last = plan.reduce((a, b) => (b.start > a.start ? b : a));
   assert.ok(last.stop <= last.start + 144);
+});
+
+test('the header simplifies tied endings and puts low notes below the treble staff', () => {
+  assert.equal(displayRhythm(noteRhythm(7, 120)).name, 'dotted whole');
+  assert.equal(displayRhythm(noteRhythm(3, 72)).name, 'dotted half');
+  assert.equal(displayRhythm(noteRhythm(0, 36)).name, 'quarter');
+  assert.equal(staffPitch(60).step, -2, 'middle C is below treble E');
+  assert.equal(staffPitch(55).register, 'treble');
+  assert.ok(staffPitch(55).ledgerSteps.length > staffPitch(60).ledgerSteps.length,
+    'lower notes retain the additional ledger lines');
 });
 
 test('pickTune: numbers pass through, random draws from the pool', () => {
@@ -288,6 +298,32 @@ test('muting preserves the visual rhythm; silence and suspension clear it', () =
   assert.ok(speaker.recentNotes(1.8).length);
   speaker.silence();
   assert.deepEqual(speaker.recentNotes(1.8), []);
+});
+
+test('4/4 measures follow the audio clock through held notes, mute, seek and cancellation', () => {
+  const speaker = new Speaker(music);
+  assert.deepEqual(speaker.recentMeasures(1.8), []);
+  unlock(speaker);
+  speaker.playTune(7, 0);
+  assert.deepEqual(speaker.recentMeasures(1.8), [], 'no bar until four beats have elapsed');
+  speaker.ctx.currentTime = 1.59;
+  assert.deepEqual(speaker.recentMeasures(1.8), []);
+  speaker.ctx.currentTime = 1.6;
+  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 1, at: 1.6 }]);
+  speaker.ctx.currentTime = 11.21;
+  assert.deepEqual(speaker.recentNotes(0.01), [], 'the ending sustains across the bar');
+  assert.deepEqual(speaker.recentMeasures(0.1).map(bar => bar.measure), [7]);
+  speaker.mute(true);
+  assert.deepEqual(speaker.recentMeasures(0.1).map(bar => bar.measure), [7]);
+  speaker.ctx.state = 'suspended';
+  assert.deepEqual(speaker.recentMeasures(1.8), []);
+  speaker.ctx.state = 'running';
+  speaker.ctx.currentTime = speaker.tuneEnd + 2;
+  assert.deepEqual(speaker.recentMeasures(1.8), [], 'bars expire and never extend beyond the tune');
+  speaker.playTune(0, 150);
+  assert.deepEqual(speaker.recentMeasures(0.2).map(bar => bar.measure), [1], 'late entry retains the measure phase');
+  speaker.silence();
+  assert.deepEqual(speaker.recentMeasures(1.8), []);
 });
 
 test('joining a tune late and replacing it never show unscheduled notes', () => {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { loadTestData, J, give, lines, menuReads } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
-import { pickItem } from '../src/inventory.js';
+import { inventoryEntries, pickItem } from '../src/inventory.js';
 import { CLASS } from '../src/data.js';
 import { Session, checkpoint, validateRecord } from '../src/record.js';
 import { MENU, menuChoiceAt, runMenu } from '../src/verbs.js';
@@ -66,10 +66,12 @@ for (const options of [{}, { perClass: true }, { accept: o => o.class !== CLASS.
 const pack = newState(data, null);
 startQuest(pack, data.characters[0]);
 give(pack, CLASS.BREAD);
-give(pack, CLASS.BREAD);
-give(pack, CLASS.TOKEN);
 give(pack, CLASS.TOKEN);
 give(pack, CLASS.ROPE);
+assert.deepEqual(inventoryEntries(pack).map(entry => entry.label), ['PAN BREAD', 'TOKEN', 'VINE ROPE'],
+  'single items omit the count, including tokens');
+give(pack, CLASS.BREAD);
+give(pack, CLASS.TOKEN);
 give(pack, CLASS.ROPE);
 const inventory = runMenu(pack);
 inventory.next();

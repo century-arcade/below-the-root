@@ -17,7 +17,7 @@ export function inventoryEntries(state) {
     else groups.set(item.class, { item, count: 1 });
   }
   return [...groups.values()].map(({ item, count }) => ({
-    item, label: `${count} ${item.name.replace(/^(?:A|AN|THE) /, '')}`,
+    item, label: `${count > 1 ? `${count} ` : ''}${item.name.replace(/^(?:A|AN|THE) /, '')}`,
   }));
 }
 

@@ -13,7 +13,7 @@ with sync_playwright() as p:
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     trail = page.locator('#music-notes')
     treble_staff = trail.locator('[data-register="treble"]')
-    bass_staff = trail.locator('[data-register="bass"]')
+    expect(trail.locator('[data-register="bass"]')).to_have_count(0)
     expect(trail).to_have_attribute('aria-hidden', 'true')
     expect(trail.locator('[data-rhythm]')).to_have_count(0)
     # Notes retain pitch and their onset offsets become animation delays.
@@ -30,32 +30,47 @@ with sync_playwright() as p:
                 {voice: 1, midi: 48, rhythm: noteRhythm(0, 144), at: 3.8},
             ];
             window.noteSpeaker = {playing: {}, tuneEnd: 20, ctx: {currentTime: 2},
-                recentNotes: () => noteBatch, effectWaveform: () => null};
+                recentNotes: () => noteBatch, recentMeasures: () => [], effectWaveform: () => null};
             window.updateNotes = createMusicTrail(element);
             updateNotes(noteSpeaker);
             window.firstGlyph = element.querySelector('[data-rhythm="quarter"]');
         }''')
         glyphs = trail.locator('[data-rhythm]')
         treble = trail.locator('[data-register="treble"] [data-rhythm]')
-        bass = trail.locator('[data-register="bass"] [data-rhythm]')
         expect(glyphs).to_have_count(4)
         expect(glyphs.locator('svg')).to_have_count(4)
-        assert treble.evaluate_all('(nodes) => nodes.map(n => n.dataset.rhythm)') == ['half', 'eighth']
-        assert bass.evaluate_all('(nodes) => nodes.map(n => n.dataset.rhythm)') == ['quarter', 'whole']
-        assert glyphs.evaluate_all('(nodes) => nodes.map(n => n.style.animationDelay)') == ['0.3s', '0.9s', '0s', '1.8s']
+        assert treble.evaluate_all('(nodes) => nodes.map(n => n.dataset.rhythm)') == ['quarter', 'half', 'eighth', 'whole']
+        expect(treble_staff.locator('[data-midi="48"]')).to_have_attribute('data-ledger-lines', '4')
+        assert glyphs.evaluate_all('(nodes) => nodes.map(n => n.style.animationDelay)') == ['0s', '0.3s', '0.9s', '1.8s']
         page.evaluate('updateNotes(noteSpeaker)')
         expect(glyphs).to_have_count(4)
         assert page.evaluate("document.querySelector('#music-notes [data-rhythm=quarter]') === firstGlyph")
         page.evaluate('noteBatch = noteBatch.slice(1); updateNotes(noteSpeaker)')
-        expect(bass).to_have_count(1)
-        expect(treble).to_have_count(2)
+        expect(treble).to_have_count(3)
         page.evaluate('noteBatch = []; updateNotes(noteSpeaker)')
         expect(glyphs).to_have_count(0)
         expect(treble_staff).to_be_visible()
-        expect(bass_staff).to_be_visible()
+        page.evaluate('''async () => {
+            const { noteRhythm } = await import('/music-notation.js');
+            noteBatch = [{midi: 71, rhythm: noteRhythm(7, 120), at: 1}];
+            noteSpeaker.recentMeasures = () => [{measure: 1, at: 1.6}];
+            updateNotes(noteSpeaker);
+        }''')
+        expect(glyphs).to_have_count(1)
+        expect(glyphs).to_have_attribute('data-rhythm', 'dotted whole')
+        expect(glyphs.locator('ellipse')).to_have_count(1)
+        expect(glyphs.locator('circle')).to_have_count(1)
+        bars = trail.locator('[data-measure]')
+        expect(bars).to_have_count(1)
+        expect(bars).to_have_attribute('data-measure', '1')
+        page.evaluate('updateNotes(noteSpeaker)')
+        expect(bars).to_have_count(1)
+        assert treble_staff.locator('[data-at]').evaluate_all(
+            '(nodes) => nodes.map(n => n.dataset.rhythm || n.dataset.measure)') == ['dotted whole', '1']
+        page.evaluate('noteSpeaker.recentMeasures = () => []; noteBatch = []; updateNotes(noteSpeaker)')
+        expect(bars).to_have_count(0)
         page.evaluate('noteSpeaker.playing = null; updateNotes(noteSpeaker)')
         expect(treble_staff).to_be_hidden()
-        expect(bass_staff).to_be_hidden()
 
         # Use actual WebAudio samples to check both tonal and noise effects while muted.
         page.evaluate('''async () => {
@@ -73,7 +88,6 @@ with sync_playwright() as p:
             page.evaluate('updateNotes(effectSpeaker)')
             expect(waveform).to_be_visible()
             expect(treble_staff).to_be_hidden()
-            expect(bass_staff).to_be_hidden()
             page.wait_for_function('effectSpeaker.effectWaveform() === null')
             page.evaluate('updateNotes(effectSpeaker)')
             expect(waveform).to_be_visible()
@@ -83,7 +97,8 @@ with sync_playwright() as p:
         # A known signal makes the transition independent of short real-time effects.
         page.evaluate("""() => {
             window.traceSpeaker = {muted: true, effect: {}, ctx: {currentTime: 0},
-                effectWaveform: () => new Float32Array([0, 0.5, -0.5, 0]), recentNotes: () => []};
+                effectWaveform: () => new Float32Array([0, 0.5, -0.5, 0]),
+                recentNotes: () => [], recentMeasures: () => []};
             updateNotes(traceSpeaker);
             window.activeTrace = document.querySelector('.sound-waveform').toDataURL();
             traceSpeaker.effectWaveform = () => null;
@@ -101,10 +116,9 @@ with sync_playwright() as p:
         page.evaluate('effectSpeaker.playTune(0, 0); updateNotes(effectSpeaker)')
         expect(waveform).to_be_hidden()
         expect(treble_staff).to_be_visible()
-        expect(bass_staff).to_be_visible()
         expect(glyphs).to_have_count(1)
         page.evaluate('effectSpeaker.silence(); updateNotes(effectSpeaker); effectSpeaker.ctx.close()')
         expect(glyphs).to_have_count(0)
     assert not errors, errors
     browser.close()
-    print('browser_music_test: scrolling pitch staves, timing gaps, waveforms, mute and expiry passed')
+    print('browser_music_test: single treble staff, low notes, dotted endings, measures, waveforms, mute and expiry passed')

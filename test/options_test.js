@@ -58,7 +58,7 @@ give(state, CLASS.TOKEN);
 give(state, CLASS.TOKEN);
 const inventoryRows = statusRows(state).slice(0, -2);
 assert.deepEqual(inventoryRows, [
-  '1 PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN',
+  'PAN BREAD'.padEnd(PANEL_COLS / 2) + '3 TOKEN',
   '2 VINE ROPE'.padEnd(PANEL_COLS / 2),
 ], 'inventory uses columns, drops articles and combines every item class');
 assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));
