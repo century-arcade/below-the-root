@@ -44,27 +44,6 @@ a { color: #c7f5ae; }
 #site-header #developer-mode { width: auto; min-width: 32px; padding: 0 5px; font-size: 12px; }
 #site-header button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; vertical-align: middle; }
 #volume { width: 80px; min-width: 48px; margin: 0; accent-color: #9ad284; }
-#music-notes { position: relative; display: block; width: 112px; height: 60px; overflow: hidden; pointer-events: none; }
-#music-notes > [data-register] { position: relative; top: calc(50% - 24px); display: block; height: 60px; overflow: hidden; transform: scaleY(1.6); transform-origin: top; }
-#music-notes > [data-register]::after { content: ""; position: absolute; inset: 8px 0 auto; height: 13px; background: repeating-linear-gradient(to bottom, #66815d 0 1px, transparent 1px 3px); }
-#music-notes :is([data-rhythm], [data-measure]) { position: absolute; z-index: 1; left: 76px; top: 0; color: #d6f897; animation: music-note-scroll linear both; }
-#music-notes [data-measure] { top: 9px; height: 12px; border-left: 1px solid currentColor; animation-name: music-measure-scroll; }
-#music-notes svg { display: block; }
-#music-notes .sound-waveform { position: absolute; top: 0; left: 0; width: 50%; height: 100%; background: transparent; image-rendering: auto; }
-@keyframes music-note-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-112px); }
-}
-/* Twice the distance and duration keeps bars moving at the notes' speed. */
-@keyframes music-measure-scroll {
-  from { transform: translateX(112px); }
-  to { transform: translateX(-112px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  #music-notes > [data-register] { display: flex; justify-content: end; align-items: start; }
-  #music-notes :is([data-rhythm], [data-measure]) { position: static; flex-shrink: 0; animation: none; }
-  #music-notes [data-measure] { margin-top: 9px; }
-}
 #site-header button[aria-pressed="true"], #site-header #help[aria-expanded="true"] { background: #354537; border-color: #d6f897; }
 button { font: inherit; background: #142019; color: #b6e6a4; border: 1px solid #567; padding: 5px 9px; cursor: pointer; }
 button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }

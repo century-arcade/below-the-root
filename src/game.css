@@ -65,7 +65,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 /* Cabinet dimensions also reserve room when fitting the game to the window. */
 #monitor {
-  --rim: 18px; --chin: 66px; --side: 0px;
+  --rim: 14px; --chin: 84px; --side: 0px;
   display: grid; grid-template-columns: auto; grid-template-rows: auto var(--chin);
   padding: var(--rim); border-radius: 12px 12px 8px 8px;
   color: #403a30; background: linear-gradient(115deg, #d2c9b4, #b0a58e);
@@ -73,14 +73,11 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 }
 #monitor #canvas-box { border-radius: 10px; box-shadow: 0 0 0 5px #49463d, 0 0 0 7px #817866, 0 3px 7px 7px #0005; }
 #monitor-controls { display: flex; align-items: center; gap: 20px; padding-top: 12px; font: 9px/1.4 Arial, sans-serif; letter-spacing: .12em; }
-.monitor-badge { font-weight: bold; border-left: 4px solid #6d807d; padding-left: 6px; }
-.monitor-speaker { flex: 1; min-width: 20px; height: 25px; background: repeating-linear-gradient(0deg, #514d4144 0 2px, transparent 2px 5px); }
 #monitor-volume { display: flex; flex-direction: column; gap: 5px; }
 #monitor #volume { width: 88px; height: 16px; accent-color: #514c40; cursor: pointer; }
-#monitor-power { display: grid; grid-template-columns: 8px 30px; align-items: center; justify-items: center; gap: 4px 6px; padding: 5px; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; }
+#monitor-power { display: grid; grid-template-columns: 1fr; align-items: center; justify-items: center; gap: 4px 6px; padding: 5px; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; }
 .power-light { width: 5px; height: 5px; background: #ff543d; border-radius: 50%; box-shadow: 0 0 5px #ff543d99; }
-.power-switch { width: 27px; height: 17px; background: linear-gradient(#6a6253, #514a3e); border: 1px solid #40392d; box-shadow: inset 0 2px 4px #0008; border-radius: 2px; }
-#monitor-power::after { content: ''; }
+.power-switch { display: grid; place-items: center; width: 27px; height: 17px; background: linear-gradient(#6a6253, #514a3e); border: 1px solid #40392d; box-shadow: inset 0 2px 4px #0008; border-radius: 2px; }
 #monitor.powered-off .power-light { background: #562e25; box-shadow: none; }
 #monitor.powered-off .power-switch { background: linear-gradient(#8e8471, #635a49); box-shadow: 0 2px 1px #342d21; transform: translateY(-2px); }
 #monitor.powered-off #canvas-box > * { visibility: hidden; }
@@ -93,21 +90,44 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 }
 #monitor[data-surround="portable"] #canvas-box { box-shadow: 0 0 0 6px #272621, 0 0 0 9px #aa9a82; }
 #monitor[data-surround="portable"] #monitor-controls { flex-direction: column; padding: 8px 0 4px 20px; gap: 18px; }
-#monitor[data-surround="portable"] .monitor-badge { text-align: center; border: 0; padding: 0; }
-#monitor[data-surround="portable"] .monitor-speaker { width: 100%; min-height: 30px; background: repeating-linear-gradient(90deg, #251f1b 0 3px, transparent 3px 7px); }
 #monitor[data-surround="portable"] #volume { accent-color: #ded0b5; }
 #monitor[data-surround="dark"] {
   color: #9d9d90; background: linear-gradient(120deg, #30332f, #151a16);
   box-shadow: inset 0 1px 1px #666b5c, inset 0 -4px 2px #090d09, 0 12px 30px #000b;
 }
 #monitor[data-surround="dark"] #canvas-box { box-shadow: 0 0 0 5px #101510, 0 0 0 7px #3c4038; }
-#monitor[data-surround="dark"] .monitor-speaker { background: repeating-linear-gradient(0deg, #090e0b 0 2px, transparent 2px 5px); }
 #monitor[data-surround="dark"] #volume { accent-color: #9d9d90; }
 @media (max-width: 600px) {
-  #monitor { --rim: 10px; --chin: 64px; }
+  #monitor { --rim: 10px; --chin: 84px; }
   #monitor-controls { gap: 10px; }
-  .monitor-badge { max-width: 60px; }
   #monitor[data-surround="portable"] { --rim: 12px; --side: 82px; }
   #monitor[data-surround="portable"] #monitor-controls { padding-left: 12px; gap: 10px; }
   #monitor[data-surround="portable"] #volume { width: 64px; }
 }
+
+#monitor-waveform { flex: 0 0 64px; height: 42px; }
+#monitor-waveform .sound-waveform { width: 100%; height: 100%; background: transparent; image-rendering: auto; }
+#music-notes { --groove: #514d4166; position: relative; flex: 1; min-width: 40px; height: 72px; overflow: hidden; pointer-events: none; container-type: inline-size; }
+#music-notes::before { content: ""; position: absolute; inset: 15px 0 auto; height: 42px; background: repeating-linear-gradient(to bottom, var(--groove) 0 2px, transparent 2px 10px); }
+#music-notes > [data-register] { position: relative; top: -15px; display: block; height: 87px; }
+#music-notes :is([data-rhythm], [data-measure]) { position: absolute; left: calc(100% - 56px); top: 0; color: #30392b; animation: music-note-scroll linear both; }
+#music-notes svg { display: block; transform: scale(3.333333); transform-origin: top left; }
+#music-notes [data-measure] { top: 30px; height: 40px; border-left: 1px solid currentColor; animation-name: music-measure-scroll; }
+@keyframes music-note-scroll { from { transform: translateX(0); } to { transform: translateX(-100cqw); } }
+@keyframes music-measure-scroll { from { transform: translateX(100cqw); } to { transform: translateX(-100cqw); } }
+#monitor[data-surround="dark"] #music-notes { --groove: #090e0b; }
+#monitor[data-surround="dark"] #music-notes :is([data-rhythm], [data-measure]),
+#monitor[data-surround="portable"] #music-notes :is([data-rhythm], [data-measure]) { color: #d6f897; }
+#monitor[data-surround="portable"] #music-notes { --groove: #251f1b; flex: 0 0 72px; width: 100%; }
+#monitor[data-surround="portable"] #monitor-waveform { flex: 0 0 42px; width: 64px; }
+#monitor.powered-off :is(#music-notes > *, #monitor-waveform) { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  #music-notes > [data-register] { display: flex; justify-content: end; align-items: start; }
+  #music-notes :is([data-rhythm], [data-measure]) { position: static; flex: 0 0 56px; animation: none; }
+  #music-notes [data-measure] { flex-basis: 0; margin-top: 30px; }
+}
+.game-fullscreen #monitor { --rim: 0px; --chin: 0px; --side: 0px; display: block; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.game-fullscreen #monitor-controls { display: none; }
+.game-fullscreen #monitor #canvas-box { border-radius: 0; box-shadow: none; clip-path: none; }
+.game-fullscreen #screen-focus { display: none; }
+.game-fullscreen #screen:focus-visible { outline: 2px solid #56734e; outline-offset: -2px; }

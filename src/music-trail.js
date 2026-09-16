@@ -2,7 +2,7 @@ import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
 const LIFETIME = 1.8;
 
-export function createMusicTrail(element) {
+export function createMusicTrail(element, waveformElement) {
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
   const waveform = element.ownerDocument.createElement('canvas');
@@ -14,7 +14,8 @@ export function createMusicTrail(element) {
   const reducedMotion = element.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)');
   let drawnEffect = null;
   let drawnFlatline = false;
-  element.replaceChildren(staff, waveform);
+  element.replaceChildren(staff);
+  waveformElement.replaceChildren(waveform);
   const visible = new Map();
   const bars = new Map();
   let currentTune = null;

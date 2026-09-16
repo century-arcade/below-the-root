@@ -36,6 +36,12 @@ with sync_playwright() as p:
     expect(page.locator('#screen')).to_be_visible()
     page.wait_for_function('(frame) => questSession().frame > frame', arg=before['frame'])
     expect(volume).to_have_value('70')
+    page.get_by_role('button', name='Fullscreen', exact=True).click()
+    page.wait_for_function('document.fullscreenElement !== null')
+    expect(page.get_by_role('group', name='Monitor controls')).to_be_hidden()
+    expect(page.locator('#screen')).to_be_visible()
+    page.evaluate('document.exitFullscreen()')
+    expect(page.get_by_role('group', name='Monitor controls')).to_be_visible()
     assert not errors, errors
     browser.close()
 print('browser_monitor_test: selection, persistence, power and volume passed')

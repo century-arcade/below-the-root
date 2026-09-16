@@ -31,7 +31,7 @@ with sync_playwright() as p:
             ];
             window.noteSpeaker = {playing: {}, tuneEnd: 20, ctx: {currentTime: 2},
                 recentNotes: () => noteBatch, recentMeasures: () => [], effectWaveform: () => null};
-            window.updateNotes = createMusicTrail(element);
+            window.updateNotes = createMusicTrail(element, document.getElementById('monitor-waveform'));
             updateNotes(noteSpeaker);
             window.firstGlyph = element.querySelector('[data-rhythm="quarter"]');
         }''')
@@ -81,7 +81,7 @@ with sync_playwright() as p:
             await effectSpeaker.ctx.resume();
             effectSpeaker.mute(true);
         }''')
-        waveform = trail.locator('.sound-waveform')
+        waveform = page.locator('#monitor-waveform .sound-waveform')
         for sound in [1, 11]:
             page.evaluate('(id) => effectSpeaker.sfx(id)', sound)
             page.wait_for_function('effectSpeaker.effectWaveform()?.some(sample => Math.abs(sample) > 0.001)')

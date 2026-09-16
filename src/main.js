@@ -29,7 +29,7 @@ canvas.width = WIDTH;
 const band = statusHeight();
 canvas.height = HEIGHT + band;
 const image = ctx.createImageData(WIDTH, HEIGHT + band);
-const CANVAS_PADDING = 12; // Keep the full picture inside the bowed screen surround.
+const CANVAS_PADDING = 8; // Keep the full picture inside the bowed screen surround.
 
 function fit() {
   const full = fullscreenMode.matches || document.fullscreenElement !== null;
@@ -46,14 +46,15 @@ function fit() {
   const shell = getComputedStyle(monitor);
   const shellWidth = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
   const shellHeight = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--chin'));
-  const scale = fitScale((full ? game.clientWidth : window.innerWidth) - shellWidth, availableHeight - shellHeight, HEIGHT + band, CANVAS_PADDING);
-  canvas.parentElement.style.setProperty('--canvas-padding', `${CANVAS_PADDING * scale}px`);
+  const padding = full ? 0 : CANVAS_PADDING;
+  const scale = fitScale((full ? game.clientWidth : window.innerWidth) - shellWidth, availableHeight - shellHeight, HEIGHT + band, padding);
+  canvas.parentElement.style.setProperty('--canvas-padding', `${padding * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
   canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
-  if (!full) game.style.width = ((WIDTH + 2 * CANVAS_PADDING) * scale + shellWidth) + 'px';
+  if (!full) game.style.width = ((WIDTH + 2 * padding) * scale + shellWidth) + 'px';
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
@@ -151,7 +152,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
-  const musicTrail = createMusicTrail(document.getElementById('music-notes'));
+  const musicTrail = createMusicTrail(document.getElementById('music-notes'), document.getElementById('monitor-waveform'));
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
