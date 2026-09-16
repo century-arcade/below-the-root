@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { loadTestData, J } from './helpers.js';
 import { Session, checkpoint } from '../src/record.js';
 const data = await loadTestData();
@@ -12,6 +13,16 @@ watched.nextRoom();const first=checkpoint(watched.state);
 watched.nextRoom();const second=checkpoint(watched.state);
 watched=watched.previousRoom();assert.deepEqual(checkpoint(watched.state),first);
 watched.nextRoom();assert.deepEqual(checkpoint(watched.state),second);
+
+// A backward seek does not stop in a pass-through room that immediately
+// carries the recording forward to where the seek began.
+const nericRecord=JSON.parse(await readFile(new URL('fixtures/neric-win.json',import.meta.url)));
+let neric=Session.watch(data,idle,nericRecord);
+for(let i=0;i<26;i++)neric.nextRoom();
+assert.equal(neric.state.room.code,'C6');
+neric=neric.previousRoom();
+assert.equal(neric.state.room.code,'D5');
+assert.equal(neric.roomChanges,24);
 while(!watched.playbackDone)watched.nextRoom();
 assert.deepEqual(checkpoint(watched.state),recording.checkpoint);
 assert.deepEqual(watched.snapshot(),recording);

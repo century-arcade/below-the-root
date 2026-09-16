@@ -13,6 +13,7 @@ export const AUTOSAVE_KEY = 'btr.autosave.v3';
 export const MAX_SIMTICKS = 60 * 60 * 60 * 24;
 export const MAX_RECORD_BYTES = 5 * 1024 * 1024;
 const MAX_WORK = MAX_SIMTICKS + 100000;
+const MIN_SEEK_ROOM_TICKS = 30;
 const copy = value => JSON.parse(JSON.stringify(value));
 const same = (a, b) => a.dx === b.dx && a.dy === b.dy && !!a.fire === !!b.fire;
 function equal(a, b) {
@@ -323,8 +324,14 @@ export class Session {
   }
   previousRoom(count = 1) {
     if (!this.playback) return this;
-    const target = Math.max(0, this.roomChanges - count);
-    const boundary = this.history.find(e => e.roomChanges === target);
+    const rooms = this.history.filter((e, i, all) => i === 0 || e.roomChanges !== all[i - 1].roomChanges);
+    let index = rooms.findLastIndex(e => e.roomChanges <= this.roomChanges);
+    while (count > 0 && index > 0) {
+      index--;
+      const duration = rooms[index + 1].simticks - rooms[index].simticks;
+      if (duration >= MIN_SEEK_ROOM_TICKS || index === 0) count--;
+    }
+    const boundary = rooms[index];
     return this.restoreAt(boundary ?? { simticks: 0, eventIndex: 0 });
   }
   get canBackRoom() {
