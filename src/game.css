@@ -112,7 +112,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #music-notes > [data-register] { position: relative; top: -15px; display: block; height: 87px; }
 #music-notes :is([data-rhythm], [data-measure]) { position: absolute; left: calc(100% - 56px); top: 0; color: #30392b; animation: music-note-scroll linear both; }
 #music-notes svg { display: block; transform: scale(3.333333); transform-origin: top left; }
-#music-notes [data-measure] { left: calc(100% - 68px); top: 30px; height: 40px; border-left: 1px solid currentColor; animation-name: music-measure-scroll; }
+#music-notes [data-measure] { left: calc(100% - 56px - var(--measure-gap, 12px)); top: 30px; height: 40px; border-left: 1px solid currentColor; animation-name: music-measure-scroll; }
 @keyframes music-note-scroll { from { transform: translateX(0); } to { transform: translateX(-100cqw); } }
 @keyframes music-measure-scroll { from { transform: translateX(100cqw); } to { transform: translateX(-100cqw); } }
 #monitor[data-surround="dark"] #music-notes { --groove: #090e0b; }
@@ -124,8 +124,11 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 @media (prefers-reduced-motion: reduce) {
   #music-notes > [data-register] { display: flex; justify-content: end; align-items: start; }
   #music-notes :is([data-rhythm], [data-measure]) { position: static; flex: 0 0 42px; animation: none; }
-  #music-notes [data-measure] { flex-basis: 0; margin-top: 30px; margin-right: 12px; }
+  #music-notes [data-measure] { flex-basis: 0; margin-top: 30px; margin-right: var(--measure-gap, 12px); }
 }
+#music-tuning { position: fixed; bottom: 12px; right: 12px; z-index: 100; padding: 12px; background: #222; color: #eee; border: 1px solid #888; font: 14px sans-serif; }
+#music-tuning label { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+#music-tuning output { min-width: 44px; }
 .game-fullscreen #monitor { --rim: 0px; --chin: 0px; --side: 0px; display: block; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 .game-fullscreen #monitor-controls { display: none; }
 .game-fullscreen #monitor #canvas-box { border-radius: 0; box-shadow: none; clip-path: none; }

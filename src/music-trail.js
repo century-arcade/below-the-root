@@ -1,8 +1,7 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
-const LIFETIME = 2.4;
-
-export function createMusicTrail(element, waveformElement) {
+export function createMusicTrail(element, waveformElement, settings = { lifetime: 2.4 }) {
+  let lifetime = settings.lifetime;
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
   const waveform = element.ownerDocument.createElement('canvas');
@@ -21,13 +20,19 @@ export function createMusicTrail(element, waveformElement) {
   let currentTune = null;
   function insert(glyph, at, now, lead = 0) {
     glyph.dataset.at = at;
-    glyph.style.animationDuration = `${LIFETIME + lead}s`;
+    glyph.style.animationDuration = `${lifetime + lead}s`;
     glyph.style.animationDelay = `${at - now - lead}s`;
     const next = [...staff.children].find(child => Number(child.dataset.at) > at);
     staff.insertBefore(glyph, next || null);
   }
   return speaker => {
-    const notes = new Set(speaker.recentNotes(LIFETIME));
+    if (lifetime !== settings.lifetime) {
+      lifetime = settings.lifetime;
+      staff.replaceChildren();
+      visible.clear();
+      bars.clear();
+    }
+    const notes = new Set(speaker.recentNotes(lifetime));
     const silent = speaker.muted || speaker.volume === 0;
     const samples = silent ? speaker.effectWaveform() : null;
     const tunePlaying = speaker.playing && speaker.ctx.currentTime < speaker.tuneEnd;
@@ -39,7 +44,7 @@ export function createMusicTrail(element, waveformElement) {
       currentTune = speaker.playing;
     }
     // Bars enter from the right before their onset, then travel alongside the notes.
-    const measures = speaker.recentMeasures(LIFETIME, LIFETIME);
+    const measures = speaker.recentMeasures(lifetime, lifetime);
     const recent = new Set(measures.map(({ measure }) => measure));
     for (const [measure, bar] of bars) {
       if (recent.has(measure)) continue;
@@ -50,7 +55,7 @@ export function createMusicTrail(element, waveformElement) {
       if (bars.has(measure)) continue;
       const bar = element.ownerDocument.createElement('span');
       bar.dataset.measure = measure;
-      insert(bar, at, speaker.ctx.currentTime, LIFETIME);
+      insert(bar, at, speaker.ctx.currentTime, lifetime);
       bars.set(measure, bar);
     }
     const flatline = !samples;
