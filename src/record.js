@@ -1,7 +1,7 @@
 // One quest: effective input changes, semantic commands, and a verified boundary.
 import { newState, startQuest, startDemo, endDemo, tick, canOpenCommandMenu, openCommandMenu, closeCommandMenu } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
-import { enterRoom } from './world.js';
+import { enterRoom, cell, isSupport } from './world.js';
 import { IDLE, isIdle } from './input.js';
 import { importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
@@ -333,8 +333,12 @@ export class Session {
 
   get playbackDelay() {
     if (this.playback && this.state.tuneWait != null) return 1000 / 60;
-    // A glide continues moving after the controls are released.
-    const idle = isIdle(this.lastJoy) && !this.state.player.gliding;
+    // Released controls do not stop airborne movement. Check support as well
+    // as the fall counter so the first falling step keeps its normal delay.
+    const p = this.state.player;
+    const airborne = p.gliding || p.leaping || p.fallen > 0
+      || !isSupport(this.state, cell(this.state, p.col, p.row + 1));
+    const idle = isIdle(this.lastJoy) && !airborne;
     return this.playback && (idle || this.state.verb || this.state.stall) ? 0 : 1000 / 60;
   }
   nextRoom() {

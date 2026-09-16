@@ -142,7 +142,7 @@ for (const device of ['keyboard', 'gamepad']) {
   advance(s, 32);
   s.command('RENEW');
   const replay = Session.watch(data, idle, s.snapshot());
-  assert.equal(replay.playbackDelay, 0, 'idle input before the glide can be skipped');
+  assert.equal(replay.playbackDelay, 1000 / 60, 'an unsupported player is already falling before the first movement');
   let gliding = 0;
   while (!replay.playbackDone) {
     if (replay.state.player.gliding && !replay.lastJoy.dx && !replay.lastJoy.fire) {
@@ -152,6 +152,26 @@ for (const device of ['keyboard', 'gamepad']) {
     advance(replay, 1);
   }
   assert.ok(gliding > 0, 'replayed a glide after releasing steering');
+}
+
+// Neutral input cannot fast-forward a fall, including its first tick and landing.
+{
+  const s = imported(state => enterRoom(state, data.roomByCode.get('C4'), 14, 0));
+  advance(s, 200);
+  s.command('RENEW');
+  const replay = Session.watch(data, idle, s.snapshot());
+  assert.equal(replay.playbackDelay, 1000 / 60, 'fall starts at normal speed');
+  let falling = 0, settled = 0;
+  while (!replay.playbackDone) {
+    if (replay.state.player.fallen > 0) {
+      assert.equal(replay.playbackDelay, 1000 / 60, 'falling with neutral input stays at normal speed');
+      falling++;
+    } else if (replay.playbackDelay === 0) settled++;
+    advance(replay, 1);
+  }
+  assert.ok(falling > 0, 'recording exercises a fall');
+  assert.ok(settled > 0, 'idle skipping resumes after landing');
+  assert.deepEqual(checkpoint(replay.state), s.snapshot().checkpoint);
 }
 
 // Recorded commands dismiss their text when gameplay resumes, as the menu does.
