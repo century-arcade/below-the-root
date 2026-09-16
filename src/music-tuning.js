@@ -1,11 +1,11 @@
 // Temporary live controls; values intentionally reset on reload.
 export function setupMusicTuning(staff) {
-  const settings = { lifetime: 2.4 };
+  const settings = { lifetime: 6 };
   const panel = document.createElement('details');
   panel.id = 'music-tuning';
   panel.open = true;
   panel.innerHTML = `<summary>Music tuning (temporary)</summary>
-    <label>Travel time <input type="range" min="1" max="6" step="0.1" value="2.4" data-setting="lifetime"> <output>2.4 s</output></label>
+    <label>Travel time <input type="range" min="1" max="6" step="0.1" value="6" data-setting="lifetime"> <output>6 s</output></label>
     <small>Higher = slower, closer notes.</small>
     <label>Extra bar gap <input type="range" min="0" max="32" step="1" value="12" data-setting="gap"> <output>12 px</output></label>
     <button type="button">Reset</button>`;
@@ -19,7 +19,7 @@ export function setupMusicTuning(staff) {
   }
   panel.addEventListener('input', update);
   panel.querySelector('button').addEventListener('click', () => {
-    lifetime.value = '2.4';
+    lifetime.value = '6';
     gap.value = '12';
     update();
   });

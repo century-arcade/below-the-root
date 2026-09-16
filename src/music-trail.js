@@ -1,6 +1,6 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
-export function createMusicTrail(element, waveformElement, settings = { lifetime: 2.4 }) {
+export function createMusicTrail(element, waveformElement, settings = { lifetime: 6 }) {
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
   const waveform = element.ownerDocument.createElement('canvas');
@@ -36,7 +36,7 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
       bars.clear();
       currentTune = speaker.playing;
     }
-    // Keep the sounding attack on the score until the following attack.
+    // Notes and bars share a constant-speed clock just behind the sound.
     const measures = speaker.recentMeasures(now - notationTime, Infinity);
     const recent = new Set(measures.map(({ measure }) => measure));
     for (const [measure, bar] of bars) {

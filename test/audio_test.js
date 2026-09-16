@@ -263,7 +263,7 @@ test('silence discards a paused tune', () => {
   assert.equal(speaker.ringing.length, 0);
 });
 
-test('the score keeps each sounding attack until the next attack', () => {
+test('the score scrolls at constant speed with a fixed delay after each attack', () => {
   const speaker = new Speaker(music);
   assert.equal(speaker.notationTime(), 0, 'the score clock is idle before audio unlock');
   assert.deepEqual(speaker.upcomingNotes(), []);
@@ -275,17 +275,18 @@ test('the score keeps each sounding attack until the next attack', () => {
   speaker.mute(true);
   speaker.setVolume(0);
   assert.deepEqual(speaker.upcomingNotes(), future);
-  speaker.ctx.currentTime = 47 / 60;
-  assert.deepEqual(speaker.upcomingNotes(), future, 'the opening chord stays during its sound');
-  speaker.ctx.currentTime = 48 / 60;
-  assert.ok(speaker.upcomingNotes().every(note => note.start >= 48));
-  assert.ok(speaker.upcomingNotes().some(note => note.start === 48), 'the new attack remains visible');
-  speaker.ctx.currentTime = 72 / 60;
-  assert.ok(speaker.upcomingNotes().every(note => note.start >= 72), 'both chord voices expire together');
-  speaker.ctx.currentTime = 144 / 60;
-  assert.deepEqual(speaker.upcomingNotes().map(note => note.start), [144, 144]);
+  speaker.ctx.currentTime = 0.29;
+  assert.deepEqual(speaker.upcomingNotes(), future, 'the opening chord stays briefly after sounding');
+  speaker.ctx.currentTime = 0.3;
+  assert.ok(speaker.upcomingNotes().every(note => note.start > 0), 'the opening chord leaves together');
+  // Equal audio intervals advance notation equally, across long and short notes.
+  for (const now of [0.4, 0.8, 1.0, 1.2, 1.6, 2.4, 2.7]) {
+    speaker.ctx.currentTime = now;
+    assert.ok(Math.abs(speaker.notationTime() - (now - 0.3)) < 1e-9);
+    assert.deepEqual(speaker.upcomingNotes(), future.filter(note => note.at > now - 0.3));
+  }
   speaker.ctx.currentTime = speaker.tuneEnd;
-  assert.deepEqual(speaker.upcomingNotes(), [], 'the final chord leaves at the end of the tune');
+  assert.deepEqual(speaker.upcomingNotes(), []);
   speaker.silence();
   assert.deepEqual(speaker.upcomingNotes(), []);
 });
