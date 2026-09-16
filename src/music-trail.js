@@ -5,10 +5,6 @@ const LIFETIME = 1.8;
 export function createMusicTrail(element) {
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
-  const clef = element.ownerDocument.createElement('span');
-  clef.className = 'music-clef';
-  clef.innerHTML = '<svg width="12" height="30" viewBox="0 0 12 30" fill="none" stroke="currentColor" stroke-width="1.1" aria-hidden="true"><path d="M7 27C12 25 3 8 7 2C11 5 7 10 4 13C-2 19 5 25 10 20C14 15 4 12 4 18C4 20 6 21 8 20M7 27C3 30 1 25 4 25"/></svg>';
-  staff.append(clef);
   const waveform = element.ownerDocument.createElement('canvas');
   waveform.className = 'sound-waveform';
   waveform.width = 112;
