@@ -65,7 +65,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 /* Cabinet dimensions also reserve room when fitting the game to the window. */
 #monitor {
-  --rim: 14px; --chin: 84px; --side: 0px;
+  --rim: 14px; --chin: 100px; --side: 0px;
   display: grid; grid-template-columns: auto; grid-template-rows: auto var(--chin);
   padding: var(--rim); border-radius: 12px 12px 8px 8px;
   color: #403a30; background: linear-gradient(115deg, #d2c9b4, #b0a58e);
@@ -98,7 +98,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor[data-surround="dark"] #canvas-box { box-shadow: 0 0 0 5px #101510, 0 0 0 7px #3c4038; }
 #monitor[data-surround="dark"] #volume { accent-color: #9d9d90; }
 @media (max-width: 600px) {
-  #monitor { --rim: 10px; --chin: 84px; }
+  #monitor { --rim: 10px; --chin: 100px; }
   #monitor-controls { gap: 10px; }
   #monitor[data-surround="portable"] { --rim: 12px; --side: 82px; }
   #monitor[data-surround="portable"] #monitor-controls { padding-left: 12px; gap: 10px; }
@@ -107,16 +107,16 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 #monitor-waveform { flex: 0 0 64px; height: 42px; }
 #monitor-waveform .sound-waveform { width: 100%; height: 100%; background: transparent; image-rendering: auto; }
-#music-notes { --groove: #514d4166; position: relative; flex: 1; min-width: 40px; height: 72px; overflow: hidden; pointer-events: none; container-type: inline-size; }
-#music-notes::before { content: ""; position: absolute; inset: 23px 0 auto; height: 34px; background: repeating-linear-gradient(to bottom, var(--groove) 0 2px, transparent 2px 8px); }
+#music-notes { --groove: #514d4166; position: relative; flex: 1; min-width: 40px; height: 88px; overflow: hidden; pointer-events: none; container-type: inline-size; }
+#music-notes > .staff-lines { position: absolute; top: 22px; left: 0; width: 100%; height: 34px; fill: none; stroke: var(--groove); stroke-width: 1px; shape-rendering: crispEdges; }
 #music-notes > [data-register] { position: relative; top: -15px; display: block; height: 87px; }
 #music-notes :is([data-rhythm], [data-measure]) { position: absolute; left: 0; top: 0; color: #30392b; }
-#music-notes svg { display: block; transform: scale(3.333333); transform-origin: top left; }
+#music-notes [data-rhythm] svg { display: block; transform: scale(3.333333); transform-origin: top left; }
 #music-notes [data-measure] { left: calc(-1 * var(--measure-gap, 12px)); top: 38px; height: 32px; border-left: 1px solid currentColor; }
 #monitor[data-surround="dark"] #music-notes { --groove: #090e0b; }
 #monitor[data-surround="dark"] #music-notes :is([data-rhythm], [data-measure]),
 #monitor[data-surround="portable"] #music-notes :is([data-rhythm], [data-measure]) { color: #d6f897; }
-#monitor[data-surround="portable"] #music-notes { --groove: #251f1b; flex: 0 0 72px; width: 100%; }
+#monitor[data-surround="portable"] #music-notes { --groove: #251f1b; flex: 0 0 88px; width: 100%; }
 #monitor[data-surround="portable"] #monitor-waveform { flex: 0 0 42px; width: 64px; }
 #monitor.powered-off :is(#music-notes > *, #monitor-waveform) { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {

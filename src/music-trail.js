@@ -1,6 +1,12 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
 export function createMusicTrail(element, waveformElement, settings = { lifetime: 6 }) {
+  const lines = element.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  lines.classList.add('staff-lines');
+  lines.setAttribute('viewBox', '0 0 1 34');
+  lines.setAttribute('preserveAspectRatio', 'none');
+  lines.setAttribute('aria-hidden', 'true');
+  lines.innerHTML = '<path d="M0 1H1M0 9H1M0 17H1M0 25H1M0 33H1" vector-effect="non-scaling-stroke"/>';
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
   const waveform = element.ownerDocument.createElement('canvas');
@@ -12,7 +18,7 @@ export function createMusicTrail(element, waveformElement, settings = { lifetime
   const reducedMotion = element.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)');
   let drawnEffect = null;
   let drawnFlatline = false;
-  element.replaceChildren(staff);
+  element.replaceChildren(lines, staff);
   waveformElement.replaceChildren(waveform);
   const visible = new Map();
   const bars = new Map();
