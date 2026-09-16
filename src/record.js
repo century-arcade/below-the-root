@@ -5,6 +5,7 @@ import { enterRoom } from './world.js';
 import { IDLE, isIdle } from './input.js';
 import { importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
+import { clearPanel } from './panel.js';
 import { COMMANDS, commandDraft, executeCommand } from './verbs.js';
 
 export const RECORD_VERSION = 3;
@@ -109,6 +110,7 @@ export class Session {
     this.lastVisit = null;
     this.lastDay = null;
     this.completed = false;
+    this.commandMessage = false;
     this.boundary = null;
     this.noteBoundary();
   }
@@ -180,6 +182,7 @@ export class Session {
     this.record.events.push(copy(event));
     const presentation = { stall: this.state.stall, tuneWait: this.state.tuneWait, events: this.state.events.length };
     executeCommand(this.state, name, choices);
+    if (this.playback) this.commandMessage = !this.state.resting && !this.state.progress.won;
     if (presented) {
       this.state.stall = presentation.stall;
       this.state.tuneWait = presentation.tuneWait;
@@ -215,6 +218,12 @@ export class Session {
       } else if (this.read('t', 'trigger').press && this.skippable) this.skipTune();
     }
     const tune = s.tuneWait;
+    // Recorded commands bypass the menu's acknowledgement and panel cleanup.
+    // Keep their text through music, then dismiss it when gameplay resumes.
+    if (this.commandMessage && !s.stall && !s.verb && s.active) {
+      clearPanel(s);
+      this.commandMessage = false;
+    }
     shellFrame(s);
     tick(s);
     if (tune != null && s.tuneWait == null) this.handoff();

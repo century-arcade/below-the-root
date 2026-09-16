@@ -7,7 +7,8 @@ import { exportSave, importSave } from '../src/save.js';
 import { Keyboard, Gamepad, IDLE } from '../src/input.js';
 import { CLASS } from '../src/data.js';
 import { playTime } from '../src/progress.js';
-import { SFX } from '../src/audio.js';
+import { SFX, startTune } from '../src/audio.js';
+import { panelLines } from '../src/panel.js';
 
 const data = await loadTestData();
 const idle = { read: () => IDLE };
@@ -128,6 +129,58 @@ for (const device of ['keyboard', 'gamepad']) {
   assert.equal(playTime(a.state), playTime(b.state));
 }
 
+// Replay keeps unsteered glides at normal speed, but still skips idle gaps.
+{
+  const s = imported(state => {
+    enterRoom(state, data.roomByCode.get('C4'), 14, 0);
+    state.objects.find(o => o.class === CLASS.SHUBA).carried = true;
+  });
+  let joy = J.right;
+  s.live = { read: () => joy };
+  advanceUntil(s, x => x.state.player.gliding, 'started gliding');
+  joy = IDLE;
+  advance(s, 32);
+  s.command('RENEW');
+  const replay = Session.watch(data, idle, s.snapshot());
+  assert.equal(replay.playbackDelay, 0, 'idle input before the glide can be skipped');
+  let gliding = 0;
+  while (!replay.playbackDone) {
+    if (replay.state.player.gliding && !replay.lastJoy.dx && !replay.lastJoy.fire) {
+      assert.equal(replay.playbackDelay, 1000 / 60, 'releasing steering does not speed up a glide');
+      gliding++;
+    }
+    advance(replay, 1);
+  }
+  assert.ok(gliding > 0, 'replayed a glide after releasing steering');
+}
+
+// Recorded commands dismiss their text when gameplay resumes, as the menu does.
+for (const name of ['USE', 'HEAL', 'EXAMINE']) {
+  const s = imported(state => {
+    const lamp = state.objects.find(o => o.class === CLASS.HONEYLAMP);
+    lamp.exists = lamp.carried = true;
+  });
+  const lamp = s.state.objects.find(o => o.class === CLASS.HONEYLAMP);
+  s.command(name, name === 'USE' ? { item: lamp.object } : {});
+  s.live = { read: () => J.right };
+  advance(s, 80);
+  s.command('RENEW');
+  const replay = Session.watch(data, idle, s.snapshot());
+  advance(replay, 1);
+  assert.ok(panelLines(replay.state).some(line => line.trim()), `${name} displays its message`);
+  if (name === 'USE') {
+    startTune(replay.state, 0);
+    const message = panelLines(replay.state);
+    advance(replay, 1);
+    assert.deepEqual(panelLines(replay.state), message, 'music preserves the command message');
+    replay.skipTune();
+  }
+  advanceUntil(replay, x => x.simticks > 0, 'resumed gameplay after the command');
+  assert.ok(panelLines(replay.state).every(line => !line.trim()), `${name} clears its message`);
+  while (!replay.playbackDone) advance(replay, 1);
+  assert.deepEqual(checkpoint(replay.state), s.snapshot().checkpoint);
+}
+
 // UI choices produce stable object IDs and keep cursor travel out of the stream.
 {
   let queue = [];
@@ -174,6 +227,10 @@ for (const device of ['keyboard', 'gamepad']) {
   assert.equal(s.record.events[1].simticks, 320);
   assert.deepEqual(s.record.events[1].stick, [-1, 0, 0]);
   saveHere(s);
+  const replay = Session.watch(data, idle, s.snapshot());
+  advance(replay, 2);
+  assert.ok(replay.state.resting);
+  assert.ok(replay.state.statusVisible, 'resting replay keeps its status display');
 }
 
 // REST preserves the original tick-tock sequence around each completed hour.
