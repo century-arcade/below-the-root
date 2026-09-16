@@ -181,6 +181,7 @@ export function endDemo(state) {
 // a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait
 export function startVerb(state, gen, carryMovement = false) {
   state.verbCarryMovement = carryMovement;
+  state.verbUnread = false;
   state.commandMenuOpen = false;
   state.verb = gen;
   state.verbWait = 0;
@@ -203,7 +204,7 @@ function advanceVerb(state, r) {
 
 function endVerb(state) {
   state.verb = null;
-  state.commands?.handoff({ movement: !state.verbCarryMovement });
+  state.commands?.handoff({ movement: !state.verbCarryMovement, unread: state.verbUnread });
   if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);
   if (!state.ended) state.active = true;

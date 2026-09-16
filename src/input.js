@@ -88,17 +88,22 @@ export class Keyboard {
     if (!source) for (const device of this.devices) device.cancel(true);
     if (source) this.sources.delete(source); else this.sources.clear();
     this.events = source ? this.events.filter(e => e.source !== source) : [];
+    if (!source || this.lastEvent?.source === source) this.lastEvent = null;
     if (!source) this.deliveredFire = false;
   }
   attach(device) { this.devices.add(device); }
-  handoff({ movement = false } = {}) {
-    this.blockFireUntilRelease(this.consumed);
+  handoff({ movement = false, unread = false } = {}) {
+    const event = unread && this.lastEvent;
+    const through = event ? event.id - 1 : this.consumed;
+    this.blockFireUntilRelease(through);
     if (movement) {
-      this.events = this.events.filter(e => e.id > this.consumed);
+      this.events = this.events.filter(e => e.id > through);
       for (const s of this.sources.values()) {
-        for (const [key, id] of s.down) if (id <= this.consumed) s.blocked.add(key);
+        for (const [key, id] of s.down) if (id <= through) s.blocked.add(key);
       }
     }
+    if (event) this.events.unshift(event);
+    this.lastEvent = null;
   }
   blockFireUntilRelease(through = this.sequence) {
     this.events = this.events.filter(e => e.id > through || !e.keys.includes('fire'));
@@ -110,6 +115,7 @@ export class Keyboard {
   fresh() {
     for (const device of this.devices) device.cancel(true);
     this.events = [];
+    this.lastEvent = null;
     for (const s of this.sources.values()) for (const key of s.down.keys()) s.blocked.add(key);
     return true;
   }
@@ -149,6 +155,7 @@ export class Keyboard {
       } else if (event) this.events.shift();
     }
     if (event) this.consumed = Math.max(this.consumed, event.id);
+    this.lastEvent = policy === 'press' ? event : null;
     const pressed = new Set(event?.keys || []);
     if (policy === 'press' || policy === 'trigger') {
       const move = axes(pressed);

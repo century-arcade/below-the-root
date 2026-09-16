@@ -114,6 +114,44 @@ test('handoff preserves the next queued press after a menu', () => {
   assert.ok(session.record.events.some(e => e.stick?.[0] === 1), 'first subsequent movement reaches gameplay');
 });
 
+for (const held of [false, true]) for (const name of ['ArrowRight', 'Enter']) {
+  test(`TAKE dismissal reaches gameplay: ${name}, ${held ? 'held' : 'tapped'}`, () => {
+    const { keys, session, state } = fixture(s => {
+      const item = s.objects.find(o => o.exists && !o.carried && o.room === s.nidPlace.room);
+      place(s, item.room, item.col, item.row);
+    });
+    choose(session, keys, 1, 0);
+    until(session, () => lines(state)[0].startsWith('YOU FIND'), 'pickup succeeds');
+    assert.ok(state.objects.some(o => o.carried), 'item is in inventory');
+    if (held) key(keys, name); else tap(keys, name);
+    until(session, () => !state.verb, 'first input clears the result');
+    assert.ok(lines(state).every(line => !line.trim()), 'result panel clears');
+    const input = session.read('s');
+    assert.equal(input.dx, name === 'ArrowRight' ? 1 : 0);
+    assert.equal(input.press, name === 'Enter', 'dismissal trigger gets a gameplay edge');
+    if (held) key(keys, name, true);
+    assert.equal(session.read('s').dx, 0, 'tap is delivered only once; release stops a hold');
+    assert.equal(session.read('s').press, false, 'trigger is delivered only once');
+  });
+}
+
+test('TAKE dismissal stays ahead of later taps and replays as gameplay', () => {
+  const { keys, session, state } = fixture(s => {
+    const item = s.objects.find(o => o.exists && !o.carried && o.room === s.nidPlace.room);
+    place(s, item.room, item.col, item.row);
+  });
+  choose(session, keys, 1, 0);
+  until(session, () => lines(state)[0].startsWith('YOU FIND'), 'pickup succeeds');
+  const afterPickup = session.record.events.length;
+  tap(keys, 'ArrowRight');
+  tap(keys, 'ArrowLeft');
+  advance(session);
+  assert.deepEqual(session.record.events.slice(afterPickup).filter(e => e.stick).map(e => e.stick[0]),
+    [1, -1, 0], 'dismissal and subsequent tap both reach gameplay in order');
+  const replay = session.restoreAt({ simticks: session.simticks, eventIndex: session.record.events.length });
+  assert.deepEqual(checkpoint(replay.state), checkpoint(state), 'carried-through input replays deterministically');
+});
+
 test('control-seizing message rejects holds and accepts a fresh tap immediately', () => {
   const { keys, session, state } = fixture();
   key(keys, 'ArrowRight'); key(keys, 'Enter');

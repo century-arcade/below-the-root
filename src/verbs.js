@@ -84,6 +84,8 @@ export function* runMenu(state) {
   if (result === CANCELLED) return clearPanel(state);
   if (NO_TRAILING_READ.has(verb) || state.ended) return;
   yield* anyInput();
+  // A result message closes on the next action; gameplay still owns that action.
+  state.verbUnread = !state.demo;
   clearPanel(state);
 }
 
