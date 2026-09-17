@@ -137,9 +137,7 @@ node tools/playthrough.mjs run.json --expect-win
 
 This verifies deterministic replay and that the run reached a winning
 outcome, including a recording stopped during Raamo's victory speech.
-`node test/win_replay_test.js` runs the checked-in Pomma victory through both
-acknowledgements; it is part of `make test`. It does not establish the provenance of externally imported
-C64 saves or prove that a route is the original game's intended one.
+See [testing](testing.md) for winning-recording coverage and its limits.
 
 ## Cleaning a route
 
@@ -164,19 +162,4 @@ or automatic mistake detection yet.
 
 ## Tests
 
-`make test` covers atomic C64 import, direct-load mode reset, empty rooms,
-input cancellation, recorded continuation, and focused winning-sequence
-cases. Those ending cases place the player near Raamo; they are not a
-completed normal walkthrough.
-
-With `make serve` running and Python Playwright/Chromium installed:
-
-```
-python3 test/browser_test.py
-python3 test/browser_recovery_test.py
-```
-
-The browser tests check checkpoint recovery with backup/failure handling,
-autosave/resume, pointer cancellation, a typing
-and simulation-isolated issue dialog, failure/retry, JSON download/import,
-and small-screen sizing. GitHub is mocked: this test never posts an issue.
+See [testing](testing.md) for the Node, Python, browser, and golden suites.

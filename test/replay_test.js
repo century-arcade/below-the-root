@@ -1,13 +1,15 @@
-// Run a demo script through the port and print one line per joystick read:
-//   <read#> <room> <col> <row> <facing> <flags>
-// With build/traces/vice_<script>.txt present (tools/trace_demo.py), diff against it.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { loadTestData } from './helpers.js';
 import { newState, startDemo, tick } from '../src/game.js';
 import { panelText, PANEL_ROW } from '../src/panel.js';
+
+// Run a demo script through the port and print one line per joystick read:
+//   <read#> <room> <col> <row> <facing> <flags>
+// With build/traces/vice_<script>.txt present (tools/trace_demo.py), diff against it.
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 function flags(p) {
@@ -36,11 +38,9 @@ function trace(data, name, maxReads = 5000) {
   return { lines, state, ticks };
 }
 
-const name = process.argv[2] || 'intro';
 const data = await loadTestData();
-const { lines, state, ticks } = trace(data, name);
-const vice = join(ROOT, 'build', 'traces', `vice_${name}.txt`);
-if (existsSync(vice)) {
+function compare(name, result, vice) {
+  const { lines, state } = result;
   const want = readFileSync(vice, 'utf8').trim().split('\n');
   let first = -1;
   for (let i = 0; i < Math.max(want.length, lines.length); i++) {
@@ -48,17 +48,25 @@ if (existsSync(vice)) {
     const b = (want[i] || '').split(' ').slice(0, 5).join(' ');
     if (a !== b) { first = i; break; }
   }
-  const ended = state.ended ? ` (port stops at ${state.ended}, ${want.length - lines.length} VICE reads unchecked)` : '';
-  if (first < 0 || (state.ended && first >= lines.length)) {
-    console.log(`ok    ${name}: ${lines.length} reads match VICE${ended}`);
-  } else {
-    console.log(`FAIL  ${name}: first difference at read ${first + 1} of ${want.length}`);
-    for (let i = Math.max(0, first - 3); i < Math.min(first + 4, Math.max(want.length, lines.length)); i++) {
-      console.log(`  port ${(lines[i] || '-').padEnd(40)} vice ${want[i] || '-'}`);
-    }
-    process.exit(1);
+  // The port can end before VICE; preserve the original prefix comparison.
+  if (first < 0 || (state.ended && first >= lines.length)) return;
+  const context = [];
+  for (let i = Math.max(0, first - 3); i < Math.min(first + 4, Math.max(want.length, lines.length)); i++) {
+    context.push(`  port ${(lines[i] || '-').padEnd(40)} vice ${want[i] || '-'}`);
   }
-} else {
-  console.log(lines.join('\n'));
-  console.error(`${name}: ${lines.length} reads, ${ticks} ticks, ended in room ${state.room.room} at ${state.player.col},${state.player.row}`);
+  assert.fail(`${name}: first difference at read ${first + 1} of ${want.length}\n${context.join('\n')}`);
+}
+
+const direct = !process.env.NODE_TEST_CONTEXT;
+for (const name of direct ? [process.argv[2] || 'intro'] : ['intro', 'quest']) {
+  const vice = join(ROOT, 'build', 'traces', `vice_${name}.txt`);
+  if (direct && !existsSync(vice)) {
+    const { lines, state, ticks } = trace(data, name);
+    console.log(lines.join('\n'));
+    console.error(`${name}: ${lines.length} reads, ${ticks} ticks, ended in room ${state.room.room} at ${state.player.col},${state.player.row}`);
+  } else {
+    test(`${name} demo movement matches the VICE trace`, {
+      skip: !existsSync(vice) && `needs build/traces/vice_${name}.txt; see docs/testing.md`,
+    }, () => compare(name, trace(data, name), vice));
+  }
 }

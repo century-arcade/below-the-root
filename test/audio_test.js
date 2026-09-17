@@ -1,20 +1,14 @@
-// M6.4: the tune plan from music.json, and startTune's wait
+import { unlockAudio as unlock } from './helpers.js';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { planTune, pickTune, startTune, Speaker } from '../src/audio.js';
-import { displayRhythm, noteRhythm, staffPitch, QUARTER_FRAMES } from '../src/music-notation.js';
+import { QUARTER_FRAMES } from '../src/music-notation.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const music = JSON.parse(readFileSync(join(ROOT, 'docs', 'spec', 'data', 'music.json'), 'utf8'));
-
-let passed = 0;
-function test(name, fn) {
-  fn();
-  passed += 1;
-}
 
 test('every tune plans one note per sounding event, none longer than the decay', () => {
   for (const tune of music.tunes) {
@@ -52,34 +46,10 @@ test('notation preserves every original pitch and duration in all eleven tunes',
   }
 });
 
-test('rhythm uses the tune pulse, retaining dots, triplets and tied long notes', () => {
-  const names = (tune, duration) => noteRhythm(tune, duration).map(value => value.name);
-  assert.deepEqual(names(0, 36), ['quarter']);
-  assert.deepEqual(names(0, 18), ['eighth']);
-  assert.deepEqual(names(3, 24), ['quarter']);
-  assert.deepEqual(names(3, 48), ['half']);
-  assert.deepEqual(names(3, 72), ['dotted half']);
-  assert.deepEqual(names(1, 27), ['dotted eighth']);
-  assert.deepEqual(names(1, 9), ['sixteenth']);
-  assert.deepEqual(names(1, 12), ['triplet eighth']);
-  assert.deepEqual(names(7, 120), ['whole', 'quarter']);
-  assert.throws(() => noteRhythm(0, 13), /Unmapped rhythm/);
-});
-
 test('the last note may ring past the end byte, up to its decay', () => {
   const plan = planTune(music, 0);
   const last = plan.reduce((a, b) => (b.start > a.start ? b : a));
   assert.ok(last.stop <= last.start + 144);
-});
-
-test('the header simplifies tied endings and puts low notes below the treble staff', () => {
-  assert.equal(displayRhythm(noteRhythm(7, 120)).name, 'dotted whole');
-  assert.equal(displayRhythm(noteRhythm(3, 72)).name, 'dotted half');
-  assert.equal(displayRhythm(noteRhythm(0, 36)).name, 'quarter');
-  assert.equal(staffPitch(60).step, -2, 'middle C is below treble E');
-  assert.equal(staffPitch(55).register, 'treble');
-  assert.ok(staffPitch(55).ledgerSteps.length > staffPitch(60).ledgerSteps.length,
-    'lower notes retain the additional ledger lines');
 });
 
 test('pickTune: numbers pass through, random draws from the pool', () => {
@@ -97,54 +67,6 @@ test('startTune stalls for the tune, except when told not to', () => {
   assert.deepEqual(state.events, [{ music: 0 }, { music: 2 }]);
   assert.equal(state.stall, 1441);
 });
-
-class AudioContextStub {
-  currentTime = 0;
-  state = 'running';
-  sampleRate = 60;
-  destination = {};
-  resumeCalls = 0;
-  createGain() {
-    return {
-      gain: {
-        value: 0, setValueAtTime() {}, linearRampToValueAtTime() {},
-        exponentialRampToValueAtTime() {}, cancelAndHoldAtTime() {},
-      },
-      connect() { return this; },
-    };
-  }
-  createOscillator() {
-    return {
-      frequency: {}, setPeriodicWave() {}, connect(gain) { return gain; },
-      start(at) { this.startedAt = at; }, stop(at) { this.stoppedAt = at; },
-    };
-  }
-  createPeriodicWave() { return {}; }
-  createAnalyser() {
-    return {
-      connect(target) { this.output = target; },
-      getFloatTimeDomainData(samples) { samples.fill(0.25); },
-    };
-  }
-  createBufferSource() {
-    return {
-      playbackRate: {}, connect(gain) { return gain; },
-      start(at) { this.startedAt = at; }, stop(at) { this.stoppedAt = at; },
-    };
-  }
-  createBuffer(channels, n) { return { getChannelData: () => new Float32Array(n) }; }
-  resume() { this.resumeCalls++; return Promise.resolve(); }
-}
-
-function unlock(speaker, tick = 0) {
-  const original = globalThis.AudioContext;
-  globalThis.AudioContext = AudioContextStub;
-  try { speaker.unlock({ tick }); }
-  finally {
-    if (original === undefined) delete globalThis.AudioContext;
-    else globalThis.AudioContext = original;
-  }
-}
 
 test('setVolume and mute drive the master gain without interrupting a tune', () => {
   const speaker = new Speaker(music);
@@ -407,5 +329,3 @@ test('new effects replace old ones; music and silence stop the effect trace', ()
   assert.equal(speaker.effectWaveform(), null);
   assert.ok(effect.src.stoppedAt < 0.12);
 });
-
-console.log(`audio_test: ${passed} passed`);

@@ -13,7 +13,6 @@ CHOKIDAR_USEPOLLING ?= 1
 CHOKIDAR_INTERVAL ?= 500
 
 TEST_TIMEOUT ?= 60
-NODE_TEST := timeout $(TEST_TIMEOUT) node
 
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
@@ -45,32 +44,14 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
-	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'release_test.py'
-	$(NODE_TEST) test/site_test.js
-	$(NODE_TEST) test/log_test.js
-	$(NODE_TEST) test/fit_test.js
-	$(NODE_TEST) test/render_test.js
-	$(NODE_TEST) test/world_test.js
-	$(NODE_TEST) test/map_test.js
-	$(NODE_TEST) test/options_test.js
-	$(NODE_TEST) test/player_test.js
-	$(NODE_TEST) test/talk_test.js
-	$(NODE_TEST) test/time_test.js
-	$(NODE_TEST) test/shell_test.js
-	$(NODE_TEST) test/audio_test.js
-	$(NODE_TEST) test/input_test.js
-	$(NODE_TEST) test/input_contract_test.js
-	$(NODE_TEST) test/menu_test.js
-	$(NODE_TEST) test/gamepad_test.js
-	$(NODE_TEST) test/session_test.js
-	$(NODE_TEST) test/rewind_test.js
-	$(NODE_TEST) test/progress_test.js
-	$(NODE_TEST) tools/record-fixtures.mjs --check
-	$(NODE_TEST) test/win_replay_test.js
-	$(NODE_TEST) test/github_test.mjs
-	$(NODE_TEST) test/replay_test.js intro
-	$(NODE_TEST) test/replay_test.js quest
-	@echo "make test: all passed"
+	@out=$$(mktemp); start=$$(date +%s); status=0; trap 'rm -f "$$out"' EXIT HUP INT TERM; \
+	unset $$(git rev-parse --local-env-vars); \
+	timeout $(TEST_TIMEOUT) node --test --test-reporter=tap test/*_test.js test/*_test.mjs >"$$out" 2>&1 || { status=$$?; echo "Node tests failed (exit $$status)" >>"$$out"; }; \
+	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'release_test.py' >>"$$out" 2>&1 || { status=$$?; echo "Python tests failed (exit $$status)" >>"$$out"; }; \
+	if [ $$status -ne 0 ]; then cat "$$out"; exit $$status; fi; \
+	awk -v start="$$start" '/^# pass / { passed = $$3 } /^# skipped / { skipped = $$3 } \
+	  /^Ran [0-9]+ tests?/ { python = $$2 } /^OK .*skipped=/ { split($$0, parts, "skipped="); python_skipped = parts[2] + 0 } \
+	  END { printf "make test: %d passed, %d skipped, %d s\n", passed + python - python_skipped, skipped + python_skipped, systime() - start }' "$$out"
 
 screenshot: build
 	$(PY) tools/shot.py --url $(BTR_URL)/ --width 1100 --height 850 --crt --select '#screen' --keys ArrowLeft --wait 3000 assets/box/screen.png '?room=B8'

@@ -1,39 +1,15 @@
+import { inputContractFixture, lines, give, place, talkFixture, questState, J, stick as reader, timeFixture } from './helpers.js';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadTestData, give, lines, place } from './helpers.js';
-import { Keyboard, Gamepad, Pointer, IDLE } from '../src/input.js';
-import { Session, checkpoint } from '../src/record.js';
+import { Gamepad, IDLE, Keyboard } from '../src/input.js';
+import { checkpoint, Session } from '../src/record.js';
 import { CLASS } from '../src/data.js';
-import { exportSave } from '../src/save.js';
 import { startTune } from '../src/audio.js';
+import { tick } from '../src/game.js';
 
-const data = await loadTestData();
-const advance = (session, n = 30) => { for (let i = 0; i < n; i++) session.step(); };
-const until = (session, done, message, limit = 2000) => {
-  for (let i = 0; i < limit && !done(); i++) session.step();
-  assert.ok(done(), message);
-};
-function fixture(edit = () => {}) {
-  const keys = new Keyboard({ addEventListener() {} });
-  const session = new Session(data, keys, { initial: { mode: 'quest' } });
-  edit(session.state);
-  session.load(exportSave(session.state));
-  return { keys, session, state: session.state };
-}
-const key = (keys, name, up = false, code = name) => keys.map({ key: name, code }, up);
-const tap = (keys, name, code) => { key(keys, name, false, code); key(keys, name, true, code); };
-function choose(session, keys, col, row) {
-  assert.ok(session.commandMenu());
-  advance(session, 8);
-  session.state.commandMenuClick = { col, row };
-  tap(keys, 'Enter');
-}
-let failures = 0;
-function test(name, run) {
-  try { run(); console.log(`ok    ${name}`); }
-  catch (error) { failures++; console.error(`FAIL  ${name}\n${error.stack}`); }
-}
+for (const cadence of [1, 3, 11]) test(`held KINIPORT source and destination, cadence ${cadence}`, async () => {
+  const { advance, until, fixture, key, choose } = await inputContractFixture();
 
-for (const cadence of [1, 3, 11]) test(`held KINIPORT source and destination, cadence ${cadence}`, () => {
   const { keys, session, state } = fixture(s => { s.player.spiritLimit = s.player.spiritEnergy = 50; });
   choose(session, keys, 3, 3);
   until(session, () => !!state.pointer, 'source selector opens');
@@ -62,7 +38,9 @@ for (const cadence of [1, 3, 11]) test(`held KINIPORT source and destination, ca
   assert.equal(state.pointer.col, end, 'release stops destination cursor');
 });
 
-for (const device of ['keyboard', 'gamepad']) test(`${device} walks through a spirit door and its message`, () => {
+for (const device of ['keyboard', 'gamepad']) test(`${device} walks through a spirit door and its message`, async () => {
+  const { until, fixture, key } = await inputContractFixture();
+
   const { keys, session, state } = fixture(s => { place(s, 384, 20, 7); give(s, CLASS.BELL); });
   if (device === 'keyboard') key(keys, 'ArrowRight');
   else {
@@ -77,7 +55,9 @@ for (const device of ['keyboard', 'gamepad']) test(`${device} walks through a sp
   assert.deepEqual(checkpoint(replay.state), checkpoint(state), 'bell movement replays deterministically');
 });
 
-test('door arrival tune preserves direction and consumes a skip once', () => {
+test('door arrival tune preserves direction and consumes a skip once', async () => {
+  const { advance, until, fixture, key } = await inputContractFixture();
+
   const { keys, session, state } = fixture(s => { place(s, 32, 20, 18); s.paid = true; });
   // Use the actual painted doorway, with its gate paid for this visit.
   const door = state.room.doors[1];
@@ -97,7 +77,9 @@ test('door arrival tune preserves direction and consumes a skip once', () => {
   until(session, () => state.player.col > col, 'held direction survives music');
 });
 
-test('queued confirm advances one chooser stage and NOTHING exits once', () => {
+test('queued confirm advances one chooser stage and NOTHING exits once', async () => {
+  const { until, fixture, tap, choose } = await inputContractFixture();
+
   const { keys, session, state } = fixture();
   choose(session, keys, 1, 2); // USE, with no carried items
   tap(keys, 'Enter'); // separate physical confirmation already waiting
@@ -106,7 +88,9 @@ test('queued confirm advances one chooser stage and NOTHING exits once', () => {
   assert.equal(session.record.events.filter(e => e.command).length, 0);
 });
 
-test('handoff preserves the next queued press after a menu', () => {
+test('handoff preserves the next queued press after a menu', async () => {
+  const { advance, fixture, tap, choose } = await inputContractFixture();
+
   const { keys, session } = fixture();
   choose(session, keys, 0, 0); // PAUSE
   tap(keys, 'ArrowRight');
@@ -115,7 +99,9 @@ test('handoff preserves the next queued press after a menu', () => {
 });
 
 for (const exhausted of [false, true]) for (const name of ['ArrowRight', 'Enter']) {
-  test(`spirit reward final passage dismisses once: ${name}, visions exhausted: ${exhausted}`, () => {
+  test(`spirit reward final passage dismisses once: ${name}, visions exhausted: ${exhausted}`, async () => {
+  const { data, until, fixture, tap, choose } = await inputContractFixture();
+
     const { keys, session, state } = fixture(s => {
       place(s, 19, 0, 0);
       s.player.spiritLimit = s.player.spiritEnergy = 10;
@@ -146,7 +132,9 @@ for (const exhausted of [false, true]) for (const name of ['ArrowRight', 'Enter'
 }
 
 for (const held of [false, true]) for (const name of ['ArrowRight', 'Enter']) {
-  test(`TAKE dismissal reaches gameplay: ${name}, ${held ? 'held' : 'tapped'}`, () => {
+  test(`TAKE dismissal reaches gameplay: ${name}, ${held ? 'held' : 'tapped'}`, async () => {
+  const { until, fixture, key, tap, choose } = await inputContractFixture();
+
     const { keys, session, state } = fixture(s => {
       const item = s.objects.find(o => o.exists && !o.carried && o.room === s.nidPlace.room);
       place(s, item.room, item.col, item.row);
@@ -166,7 +154,9 @@ for (const held of [false, true]) for (const name of ['ArrowRight', 'Enter']) {
   });
 }
 
-test('TAKE dismissal stays ahead of later taps and replays as gameplay', () => {
+test('TAKE dismissal stays ahead of later taps and replays as gameplay', async () => {
+  const { advance, until, fixture, tap, choose } = await inputContractFixture();
+
   const { keys, session, state } = fixture(s => {
     const item = s.objects.find(o => o.exists && !o.carried && o.room === s.nidPlace.room);
     place(s, item.room, item.col, item.row);
@@ -183,7 +173,9 @@ test('TAKE dismissal stays ahead of later taps and replays as gameplay', () => {
   assert.deepEqual(checkpoint(replay.state), checkpoint(state), 'carried-through input replays deterministically');
 });
 
-test('control-seizing message rejects holds and accepts a fresh tap immediately', () => {
+test('control-seizing message rejects holds and accepts a fresh tap immediately', async () => {
+  const { advance, until, fixture, key, tap } = await inputContractFixture();
+
   const { keys, session, state } = fixture();
   key(keys, 'ArrowRight'); key(keys, 'Enter');
   state.stop = { reason: 'ambush', outcome: 'kidnap_salaat' };
@@ -194,7 +186,9 @@ test('control-seizing message rejects holds and accepts a fresh tap immediately'
   until(session, () => !state.verb, 'first fresh tap dismisses kidnapping', 30);
 });
 
-test('tune skip leaves queued navigation and subsequent confirmation available', () => {
+test('tune skip leaves queued navigation and subsequent confirmation available', async () => {
+  const { advance, until, fixture, tap } = await inputContractFixture();
+
   const { keys, session, state } = fixture();
   session.commandMenu();
   startTune(state, 0); session.skippable = true;
@@ -204,7 +198,9 @@ test('tune skip leaves queued navigation and subsequent confirmation available',
   until(session, () => session.record.events.some(e => e.command === 'TAKE'), 'navigation then fresh confirm survive skip');
 });
 
-test('opposite taps remain ordered in menus and continuous movement', () => {
+test('opposite taps remain ordered in menus and continuous movement', async () => {
+  const { advance, fixture, key, tap } = await inputContractFixture();
+
   const { keys, session } = fixture();
   tap(keys, 'ArrowLeft'); tap(keys, 'ArrowRight');
   assert.equal(session.read('s').dx, -1);
@@ -217,7 +213,9 @@ test('opposite taps remain ordered in menus and continuous movement', () => {
   assert.equal(selected, 'PAUSE', 'opposite simultaneous holds remain ordered menu moves');
 });
 
-test('gameplay aliases, opposites and rapid trigger taps survive different read timing', () => {
+test('gameplay aliases, opposites and rapid trigger taps survive different read timing', async () => {
+  const { fixture, key, tap } = await inputContractFixture();
+
   const { keys, session } = fixture();
   key(keys, 'ArrowRight'); key(keys, 'd', false, 'KeyD');
   key(keys, 'ArrowRight', true);
@@ -232,7 +230,9 @@ test('gameplay aliases, opposites and rapid trigger taps survive different read 
   assert.equal(session.read('s').press, true, 'second tap gets a distinct effective gameplay edge');
 });
 
-test('gamepad buttons and stick/d-pad aliases deliver distinct ordered menu presses', () => {
+test('gamepad buttons and stick/d-pad aliases deliver distinct ordered menu presses', async () => {
+  const { advance, until, fixture } = await inputContractFixture();
+
   const { keys, session, state } = fixture();
   const pad = { connected: true, axes: [0, 0], buttons: Array.from({ length: 16 }, () => ({ pressed: false })) };
   const gamepad = new Gamepad(keys, { getGamepads: () => [pad] });
@@ -249,7 +249,9 @@ test('gamepad buttons and stick/d-pad aliases deliver distinct ordered menu pres
   assert.deepEqual(keys.read(), IDLE, 'disconnect removes stale gamepad input');
 });
 
-test('held doorway trigger transits once; release/repress transits again and replays', () => {
+test('held doorway trigger transits once; release/repress transits again and replays', async () => {
+  const { data, advance, until, fixture, key } = await inputContractFixture();
+
   const { keys, session, state } = fixture(s => {
     [s.player.col, s.player.row] = s.room.doors.find(Boolean).cells.at(-1);
   });
@@ -265,7 +267,9 @@ test('held doorway trigger transits once; release/repress transits again and rep
   assert.deepEqual(checkpoint(replay.state), record.checkpoint);
 });
 
-test('REST ignores its selecting hold and wakes on the first fresh input', () => {
+test('REST ignores its selecting hold and wakes on the first fresh input', async () => {
+  const { advance, until, fixture, key, tap } = await inputContractFixture();
+
   const { keys, session, state } = fixture();
   session.commandMenu(); advance(session, 8);
   state.commandMenuClick = { col: 2, row: 3 };
@@ -277,7 +281,9 @@ test('REST ignores its selecting hold and wakes on the first fresh input', () =>
   until(session, () => !state.resting, 'first new direction wakes REST', 10);
 });
 
-test('one observed trigger interrupts a demo without selecting the main menu', () => {
+test('one observed trigger interrupts a demo without selecting the main menu', async () => {
+  const { data, advance, key, tap } = await inputContractFixture();
+
   const keys = new Keyboard({ addEventListener() {} });
   const session = new Session(data, keys, { initial: { mode: 'demo', demo: 'intro' } });
   tap(keys, 'ArrowDown'); // Input made while watching belongs to the demo.
@@ -291,23 +297,9 @@ test('one observed trigger interrupts a demo without selecting the main menu', (
   assert.ok(lines(session.state).some(line => line.includes('NERIC')), 'fresh confirmation opens character chooser');
 });
 
-class Target {
-  constructor() { this.listeners = {}; }
-  addEventListener(name, fn) { (this.listeners[name] ||= []).push(fn); }
-  send(name, data = {}) { for (const fn of this.listeners[name] || []) fn(data); }
-}
-function pointerFixture() {
-  const f = fixture();
-  const canvas = new Target(), target = new Target();
-  Object.assign(canvas, { style: {}, width: 320, height: 200, setPointerCapture() {},
-    getBoundingClientRect: () => ({ left: 0, top: 0, width: 320, height: 200 }) });
-  const pointer = new Pointer(canvas, f.keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
-  const event = { button: 0, pointerId: 1, clientX: 200, clientY: 100, preventDefault() {} };
-  const tapPointer = (e = event) => { canvas.send('pointerdown', e); canvas.send('pointerup', e); };
-  return { ...f, canvas, target, pointer, event, tapPointer };
-}
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-try {
+test("pointer single tap is a coherent delayed gameplay gesture", async () => {
+  const { advance, pointerFixture, wait } = await inputContractFixture();
+
   const f = pointerFixture();
   f.tapPointer();
   advance(f.session, 12);
@@ -317,9 +309,11 @@ try {
   assert.ok(f.session.record.events.some(e => String(e.stick) === '1,0,1'), 'direction and trigger reach gameplay together');
   assert.ok(f.state.player.leaping, 'single directional tap jumps');
   f.pointer.cancel();
-  console.log('ok    pointer single tap is a coherent delayed gameplay gesture');
-} catch (error) { failures++; console.error(error.stack); }
-try {
+});
+
+test("pointer double tap, stop, focus reset and cancellation", async () => {
+  const { advance, pointerFixture, wait } = await inputContractFixture();
+
   const f = pointerFixture();
   f.tapPointer(); f.tapPointer();
   await wait(230);
@@ -336,7 +330,38 @@ try {
   await wait(230);
   assert.deepEqual(f.keys.read(), IDLE, 'pointer cancellation leaves no delayed action');
   f.pointer.cancel();
-  console.log('ok    pointer double tap, stop, focus reset and cancellation');
-} catch (error) { failures++; console.error(error.stack); }
+});
 
-if (failures) process.exitCode = 1;
+test('holding the button on a doorway goes through once', async () => {
+  const { data, pomma } = await talkFixture();
+
+  const s = questState(data, pomma);
+  place(s, 1, 18, 14);
+  s.input = reader(() => J.fire);
+  s.active = true;
+  const rooms = [s.room.room];
+  for (let i = 0; i < 400; i++) {
+    tick(s);
+    if (s.room.room !== rooms.at(-1)) rooms.push(s.room.room);
+  }
+  assert.deepEqual(rooms, [1, 9], 'one transit while the button stays down');
+  assert.equal(s.player.indoors, false);
+  let reads = 0;
+  s.input = reader(() => (reads++ === 0 ? J.idle : J.fire));
+  for (let i = 0; i < 400 && s.room.room === 9; i++) tick(s);
+  assert.equal(s.room.room, 1, 'releasing the button arms the door again');
+  assert.equal(s.player.indoors, true);
+});
+
+test('holding a direction dismisses the spirit bell message without requiring release', async () => {
+  const { settle, data, pomma } = await timeFixture();
+
+  const s = questState(data, pomma);
+  place(s, 26, 5, 5);
+  s.stop = { reason: 'bell' };
+  s.active = true;
+  tick(s);
+  assert.equal(lines(s)[0], 'THE SPIRIT BELL RINGS');
+  settle(s, [J.left, J.left]);
+  assert.ok(s.active);
+});

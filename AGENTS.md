@@ -7,3 +7,5 @@ Issue-loop stages (triage, diagnose, fix, review) run in a temporary worktree an
 Tests assert behaviour, never layout geometry: no pixel positions, element widths, or viewport-dependent coordinates. A test that only breaks when CSS changes is deleted, not updated.
 
 Run `make test` before every commit; the pre-commit hook runs it (`make install-hooks`), and `--no-verify` is not allowed.
+
+Follow [docs/testing.md](docs/testing.md) for the test structure and runners.

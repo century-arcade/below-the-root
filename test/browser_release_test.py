@@ -1,6 +1,6 @@
 """Play the extracted release with external requests blocked; requires Playwright.
 
-Usage: python test/release_browser_test.py [dist/below-the-root-preservation.zip]
+Usage: python test/browser_release_test.py [dist/below-the-root-preservation.zip]
 """
 import hashlib
 import json
@@ -85,4 +85,4 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
         server.terminate()
         server.wait(timeout=10)
         server.stdout.close()
-print('release_browser_test: checksums, offline pages, gameplay, map, help, recording and resume passed')
+print('browser_release_test: checksums, offline pages, gameplay, map, help, recording and resume passed')

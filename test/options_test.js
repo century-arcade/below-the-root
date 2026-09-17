@@ -1,103 +1,40 @@
+import { memory } from './helpers.js';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DEFAULTS, loadOptions, storeOption } from '../src/options.js';
-import { statusRows } from '../src/status.js';
-import { clearPanel, PANEL_COLS, say } from '../src/panel.js';
-import { statusLayout } from '../src/video.js';
-import { give, loadTestData } from './helpers.js';
-import { newState, startQuest } from '../src/game.js';
-import { IDLE } from '../src/input.js';
-import { CLASS } from '../src/data.js';
 
-const memory = () => {
-  const map = new Map();
-  return { getItem: (k) => (map.has(k) ? map.get(k) : null), setItem: (k, v) => map.set(k, String(v)), map };
-};
+test("empty storage supplies defaults and stored options override them", () => {
+  let storage = memory();
+  assert.deepEqual(loadOptions(storage), DEFAULTS, 'an empty store gives the defaults');
+  assert.equal(DEFAULTS.volume, 0.5, 'the volume starts half way');
 
-let storage = memory();
-assert.deepEqual(loadOptions(storage), DEFAULTS, 'an empty store gives the defaults');
-assert.equal(DEFAULTS.volume, 0.5, 'the volume starts half way');
+  storage.setItem('btr.volume.v2', '0.8');
+  storage.setItem('btr.muted', '1');
+  storage.setItem('btr.crt', '1');
+  storage.setItem('btr.debug', 'nonsense');
+  assert.deepEqual(loadOptions(storage), { surround: 'dark', volume: 0.8, muted: true, crt: true, classic: false, debug: false },
+    'stored values override the defaults; anything but 1 is off');
 
-storage.setItem('btr.volume.v2', '0.8');
-storage.setItem('btr.muted', '1');
-storage.setItem('btr.crt', '1');
-storage.setItem('btr.debug', 'nonsense');
-assert.deepEqual(loadOptions(storage), { surround: 'dark', volume: 0.8, muted: true, crt: true, classic: false, debug: false },
-  'stored values override the defaults; anything but 1 is off');
+  for (const surround of ['commodore', 'portable', 'dark']) {
+    storeOption(storage, 'surround', surround);
+    assert.equal(loadOptions(storage).surround, surround);
+  }
+  storage.setItem('btr.surround', 'unknown');
+  assert.equal(loadOptions(storage).surround, 'dark');
 
-for (const surround of ['commodore', 'portable', 'dark']) {
-  storeOption(storage, 'surround', surround);
-  assert.equal(loadOptions(storage).surround, surround);
-}
-storage.setItem('btr.surround', 'unknown');
-assert.equal(loadOptions(storage).surround, 'dark');
+  storage.setItem('btr.volume.v2', 'loud');
+  assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');
+  storage.setItem('btr.volume.v2', '7');
+  assert.equal(loadOptions(storage).volume, 1, 'volume is clamped');
+});
 
-storage.setItem('btr.volume.v2', 'loud');
-assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');
-storage.setItem('btr.volume.v2', '7');
-assert.equal(loadOptions(storage).volume, 1, 'volume is clamped');
-
-storage = memory();
-storeOption(storage, 'crt', true);
-storeOption(storage, 'classic', false);
-storeOption(storage, 'volume', 0.3);
-assert.deepEqual([...storage.map], [['btr.crt', '1'], ['btr.classic', '0'], ['btr.volume.v2', '0.3']]);
-storage.setItem('btr.volume', '0.1');
-assert.equal(loadOptions(storage).volume, 0.3, 'the linear-era key is ignored');
-storeOption({ setItem() { throw new Error('quota'); } }, 'crt', true);
-
-const data = await loadTestData();
-const state = newState(data, { read: () => IDLE, pace: 0 });
-assert.deepEqual(statusRows(state), [], 'no rows before a quest');
-startQuest(state, data.characters[0]);
-const rows = statusRows(state);
-const p = state.player;
-assert.equal(rows.length, 2);
-assert.ok(rows.every(r => r.length <= PANEL_COLS), rows);
-assert.match(rows[0], /^DAY 1 {3}EARLY MORNING/);
-assert.ok(rows[0].endsWith(p.name), rows[0]);
-assert.match(rows[1], new RegExp(`^STAMINA ${p.stamina} +FOOD ${p.food} +REST ${p.rest} +SPIRIT ${p.spiritEnergy}/${p.spiritLimit}$`));
-const bread = give(state, CLASS.BREAD);
-assert.ok(statusRows(state).some(row => row.includes('PAN BREAD')), 'carried items appear above status without articles');
-give(state, CLASS.ROPE);
-give(state, CLASS.ROPE);
-give(state, CLASS.TOKEN);
-give(state, CLASS.TOKEN);
-give(state, CLASS.TOKEN);
-const inventoryRows = statusRows(state).slice(0, -2);
-assert.deepEqual(inventoryRows, [
-  'PAN BREAD'.padEnd(PANEL_COLS / 2),
-  'TOKEN x3'.padEnd(PANEL_COLS / 2),
-  'VINE ROPE x2'.padEnd(PANEL_COLS / 2),
-], 'inventory uses columns, drops articles and combines every item class');
-assert.ok(inventoryRows.every(row => !row.includes('YOU HAVE')));
-assert.ok(statusRows(state).every(row => !row.includes('NOTHING')), 'an empty inventory entry is never shown');
-state.commandMenuOpen = true;
-assert.ok(statusRows(state).every(row => !row.includes('PAN BREAD')), 'inventory is hidden behind the action menu');
-state.commandMenuOpen = false;
-state.verb = {};
-assert.ok(statusRows(state).every(row => !row.includes('PAN BREAD')), 'inventory is hidden while a message is active');
-state.verb = null;
-let layout = statusLayout(state, statusRows(state));
-assert.deepEqual(layout.panelRows, inventoryRows, 'inventory occupies the game text panel');
-say(state, 'A MESSAGE');
-assert.deepEqual(statusRows(state), rows, 'a message suppresses inventory even without an active verb');
-layout = statusLayout(state, statusRows(state));
-assert.deepEqual(layout.panelRows, [], 'a message owns the text panel');
-assert.deepEqual(layout.bandRows.slice(-2), statusRows(state).slice(-2), 'permanent status stays in its bottom rows');
-clearPanel(state);
-assert.deepEqual(statusLayout(state, statusRows(state)).panelRows, inventoryRows, 'inventory returns when the message clears');
-state.commandMenuOpen = true;
-assert.deepEqual(statusLayout(state, statusRows(state)).panelRows, [], 'the menu owns the panel before its first text is drawn');
-assert.deepEqual(statusLayout(state, statusRows(state)).bandRows, layout.bandRows, 'switching to the menu preserves status');
-state.commandMenuOpen = false;
-const playback = { roomChanges: 1, totalRoomChanges: 3 };
-const classicLayout = statusLayout(state, statusRows(state, { classic: true, playback }), { classic: true });
-assert.deepEqual(classicLayout.panelRows, ['1/3'], 'classic replay details belong to the shared panel');
-assert.ok(classicLayout.bandRows.every(row => row === ''), 'classic mode leaves permanent status empty');
-Object.assign(p, { stamina: 30, food: 30, rest: 30, spiritEnergy: 30, spiritLimit: 30 });
-state.clock.day = 51;
-state.clock.hour = 2;
-for (const row of statusRows(state)) assert.ok(row.length <= PANEL_COLS, row);
-state.title = true;
-assert.deepEqual(statusRows(state), [], 'the shell screens have no rows');
-console.log('options_test: defaults, stored overrides, clamping, quota errors and the status strip passed');
+test("options serialize booleans and volume and tolerate storage failure", () => {
+  const storage = memory();
+  storeOption(storage, 'crt', true);
+  storeOption(storage, 'classic', false);
+  storeOption(storage, 'volume', 0.3);
+  assert.deepEqual([...storage.map], [['btr.crt', '1'], ['btr.classic', '0'], ['btr.volume.v2', '0.3']]);
+  storage.setItem('btr.volume', '0.1');
+  assert.equal(loadOptions(storage).volume, 0.3, 'the linear-era key is ignored');
+  storeOption({ setItem() { throw new Error('quota'); } }, 'crt', true);
+});

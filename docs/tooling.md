@@ -64,7 +64,7 @@ hard way:
   / `spec_assets.py` -- regenerate `docs/spec/data/*.json`;
   `spec_check.py` cross-checks them.  See `docs/spec/README.md`.
   `spec_world.py --sheet PNG` writes all 438 rooms at full size as a
-  palette-mode PNG whose pixel values are colour indices; `make test`
-  compares the port's renderer against it.
+  palette-mode PNG whose pixel values are colour indices; the
+  [rendering goldens](testing.md#goldens) compare the port's renderer against it.
 - `poster_map.py [--image PATH]` (`make poster`) -- measure the untracked
   `iso/map.jpg` into `docs/spec/data/poster.json` using Pillow and NumPy.

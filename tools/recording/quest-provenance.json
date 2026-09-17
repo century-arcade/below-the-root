@@ -38,13 +38,6 @@
         "Raamo saved"
       ],
       "verify": "node tools/playthrough.mjs test/fixtures/herd-win.json --expect-win"
-    },
-    {
-      "file": "herd-caverns.json",
-      "endpoint": "First entry to 0C in the same fresh live run",
-      "simticks": 21312,
-      "events": 678,
-      "verify": "node tools/playthrough.mjs test/fixtures/herd-caverns.json"
     }
   ],
   "preservation": "Original C64 saves, scripted demo inputs, and VICE trace fixtures are unchanged. Obsolete Pomma v1/v2 and Genaa browser recordings were removed."

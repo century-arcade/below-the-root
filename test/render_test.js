@@ -1,22 +1,20 @@
+import { execFileSync } from 'node:child_process';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
-
-import { loadTestData } from './helpers.js';
+import { loadTestData, readPNG, rgbWindow, writePNG } from './helpers.js';
 import { renderIndexed, WIDTH, HEIGHT, figureOrigin } from '../src/video.js';
-import { readPNG, rgbWindow, writePNG } from './png.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '_build');
 const SHEET = join(ROOT, 'build', 'rooms', 'sheet.png');
+const DISK = join(ROOT, 'build', 'btr2.d64');
 const VICE = join(ROOT, 'build', 'shots', 'ingame.png');
 
-let failures = 0;
 function report(name, bad, detail) {
-  console.log(`${bad === 0 ? 'ok  ' : 'FAIL'}  ${name}: ${bad} mismatching pixels`
-    + (detail ? `  ${detail}` : ''));
-  if (bad !== 0) failures++;
+  assert.equal(bad, 0, `${name}: ${bad} mismatching pixels${detail ? `  ${detail}` : ''}`);
 }
 
 function diffRegions(a, b, width, height) {
@@ -82,11 +80,6 @@ function testIngame(data) {
 
 function testWorld(data) {
   if (!existsSync(SHEET)) {
-    if (!existsSync(join(ROOT, 'build', 'btr2.d64'))) {
-      console.log('skip  all rooms vs spec_world.py --sheet '
-        + '(needs build/btr2.d64 and build/dumps/loaded.bin -- see docs/tooling.md)');
-      return;
-    }
     execFileSync('python3', [join(ROOT, 'tools', 'spec_world.py'),
       '--out', join(OUT, 'specdata'), '--sheet', SHEET], { stdio: 'inherit' });
   }
@@ -113,23 +106,8 @@ function testWorld(data) {
 
 function testSprite(data) {
   const room = data.roomByCode.get('T1');
-  const sheet = data.sheets.player0;
   const fig = { sheet: 'player0', frame: 3, col: 22, row: 9, color: 1 };
 
-  const f = sheet.frames[fig.frame];
-  const [ox, oy] = figureOrigin(fig.col, fig.row);
-  const claimed = [fig.col * 8 + f.offset.x, fig.row * 8 + f.offset.y];
-  const actual = [ox + f.ink.x, oy + f.ink.y];
-  if (claimed[0] !== actual[0] || claimed[1] !== actual[1]) {
-    console.log(`FAIL  assets.json ink_offset_from_cell_px disagrees with `
-      + `(8*col-8, 8*row-33): ${claimed} vs ${actual}`);
-    failures++;
-  }
-
-  if (!existsSync(VICE)) {
-    console.log('skip  room T1 + Neric vs build/shots/ingame.png (capture absent)');
-    return;
-  }
   const png = readPNG(VICE);
   // the display window is whatever is not the border colour at the corner
   let x0 = 0, y0 = 0;
@@ -196,9 +174,16 @@ function testPointer(data) {
 }
 
 const data = await loadTestData();
-testIngame(data);
-testWorld(data);
-testSprite(data);
-testPointer(data);
-console.log(failures ? `${failures} test(s) failed` : 'all tests passed');
-process.exit(failures ? 1 : 0);
+test('room T1 matches the checked-in screen capture', () => testIngame(data));
+test('all rooms match the Python room sheet', { skip: !existsSync(SHEET) && !existsSync(DISK) && 'needs build/rooms/sheet.png or build/btr2.d64 and build/dumps/loaded.bin; see docs/testing.md' }, () => testWorld(data));
+test('Neric in room T1 matches the VICE capture', { skip: !existsSync(VICE) && 'needs build/shots/ingame.png; see docs/testing.md' }, () => testSprite(data));
+test('sprite ink agrees with the authored cell offset', () => {
+  const sheet = data.sheets.player0;
+  const fig = { frame: 3, col: 22, row: 9 };
+  const f = sheet.frames[fig.frame];
+  const [ox, oy] = figureOrigin(fig.col, fig.row);
+  const claimed = [fig.col * 8 + f.offset.x, fig.row * 8 + f.offset.y];
+  const actual = [ox + f.ink.x, oy + f.ink.y];
+  assert.deepEqual(actual, claimed, 'sprite ink agrees with the authored cell offset');
+});
+test('the KINIPORT pointer paints only its selected cell', () => testPointer(data));

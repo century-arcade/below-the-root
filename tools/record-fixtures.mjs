@@ -10,7 +10,7 @@ const check = process.argv[2] === '--check';
 if (process.argv.length > (check ? 3 : 2)) throw new Error('Usage: node tools/record-fixtures.mjs [--check]');
 const data = await loadTestData();
 const fixtures = new URL('../test/fixtures/', import.meta.url);
-const controls = JSON.parse(readFileSync(new URL('herd-controls.json', fixtures)));
+const controls = JSON.parse(readFileSync(new URL('./recording/herd-controls.json', import.meta.url)));
 let joy = IDLE, uiFire = false, caverns;
 const live = { read: kind => ['v', 't'].includes(kind) ? { ...IDLE, fire: uiFire = !uiFire } : joy };
 const session = new Session(data, live, {
@@ -45,7 +45,7 @@ for (const [simticks, action, a, b] of controls.steps) {
 }
 assert.ok(session.state.progress.won, 'the complete route saves Raamo');
 assert.ok(caverns, 'the route enters the caverns');
-for (const [name, record] of [['herd-win.json', session.snapshot()], ['herd-caverns.json', caverns]]) {
+for (const [name, record] of [['herd-win.json', session.snapshot()]]) {
   const verified = Session.replay(data, { read: () => IDLE }, record);
   assert.deepEqual(checkpoint(verified.state), record.checkpoint);
   if (check) assert.deepEqual(record, JSON.parse(readFileSync(new URL(name, fixtures))), `${name} matches fresh live recording`);

@@ -89,10 +89,7 @@ not scored. JSON recordings reconstruct collection history by replaying it.
 C64 imports recover spirit gifts, consumed elixirs and currently carried quest
 items and world tokens; earlier dropped-item and spent-token history is unknown.
 
-`node test/win_replay_test.js` replays `test/fixtures/pomma-win.json` in Node,
-verifies its checkpoint, then acknowledges the ending with normal button input.
-The recording includes a fresh Pomma quest that wins on day 3 (87% completion,
-about 24m 23s unpaused). This regression also runs under `make test`.
+See [testing](docs/testing.md) for winning-recording regressions and how to run them.
 
 M or Tab (or Map in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
 The map is generated when opened from the original room tiles and current quest objects.
@@ -160,7 +157,7 @@ the map, help, and recording import/export work offline. External links and
 GitHub issue reporting still require online services. The archive's `README.txt`
 includes instructions for playing, verification, and the original materials.
 To verify an extracted release in Chromium with external requests blocked, run
-`python test/release_browser_test.py` after `make release` using a Python
+`python test/browser_release_test.py` after `make release` using a Python
 environment with Playwright and its Chromium installed.
 
 The site has separate `/about`, `/play`, and `/links` pages. Edit

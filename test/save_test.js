@@ -1,0 +1,60 @@
+import { timeFixture, questState, place, give } from './helpers.js';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { CLASS } from '../src/data.js';
+import { newState, startQuest } from '../src/game.js';
+import { carried } from '../src/inventory.js';
+import { DREAM } from '../src/clock.js';
+import { exportSave, importSave } from '../src/save.js';
+
+test('a save round-trips through the C64 image', async () => {
+  const { data, pomma, neric } = await timeFixture();
+
+  const s = questState(data, pomma);
+  const p = s.player;
+  place(s, 26, 7, 5, -1);
+  give(s, CLASS.TOKEN);
+  give(s, CLASS.WAND);
+  s.flags[60].gift = true;
+  s.flags[60].day = 3;
+  s.flags[52].banished = true;
+  const ambusher = data.creatures.find((c) => c.movement === 'ambusher');
+  s.flags[ambusher.state_id].hour = 6;
+  Object.assign(s.clock, { day: 12, hour: 5, ticks: 3000 });
+  Object.assign(p, { food: 3, rest: 2, spiritLimit: 20, spiritEnergy: 7, fatigue: 99, crawling: true });
+  s.visions = 2;
+  s.animalsPensed = 4;
+  s.berriesOffered = 1;
+  s.fallaKey = true;
+  s.lamp = { object: 5, fuel: 7 };
+  s.dream = DREAM.clouds;
+  const bytes = exportSave(s);
+  assert.equal(bytes.length, data.save.file.file_bytes);
+  const at = (name) => [...data.save.variables, ...data.save.zero_page].find((v) => v.name === name).offset;
+  assert.equal(bytes[at('day')], 12);
+  assert.equal(bytes[at('time_of_day')], 5);
+  assert.equal(bytes[at('facing')], 255);
+  assert.equal(bytes[at('dream_state')], 255);
+  assert.equal(bytes[at('clock_period')], 35 - 11);
+  assert.equal(bytes[at('clock_prescale')], 256 - (3000 - 11 * 256));
+  assert.equal(bytes[data.save.regions.find((r) => r.name === 'creature_banished').offset + 52], 0x80);
+
+  const t = newState(data, null, { rng: () => 0.5 });
+  startQuest(t, neric);
+  importSave(t, bytes);
+  assert.equal(t.character, pomma.id);
+  assert.equal(t.player.name, 'POMMA');
+  assert.equal(t.player.sheet, pomma.sprite_sheet);
+  assert.deepEqual(t.clock, s.clock);
+  const fields = ['col', 'row', 'facing', 'crawling', 'indoors', 'food', 'rest', 'foodCap', 'restCap', 'stamina',
+    'spiritLimit', 'spiritEnergy', 'standingKindar', 'standingErdling', 'fatigue'];
+  for (const f of fields) assert.equal(t.player[f], p[f], f);
+  assert.deepEqual(t.flags, s.flags);
+  assert.deepEqual(carried(t).map((o) => o.object), carried(s).map((o) => o.object));
+  assert.deepEqual(t.objects.map((o) => [o.exists, o.room, o.col, o.row]), s.objects.map((o) => [o.exists, o.room, o.col, o.row]));
+  for (const f of ['visions', 'animalsPensed', 'berriesOffered', 'fallaKey', 'dream']) assert.equal(t[f], s[f], f);
+  assert.deepEqual(t.lamp, s.lamp);
+  assert.deepEqual(t.nidPlace, s.nidPlace);
+  assert.equal(t.room.room, 26);
+  assert.ok(t.active);
+});
