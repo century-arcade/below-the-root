@@ -1,20 +1,15 @@
 """World map controls and game hold; run against make serve."""
 import os
-from browser_helpers import install_probe, observe
-from playwright.sync_api import sync_playwright
+from browser_helpers import browser_page, observe, held, until
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    page = browser.new_page(viewport={"width": 900, "height": 750})
+def setup(page):
     # Keep authored-map experiments independent of the exploration scenarios.
     page.route('**/assets/initial-map.json', lambda route: route.fulfill(
         json={'rooms': ['M5', 'M8', 'B8']}))
-    install_probe(page)
-    errors = []
-    page.on('pageerror', lambda e: errors.append(str(e)))
-    page.goto(BASE + '/play#map')
+
+with browser_page('/play#map', setup=setup, viewport={"width": 900, "height": 750}) as page:
     page.locator('#map-screen').wait_for()
     assert page.locator('#map').is_visible()
     assert page.locator('#map-grid [aria-current="location"]').count() == 0
@@ -32,11 +27,11 @@ with sync_playwright() as p:
     page.keyboard.press('Tab')
     page.locator('#map-screen').wait_for()
     stopped = record()['frame']
-    page.wait_for_timeout(300)
+    held(page, 'map')
     assert record()['frame'] == stopped, 'the map must hold game time'
     page.keyboard.press('Tab')
     page.locator('#map-screen').wait_for(state='hidden')
-    page.wait_for_timeout(200)
+    until(page, '(s, frame) => s.frame > frame', stopped)
     assert record()['frame'] > stopped
 
     # Outside the map, Tab on a control keeps browser focus navigation.
@@ -48,7 +43,7 @@ with sync_playwright() as p:
     page.locator('#map-zoom-in').focus()
     stopped = record()['frame']
     page.keyboard.press('Space')
-    page.wait_for_timeout(200)
+    held(page, 'map')
     assert record()['frame'] == stopped, 'map controls must not send game input'
     page.keyboard.press('Escape')
     page.locator('#map-screen').wait_for(state='hidden')
@@ -97,7 +92,7 @@ with sync_playwright() as p:
     assert record()['frame'] == stopped, 'map navigation keeps the game held'
     page.keyboard.press('Escape')
     page.locator('#map-screen').wait_for(state='hidden')
-    page.wait_for_timeout(200)
+    page.clock.run_for(200)  # Let gameplay sample the released map keys.
     assert all(r['stick'] == [0, 0, 0] for r in record()['events']), 'resuming from the map drops the movement key'
 
     page.locator('#map').press('Enter')
@@ -128,7 +123,4 @@ with sync_playwright() as p:
     page.locator('#map-screen').wait_for()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
     assert page.locator('#map-grid [aria-label^="I5 ·"]').count() == 0
-    assert not errors, errors
-    page.close()
-    browser.close()
     print('browser_map_test: Tab dismissal, hold/resume, control isolation, panning and location passed')

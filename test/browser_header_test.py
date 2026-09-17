@@ -44,5 +44,4 @@ with browser_page('/') as page:
     page.evaluate('document.exitFullscreen()')
     page.wait_for_function('document.fullscreenElement === null')
     page.keyboard.press('Escape')
-    page.wait_for_timeout(200)
 print('browser_header_test: volume, developer mode, CRT preference and fullscreen passed')

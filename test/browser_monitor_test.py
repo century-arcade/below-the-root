@@ -1,33 +1,25 @@
 """Monitor power clears the game and restarts at the menu."""
-import os
-from browser_helpers import install_probe, observe
-from playwright.sync_api import sync_playwright, expect
+from browser_helpers import browser_page, observe, held, until, session_eval
+from playwright.sync_api import expect
 
-BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    page = browser.new_page()
-    install_probe(page)
-    errors = []
-    page.on('pageerror', lambda error: errors.append(str(error)))
-    page.goto(BASE + '/play?room=B8&debug')
+with browser_page('/play?room=B8') as page:
     expect(page.locator('#monitor')).to_have_attribute('data-surround', 'dark')
     power = page.get_by_role('button', name='Monitor power', exact=True)
-    page.wait_for_function('window.questSession && questSession().state.quest')
-    page.evaluate('window.oldSession = questSession()')
+    until(page, 's => s.state.quest')
+    session_eval(page, 's => window.oldSession = s')
     page.keyboard.press('p')
     power.click()
     expect(power).to_have_attribute('aria-pressed', 'false')
     expect(page.locator('#screen')).not_to_be_visible()
     before = observe(page)
     assert before['title'] and not before['quest'], 'power off discards the quest'
-    assert page.evaluate('questSession() !== oldSession'), 'power creates a fresh session'
-    assert page.evaluate('questSession().record == null && !questSession().canBackRoom')
+    assert session_eval(page, 's => s !== oldSession'), 'power creates a fresh session'
+    assert session_eval(page, 's => s.record == null && !s.canBackRoom')
     assert page.evaluate("localStorage.getItem('btr.autosave.v3')") is None
     page.keyboard.press('ArrowRight')
     page.keyboard.press('p')
-    page.wait_for_timeout(200)
+    held(page, 'power')
     assert observe(page)['checkpoint'] == before['checkpoint'], 'power off leaves the reset game idle'
     assert observe(page)['frame'] == before['frame'], 'power off stops game time'
     volume = page.get_by_role('slider', name='Volume', exact=True)
@@ -37,10 +29,10 @@ with sync_playwright() as p:
     page.keyboard.press('Space')
     expect(power).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#screen')).to_be_visible()
-    page.wait_for_function('(frame) => questSession().frame > frame', arg=before['frame'])
+    until(page, '(s, frame) => s.frame > frame', arg=before['frame'])
     menu = observe(page)
     assert menu['title'] and not menu['quest'], 'power on resumes at a fresh menu'
-    page.wait_for_function('String.fromCharCode(...questSession().state.panel.map(value => value & 127)).includes("START GAME")')
+    until(page, 's => String.fromCharCode(...s.state.panel.map(value => value & 127)).includes("START GAME")')
     assert 'CONTINUE' not in ''.join(chr(value & 127) for value in observe(page)['panel'])
     expect(volume).to_have_value('70')
     page.get_by_role('button', name='Fullscreen', exact=True).click()
@@ -49,6 +41,4 @@ with sync_playwright() as p:
     expect(page.locator('#screen')).to_be_visible()
     page.evaluate('document.exitFullscreen()')
     expect(page.get_by_role('group', name='Monitor controls')).to_be_visible()
-    assert not errors, errors
-    browser.close()
 print('browser_monitor_test: power and volume passed')

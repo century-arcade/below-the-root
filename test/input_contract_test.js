@@ -75,9 +75,8 @@ async function inputContractFixture() {
     };
     return { ...f, canvas, target, pointer, event, tapPointer };
   }
-  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  return { data, advance, until, fixture, key, tap, choose, Target, pointerFixture, wait };
+  return { data, advance, until, fixture, key, tap, choose, Target, pointerFixture };
 }
 
 for (const cadence of [1, 3, 11]) test(`held KINIPORT source and destination, cadence ${cadence}`, async () => {
@@ -365,26 +364,28 @@ test('one observed trigger interrupts a demo without selecting the main menu', a
   assert.ok(lines(session.state).some(line => line.includes('NERIC')), 'fresh confirmation opens character chooser');
 });
 
-test("pointer single tap is a coherent delayed gameplay gesture", async () => {
-  const { advance, pointerFixture, wait } = await inputContractFixture();
+test("pointer single tap is a coherent delayed gameplay gesture", async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { advance, pointerFixture } = await inputContractFixture();
 
   const f = pointerFixture();
   f.tapPointer();
   advance(f.session, 12);
   assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'first tap waits for double-tap recognition');
-  await wait(230);
+  t.mock.timers.tick(230);
   advance(f.session, 12);
   assert.ok(f.session.record.events.some(e => String(e.stick) === '1,0,1'), 'direction and trigger reach gameplay together');
   assert.ok(f.state.player.leaping, 'single directional tap jumps');
   f.pointer.cancel();
 });
 
-test("pointer double tap, stop, focus reset and cancellation", async () => {
-  const { advance, pointerFixture, wait } = await inputContractFixture();
+test("pointer double tap, stop, focus reset and cancellation", async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { advance, pointerFixture } = await inputContractFixture();
 
   const f = pointerFixture();
   f.tapPointer(); f.tapPointer();
-  await wait(230);
+  t.mock.timers.tick(230);
   advance(f.session, 30);
   assert.ok(f.session.record.events.some(e => e.stick?.[0] === 1), 'double tap walks');
   assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'double tap does not also jump');
@@ -392,10 +393,10 @@ test("pointer double tap, stop, focus reset and cancellation", async () => {
   assert.equal(f.pointer.walk, null, 'tapping the figure stops walking');
   assert.equal(f.session.read('s').fire, false, 'stopping does not also trigger');
   f.tapPointer(); f.keys.reset();
-  await wait(230);
+  t.mock.timers.tick(230);
   assert.deepEqual(f.keys.read(), IDLE, 'focus reset cancels pending pointer gestures');
   f.tapPointer(); f.canvas.send('pointercancel');
-  await wait(230);
+  t.mock.timers.tick(230);
   assert.deepEqual(f.keys.read(), IDLE, 'pointer cancellation leaves no delayed action');
   f.pointer.cancel();
 });

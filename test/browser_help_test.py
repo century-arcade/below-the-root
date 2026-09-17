@@ -1,21 +1,17 @@
 """Input help, startup intro hold, toggles and keyboard/touch controls."""
 import json
 import os
-from browser_helpers import install_probe, observe
+from browser_helpers import browser_page, observe, held, until
 import re
 from pathlib import Path
-from playwright.sync_api import sync_playwright, expect
+from playwright.sync_api import expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    page = browser.new_page(viewport={"width": 900, "height": 750}, has_touch=True)
-    install_probe(page)
-    errors = []
-    page.on('pageerror', lambda e: errors.append(str(e)))
+def setup(page):
     page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': False}))
 
+with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 750}, has_touch=True) as page:
     def record():
         return observe(page)
 
@@ -28,7 +24,6 @@ with sync_playwright() as p:
     def snapshot():
         return observe(page)
 
-    page.goto(BASE + '/play?debug')
     help_screen = page.locator('#help-screen')
     expect(help_screen).to_be_visible()
     expect(page.locator('#developer-help')).to_be_visible()
@@ -38,12 +33,12 @@ with sync_playwright() as p:
     help_screen.focus()
     page.keyboard.press('ArrowDown')
     page.keyboard.press('Space')
-    page.wait_for_timeout(200)
+    held(page, 'startup-help')
     assert snapshot()['frame'] == 0, 'reading startup Help holds the intro'
     page.get_by_role('button', name='Help', exact=True).tap()
     expect(help_screen).to_be_hidden()
     expect(page.locator('#help')).to_be_focused()
-    page.wait_for_timeout(200)
+    until(page, 's => s.frame > 0')
     intro = snapshot()
     assert intro['frame'] > 0
     assert intro['demo'] == 'intro', 'Closing startup help starts the intro without skipping it'
@@ -90,7 +85,7 @@ with sync_playwright() as p:
     expect(help_screen).to_be_hidden()
 
     page.goto(BASE + '/?player=0')
-    page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
+    until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
     expect(page.locator('#map')).to_be_visible()
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
@@ -106,23 +101,24 @@ with sync_playwright() as p:
         else:
             getattr(menu_button, action)()
         expect(menu_button).to_be_hidden()
-        page.wait_for_timeout(150)
+        until(page, 's => String.fromCharCode(...s.state.panel.map(v => v & 127)).includes("GRUNSPREKE")')
         panel = ''.join(chr(value & 127) for value in record()['panel'])
         assert 'PAUSE' in panel and 'GRUNSPREKE' in panel, 'command menu opens'
         page.keyboard.press('Escape')
         expect(menu_button).to_be_visible()
         resumed = record()['frame']
-        page.wait_for_timeout(100)
+        until(page, '(s, frame) => s.frame > frame', resumed)
         assert record()['frame'] > resumed, 'Escape dismisses the menu and leaves play running'
     page.keyboard.down('f')
     expect(menu_button).to_be_hidden()
-    page.wait_for_timeout(250)
+    page.clock.run_for(250)
     page.keyboard.down('f')  # browser repeat while held
-    page.wait_for_timeout(150)
+    page.clock.run_for(150)
     expect(menu_button).to_be_hidden()
     page.keyboard.up('f')
-    page.wait_for_timeout(100)
+    page.clock.run_for(100)
     page.keyboard.press('f')
+    until(page, 's => !s.state.commandMenuOpen')
     expect(menu_button).to_be_visible()  # F selects PAUSE and returns to play
     page.keyboard.press('h')
     expect(help_screen).to_be_visible()
@@ -131,18 +127,20 @@ with sync_playwright() as p:
     for key, axis, direction in [('ArrowRight', 0, 1), ('a', 0, -1), ('w', 1, -1), ('s', 1, 1), ('Space', 2, 1)]:
         before = len(record()['events'])
         page.keyboard.down(key)
-        page.wait_for_timeout(200)
+        until(page, '(s, [start, axis, direction]) => s.record.events.slice(start).some(e => e.stick?.[axis] === direction)', [before, axis, direction])
         page.keyboard.up(key)
         assert any(entry['stick'][axis] == direction for entry in record()['events'][before:]), 'help focus allows movement'
     assert record()['frame'] > stopped['frame'], 'game time continues with help open'
     page.locator('#screen').focus()
+    before = len(record()['events'])
     page.keyboard.down('ArrowRight')
-    page.wait_for_timeout(200)
+    until(page, '(s, start) => s.record.events.slice(start).some(e => e.stick?.[0] === 1)', before)
     page.keyboard.up('ArrowRight')
     assert any(entry['stick'][0] == 1 for entry in record()['events']), 'canvas controls work while help stays open'
     expect(help_screen).to_be_visible()
+    stopped = record()
     page.keyboard.press('Escape')
-    page.wait_for_timeout(200)
+    until(page, '(s, frame) => s.frame > frame', stopped['frame'])
     assert record()['frame'] > stopped['frame'], 'closing help resumes game time'
     page.keyboard.press('Tab')
     expect(page.locator('#map-screen')).to_be_visible()
@@ -154,6 +152,7 @@ with sync_playwright() as p:
     page.locator('#map').click()
     expect(help_screen).to_be_visible()
     expect(page.locator('#map-screen')).to_be_visible()
+    held(page, 'map')
     expect(page.locator('#map')).to_have_attribute('aria-current', 'page')
     page.keyboard.press('Escape')
     expect(page.locator('#map-screen')).to_be_hidden()
@@ -178,26 +177,22 @@ with sync_playwright() as p:
     page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
     menu = record()
     assert menu['title'] and menu['quest']
-    page.wait_for_timeout(150)
+    until(page, 's => String.fromCharCode(...s.state.panel.map(v => v & 127)).includes("START GAME")')
     page.keyboard.press('f')
-    page.wait_for_timeout(150)
+    until(page, 's => String.fromCharCode(...s.state.panel.map(v => v & 127)).includes("CHOOSE YOUR PLAYER")')
     panel = ''.join(chr(value & 127) for value in record()['panel'])
     assert 'CHOOSE YOUR PLAYER' in panel, 'F selects START GAME on the title menu'
-    page.wait_for_timeout(150)  # the character chooser samples the released trigger
+    until(page, 's => !s.uiFire')  # the chooser samples the released trigger
     page.keyboard.press('f')
+    until(page, 's => !s.state.title')
     expect(menu_button).to_be_visible()
     assert not record()['title'], 'F selects the character and starts play'
-    assert not errors, errors
-    page.close()
-    # At touch width the command-menu button remains an available input path.
-    page = browser.new_page(viewport={"width": 390, "height": 750}, has_touch=True)
-    page.goto(BASE + '/?player=0')
+# At touch width the command-menu button remains an available input path.
+with browser_page('/?player=0', viewport={"width": 390, "height": 750}, has_touch=True) as page:
     menu_button = page.get_by_role('button', name='Open command menu', exact=True)
     expect(menu_button).to_be_visible()
     menu_button.tap()
     expect(menu_button).to_be_hidden()
     page.keyboard.press('Escape')
     expect(menu_button).to_be_visible()
-    page.close()
-    browser.close()
-    print('browser_help_test: startup help, live play with help, keyboard/touch toggles, focus and map coexistence passed')
+print('browser_help_test: startup help, live play with help, keyboard/touch toggles, focus and map coexistence passed')

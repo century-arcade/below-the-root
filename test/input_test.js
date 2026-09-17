@@ -221,15 +221,15 @@ test("demo holds and taps produce distinct trigger edges", async () => {
   assert.deepEqual(Array.from({ length: 6 }, () => demo.read().press), [true, false, false, false, true, false]);
 });
 
-test("pointer cancellation clears delayed gestures and preserves keyboard holds", async () => {
+test("pointer cancellation clears delayed gestures and preserves keyboard holds", async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
   const { target, canvas, keys } = await keyboardFixture();
   const pointer = new Pointer(canvas, keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
   const event = { button: 0, pointerId: 1, clientX: 200, clientY: 100, preventDefault: () => {} };
-  const wait = ms => new Promise(r => setTimeout(r, ms));
   canvas.send('pointerdown', event); canvas.send('pointercancel');
-  await wait(180); assert.deepEqual(keys.read(), IDLE, 'cancelled hold timer must not fire');
+  t.mock.timers.tick(180); assert.deepEqual(keys.read(), IDLE, 'cancelled hold timer must not fire');
   canvas.send('pointerdown', event); canvas.send('pointerup', event); canvas.send('pointercancel');
-  await wait(320); assert.deepEqual(keys.read(), IDLE, 'cancelled single-tap timer must not fire');
+  t.mock.timers.tick(320); assert.deepEqual(keys.read(), IDLE, 'cancelled single-tap timer must not fire');
   canvas.send('pointerdown', event); canvas.send('pointerup', { ...event, pointerId: 2 });
   assert.equal(pointer.pointerId, 1, 'second finger cannot release the first');
   pointer.cancel();

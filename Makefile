@@ -61,6 +61,7 @@ poster:
 	$(PY) tools/poster_map.py
 
 browser-test: build
+	@if grep -rnE 'wait_for_timeout|setTimeout\(r' test/; then echo "Use deterministic waits or fake clocks in tests"; exit 1; fi
 	@for t in $(filter-out test/browser_release_test.py,$(wildcard test/browser_*.py)); do BTR_URL=$(BTR_URL) $(PY) $$t || exit 1; done
 
 clean:

@@ -122,7 +122,7 @@ test('backward seeks skip brief pass-through rooms across winning routes', async
       assert.ok(landed === 0 || path[landed + 1].simticks - path[landed].simticks >= 30,
         `${name}: destination is a settled room visit`);
       checked++;
-      break; // One pass-through per route avoids repeatedly replaying its prefixes.
+      break;
     }
   }
   assert.ok(checked > 0, 'winning routes exercise a pass-through room');
@@ -305,24 +305,36 @@ test('Neutral waits execute creatures, clock, RNG and movement at any playback p
   assert.equal(playTime(a.state), playTime(b.state));
 });
 
-test('Neutral input cannot fast-forward a fall, including its first tick and landing', async () => {
-  const { data, idle, advance, imported } = await recordingFixture();
+test('Neutral input cannot fast-forward a fall or glide, including landing', async () => {
+  const { data, idle, advance, advanceUntil, imported } = await recordingFixture();
 
-  const s = imported(state => enterRoom(state, data.roomByCode.get('C4'), 14, 0));
+  const s = imported(state => {
+    enterRoom(state, data.roomByCode.get('C4'), 14, 0);
+    state.objects.find(o => o.exists && o.class === CLASS.SHUBA).carried = true;
+  });
+  advanceUntil(s, x => x.state.player.fallen >= 2, 'fall before steering');
+  s.live = { read: () => J.right };
+  advanceUntil(s, x => x.state.player.gliding, 'sideways push starts gliding');
+  s.live = idle;
   advance(s, 200);
   s.command('RENEW');
   const replay = Session.watch(data, idle, s.snapshot());
   assert.equal(replay.playbackDelay, 1000 / 60, 'fall starts at normal speed');
   let falling = 0,
+    gliding = 0,
     settled = 0;
   while (!replay.playbackDone) {
     if (replay.state.player.fallen > 0) {
       assert.equal(replay.playbackDelay, 1000 / 60, 'falling with neutral input stays at normal speed');
       falling++;
+    } else if (replay.state.player.gliding && replay.lastJoy.dx === 0) {
+      assert.equal(replay.playbackDelay, 1000 / 60, 'releasing steering mid-glide keeps normal speed');
+      gliding++;
     } else if (replay.playbackDelay === 0) settled++;
     advance(replay, 1);
   }
   assert.ok(falling > 0, 'recording exercises a fall');
+  assert.ok(gliding > 0, 'recording exercises a glide after releasing steering');
   assert.ok(settled > 0, 'idle skipping resumes after landing');
   assert.deepEqual(checkpoint(replay.state), s.snapshot().checkpoint);
 });

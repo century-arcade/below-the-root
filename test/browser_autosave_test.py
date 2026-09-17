@@ -1,43 +1,38 @@
 """Boundary autosaves, obsolete-key disposal, invalid imports and quota reporting."""
 import json
-import os
 from pathlib import Path
-from playwright.sync_api import sync_playwright, expect
-from browser_helpers import install_probe, observe
-BASE=os.environ.get('BTR_URL','http://localhost:8000')
+from playwright.sync_api import expect
+from browser_helpers import browser_page, observe, until, session_eval
 KEY='btr.autosave.v3'
-with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
-    page=browser.new_page()
-    install_probe(page)
-    errors=[]
-    page.on('pageerror',lambda e:errors.append(str(e)))
+def setup(page):
     page.route('**/.netlify/functions/github?*',lambda route:route.fulfill(json={'configured':False}))
     page.add_init_script('''
       localStorage.setItem('btr.autosave.v1','obsolete');
       localStorage.setItem('btr.autosave.v1.recovery.8','obsolete');
       localStorage.setItem('unrelated-preference','keep');
     ''')
-    page.goto(BASE+'/?player=0&debug')
-    page.wait_for_function('window.questSession && questSession().simticks>20')
+
+with browser_page('/?player=0&debug', setup=setup) as page:
+    until(page, 's => s.simticks>20')
     assert page.evaluate("localStorage.getItem('btr.autosave.v1')") is None
     assert page.evaluate("localStorage.getItem('btr.autosave.v1.recovery.8')") is None
     assert page.evaluate("localStorage.getItem('unrelated-preference')")=='keep'
     start=page.evaluate('(key)=>localStorage.getItem(key)',KEY)
     page.keyboard.press('ArrowLeft')
-    page.wait_for_timeout(300)
+    until(page, 's => s.record.events.some(e => e.stick?.[0] === -1)')
     page.evaluate("dispatchEvent(new Event('pagehide'))")
     assert page.evaluate('(key)=>localStorage.getItem(key)',KEY)==start
     page.reload()
-    page.wait_for_function('window.questSession && questSession().simticks>10')
+    until(page, 's => s.simticks>10')
     assert observe(page)['checkpoint']['player']['col']==json.loads(start)['checkpoint']['player']['col']
-    page.evaluate('questSession().command("RENEW")')
-    page.wait_for_function('(key)=>JSON.parse(localStorage.getItem(key)).endpoint.kind==="room"',arg=KEY)
+    session_eval(page, 's => s.command("RENEW")')
+    until(page, '(s, key) => JSON.parse(localStorage.getItem(key)).endpoint.kind==="room"', KEY)
     saved=page.evaluate('(key)=>localStorage.getItem(key)',KEY)
     page.locator('#record-file').set_input_files({'name':'old.json','mimeType':'application/json','buffer':b'{"format":"below-the-root-record","version":2}'})
     expect(page.locator('#log')).to_contain_text('Unsupported playthrough recording version')
     assert page.evaluate('(key)=>localStorage.getItem(key)',KEY)==saved
-    page.evaluate('''() => {
+    page.evaluate('''async () => {
+      const { questSession } = await import('/main.js');
       const set=Storage.prototype.setItem;
       Storage.prototype.setItem=function(key,value) {
         if(key==='btr.autosave.v3') throw Error('Test quota');
@@ -45,8 +40,7 @@ with sync_playwright() as p:
       };
       questSession().command('RENEW');
     }''')
+    until(page, 's => document.getElementById("log").textContent.includes("Autosave failed: Test quota")')
     expect(page.locator('#log')).to_contain_text('Autosave failed: Test quota')
     assert page.evaluate('(key)=>localStorage.getItem(key)',KEY)==saved
-    assert not errors,errors
-    browser.close()
 print('browser_autosave_test: boundaries, reload, obsolete keys, unsupported uploads and quota failures passed')

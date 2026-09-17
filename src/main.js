@@ -86,6 +86,11 @@ function doorsAt(state, col, row) {
   };
 }
 
+let session;
+export const questSession = () => session;
+let holdReasons = () => ['loading'];
+export const questPaused = () => holdReasons();
+
 canvas.focus({ preventScroll: true });
 
 loadData((path) => fetch(`/${path}`).then((r) => {
@@ -116,7 +121,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     discardObsoleteAutosaves(localStorage);
     existing = localStorage.getItem(AUTOSAVE_KEY);
   } catch {}
-  let session;
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   if (existing && initial.mode === 'cold') {
     let stored = null;
@@ -195,7 +199,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
   let inactive = false;
-  const isRunning = () => powered && !paused && !held && !inactive && !document.hidden && !session.playbackDone;
+  holdReasons = () => [
+    !powered && 'power', paused && 'dialog',
+    held && (startupHelp ? 'startup-help' : overlay ? 'map' : 'pause'),
+    inactive && 'focus', document.hidden && 'hidden', session.playbackDone && 'playback-done',
+  ].filter(Boolean);
+  const isRunning = () => holdReasons().length === 0;
   let overlay = null;
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');

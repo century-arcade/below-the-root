@@ -1,5 +1,5 @@
 """Pause/resume controls stop game time; menu navigation preserves the quest."""
-from browser_helpers import browser_page, observe
+from browser_helpers import browser_page, observe, held, until
 
 with browser_page('/?player=0') as page:
     def frames():
@@ -7,19 +7,18 @@ with browser_page('/?player=0') as page:
 
     page.keyboard.press('Escape')
     stopped = frames()
-    page.wait_for_timeout(300)
+    held(page, 'pause')
     assert frames() == stopped, 'Escape must stop game time'
     page.keyboard.press('ArrowRight')
-    page.wait_for_timeout(300)
+    until(page, '(s, frame) => s.frame > frame', stopped)
     assert frames() > stopped, 'a movement key must resume game time'
     page.evaluate("dispatchEvent(new Event('blur'))")
     stopped = frames()
-    page.wait_for_timeout(300)
+    held(page, 'focus')
     assert frames() == stopped, 'leaving the window must pause game time'
     page.locator('#screen').click()
-    page.wait_for_timeout(300)
+    until(page, '(s, frame) => s.frame > frame', stopped)
     assert frames() > stopped, 'a tap on the screen must resume game time'
-    page.wait_for_timeout(350)
 
     # The main menu is presentation; returning to Play preserves quest state.
     saved = observe(page)

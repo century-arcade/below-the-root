@@ -11,7 +11,8 @@ import tempfile
 from urllib.parse import urlsplit
 from zipfile import ZipFile
 
-from playwright.sync_api import expect, sync_playwright
+from playwright.sync_api import expect
+from browser_helpers import browser_page, observe, held, until
 
 archive_path = Path(sys.argv[1] if len(sys.argv) > 1 else 'dist/below-the-root-preservation.zip')
 with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
@@ -27,11 +28,9 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
     try:
         address = server.stdout.readline().strip().removeprefix('Below the Root: ').rstrip('/')
         assert address.startswith('http://127.0.0.1:'), address
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page(accept_downloads=True)
-            external, failed, errors = [], [], []
+        external, failed = [], []
 
+        def setup(page):
             def local_only(route):
                 if urlsplit(route.request.url).netloc == urlsplit(address).netloc:
                     route.continue_()
@@ -41,19 +40,23 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
 
             page.route('**/*', local_only)
             page.on('response', lambda response: failed.append(response.url) if response.status >= 400 else None)
-            page.on('pageerror', lambda error: errors.append(str(error)))
-            page.goto(address)
+
+        with browser_page('/', base=address, setup=setup, accept_downloads=True) as page:
+            held(page, 'startup-help')
+            assert observe(page)['frame'] == 0
             expect(page).to_have_url(address + '/')
             expect(page.locator('#screen')).to_be_visible()
             page.evaluate('document.fonts.ready')
             page.locator('nav a[href="/links"]').click()
             expect(page).to_have_url(address + '/links')
             page.goto(address + '/?player=0&debug')
-            page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
+            until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
+            assert observe(page)['quest']
             expect(page.locator('#file-issue')).to_be_disabled()
             page.keyboard.press('ArrowRight')
             page.locator('#map').click()
             expect(page.locator('#map-screen')).to_be_visible()
+            held(page, 'map')
             page.keyboard.press('Escape')
             expect(page.locator('#map-screen')).to_be_hidden()
             page.locator('#help').click()
@@ -69,6 +72,8 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.locator('#record-file').set_input_files({
                 'name': 'playthrough.json', 'mimeType': 'application/json', 'buffer': recording.encode()})
             expect(page.locator('#log')).to_contain_text('Replaying')
+            until(page, 's => s.playback')
+            assert observe(page)['quest']
             page.locator('nav a[href="/about"]').click()
             before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
             page.goto(address)
@@ -79,8 +84,6 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             assert after['initial'] == json.loads(before)['initial'], 'saved quest restored'
             assert not external, external
             assert not failed, failed
-            assert not errors, errors
-            browser.close()
     finally:
         server.terminate()
         server.wait(timeout=10)

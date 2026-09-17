@@ -1,6 +1,6 @@
 """Issue drafts survive failed submissions; retry and cancellation resume gameplay. GitHub is mocked."""
 import json
-from browser_helpers import browser_page, observe
+from browser_helpers import browser_page, observe, held, until
 
 with browser_page('/?player=0&debug') as page:
     posted = []
@@ -21,7 +21,7 @@ with browser_page('/?player=0&debug') as page:
     page.route('**/.netlify/functions/github?*', github)
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-    page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
+    until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
 
     def frames():
         return observe(page)['frame']
@@ -31,14 +31,13 @@ with browser_page('/?player=0&debug') as page:
     saved = observe(page)
     draft = 'wasd and spaces should only type here\nThe doorway did not open.'
     page.locator('#issue-message').fill(draft)
-    page.wait_for_timeout(150)
     assert page.locator('#issue-message').input_value() == draft
     page.locator('#issue-submit').click()
     page.locator('#issue-result').filter(has_text='Test network failure').wait_for()
     assert page.locator('#issue-dialog').evaluate('e => e.open')
     assert page.locator('#issue-message').input_value() == draft
     assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") == draft
-    page.wait_for_timeout(300)
+    held(page, 'dialog')
     assert frames() == saved['frame'], 'a failed submission must keep game time paused'
     page.locator('#issue-submit').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
@@ -52,21 +51,21 @@ with browser_page('/?player=0&debug') as page:
     assert page.locator('#issue-message').input_value() == ''
     assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") is None
     page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
-    page.wait_for_timeout(300)
+    until(page, '(s, frame) => s.frame > frame', saved['frame'])
     assert frames() > saved['frame'], 'successful submission must resume game time'
     before_events = len(observe(page)['events'])
     page.keyboard.press('ArrowRight')
-    page.wait_for_timeout(300)
+    until(page, '(s, start) => s.record.events.slice(start).some(e => e.stick?.[0] === 1)', before_events)
     assert any(e.get('stick') == [1, 0, 0] for e in observe(page)['events'][before_events:])
     page.keyboard.press('r')
     assert page.locator('#issue-message').input_value() == ''
     stopped = frames()
-    page.wait_for_timeout(300)
+    held(page, 'dialog')
     assert frames() == stopped
     page.locator('#issue-cancel').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
     page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
-    page.wait_for_timeout(300)
+    until(page, '(s, frame) => s.frame > frame', stopped)
     assert frames() > stopped, 'manual close must resume game time'
     page.keyboard.press('r')
     page.locator('#issue-message').fill('Report with failed playthrough upload')
