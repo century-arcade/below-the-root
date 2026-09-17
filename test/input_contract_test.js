@@ -9,8 +9,10 @@ import { startTune } from '../src/audio.js';
 import { tick, newState, startQuest } from '../src/game.js';
 import { pickItem } from '../src/inventory.js';
 
+const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
+const data = await loadTestData();
+
 async function inputContractFixture() {
-  const data = await loadTestData();
   const advance = (session, n = 30) => {
     for (let i = 0; i < n; i++) session.step();
   };
@@ -176,10 +178,18 @@ test('reward screens wait for their tune and take one fresh press per passage', 
   for (const screen of ['CONGRATULATIONS QUESTER, YOU HAVE', 'A VISION COMES TO YOU:']) {
     until(session, () => lines(state)[0] === screen, 'reward passage appears');
     assert.notEqual(state.tuneWait, null);
+    key(keys, 'Enter', true);
+    let reads = 0;
+    const read = state.input.read;
+    state.input.read = (...args) => { reads++; return read(...args); };
     advance(session, 10);
-    assert.equal(lines(state)[0], screen, 'input waits for the tune');
+    assert.notEqual(state.tuneWait, null);
+    assert.equal(reads, 0, 'the verb does not read input during the tune');
+    key(keys, 'Enter');
     until(session, () => state.tuneWait == null, 'reward tune finishes');
     advance(session);
+    assert.ok(reads > 0, 'the verb resumes reading input after the tune');
+    state.input.read = read;
     assert.equal(lines(state)[0], screen, 'held confirmation cannot acknowledge the passage');
     key(keys, 'Enter', true);
     advance(session);
@@ -270,8 +280,7 @@ test('opposite taps remain ordered in menus and continuous movement', async () =
   session.commandMenu();
   key(keys, 'ArrowRight'); key(keys, 'ArrowLeft');
   advance(session);
-  const selected = Array.from(session.state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
-  assert.equal(selected, 'PAUSE', 'opposite simultaneous holds remain ordered menu moves');
+  assert.equal(selected(session.state), 'PAUSE', 'opposite simultaneous holds remain ordered menu moves');
 });
 
 test('gameplay aliases, opposites and rapid trigger taps survive different read timing', async () => {
@@ -301,8 +310,7 @@ test('gamepad buttons and stick/d-pad aliases deliver distinct ordered menu pres
   pad.buttons[15].pressed = true; gamepad.poll();
   pad.axes[0] = 1; gamepad.poll();
   advance(session);
-  const selected = Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
-  assert.equal(selected, 'DROP', 'd-pad and stick are independent physical presses');
+  assert.equal(selected(state), 'DROP', 'd-pad and stick are independent physical presses');
   pad.buttons[0].pressed = true; gamepad.poll();
   pad.buttons[1].pressed = true; gamepad.poll();
   until(session, () => !state.verb, 'two face-button presses select DROP then dismiss NOT HERE', 100);
@@ -407,7 +415,6 @@ test('holding a direction dismisses the spirit bell message without requiring re
 
 test("queued physical keypresses navigate the menu exactly once", async () => {
   const { data, key, tap } = await inputContractFixture();
-  const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
   // Real keyboard events, with no simulation read between release and repress.
   const keyboard = new Keyboard({ addEventListener() {} });
   const keyed = new Session(data, keyboard, { initial: { mode: 'quest' } });

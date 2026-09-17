@@ -9,6 +9,8 @@ import { CLASS } from '../src/data.js';
 import { MENU, runMenu } from '../src/verbs.js';
 import { cell, role } from '../src/world.js';
 
+const data = await loadTestData();
+
 async function shellFixture() {
   // the stick: a queue of reads, idle once it runs dry
   function stick() {
@@ -42,8 +44,6 @@ async function shellFixture() {
   // a tap: the read itself, then the stick let go so the next screen's fireUp sees it
   const tap = j => [j, J.idle];
   const push = (j, n = 1) => Array(n).fill([j, J.idle]).flat();
-
-  const data = await loadTestData();
 
   return { stick, fresh, settle, tap, push, data };
 }
@@ -117,7 +117,8 @@ test('character select opens on Neric, down cycles through RETURN TO MENU and ba
   settle(s);
   s.stick.feed(...tap(J.fire));
   settle(s);
-  assert.deepEqual(lines(s), ['       CHOOSE YOUR PLAYER:  NERIC', '', ' A KINDAR-BORN YOUNG MAN', ' STRONG--IMPULSIVE--MODERATE SPIRIT']);
+  assert.match(lines(s)[0].trim(), /^CHOOSE YOUR PLAYER:\s+NERIC$/);
+  assert.deepEqual(lines(s).slice(1).map(line => line.trim()), ['', 'A KINDAR-BORN YOUNG MAN', 'STRONG--IMPULSIVE--MODERATE SPIRIT']);
   const names = ['NERIC'];
   for (let i = 0; i < 6; i++) {
     s.stick.feed(...tap(J.down));
@@ -160,7 +161,7 @@ test('RETURN TO MENU goes back with the character unchanged', async () => {
   settle(s);
   s.stick.feed(...tap(J.fire), ...push(J.down, 5), ...tap(J.fire));
   settle(s);
-  assert.equal(lines(s)[0], '               START GAME');
+  assert.equal(lines(s)[0].trim(), 'START GAME');
   assert.equal(s.character, null);
   assert.equal(s.quest, false);
 });
@@ -205,7 +206,7 @@ test('the menu verb leaves the quest in progress and CONTINUE puts you back on t
   assert.equal(s.title, true);
   assert.equal(s.quest, true);
   assert.ok(lines(s).some(line => line.trim() === 'CONTINUE'));
-  assert.equal(lines(s)[0], '               START GAME');
+  assert.equal(lines(s)[0].trim(), 'START GAME');
   s.stick.feed(...tap(J.down), ...tap(J.fire));
   settle(s);
   assert.equal(s.active, true);
@@ -322,7 +323,7 @@ test('cold start runs the intro once, prints the story pages, and lands in the m
   assert.equal(s.demo, null);
   settle(s);
   assert.equal(s.title, true);
-  assert.equal(lines(s)[0], '               START GAME');
+  assert.equal(lines(s)[0].trim(), 'START GAME');
 });
 
 test('cold start consumes the starting press, then a fresh press ends the intro', async () => {

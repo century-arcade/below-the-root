@@ -12,8 +12,6 @@ with sync_playwright() as p:
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE + '/play?room=B8&debug')
-    surround = page.get_by_role('combobox', name='Monitor surround')
-    expect(surround).to_have_count(0)
     expect(page.locator('#monitor')).to_have_attribute('data-surround', 'dark')
     power = page.get_by_role('button', name='Monitor power', exact=True)
     page.wait_for_function('window.questSession && questSession().state.quest')

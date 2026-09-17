@@ -1,0 +1,48 @@
+"""Header controls adjust volume, persist CRT preference, gate developer tools and enter fullscreen."""
+from browser_helpers import browser_page
+from playwright.sync_api import expect
+
+with browser_page('/') as page:
+    assert not page.locator('#debug-tools').is_visible()
+    assert not page.locator('#file-issue').is_visible()
+    volume = page.get_by_role('slider', name='Volume', exact=True)
+    expect(volume).to_have_value('50')
+    page.keyboard.press('-')
+    expect(volume).to_have_value('40')
+    page.keyboard.press('+')
+    expect(volume).to_have_value('50')
+    volume.press('Home')
+    for _ in range(3):
+        volume.press('ArrowRight')
+    expect(volume).to_have_value('30')
+    volume.press('Home')
+    expect(volume).to_have_value('0')
+    volume.press('ArrowRight')
+    expect(volume).to_have_value('10')
+    # Developer mode toggles directly and gates the report shortcut.
+    developer = page.get_by_role('button', name='Developer mode', exact=True)
+    expect(developer).to_have_attribute('aria-pressed', 'false')
+    developer.focus()
+    page.keyboard.press('Enter')
+    expect(developer).to_have_attribute('aria-pressed', 'true')
+    expect(page.locator('#file-issue')).to_be_visible()
+    crt = page.get_by_role('button', name='CRT effect', exact=True)
+    crt.click()
+    expect(crt).to_have_attribute('aria-pressed', 'true')
+    page.reload()
+    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    expect(crt).to_have_attribute('aria-pressed', 'true')
+    crt.click()
+    developer.click()
+    expect(page.locator('#debug-tools')).to_be_hidden()
+    page.keyboard.press('r')
+    expect(page.locator('#issue-dialog')).to_be_hidden()
+    page.get_by_role('button', name='Fullscreen', exact=True).click()
+    page.wait_for_function('document.fullscreenElement === document.documentElement')
+    page.keyboard.press('f')
+    assert page.evaluate('document.fullscreenElement !== null'), 'F does not toggle fullscreen'
+    page.evaluate('document.exitFullscreen()')
+    page.wait_for_function('document.fullscreenElement === null')
+    page.keyboard.press('Escape')
+    page.wait_for_timeout(200)
+print('browser_header_test: volume, developer mode, CRT preference and fullscreen passed')

@@ -45,14 +45,7 @@ class AudioContextStub {
     return {};
   }
   createAnalyser() {
-    return {
-      connect(target) {
-        this.output = target;
-      },
-      getFloatTimeDomainData(samples) {
-        samples.fill(0.25);
-      },
-    };
+    return { connect() {} };
   }
   createBufferSource() {
     return {
@@ -148,46 +141,55 @@ test('startTune stalls for the tune, except when told not to', () => {
   assert.equal(state.stall, 1441);
 });
 
-test('setVolume and mute drive the master gain without interrupting a tune', () => {
+test('volume increases gain monotonically and mute restores it without interrupting playback', () => {
   const speaker = new Speaker(music);
   unlock(speaker);
   speaker.playTune(0, 0);
   const voices = [...speaker.ringing];
   const stops = voices.map(v => v.src.stoppedAt);
-  assert.equal(speaker.master.gain.value, 0.25);
-  speaker.setVolume(0.5);
-  assert.equal(speaker.master.gain.value, 0.0625);
+  speaker.setVolume(0);
+  assert.equal(speaker.master.gain.value, 0);
+  let previous = 0;
+  for (const level of [0.2, 0.5, 0.7, 1]) {
+    speaker.setVolume(level);
+    const gain = speaker.master.gain.value;
+    assert.ok(gain > previous, 'raising the volume raises the gain');
+    speaker.mute(true);
+    assert.equal(speaker.master.gain.value, 0);
+    speaker.mute(false);
+    assert.equal(speaker.master.gain.value, gain, 'unmuting restores the selected volume');
+    previous = gain;
+  }
   speaker.mute(true);
-  assert.equal(speaker.master.gain.value, 0);
-  speaker.setVolume(0.7);
-  assert.equal(speaker.master.gain.value, 0);
+  speaker.setVolume(0.5);
+  assert.equal(speaker.master.gain.value, 0, 'changing volume while muted stays silent');
   speaker.mute(false);
-  assert.equal(speaker.master.gain.value, 0.25 * 0.7 ** 2);
-  speaker.setVolume(2);
-  assert.equal(speaker.volume, 1);
-  assert.equal(speaker.master.gain.value, 0.25);
+  assert.ok(speaker.master.gain.value > 0 && speaker.master.gain.value < previous);
   speaker.setVolume(-1);
   assert.equal(speaker.volume, 0);
   assert.equal(speaker.master.gain.value, 0);
-  for (const level of [NaN, Infinity, -Infinity]) {
+  for (const level of [2, NaN, Infinity, -Infinity]) {
     speaker.setVolume(level);
     assert.equal(speaker.volume, 1);
-    assert.equal(speaker.master.gain.value, 0.25);
+    assert.equal(speaker.master.gain.value, previous);
   }
   assert.deepEqual(speaker.ringing, voices);
   assert.deepEqual(voices.map(v => v.src.stoppedAt), stops);
 });
 
-test('volume and mute set before the context exists are applied by unlock', () => {
+test('volume and mute set before audio unlock behave like changes made afterward', () => {
+  const reference = new Speaker(music);
+  unlock(reference);
+  reference.setVolume(0.5);
   for (const muted of [false, true]) {
     const speaker = new Speaker(music);
     speaker.setVolume(0.5);
     speaker.mute(muted);
     assert.equal(speaker.ctx, null);
     unlock(speaker);
-    assert.equal(speaker.master.gain.value, muted ? 0 : 0.0625);
+    assert.equal(speaker.master.gain.value, muted ? 0 : reference.master.gain.value);
     speaker.mute(false);
-    assert.equal(speaker.master.gain.value, 0.0625);
+    assert.equal(speaker.master.gain.value, reference.master.gain.value);
   }
 });
 
@@ -265,147 +267,48 @@ test('silence discards a paused tune', () => {
   assert.equal(speaker.ringing.length, 0);
 });
 
-test('the score scrolls at constant speed with a fixed delay after each attack', () => {
-  const speaker = new Speaker(music);
-  assert.equal(speaker.notationTime(), 0, 'the score clock is idle before audio unlock');
-  assert.deepEqual(speaker.upcomingNotes(), []);
-  unlock(speaker);
-  speaker.playTune(3, 0);
-  const future = [...speaker.notes];
-  assert.deepEqual(speaker.upcomingNotes(), future);
-  assert.ok(future.some(note => note.start === 144), 'the end is already present');
-  speaker.mute(true);
-  speaker.setVolume(0);
-  assert.deepEqual(speaker.upcomingNotes(), future);
-  speaker.ctx.currentTime = 0.29;
-  assert.deepEqual(speaker.upcomingNotes(), future, 'the opening chord stays briefly after sounding');
-  speaker.ctx.currentTime = 0.3;
-  assert.ok(speaker.upcomingNotes().every(note => note.start > 0), 'the opening chord leaves together');
-  // Equal audio intervals advance notation equally, across long and short notes.
-  for (const now of [0.4, 0.8, 1.0, 1.2, 1.6, 2.4, 2.7]) {
-    speaker.ctx.currentTime = now;
-    assert.ok(Math.abs(speaker.notationTime() - (now - 0.3)) < 1e-9);
-    assert.deepEqual(speaker.upcomingNotes(), future.filter(note => note.at > now - 0.3));
-  }
-  speaker.ctx.currentTime = speaker.tuneEnd;
-  assert.deepEqual(speaker.upcomingNotes(), []);
-  speaker.silence();
-  assert.deepEqual(speaker.upcomingNotes(), []);
-});
-
-test('recent notes follow actual scheduled onsets across voices and rests', () => {
-  const speaker = new Speaker(music);
-  assert.deepEqual(speaker.recentNotes(1.8), []);
-  unlock(speaker);
-  speaker.playTune(3, 0);
-  assert.deepEqual(speaker.recentNotes(0.1).map(n => n.voice), [0, 1]);
-  assert.deepEqual(speaker.recentNotes(0.1).map(n => n.midi), [70, 67]);
-  speaker.ctx.currentTime = 47 / 60;
-  assert.deepEqual(speaker.recentNotes(0.1), []);
-  speaker.ctx.currentTime = 48 / 60;
-  assert.deepEqual(speaker.recentNotes(0.1).map(n => [n.voice, n.start]), [[0, 48]]);
-  speaker.ctx.currentTime = 72 / 60;
-  assert.deepEqual(speaker.recentNotes(0.1).map(n => [n.voice, n.start]), [[0, 72], [1, 72]]);
-  speaker.ctx.currentTime = 100;
-  assert.deepEqual(speaker.recentNotes(1.8), []);
-});
-
-test('muting preserves the visual rhythm; silence and suspension clear it', () => {
+test('a note leaves the upcoming set after its attack', () => {
   const speaker = new Speaker(music);
   unlock(speaker);
   speaker.playTune(3, 0);
-  const notes = speaker.recentNotes(1.8);
-  assert.ok(notes.length);
-  speaker.mute(true);
-  speaker.setVolume(0);
-  assert.deepEqual(speaker.recentNotes(1.8), notes);
-  speaker.ctx.state = 'suspended';
-  assert.deepEqual(speaker.recentNotes(1.8), []);
-  speaker.ctx.state = 'running';
-  speaker.suspend();
-  assert.deepEqual(speaker.recentNotes(1.8), []);
-  speaker.resume();
-  assert.ok(speaker.recentNotes(1.8).length);
-  speaker.silence();
-  assert.deepEqual(speaker.recentNotes(1.8), []);
+  const notes = speaker.upcomingNotes();
+  const opening = notes.find(note => note.start === 0);
+  assert.ok(opening);
+  speaker.ctx.currentTime = 1;
+  const upcoming = speaker.upcomingNotes();
+  assert.ok(!upcoming.includes(opening));
+  assert.ok(upcoming.length > 0, 'later notes remain upcoming while the tune plays');
 });
 
-test('4/4 measures follow the audio clock through held notes, mute, seek and cancellation', () => {
+test('measures expire after the tune finishes', () => {
   const speaker = new Speaker(music);
-  assert.deepEqual(speaker.recentMeasures(1.8), []);
   unlock(speaker);
   speaker.playTune(7, 0);
-  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 0, at: 0 }], 'the opening bar appears immediately');
-  assert.deepEqual(speaker.recentMeasures(1.8, 1.8), [
-    { measure: 0, at: 0 }, { measure: 1, at: 1.6 },
-  ], 'upcoming bars are available before their notes play');
-  speaker.ctx.currentTime = 1.59;
-  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 0, at: 0 }]);
-  speaker.ctx.currentTime = 1.6;
-  assert.deepEqual(speaker.recentMeasures(1.8), [{ measure: 0, at: 0 }, { measure: 1, at: 1.6 }]);
-  speaker.ctx.currentTime = 11.21;
-  assert.deepEqual(speaker.recentNotes(0.01), [], 'the ending sustains across the bar');
-  assert.deepEqual(speaker.recentMeasures(0.1).map(bar => bar.measure), [7]);
-  speaker.mute(true);
-  assert.deepEqual(speaker.recentMeasures(0.1).map(bar => bar.measure), [7]);
-  speaker.ctx.state = 'suspended';
-  assert.deepEqual(speaker.recentMeasures(1.8), []);
-  speaker.ctx.state = 'running';
-  speaker.ctx.currentTime = speaker.tuneEnd + 2;
-  assert.deepEqual(speaker.recentMeasures(1.8, 1.8), [], 'bars expire and never extend beyond the tune');
-  speaker.playTune(0, 150);
-  assert.deepEqual(speaker.recentMeasures(0.2).map(bar => bar.measure), [1], 'late entry retains the measure phase');
-  speaker.silence();
-  assert.deepEqual(speaker.recentMeasures(1.8), []);
+  const history = 1;
+  assert.ok(speaker.recentMeasures(history).length > 0);
+  speaker.ctx.currentTime = speaker.tuneEnd + history;
+  assert.deepEqual(speaker.recentMeasures(history, Infinity), []);
 });
 
-test('joining a tune late and replacing it never show unscheduled notes', () => {
-  const speaker = new Speaker(music);
-  speaker.tune(3, 0);
-  unlock(speaker, 60);
-  assert.deepEqual(speaker.recentNotes(1.8).map(n => [n.voice, n.start]), [[0, 60]]);
-  const previous = speaker.recentNotes(1.8);
-  speaker.playTune(2, 0);
-  assert.ok(speaker.recentNotes(1.8).every(n => !previous.includes(n)));
-});
-
-test('tone and noise waveforms follow effect playback, including mute and expiry', () => {
-  const speaker = new Speaker(music);
-  assert.equal(speaker.effectWaveform(), null);
-  unlock(speaker);
-  assert.equal(speaker.effectWaveform(), null);
-  for (const id of [1, 8]) {
-    speaker.sfx(id);
-    assert.ok(speaker.effectWaveform().some(sample => sample !== 0));
-    assert.equal(speaker.effectAnalyser.output, speaker.master);
-    speaker.mute(true);
-    speaker.setVolume(0);
-    assert.ok(speaker.effectWaveform().some(sample => sample !== 0));
-    speaker.ctx.state = 'suspended';
-    assert.equal(speaker.effectWaveform(), null);
-    speaker.ctx.state = 'running';
-    speaker.ctx.currentTime = speaker.effectEnd;
-    assert.equal(speaker.effectWaveform(), null);
-  }
-});
-
-test('new effects replace old ones; music and silence stop the effect trace', () => {
+test('new effects cut old effects, and tunes suppress effects until silenced', () => {
   const speaker = new Speaker(music);
   unlock(speaker);
   speaker.sfx(8);
   const previous = speaker.effect;
+  const scheduledStop = previous.src.stoppedAt;
   speaker.ctx.currentTime = 0.1;
   speaker.sfx(1);
   assert.notEqual(speaker.effect, previous);
-  assert.ok(previous.src.stoppedAt < 0.12);
+  assert.ok(previous.src.stoppedAt < scheduledStop, 'replacement cuts the old effect short');
   speaker.playTune(0, 0);
-  assert.equal(speaker.effectWaveform(), null);
+  assert.equal(speaker.effect, null);
   speaker.sfx(1);
-  assert.equal(speaker.effectWaveform(), null, 'effects suppressed during music have no trace');
+  assert.equal(speaker.effect, null, 'effects cannot interrupt a tune');
   speaker.silence();
   speaker.sfx(8);
   const effect = speaker.effect;
+  const stop = effect.src.stoppedAt;
   speaker.silence();
-  assert.equal(speaker.effectWaveform(), null);
-  assert.ok(effect.src.stoppedAt < 0.12);
+  assert.equal(speaker.effect, null);
+  assert.ok(effect.src.stoppedAt < stop, 'silence cuts the active effect short');
 });

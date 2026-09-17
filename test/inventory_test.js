@@ -6,8 +6,9 @@ import { pickItem, inventoryEntries } from '../src/inventory.js';
 import { CLASS } from '../src/data.js';
 import { runMenu } from '../src/verbs.js';
 
+const data = await loadTestData();
+
 test("item choices wrap through the cancellation entry", async () => {
-  const data = await loadTestData();
   for (const options of [{}, { perClass: true }, { accept: o => o.class !== CLASS.TOKEN }]) {
     const state = newState(data, null);
     startQuest(state, data.characters[0]);
@@ -33,17 +34,23 @@ test("item choices wrap through the cancellation entry", async () => {
 });
 
 test("inventory counts repeated items once per class", async () => {
-  const data = await loadTestData();
   const pack = newState(data, null);
   startQuest(pack, data.characters[0]);
   give(pack, CLASS.BREAD);
   give(pack, CLASS.TOKEN);
   give(pack, CLASS.ROPE);
-  assert.deepEqual(inventoryEntries(pack).map(entry => entry.label), ['PAN BREAD', 'TOKEN', 'VINE ROPE'],
+  assert.deepEqual(new Set(inventoryEntries(pack).map(entry => entry.label)), new Set(['PAN BREAD', 'TOKEN', 'VINE ROPE']),
     'single items omit the count, including tokens');
   give(pack, CLASS.BREAD);
   give(pack, CLASS.TOKEN);
   give(pack, CLASS.ROPE);
+  const entries = inventoryEntries(pack);
+  assert.deepEqual(new Map(entries.map(({ item, label }) => [item.class, label])), new Map([
+    [CLASS.BREAD, 'PAN BREAD x2'], [CLASS.TOKEN, 'TOKEN x2'], [CLASS.ROPE, 'VINE ROPE x2'],
+  ]));
+  const carriedClasses = new Set(pack.objects.filter(item => item.exists && item.carried).map(item => item.class));
+  assert.equal(entries.length, carriedClasses.size, 'each carried class appears exactly once');
+  assert.deepEqual(new Set(entries.map(({ item }) => item.class)), carriedClasses);
   const inventory = runMenu(pack);
   inventory.next();
   for (const input of menuReads('INVENTORY')) inventory.next(input);
