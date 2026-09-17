@@ -25,7 +25,7 @@ async function inputContractFixture() {
     session.load(exportSave(session.state));
     return { keys, session, state: session.state };
   }
-  const key = (keys, name, up = false, code = name) => keys.map({ key: name, code }, up);
+  const key = (keys, name, up = false, code = name, repeat = false) => keys.map({ key: name, code, repeat }, up);
   const tap = (keys, name, code) => {
     key(keys, name, false, code);
     key(keys, name, true, code);
@@ -406,40 +406,38 @@ test('holding a direction dismisses the spirit bell message without requiring re
 });
 
 test("queued physical keypresses navigate the menu exactly once", async () => {
-  const data = await loadTestData();
+  const { data, key, tap } = await inputContractFixture();
   const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
   // Real keyboard events, with no simulation read between release and repress.
   const keyboard = new Keyboard({ addEventListener() {} });
   const keyed = new Session(data, keyboard, { initial: { mode: 'quest' } });
   const settleKeys = () => { for (let i = 0; i < 60; i++) keyed.step(); };
-  const key = (name, up = false, repeat = false) => keyboard.map({ key: name, code: name, repeat }, up);
-  const tapKey = name => { key(name); key(name, true); };
   keyed.commandMenu();
-  tapKey('ArrowRight');
+  tap(keyboard, 'ArrowRight');
   settleKeys();
   assert.equal(selected(keyed.state), 'TAKE', 'the first press while the menu opens is preserved');
-  key('ArrowDown');
+  key(keyboard, 'ArrowDown');
   settleKeys();
   assert.equal(selected(keyed.state), 'BUY');
-  key('ArrowDown', true);
-  key('ArrowDown');
+  key(keyboard, 'ArrowDown', true);
+  key(keyboard, 'ArrowDown');
   settleKeys();
   assert.equal(selected(keyed.state), 'USE', 'release/repress between reads moves again');
-  for (let i = 0; i < 10; i++) key('ArrowDown', false, true);
+  for (let i = 0; i < 10; i++) key(keyboard, 'ArrowDown', false, 'ArrowDown', true);
   settleKeys();
   assert.equal(selected(keyed.state), 'USE', 'held keys and auto-repeat cannot move twice');
-  key('ArrowDown', true);
-  tapKey('ArrowUp');
-  tapKey('ArrowUp');
-  tapKey('ArrowDown');
+  key(keyboard, 'ArrowDown', true);
+  tap(keyboard, 'ArrowUp');
+  tap(keyboard, 'ArrowUp');
+  tap(keyboard, 'ArrowDown');
   settleKeys();
   assert.equal(selected(keyed.state), 'BUY', 'every queued tap is consumed in order');
-  key('ArrowDown');
-  key('s');
+  key(keyboard, 'ArrowDown');
+  key(keyboard, 's');
   settleKeys();
   assert.equal(selected(keyed.state), 'EAT', 'separate physical aliases each count while held');
-  key('ArrowDown', true);
-  key('s', true);
+  key(keyboard, 'ArrowDown', true);
+  key(keyboard, 's', true);
   settleKeys();
   assert.equal(selected(keyed.state), 'EAT', 'releases do not move the menu');
 });
@@ -502,23 +500,21 @@ test("queued navigation and confirmation select the intended character", async (
 });
 
 test("the item chooser preserves its opening press and consumes rapid taps", async () => {
-  const data = await loadTestData();
+  const { data, key, tap } = await inputContractFixture();
   const keyboard = new Keyboard({ addEventListener() {} });
-  const key = (name, up = false, repeat = false) => keyboard.map({ key: name, code: name, repeat }, up);
-  const tapKey = name => { key(name); key(name, true); };
   const itemState = newState(data, null);
   startQuest(itemState, data.characters[0]);
   const firstItem = give(itemState, CLASS.BREAD);
   const secondItem = give(itemState, CLASS.FRUIT);
   const chooser = pickItem(itemState);
   chooser.next();
-  key('ArrowDown');
+  key(keyboard, 'ArrowDown');
   for (let i = 0; i < 10; i++) chooser.next(keyboard.read('press'));
-  key('ArrowDown', true);
+  key(keyboard, 'ArrowDown', true);
   assert.match(lines(itemState)[0], new RegExp(`${secondItem.name}$`), 'item chooser keeps its opening press');
-  tapKey('ArrowUp');
-  tapKey('ArrowDown');
-  tapKey('ArrowUp');
+  tap(keyboard, 'ArrowUp');
+  tap(keyboard, 'ArrowDown');
+  tap(keyboard, 'ArrowUp');
   for (let i = 0; i < 10; i++) chooser.next(keyboard.read('press'));
   assert.match(lines(itemState)[0], new RegExp(`${firstItem.name}$`), 'item chooser consumes rapid taps exactly once');
 });

@@ -53,15 +53,13 @@ source/ (requires Make, Node.js, and npm; installing Marked may need internet).
 For tools that expect source/iso/, copy the preserved iso/ directory there.
 Winning recordings for Genaa, Herd, Neric, and Pomma are in recordings/.
 Import one with the debug tools' Load recording button to watch it offline.
-The source fixtures and quest provenance are in source/test/fixtures/.
+The source fixtures are in source/test/fixtures/.
 From source/, verify each winning recording with:
 
     node tools/playthrough.mjs ../recordings/genaa-win.json --expect-win
     node tools/playthrough.mjs ../recordings/herd-win.json --expect-win
     node tools/playthrough.mjs ../recordings/neric-win.json --expect-win
     node tools/playthrough.mjs ../recordings/pomma-win.json --expect-win
-
-Reproduce the Herd fixtures from live controls with node tools/record-fixtures.mjs.
 
 The original game and materials retain their original copyrights and notices;
 see iso/LEGAL and iso/readme.txt. Cinzel's SIL Open Font License is included in

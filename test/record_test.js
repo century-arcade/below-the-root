@@ -525,7 +525,7 @@ test('Bad files fail on a private quest with useful location diagnostics', async
   }
   const bad = structuredClone(original);
   bad.events[0].pos[0]++;
-  assert.throws(() => Session.replay(data, idle, bad), /Event 1, tick 7:.*expected T1.*actual tick 7 T1/);
+  assert.throws(() => Session.replay(data, idle, bad), /Event 1, tick 7: location mismatch; expected T1.*actual tick 7 T1/);
   const missed = structuredClone(original);
   missed.events[0].simticks++;
   assert.throws(() => Session.replay(data, idle, missed), /Event 1, tick 8:.*consumption.*actual tick 9/);

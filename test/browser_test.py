@@ -2,7 +2,6 @@
 import json
 import os
 from browser_helpers import install_probe, observe
-import re
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
