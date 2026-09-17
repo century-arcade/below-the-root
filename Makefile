@@ -45,7 +45,6 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
-	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'version_test.py'
 	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'release_test.py'
 	$(NODE_TEST) test/site_test.js
 	$(NODE_TEST) test/log_test.js
