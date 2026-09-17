@@ -1,7 +1,92 @@
-import { authenticatedGithubFixture, githubFixture } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHandler } from '../functions/github.mjs';
+
+async function githubFixture() {
+  const mock = {
+    calls: [],
+    scope: 'public_repo,gist',
+    gistStatus: 201,
+    issueStatus: 201,
+    deleteStatus: 204,
+    issueThrows: false,
+    deleteThrows: false,
+  };
+
+  const origin = 'https://below-the-root.netlify.app';
+  const base = origin + '/.netlify/functions/github';
+  const env = {
+    GITHUB_CLIENT_ID: 'test-client',
+    GITHUB_CLIENT_SECRET: 'test-secret',
+    GITHUB_SESSION_SECRET: 'a'.repeat(32),
+  };
+
+  const gist = {
+    id: '456',
+    html_url: 'https://gist.github.com/tester/456',
+    files: {
+      'btr-playthrough-5.json': {
+        raw_url: 'https://gist.githubusercontent.com/tester/456/raw/btr-playthrough-5.json',
+      },
+    },
+  };
+  const issue = { html_url: 'https://github.com/century-arcade/below-the-root/issues/123', number: 123 };
+  const remote = async (url, options) => {
+    mock.calls.push({ url, options });
+    if (url.endsWith('/access_token'))
+      return Response.json({ access_token: 'private-test-token', scope: mock.scope });
+    if (url.endsWith('/user')) return Response.json({ login: 'tester' });
+    assert.equal(options.headers.Authorization, 'Bearer private-test-token');
+    if (url.endsWith('/gists') && options.method === 'POST')
+      return Response.json(gist, { status: mock.gistStatus });
+    if (url.endsWith('/gists/456') && options.method === 'DELETE') {
+      if (mock.deleteThrows) throw new Error('Cleanup network failure');
+      return new Response(null, { status: mock.deleteStatus });
+    }
+    assert.equal(url, 'https://api.github.com/repos/century-arcade/below-the-root/issues');
+    assert.equal(options.method, 'POST');
+    if (mock.issueThrows) throw new Error('Issue network failure');
+    return Response.json(issue, { status: mock.issueStatus });
+  };
+  const handler = createHandler(env, remote);
+  const req = (op, headers = {}, body) =>
+    new Request(base + '?op=' + op, { method: body ? 'POST' : 'GET', headers, body });
+
+  return Object.assign(mock, { origin, base, env, gist, issue, remote, handler, req });
+}
+
+async function authenticatedGithubFixture() {
+  const mock = await githubFixture();
+  const { handler, req, origin } = mock;
+  const login = await handler(req('login'));
+  const auth = new URL(login.headers.get('Location'));
+  const flowCookie = login.headers.getSetCookie()[0].split(';')[0];
+  async function sessionCookie() {
+    const callback = await handler(
+      req('callback&code=test&state=' + auth.searchParams.get('state'), { Cookie: flowCookie }),
+    );
+    assert.equal(callback.headers.get('Location'), '/?debug');
+    const value = callback.headers
+      .getSetCookie()
+      .find(x => x.startsWith('__Host-btr-github='))
+      .split(';')[0];
+    assert.ok(!value.includes('private-test-token'));
+    return value;
+  }
+  const cookie = await sessionCookie();
+  const headers = { Cookie: cookie, Origin: origin, 'Content-Type': 'application/json' };
+  const recording = JSON.stringify({ version: 3, checkpoint: { room: 'P2', simticks: 5 }, events: [] });
+  const report = {
+    message: 'Door failed\nI tapped it.',
+    context: '{"room":"P2"}',
+    recording,
+    meta: { simticks: 5, room: 'P2' },
+  };
+  const body = JSON.stringify(report);
+  const post = (changes = {}) => handler(req('issue', headers, JSON.stringify({ ...report, ...changes })));
+
+  return Object.assign(mock, { cookie, headers, recording, report, body, post, sessionCookie });
+}
 
 test("OAuth uses PKCE and rejects callbacks with a mismatched state", async () => {
   const mock = await githubFixture();

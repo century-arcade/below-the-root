@@ -1,7 +1,52 @@
-import { gamepadFixture, keyboardFixture } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { IDLE, Gamepad, Keyboard, DemoInput, Pointer } from '../src/input.js';
+import { IDLE, Gamepad, Keyboard, DemoInput, Pointer, pressEdge } from '../src/input.js';
+
+async function keyboardFixture() {
+  class Target {
+    constructor() {
+      this.listeners = {};
+    }
+    addEventListener(name, fn) {
+      (this.listeners[name] ||= []).push(fn);
+    }
+    send(name, data = {}) {
+      for (const fn of this.listeners[name] || []) fn(data);
+    }
+  }
+  const target = new Target();
+  const canvas = new Target();
+  Object.assign(canvas, {
+    style: {},
+    width: 320,
+    height: 200,
+    setPointerCapture: () => {},
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 320, height: 200 }),
+  });
+  const keys = new Keyboard(target);
+  const read = pressEdge(() => keys.read());
+
+  return { Target, target, canvas, keys, read };
+}
+
+async function gamepadFixture() {
+  const mock = { pads: [] };
+
+  const keys = new Keyboard({ addEventListener() {} });
+
+  const gamepad = new Gamepad(keys, { getGamepads: () => mock.pads });
+  const pad = ({ buttons = [], axes = [0, 0] } = {}) => ({
+    connected: true,
+    buttons: Array.from({ length: 16 }, (_, i) => ({ pressed: buttons.includes(i) })),
+    axes,
+  });
+  const read = () => {
+    gamepad.poll();
+    return keys.read();
+  };
+
+  return Object.assign(mock, { keys, gamepad, pad, read });
+}
 
 test("gamepad directions combine the d-pad and stick with a dead zone", async () => {
   const mock = await gamepadFixture();
@@ -57,7 +102,7 @@ test("the first connected gamepad supplies input and disconnect clears it", asyn
   assert.deepEqual(read(), { ...IDLE, dy: -1 }, 'next connected pad takes over');
   mock.pads[3].connected = false;
   assert.deepEqual(read(), IDLE, 'disconnect clears held directions');
-  for (const disconnect of [() => { mock.pads[0].connected = false; }, async () => { mock.pads = []; }]) {
+  for (const disconnect of [() => { mock.pads[0].connected = false; }, () => { mock.pads = []; }]) {
     mock.pads = [pad({ buttons: [0, 15] })];
     gamepad.poll();
     disconnect();

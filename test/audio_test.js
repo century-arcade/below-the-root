@@ -1,4 +1,3 @@
-import { unlockAudio as unlock } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -6,6 +5,87 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { planTune, pickTune, startTune, Speaker } from '../src/audio.js';
 import { QUARTER_FRAMES } from '../src/music-notation.js';
+
+class AudioContextStub {
+  currentTime = 0;
+  state = 'running';
+  sampleRate = 60;
+  destination = {};
+  resumeCalls = 0;
+  createGain() {
+    return {
+      gain: {
+        value: 0,
+        setValueAtTime() {},
+        linearRampToValueAtTime() {},
+        exponentialRampToValueAtTime() {},
+        cancelAndHoldAtTime() {},
+      },
+      connect() {
+        return this;
+      },
+    };
+  }
+  createOscillator() {
+    return {
+      frequency: {},
+      setPeriodicWave() {},
+      connect(gain) {
+        return gain;
+      },
+      start(at) {
+        this.startedAt = at;
+      },
+      stop(at) {
+        this.stoppedAt = at;
+      },
+    };
+  }
+  createPeriodicWave() {
+    return {};
+  }
+  createAnalyser() {
+    return {
+      connect(target) {
+        this.output = target;
+      },
+      getFloatTimeDomainData(samples) {
+        samples.fill(0.25);
+      },
+    };
+  }
+  createBufferSource() {
+    return {
+      playbackRate: {},
+      connect(gain) {
+        return gain;
+      },
+      start(at) {
+        this.startedAt = at;
+      },
+      stop(at) {
+        this.stoppedAt = at;
+      },
+    };
+  }
+  createBuffer(channels, n) {
+    return { getChannelData: () => new Float32Array(n) };
+  }
+  resume() {
+    this.resumeCalls++;
+    return Promise.resolve();
+  }
+}
+function unlock(speaker, tick = 0) {
+  const original = globalThis.AudioContext;
+  globalThis.AudioContext = AudioContextStub;
+  try {
+    speaker.unlock({ tick });
+  } finally {
+    if (original === undefined) delete globalThis.AudioContext;
+    else globalThis.AudioContext = original;
+  }
+}
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const music = JSON.parse(readFileSync(join(ROOT, 'docs', 'spec', 'data', 'music.json'), 'utf8'));

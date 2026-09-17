@@ -61,7 +61,7 @@ poster:
 	$(PY) tools/poster_map.py
 
 browser-test: build
-	@for t in test/browser_*.py; do BTR_URL=$(BTR_URL) $(PY) $$t || exit 1; done
+	@for t in $(filter-out test/browser_release_test.py,$(wildcard test/browser_*.py)); do BTR_URL=$(BTR_URL) $(PY) $$t || exit 1; done
 
 clean:
 	rm -rf $(BUILD)

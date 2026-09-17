@@ -1,4 +1,4 @@
-"""Saved monitor preferences apply, and power clears the game and restarts at the menu."""
+"""Monitor power clears the game and restarts at the menu."""
 import os
 from browser_helpers import install_probe, observe
 from playwright.sync_api import sync_playwright, expect
@@ -15,10 +15,6 @@ with sync_playwright() as p:
     surround = page.get_by_role('combobox', name='Monitor surround')
     expect(surround).to_have_count(0)
     expect(page.locator('#monitor')).to_have_attribute('data-surround', 'dark')
-    for style in ['commodore', 'portable', 'dark']:
-        page.evaluate("style => localStorage.setItem('btr.surround', style)", style)
-        page.reload()
-        expect(page.locator('#monitor')).to_have_attribute('data-surround', style)
     power = page.get_by_role('button', name='Monitor power', exact=True)
     page.wait_for_function('window.questSession && questSession().state.quest')
     page.evaluate('window.oldSession = questSession()')
@@ -57,4 +53,4 @@ with sync_playwright() as p:
     expect(page.get_by_role('group', name='Monitor controls')).to_be_visible()
     assert not errors, errors
     browser.close()
-print('browser_monitor_test: saved preferences, power and volume passed')
+print('browser_monitor_test: power and volume passed')

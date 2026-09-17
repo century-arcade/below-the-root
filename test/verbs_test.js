@@ -1,86 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadTestData, J, talkFixture, questState, menuReads as menu, place, lines, give, stick as reader, page, timeFixture } from './helpers.js';
-import { Session, checkpoint } from '../src/record.js';
+import { J, talkFixture, questState, menuReads as menu, place, lines, give, stick as reader, page, timeFixture } from './helpers.js';
 import { MENU, menuChoiceAt, runMenu } from '../src/verbs.js';
-import { Keyboard } from '../src/input.js';
 import { CLASS } from '../src/data.js';
 import { startVerb, tick } from '../src/game.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 
-test("holding a menu direction moves once and releasing permits another move", async () => {
-  const data = await loadTestData();
-  const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
-  let joy = J.idle;
-  const live = { read: () => joy };
-  function hold(game, input) {
-    joy = input;
-    for (let i = 0; i < 30; i++) game.step();
-  }
-
-  const game = new Session(data, live, { initial: { mode: 'quest' } });
-  game.commandMenu();
-  hold(game, J.idle);
-  hold(game, J.right);
-  assert.equal(selected(game.state), 'TAKE', 'holding right moves one command');
-  hold(game, J.down);
-  assert.equal(selected(game.state), 'BUY', 'holding down moves one command');
-  hold(game, J.idle);
-  hold(game, J.down);
-  assert.equal(selected(game.state), 'USE', 'release permits the next command');
-  hold(game, J.up);
-  assert.equal(selected(game.state), 'BUY', 'up navigates back');
-  hold(game, J.left);
-  assert.equal(selected(game.state), 'SPEAK', 'left navigates back');
-  assert.deepEqual(checkpoint(Session.replay(data, live, game.snapshot()).state), checkpoint(game.state),
-    'menu navigation leaves the saved quest unchanged');
-});
-
 test("command selection maps to an action and blank actions cannot be chosen", () => {
   assert.deepEqual(menuChoiceAt(14, 2), { col: 2, row: 2 });
   assert.equal(MENU[menuChoiceAt(14, 2).row][menuChoiceAt(14, 2).col], 'HEAL');
   assert.equal(menuChoiceAt(39, 3), null, 'the blank action is not clickable');
-});
-
-test("queued physical keypresses navigate the menu exactly once", async () => {
-  const data = await loadTestData();
-  const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
-  // Real keyboard events, with no simulation read between release and repress.
-  const keyboard = new Keyboard({ addEventListener() {} });
-  const keyed = new Session(data, keyboard, { initial: { mode: 'quest' } });
-  const settleKeys = () => { for (let i = 0; i < 60; i++) keyed.step(); };
-  const key = (name, up = false, repeat = false) => keyboard.map({ key: name, code: name, repeat }, up);
-  const tapKey = name => { key(name); key(name, true); };
-  keyed.commandMenu();
-  tapKey('ArrowRight');
-  settleKeys();
-  assert.equal(selected(keyed.state), 'TAKE', 'the first press while the menu opens is preserved');
-  key('ArrowDown');
-  settleKeys();
-  assert.equal(selected(keyed.state), 'BUY');
-  key('ArrowDown', true);
-  key('ArrowDown');
-  settleKeys();
-  assert.equal(selected(keyed.state), 'USE', 'release/repress between reads moves again');
-  for (let i = 0; i < 10; i++) key('ArrowDown', false, true);
-  settleKeys();
-  assert.equal(selected(keyed.state), 'USE', 'held keys and auto-repeat cannot move twice');
-  key('ArrowDown', true);
-  tapKey('ArrowUp');
-  tapKey('ArrowUp');
-  tapKey('ArrowDown');
-  settleKeys();
-  assert.equal(selected(keyed.state), 'BUY', 'every queued tap is consumed in order');
-  key('ArrowDown');
-  key('s');
-  settleKeys();
-  assert.equal(selected(keyed.state), 'EAT', 'separate physical aliases each count while held');
-  key('ArrowDown', true);
-  key('s', true);
-  settleKeys();
-  assert.equal(selected(keyed.state), 'EAT', 'releases do not move the menu');
 });
 
 test('SPEAK with nobody facing', async () => {
@@ -90,36 +21,6 @@ test('SPEAK with nobody facing', async () => {
   place(s, 26, 5, 5);
   assert.equal(run(s, menu('SPEAK'))[0], 'SPEAK WITH WHOM?');
 });
-
-for (const [verb, cls] of [['EAT', CLASS.BREAD], ['USE', CLASS.HONEYLAMP], ['SELL', CLASS.SHUBA], ['OFFER', CLASS.BREAD]]) {
-  for (const hasItem of [false, true]) {
-    test(`${verb} NOTHING cancels with one trigger press ${hasItem ? 'after paging past an item' : 'with no items'}`, async () => {
-  const { faceCreature, data, pomma } = await talkFixture();
-
-  const s = questState(data, pomma);
-      if (verb === 'SELL' || verb === 'OFFER') faceCreature(s, 26);
-      if (hasItem) give(s, cls);
-      const objects = structuredClone(s.objects);
-      const food = s.player.food;
-      const inputs = [...menu(verb), J.idle, ...(hasItem ? [J.up] : [])];
-      s.input = reader(() => inputs.shift() || J.idle);
-      s.active = false;
-      startVerb(s, runMenu(s));
-      for (let i = 0; inputs.length && i < 100; i++) tick(s);
-      assert.equal(inputs.length, 0);
-      assert.match(lines(s)[0], /\bNOTHING$/);
-      assert.ok(s.verb, 'waiting for the choice');
-
-      inputs.push(J.fire);
-      tick(s);
-      assert.equal(s.verb, null, 'one trigger press closes the item picker');
-      assert.equal(s.active, true, 'play resumes');
-      assert.deepEqual(lines(s), ['', '', '', ''], 'the cancelled prompt is cleared');
-      assert.deepEqual(s.objects, objects, 'no item is consumed');
-      assert.equal(s.player.food, food, 'food is unchanged');
-    });
-  }
-}
 
 test('eating food keeps its result message until the next input', async () => {
   const { data, pomma } = await talkFixture();
@@ -298,9 +199,9 @@ test('USE a vine rope with no gap two cells ahead is useless and kept', async ()
 
 for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.'], [30, 'GIFTED QUESTER.']]) {
   for (const item of [CLASS.SHUBA, CLASS.ROPE]) test(`OFFER ${item} to Raamo on day ${day} wins with ${rank}`, async () => {
-  const { press, run, faceCreature, data, pomma } = await talkFixture();
+    const { press, run, faceCreature, data, pomma } = await talkFixture();
 
-  const s = questState(data, pomma);
+    const s = questState(data, pomma);
     faceCreature(s, data.roomByCode.get('GE').room);
     s.clock.day = day;
     give(s, item);

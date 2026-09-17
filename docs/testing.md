@@ -20,11 +20,10 @@ Input integration rules belong in `input_contract_test.js`, against
 `github_test.mjs` for `functions/github.mjs`. The render and demo replay
 goldens retain their established filenames.
 
-Shared setup belongs only in `test/helpers.js`. Checked-in recording
-fixtures are `test/fixtures/*-win.json`; derive intermediate recordings
-from those winning runs. Generator controls and provenance live in
-`tools/recording/`. A named recording test checks that the Herd fixture
-matches `tools/record-fixtures.mjs --check`.
+Setup used by multiple test files belongs in `test/helpers.js`; setup used
+by one file stays in that file. The PNG codec lives in `test/png.js`.
+Checked-in recording fixtures are `test/fixtures/*-win.json`; every winning
+run is replayed and verified. Derive intermediate recordings from those runs.
 
 Tests assert behaviour, never browser layout geometry. Do not assert pixel
 positions, element widths, or viewport-dependent coordinates. Delete tests
@@ -66,7 +65,7 @@ concern per file, stated in its docstring. Shared Python browser setup is
 in `test/browser_helpers.py`. Browser checks run with `make browser-test`,
 never `make test`. Install Playwright and its Chromium browser in the
 Python environment selected by `PY`, start the site with `make serve`,
-and build the preservation archive with `make release` first:
+then run the suite:
 
 ```
 make browser-test PY=python3
@@ -74,9 +73,11 @@ BTR_URL=http://localhost:8000 python3 test/browser_replay_test.py
 python3 test/browser_release_test.py dist/below-the-root-preservation.zip
 ```
 
-`BTR_URL` selects the running site. `browser_release_test.py` instead
-extracts the archive and serves it itself, checking offline operation with
-external requests blocked. `make release` needs the original media under
+`BTR_URL` selects the running site. `browser_release_test.py` is excluded
+from `make browser-test`: it is a separate manual release gate. Build the
+archive with `make release` before running it. It extracts the archive and
+serves it itself, checking offline operation with external requests blocked.
+`make release` needs the original media under
 `iso/` (or the `ISO` override). The browser suite covers its named concerns,
 including autosave/resume, input, navigation, recordings, and mocked GitHub
 login and reporting.

@@ -1,4 +1,4 @@
-import { mapFixture, loadTestData, J } from './helpers.js';
+import { loadTestData, J } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mapCells, visitedRooms, defaultMapRooms, visitedEmptyRooms, mapLocation, mapRoom } from '../src/map.js';
@@ -7,6 +7,15 @@ import { enterRoom, leaveByEdge } from '../src/world.js';
 import { startQuest } from '../src/game.js';
 import { openMenu } from '../src/shell.js';
 import { render } from '../src/video.js';
+
+async function mapFixture() {
+  const data = await loadTestData();
+  data.initialMap = { rooms: ['M5', 'B8'] };
+  const defaults = visitedRooms([], data);
+  const entry = (room, extra = {}) => ({ room, quest: true, blank: false, title: false, ...extra });
+  const at = code => data.roomByCode.get(code);
+  return { data, defaults, entry, at };
+}
 
 test("the authored map reveals exteriors and explored caverns but hides interiors", async () => {
   const data = await loadTestData();

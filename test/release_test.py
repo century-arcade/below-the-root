@@ -94,7 +94,6 @@ class ReleaseTest(unittest.TestCase):
         winners = ('genaa', 'herd', 'neric', 'pomma', 'future')
         for character in winners:
             (fixtures / f'{character}-win.json').write_text(character)
-        (fixtures / 'herd-caverns.json').write_text('unfinished quest')
         self.git('add', 'test/fixtures')
         (fixtures / 'untracked-win.json').write_text('untracked recording')
         package(self.repo, self.site, self.iso, self.output)

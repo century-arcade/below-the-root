@@ -1,10 +1,11 @@
+import { readPNG, rgbWindow, writePNG } from './png.js';
 import { execFileSync } from 'node:child_process';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadTestData, readPNG, rgbWindow, writePNG } from './helpers.js';
+import { loadTestData } from './helpers.js';
 import { renderIndexed, WIDTH, HEIGHT, figureOrigin } from '../src/video.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');

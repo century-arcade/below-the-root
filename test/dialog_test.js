@@ -1,7 +1,7 @@
-import { talkFixture, questState, menuReads as menu, J, lines, stick as reader } from './helpers.js';
+import { talkFixture, questState, menuReads as menu, J, lines } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { startVerb, tick } from '../src/game.js';
+import { startVerb } from '../src/game.js';
 import { gainSpirit, pense } from '../src/dialog.js';
 
 test('PENSE prints the emotion and the message and costs 2', async () => {
@@ -58,60 +58,60 @@ test('a blesser adds 5, announces the skill and shows a vision', async () => {
   assert.equal(s.player.spiritLimit, 15);
 });
 
-for (const reward of ['spirit', 'fifth animal']) {
-  for (const limit of [25, 35, 40]) {
-    for (const exhausted of [false, true]) test(`${reward} at limit ${limit}, visions exhausted: ${exhausted}`, async () => {
-  const { faceCreature, data, pomma } = await talkFixture();
-
+test('reaching spirit 25 announces KINIPORT tools, then a vision', async () => {
+  const { data, pomma } = await talkFixture();
   const s = questState(data, pomma);
-      s.presentationRng = () => (data.music.random_pool.indexOf(3) + 0.5) / data.music.random_pool.length;
-      s.visions = exhausted ? data.quest.visions.length : 0;
-      let gen;
-      if (reward === 'spirit') {
-        s.player.spiritLimit = limit - 5;
-        gen = gainSpirit(s, 5);
-      } else {
-        const c = faceCreature(s, 67);
-        assert.equal(c.def.kind, 'pensable_animal');
-        s.animalsPensed = 4;
-        s.player.spiritLimit = limit - c.def.params.pense_message_gain;
-        gen = pense(s);
-      }
-      let stick = J.fire;
-      let reads = 0;
-      s.input = reader(() => { reads += 1; return stick; });
-      const musicEvents = () => s.events.filter(e => 'music' in e);
-      const frames = data.music.tunes[3].frames;
-      const screens = [];
-      if (limit < 35) screens.push('CONGRATULATIONS QUESTER, YOU HAVE');
-      if (!exhausted) screens.push('A VISION COMES TO YOU:');
-      startVerb(s, gen);
-      assert.equal(s.player.spiritLimit, limit);
-      assert.equal(s.player.spiritEnergy, limit);
-      for (const [i, screen] of screens.entries()) {
-        assert.equal(lines(s)[0], screen);
-        if (limit === 25 && i === 0) assert.equal(lines(s)[1], 'GAINED THE POWER TO KINIPORT TOOLS');
-        assert.deepEqual(musicEvents(), Array(i + 1).fill({ music: 3 }));
-        assert.equal(s.stall, frames, 'only the playing tune blocks input');
-        const before = reads;
-        for (let frame = 0; frame < frames; frame++) tick(s);
-        assert.equal(reads, before, 'input waits until the tune finishes');
-        tick(s);
-        assert.equal(lines(s)[0], screen, 'a held button cannot acknowledge the screen');
-        assert.ok(s.verb);
-        stick = J.idle;
-        tick(s);
-        assert.equal(lines(s)[0], screen, 'releasing alone cannot acknowledge the screen');
-        stick = J.fire;
-        tick(s);
-      }
-      assert.equal(s.verb, null, 'one acknowledgement per screen finishes the reward');
-      assert.equal(s.visions, exhausted ? data.quest.visions.length : 1);
-      assert.deepEqual(musicEvents(), Array(Math.max(1, screens.length)).fill({ music: 3 }));
-      if (!screens.length) assert.equal(s.stall, frames, 'a reward without announcements still plays one tune');
-    });
-  }
-}
+  s.player.spiritLimit = 20;
+  const reward = gainSpirit(s, 5);
+  reward.next();
+  assert.equal(s.player.spiritLimit, 25);
+  assert.equal(s.player.spiritEnergy, 25);
+  assert.equal(lines(s)[0], 'CONGRATULATIONS QUESTER, YOU HAVE');
+  assert.equal(lines(s)[1], 'GAINED THE POWER TO KINIPORT TOOLS');
+  reward.next(J.idle);
+  reward.next(J.fire);
+  assert.equal(lines(s)[0], 'A VISION COMES TO YOU:');
+  assert.equal(s.visions, 1);
+});
+
+test('reaching spirit 35 stops skill announcements but still grants a vision', async () => {
+  const { data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  s.player.spiritLimit = 30;
+  gainSpirit(s, 5).next();
+  assert.equal(s.player.spiritLimit, 35);
+  assert.equal(s.player.spiritEnergy, 35);
+  assert.equal(lines(s)[0], 'A VISION COMES TO YOU:');
+  assert.equal(s.visions, 1);
+});
+
+test('exhausted visions leave an unannounced reward with one tune', async () => {
+  const { data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  s.player.spiritLimit = 35;
+  s.visions = data.quest.visions.length;
+  const before = lines(s);
+  assert.equal(gainSpirit(s, 5).next().done, true);
+  assert.equal(s.player.spiritLimit, 40);
+  assert.equal(s.player.spiritEnergy, 40);
+  assert.equal(s.visions, data.quest.visions.length);
+  assert.deepEqual(lines(s), before);
+  assert.equal(s.events.filter(e => 'music' in e).length, 1);
+});
+
+test('the fifth animal grants a spirit reward and a vision', async () => {
+  const { faceCreature, data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  const creature = faceCreature(s, 67);
+  s.animalsPensed = 4;
+  s.player.spiritLimit = 35;
+  pense(s).next();
+  assert.equal(s.animalsPensed, 5);
+  assert.equal(s.player.spiritLimit, 35 + creature.def.params.pense_message_gain);
+  assert.equal(s.player.spiritEnergy, s.player.spiritLimit);
+  assert.equal(lines(s)[0], 'A VISION COMES TO YOU:');
+  assert.equal(s.visions, 1);
+});
 
 test('an animal before the fifth gives one reward tune without an announcement', async () => {
   const { faceCreature, data, pomma } = await talkFixture();

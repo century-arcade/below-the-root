@@ -1,8 +1,31 @@
-import { playerFixture } from './helpers.js';
+import { enterRoom } from '../src/world.js';
+import { newState, startQuest } from '../src/game.js';
+import { IDLE } from '../src/input.js';
+import { loadTestData, stick } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { idleFrame, step } from '../src/player.js';
 import { CLASS } from '../src/data.js';
+
+async function playerFixture() {
+  const data = await loadTestData();
+  const controls = { input: IDLE };
+  function at(code, col, row, facing) {
+    controls.input = { dx: 0, dy: 0, fire: false };
+    const state = newState(
+      data,
+      stick(() => controls.input),
+      { rng: () => 0.5 },
+    );
+    startQuest(state, data.characters[0]);
+    enterRoom(state, data.roomByCode.get(code), col, row);
+    state.player.facing = facing;
+    state.player.frame = idleFrame(state.player);
+    return state;
+  }
+
+  return { at, controls };
+}
 
 test('a leap onto a ledge ends in the idle pose with no further input', async () => {
   const { at, controls } = await playerFixture();
@@ -45,7 +68,7 @@ test('entering the top rung from either direction shows the top-rung pose', asyn
 
 for (const fire of [false, true]) {
   test(`a sideways push after falling two rows glides with the button ${fire ? 'held' : 'free'}`, async () => {
-  const { at, controls } = await playerFixture();
+    const { at, controls } = await playerFixture();
     for (const dx of [-1, 1]) {
       const state = at('C4', 14, 0, -dx);
       const p = state.player;

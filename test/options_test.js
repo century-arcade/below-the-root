@@ -1,7 +1,11 @@
-import { memory } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DEFAULTS, loadOptions, storeOption } from '../src/options.js';
+
+const memory = () => {
+  const map = new Map();
+  return { getItem: k => (map.has(k) ? map.get(k) : null), setItem: (k, v) => map.set(k, String(v)), map };
+};
 
 test("empty storage supplies defaults and stored options override them", () => {
   let storage = memory();

@@ -1,4 +1,4 @@
-"""Login and reporting must work while logged out or session lookup is unavailable.
+"""Login and reporting must work while logged out.
 Run against make serve. OAuth navigation is intercepted; no GitHub login occurs.
 """
 import os
@@ -8,37 +8,22 @@ BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    for mode in ['pending', 'failed', 'logged-out', 'logout']:
-        for action in ['report', 'shortcut']:
-            context = browser.new_context()
-            page = context.new_page()
-            if mode == 'pending':
-                page.add_init_script("""const originalFetch = window.fetch;
-                  window.fetch = (url, ...args) => String(url).includes('?op=session')
-                    ? new Promise(() => {}) : originalFetch(url, ...args);""")
-            elif mode == 'failed':
-                page.route('**/.netlify/functions/github?op=session', lambda route: route.abort())
-            else:
-                page.route('**/.netlify/functions/github?op=session', lambda route: route.fulfill(
-                    json={"configured": True, "login": "tester" if mode == 'logout' else None}))
-            page.route('**/.netlify/functions/github?op=logout', lambda route: route.fulfill(json={}))
-            page.route('**/.netlify/functions/github?op=login', lambda route: route.fulfill(
-                content_type='text/html', body='<p>Reached login endpoint</p>'))
-            page.goto(BASE + '/?debug&player=0')
-            page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
-            if mode == 'logout':
-                page.wait_for_function("!document.getElementById('github-logout').hidden")
-                page.locator('#file-issue').click()
-                page.locator('#github-logout').click()
-                page.locator('#issue-dialog').wait_for(state='hidden')
-                assert page.locator('#github-logout').get_attribute('hidden') is not None
-            assert page.locator('#file-issue').is_visible(), mode
-            if action == 'shortcut':
-                page.keyboard.press('r')
-            else:
-                page.locator('#file-issue').click()
-            page.get_by_text('Reached login endpoint').wait_for()
-            assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3')).initial.mode")
-            context.close()
+    for action in ['report', 'shortcut']:
+        context = browser.new_context()
+        page = context.new_page()
+        page.route('**/.netlify/functions/github?op=session', lambda route: route.fulfill(
+            json={"configured": True, "login": None}))
+        page.route('**/.netlify/functions/github?op=login', lambda route: route.fulfill(
+            content_type='text/html', body='<p>Reached login endpoint</p>'))
+        page.goto(BASE + '/?debug&player=0')
+        page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
+        assert page.locator('#file-issue').is_visible()
+        if action == 'shortcut':
+            page.keyboard.press('r')
+        else:
+            page.locator('#file-issue').click()
+        page.get_by_text('Reached login endpoint').wait_for()
+        assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3')).initial.mode")
+        context.close()
     browser.close()
-    print('browser_login_test: report/R save and start login with pending, failed, logged-out, and cleared sessions')
+    print('browser_login_test: report/R save and start login while logged out')

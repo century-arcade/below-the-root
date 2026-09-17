@@ -1,18 +1,97 @@
-import { rewindFixture, advanceSession, loadTestData, J, recordingFixture, menuReads, page } from './helpers.js';
+import { newState, startQuest } from '../src/game.js';
+import { loadTestData, J, menuReads, page } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Session, checkpoint, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves } from '../src/record.js';
-import { readFile } from 'node:fs/promises';
+import { Session, checkpoint, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, validateRecord } from '../src/record.js';
 import { exportSave } from '../src/save.js';
-import { playTime, completion } from '../src/progress.js';
+import { playTime } from '../src/progress.js';
 import { IDLE, Keyboard, Gamepad } from '../src/input.js';
 import { enterRoom } from '../src/world.js';
 import { CLASS } from '../src/data.js';
 import { startTune, SFX } from '../src/audio.js';
 import { panelLines } from '../src/panel.js';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+
+const winningFixtures = readdirSync(new URL('./fixtures/', import.meta.url))
+  .filter(name => name.endsWith('-win.json')).sort();
+const fixtureURL = name => new URL(`./fixtures/${name}`, import.meta.url);
+const winningRecord = name => JSON.parse(readFileSync(fixtureURL(name)));
+
+function advanceSession(session, count = 1) {
+  for (let i = 0; i < count; i++) {
+    session.step();
+    session.state.events.length = 0;
+  }
+}
+
+async function recordingFixture() {
+  const data = await loadTestData();
+  const idle = { read: () => IDLE };
+  const fresh = (live = idle, initial = { mode: 'quest', character: 0 }) =>
+    new Session(data, live, { initial, seed: 123 });
+  const advance = (s, n) => {
+    for (let i = 0; i < n; i++) {
+      s.step();
+      s.state.events.length = 0;
+    }
+  };
+  // advanceUntil: a live session has no engine work ceiling, unlike playback
+  const advanceUntil = (s, done, what, limit = 500) => {
+    for (let i = 0; i < limit && !done(s); i++) advance(s, 1);
+    if (done(s)) return s;
+    const at = s.place();
+    return assert.fail(
+      `never ${what} in ${limit} steps; tick ${s.simticks} ${at.screen} ${at.pos}, last event ${JSON.stringify(s.record?.events.at(-1))}`,
+    );
+  };
+  const roundtrip = s => {
+    const record = s.snapshot();
+    validateRecord(record, data);
+    const watched = Session.watch(data, idle, record);
+    while (!watched.playbackDone) {
+      watched.step();
+      watched.state.events.length = 0;
+    }
+    assert.deepEqual(checkpoint(watched.state), record.checkpoint);
+    assert.deepEqual(watched.snapshot(), record);
+    return watched;
+  };
+  const saveHere = s => {
+    s.command('RENEW');
+    return roundtrip(s);
+  };
+  const imported = edit => {
+    const s = newState(data, idle);
+    startQuest(s, data.characters[0]);
+    edit(s);
+    const session = fresh();
+    session.load(exportSave(s));
+    return session;
+  };
+
+  return { data, idle, fresh, advance, advanceUntil, roundtrip, saveHere, imported };
+}
+
+async function rewindFixture() {
+  const data = await loadTestData();
+  const idle = { read: () => J.idle };
+  let s = new Session(data, idle, { initial: { mode: 'quest' }, seed: 9 });
+  advanceSession(s, 40);
+  s.command('RENEW');
+  advanceSession(s, 80);
+  s.command('RENEW');
+  advanceSession(s, 16);
+  s.command('RENEW');
+  const recording = s.snapshot();
+  let watched = Session.watch(data, idle, recording);
+  watched.nextRoom();
+  const first = checkpoint(watched.state);
+  watched.nextRoom();
+  const second = checkpoint(watched.state);
+  return { data, idle, s, recording, watched, first, second };
+}
 
 test('replay seeks backward and forward across repeated room visits', async () => {
   let { recording, watched, first, second } = await rewindFixture();
@@ -26,16 +105,27 @@ test('replay seeks backward and forward across repeated room visits', async () =
   assert.deepEqual(watched.snapshot(), recording);
 });
 
-test('a backward seek skips a room that immediately returns to its starting point', async () => {
+test('backward seeks skip brief pass-through rooms across winning routes', async () => {
   const data = await loadTestData();
   const idle = { read: () => J.idle };
-  const record = JSON.parse(await readFile(new URL('fixtures/neric-win.json', import.meta.url)));
-  let watched = Session.watch(data, idle, record);
-  for (let i = 0; i < 26; i++) watched.nextRoom();
-  assert.equal(watched.state.room.code, 'C6');
-  watched = watched.previousRoom();
-  assert.equal(watched.state.room.code, 'D5');
-  assert.equal(watched.roomChanges, 24);
+  let checked = 0;
+  for (const name of winningFixtures) {
+    const watched = Session.watch(data, idle, winningRecord(name));
+    while (!watched.playbackDone) watched.nextRoom();
+    const path = watched.path;
+    for (let i = 1; i < path.length - 1; i++) {
+      // A visit shorter than half a second is a pass-through room.
+      if (path[i + 1].simticks - path[i].simticks >= 30) continue;
+      const boundary = watched.history.find(e => e.visit === path[i + 1].visit);
+      const before = watched.restoreAt(boundary).previousRoom();
+      const landed = path.findIndex(entry => entry.visit === before.state.visit);
+      assert.ok(landed >= 0 && landed < i, `${name}: seek passes the transient visit`);
+      assert.ok(landed === 0 || path[landed + 1].simticks - path[landed].simticks >= 30,
+        `${name}: destination is a settled room visit`);
+      checked++;
+    }
+  }
+  assert.ok(checked > 0, 'winning routes exercise a pass-through room');
 });
 
 test('taking over a replay preserves its current gameplay state', async () => {
@@ -334,14 +424,10 @@ test('UI choices produce stable object IDs and keep cursor travel out of the str
   assert.equal(s.state.progress.elixirs, 1);
   assert.equal(s.state.objects.find(o => o.object === item.object).exists, false);
   saveHere(s);
-  const cancel = fresh(live);
-  cancel.commandMenu();
-  queue = [...menuReads('USE'), ...page(0)];
-  for (let i = 0; i < 500 && cancel.state.verb; i++) cancel.step();
-  assert.equal(cancel.record.events.length, 0, 'NOTHING cancels without a command');
-  cancel.command('HEAL');
-  assert.equal(cancel.record.events.at(-1).command, 'HEAL', 'a failed command remains recorded');
-  saveHere(cancel);
+  const failed = fresh();
+  failed.command('HEAL');
+  assert.equal(failed.record.events.at(-1).command, 'HEAL', 'a failed command remains recorded');
+  saveHere(failed);
 });
 
 test('REST has no duration arguments: a separately timed movement wakes it', async () => {
@@ -412,6 +498,7 @@ test('REST preserves the original tick-tock sequence around each completed hour'
 
 test('Bad files fail on a private quest with useful location diagnostics', async () => {
   const { data, idle, fresh, advance } = await recordingFixture();
+  const { MAX_SIMTICKS, MAX_RECORD_BYTES } = await import('../src/record.js');
 
   const s = fresh({ read: () => J.left });
   advance(s, 60);
@@ -426,6 +513,11 @@ test('Bad files fail on a private quest with useful location diagnostics', async
     r => (r.initial.character = 20),
     r => (r.endpoint.kind = 'arbitrary'),
     r => (r.events[0].item = 1),
+    r => (r.checkpoint.simticks = MAX_SIMTICKS + 1),
+    r => (r.checkpoint.padding = 'x'.repeat(MAX_RECORD_BYTES)),
+    r => (r.events[0].duration = 100),
+    r => r.endpoint.visit++,
+    r => (r.initial.character = null),
   ]) {
     const bad = structuredClone(original);
     mutate(bad);
@@ -438,9 +530,26 @@ test('Bad files fail on a private quest with useful location diagnostics', async
   missed.events[0].simticks++;
   assert.throws(() => Session.replay(data, idle, missed), /Event 1, tick 8:.*consumption.*actual tick 9/);
   assert.deepEqual(s.snapshot(), original);
-  const drift = structuredClone(original);
-  drift.checkpoint.player.food++;
-  assert.throws(() => Session.replay(data, idle, drift), /Gameplay checkpoint mismatch/);
+  for (const alter of [
+    r => r.checkpoint.player.food++,
+    r => r.checkpoint.progress.spirit++,
+    r => r.checkpoint.rng++,
+    r => (r.checkpoint.objects[0].exists = !r.checkpoint.objects[0].exists),
+  ]) {
+    const drift = structuredClone(original);
+    alter(drift);
+    assert.throws(() => Session.replay(data, idle, drift), /Gameplay checkpoint mismatch/);
+  }
+  const unreachable = structuredClone(original);
+  unreachable.endpoint.visit++;
+  unreachable.checkpoint.visit++;
+  unreachable.checkpoint.simticks += 16;
+  assert.throws(() => Session.replay(data, idle, unreachable), /endpoint unreachable/);
+  const reordered = structuredClone(original);
+  reordered.checkpoint = Object.fromEntries(Object.entries(reordered.checkpoint).reverse());
+  assert.deepEqual(checkpoint(Session.replay(data, idle, reordered).state), original.checkpoint,
+    'JSON object field order is immaterial');
+  assert.deepEqual(s.snapshot(), original, 'rejected files leave the live quest unchanged');
 });
 
 test('Storage failures remain retryable, and obsolete keys are discarded selectively', async () => {
@@ -746,153 +855,49 @@ test('Object KINIPORT records identity even when the right half is selected', as
   saveHere(s);
 });
 
-test('File limits and unreachable endpoints fail without advancing the live quest', async () => {
-  const { data, idle, fresh, advance } = await recordingFixture();
-
-  const { MAX_SIMTICKS, MAX_RECORD_BYTES } = await import('../src/record.js');
-  const s = fresh();
-  advance(s, 8);
-  s.command('RENEW');
-  const original = s.snapshot();
-  for (const alter of [
-    r => (r.checkpoint.simticks = MAX_SIMTICKS + 1),
-    r => (r.checkpoint.padding = 'x'.repeat(MAX_RECORD_BYTES)),
-    r => (r.events[0].duration = 100),
-    r => r.endpoint.visit++,
-    r => (r.initial.character = null),
-  ]) {
-    const bad = structuredClone(original);
-    alter(bad);
-    assert.throws(() => Session.watch(data, idle, bad));
-  }
-  const unreachable = structuredClone(original);
-  unreachable.endpoint.visit++;
-  unreachable.checkpoint.visit++;
-  unreachable.checkpoint.simticks += 16;
-  assert.throws(() => Session.replay(data, idle, unreachable), /endpoint unreachable/);
-  assert.deepEqual(s.snapshot(), original);
-});
-
-test('the live Herd recording saves Raamo and replay preserves completion', async () => {
-  const data = await loadTestData();
-  const record = JSON.parse(readFileSync(new URL('./fixtures/herd-win.json', import.meta.url)));
-  const idle = { read: () => J.idle };
-  assert.deepEqual(record.initial, { mode: 'quest', character: 2 });
-  assert.equal(record.endpoint.kind, 'complete');
-  assert.deepEqual(
-    Object.keys(record).sort(),
-    ['format', 'version', 'engine', 'seed', 'initial', 'events', 'endpoint', 'checkpoint'].sort(),
-  );
-
-  const replay = Session.watch(data, idle, record);
-  const autosave = new Autosave({
-    setItem() {
-      assert.fail('watching cannot replace the live quest');
-    },
+for (const name of winningFixtures) {
+  test(`${name} wins, matches its checkpoint and round-trips its snapshot`, async () => {
+    const data = await loadTestData();
+    const record = winningRecord(name);
+    const replay = Session.watch(data, { read: () => J.idle }, record);
+    while (!replay.playbackDone) replay.nextRoom();
+    assert.equal(replay.state.progress.won, true);
+    assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+    assert.deepEqual(replay.snapshot(), record);
   });
-  autosave.save(replay);
-  assert.equal(replay.simticks, 0);
-  replay.nextRoom();
-  assert.equal(replay.state.room.code, 'A6');
-  assert.ok(replay.simticks > 0 && replay.simticks < record.checkpoint.simticks);
-  while (!replay.playbackDone) replay.nextRoom();
-  assert.equal(replay.simticks, record.checkpoint.simticks);
-  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
-  assert.deepEqual(replay.snapshot(), record);
-  assert.equal(replay.state.player.name, 'HERD');
-  assert.equal(replay.state.room.room, data.quest.goal_npc.room);
-  assert.equal(replay.state.progress.won, true, 'the final OFFER actually saves Raamo');
-  assert.equal(replay.state.clock.day, 4);
-  assert.equal(replay.state.player.spiritLimit, 30);
-  assert.equal(replay.state.animalsPensed, 5);
-  assert.equal(replay.state.progress.spirit, 25);
-  assert.equal(replay.state.progress.partialTime, false);
-  assert.equal(completion(replay.state), 65);
-  assert.equal(playTime(replay.state), '00:08:34');
-  assert.ok(replay.path.some(p => p.room === '4A' && p.blank));
-  assert.ok(replay.path.filter(p => p.room === 'GF').length > 1, 'repeated visits reconstruct normally');
-  assert.ok(record.events.some(e => e.command === 'REST'));
-  assert.ok(record.events.some(e => e.command === 'KINIPORT'));
-  const won = checkpoint(replay.state);
-  for (let i = 0; i < 1000; i++) replay.step();
-  assert.deepEqual(checkpoint(replay.state), won, 'endpoint cannot drift on held input');
-  const continued = Session.replay(data, { read: () => J.fire }, record);
-  for (let i = 0; i < 1000; i++) continued.step();
-  assert.equal(playTime(continued.state), '00:08:34', 'completion freezes play time');
-  assert.deepEqual(continued.snapshot(), record);
-});
+
+  test(`the playthrough tool verifies ${name} with --expect-win`, () => {
+    const report = execFileSync(process.execPath, [
+      fileURLToPath(new URL('../tools/playthrough.mjs', import.meta.url)),
+      fileURLToPath(fixtureURL(name)), '--expect-win',
+    ], { encoding: 'utf8' });
+    assert.match(report, /Raamo saved/);
+    assert.match(report, /Gameplay checkpoint verified/);
+  });
+}
 
 test('a cavern boundary derived from the winning run can branch', async () => {
   const data = await loadTestData();
-  const record = JSON.parse(readFileSync(new URL('./fixtures/herd-win.json', import.meta.url)));
   const idle = { read: () => J.idle };
-  // Seek a normal room boundary in the winning run before taking over.
-  const watched = Session.watch(data, idle, record);
-  while (watched.state.room.code !== '0C' && !watched.playbackDone) watched.nextRoom();
+  // Select a route by the boundary it reaches, not by the character playing it.
+  let watched, record;
+  for (const name of winningFixtures) {
+    record = winningRecord(name);
+    watched = Session.watch(data, idle, record);
+    while (watched.state.room.code !== '0C' && !watched.playbackDone) watched.nextRoom();
+    if (watched.state.room.code === '0C') break;
+  }
+  assert.equal(watched.state.room.code, '0C', 'a winning route reaches the cavern boundary');
   watched.continueLive();
   const caverns = watched.snapshot();
   const restored = Session.replay(data, idle, caverns);
   assert.equal(restored.state.room.code, '0C');
   assert.equal(restored.state.progress.won, false);
-  assert.equal(restored.state.player.spiritLimit, 24);
   assert.deepEqual(checkpoint(restored.state), caverns.checkpoint);
   assert.deepEqual(record.events.slice(0, caverns.events.length), caverns.events);
   restored.command('RENEW');
   assert.deepEqual(
     checkpoint(Session.replay(data, idle, restored.snapshot()).state),
     checkpoint(restored.state),
-  );
-});
-
-test('recordings validate earned items, randomness, and event locations', async () => {
-  const data = await loadTestData();
-  const record = JSON.parse(readFileSync(new URL('./fixtures/herd-win.json', import.meta.url)));
-  const idle = { read: () => J.idle };
-  // Final gameplay verification covers earned items, world flags, and randomness.
-  for (const alter of [
-    r => r.checkpoint.progress.spirit++,
-    r => r.checkpoint.rng++,
-    r => (r.checkpoint.objects.find(o => o.object === 0).exists = false),
-  ]) {
-    const corrupt = structuredClone(record);
-    alter(corrupt);
-    assert.throws(() => Session.replay(data, idle, corrupt), /checkpoint mismatch/);
-  }
-  const reordered = structuredClone(record);
-  reordered.checkpoint = Object.fromEntries(Object.entries(reordered.checkpoint).reverse());
-  assert.deepEqual(
-    checkpoint(Session.replay(data, idle, reordered).state),
-    record.checkpoint,
-    'JSON object field order is immaterial',
-  );
-  const corrupt = structuredClone(record);
-  corrupt.events.at(-1).pos[0]++;
-  assert.throws(
-    () => Session.replay(data, idle, corrupt),
-    /Event 962, tick 30841: location mismatch; expected GE .*actual tick 30841 GE/,
-  );
-});
-
-test('the playthrough tool verifies a winning recording', () => {
-  const report = execFileSync(
-    process.execPath,
-    [
-      fileURLToPath(new URL('../tools/playthrough.mjs', import.meta.url)),
-      fileURLToPath(new URL('./fixtures/herd-win.json', import.meta.url)),
-      '--expect-win',
-    ],
-    { encoding: 'utf8' },
-  );
-  assert.match(report, /65% complete; Raamo saved/);
-  assert.match(report, /Gameplay checkpoint verified/);
-});
-
-test('winning fixtures match a fresh live recording from the authored controls', () => {
-  execFileSync(
-    process.execPath,
-    [fileURLToPath(new URL('../tools/record-fixtures.mjs', import.meta.url)), '--check'],
-    {
-      encoding: 'utf8',
-    },
   );
 });

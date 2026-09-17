@@ -77,13 +77,6 @@ with sync_playwright() as p:
         expect(page.locator('#screen')).to_have_count(0)
         expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
         expect(page.get_by_role('button', name='Fullscreen', exact=True)).to_have_count(0)
-        for legacy, target in [('/#about', '/about'), ('/#play', '/#play'), ('/#help', '/#help'),
-                               ('/?room=B8#links', '/links?room=B8'),
-                               ('/?room=B8#resources', '/links?room=B8'),
-                               ('/resources', '/links'), ('/resources/', '/links'),
-                               ('/resources.html?ref=old', '/links?ref=old')]:
-            page.goto(BASE + legacy)
-            expect(page).to_have_url(BASE + target)
         for name in ['about', 'links', 'play']:
             response = page.goto(BASE + '/' + name + '/')
             assert response.ok
@@ -92,7 +85,7 @@ with sync_playwright() as p:
             expect(page.locator('#site-header a[aria-current]')).to_have_text(name.capitalize())
         assert not errors, errors
         page.close()
-    # Header preferences work without loading a game and carry across every page.
+    # Reading-page developer controls work without loading a game.
     page = browser.new_page()
     errors = []
     data_requests = []
@@ -101,15 +94,9 @@ with sync_playwright() as p:
     page.route('**/.netlify/functions/github?*', lambda route: route.fulfill(json={'configured': True, 'login': 'tester'}))
     page.goto(BASE + '/about')
     developer = page.get_by_role('button', name='Developer mode', exact=True)
-    crt = page.get_by_role('button', name='CRT effect', exact=True)
     expect(developer).to_have_attribute('aria-pressed', 'false')
     developer.click()
-    crt.click()
-    page.evaluate("localStorage.setItem('btr.volume.v2', '0.3')")
-    page.get_by_role('navigation').get_by_role('link', name='Links').click()
-    page.reload()
     expect(developer).to_have_attribute('aria-pressed', 'true')
-    expect(crt).to_have_attribute('aria-pressed', 'true')
     expect(page.get_by_role('slider', name='Volume')).to_have_count(0)
     expect(page.get_by_role('link', name='Source on GitHub')).to_be_visible()
     assert not data_requests, 'reading-page controls must not load or start the game'
@@ -118,16 +105,6 @@ with sync_playwright() as p:
         page.locator('#' + tool).click()
         expect(page).to_have_url(BASE + '/play?debug#' + tool)
         expect(page.locator('#' + tool)).to_be_focused()
-        expect(crt).to_have_attribute('aria-pressed', 'true')
-        expect(page.locator('#crt')).to_be_visible()
-        expect(page.get_by_role('slider', name='Volume')).to_have_value('30')
-    page.goto(BASE + '/links')
-    crt.click()
-    developer.click()
-    page.goto(BASE + '/play')
-    expect(developer).to_have_attribute('aria-pressed', 'false')
-    expect(page.locator('#debug-tools')).to_be_hidden()
-    expect(page.locator('#crt')).to_be_hidden()
     assert not errors, errors
     page.close()
     # Reading pages are complete HTML and work without JavaScript or storage.

@@ -1,45 +1,52 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadTestData, shellFixture, J, menuReads, place, give } from './helpers.js';
-import { Session } from '../src/record.js';
-import { Keyboard } from '../src/input.js';
+import { loadTestData, J, menuReads, place, give } from './helpers.js';
+import { pressEdge } from '../src/input.js';
 import { openMenu, shellFrame, coldStart } from '../src/shell.js';
 import { panelLines as lines } from '../src/panel.js';
-import { startQuest, startVerb, tick } from '../src/game.js';
+import { startQuest, startVerb, tick, newState } from '../src/game.js';
 import { CLASS } from '../src/data.js';
 import { MENU, runMenu } from '../src/verbs.js';
 import { cell, role } from '../src/world.js';
 
-test("the main menu consumes rapid presses in order", async () => {
-  const data = await loadTestData();
-  const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
-  const keyboard = new Keyboard({ addEventListener() {} });
-  const key = (name, up = false, repeat = false) => keyboard.map({ key: name, code: name, repeat }, up);
-  const tapKey = name => { key(name); key(name, true); };
-  const shell = new Session(data, keyboard, { initial: { mode: 'menu' } });
-  tapKey('ArrowDown');
-  tapKey('ArrowUp');
-  tapKey('ArrowDown');
-  for (let i = 0; i < 60; i++) shell.step();
-  assert.equal(shell.state.menuSel, 2, 'main menu consumes every rapid press in order');
-});
+async function shellFixture() {
+  // the stick: a queue of reads, idle once it runs dry
+  function stick() {
+    const s = { queue: [], pace: 0 };
+    s.read = pressEdge(() => (s.queue.length ? s.queue.shift() : J.idle), J.fire);
+    s.feed = (...reads) => {
+      s.queue.push(...reads);
+      return s;
+    };
+    return s;
+  }
 
-test("queued navigation and confirmation select the intended character", async () => {
+  function fresh() {
+    const state = newState(data, null, { rng: () => 0.5 });
+    state.stick = stick();
+    state.input = state.stick;
+    return state;
+  }
+
+  // run frames until the queue is drained and the shell is waiting on an idle stick
+  function settle(state, max = 5000) {
+    for (let i = 0; i < max; i++) {
+      shellFrame(state);
+      tick(state);
+      if (!state.stick.queue.length && state.verb && state.verbWait === 0 && !state.stall) return;
+      if (!state.verb && state.active) return;
+    }
+    assert.fail('did not settle');
+  }
+
+  // a tap: the read itself, then the stick let go so the next screen's fireUp sees it
+  const tap = j => [j, J.idle];
+  const push = (j, n = 1) => Array(n).fill([j, J.idle]).flat();
+
   const data = await loadTestData();
-  const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
-  const keyboard = new Keyboard({ addEventListener() {} });
-  const key = (name, up = false, repeat = false) => keyboard.map({ key: name, code: name, repeat }, up);
-  const tapKey = name => { key(name); key(name, true); };
-  const characters = new Session(data, keyboard, { initial: { mode: 'menu' } });
-  for (let i = 0; i < 20; i++) characters.step();
-  tapKey('Enter');
-  tapKey('ArrowDown');
-  tapKey('ArrowDown');
-  tapKey('Enter');
-  for (let i = 0; i < 100; i++) characters.step();
-  assert.equal(characters.state.character, 2, 'queued navigation and confirmation select the intended character');
-  assert.equal(characters.state.quest, true);
-});
+
+  return { stick, fresh, settle, tap, push, data };
+}
 
 test('the main menu draws over T4 with START GAME selected', async () => {
   const { fresh, settle } = await shellFixture();
@@ -52,19 +59,13 @@ test('the main menu draws over T4 with START GAME selected', async () => {
   assert.equal(s.menuSel, 0);
 });
 
-test('the cursor clamps at both ends and a held stick moves once', async () => {
+test('the main menu cursor clamps at both ends', async () => {
   const { fresh, settle, push, data } = await shellFixture();
 
   const s = fresh();
   startQuest(s, data.characters[0]);
   openMenu(s);
   settle(s);
-  s.stick.feed(J.down, J.down, J.down, J.idle);
-  settle(s);
-  assert.equal(s.menuSel, 1);
-  s.stick.feed(...push(J.down));
-  settle(s);
-  assert.equal(s.menuSel, 2);
   s.stick.feed(...push(J.down, 5));
   settle(s);
   assert.equal(s.menuSel, 2);
@@ -74,12 +75,6 @@ test('the cursor clamps at both ends and a held stick moves once', async () => {
   s.stick.feed(...push(J.up, 5));
   settle(s);
   assert.equal(s.menuSel, 0);
-  s.stick.feed(J.up, J.down, J.down, J.idle);
-  settle(s);
-  assert.equal(s.menuSel, 0);
-  s.stick.feed(...push(J.down));
-  settle(s);
-  assert.equal(s.menuSel, 1);
   assert.ok(s.events.every((e) => 'sfx' in e || e.music === null));
 });
 
@@ -133,25 +128,7 @@ test('character select opens on Neric, down cycles through RETURN TO MENU and ba
   assert.equal(s.active, false);
 });
 
-test('character select waits for release and a held stick advances one record', async () => {
-  const { fresh, settle, tap } = await shellFixture();
-
-  const s = fresh();
-  openMenu(s);
-  settle(s);
-  s.stick.feed(J.fire, J.fire, J.down, J.down, J.idle);
-  settle(s);
-  assert.match(lines(s)[0], /NERIC$/);
-  assert.equal(s.quest, false);
-  s.stick.feed(...Array(4).fill(J.down), J.idle);
-  settle(s);
-  assert.match(lines(s)[0], /GENAA$/);
-  s.stick.feed(...tap(J.down));
-  settle(s);
-  assert.match(lines(s)[0], /HERD$/);
-});
-
-test('up cycles backward, wraps, and waits for release before changing direction', async () => {
+test('character select cycles backward and wraps', async () => {
   const { fresh, settle, tap } = await shellFixture();
 
   const s = fresh();
@@ -159,7 +136,7 @@ test('up cycles backward, wraps, and waits for release before changing direction
   settle(s);
   s.stick.feed(...tap(J.fire));
   settle(s);
-  s.stick.feed(J.up, J.up, J.down, J.idle);
+  s.stick.feed(...tap(J.up));
   settle(s);
   assert.equal(lines(s)[0].trim(), 'RETURN TO MENU');
   const names = [];

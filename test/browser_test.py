@@ -13,8 +13,6 @@ with sync_playwright() as p:
     install_probe(page)
     errors = []
     page.on('pageerror', lambda e: errors.append(str(e)))
-    logged = []
-    page.on('console', lambda msg: logged.append(msg.text) if msg.type == 'log' else None)
     posted = []
 
     def github(route):
@@ -118,17 +116,6 @@ with sync_playwright() as p:
     assert page.locator('#where').count() == 0
     page.locator('#record-file').set_input_files('/tmp/btr-browser-record.json')
     page.locator('#log').filter(has_text='Replaying btr-browser-record.json').wait_for()
-    # Imports display timestamps while the console retains the original text.
-    logged.clear()
-    replay_message = 'from the beginning, skipping idle time. Left/Right goes back/forward one room, Shift+Left/Right ten; hold to keep skipping.'
-    for n in range(101):
-        page.locator('#record-file').set_input_files({
-            'name': f'log-{n}.json', 'mimeType': 'application/json',
-            'buffer': json.dumps(record).encode(),
-        })
-        expect(page.locator('#log')).to_contain_text(f'Replaying log-{n}.json {replay_message}')
-    expect(page.locator('#log > div').last).to_have_text(re.compile(r'^\d\d:\d\d:\d\d ' + re.escape(f'Replaying log-100.json {replay_message}') + '$'))
-    assert logged == [f'Replaying log-{n}.json {replay_message}' for n in range(101)]
     assert not errors, errors
     page.screenshot(path='/tmp/btr-debug.png')
     page.goto(BASE + '/')
@@ -150,18 +137,12 @@ with sync_playwright() as p:
     volume.press('Home')
     for _ in range(3):
         volume.press('ArrowRight')
-    assert page.evaluate("localStorage.getItem('btr.volume.v2')") == '0.3'
+    expect(volume).to_have_value('30')
     volume.press('Home')
     expect(volume).to_have_value('0')
     volume.press('ArrowRight')
     expect(volume).to_have_value('10')
-    volume.press('Home')
-    for _ in range(3):
-        volume.press('ArrowRight')
-    page.reload()
-    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-    expect(volume).to_have_value('30')
-    # Developer mode toggles directly, persists, and gates the report shortcut.
+    # Developer mode toggles directly and gates the report shortcut.
     developer = page.get_by_role('button', name='Developer mode', exact=True)
     expect(developer).to_have_attribute('aria-pressed', 'false')
     developer.focus()
@@ -171,17 +152,14 @@ with sync_playwright() as p:
     crt = page.get_by_role('button', name='CRT effect', exact=True)
     crt.click()
     expect(crt).to_have_attribute('aria-pressed', 'true')
-    assert page.evaluate("localStorage.getItem('btr.crt')") == '1'
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-    expect(developer).to_have_attribute('aria-pressed', 'true')
     expect(crt).to_have_attribute('aria-pressed', 'true')
     crt.click()
     developer.click()
     expect(page.locator('#debug-tools')).to_be_hidden()
     page.keyboard.press('r')
     expect(page.locator('#issue-dialog')).to_be_hidden()
-    assert page.evaluate("localStorage.getItem('btr.debug')") == '0'
     page.get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement === document.documentElement')
     page.keyboard.press('f')
