@@ -883,3 +883,143 @@ test('a cavern boundary derived from the winning run can branch', async () => {
     checkpoint(restored.state),
   );
 });
+
+async function spiritLeaderRecording() {
+  const { imported, advance } = await recordingFixture();
+  const s = imported(state => {
+    enterRoom(state, data.roomById.get(19), 0, 0);
+    const c = state.creature;
+    Object.assign(state.player, { col: c.col + c.facing * 2, row: c.row,
+      facing: -c.facing, spiritLimit: 10, spiritEnergy: 10 });
+  });
+  const c = s.state.creature;
+  Object.assign(s.state.player, { col: c.col + c.facing * 2, row: c.row, facing: -c.facing });
+  s.load(exportSave(s.state));
+  s.command('SPEAK');
+  assert.equal(s.state.player.spiritLimit, 15);
+  advance(s, 1200);
+  s.command('RENEW');
+  return s.snapshot();
+}
+
+test('Spirit Leader replay presents two songs and held skip dismisses only one', async () => {
+  const record = await spiritLeaderRecording();
+  let fire = false;
+  let handoffs = 0;
+  const replay = Session.watch(data, { read: () => ({ ...IDLE, fire }), handoff: () => handoffs++ }, record);
+  replay.skippable = true;
+  replay.state.events.length = 0;
+  replay.step();
+  assert.match(panelLines(replay.state).join(' '), /CONGRATULATIONS/);
+  assert.equal(replay.state.events.filter(e => 'music' in e).length, 1);
+  assert.equal(replay.state.stall, data.music.tunes[replay.state.tuneWait].frames);
+  const afterCommand = checkpoint(replay.state);
+  replay.state.events.length = 0;
+  fire = true;
+  replay.step();
+  assert.equal(replay.state.tuneWait, null);
+  replay.step();
+  assert.match(panelLines(replay.state).join(' '), /A VISION COMES TO YOU/);
+  const song = replay.state.tuneWait;
+  const frames = replay.state.stall;
+  advanceSession(replay, 10);
+  assert.equal(replay.state.tuneWait, song);
+  assert.equal(replay.state.stall, frames - 10);
+  assert.deepEqual(checkpoint(replay.state), afterCommand);
+  fire = false;
+  replay.step();
+  fire = true;
+  replay.step();
+  assert.equal(replay.state.tuneWait, null);
+  assert.equal(handoffs, 0, 'viewer handoff must not erase separately queued presses');
+  while (!replay.playbackDone) advanceSession(replay);
+  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+  assert.deepEqual(replay.record.events, record.events);
+  assert.deepEqual(replay.snapshot(), record);
+});
+
+test('separately queued viewer presses can skip each Spirit Leader song', async () => {
+  const record = await spiritLeaderRecording();
+  const keys = new Keyboard({ addEventListener() {} });
+  const replay = Session.watch(data, keys, record);
+  replay.skippable = true;
+  replay.step();
+  keys.tap('fire');
+  keys.tap('fire');
+  replay.step();
+  assert.equal(replay.state.tuneWait, null);
+  replay.step();
+  assert.notEqual(replay.state.tuneWait, null);
+  replay.step();
+  assert.equal(replay.state.tuneWait, null);
+  assert.equal(replay.simticks, 0);
+});
+
+test('Spirit Leader seeking and live continuation discard presentation without repeating effects', async () => {
+  const record = await spiritLeaderRecording();
+  const idle = { read: () => IDLE };
+  const replay = Session.watch(data, idle, record);
+  replay.step();
+  const at = checkpoint(replay.state);
+  replay.continueLive();
+  assert.deepEqual(checkpoint(replay.state), at);
+  assert.equal(replay.state.stall, 0);
+  assert.equal(replay.state.tuneWait, null);
+  replay.step();
+  assert.equal(replay.simticks, 1);
+  const seeking = Session.watch(data, { read: () => { throw Error('seeking read viewer input'); } }, record);
+  seeking.step();
+  seeking.nextRoom();
+  assert.deepEqual(checkpoint(seeking.state), record.checkpoint);
+  assert.deepEqual(checkpoint(Session.replay(data, idle, record).state), record.checkpoint);
+});
+
+test('backward reconstruction preserves total rooms including the starting room', async () => {
+  const { watched, recording, idle } = await rewindFixture();
+  const back = watched.previousRoom(10);
+  assert.equal(back.roomChanges + 1, 1);
+  assert.equal(back.totalRoomChanges, recording.checkpoint.visit - back.startVisit);
+  while (!back.playbackDone) back.nextRoom();
+  assert.equal(back.roomChanges + 1, back.totalRoomChanges + 1);
+  const live = new Session(data, idle, { initial: { mode: 'quest' } });
+  const start = Session.watch(data, idle, live.snapshot());
+  assert.equal(start.roomChanges + 1, 1);
+  assert.equal(start.totalRoomChanges + 1, 1);
+});
+
+test('visible replay actions use normal speed and the trial toggle restores acceleration', async () => {
+  const { recording, idle } = await rewindFixture();
+  const replay = Session.watch(data, idle, recording);
+  replay.state.creature = null;
+  assert.equal(replay.playbackDelay, 0, 'supported idle time is accelerated');
+  for (const [key, value] of [['verb', {}], ['stall', 20], ['resting', {}], ['creature', {}]]) {
+    replay.state[key] = value;
+    assert.equal(replay.playbackDelay, 1000 / 60, key);
+    replay.normalSpeedActions = false;
+    assert.equal(replay.playbackDelay, 0, `${key} with legacy pacing`);
+    replay.normalSpeedActions = true;
+    replay.state[key] = key === 'stall' ? 0 : null;
+  }
+});
+
+test('unskipped Spirit Leader songs each finish before the next passage advances', async () => {
+  const record = await spiritLeaderRecording();
+  const replay = Session.watch(data, { read: () => IDLE }, record);
+  replay.step();
+  for (const text of [/CONGRATULATIONS/, /A VISION COMES TO YOU/]) {
+    const panel = panelLines(replay.state);
+    assert.match(panel.join(' '), text);
+    const frames = replay.state.stall;
+    assert.ok(frames > 0);
+    advanceSession(replay, frames - 1);
+    assert.notEqual(replay.state.tuneWait, null);
+    assert.deepEqual(panelLines(replay.state), panel);
+    assert.equal(replay.simticks, 0);
+    replay.step();
+    assert.equal(replay.state.tuneWait, null);
+    assert.deepEqual(panelLines(replay.state), panel);
+    replay.step();
+  }
+  while (!replay.playbackDone) advanceSession(replay);
+  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+});

@@ -3,11 +3,9 @@ import { PANEL_COLS, PANEL_ROWS } from './panel.js';
 import { completion, playTime } from './progress.js';
 import { inventoryEntries } from './inventory.js';
 
-// Extra STATUS and replay details appear above the permanent quest status.
-export function statusRows(state, { classic = false, playback = null } = {}) {
+export function statusRows(state, { classic = false } = {}) {
   const rows = [];
   if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
-  if (playback) rows.push(`${playback.roomChanges}/${playback.totalRoomChanges ?? '?'}`);
   if (!classic && state.quest && !state.title && !state.demo && state.room
       && !state.commandMenuOpen && !state.verb && !state.panel?.some(Boolean)) {
     const inventory = inventoryEntries(state).map(entry => entry.label);

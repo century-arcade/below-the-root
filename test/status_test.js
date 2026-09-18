@@ -45,7 +45,7 @@ test('menus and messages hide inventory until they close', () => {
   assert.ok(showsInventory());
 });
 
-test('STATUS shows live completion and elapsed time and classic replay keeps its visit count', async () => {
+test('STATUS shows live completion and elapsed time without replay room counts', async () => {
   const s = newState(data, { read: () => IDLE });
   startQuest(s, data.characters[3]);
   s.progress.spirit = 35;
@@ -62,7 +62,7 @@ test('STATUS shows live completion and elapsed time and classic replay keeps its
   assert.ok(statusRows(s, { classic: true }).includes('01:02:04 PLAY / 65% COMPLETE'));
   clearPanel(s);
   assert.deepEqual(statusRows(s, { classic: true }), [], 'leaving STATUS clears its details');
-  assert.ok(statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130'));
+  assert.ok(!statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130'));
   assert.deepEqual(statusRows(s, { classic: true, playback: { roomChanges: 0, totalRoomChanges: 0 } }),
-    ['0/0'], 'playback progress remains available in classic mode');
+    [], 'replay progress belongs outside the canvas');
 });

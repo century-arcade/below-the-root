@@ -28,7 +28,23 @@
       <div id="map-viewport"><div id="map-grid"></div></div>
       <p id="map-hint">WASD / arrows to pan · Scroll to zoom · Drag to explore</p>
     </div>
-    <button id="play-from-replay" type="button" hidden>Play from here</button>
+    <div id="replay-controls" hidden>
+      <div id="replay-navigation" role="group" aria-label="Replay room navigation">
+        <button type="button" data-replay-rooms="-10" aria-label="Back ten rooms">&lt;&lt;-</button>
+        <button type="button" data-replay-rooms="-1" aria-label="Back one room">&lt;-</button>
+        <button id="play-from-replay" type="button">Play from here</button>
+        <button type="button" data-replay-rooms="1" aria-label="Forward one room">-&gt;</button>
+        <button type="button" data-replay-rooms="10" aria-label="Forward ten rooms">-&gt;&gt;</button>
+      </div>
+      <output id="replay-progress" aria-label="Replay room progress"></output>
+      <fieldset id="replay-tuning">
+        <legend>Replay pacing trial</legend>
+        <label for="replay-message-delay">Message delay</label>
+        <input id="replay-message-delay" type="range" min="0" max="1000" step="50" value="500">
+        <output id="replay-message-ms" for="replay-message-delay">500 ms</output>
+        <label><input id="replay-normal-speed" type="checkbox" checked> Normal-speed visible actions</label>
+      </fieldset>
+    </div>
     <aside id="help-screen" hidden aria-label="Input help" tabindex="-1">
       <h2 id="help-heading">Input help</h2>
       <div id="help-content">{{help}}</div>

@@ -68,6 +68,8 @@ export class Session {
     this.lastJoy = IDLE;
     this.previousFire = false;
     this.viewerFire = false;
+    this.passages = [];
+    this.normalSpeedActions = true;
     this.uiFire = true;
     this.history = [];
     this.path = [];
@@ -168,7 +170,7 @@ export class Session {
     this.live.handoff?.(options);
   }
 
-  command(name, choices = {}, { presented = false } = {}) {
+  command(name, choices = {}, { presented = false, replayPresentation = true } = {}) {
     if (!this.record || !this.state.quest || this.state.demo || this.state.progress.won || this.state.timeUp || this.state.resting) throw new Error('No active quest for command');
     const event = { ...this.anchor(), command: name, ...choices };
     validateEvent(event, this.state.data);
@@ -181,7 +183,24 @@ export class Session {
     }
     this.record.events.push(copy(event));
     const presentation = { stall: this.state.stall, tuneWait: this.state.tuneWait, events: this.state.events.length };
-    executeCommand(this.state, name, choices);
+    const s = this.state;
+    const capture = this.playback && replayPresentation;
+    let panel = Array.from(s.panel).join(',');
+    const eventStart = s.events.length;
+    executeCommand(s, name, choices, capture ? () => {
+      const events = s.events.splice(eventStart);
+      const key = Array.from(s.panel).join(',');
+      if (key !== panel || events.length || s.stall) {
+        this.passages.push({ panel: s.panel.slice(), events, stall: s.stall, tuneWait: s.tuneWait });
+      }
+      panel = key;
+      s.stall = 0;
+      s.tuneWait = null;
+    } : null);
+    if (capture && this.passages.length) {
+      this.finalPanel = s.panel.slice();
+      this.presentPassage();
+    }
     if (this.playback) this.commandMessage = !this.state.resting && !this.state.progress.won;
     if (presented) {
       this.state.stall = presentation.stall;
@@ -192,10 +211,43 @@ export class Session {
     this.checkEndpoint();
   }
 
-  step() {
+  presentPassage() {
+    const passage = this.passages.shift();
+    this.state.panel.set(passage.panel);
+    this.state.events.push(...passage.events);
+    this.state.stall = passage.stall;
+    this.state.tuneWait = passage.tuneWait;
+  }
+
+  discardPresentation() {
+    this.passages.length = 0;
+    if (this.finalPanel) {
+      this.state.panel.set(this.finalPanel);
+      this.state.stall = 0;
+      this.state.tuneWait = null;
+      this.finalPanel = null;
+    }
+  }
+
+  step({ presentation = true } = {}) {
     if (this.playbackDone) return false;
     if (this.playback && (++this.work > MAX_WORK || this.simticks > MAX_SIMTICKS)) throw new Error('Recording simulation work limit exceeded; endpoint unreachable');
     const s = this.state;
+    if (!presentation) this.discardPresentation();
+    if (this.playback && this.finalPanel) {
+      if (s.stall) {
+        this.readViewerSkip();
+        if (s.stall) tick(s);
+        this.frame++;
+        return true;
+      }
+      if (this.passages.length) {
+        this.presentPassage();
+        this.frame++;
+        return true;
+      }
+      this.finalPanel = null;
+    }
     if (this.playback) {
       const event = this.sourceRecord.events[this.eventIndex];
       if (event && event.simticks < this.simticks) this.mismatch(event, 'missed scheduled tick');
@@ -203,23 +255,17 @@ export class Session {
       if (!s.verb && event?.command && event.simticks === this.simticks) {
         this.verifyEvent(event);
         const { simticks, screen, pos, command, ...choices } = event;
-        this.command(command, choices);
+        this.command(command, choices, { replayPresentation: presentation });
         this.frame++;
         return !this.playbackDone;
       }
     }
     if (s.tuneWait != null && !s.demo) {
       if (this.playback) {
-        const joy = this.live.read('trigger');
-        const fire = !!joy.fire;
-        const press = joy.observed ? fire : fire && !this.viewerFire;
-        this.viewerFire = fire;
-        if (press && this.skippable) this.skipTune();
+        if (presentation) this.readViewerSkip();
       } else if (this.read('t', 'trigger').press && this.skippable) this.skipTune();
     }
     const tune = s.tuneWait;
-    // Recorded commands bypass the menu's acknowledgement and panel cleanup.
-    // Keep their text through music, then dismiss it when gameplay resumes.
     if (this.commandMessage && !s.stall && !s.verb && s.active) {
       clearPanel(s);
       this.commandMessage = false;
@@ -244,6 +290,15 @@ export class Session {
       if (this.completed) throw new Error('Recording endpoint is unreachable after quest completion');
     }
     return true;
+  }
+
+  readViewerSkip() {
+    if (this.state.tuneWait == null) return;
+    const joy = this.live.read('trigger');
+    const fire = !!joy.fire;
+    const press = joy.observed ? fire : fire && !this.viewerFire;
+    this.viewerFire = fire;
+    if (press && this.skippable) this.skipTune();
   }
 
   noteBoundary() {
@@ -289,6 +344,7 @@ export class Session {
       throw new Error(`Gameplay checkpoint mismatch at tick ${this.simticks}, ${this.place().screen} ${this.place().pos}`);
     }
     this.playbackDone = true;
+    this.discardPresentation();
     this.totalRoomChanges = this.roomChanges;
   }
 
@@ -299,6 +355,9 @@ export class Session {
   }
 
   continueLive() {
+    this.discardPresentation();
+    if (this.commandMessage) clearPanel(this.state);
+    this.commandMessage = false;
     this.playback = false;
     this.playbackDone = false;
     this.sourceRecord = null;
@@ -333,18 +392,18 @@ export class Session {
 
   get playbackDelay() {
     if (this.playback && this.state.tuneWait != null) return 1000 / 60;
-    // Released controls do not stop airborne movement. Check support as well
-    // as the fall counter so the first falling step keeps its normal delay.
     const p = this.state.player;
     const airborne = p.gliding || p.leaping || p.fallen > 0
       || !isSupport(this.state, cell(this.state, p.col, p.row + 1));
     const idle = isIdle(this.lastJoy) && !airborne;
+    if (this.playback && this.normalSpeedActions && (this.state.verb || this.state.stall
+        || this.state.resting || this.state.creature)) return 1000 / 60;
     return this.playback && (idle || this.state.verb || this.state.stall) ? 0 : 1000 / 60;
   }
   nextRoom() {
     if (!this.playback) return;
     const visit = this.state.visit;
-    while (!this.playbackDone && this.state.visit === visit) { this.step(); this.state.events.length = 0; }
+    while (!this.playbackDone && this.state.visit === visit) { this.step({ presentation: false }); this.state.events.length = 0; }
   }
   previousRoom(count = 1) {
     if (!this.playback) return this;
@@ -387,9 +446,11 @@ export class Session {
     const restored = new Session(this.state.data, this.live, { initial: source.initial, seed: source.seed });
     restored.playback = true;
     restored.sourceRecord = copy(source);
+    restored.totalRoomChanges = source.checkpoint.visit - restored.startVisit;
+    restored.normalSpeedActions = this.normalSpeedActions;
     restored.checkEndpoint = () => {};
     while (restored.simticks < target.simticks || restored.eventIndex < target.eventIndex) {
-      restored.step();
+      restored.step({ presentation: false });
       restored.state.events.length = 0;
     }
     delete restored.checkEndpoint;
@@ -402,7 +463,7 @@ export class Session {
   }
   static replay(data, live, record) {
     const session = Session.watch(data, live, record);
-    while (!session.playbackDone) { session.step(); session.state.events.length = 0; }
+    while (!session.playbackDone) { session.step({ presentation: false }); session.state.events.length = 0; }
     session.continueLive();
     return session;
   }

@@ -13,6 +13,7 @@ import { fitScale, crtVars } from './fit.js';
 import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
+import { ReplayPresentation } from './replay-presentation.js';
 import { createLog } from './log.js';
 import { setupDeveloper, GAME_TOOLS } from './header.js';
 
@@ -43,6 +44,8 @@ function fit() {
       .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
+  const replayControls = document.getElementById('replay-controls');
+  if (!replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
   const shell = getComputedStyle(monitor);
   const shellWidth = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
   const shellHeight = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--chin'));
@@ -209,6 +212,22 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');
   const playFromReplay = document.getElementById('play-from-replay');
+  const replayControls = document.getElementById('replay-controls');
+  const replayProgress = document.getElementById('replay-progress');
+  const presentation = new ReplayPresentation();
+  const messageDelay = document.getElementById('replay-message-delay');
+  const normalSpeed = document.getElementById('replay-normal-speed');
+  messageDelay.oninput = () => {
+    presentation.messageDelay = Number(messageDelay.value);
+    document.getElementById('replay-message-ms').value = `${messageDelay.value} ms`;
+  };
+  const roomButtons = [...document.querySelectorAll('[data-replay-rooms]')];
+  for (const button of roomButtons) button.onclick = () => {
+    if (!powered || paused) return;
+    release();
+    seekReplayRoom(Number(button.dataset.replayRooms));
+    canvas.focus({ preventScroll: true });
+  };
   const menuButton = document.getElementById('command-menu');
   let startupHelp = false;
   const mapScreen = document.getElementById('map-screen');
@@ -397,6 +416,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (paused || !session.playback) return;
     release();
     session.continueLive();
+    presentation.reset();
     returnSession = null;
     seekRoom = null; acc = 0;
     speaker.silence();
@@ -472,11 +492,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function seekReplayRoom(direction) {
     if (!session.playback || seekRoom != null || (direction > 0 && session.playbackDone)) return;
     const target = Math.max(0, session.roomChanges + direction);
+    presentation.reset();
+    session.discardPresentation();
     if (direction < 0) {
       session = session.previousRoom(-direction);
       state = session.state;
     }
-    seekRoom = target === session.roomChanges ? null : target;
+    seekRoom = direction < 0 || target === session.roomChanges ? null : target;
     acc = 0;
     last = performance.now();
     speaker.silence();
@@ -565,7 +587,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       }
       held = false; acc = 0; seekRoom = null;
       dropInput(); canvas.focus({ preventScroll: true });
-      fit();
+      fit(); draw();
       speaker.silence();
     } catch (err) { log(err.message); }
     finally { resume(); }
@@ -582,11 +604,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     screenFocus.toggleAttribute('hidden', !isRunning());
     menuButton.hidden = session.playback || !canOpenCommandMenu(state);
     if (replayHelp) replayHelp.hidden = !session.playback;
-    playFromReplay.hidden = !session.playback;
+    const replayChanged = replayControls.hidden === session.playback;
+    replayControls.hidden = !session.playback;
+    if (replayChanged) fit();
+    replayProgress.value = `${session.roomChanges + 1}/${(session.totalRoomChanges ?? session.roomChanges) + 1}`;
+    for (const button of roomButtons) button.disabled = seekRoom != null
+      || (Number(button.dataset.replayRooms) < 0 ? session.roomChanges === 0 : session.playbackDone);
     rewindRoomButton.hidden = !debug || session.playback;
     rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
-    const rows = statusRows(state, { classic: options.classic, playback: session.playback ? session : null });
+    const rows = statusRows(state, { classic: options.classic });
     const { panelRows, bandRows } = statusLayout(state, rows, { classic: options.classic });
     image.data.set(render(state, panelRows));
     image.data.set(renderStatus(state, bandRows), WIDTH * HEIGHT * 4);
@@ -612,15 +639,18 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     acc += Math.min(elapsed, 250);
     last = now;
     gamepad.poll();
+    presentation.advance(session, elapsed, { running, seeking: seekRoom != null });
+    session.normalSpeedActions = normalSpeed.checked;
     let budget = 2000;
     while (running && budget-- > 0) {
+      if (seekRoom == null && !presentation.ready(session)) { acc = 0; break; }
       const delay = session.playback ? session.playbackDelay : STEP_MS;
       if (seekRoom == null && acc < delay) break;
       const idleScreen = session.playback && delay === 0 && seekRoom == null ? screenKey(state) : null;
       session.skippable = !options.classic;
       const previousRoom = state.room;
       const previousTitle = state.title;
-      try { session.step(); }
+      try { session.step({ presentation: seekRoom == null }); }
       catch (err) {
         session.playbackDone = true;
         session.playbackError = err.message;
@@ -630,13 +660,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       autosave.save(session);
       if (seekRoom != null) state.events.length = 0;
       else speaker.frame(state);
+      const messageChanged = seekRoom == null && session.playback && presentation.observe(session);
       acc = Math.max(0, acc - delay);
       if (session.playbackDone) {
         seekRoom = null; acc = 0;
         break;
       }
       if (seekRoom != null && session.roomChanges >= seekRoom) { seekRoom = null; acc = 0; break; }
-      // Render screen changes encountered during an idle gap before advancing again.
+      if (messageChanged) { acc = 0; break; }
       if (idleScreen != null && screenKey(state) !== idleScreen) { acc = 0; break; }
     }
     musicTrail(speaker);

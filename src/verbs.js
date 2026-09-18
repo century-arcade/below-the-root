@@ -540,7 +540,7 @@ export function commandDraft(state) {
 export const COMMANDS = ['TAKE', 'DROP', 'EXAMINE', 'SPEAK', 'BUY', 'SELL', 'RENEW',
   'PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'OFFER', 'EAT', 'REST', 'KINIPORT'];
 
-export function executeCommand(state, name, choices = {}) {
+export function executeCommand(state, name, choices = {}, passage = null) {
   if (!COMMANDS.includes(name)) throw new Error('Invalid gameplay command');
   state.commandChoice = { ...choices, applying: true, used: new Set() };
   const active = state.active;
@@ -548,9 +548,11 @@ export function executeCommand(state, name, choices = {}) {
   try {
     const gen = VERBS[name](state);
     let result = gen.next();
+    passage?.();
     for (let i = 0; !result.done; i++) {
       if (i >= 100) throw new Error('Command could not finish');
       result = gen.next({ dx: 0, dy: 0, fire: i % 2 === 1, press: i % 2 === 1 });
+      passage?.();
     }
     if (Object.keys(choices).some(k => !state.commandChoice.used.has(k))) throw new Error('Unused command argument');
     if (result.value === CANCELLED) throw new Error('Cancelled selection is not a gameplay command');
