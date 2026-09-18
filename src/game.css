@@ -57,7 +57,9 @@ dialog {
 textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108px; margin: 10px 0; background: #000; color: #d6f897; font: inherit; }
 #issue-result { overflow-wrap: anywhere; }
 
-#play-area { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+#play-area { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+#startup-status { position: absolute; top: 0; left: 0; right: 0; z-index: 2; margin: 0; padding: 12px; background: #0b130d; }
+#monitor.unfitted { visibility: hidden; }
 #canvas-box { flex: none; }
 #replay-controls { align-self: center; text-align: center; }
 #replay-navigation { display: flex; align-items: center; justify-content: center; gap: 4px; }

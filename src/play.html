@@ -1,9 +1,10 @@
 <section id="play" aria-label="Play Below the Root">
 <div id="game">
   <div id="play-area">
-    <div id="monitor" data-surround="dark">
+    <p id="startup-status" role="status"><span>Loading game…</span> <a href="">Reload page</a> if it does not start.</p>
+    <div id="monitor" class="unfitted" data-surround="dark">
     <div id="canvas-box">
-      <canvas id="screen" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; Space or Enter is the joystick button; F opens the command menu or selects a choice; Up and Down browse choices once per press; Escape closes the menu or pauses; P pauses; M or Tab shows the map. Press ? for all controls."></canvas>
+      <canvas id="screen" width="320" height="232" tabindex="0" aria-label="Below the Root game. Arrow keys or WASD to move; Space or Enter is the joystick button; F opens the command menu or selects a choice; Up and Down browse choices once per press; Escape closes the menu or pauses; P pauses; M or Tab shows the map. Press ? for all controls."></canvas>
       <button id="command-menu" hidden aria-label="Open command menu" aria-keyshortcuts="F" title="Open command menu (F)"></button>
       <div id="crt" aria-hidden="true" hidden><div id="scanlines"></div><div id="stripes"></div></div>
       <svg id="screen-focus" hidden viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true" focusable="false"><use href="#screen-curve"/></svg>

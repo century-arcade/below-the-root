@@ -94,6 +94,16 @@ export const questSession = () => session;
 let holdReasons = () => ['loading'];
 export const questPaused = () => holdReasons();
 
+const startupStatus = document.getElementById('startup-status');
+let options;
+try { options = loadOptions(localStorage); }
+catch (err) { options = loadOptions({ getItem: () => null }); log(`Browser storage is unavailable: ${err.message}`); }
+monitor.dataset.surround = options.surround;
+addEventListener('resize', fit);
+fullscreenMode.addEventListener('change', fit);
+document.addEventListener('fullscreenchange', fit);
+fit();
+monitor.classList.remove('unfitted');
 canvas.focus({ preventScroll: true });
 
 loadData((path) => fetch(`/${path}`).then((r) => {
@@ -102,9 +112,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
 })).then((data) => {
   const params = new URLSearchParams(location.search);
   const stick = new Keyboard();
-  let options;
-  try { options = loadOptions(localStorage); }
-  catch (err) { options = loadOptions({ getItem: () => null }); log(`Browser storage is unavailable: ${err.message}`); }
   let debug = params.has('debug') || options.debug;
   const room = pickRoom(data, params.get('room'));
   let initial;
@@ -164,7 +171,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
-  monitor.dataset.surround = options.surround;
   function syncVolume() {
     const level = speaker.muted ? 0 : Math.round(speaker.volume * 100);
     volume.value = level;
@@ -669,9 +675,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     draw();
     requestAnimationFrame(frame);
   }
-  addEventListener('resize', fit);
-  fullscreenMode.addEventListener('change', fit);
-  document.addEventListener('fullscreenchange', fit);
   if (['home', 'map', 'help'].includes(location.hash.slice(1))) showView(location.hash.slice(1));
   else if (debug && GAME_TOOLS.includes(location.hash.slice(1))) {
     document.getElementById(location.hash.slice(1)).focus();
@@ -679,8 +682,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   else if (freshStart) openHelp(true);
   fit();
   draw();
+  startupStatus.hidden = true;
   requestAnimationFrame(frame);
 }).catch((err) => {
+  startupStatus.firstElementChild.textContent = `The game could not load: ${err.message || err}.`;
   log(String(err));
   console.error(err);
 });
