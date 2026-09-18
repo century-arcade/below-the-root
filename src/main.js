@@ -160,7 +160,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);
   const musicStaff = document.getElementById('music-notes');
-  const musicTrail = createMusicTrail(musicStaff, document.getElementById('monitor-waveform'));
+  const musicTrail = createMusicTrail(musicStaff);
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');

@@ -50,7 +50,7 @@ with browser_page('/?player=0&debug') as page:
     assert posted[1] == posted[0], 'retry must retain the message and captured context'
     assert page.locator('#issue-message').input_value() == ''
     assert page.evaluate("sessionStorage.getItem('btr.issue-draft')") is None
-    page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
+    page.wait_for_function("document.activeElement === document.getElementById('screen')")
     until(page, '(s, frame) => s.frame > frame', saved['frame'])
     assert frames() > saved['frame'], 'successful submission must resume game time'
     before_events = len(observe(page)['events'])
@@ -64,7 +64,7 @@ with browser_page('/?player=0&debug') as page:
     assert frames() == stopped
     page.locator('#issue-cancel').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
-    page.wait_for_function("document.activeElement === document.getElementById('file-issue')")
+    page.wait_for_function("document.activeElement === document.getElementById('screen')")
     until(page, '(s, frame) => s.frame > frame', stopped)
     assert frames() > stopped, 'manual close must resume game time'
     page.keyboard.press('r')

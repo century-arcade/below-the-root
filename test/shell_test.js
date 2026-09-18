@@ -6,7 +6,7 @@ import { openMenu, shellFrame, coldStart } from '../src/shell.js';
 import { panelLines as lines } from '../src/panel.js';
 import { startQuest, startVerb, tick, newState } from '../src/game.js';
 import { CLASS } from '../src/data.js';
-import { MENU, runMenu } from '../src/verbs.js';
+import { runMenu } from '../src/verbs.js';
 import { cell, role } from '../src/world.js';
 
 const data = await loadTestData();
@@ -187,8 +187,8 @@ test('choosing Pomma starts her quest in her nid with the three tokens on the fl
   assert.equal(s.clock.day, 1);
 });
 
-test('the menu verb leaves the quest in progress and CONTINUE puts you back on the same cell', async () => {
-  const { fresh, settle, tap, push } = await shellFixture();
+test('opening the title menu preserves the quest and CONTINUE returns to the same cell', async () => {
+  const { fresh, settle, tap } = await shellFixture();
 
   const s = fresh();
   openMenu(s);
@@ -197,11 +197,7 @@ test('the menu verb leaves the quest in progress and CONTINUE puts you back on t
   settle(s);
   const room = s.room, col = s.player.col, row = s.player.row;
   s.player.col += 2;
-  const menuRow = MENU.findIndex((r) => r.includes('MENU'));
-  const menuCol = MENU[menuRow].indexOf('MENU');
-  s.stop = { reason: 'menu' };
-  s.active = true;
-  s.stick.feed(J.idle, ...push(J.right, menuCol), ...push(J.down, menuRow), J.fire, J.idle);
+  openMenu(s);
   settle(s);
   assert.equal(s.title, true);
   assert.equal(s.quest, true);
@@ -242,9 +238,7 @@ test('CONTINUE preserves grunspreking, creatures, permissions and the last lamp 
     offered: s.offered, paid: s.paid, lamp: s.lamp,
   });
   const before = preserved();
-  s.active = false;
-  startVerb(s, runMenu(s));
-  s.stick.feed(...menuReads('MENU'), J.idle);
+  openMenu(s);
   settle(s);
   assert.equal(s.title, true);
   s.stick.feed(...tap(J.down), ...tap(J.fire));

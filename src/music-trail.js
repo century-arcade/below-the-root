@@ -1,6 +1,6 @@
 import { displayRhythm, rhythmSVG, staffPitch } from './music-notation.js';
 
-export function createMusicTrail(element, waveformElement) {
+export function createMusicTrail(element) {
   const lines = element.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
   lines.classList.add('staff-lines');
   lines.setAttribute('viewBox', '0 0 1 34');
@@ -9,17 +9,7 @@ export function createMusicTrail(element, waveformElement) {
   lines.innerHTML = '<path d="M0 1H1M0 9H1M0 17H1M0 25H1M0 33H1" vector-effect="non-scaling-stroke"/>';
   const staff = element.ownerDocument.createElement('span');
   staff.dataset.register = 'treble';
-  const waveform = element.ownerDocument.createElement('canvas');
-  waveform.className = 'sound-waveform';
-  waveform.width = 112;
-  waveform.height = 72;
-  waveform.hidden = true;
-  const ctx = waveform.getContext('2d');
-  const reducedMotion = element.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)');
-  let drawnEffect = null;
-  let drawnFlatline = false;
   element.replaceChildren(lines, staff);
-  waveformElement.replaceChildren(waveform);
   const visible = new Map();
   const bars = new Map();
   let currentTune = null;
@@ -32,10 +22,7 @@ export function createMusicTrail(element, waveformElement) {
     const notes = new Set(speaker.upcomingNotes());
     const now = speaker.ctx?.currentTime ?? 0;
     const notationTime = speaker.notationTime?.() ?? now;
-    const silent = speaker.muted || speaker.volume === 0;
-    const samples = silent ? speaker.effectWaveform() : null;
     const tunePlaying = speaker.playing && speaker.ctx.currentTime < speaker.tuneEnd;
-    waveform.hidden = !silent || !!tunePlaying;
     staff.hidden = !tunePlaying;
     if (currentTune !== speaker.playing) {
       for (const bar of bars.values()) bar.remove();
@@ -56,25 +43,6 @@ export function createMusicTrail(element, waveformElement) {
       bar.dataset.measure = measure;
       insert(bar, at);
       bars.set(measure, bar);
-    }
-    const flatline = !samples;
-    if (waveform.hidden) { drawnEffect = null; drawnFlatline = false; }
-    else if (flatline ? !drawnFlatline : drawnFlatline || !reducedMotion.matches || drawnEffect !== speaker.effect) {
-      ctx.clearRect(0, 0, waveform.width, waveform.height);
-      ctx.strokeStyle = '#d6f897';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      const trace = samples || [0, 0];
-      trace.forEach((sample, i) => {
-        const x = i / (trace.length - 1) * waveform.width;
-        const y = waveform.height / 2 - sample * (waveform.height / 2 - 2);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      // Reduced motion keeps the first non-silent trace of each effect still.
-      drawnFlatline = flatline;
-      if (flatline) drawnEffect = null;
-      else if (samples.some(sample => Math.abs(sample) > 0.001)) drawnEffect = speaker.effect;
     }
     for (const [note, glyph] of visible) {
       if (notes.has(note)) continue;

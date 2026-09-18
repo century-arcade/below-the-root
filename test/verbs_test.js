@@ -1,17 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { J, talkFixture, questState, menuReads as menu, place, lines, give, stick as reader, page, timeFixture } from './helpers.js';
-import { MENU, menuChoiceAt, runMenu } from '../src/verbs.js';
+import { MENU, runMenu, paintStatus } from '../src/verbs.js';
 import { CLASS } from '../src/data.js';
 import { startVerb, tick } from '../src/game.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 
-test("command selection maps to an action and blank actions cannot be chosen", () => {
-  assert.deepEqual(menuChoiceAt(14, 2), { col: 2, row: 2 });
-  assert.equal(MENU[menuChoiceAt(14, 2).row][menuChoiceAt(14, 2).col], 'HEAL');
-  assert.equal(menuChoiceAt(39, 3), null, 'the blank action is not clickable');
+test('the live command menu omits status, inventory and title navigation', () => {
+  assert.deepEqual(MENU.flat().sort(), [
+    'PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'SPEAK', 'BUY', 'SELL', 'RENEW',
+    'PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'OFFER', 'EAT', 'REST', 'KINIPORT',
+  ].sort());
 });
 
 test('SPEAK with nobody facing', async () => {
@@ -165,13 +166,12 @@ test('the wand of Befal banishes for good', async () => {
   assert.equal(s.creature, null);
 });
 
-test('STATUS paints the six numbers', async () => {
-  const { run, data, pomma } = await talkFixture();
-
+test('status paints the six numbers', async () => {
+  const { data, pomma } = await talkFixture();
   const s = questState(data, pomma);
-  const lines = run(s, menu('STATUS'));
-  assert.equal(lines[0], 'DAY 1              POMMA');
-  assert.equal(lines[1], `EARLY MORNING      LEVEL OF REST   ${s.player.rest}`);
+  paintStatus(s);
+  assert.equal(lines(s)[0], 'DAY 1              POMMA');
+  assert.equal(lines(s)[1], `EARLY MORNING      LEVEL OF REST   ${s.player.rest}`);
 });
 
 test('USE a vine rope bridges from two cells ahead, over the cell in front', async () => {

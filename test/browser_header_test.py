@@ -4,7 +4,7 @@ from playwright.sync_api import expect
 
 with browser_page('/') as page:
     assert not page.locator('#debug-tools').is_visible()
-    assert not page.locator('#file-issue').is_visible()
+    expect(page.locator('#file-issue')).to_have_count(0)
     volume = page.get_by_role('slider', name='Volume', exact=True)
     expect(volume).to_have_value('50')
     page.keyboard.press('-')
@@ -25,7 +25,7 @@ with browser_page('/') as page:
     developer.focus()
     page.keyboard.press('Enter')
     expect(developer).to_have_attribute('aria-pressed', 'true')
-    expect(page.locator('#file-issue')).to_be_visible()
+    expect(page.locator('#file-issue')).to_have_count(0)
     crt = page.get_by_role('button', name='CRT effect', exact=True)
     crt.click()
     expect(crt).to_have_attribute('aria-pressed', 'true')
@@ -37,7 +37,7 @@ with browser_page('/') as page:
     expect(page.locator('#debug-tools')).to_be_hidden()
     page.keyboard.press('r')
     expect(page.locator('#issue-dialog')).to_be_hidden()
-    page.get_by_role('button', name='Fullscreen', exact=True).click()
+    page.get_by_role('group', name='Monitor controls').get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement === document.documentElement')
     page.keyboard.press('f')
     assert page.evaluate('document.fullscreenElement !== null'), 'F does not toggle fullscreen'

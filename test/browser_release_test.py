@@ -52,7 +52,9 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.goto(address + '/?player=0&debug')
             until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
             assert observe(page)['quest']
-            expect(page.locator('#file-issue')).to_be_disabled()
+            expect(page.locator('#file-issue')).to_have_count(0)
+            page.keyboard.press('r')
+            expect(page.locator('#issue-dialog')).to_be_hidden()
             page.keyboard.press('ArrowRight')
             page.locator('#map').click()
             expect(page.locator('#map-screen')).to_be_visible()

@@ -1,6 +1,6 @@
 import { storeOption } from './options.js';
 
-export const GAME_TOOLS = ['download-record', 'load-record', 'file-issue'];
+export const GAME_TOOLS = ['download-record', 'load-record'];
 
 export function persistOption(name, value) {
   try { storeOption(localStorage, name, value); } catch {}

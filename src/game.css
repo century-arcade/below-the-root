@@ -108,8 +108,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
   #monitor[data-surround="portable"] #volume { width: 64px; }
 }
 
-#monitor-waveform { flex: 0 0 64px; height: 42px; }
-#monitor-waveform .sound-waveform { width: 100%; height: 100%; background: transparent; image-rendering: auto; }
+#monitor-controls #fullscreen { flex: 0 0 42px; height: 42px; }
 #music-notes { --groove: #514d4166; position: relative; flex: 1; min-width: 40px; height: 88px; overflow: hidden; pointer-events: none; container-type: inline-size; }
 #music-notes > .staff-lines { position: absolute; top: 22px; left: 0; width: 100%; height: 34px; fill: none; stroke: var(--groove); stroke-width: 1px; shape-rendering: crispEdges; }
 #music-notes > [data-register] { position: relative; top: -15px; display: block; height: 87px; }
@@ -120,8 +119,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor[data-surround="dark"] #music-notes :is([data-rhythm], [data-measure]),
 #monitor[data-surround="portable"] #music-notes :is([data-rhythm], [data-measure]) { color: #d6f897; }
 #monitor[data-surround="portable"] #music-notes { --groove: #251f1b; flex: 0 0 88px; width: 100%; }
-#monitor[data-surround="portable"] #monitor-waveform { flex: 0 0 42px; width: 64px; }
-#monitor.powered-off :is(#music-notes > *, #monitor-waveform) { visibility: hidden; }
+#monitor.powered-off #music-notes > * { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #music-notes > [data-register] { display: flex; justify-content: start; align-items: start; }
   #music-notes :is([data-rhythm], [data-measure]) { position: static; flex: 0 0 42px; transform: none !important; }

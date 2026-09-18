@@ -95,9 +95,10 @@ with browser_page('/play#map', setup=setup, viewport={"width": 900, "height": 75
     page.clock.run_for(200)  # Let gameplay sample the released map keys.
     assert all(r['stick'] == [0, 0, 0] for r in record()['events']), 'resuming from the map drops the movement key'
 
-    page.locator('#map').press('Enter')
     page.get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement !== null')
+    page.keyboard.press('Tab')
+    page.locator('#map-screen').wait_for()
     assert page.locator('#map-screen').is_visible(), 'the map is available in fullscreen'
     page.keyboard.press('Tab')
     page.locator('#map-screen').wait_for(state='hidden')

@@ -100,7 +100,7 @@ with sync_playwright() as p:
     expect(page.get_by_role('slider', name='Volume')).to_have_count(0)
     expect(page.get_by_role('link', name='Source on GitHub')).to_be_visible()
     assert not data_requests, 'reading-page controls must not load or start the game'
-    for source, tool in [('about', 'download-record'), ('links', 'load-record'), ('about', 'file-issue')]:
+    for source, tool in [('about', 'download-record'), ('links', 'load-record')]:
         page.goto(BASE + '/' + source)
         page.locator('#' + tool).click()
         expect(page).to_have_url(BASE + '/play?debug#' + tool)

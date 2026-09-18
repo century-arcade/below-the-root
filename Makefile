@@ -44,14 +44,14 @@ serve: build
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
 test:
-	@out=$$(mktemp); start=$$(date +%s); status=0; trap 'rm -f "$$out"' EXIT HUP INT TERM; \
+	@out=$$(mktemp); status=0; trap 'rm -f "$$out"' EXIT HUP INT TERM; \
 	unset $$(git rev-parse --local-env-vars); \
-	timeout $(TEST_TIMEOUT) node --test --test-reporter=tap test/*_test.js test/*_test.mjs >"$$out" 2>&1 || { status=$$?; echo "Node tests failed (exit $$status)" >>"$$out"; }; \
-	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -s test -p 'release_test.py' >>"$$out" 2>&1 || { status=$$?; echo "Python tests failed (exit $$status)" >>"$$out"; }; \
+	timeout $(TEST_TIMEOUT) node --test --test-reporter=./tools/test-reporter.mjs test/*_test.js test/*_test.mjs >"$$out" 2>&1 || { status=$$?; echo "Node tests failed (exit $$status)" >>"$$out"; }; \
+	timeout $(TEST_TIMEOUT) $(PYTHON) -m unittest discover -v -s test -p 'release_test.py' >>"$$out" 2>&1 || { status=$$?; echo "Python tests failed (exit $$status)" >>"$$out"; }; \
 	if [ $$status -ne 0 ]; then cat "$$out"; exit $$status; fi; \
-	awk -v start="$$start" '/^# pass / { passed = $$3 } /^# skipped / { skipped = $$3 } \
-	  /^Ran [0-9]+ tests?/ { python = $$2 } /^OK .*skipped=/ { split($$0, parts, "skipped="); python_skipped = parts[2] + 0 } \
-	  END { printf "make test: %d passed, %d skipped, %d s\n", passed + python - python_skipped, skipped + python_skipped, systime() - start }' "$$out"
+	awk '/^(pass|skip|todo): / { print } \
+	  /^test_.* \.\.\. ok$$/ { sub(/ \.\.\. ok$$/, ""); print "pass: " $$0 } \
+	  /^test_.* \.\.\. skipped / { print "skip: " $$0 }' "$$out"
 
 screenshot: build
 	$(PY) tools/shot.py --url $(BTR_URL)/ --width 1100 --height 850 --crt --select '#screen' --keys ArrowLeft --wait 3000 assets/box/screen.png '?room=B8'

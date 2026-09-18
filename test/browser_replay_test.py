@@ -156,9 +156,9 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     assert session_eval(page, 's => !s.playback && s.simticks > 0')
     expect(page.get_by_label('Message delay', exact=True)).to_have_count(0)
 with browser_page('/?player=0&debug', setup=setup) as page:
-    record = (Path(__file__).parent / 'fixtures' / 'herd-win.json').read_bytes()
+    record = (Path(__file__).parent / 'fixtures' / 'herd-landing.json').read_bytes()
     page.locator('#record-file').set_input_files({
-        'name': 'herd-win.json', 'mimeType': 'application/json', 'buffer': record})
+        'name': 'herd-landing.json', 'mimeType': 'application/json', 'buffer': record})
     session_eval(page, '''s => {
         while (s.simticks < 17381) s.step({presentation:false});
         s.state.events.length = 0;

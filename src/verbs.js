@@ -13,6 +13,12 @@ import { startTune, SFX, sfx } from './audio.js';
 import { acquired } from './progress.js';
 
 export const MENU = [
+  ['PAUSE', 'TAKE', 'DROP', 'EXAMINE'],
+  ['SPEAK', 'BUY', 'SELL', 'RENEW'],
+  ['PENSE', 'USE', 'HEAL', 'GRUNSPREKE'],
+  ['OFFER', 'EAT', 'REST', 'KINIPORT'],
+];
+const DEMO_MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS'],
   ['SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW'],
   ['PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'MENU'],
@@ -45,7 +51,7 @@ const NID_HOST = {
 
 function drawMenu(state, selCol, selRow) {
   clearPanel(state);
-  MENU.forEach((names, row) => names.forEach((name, col) => {
+  (state.demo ? DEMO_MENU : MENU).forEach((names, row) => names.forEach((name, col) => {
     const selected = col === selCol && row === selRow;
     print(state, PANEL_ROW + row, MENU_COLS[col], ` ${name}`.padEnd(MENU_WIDTHS[col]), selected);
   }));
@@ -54,6 +60,7 @@ function drawMenu(state, selCol, selRow) {
 // read counts are the demo replay contract (player.md, How often the stick is read)
 export function* runMenu(state) {
   state.commandMenuOpen = true;
+  const choices = state.demo ? DEMO_MENU : MENU;
   let col = 0, row = 0;
   const moved = directionPress();
   let first = yield* fireUp();
@@ -69,11 +76,11 @@ export function* runMenu(state) {
     }
     if (j.fire) break;
     const move = state.demo ? j : moved(j);
-    col = Math.max(0, Math.min(4, col + move.dx));
+    col = Math.max(0, Math.min(choices[row].length - 1, col + move.dx));
     row = Math.max(0, Math.min(3, row + move.dy));
     drawMenu(state, col, row);
   }
-  const verb = MENU[row][col];
+  const verb = choices[row][col];
   state.commandMenuOpen = false;
   sfx(state, SFX.confirm);
   clearPanel(state);

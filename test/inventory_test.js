@@ -1,10 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadTestData, J, give, lines, menuReads } from './helpers.js';
+import { loadTestData, J, give, lines } from './helpers.js';
 import { newState, startQuest } from '../src/game.js';
 import { pickItem, inventoryEntries } from '../src/inventory.js';
 import { CLASS } from '../src/data.js';
-import { runMenu } from '../src/verbs.js';
 
 const data = await loadTestData();
 
@@ -51,16 +50,15 @@ test("inventory counts repeated items once per class", async () => {
   const carriedClasses = new Set(pack.objects.filter(item => item.exists && item.carried).map(item => item.class));
   assert.equal(entries.length, carriedClasses.size, 'each carried class appears exactly once');
   assert.deepEqual(new Set(entries.map(({ item }) => item.class)), carriedClasses);
-  const inventory = runMenu(pack);
+  const inventory = pickItem(pack, { counted: true, noFire: true });
   inventory.next();
-  for (const input of menuReads('INVENTORY')) inventory.next(input);
   inventory.next(J.idle);
-  assert.match(lines(pack)[0], /YOU HAVE +PAN BREAD x2$/);
+  assert.match(lines(pack)[0], /PAN BREAD x2$/);
   inventory.next(J.down);
-  assert.match(lines(pack)[0], /YOU HAVE +TOKEN x2$/, 'duplicate bread is skipped');
+  assert.match(lines(pack)[0], /TOKEN x2$/, 'duplicate bread is skipped');
   inventory.next(J.idle);
   inventory.next(J.down);
-  assert.match(lines(pack)[0], /YOU HAVE +VINE ROPE x2$/, 'ropes are counted like tokens');
+  assert.match(lines(pack)[0], /VINE ROPE x2$/, 'ropes are counted like tokens');
   inventory.next(J.idle);
   inventory.next(J.down);
   assert.match(lines(pack)[0], /NOTHING$/, 'duplicate rope is skipped');

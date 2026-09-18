@@ -1,6 +1,6 @@
 import { acquired } from '../src/progress.js';
-import { runMenu } from '../src/verbs.js';
-import { menuReads, give, loadTestData } from './helpers.js';
+import { paintStatus } from '../src/verbs.js';
+import { give, loadTestData } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { statusRows } from '../src/status.js';
@@ -53,10 +53,7 @@ test('STATUS shows live completion and elapsed time without replay room counts',
   for (const cls of [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY, CLASS.WAND]) acquired(s, { class: cls });
   for (const token of s.objects.filter(o => o.class === CLASS.TOKEN && o.exists)) acquired(s, token);
   s.simticks = 223380;
-  // STATUS adds live progress without replacing the character's existing stats.
-  const statusMenu = runMenu(s);
-  statusMenu.next();
-  for (const input of menuReads('STATUS')) statusMenu.next(input);
+  paintStatus(s);
   assert.ok(statusRows(s).includes('01:02:03 PLAY / 65% COMPLETE'));
   s.simticks += 60;
   assert.ok(statusRows(s, { classic: true }).includes('01:02:04 PLAY / 65% COMPLETE'));

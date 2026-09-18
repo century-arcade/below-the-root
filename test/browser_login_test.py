@@ -8,7 +8,7 @@ BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    for action in ['report', 'shortcut']:
+    for action in ['r', 'R']:
         context = browser.new_context()
         page = context.new_page()
         page.route('**/.netlify/functions/github?op=session', lambda route: route.fulfill(
@@ -17,13 +17,10 @@ with sync_playwright() as p:
             content_type='text/html', body='<p>Reached login endpoint</p>'))
         page.goto(BASE + '/?debug&player=0')
         page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
-        assert page.locator('#file-issue').is_visible()
-        if action == 'shortcut':
-            page.keyboard.press('r')
-        else:
-            page.locator('#file-issue').click()
+        assert page.locator('#file-issue').count() == 0
+        page.keyboard.press(action)
         page.get_by_text('Reached login endpoint').wait_for()
         assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3')).initial.mode")
         context.close()
     browser.close()
-    print('browser_login_test: report/R save and start login while logged out')
+    print('browser_login_test: R saves and starts login while logged out')

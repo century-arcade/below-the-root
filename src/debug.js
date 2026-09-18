@@ -41,7 +41,8 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
   downloadRecording }) {
   document.getElementById('debug-tools').hidden = false;
   const logout = document.getElementById('github-logout');
-  const report = document.getElementById('file-issue');
+  const screen = document.getElementById('screen');
+  let reportingAvailable = true;
   const dialog = document.getElementById('issue-dialog');
   const form = document.getElementById('issue-form');
   const message = document.getElementById('issue-message');
@@ -74,7 +75,8 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
       dialog.close();
     } catch (err) { log(err.message); }
   };
-  report.onclick = () => {
+  function reportIssue() {
+    if (!reportingAvailable) return;
     if (!authenticated) { startLogin(); return; }
     pause(); saveNow();
     context = issueContext(getSession());
@@ -82,18 +84,17 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     try { message.value = sessionStorage.getItem(DRAFT_KEY) || ''; } catch {}
     dialog.show();
     message.focus();
-  };
+  }
   addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'r' && !e.repeat && !e.metaKey && !e.altKey && !e.ctrlKey
         && !isEditing(e.target) && !dialog.open && !document.getElementById('debug-tools').hidden) {
-      report.focus();
-      report.click();
+      reportIssue();
       e.preventDefault();
     }
   });
   message.oninput = () => { try { sessionStorage.setItem(DRAFT_KEY, message.value); } catch {} };
   document.getElementById('issue-cancel').onclick = () => dialog.close();
-  dialog.addEventListener('close', () => { resume(); report.focus(); });
+  dialog.addEventListener('close', () => { resume(); screen.focus(); });
   form.onsubmit = async e => {
     e.preventDefault();
     submit.disabled = true;
@@ -119,8 +120,7 @@ export async function setupDebug({ getSession, saveNow, pause, resume, importFil
     if (!response.ok) return;
     const body = await response.json();
     if (body.configured === false) {
-      report.disabled = true;
-      report.title = body.error || 'GitHub issue reporting is unavailable on this server.';
+      reportingAvailable = false;
       return;
     }
     if (body.login) {

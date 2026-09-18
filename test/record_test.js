@@ -20,6 +20,7 @@ const winningFixtures = readdirSync(new URL('./fixtures/', import.meta.url))
 const fixtureURL = name => new URL(`./fixtures/${name}`, import.meta.url);
 const winningRecords = new Map(winningFixtures.map(name => [name, JSON.parse(readFileSync(fixtureURL(name)))]));
 const winningRecord = name => winningRecords.get(name);
+const landingRecord = JSON.parse(readFileSync(fixtureURL('herd-landing.json')));
 
 function advanceSession(session, count = 1) {
   for (let i = 0; i < count; i++) {
@@ -848,8 +849,8 @@ for (const name of winningFixtures) {
 }
 
 test('the playthrough tool reports a verified win, its day and completion', () => {
-  const name = 'herd-win.json';
-  const record = winningRecord(name);
+  const name = 'herd-landing.json';
+  const record = landingRecord;
   const report = execFileSync(process.execPath, [
     fileURLToPath(new URL('../tools/playthrough.mjs', import.meta.url)),
     fileURLToPath(fixtureURL(name)), '--expect-win',
@@ -1000,7 +1001,7 @@ test('visible replay actions use normal speed while supported idle time accelera
 });
 
 test('animal PENSE replay finishes landing before presenting its song', () => {
-  const record = winningRecord('herd-win.json');
+  const record = landingRecord;
   const replay = Session.watch(data, { read: () => IDLE }, record);
   const eventIndex = record.events.findIndex(event => event.command === 'PENSE' && event.simticks === 17381);
   while (replay.eventIndex < eventIndex) replay.step({ presentation: false });
@@ -1025,7 +1026,7 @@ test('animal PENSE replay finishes landing before presenting its song', () => {
 
 for (const action of ['seek', 'continue']) {
   test(`${action} discards a deferred landing message`, () => {
-    const record = winningRecord('herd-win.json');
+    const record = landingRecord;
     const replay = Session.watch(data, { read: () => IDLE }, record);
     while (replay.simticks < 17381) replay.step({ presentation: false });
     replay.step();
@@ -1048,7 +1049,7 @@ for (const action of ['seek', 'continue']) {
 }
 
 test('an airborne message is shown before the next same-tick command', () => {
-  const record = winningRecord('herd-win.json');
+  const record = landingRecord;
   const replay = Session.watch(data, { read: () => IDLE }, record);
   while (replay.simticks < 15946) replay.step({ presentation: false });
   replay.step();

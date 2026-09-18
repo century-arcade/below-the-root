@@ -1,4 +1,4 @@
-"""The staff follows tune playback and muted effects show a waveform in either motion mode."""
+"""The staff follows playback without sampling effect waveforms in either motion mode."""
 import os
 from playwright.sync_api import sync_playwright, expect
 
@@ -20,8 +20,8 @@ with sync_playwright() as p:
             window.speaker = new Speaker(music);
             speaker.unlock({tick: 0});
             await speaker.ctx.resume();
-            window.updateNotes = createMusicTrail(document.getElementById('music-notes'),
-                document.getElementById('monitor-waveform'));
+            speaker.effectWaveform = () => { throw new Error('Waveform sampling is disabled'); };
+            window.updateNotes = createMusicTrail(document.getElementById('music-notes'));
             updateNotes(speaker);
         }''')
         staff = page.locator('#music-notes [data-register]')
@@ -31,9 +31,9 @@ with sync_playwright() as p:
         page.evaluate('speaker.silence(); updateNotes(speaker)')
         expect(staff).to_be_hidden()
         page.evaluate('speaker.mute(true); speaker.sfx(11); updateNotes(speaker)')
-        expect(page.locator('#monitor-waveform .sound-waveform')).to_be_visible()
+        expect(page.locator('#monitor-waveform, .sound-waveform')).to_have_count(0)
         expect(staff).to_be_hidden()
         page.evaluate('speaker.silence(); speaker.ctx.close()')
     assert not errors, errors
     browser.close()
-print('browser_music_test: staff playback/idle and muted effect waveform passed')
+print('browser_music_test: staff playback/idle and disabled effect waveform passed')
