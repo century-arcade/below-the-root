@@ -14,10 +14,9 @@ import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js'
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
-import { createLog } from './log.js';
 import { setupDeveloper, GAME_TOOLS } from './header.js';
 
-const log = createLog(document.getElementById('log'), { onToggle: () => fit() });
+const log = text => console.log(text);
 
 const canvas = document.getElementById('screen');
 const screenFocus = document.getElementById('screen-focus');
@@ -40,8 +39,7 @@ function fit() {
     game.style.width = '';
     availableHeight = game.clientHeight;
   } else {
-    const chrome = ['site-header', 'log']
-      .reduce((total, id) => total + document.getElementById(id).offsetHeight, 0);
+    const chrome = document.getElementById('site-header').offsetHeight;
     availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
   }
   const replayControls = document.getElementById('replay-controls');
@@ -94,7 +92,6 @@ export const questSession = () => session;
 let holdReasons = () => ['loading'];
 export const questPaused = () => holdReasons();
 
-const startupStatus = document.getElementById('startup-status');
 let options;
 try { options = loadOptions(localStorage); }
 catch (err) { options = loadOptions({ getItem: () => null }); log(`Browser storage is unavailable: ${err.message}`); }
@@ -678,17 +675,15 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     draw();
     requestAnimationFrame(frame);
   }
-  if (['home', 'map', 'help'].includes(location.hash.slice(1))) showView(location.hash.slice(1));
+  if (location.pathname.replace(/\/$/, '') === '/map') showView('map');
+  else if (['home', 'help'].includes(location.hash.slice(1))) showView(location.hash.slice(1));
   else if (debug && GAME_TOOLS.includes(location.hash.slice(1))) {
     document.getElementById(location.hash.slice(1)).focus();
   }
   else if (freshStart) openHelp(true);
   fit();
   draw();
-  startupStatus.hidden = true;
   requestAnimationFrame(frame);
 }).catch((err) => {
-  startupStatus.firstElementChild.textContent = `The game could not load: ${err.message || err}.`;
-  log(String(err));
   console.error(err);
 });

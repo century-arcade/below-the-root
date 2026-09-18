@@ -49,7 +49,6 @@ body:has(#map-screen:not([hidden])) { overflow: hidden; }
 #stripes { background: repeating-linear-gradient(to right, #ffdbdb 0, #ffdbdb calc(var(--stripe) / 3), #dbffdb calc(var(--stripe) / 3), #dbffdb calc(var(--stripe) * 2 / 3), #dbdbff calc(var(--stripe) * 2 / 3), #dbdbff var(--stripe)); }
 #canvas-box:not(.stripes) #stripes { display: none; }
 #canvas-box.crt > #screen { filter: brightness(1.3) blur(var(--blur)); }
-#log { height: calc(3 * 1.6em); overflow-y: auto; text-align: left; color: #9ad284; font: inherit; white-space: pre-wrap; }
 dialog {
   position: static; align-self: center; margin: 8px 0 0;
   background: #101910; color: #b6e6a4; border: 1px solid #567; width: min(480px, 85vw);
@@ -58,7 +57,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #issue-result { overflow-wrap: anywhere; }
 
 #play-area { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-#startup-status { position: absolute; top: 0; left: 0; right: 0; z-index: 2; margin: 0; padding: 12px; background: #0b130d; }
 #monitor.unfitted { visibility: hidden; }
 #canvas-box { flex: none; }
 #replay-controls { align-self: center; text-align: center; }

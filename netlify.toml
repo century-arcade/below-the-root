@@ -22,6 +22,11 @@ to = "/play.html"
 status = 200
 
 [[redirects]]
+from = "/map"
+to = "/map.html"
+status = 200
+
+[[redirects]]
 from = "/help"
 to = "/play#help"
 status = 301

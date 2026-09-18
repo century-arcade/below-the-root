@@ -41,7 +41,7 @@ with browser_page('/?player=0&debug') as page:
     assert frames() == saved['frame'], 'a failed submission must keep game time paused'
     page.locator('#issue-submit').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
-    page.locator('#log').filter(has_text='Issue #123 filed with playthrough').wait_for()
+    page.wait_for_function('consoleMessages.includes("Issue #123 filed with playthrough")')
     assert len(posted) == 2
     context = json.loads(posted[0]['context'])
     assert 'recentEvents' in context
@@ -71,5 +71,5 @@ with browser_page('/?player=0&debug') as page:
     page.locator('#issue-message').fill('Report with failed playthrough upload')
     page.locator('#issue-submit').click()
     page.locator('#issue-dialog').wait_for(state='hidden')
-    page.locator('#log').filter(has_text='Issue #123 filed; playthrough upload failed').wait_for()
+    page.wait_for_function('consoleMessages.includes("Issue #123 filed; playthrough upload failed")')
 print('browser_issue_test: draft isolation, retry and resume passed')

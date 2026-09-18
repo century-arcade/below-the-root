@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             assert checkpoint['player'], checkpoint
             page.locator('#record-file').set_input_files({
                 'name': 'playthrough.json', 'mimeType': 'application/json', 'buffer': recording.encode()})
-            expect(page.locator('#log')).to_contain_text('Replaying')
+            expect(page.locator('#log')).to_have_count(0)
             until(page, 's => s.playback')
             assert observe(page)['quest']
             page.locator('nav a[href="/about"]').click()

@@ -79,7 +79,7 @@ with browser_page('/?player=0&debug', setup=setup, has_touch=True) as page:
     assert not session_eval(page, 's => s.playback')
     expect(page.locator('#play-from-replay')).to_be_hidden()
     expect(page.locator('#replay-controls')).to_be_hidden()
-    expect(page.locator('#log > div').last).to_contain_text('Playing from here. Progress will be saved.')
+    expect(page.locator('#log')).to_have_count(0)
     assert session_eval(page, 's => s.roomChanges') == 14
     assert observe(page)['checkpoint']['character'] == 2
     assert session_eval(page, 's => s.simticks') >= replay_tick

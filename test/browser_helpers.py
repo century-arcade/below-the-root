@@ -68,6 +68,14 @@ def browser_page(path, *, setup=None, base=None, **options):
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         try:
+            page.add_init_script('''
+                window.consoleMessages = [];
+                const log = console.log.bind(console);
+                console.log = (...args) => {
+                    window.consoleMessages.push(args.join(' '));
+                    log(...args);
+                };
+            ''')
             if setup:
                 setup(page)
             page.goto((base or os.environ.get('BTR_URL', 'http://localhost:8000')) + path)

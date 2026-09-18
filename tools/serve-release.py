@@ -31,7 +31,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header('Content-Length', '0')
             self.end_headers()
             return None
-        if url.path.rstrip('/') in ('/about', '/play', '/links'):
+        if url.path.rstrip('/') in ('/about', '/play', '/map', '/links'):
             self.path = url.path.rstrip('/') + '.html' + ('?' + url.query if url.query else '')
         return super().send_head()
 

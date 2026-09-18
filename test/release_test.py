@@ -45,7 +45,7 @@ class ReleaseTest(unittest.TestCase):
             path.write_bytes(b'original\x00\xff' + name.encode())
         self.site = self.root / 'site'
         self.site.mkdir()
-        for name in ('index', 'about', 'play', 'links'):
+        for name in ('index', 'about', 'play', 'map', 'links'):
             (self.site / f'{name}.html').write_text(f'<title>{name}</title>')
         (self.site / 'main.js').write_text('export const game = true;')
         self.output = self.root / 'release.zip'
@@ -123,7 +123,7 @@ class ReleaseTest(unittest.TestCase):
         thread.start()
         try:
             base = f'http://127.0.0.1:{server.server_port}'
-            for page in ('about', 'play', 'links'):
+            for page in ('about', 'play', 'map', 'links'):
                 for route in (f'/{page}', f'/{page}/', f'/{page}.html?demo'):
                     with urlopen(base + route) as response:
                         self.assertEqual(response.read(), (self.site / f'{page}.html').read_bytes())

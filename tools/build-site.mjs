@@ -28,7 +28,7 @@ for (const page of ['about', 'play', 'links']) {
   const html = template.replace(/{{(\w+)}}/g, (_, key) => values[key]);
   writeFileSync(join(out, `${page}.html`), html);
   if (page === 'play') {
-    // Serve Play directly, preserving legacy reading-page hashes before starting the game.
+    writeFileSync(join(out, 'map.html'), html);
     writeFileSync(join(out, 'index.html'), html.replace(values.scripts,
       '<script type="module">import { enterSite } from "/site.js"; if (enterSite()) import("/main.js");</script>'));
   }

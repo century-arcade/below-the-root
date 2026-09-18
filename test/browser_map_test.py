@@ -9,8 +9,10 @@ def setup(page):
     page.route('**/assets/initial-map.json', lambda route: route.fulfill(
         json={'rooms': ['M5', 'M8', 'B8']}))
 
-with browser_page('/play#map', setup=setup, viewport={"width": 900, "height": 750}) as page:
+with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) as page:
     page.locator('#map-screen').wait_for()
+    assert page.url.endswith('/map')
+    assert page.locator('#map').get_attribute('href') == '/map'
     assert page.locator('#map').is_visible()
     assert page.locator('#map-grid [aria-current="location"]').count() == 0
     page.locator('#home').click()

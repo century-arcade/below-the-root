@@ -29,7 +29,7 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     until(page, '(s, key) => JSON.parse(localStorage.getItem(key)).endpoint.kind==="room"', KEY)
     saved=page.evaluate('(key)=>localStorage.getItem(key)',KEY)
     page.locator('#record-file').set_input_files({'name':'old.json','mimeType':'application/json','buffer':b'{"format":"below-the-root-record","version":2}'})
-    expect(page.locator('#log')).to_contain_text('Unsupported playthrough recording version')
+    page.wait_for_function('consoleMessages.some(s => s.includes("Unsupported playthrough recording version"))')
     assert page.evaluate('(key)=>localStorage.getItem(key)',KEY)==saved
     page.evaluate('''async () => {
       const { questSession } = await import('/main.js');
@@ -40,7 +40,7 @@ with browser_page('/?player=0&debug', setup=setup) as page:
       };
       questSession().command('RENEW');
     }''')
-    until(page, 's => document.getElementById("log").textContent.includes("Autosave failed: Test quota")')
-    expect(page.locator('#log')).to_contain_text('Autosave failed: Test quota')
+    until(page, 's => consoleMessages.some(message => message.includes("Autosave failed: Test quota"))')
+    expect(page.locator('#log')).to_have_count(0)
     assert page.evaluate('(key)=>localStorage.getItem(key)',KEY)==saved
 print('browser_autosave_test: boundaries, reload, obsolete keys, unsupported uploads and quota failures passed')
