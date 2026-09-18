@@ -43,8 +43,6 @@ with browser_page('/?player=0&debug', setup=setup, has_touch=True) as page:
     expect(page.locator('#replay-progress')).to_have_text('25/25')
     assert page.locator('#replay-navigation button').all_text_contents() == [
         '<<-', '<-', 'Play from here', '->', '->>']
-    assert page.locator('#replay-controls > *').evaluate_all(
-        '(elements) => elements.map(e => e.id)') == ['replay-navigation', 'replay-progress', 'replay-tuning']
     expect(page.get_by_role('button', name='Forward one room', exact=True)).to_be_disabled()
     expect(page.get_by_role('button', name='Forward ten rooms', exact=True)).to_be_disabled()
     page.get_by_role('button', name='Back ten rooms', exact=True).tap()
@@ -64,22 +62,6 @@ with browser_page('/?player=0&debug', setup=setup, has_touch=True) as page:
         page.get_by_role('button', name='Forward ten rooms', exact=True).click()
         until(page, 's => s.roomChanges === ' + str(expected))
     expect(page.locator('#replay-progress')).to_have_text('25/25')
-    delay = page.get_by_label('Message delay', exact=True)
-    expect(delay).to_have_value('500')
-    expect(delay).to_have_attribute('min', '0')
-    expect(delay).to_have_attribute('max', '1000')
-    expect(delay).to_have_attribute('step', '50')
-    delay.fill('1000')
-    expect(page.locator('#replay-message-ms')).to_have_text('1000 ms')
-    delay.fill('0')
-    expect(page.locator('#replay-message-ms')).to_have_text('0 ms')
-    delay.fill('500')
-    normal = page.get_by_label('Normal-speed visible actions', exact=True)
-    expect(normal).to_be_checked()
-    normal.uncheck()
-    page.clock.run_for(16)
-    assert not session_eval(page, 's => s.normalSpeedActions')
-    normal.check()
     page.locator('#screen').focus()
     # Seek and pause in the same browser task; idle playback can otherwise
     # advance several rooms between Playwright round trips.
@@ -137,8 +119,6 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     page.clock.run_for(16)
     assert 'SPEAK WITH WHOM?' in message()
     assert session_eval(page, 's => s.simticks') == 0
-    delay = page.get_by_label('Message delay', exact=True)
-    delay.fill('1000')
     page.clock.run_for(400)
     assert 'SPEAK WITH WHOM?' in message()
     page.locator('#screen').focus()
@@ -146,12 +126,10 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     held(page, 'pause')
     page.clock.run_for(2000)
     page.keyboard.press('p')
-    page.clock.run_for(400)
+    page.clock.run_for(300)
     assert 'SPEAK WITH WHOM?' in message()
-    delay.fill('0')
-    page.clock.run_for(16)
+    page.clock.run_for(64)
     assert 'YOU LACK THE SPIRIT SKILL' in message()
-    delay.fill('500')
     page.clock.run_for(400)
     assert 'YOU LACK THE SPIRIT SKILL' in message()
     assert session_eval(page, 's => s.simticks') == 0
@@ -167,7 +145,7 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     }""")
     page.clock.run_for(50)
     assert 'YOU LACK THE SPIRIT SKILL' in message()
-    page.clock.run_for(64)
+    page.clock.run_for(320)
     assert 'YOU LACK THE SPIRIT SKILL' not in message()
     load(records['start'])
     expect(page.locator('#replay-progress')).to_have_text('1/1')
@@ -176,5 +154,26 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     page.get_by_role('button', name='Play from here', exact=True).click()
     page.clock.run_for(32)
     assert session_eval(page, 's => !s.playback && s.simticks > 0')
-    expect(page.locator('#replay-tuning')).to_be_hidden()
-print('browser_replay_test: room controls, pacing, verification and live continuation passed')
+    expect(page.get_by_label('Message delay', exact=True)).to_have_count(0)
+with browser_page('/?player=0&debug', setup=setup) as page:
+    record = (Path(__file__).parent / 'fixtures' / 'herd-win.json').read_bytes()
+    page.locator('#record-file').set_input_files({
+        'name': 'herd-win.json', 'mimeType': 'application/json', 'buffer': record})
+    session_eval(page, '''s => {
+        while (s.simticks < 17381) s.step({presentation:false});
+        s.state.events.length = 0;
+    }''')
+    assert session_eval(page, 's => s.state.player.gliding')
+    until(page, 's => s.state.tuneWait != null')
+    assert not session_eval(page, 's => s.state.player.gliding')
+    landed = session_eval(page, 's => s.simticks')
+    remaining = session_eval(page, 's => s.state.stall')
+    page.evaluate("window.dispatchEvent(new Event('blur'))")
+    held(page, 'focus')
+    page.clock.run_for(int(remaining * 1000 / 60) + 1000)
+    assert session_eval(page, 's => s.simticks') == landed
+    assert session_eval(page, 's => s.state.tuneWait') is None
+    page.locator('#screen').dispatch_event('pointerenter', {'pointerType': 'mouse'})
+    until(page, 's => s.simticks > ' + str(landed))
+    assert not session_eval(page, 's => s.playbackError')
+print('browser_replay_test: room controls, pacing, landing, song resume and live continuation passed')

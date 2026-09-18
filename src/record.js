@@ -69,7 +69,7 @@ export class Session {
     this.previousFire = false;
     this.viewerFire = false;
     this.passages = [];
-    this.normalSpeedActions = true;
+    this.pendingLanding = null;
     this.uiFire = true;
     this.history = [];
     this.path = [];
@@ -185,6 +185,7 @@ export class Session {
     const presentation = { stall: this.state.stall, tuneWait: this.state.tuneWait, events: this.state.events.length };
     const s = this.state;
     const capture = this.playback && replayPresentation;
+    const previousPanel = s.panel.slice();
     let panel = Array.from(s.panel).join(',');
     const eventStart = s.events.length;
     executeCommand(s, name, choices, capture ? () => {
@@ -199,7 +200,10 @@ export class Session {
     } : null);
     if (capture && this.passages.length) {
       this.finalPanel = s.panel.slice();
-      this.presentPassage();
+      if (this.airborne && !s.resting && !s.progress.won) {
+        this.pendingLanding = s.visit;
+        s.panel.set(previousPanel);
+      } else this.presentPassage();
     }
     if (this.playback) this.commandMessage = !this.state.resting && !this.state.progress.won;
     if (presented) {
@@ -220,6 +224,7 @@ export class Session {
   }
 
   discardPresentation() {
+    this.pendingLanding = null;
     this.passages.length = 0;
     if (this.finalPanel) {
       this.state.panel.set(this.finalPanel);
@@ -234,7 +239,17 @@ export class Session {
     if (this.playback && (++this.work > MAX_WORK || this.simticks > MAX_SIMTICKS)) throw new Error('Recording simulation work limit exceeded; endpoint unreachable');
     const s = this.state;
     if (!presentation) this.discardPresentation();
-    if (this.playback && this.finalPanel) {
+    if (this.pendingLanding != null) {
+      const next = this.sourceRecord.events[this.eventIndex];
+      if (!this.airborne || s.visit !== this.pendingLanding
+          || (next?.command && next.simticks === this.simticks)) {
+        this.pendingLanding = null;
+        this.presentPassage();
+        this.frame++;
+        return true;
+      }
+    }
+    if (this.playback && this.finalPanel && this.pendingLanding == null) {
       if (s.stall) {
         this.readViewerSkip();
         if (s.stall) tick(s);
@@ -266,7 +281,7 @@ export class Session {
       } else if (this.read('t', 'trigger').press && this.skippable) this.skipTune();
     }
     const tune = s.tuneWait;
-    if (this.commandMessage && !s.stall && !s.verb && s.active) {
+    if (this.commandMessage && this.pendingLanding == null && !s.stall && !s.verb && s.active) {
       clearPanel(s);
       this.commandMessage = false;
     }
@@ -390,15 +405,16 @@ export class Session {
     this.handoff();
   }
 
-  get playbackDelay() {
-    if (this.playback && this.state.tuneWait != null) return 1000 / 60;
+  get airborne() {
     const p = this.state.player;
-    const airborne = p.gliding || p.leaping || p.fallen > 0
+    return p.gliding || p.leaping || p.fallen > 0
       || !isSupport(this.state, cell(this.state, p.col, p.row + 1));
-    const idle = isIdle(this.lastJoy) && !airborne;
-    if (this.playback && this.normalSpeedActions && (this.state.verb || this.state.stall
-        || this.state.resting || this.state.creature)) return 1000 / 60;
-    return this.playback && (idle || this.state.verb || this.state.stall) ? 0 : 1000 / 60;
+  }
+
+  get playbackDelay() {
+    if (this.state.tuneWait != null || this.state.verb || this.state.stall
+        || this.state.resting || this.state.creature) return 1000 / 60;
+    return this.playback && isIdle(this.lastJoy) && !this.airborne ? 0 : 1000 / 60;
   }
   nextRoom() {
     if (!this.playback) return;
@@ -447,7 +463,6 @@ export class Session {
     restored.playback = true;
     restored.sourceRecord = copy(source);
     restored.totalRoomChanges = source.checkpoint.visit - restored.startVisit;
-    restored.normalSpeedActions = this.normalSpeedActions;
     restored.checkEndpoint = () => {};
     while (restored.simticks < target.simticks || restored.eventIndex < target.eventIndex) {
       restored.step({ presentation: false });

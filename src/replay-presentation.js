@@ -1,6 +1,6 @@
 export class ReplayPresentation {
   constructor() {
-    this.messageDelay = 500;
+    this.messageDelay = 750;
     this.reset();
   }
 
@@ -8,6 +8,8 @@ export class ReplayPresentation {
     this.session = null;
     this.panel = '';
     this.elapsed = 0;
+    this.pausedSongElapsed = 0;
+    this.pausedSongFrames = 0;
   }
 
   observe(session) {
@@ -22,13 +24,23 @@ export class ReplayPresentation {
     return true;
   }
 
-  advance(session, elapsed, { running = true, seeking = false } = {}) {
+  advance(session, elapsed, { running = true, seeking = false, musicRunning = true } = {}) {
     if (!session.playback || session.playbackDone || seeking) {
       this.reset();
       return;
     }
     this.observe(session);
-    if (running) this.elapsed += elapsed;
+    if (running) {
+      this.elapsed += elapsed;
+      this.pausedSongElapsed = 0;
+      this.pausedSongFrames = 0;
+    } else if (musicRunning && session.finalPanel && session.state.tuneWait != null) {
+      this.pausedSongElapsed += elapsed;
+      const frames = Math.floor(this.pausedSongElapsed * 60 / 1000);
+      session.state.stall = Math.max(0, session.state.stall - (frames - this.pausedSongFrames));
+      this.pausedSongFrames = frames;
+      if (!session.state.stall) session.state.tuneWait = null;
+    }
   }
 
   ready(session) {

@@ -987,7 +987,7 @@ test('backward reconstruction preserves total rooms including the starting room'
   assert.equal(start.totalRoomChanges + 1, 1);
 });
 
-test('visible replay actions use normal speed and the trial toggle restores acceleration', async () => {
+test('visible replay actions use normal speed while supported idle time accelerates', async () => {
   const { recording, idle } = await rewindFixture();
   const replay = Session.watch(data, idle, recording);
   replay.state.creature = null;
@@ -995,11 +995,72 @@ test('visible replay actions use normal speed and the trial toggle restores acce
   for (const [key, value] of [['verb', {}], ['stall', 20], ['resting', {}], ['creature', {}]]) {
     replay.state[key] = value;
     assert.equal(replay.playbackDelay, 1000 / 60, key);
-    replay.normalSpeedActions = false;
-    assert.equal(replay.playbackDelay, 0, `${key} with legacy pacing`);
-    replay.normalSpeedActions = true;
     replay.state[key] = key === 'stall' ? 0 : null;
   }
+});
+
+test('animal PENSE replay finishes landing before presenting its song', () => {
+  const record = winningRecord('herd-win.json');
+  const replay = Session.watch(data, { read: () => IDLE }, record);
+  const eventIndex = record.events.findIndex(event => event.command === 'PENSE' && event.simticks === 17381);
+  while (replay.eventIndex < eventIndex) replay.step({ presentation: false });
+  replay.state.events.length = 0;
+  assert.equal(replay.state.player.gliding, true);
+  replay.step();
+  assert.notEqual(replay.pendingLanding, null);
+  assert.equal(replay.state.tuneWait, null);
+  assert.equal(replay.state.events.some(event => 'music' in event), false);
+  for (let i = 0; i < 100 && replay.pendingLanding != null; i++) replay.step();
+  assert.equal(replay.pendingLanding, null);
+  assert.equal(replay.state.player.gliding, false);
+  assert.notEqual(replay.state.tuneWait, null);
+  assert.match(panelLines(replay.state).join(' '), /MESSAGE/);
+  const landed = checkpoint(replay.state);
+  advanceSession(replay, 30);
+  assert.deepEqual(checkpoint(replay.state), landed);
+  while (!replay.playbackDone) advanceSession(replay);
+  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+  assert.deepEqual(replay.record.events, record.events);
+});
+
+for (const action of ['seek', 'continue']) {
+  test(`${action} discards a deferred landing message`, () => {
+    const record = winningRecord('herd-win.json');
+    const replay = Session.watch(data, { read: () => IDLE }, record);
+    while (replay.simticks < 17381) replay.step({ presentation: false });
+    replay.step();
+    assert.notEqual(replay.pendingLanding, null);
+    const at = checkpoint(replay.state);
+    if (action === 'seek') {
+      replay.nextRoom();
+      assert.equal(replay.pendingLanding, null);
+      while (!replay.playbackDone) replay.nextRoom();
+      assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+    } else {
+      replay.continueLive();
+      assert.equal(replay.pendingLanding, null);
+      assert.equal(replay.state.tuneWait, null);
+      assert.deepEqual(checkpoint(replay.state), at);
+      replay.step();
+      assert.ok(replay.simticks > at.simticks);
+    }
+  });
+}
+
+test('an airborne message is shown before the next same-tick command', () => {
+  const record = winningRecord('herd-win.json');
+  const replay = Session.watch(data, { read: () => IDLE }, record);
+  while (replay.simticks < 15946) replay.step({ presentation: false });
+  replay.step();
+  const next = record.events[replay.eventIndex];
+  assert.equal(next.command, 'RENEW');
+  assert.equal(next.simticks, replay.simticks);
+  replay.step();
+  assert.notEqual(replay.state.tuneWait, null);
+  assert.match(panelLines(replay.state).join(' '), /MESSAGE/);
+  assert.equal(record.events[replay.eventIndex], next);
+  while (!replay.playbackDone) advanceSession(replay);
+  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
 });
 
 test('unskipped Spirit Leader songs each finish before the next passage advances', async () => {

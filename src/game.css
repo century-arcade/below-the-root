@@ -63,9 +63,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #replay-navigation { display: flex; align-items: center; justify-content: center; gap: 4px; }
 #replay-navigation button { touch-action: manipulation; }
 #replay-progress { display: block; margin-top: 8px; }
-#replay-tuning { margin-top: 8px; font-size: 12px; }
-#replay-tuning label:has(input) { display: block; }
-#play-from-replay { font: var(--game-font-size)/1 'Green-Sky', monospace; text-transform: uppercase; }
+#replay-navigation button, #replay-progress { font: var(--game-font-size)/1 'Green-Sky', monospace; text-transform: uppercase; }
 #command-menu { position: absolute; left: 0; top: var(--menu-top); width: 100%; height: var(--menu-height); padding: 0; border: 0; background: transparent; }
 #command-menu:focus-visible { outline-offset: -2px; }
 

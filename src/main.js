@@ -215,12 +215,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const replayControls = document.getElementById('replay-controls');
   const replayProgress = document.getElementById('replay-progress');
   const presentation = new ReplayPresentation();
-  const messageDelay = document.getElementById('replay-message-delay');
-  const normalSpeed = document.getElementById('replay-normal-speed');
-  messageDelay.oninput = () => {
-    presentation.messageDelay = Number(messageDelay.value);
-    document.getElementById('replay-message-ms').value = `${messageDelay.value} ms`;
-  };
   const roomButtons = [...document.querySelectorAll('[data-replay-rooms]')];
   for (const button of roomButtons) button.onclick = () => {
     if (!powered || paused) return;
@@ -345,6 +339,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const suspendFocus = () => { inactive = true; dropInput(); };
   const restoreFocus = () => {
     if (!inactive || document.hidden) return;
+    presentation.advance(session, Math.max(0, performance.now() - last),
+      { running: false, musicRunning: powered && !paused });
     dropInput(); inactive = false; last = performance.now();
   };
   const release = () => {
@@ -635,12 +631,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       seekRepeatAt = now + 100;
     }
     const running = isRunning();
-    const elapsed = running ? Math.max(0, now - last) : 0;
-    acc += Math.min(elapsed, 250);
+    const elapsed = Math.max(0, now - last);
+    if (running) acc += Math.min(elapsed, 250);
     last = now;
     gamepad.poll();
-    presentation.advance(session, elapsed, { running, seeking: seekRoom != null });
-    session.normalSpeedActions = normalSpeed.checked;
+    presentation.advance(session, elapsed, { running, seeking: seekRoom != null, musicRunning: powered && !paused });
     let budget = 2000;
     while (running && budget-- > 0) {
       if (seekRoom == null && !presentation.ready(session)) { acc = 0; break; }
