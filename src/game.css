@@ -110,7 +110,8 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
   #monitor[data-surround="portable"] #volume { width: 64px; }
 }
 
-#monitor-controls #fullscreen { flex: 0 0 42px; height: 42px; }
+#monitor-controls #fullscreen { display: grid; place-items: center; flex: none; width: 29px; height: 25px; padding: 3px; margin: 5px; color: #e2d5bc; background: linear-gradient(#6a6253, #514a3e); border: 1px solid #40392d; border-radius: 2px; box-shadow: inset 0 2px 4px #0008; }
+#fullscreen svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 #music-notes { --groove: #514d4166; position: relative; flex: 1; min-width: 40px; height: 88px; overflow: hidden; pointer-events: none; container-type: inline-size; }
 #music-notes > .staff-lines { position: absolute; top: 22px; left: 0; width: 100%; height: 34px; fill: none; stroke: var(--groove); stroke-width: 1px; shape-rendering: crispEdges; }
 #music-notes > [data-register] { position: relative; top: -15px; display: block; height: 87px; }

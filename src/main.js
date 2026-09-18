@@ -355,6 +355,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       overlay.screen.hidden = true;
       overlay.button?.setAttribute('aria-expanded', 'false');
       overlay = null;
+      helpButton.hidden = false;
     }
     dropInput(); held = false; inactive = false; last = performance.now();
   };
@@ -366,7 +367,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     button?.setAttribute('aria-expanded', 'true');
   }
   function openHelp(startup = false) {
-    if (paused) return;
+    if (paused || overlay?.screen === mapScreen) return;
     if (!helpScreen.hidden) return closeHelp();
     startupHelp = startup;
     if (startup) hold();
@@ -387,11 +388,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }
   function openMap() {
     if (paused) return;
+    closeHelp();
     const path = state.quest ? session.path : [];
     const view = state.quest ? state : { ...state, room: null, objects: data.objects };
     drawMap(view, visitedRooms(path, data),
       state.quest ? mapLocation(data, path, state.room) : null, mapGrid, visitedEmptyRooms(path));
     openOverlay(mapScreen, mapButton);
+    helpButton.hidden = true;
     centerMap();
   }
   function showView(view) {
