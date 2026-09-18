@@ -21,7 +21,7 @@ def main():
         raise ValueError('Push the checked-out branch by itself to prepare its version.')
     version_file = Path(git('rev-parse', '--show-toplevel').stdout.strip()) / 'VERSION'
     version = git('show', 'HEAD:VERSION').stdout.strip()
-    if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version):
+    if not re.fullmatch(r'(0|[1-9][0-9]*)\.[0-9]+', version):
         raise ValueError('VERSION must contain major.minor, for example 0.90 or 1.0.')
     remote_oid = branches[0][3]
     # A new branch or an explicitly changed version is ready to publish as is.
@@ -34,8 +34,8 @@ def main():
         return 0
     if git('status', '--porcelain', '--untracked-files=no').stdout.strip():
         raise ValueError('Commit or stash tracked changes before the automatic version bump.')
-    major, minor = map(int, version.split('.'))
-    bumped = f'{major}.{minor + 1}'
+    major, minor = version.split('.')
+    bumped = f'{major}.{str(int(minor) + 1).zfill(len(minor))}'
     original = version_file.read_text()
     version_file.write_text(bumped + '\n')
     result = git('commit', '--only', '-m', f'Bump version to {bumped}', '--', 'VERSION', check=False)
