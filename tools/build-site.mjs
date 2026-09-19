@@ -53,10 +53,11 @@ export function buildSite(out) {
       styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
       content: page === 'play' ? read('play.html').replace('{{help}}', () => help)
         : `<main id="${page}" class="reading-page">\n${marked.parse(read(`${page}.md`))}</main>`,
-      scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>`,
+      scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>
+<script type="module">import { startAnalytics } from "/analytics.js"; startAnalytics();</script>`,
     };
     if (output === 'index') {
-      values.scripts = '<script type="module">import { enterSite } from "/site.js"; if (enterSite()) import("/main.js");</script>';
+      values.scripts = '<script type="module">import { enterSite } from "/site.js"; import { startAnalytics } from "/analytics.js"; if (enterSite()) { import("/main.js"); startAnalytics(); }</script>';
     }
     const metadata = { ...pages[output === 'index' ? 'play' : output], image: `${origin}/assets/box/screen.png` };
     writeFileSync(join(out, `${output}.html`), renderPage(template, metadata, values));

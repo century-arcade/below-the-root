@@ -69,10 +69,21 @@ test('map retains the game markup and only index bootstraps legacy hash routes',
   const pages = Object.fromEntries(['index', 'play', 'map', 'about', 'links']
     .map(page => [page, readFileSync(join(out, `${page}.html`), 'utf8')]));
   assert.equal(pages.map.split('<body>')[1], pages.play.split('<body>')[1]);
-  assert.match(pages.index, /if \(enterSite\(\)\) import\("\/main.js"\)/);
+  assert.match(pages.index, /if \(enterSite\(\)\) \{ import\("\/main.js"\); startAnalytics\(\); \}/);
   for (const page of ['play', 'map', 'about', 'links']) {
     assert.doesNotMatch(pages[page], /enterSite/);
     assert.ok(pages[page].includes(`src="/${page === 'play' || page === 'map' ? 'main' : 'reading'}.js"`));
+  }
+});
+
+test('every public page initializes the shared analytics loader once', t => {
+  const out = outputDirectory(t);
+  buildSite(out);
+  for (const page of ['index', 'play', 'map', 'about', 'links']) {
+    const html = readFileSync(join(out, `${page}.html`), 'utf8');
+    assert.equal(html.match(/from "\/analytics.js"/g)?.length, 1);
+    assert.equal(html.match(/startAnalytics\(\)/g)?.length, 1);
+    assert.doesNotMatch(html, /gc\.zgo\.at|goatcounter\.com/);
   }
 });
 
