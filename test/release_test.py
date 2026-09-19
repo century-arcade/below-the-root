@@ -88,6 +88,19 @@ class ReleaseTest(unittest.TestCase):
             package(self.repo, self.site, self.iso, self.output)
         self.assertEqual(self.output.read_bytes(), b'previous release')
 
+    def test_archive_preserves_favicon_and_social_preview_bytes(self):
+        assets = ('assets/favicon.svg', 'assets/box/screen.png')
+        project = Path(__file__).resolve().parent.parent
+        for name in assets:
+            target = self.site / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((project / name).read_bytes())
+        package(self.repo, self.site, self.iso, self.output)
+        with ZipFile(self.output) as archive:
+            for name in assets:
+                self.assertEqual(archive.read(PREFIX + 'site/' + name),
+                                 (project / name).read_bytes())
+
     def test_winning_recordings_are_available_outside_source(self):
         fixtures = self.repo / 'test/fixtures'
         fixtures.mkdir(parents=True)

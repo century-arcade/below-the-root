@@ -31,6 +31,7 @@ build: node_modules/.package-lock.json
 	node tools/build-site.mjs $(BUILD)
 	cp $(SPEC)/*.json $(BUILD)/data/
 	cp assets/*.json assets/*.png assets/*.woff $(BUILD)/assets/
+	cp assets/favicon.svg $(BUILD)/assets/
 	cp assets/*.ttf assets/*-OFL.txt $(BUILD)/assets/
 	cp assets/*.otf assets/*-LICENSE.txt $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
