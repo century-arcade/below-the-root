@@ -6,11 +6,9 @@
 
 ## Recording playback
 
-Seek back/forward by room:
-
-- **Left/Right**: 1 room
-- **Shift+Left/Right**: 10 rooms
+- **Left/Right**: Go back/forward 1 room
+- **Shift+Left/Right**: Go back/forward 10 rooms
 
 ## Developer mode
 
-- **Backspace**: Undo the last room.
+- **Backspace**: Rewind to previous room.
