@@ -1,10 +1,12 @@
-"""Build a preservation ZIP with the original media, offline site, and source."""
+"""Build a public or preservation ZIP with the offline site and source."""
 import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
+import shutil
 import subprocess
 import tempfile
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
@@ -17,6 +19,10 @@ REQUIRED_ORIGINALS = (
     'manual.txt', 'map.jpg', 'readme.txt', 'LEGAL', 'spoilers/walkthru.txt',
     'boot/bzImage', 'boot/isolinux.bin', 'boot/isolinux/isolinux.cfg',
 )
+PUBLIC_EXCLUDED = {
+    '.git', '.meta', '.aws', '.ssh', '.netlify', '_cbox', 'iso', 'secrets',
+    'node_modules', '.venv', 'venv', '__pycache__', '_build', 'build', 'dist',
+}
 
 
 def git(root, *args):
@@ -30,6 +36,8 @@ def validate_originals(iso):
 
 
 def files_under(directory):
+    if directory.is_symlink():
+        raise ValueError(f'Refusing to archive a symlink: {directory}')
     for path in sorted(directory.rglob('*')):
         if path.is_symlink():
             raise ValueError(f'Refusing to archive a symlink: {path}')
@@ -37,30 +45,55 @@ def files_under(directory):
             yield path.relative_to(directory).as_posix(), path
 
 
-def package(root, site, iso, output):
-    validate_originals(iso)
+def source_files(root, mode):
+    paths = git(root, 'ls-files', '-z').decode().split('\0')
+    for name in filter(None, paths):
+        parts = Path(name).parts
+        if mode == 'public' and (
+            PUBLIC_EXCLUDED.intersection(parts)
+            or name.startswith('disasm/out/')
+            or any(part == '.env' or part.startswith('.env.') for part in parts)
+            or Path(name).suffix in {'.pyc', '.pem', '.key'}
+        ):
+            continue
+        path = root
+        for part in parts:
+            path /= part
+            if path.is_symlink():
+                raise ValueError(f'Refusing to archive a symlink: {path}')
+        if path.is_file():
+            yield name, path
+
+
+def release_readme(mode):
+    template = (ROOT / 'tools/release-README.txt').read_text(encoding='utf-8')
+    return re.sub(r'\[preservation\]\n(.*?)\[/preservation\]\n',
+                  lambda match: match[1] if mode == 'preservation' else '',
+                  template, flags=re.DOTALL).replace('{edition}', mode.upper()).encode()
+
+
+def package(root, site, iso, output, mode='preservation'):
+    if mode not in ('public', 'preservation'):
+        raise ValueError(f'Unknown release mode: {mode}')
+    if mode == 'preservation':
+        validate_originals(iso)
     revision = git(root, 'rev-parse', 'HEAD').decode().strip()
-    # Stable archive metadata: repeated releases of identical inputs match byte for byte.
     epoch = int(os.environ.get('SOURCE_DATE_EPOCH') or git(root, 'show', '-s', '--format=%ct', 'HEAD'))
     timestamp = datetime.fromtimestamp(max(315532800, epoch), timezone.utc).timetuple()[:6]
-    paths = git(root, 'ls-files', '-z').decode().split('\0')
-    files = {}
-    for name in filter(None, paths):
-        path = root / name
-        if path.is_symlink():
-            raise ValueError(f'Refusing to archive a symlink: {path}')
-        if path.is_file():
-            files['source/' + name] = path
-    for folder, directory in [('site', site), ('iso', iso)]:
+    files = {'source/' + name: path for name, path in source_files(root, mode)}
+    directories = [('site', site)]
+    if mode == 'preservation':
+        directories.append(('iso', iso))
+    for folder, directory in directories:
         for name, path in files_under(directory):
             files[f'{folder}/{name}'] = path
     for name in tuple(files):
         if name.startswith('source/test/fixtures/') and name.endswith('-win.json'):
             files['recordings/' + files[name].name] = files[name]
     files['serve.py'] = ROOT / 'tools/serve-release.py'
-    files['README.txt'] = ROOT / 'tools/release-README.txt'
     changes = git(root, 'status', '--porcelain', '--untracked-files=no').decode().splitlines()
     metadata = json.dumps({
+        'mode': mode,
         'source_revision': revision,
         'source_date_epoch': epoch,
         'source_snapshot': 'Tracked working-tree files; untracked files and Git history excluded.',
@@ -84,27 +117,39 @@ def package(root, site, iso, output):
 
             for name, path in sorted(files.items()):
                 write(name, path.read_bytes(), bool(path.stat().st_mode & 0o111))
+            write('README.txt', release_readme(mode))
             write('release.json', metadata)
             write('SHA256SUMS', ''.join(hashes).encode())
         os.replace(temporary, output)
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
-    return len(files) + 2
+    return len(files) + 3
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--mode', choices=('public', 'preservation'), default='preservation')
     parser.add_argument('--iso', type=Path, default=ROOT / 'iso')
-    parser.add_argument('--output', type=Path, default=ROOT / 'dist/below-the-root-preservation.zip')
+    parser.add_argument('--output', type=Path)
     args = parser.parse_args()
+    if args.output is None:
+        filename = 'below-the-root.zip' if args.mode == 'public' else 'below-the-root-preservation.zip'
+        args.output = ROOT / 'dist' / filename
     try:
-        validate_originals(args.iso)
-        # A fresh build avoids carrying old screenshots or removed assets from _build/.
+        if args.mode == 'preservation':
+            validate_originals(args.iso)
         with tempfile.TemporaryDirectory(prefix='btr-release-') as directory:
             site = Path(directory) / 'site'
-            subprocess.run(['make', 'build', f'BUILD={site}'], cwd=ROOT, check=True)
-            count = package(ROOT, site, args.iso, args.output)
+            build_root = ROOT
+            if args.mode == 'public':
+                build_root = Path(directory) / 'source'
+                for name, path in source_files(ROOT, args.mode):
+                    target = build_root / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(path, target)
+            subprocess.run(['make', 'build', f'BUILD={site}'], cwd=build_root, check=True)
+            count = package(ROOT, site, args.iso, args.output, args.mode)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         parser.exit(1, f'release: {error}\n')
     print(f'{args.output}: {count} files, {args.output.stat().st_size:,} bytes')

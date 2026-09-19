@@ -70,15 +70,18 @@ then run the suite:
 ```
 make browser-test PY=python3
 BTR_URL=http://localhost:8000 python3 test/browser_replay_test.py
-python3 test/browser_release_test.py dist/below-the-root-preservation.zip
+make release-public
+python3 test/browser_release_test.py dist/below-the-root.zip
 ```
 
 `BTR_URL` selects the running site. `browser_release_test.py` is excluded
 from `make browser-test`: it is a separate manual release gate. Build the
-archive with `make release` before running it. It extracts the archive and
-serves it itself, checking offline operation with external requests blocked.
-`make release` needs the original media under
-`iso/` (or the `ISO` override). The browser suite covers its named concerns,
+public archive with `make release-public` before running it; no `iso/` directory
+is needed. It extracts the archive and serves it itself, checking offline
+operation with external requests blocked. To verify preservation packaging,
+build with `make release` and pass `dist/below-the-root-preservation.zip` to the
+same browser script. Preservation mode needs the original media under `iso/`
+(or the `ISO` override). The browser suite covers its named concerns,
 including autosave/resume, input, navigation, recordings, and mocked GitHub
 login and reporting.
 

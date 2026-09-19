@@ -1,4 +1,4 @@
-BELOW THE ROOT — PRESERVATION EDITION
+BELOW THE ROOT — {edition} EDITION
 
 Unzip the entire archive before playing. You need Python 3.9 or newer and a
 modern browser. No npm install, emulator, Netlify account, or internet connection
@@ -26,16 +26,18 @@ own computer and serves site/, not the source or original materials.
 
 CONTENTS
 
+[preservation]
 iso/             Everything supplied in the project's iso/ directory, unchanged:
                  both original G64 disks, the bootable C64 ISO, boot files, box
                  scans, manual, map, walkthrough, credits, and legal notices.
+[/preservation]
 site/            Ready-to-run HTML, CSS, JavaScript, data, art, music, and fonts.
 recordings/      All winning quest fixtures, ready to import as recordings.
 source/          Git-tracked project files as they were on disk when packaged:
                  port source, extracted assets, disassembly, research/specs,
                  build tools, tests, and dependency versions. No Git history.
 serve.py         Local server and browser launcher (Python standard library).
-release.json     Source revision and any tracked working-tree changes.
+release.json     Archive mode, source revision and tracked working-tree changes.
 SHA256SUMS       SHA-256 hashes of every other file, relative to this folder.
 
 On systems with sha256sum, verify the extracted files with:
@@ -44,23 +46,29 @@ On systems with sha256sum, verify the extracted files with:
 
 External articles and GitHub links still need internet access. GitHub login and
 issue submission require the hosted site's backend; local recording downloads
-and imports work offline. The original disk images require a compatible C64
-emulator or hardware; that software is not needed for the browser port.
+and imports work offline.
+[preservation]
+The original disk images require a compatible C64 emulator or hardware;
+that software is not needed for the browser port.
+[/preservation]
 
 See source/README.md for development and source/docs/tooling.md for rebuilding
 the original-game analysis. To rebuild the browser site, run make build in
 source/ (requires Make, Node.js, and npm; installing Marked may need internet).
+[preservation]
 For tools that expect source/iso/, copy the preserved iso/ directory there.
-Winning recordings for Genaa, Herd, Neric, and Pomma are in recordings/.
+[/preservation]
+Winning recordings for every playable character are in recordings/.
 Import one with the debug tools' Load recording button to watch it offline.
 The source fixtures are in source/test/fixtures/.
 From source/, verify each winning recording with:
 
-    node tools/playthrough.mjs ../recordings/genaa-win.json --expect-win
-    node tools/playthrough.mjs ../recordings/herd-win.json --expect-win
-    node tools/playthrough.mjs ../recordings/neric-win.json --expect-win
-    node tools/playthrough.mjs ../recordings/pomma-win.json --expect-win
+    for recording in ../recordings/*-win.json; do
+        node tools/playthrough.mjs "$recording" --expect-win
+    done
 
-The original game and materials retain their original copyrights and notices;
-see iso/LEGAL and iso/readme.txt. Cinzel's SIL Open Font License is included in
-site/assets/cinzel-OFL.txt.
+The original game and materials retain their original copyrights and notices.
+[preservation]
+See iso/LEGAL and iso/readme.txt for the included original materials.
+[/preservation]
+Cinzel's SIL Open Font License is included in site/assets/cinzel-OFL.txt.

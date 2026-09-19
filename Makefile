@@ -6,6 +6,7 @@ CONTEXT ?= dev
 PYTHON ?= python3
 ISO ?= iso
 RELEASE ?= dist/below-the-root-preservation.zip
+PUBLIC_RELEASE ?= dist/below-the-root.zip
 NETLIFY_BIN := $(shell p=$$(command -v netlify 2>/dev/null); if [ -f "$$p" ] && [ -x "$$p" ]; then printf '%s' "$$p"; fi)
 NETLIFY ?= $(if $(NETLIFY_BIN),$(NETLIFY_BIN),npx --yes --package=netlify-cli@27.5.0 netlify)
 # Poll by default: shared Linux users can exhaust their inotify instance limit.
@@ -17,7 +18,7 @@ TEST_TIMEOUT ?= 60
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve release test browser-test poster screenshot clean install-hooks
+.PHONY: build serve release release-public test browser-test poster screenshot clean install-hooks
 
 install-hooks:
 	git config core.hooksPath .githooks
@@ -38,6 +39,9 @@ build: node_modules/.package-lock.json
 
 release:
 	$(PYTHON) tools/release.py --iso "$(ISO)" --output "$(RELEASE)"
+
+release-public:
+	$(PYTHON) tools/release.py --mode public --output "$(PUBLIC_RELEASE)"
 
 serve: build
 	@if curl -sf -o /dev/null $(BTR_URL)/; then echo "already serving $(BUILD) at $(BTR_URL); a new build is picked up as is"; else \
