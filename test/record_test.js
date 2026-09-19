@@ -4,10 +4,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Session, checkpoint, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, validateRecord } from '../src/record.js';
 import { exportSave } from '../src/save.js';
-import { playTime } from '../src/progress.js';
+import { completion, playTime } from '../src/progress.js';
 import { IDLE, Keyboard, Gamepad } from '../src/input.js';
 import { enterRoom } from '../src/world.js';
 import { CLASS } from '../src/data.js';
+import { facingCreature } from '../src/creatures.js';
 import { startTune, SFX } from '../src/audio.js';
 import { panelLines } from '../src/panel.js';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -20,7 +21,6 @@ const winningFixtures = readdirSync(new URL('./fixtures/', import.meta.url))
 const fixtureURL = name => new URL(`./fixtures/${name}`, import.meta.url);
 const winningRecords = new Map(winningFixtures.map(name => [name, JSON.parse(readFileSync(fixtureURL(name)))]));
 const winningRecord = name => winningRecords.get(name);
-const landingRecord = JSON.parse(readFileSync(fixtureURL('herd-landing.json')));
 
 function advanceSession(session, count = 1) {
   for (let i = 0; i < count; i++) {
@@ -849,14 +849,14 @@ for (const name of winningFixtures) {
 }
 
 test('the playthrough tool reports a verified win, its day and completion', () => {
-  const name = 'herd-landing.json';
-  const record = landingRecord;
+  const name = 'herd-win.json';
+  const record = winningRecord(name);
   const report = execFileSync(process.execPath, [
     fileURLToPath(new URL('../tools/playthrough.mjs', import.meta.url)),
     fileURLToPath(fixtureURL(name)), '--expect-win',
   ], { encoding: 'utf8' });
   assert.match(report, new RegExp(`day ${record.checkpoint.clock.day}\\b`));
-  assert.match(report, /65% complete; Raamo saved/);
+  assert.ok(report.includes(`${completion(record.checkpoint)}% complete; Raamo saved`));
   assert.match(report, /Gameplay checkpoint verified/);
 });
 
@@ -1000,43 +1000,69 @@ test('visible replay actions use normal speed while supported idle time accelera
   }
 });
 
-test('animal PENSE replay finishes landing before presenting its song', () => {
-  const record = landingRecord;
-  const replay = Session.watch(data, { read: () => IDLE }, record);
-  const eventIndex = record.events.findIndex(event => event.command === 'PENSE' && event.simticks === 17381);
-  while (replay.eventIndex < eventIndex) replay.step({ presentation: false });
-  replay.state.events.length = 0;
+async function airborneAnimalRecording({ sameTickRenew = false } = {}) {
+  const { imported, idle, advance, advanceUntil } = await recordingFixture();
+  const s = imported(state => {
+    enterRoom(state, data.roomByCode.get('32'), 1, 3);
+    Object.assign(state.player, { spiritLimit: 10, spiritEnergy: 10 });
+    state.objects.find(o => o.exists && o.class === CLASS.SHUBA).carried = true;
+  });
+  assert.equal(s.state.creature.def.kind, 'pensable_animal');
+  assert.equal(s.state.flags[s.state.creature.def.state_id].gift, false);
+  advanceUntil(s, x => x.state.player.fallen >= 2, 'fall before steering toward animal');
+  s.live = { read: () => J.right };
+  advanceUntil(s, x => x.state.player.gliding && facingCreature(x.state), 'glide facing animal');
+  s.live = idle;
+  const eventIndex = s.record.events.length;
+  s.command('PENSE');
+  assert.equal(s.state.animalsPensed, 1);
+  if (sameTickRenew) s.command('RENEW');
+  advanceUntil(s, x => !x.airborne && !x.state.stall, 'finish song and land', 2000);
+  advance(s, 30);
+  s.command('RENEW');
+  const record = s.snapshot();
+  validateRecord(record, data);
+  const replay = Session.watch(data, idle, record);
+  advanceUntil(replay, x => x.eventIndex === eventIndex, 'reach airborne PENSE');
+  assert.equal(record.events[replay.eventIndex].command, 'PENSE');
   assert.equal(replay.state.player.gliding, true);
+  replay.state.events.length = 0;
+  return { record, replay, advanceUntil };
+}
+
+test('animal PENSE replay finishes landing before presenting its song', async () => {
+  const { record, replay, advanceUntil } = await airborneAnimalRecording();
   replay.step();
   assert.notEqual(replay.pendingLanding, null);
   assert.equal(replay.state.tuneWait, null);
   assert.equal(replay.state.events.some(event => 'music' in event), false);
-  for (let i = 0; i < 100 && replay.pendingLanding != null; i++) replay.step();
-  assert.equal(replay.pendingLanding, null);
+  assert.doesNotMatch(panelLines(replay.state).join(' '), /MESSAGE/);
+  advanceUntil(replay, x => x.pendingLanding == null, 'land before presenting animal message');
   assert.equal(replay.state.player.gliding, false);
+  assert.equal(replay.airborne, false);
   assert.notEqual(replay.state.tuneWait, null);
   assert.match(panelLines(replay.state).join(' '), /MESSAGE/);
   const landed = checkpoint(replay.state);
   advanceSession(replay, 30);
   assert.deepEqual(checkpoint(replay.state), landed);
-  while (!replay.playbackDone) advanceSession(replay);
+  advanceUntil(replay, x => x.playbackDone, 'finish landing replay', 2000);
   assert.deepEqual(checkpoint(replay.state), record.checkpoint);
   assert.deepEqual(replay.record.events, record.events);
+  assert.deepEqual(replay.snapshot(), record);
 });
 
 for (const action of ['seek', 'continue']) {
-  test(`${action} discards a deferred landing message`, () => {
-    const record = landingRecord;
-    const replay = Session.watch(data, { read: () => IDLE }, record);
-    while (replay.simticks < 17381) replay.step({ presentation: false });
+  test(`${action} discards a deferred landing message`, async () => {
+    const { record, replay, advanceUntil } = await airborneAnimalRecording();
     replay.step();
     assert.notEqual(replay.pendingLanding, null);
     const at = checkpoint(replay.state);
     if (action === 'seek') {
       replay.nextRoom();
       assert.equal(replay.pendingLanding, null);
-      while (!replay.playbackDone) replay.nextRoom();
+      assert.equal(replay.state.tuneWait, null);
       assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+      assert.deepEqual(replay.record.events, record.events);
     } else {
       replay.continueLive();
       assert.equal(replay.pendingLanding, null);
@@ -1044,15 +1070,18 @@ for (const action of ['seek', 'continue']) {
       assert.deepEqual(checkpoint(replay.state), at);
       replay.step();
       assert.ok(replay.simticks > at.simticks);
+      advanceUntil(replay, x => !x.airborne, 'land after continuing live');
+      assert.equal(replay.state.tuneWait, null);
+      assert.doesNotMatch(panelLines(replay.state).join(' '), /MESSAGE/);
     }
+    assert.deepEqual(replay.passages, []);
   });
 }
 
-test('an airborne message is shown before the next same-tick command', () => {
-  const record = landingRecord;
-  const replay = Session.watch(data, { read: () => IDLE }, record);
-  while (replay.simticks < 15946) replay.step({ presentation: false });
+test('an airborne message is shown before the next same-tick command', async () => {
+  const { record, replay, advanceUntil } = await airborneAnimalRecording({ sameTickRenew: true });
   replay.step();
+  assert.notEqual(replay.pendingLanding, null);
   const next = record.events[replay.eventIndex];
   assert.equal(next.command, 'RENEW');
   assert.equal(next.simticks, replay.simticks);
@@ -1060,8 +1089,14 @@ test('an airborne message is shown before the next same-tick command', () => {
   assert.notEqual(replay.state.tuneWait, null);
   assert.match(panelLines(replay.state).join(' '), /MESSAGE/);
   assert.equal(record.events[replay.eventIndex], next);
-  while (!replay.playbackDone) advanceSession(replay);
+  const presented = checkpoint(replay.state);
+  advanceSession(replay, 30);
+  assert.deepEqual(checkpoint(replay.state), presented);
+  assert.equal(record.events[replay.eventIndex], next);
+  advanceUntil(replay, x => x.playbackDone, 'finish same-tick command replay', 2000);
   assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+  assert.deepEqual(replay.record.events, record.events);
+  assert.deepEqual(replay.snapshot(), record);
 });
 
 test('unskipped Spirit Leader songs each finish before the next passage advances', async () => {

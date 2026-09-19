@@ -154,13 +154,49 @@ with browser_page('/?player=0&debug', setup=setup) as page:
     assert session_eval(page, 's => !s.playback && s.simticks > 0')
     expect(page.get_by_label('Message delay', exact=True)).to_have_count(0)
 with browser_page('/?player=0&debug', setup=setup) as page:
-    record = (Path(__file__).parent / 'fixtures' / 'herd-landing.json').read_bytes()
+    fixture = session_eval(page, """async current => {
+        const {Session} = await import('/record.js');
+        const {newState, startQuest} = await import('/game.js');
+        const {enterRoom} = await import('/world.js');
+        const {exportSave} = await import('/save.js');
+        const {CLASS} = await import('/data.js');
+        const {IDLE} = await import('/input.js');
+        const {facingCreature} = await import('/creatures.js');
+        const data = current.state.data, idle = {read: () => IDLE};
+        const state = newState(data, idle);
+        startQuest(state, data.characters[0]);
+        enterRoom(state, data.roomByCode.get('32'), 1, 3);
+        Object.assign(state.player, {spiritLimit:10, spiritEnergy:10});
+        state.objects.find(o => o.exists && o.class === CLASS.SHUBA).carried = true;
+        const s = new Session(data, idle, {initial:{mode:'quest', character:0}, seed:123});
+        s.load(exportSave(state));
+        const advanceUntil = (done, what) => {
+            for (let i=0; i<2000 && !done(); i++) {
+                s.step();
+                s.state.events.length = 0;
+            }
+            if (!done()) throw Error(`Never ${what}; tick ${s.simticks}, ${JSON.stringify(s.place())}`);
+        };
+        advanceUntil(() => s.state.player.fallen >= 2, 'fell before steering');
+        s.live = {read: () => ({...IDLE, dx:1})};
+        advanceUntil(() => s.state.player.gliding && facingCreature(s.state), 'glided facing animal');
+        s.live = idle;
+        const eventIndex = s.record.events.length;
+        s.command('PENSE');
+        if (s.state.animalsPensed !== 1) throw Error('Airborne PENSE did not grant animal gift');
+        advanceUntil(() => !s.airborne && !s.state.stall, 'finished song and landed');
+        for (let i=0; i<30; i++) s.step();
+        s.command('RENEW');
+        return {record:s.snapshot(), eventIndex};
+    }""")
     page.locator('#record-file').set_input_files({
-        'name': 'herd-landing.json', 'mimeType': 'application/json', 'buffer': record})
-    session_eval(page, '''s => {
-        while (s.simticks < 17381) s.step({presentation:false});
+        'name': 'landing.json', 'mimeType': 'application/json',
+        'buffer': json.dumps(fixture['record']).encode()})
+    session_eval(page, '''(s, eventIndex) => {
+        for (let i=0; i<500 && s.eventIndex < eventIndex; i++) s.step({presentation:false});
+        if (s.eventIndex !== eventIndex) throw Error(`Never reached airborne PENSE; tick ${s.simticks}`);
         s.state.events.length = 0;
-    }''')
+    }''', fixture['eventIndex'])
     assert session_eval(page, 's => s.state.player.gliding')
     until(page, 's => s.state.tuneWait != null')
     assert not session_eval(page, 's => s.state.player.gliding')
