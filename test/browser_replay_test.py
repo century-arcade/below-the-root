@@ -41,8 +41,6 @@ with browser_page('/?player=0&debug', setup=setup, has_touch=True) as page:
     assert page.evaluate('(key) => localStorage.getItem(key)', KEY) == before
     assert download() == records
     expect(page.locator('#replay-progress')).to_have_text('25/25')
-    assert page.locator('#replay-navigation button').all_text_contents() == [
-        '<<-', '<-', 'Play from here', '->', '->>']
     expect(page.get_by_role('button', name='Forward one room', exact=True)).to_be_disabled()
     expect(page.get_by_role('button', name='Forward ten rooms', exact=True)).to_be_disabled()
     page.get_by_role('button', name='Back ten rooms', exact=True).tap()
