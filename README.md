@@ -30,8 +30,8 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
 | M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider, the ? help panel; top-bar reset and developer tools with CRT effect (CSS overlay); modern status rows and tune skipping; palette choice parked | done |
-| M6.5 ship -- normal walkthrough recording and cleanup tools ready; speedrun playthroughs per character in progress; GitHub OAuth configured; user authorization still to verify | **in progress** |
+| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider, the ? help panel; monitor power/reset and developer tools with CRT effect (CSS overlay); modern status rows and tune skipping; palette choice parked | done |
+| M6.5 ship -- verified winning recordings for all five characters; public and preservation packaging includes every winning fixture; release verification remains | **in progress** |
 
 The spec has 10 unknowns, listed under "Unknowns" at the end of most area files;
 none blocks M6.4.  Still read from the code but never watched in the
@@ -45,24 +45,31 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 
 The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
 script, `?room=T1` to start somewhere else).
-About introduces the game; Play opens it, and Links collects interviews, reviews, guides and original materials.
-Returning players with an autosave land on Play; an explicit tab link takes precedence.
+Play is the default page, with autosave resume when available. About introduces
+the game; Links collects interviews, reviews, guides and original materials.
+Map opens the world map, also available directly at `/map`.
 
 Keys: arrows/WASD move; Space or Enter is the button; F opens the command menu; Escape closes the command menu, map or help, otherwise it pauses. P pauses; M or Tab toggles the map; ? or H toggles help. - and = (or _ and +) step the volume. Use the volume slider to mute and the fullscreen button to expand the game. Clicking or tapping the menu area below the scene also opens the command menu.
 
-Menus wait for the stick to centre between pushes, so holding a direction moves once.
+Menus move once per direction press. Item and character choices use Down for
+next and Up for previous; item choices wrap through NOTHING to cancel.
 
 Uploading a JSON recording in developer tools plays it from the beginning.
-Left/Right skips back/forward one room change; add Shift to skip ten or hold
-the arrow to keep skipping. Playback stops at the end of the file and verifies
-its checkpoint. **Game** returns to the title menu; **Continue** resumes your live quest. Watching never replaces your autosave. C64 `.prg` uploads
-still load a saved position.
+The room buttons seek one or ten room changes; Left/Right does the same with
+canvas focus, Shift selects ten, and holding an arrow repeats. Backward seeking
+skips brief pass-through visits. Grounded idle periods accelerate; movement,
+falls, creatures, REST and tunes retain normal pacing, with brief pauses for
+messages. A fresh button press skips a waited tune in the default display.
+Playback stops at its verified endpoint. **Play** returns to the title menu,
+where **CONTINUE** resumes the original live quest. Watching preserves its
+autosave. **Play from here** takes over the replay and replaces that autosave
+with the replay's latest boundary. C64 `.prg` uploads load a saved position.
 
-Winning shows unpaused play time and game completion. Time includes dialogs,
-music and the in-game menus, excludes browser pauses, the map and hidden tabs,
-and stops when Raamo is saved. New recordings retain actual elapsed wall time;
-older recordings estimate it at 60 frames per second. Loading a C64 save starts
-a partial timer, marked `>=`, because the save has no elapsed-time history.
+Winning shows simulation play time and game completion. Time is gameplay
+updates divided by 60, including REST, and freezes when Raamo is saved.
+Menus, dialogue waits, tunes, pauses and the map add no simulation time.
+Loading a C64 save starts a partial timer, marked `>=`, because the save has
+no elapsed-time history.
 
 Completion totals 100%:
 
@@ -99,17 +106,31 @@ current character's home exterior. Other rooms appear as you visit them.
 Interiors stay blank. The white marker stays at your last outdoor
 location while indoors (or your nid's exit on a new quest); there is no marker before a quest.
 Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
-Drag or scroll to explore when zoomed, and use Your location to return to the marker.
+Drag or use arrows/WASD to pan; scroll to zoom. Opening the map centres the marker.
 
 ? (or H, or Help in the navbar) toggles help beside the canvas, or below it on narrow screens. The game keeps running while help is open; focus the canvas to keep playing. Recording playback adds replay commands to help.
 
-The Play monitor has a volume slider (starts at 50%; gain is squared for quiet low levels). Zero volume mutes; raising it restores sound. The red `[!]` button resets the game in one click, deleting the autosave and returning to the main menu while preserving preferences. The `</>` button toggles developer mode: recording tools, issue reporting and a CRT effect toggle (scanlines, phosphor stripes, vignette and colour bleed; off by default). Preferences persist in localStorage. Messages (loaded files, reset, storage errors) appear in a small log under the picture.
+The Play monitor has fullscreen, volume and power controls. Volume starts at
+50%; gain is squared for quiet low levels, and zero mutes. Powering off resets
+the game and deletes the autosave while preserving preferences; powering on
+starts at the main menu. The version button toggles developer mode, exposing
+recording tools, room rewind and a CRT effect toggle (off by default).
+Backspace or Delete with canvas focus rewinds live play to the previous room
+entry and discards the later timeline. Developer mode also enables R for
+GitHub issue reporting. Messages about files, storage and replay errors go to
+the browser console.
 
-Classic display is retired from the UI. Its implementation and saved `btr.classic` preference remain supported, but there is no control to select it. The default modern display adds two rows in the game's own font under the picture with the status sheet's day, time, name and numbers, live during a quest (in fullscreen too), and lets the button skip any tune the game would wait for (a recorded action, so playthroughs replay).
+The default display shows carried items in the message area while it is idle,
+and a status band with day, time, name, stamina, food, rest and spirit during a
+quest. At victory the band shows play time and completion. STATUS, INVENTORY
+and MENU are absent from the live command menu; Play opens the title menu.
+The original demo scripts retain their original command layout.
 
-There is no options dialog.
-
-“Monitor in darkness” is the default surround. Volume and fullscreen controls appear only on Play. Developer mode and CRT preferences carry across pages. Recording and issue controls on About or Links open Game and focus the requested control.
+There is no options dialog. The saved `btr.classic` preference remains supported
+without a UI selector; it suppresses the modern status/inventory display and
+tune skipping. The default surround is “Monitor in darkness”. Developer mode
+and CRT preferences carry across pages; recording controls on About or Links
+open Play. Preferences persist in localStorage.
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;
 the button is optional, unlike the original.
@@ -171,15 +192,15 @@ Chromium with external requests blocked, run
 `make release-public` using a Python environment with Playwright and its Chromium
 installed. Pass the preservation ZIP path to check that archive instead.
 
-The site has separate `/about`, `/play`, and `/links` pages. Edit
+The site has `/about`, `/play`, `/map`, and `/links` routes. Edit
 `src/about.md` and `src/links.md` for the reading pages; About retains a few
 HTML wrappers for its box art and styling. `tools/build-site.mjs` renders Markdown
 with Marked into the shared `src/page.html` template. `make build` installs the
 pinned npm build dependency when needed; the published pages need no Markdown
-runtime. The homepage sends new visitors to About and returning players to Play;
-old `#about`, `#play`, `#resources` and game query links still work; `/resources`
-and `/resources.html` redirect to `/links`. Leaving Play
-saves the game, and returning restores it.
+runtime. The homepage opens Play; old `#about`, `#play`, `#resources` and game query
+links still work. `/resources` and `/resources.html` redirect to `/links`.
+Returning to Play restores the latest quest-start, room-entry or completion
+boundary; leaving mid-room does not save that unfinished progress.
 
 Edit `src/help.md` for the in-game **?** Help screen, then run `make build`.
 Help appears before the intro on a fresh launch; saved games resume directly.
@@ -192,18 +213,26 @@ need no Python font tools.
 Regenerating the spec tables and the emulator setup: `docs/spec/README.md`
 and `docs/tooling.md`.
 
-## Playthrough preparation
+## Recordings and release readiness
 
-The game autosaves on room/menu/dialogue/terrain changes and on page hide.
-Return to `/` or `/?debug` to resume. The permanent footer is gone.
-`?debug` adds recording download/import and GitHub login/issue filing with automatic playthrough uploads to secret gists.
-The latter needs the one-time OAuth setup in [docs/github-issues.md](docs/github-issues.md).
+Autosaves and recording downloads retain the latest quest-start, room-entry or
+completion boundary. Return to `/` or `/?debug` to resume it. `?debug` enables
+recording download/import and R for GitHub login/issue filing, including
+playthrough uploads to secret gists. The hosted service needs the one-time
+OAuth setup in [docs/github-issues.md](docs/github-issues.md).
 
-A v2 recording groups joystick reads by kind and value, with read counts,
-player-place anchors, and unpaused window time. It also contains canvas/key
-events, seeded randomness, the room path, and a state checkpoint, separate
-from the original C64 save format. Old v1 recordings convert on load. Verify or shorten a copy with
-`node tools/playthrough.mjs run.json`; see [docs/playthrough.md](docs/playthrough.md).
+Current recordings use version 3 with engine `btr-quest-1`: seeded initial
+conditions, effective stick changes, semantic commands and a verified gameplay
+checkpoint. Older browser recording formats are unsupported. Verify a recording
+with `node tools/playthrough.mjs run.json`; see
+[docs/playthrough.md](docs/playthrough.md) for the schema and winning fixtures.
 
-Next is a complete ordinary quest, not another attract-demo replay.
-Mobile testing and palette choice are parked in `.meta/maybe/`.
+Neric, Genaa, Pomma, Herd and Charn each have a verified winning recording.
+Release readiness still requires manual real-device checks, an offline archive
+browser check, deployed analytics verification and authenticated GitHub issue
+submission. Automated browser tests use mocked GitHub responses. Show HN has
+already been submitted.
+
+Mobile playability and a conversation journal are next-round work, not release
+requirements. Palette choice, named saves and authentic delays are deferred.
+Room rewind is available; seconds-based rewind was cancelled.

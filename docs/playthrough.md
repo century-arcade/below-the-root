@@ -1,165 +1,152 @@
-# Browser saves and playthrough recordings
+# Browser saves and quest recordings
 
-The browser automatically saves to `localStorage['btr.autosave.v1']` when
-rooms, title/menu screens, panel text, or the editable tile grid change.
-Player animation and water animation are not screen changes. Hiding or
-leaving the page saves the current frame too. Returning to `/` or
-`/?debug` replays that save and resumes it; explicit `?player=`, `?room=`,
-`?menu`, and `?demo` startup modes override auto-resume.
+The browser stores the latest quest boundary in
+`localStorage['btr.autosave.v3']`: quest start, room entry, or completion
+(victory or timeout). Live downloads retain that boundary. Menu navigation,
+dialogue, terrain edits and leaving the page do not create save boundaries.
+Reloading mid-room loses progress since the last boundary. Returning to `/`
+or `/?debug` verifies and resumes the save; explicit `?player=`, `?room=`,
+`?menu` and `?demo` startup modes override auto-resume.
 
-The permanent footer and manual digit/X shortcuts have been removed.
-Keyboard movement remains arrows/WASD plus space, Shift, or Control.
-F or a click/tap in the command area opens the command menu; Escape dismisses it.
-Opening and dismissing the menu are recorded actions, so reload and replay
-restore the same interaction. Otherwise Escape or P pauses; any movement key
-or a tap on the screen resumes. Help stays available beside the running game.
-Leaving the tab or window pauses too. Music continues while game time is paused.
-Mouse/touch input remains hold-to-steer, tap-for-button, and double-tap
-to walk. The port omits DISK STORAGE; the autosave is the save.
-Dropped files can be a raw C64 QUEST file or a JSON playthrough recording.
-JSON uploads play continuously from the beginning, skipping recorded delays
-and idle gaps while showing movement at 60 Hz. Left/Right skips back/forward
-one room change; Shift skips ten, and holding the arrow repeats. Then playback
-continues at normal speed;
-the replay stops and verifies the checkpoint at the file's end. Home exits
-replay to the menu, where CONTINUE resumes the live quest. Its autosave is
-untouched while watching.
+A new quest or C64 save import replaces the autosave. Watching a recording or
+an attract demo does not. Download runs you want to retain before replacing
+them. Storage is browser/origin-specific and finite; failures are logged to
+the browser console and writes remain retryable. There is no cross-tab
+synchronization. Older browser autosaves and their backups are discarded;
+older recording formats are unsupported. A current save that cannot be
+verified logs its error and opens the main menu without restoring the quest.
 
-## What a recording contains
+## Recording schema
 
-`src/record.js` owns a `Session` around the game:
+`src/record.js` owns `Session` and its JSON recording. The top-level fields are:
 
-- Format and engine version, initial startup mode, character/optional
-  room override, and a seeded game RNG.
-- A monotonic 60 Hz frame counter, independent of the room's tick.
-- V2 `reads` entries: `{k, j: [dx, dy, fire], n, at: [room, col, row, facing], ms}`.
-  Each entry groups consecutive reads of the same kind and joystick value,
-  including idle. Kinds are `s` (state step), `g` (glide), `v` (verb/menu/shell),
-  `t` (tune wait), and `d` (demo end). Anchors use room codes, or null on title
-  and menu screens, at the first read of the entry.
-- `ms` stores unpaused wall time from the first read until the next entry,
-  an action, victory, or the recording's end. Actions and endpoints split
-  entries even if the next read has the same kind and value. Closing a quest
-  window adds its time to the timer; the displayed timer lags while a window
-  is open, and victory closes it before displaying final statistics. Frames
-  before the first read, and gaps from an action/end to the next read, are
-  outside these windows. Repeated snapshots during a pause add no time.
-  `inputs` and per-frame `durations` are absent.
-- Per-quest elapsed time and earned completion milestones, reset on START GAME
-  and frozen when Raamo is saved. C64 imports mark elapsed time as partial.
-- Game-canvas pointer down/up coordinates and game-key down/up events,
-  as `[frame, kind, consumingRead, ...details]` diagnostic annotations. Read
-  indices start at 1; an unconsumed gesture has null. Mouse movement is represented through the
-  sampled joystick, not an event per pixel. Issue text and GitHub
-  credentials are never recorded.
-- Imported C64 saves with their application frame, and the room/title/quest
-  path with positions and game time.
-- Won/timeout outcomes, retained even after the shell returns to its menu.
-- A final state checkpoint and, while a quest is active, a base64 C64
-  QUEST image for interoperability.
-- After checkpoint recovery, `recoveredFrom` contains the complete preceding
-  recording, including any earlier recovery segments. Each segment retains its
-  own engine, seed, journal, and checkpoint; these older segments stay opaque. UI gestures are
-  retained for the entire session too.
+| Field | Meaning |
+| --- | --- |
+| `format` | `"below-the-root-record"` |
+| `version` | `3` |
+| `engine` | `"btr-quest-1"` |
+| `seed` | Unsigned 32-bit seed for the quest RNG |
+| `initial` | `{mode: "quest", character, room?}` or `{mode: "import", state}` |
+| `events` | Ordered effective stick changes and semantic commands |
+| `endpoint` | `{kind: "start"}`, `{kind: "room", visit}`, or `{kind: "complete"}` |
+| `checkpoint` | Expected gameplay state at that boundary |
 
-This is intentionally separate from the original 1410-byte C64 file.
-A raw C64 file cannot store a running JavaScript generator, input history,
-creature timing, or every transient tile edit. Replaying the journal
-re-creates those, including a menu/verb halfway through its input waits.
-Replay checks the kind and player place at each entry start and reports the
-read index, expected place, and actual place on drift. Restoration also
-compares the reconstructed state with the checkpoint before
-replacing the live session. It does not execute code from the file.
+For a new quest, `character` is its numeric ID (default 0); optional `room`
+is a numeric room ID override. An import's `state` is the base64 C64 QUEST
+image, which must contain an active quest. Importing begins a separate
+recording and a partial play timer. Starting a quest restarts its RNG from
+the recorded seed. Title menus and attract demos are outside the recording.
 
-V1 files convert on load by replaying their old frame sampler once into the
-v2 recorder. The existing autosave key remains readable. To convert explicitly:
+Each event has an anchor `{simticks, screen, pos}`. `screen` is the room code,
+with `:air` for a blank outdoor room; `pos` is `[col, row]`. It also has either:
 
-```
-node tools/playthrough.mjs run.json --convert --out run2.json
-```
+- `stick: [dx, dy, fire]`, where each direction is -1, 0 or 1 and fire is 0 or 1.
+- `command: "NAME"`, with any required `item`, `source` or `destination` choices.
 
-The converter verifies gameplay against the old checkpoint and writes the
-checkpoint of its own replay, reporting old and new play time. Window rounding
-and gaps after actions can change the time: the converted Pomma fixture saves
-Raamo at 87%, 00:24:21 (v1: 00:24:23), and Genaa at 89%, 00:30:24
-(v1: 00:30:26). These two-second differences follow the window boundaries,
-including the gaps after tune skips.
+Stick events store effective changes consumed by movement, glide or REST
+reads, including a change back to neutral. Holds and unchanged neutral input
+need no repeated events. Keyboard, pointer and gamepad gestures are resolved
+before recording; raw device events are not serialized.
 
-Keep `ENGINE_VERSION` in sync when changing simulation rules or data in a
-way that breaks existing recordings. An unsupported or diverging autosave
-is recovered automatically at startup from its C64 checkpoint. The game
-backs up the original under `btr.autosave.v1.recovery` keys and starts a
-new segment from the recovered quest, with a message in the game log.
-The preceding recording is embedded in autosaves and downloads rather than
-discarded. Older recovery backups still in this browser are reattached when
-their final C64 checkpoint matches a segment's initial load. Missing backups
-cannot be reconstructed from a checkpoint alone. Later recoveries retain the
-whole chain. Playback verifies the current segment; preceding segments may
-need their original engine to replay. An action in progress may restart;
-transient animation, creature timing, tile edits, and the visited-room
-map are not restored by the C64 checkpoint.
+Commands are TAKE, DROP, EXAMINE, SPEAK, BUY, SELL, RENEW, PENSE, USE, HEAL,
+GRUNSPREKE, OFFER, EAT, REST and KINIPORT. `item` is a stable object ID, not a
+menu index. KINIPORT records source/destination cell pairs and, for an object,
+its ID. REST has no duration argument: gameplay updates advance resting and a
+later stick change wakes the character. Opening menus, moving selectors,
+cancelling with NOTHING, acknowledging dialogue and skipping tunes are
+presentation actions, not commands.
 
-If there is no checkpoint or recovery fails, the game keeps the original
-where it can, logs the reason to the browser console only, and starts at
-the main menu. Nothing is shown on the page. Autosaving continues when a
-new quest starts. Dropped recording files still report
-replay errors without automatic recovery.
+`simticks` is an absolute count of gameplay updates since quest start/import,
+not a room-relative tick or wall-clock timestamp. An update consumes stick
+events at its starting tick and increments the counter after all gameplay
+effects, including room transitions. Commands execute between updates without
+advancing this counter. Events at the same tick retain array order; a stick
+event must meet a gameplay read and a command must meet its between-update
+application point. Replay still executes every intervening gameplay update,
+including neutral waits, so clock, creatures and RNG advance deterministically.
 
-Attract/demo screens do not overwrite a quest autosave. A new real quest
-replaces the autosave; download any run you want to retain first. Browser
-storage errors are reported, not treated as successful writes. Local
-storage is finite and browser/origin-specific: use **Download recording**
-for durable copies. Imports are limited to 5 MiB and 24 hours of ticks;
-restoration currently replays synchronously from the start, so long runs
-can take time. There is no cross-tab synchronization.
+Displayed play time is `floor(simticks / 60)` seconds. Victory freezes it at
+`progress.finishedAt`. REST counts; menus, dialogue acknowledgements, tunes,
+pauses and the map do not. C64 imports show `>=` because earlier time is unknown.
+Playback speed and tune skipping do not change the result.
 
-## A normal playthrough
+The checkpoint includes simulation ticks, room/visit, player, clock, tile grid,
+objects, creature and flags, quest fields, REST state, completion progress and
+RNG state. It excludes presentation waits, panel text and generators. Room/day
+history and the map path are reconstructed at runtime, not serialized.
+`visit` distinguishes repeated entries to the same room. A completion endpoint
+may be victory or timeout; `--expect-win` requires victory specifically.
 
-1. Open `/?debug&menu` and choose START GAME and a character. This bypasses
-   the attract intro, not game progression. Do not use SAMPLE QUEST or a
-   room override for the acceptance run.
-2. Follow the fourteen milestones in `docs/spec/data/quest.json` and the
-   route summary in `docs/spec/time.md`. The detailed original walkthrough
-   is local input at `iso/walkthru.txt`.
-3. Reload periodically to test continuation. Download a recording at each
-   significant milestone and before experimenting with route changes.
-4. Use **File an issue** for problems. The dialog pauses simulation and
-   includes game state and recent path/input changes, with each history entry
-   on one JSON line. The C64-format save image is omitted from the report.
-   It does not upload the full recording. Download that separately and
-   attach it on GitHub if needed.
-5. After completing and acknowledging the winning screens, download the
-   run and verify it:
+This format is separate from the original 1410-byte C64 QUEST image. A native
+quest recording contains no fallback C64 save. Keep `ENGINE_VERSION` in sync
+with simulation or data changes that would break deterministic replay.
 
-```
-node tools/playthrough.mjs run.json --expect-win
+## Playback, continuation and verification
+
+Drop a JSON recording onto Play or use developer tools' **Load recording**.
+It plays from the beginning. Movement, falls, glides, creatures, REST and tune
+waits use normal pacing. Grounded idle periods without a creature accelerate;
+messages receive a short reading pause. A fresh button press skips a waited
+tune in the default display, without modifying the recording.
+
+The replay buttons seek one or ten room changes. With canvas focus,
+Left/Right seeks one, Shift+Left/Right ten; holding repeats. Backward seeking
+skips pass-through visits shorter than 30 simulation ticks. Seeking rebuilds
+the state without waiting for presentation. Playback stops at the endpoint
+and checks the gameplay checkpoint. Downloading while watching returns the
+uploaded recording through its original endpoint.
+
+**Play** returns to the title menu; **CONTINUE** there resumes the original
+live quest. **Play from here** takes over the replay at its current state,
+discards its future and saves its latest boundary, replacing the original
+autosave. Subsequent play records a new branch. Developer **Rewind one room**
+(or Backspace/Delete with canvas focus) rebuilds the previous room entry and
+discards later live events. Neither action preserves unfinished mid-room
+progress across reloads.
+
+Validation rejects unsupported formats/engines, invalid initial conditions,
+events, command choices and ordering. Replay rejects missed consumption
+points, location drift, events beyond the endpoint, unreachable endpoints and
+checkpoint mismatches. Event drift errors identify the event number, tick,
+expected screen/position and actual screen/position. Autosave restoration
+verifies a separate session before adopting it; uploaded playback checks as
+it runs. Neither executes code from the recording.
+
+Imports are limited to 5 MiB, 100,000 events and 24 hours of simulation ticks,
+with a replay work limit. Restoration and backward reconstruction replay from
+the start synchronously, so long runs can take time.
+
+## Verify a recording
+
+The CLI verifies a quest by replaying it to its boundary. With no arguments it
+prints usage and exits unsuccessfully. Its supported invocation is:
+
+```sh
+node tools/playthrough.mjs test/fixtures/pomma-win.json
+node tools/playthrough.mjs test/fixtures/pomma-win.json --expect-win
 ```
 
-This verifies deterministic replay and that the run reached a winning
-outcome, including a recording stopped during Raamo's victory speech.
-See [testing](testing.md) for winning-recording coverage and its limits.
+Output includes simulation ticks, event count, final room/day/position, play
+time, completion and the reconstructed route, followed by checkpoint
+verification. Errors exit unsuccessfully. The tool verifies only; it has no
+conversion or route-editing mode.
 
-## Cleaning a route
+Winning fixtures exist for all five characters: Neric, Genaa, Pomma, Herd and
+Charn. Verify them all with:
 
-First preserve the original. Inspect the frame-labelled path:
-
+```sh
+for recording in test/fixtures/*-win.json; do
+    node tools/playthrough.mjs "$recording" --expect-win
+done
 ```
-node tools/playthrough.mjs run.json
-node tools/playthrough.mjs run.json --cut 1200:1800 --out shorter.json
-node tools/playthrough.mjs shorter.json --expect-win
-```
 
-A cut removes the half-open frame range `[1200,1800)`. Replay locates the
-consumed-read counts at both boundaries; straddling entries split by count,
-with `ms` apportioned by count because v2 no longer stores individual frame
-durations. Later actions and gestures shift by the cut's frame length.
-Re-simulation writes new anchors, a checkpoint, and a path in v2.
-It never overwrites the original or an existing output file. Removing a
-misstep can change creature encounters, food, positions, and all later
-input timing: the shorter run must be tested, not assumed equivalent.
-The browser can load the resulting JSON. There is no visual route editor
-or automatic mistake detection yet.
+To record ordinary play, open `/?debug&menu`, choose START GAME and a character,
+and play without a room override or SAMPLE QUEST. Download at a room boundary
+or after winning; victory is committed before its final acknowledgements.
+In developer mode, R opens GitHub reporting/login on a configured hosted site.
+Submitting includes recent state/events and uploads the boundary recording to
+a secret gist. It needs network access; local downloads do not.
 
-## Tests
-
-See [testing](testing.md) for the Node, Python, browser, and golden suites.
+See [testing](testing.md) for cancellation, rewind, winning-recording and
+browser coverage and its limits. Release archives include every winning
+fixture in `recordings/`.

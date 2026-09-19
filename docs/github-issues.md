@@ -1,12 +1,12 @@
 # Debug GitHub issue filing
 
-Only `?debug` shows the **Report issue** button (🐞) in the top bar. Clicking
-it or pressing `R` starts login when logged out, saving the
-quest first. Once authenticated, either opens a single-message dialog immediately.
+Enable developer mode with the version button or `?debug`, then press `R`
+on Play. When logged out, this saves the latest quest boundary and starts
+login. Once authenticated, `R` opens a single-message dialog immediately.
 The dialog sits below the game and includes **Log out**. Submission creates an issue as
 that user in `century-arcade/below-the-root`; its first message line
-becomes the title. The full recording is automatically uploaded to a secret gist
-under the reporter's account and linked from the issue. State and recent moves
+becomes the title. The recording through the latest save boundary is uploaded
+to a secret gist under the reporter's account and linked from the issue. State and recent moves
 appear in a collapsed **State at filing** block. OAuth requests `public_repo gist`;
 existing logins are asked to log in again once to grant gist access. Each recent
 input change and room transition occupies one JSON line. The redundant C64-format
@@ -86,6 +86,7 @@ preview domains likewise need a matching app/callback configuration.
 
 The toolbar's background session lookup only reveals an existing login.
 It does not gate login: a pending or failed lookup still allows
-**Report issue** and `R` to navigate to the server's login endpoint.
+`R` to navigate to the server's login endpoint.
 `test/browser_login_test.py` checks these cases, logged-out sessions, and
-logging out with mocked navigation, and confirms the quest saves first.
+logging out with mocked navigation, and confirms the latest quest boundary
+saves first.

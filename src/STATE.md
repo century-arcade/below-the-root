@@ -21,7 +21,7 @@ state = {
   demo,            // null or the running demo script: startDemo sets it and replaces input
   restDelayCut,    // the demo's end_rest_delay: the running REST pause ends on its next read
   rng,             // () -> [0,1): the only randomness; replay pins it
-  progress,        // elapsed milliseconds, partialTime, earned spirit, elixirs, unique quest items, won, collected token IDs, character's tokenTotal
+  progress,
   events,          // [{sfx: id}|{music: tune}] since the last drain; main.js's Speaker.frame plays and empties them
   panel,           // Uint8Array(4*40): text rows 21-24, ASCII, bit 7 = reverse video (panel.js)
   verb,            // the running verb or shell message: a generator, one yield per stick read
@@ -85,43 +85,53 @@ The room loop sets exactly one and stops; the shell checks them in
 | `demo_room` | `room` | the demo script's goto_room |
 | `demo_page` | `page` | the demo script's text_page |
 
-## Frame order
+## Simulation and frame order
 
-`Session.step()` reads the stick during a waited tune for a fresh-press
-skip (modern display only); demos already read it in `shellFrame`.
-`tick(state)`: if `stall` > 0, decrement it and do nothing else.
-Otherwise `tick` advances (water animation).  If a `verb` is running it
-gets the frame: after `verbWait` idle ticks one stick read is handed to
-the generator; when it finishes the room loop resumes (or a stop it left
-is resolved).  Otherwise, if `active`, the clock ticks (it may stop the
-loop with `collapse` or `timeout`), the creature runs its tick (it may
-stop it with `ambush`), then `player.counter` advances; when it reaches
-`player.period` it resets and one state step runs (`player.step`).  A
-state step may set `stop`, which clears `active`; the shell then
-resolves it and sets `active` again.  Clock and creature are frozen
-while a verb is up; the clock and the fatigue drain also while `dream`
-is set.
+`simticks` counts gameplay updates since quest start/import; `visit` increases
+on room entry, including re-entry to the same room. Both reset on a new quest.
+`questNumber` distinguishes new quests within one browser session. `progress`
+tracks earned milestones and `finishedAt`, the victory tick; displayed play
+time is ticks divided by 60, marked partial for a C64 import. Presentation
+frames and the room's `tick` are not this timer.
 
-Every message the shell prints, and every verb but DROP and PAUSE, ends
-by waiting for the button to be up, then for any input, and clears the
-panel (`anyInput` in `input.js`); the original's `verb_done`.  REST's
-wake path does its own wait and skips the menu's.
+`Session.step()` applies scheduled replay commands between updates and handles
+tune skipping. It then calls `shellFrame(state)` and `tick(state)`. A positive
+`stall` consumes a presentation frame; otherwise a running `verb` receives its
+paced input. Neither advances `simticks`. An active, unfinished quest then runs
+one gameplay update and increments `simticks` after all effects, including room
+transitions. Events consumed in that update use its starting tick.
 
-## Input
+Ordinary updates advance the clock, then creatures, then the player's step
+counter. A stop from the clock or creatures is resolved before player movement.
+When `player.counter` reaches `player.period`, it resets and `player.step` runs.
+The shell resolves any resulting stop. Clock and creatures freeze during verb
+presentation; `dream` also freezes the clock and fatigue drain.
 
-`input.read()` returns `{dx: -1|0|1, dy: -1|0|1, fire: bool, press: bool}`.
-It is called during tune waits and where the spec reads the joystick:
-rule 8 of the state step, rule 3 of a glide step, and every read the command menu and its
-verbs make.  Verbs are generators (`verbs.js`, `dialog.js`): each
-`yield` is one read, so the read structure is visible in the code and
-the browser can run them one read per few frames instead of spinning.
-A `yield` may carry a tick count to wait instead of `input.pace` (REST's
-pause between chimes reads every tick).  The demo script advances one
-entry per read, so the places reads happen are part of the replay
-contract.
+Live REST uses `resting: {ticks}` instead of a waiting generator. Each gameplay
+update reads input to wake or advances resting; eight twenty-tick intervals
+complete an hour and apply recovery and host effects. Tune waits remain
+presentation frames. Original demos retain their scripted REST/read behavior.
 
-`press` is `fire && !previous.fire` across consecutive reads of the session
-or demo stream. Recordings store levels and reproduce the edge on replay.
+## Input and commands
+
+`input.read(kind, policy)` returns direction and fire levels plus `press`.
+Gameplay kinds `s`, `g` and `r` cover movement, glide and REST. The session
+records effective level changes and derives `press` from the gameplay fire
+edge. Presentation reads have a separate edge and do not change held gameplay
+input. Live policies select continuous holds, steering with a fresh trigger,
+ordered presses, or triggers alone; see [the input contract](../docs/spec/input.md).
+
+Verbs and shell screens use generators, with `verbWait` and `verbPolicy` pacing
+each yield. `commandMenuOpen` distinguishes the command chooser.
+`commands.execute` validates and applies a semantic command with resolved
+choices to the quest; selector presentation runs against a private draft.
+Cancellation adds no command. `commands.handoff` prevents already-consumed
+input from leaking into the next consumer while preserving later presses.
+`verbCarryMovement` and `verbUnread` control that handoff at generator exit.
+
+Original demo scripts still advance by joystick reads and retain their own
+controls. Quest recordings instead replay effective stick changes and semantic
+commands at absolute simulation ticks, preserving same-tick array order.
 
 ## The shell
 
@@ -130,19 +140,16 @@ same verb driver: `shellFrame(state)` once a frame (before `tick`)
 opens the main menu whenever the room loop is idle and no demo is
 running, and ends a demo on the button.  `openMenu` sets `title`, which
 makes `video.js` draw room `T4` with no figures over whatever `room`
-the quest is in; CONTINUE preserves the live room. Only version 2 replay
-prefixes use the old room reload, bounded by `legacyContinueUntil` once resumed.
-Every screen waits for input rather than counting ticks: the main menu
-moves once per push and re-arms when the stick centres; every other
-screen waits for the stick to centre and the button to be up, then for
-the next push or the button.
+the quest is in; CONTINUE preserves the live room, tile edits and per-visit state.
+Live shell screens consume ordered presses, so holding a direction moves
+once and queued taps remain distinct. Sampled demo input retains its
+release/centre waits.
 
 Command and item choosers consume each direction press once. Item choices
 use Down for next and Up for previous, wrapping through NOTHING. Demo scripts
-retain their original controls. Session journals mark `menuNavigationFrom`:
-earlier frames use repeating menu movement and up-only item paging; a missing
-boundary means the whole recording predates these controls. Resuming play sets
-the boundary to the current frame so old saves remain replayable.
+retain their original controls and command layout. Live play omits STATUS,
+INVENTORY and MENU; the modern display supplies inventory/status and the Play
+link opens the title menu.
 
 ## Saves
 
@@ -154,16 +161,21 @@ enters the saved room. Direct imports validate and decode into a draft
 before replacing live state, resolve empty/outdoor rooms, clear transient
 shell/demo state, and restore the real stick.
 
-`record.js` also owns the browser `Session`: a seeded RNG, monotonic frame
-counter, timed joystick changes and external-load actions. Its JSON
-recording reconstructs even running generators by replay and checks the
-result before adoption. `Autosave` persists it on screen changes and page
-hide; it does not change the C64 image layout. See `docs/playthrough.md`.
+`record.js` also owns the browser `Session`: seeded RNG, initial quest or C64
+import, effective stick events and semantic commands. Version 3 recordings use
+engine `btr-quest-1`. Replaying reconstructs gameplay and verifies the endpoint
+checkpoint. `Autosave` persists only quest-start, room-entry and completion
+boundaries under `btr.autosave.v3`; downloads use the same boundary. Screen
+invalidation and page hiding do not save unfinished mid-room progress. See
+[quest recordings](../docs/playthrough.md) for the schema and validation.
 
-Room and day boundaries also keep in-memory copies of plain game state, RNG and
-input cursors. Rewinding restores the nearest copy; a boundary inside a generator
-is rebuilt silently from there before drawing. Developer day rewind truncates the
-journal at the restored frame, so autosaves and downloads follow the new timeline.
+Runtime `path` holds room entries for the map; `history` holds tick/event
+cursors at room, day and completion boundaries. Rewind reconstructs from the
+seed and initial conditions to a selected cursor without presentation waits.
+Live room rewind drops later events and continues a new branch. `backDay()`
+also exists internally; the developer UI exposes room rewind. Day history can
+end inside a room, but persistence still retains the latest real save boundary.
+There are no serialized generator snapshots or legacy compatibility fields.
 
 ## Text
 

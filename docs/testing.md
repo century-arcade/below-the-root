@@ -43,10 +43,10 @@ The filename globs above discover both JavaScript extensions without
 counting `helpers.js` as a test. Use the runner for individual files too.
 
 `make test` captures both suites and prints their full output on failure,
-including timeout failures. Success prints exactly one line:
-`make test: N passed, M skipped, T s`. Counts include Node and Python;
-skipped goldens remain visible. `TEST_TIMEOUT` sets each suite's timeout
-in seconds (default 60). Run `make test` before every commit;
+including timeout failures. Success prints one named `pass:` line per passing
+test from both Node and Python, with visible `skip:` lines and reasons for
+skipped tests (including optional goldens), and `todo:` lines when present.
+`TEST_TIMEOUT` sets each suite's timeout in seconds (default 60). Run `make test` before every commit;
 `make install-hooks` installs the pre-commit check. The runner clears Git
 repository environment variables inherited from hooks so temporary release
 repositories stay isolated.
@@ -116,6 +116,7 @@ file it compares the trace; under `node --test`, both demos register and
 missing traces skip without printing. Comparisons preserve the existing
 rule that an ended port run may match a prefix of the VICE trace.
 
+All five characters (Neric, Genaa, Pomma, Herd and Charn) have winning fixtures.
 Winning recording tests verify normal quest completion, deterministic
 replay, seeking, continuation, and corruption detection. Focused ending
 tests also place the player near Raamo to check specific outcomes. Neither
