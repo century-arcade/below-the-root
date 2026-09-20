@@ -1,5 +1,5 @@
 canvas { image-rendering: pixelated; display: block; background: #000; }
-#game { display: flex; flex-direction: column; align-items: stretch; margin-top: var(--header-gap); }
+#game { display: flex; flex-direction: column; align-items: stretch; margin-top: calc(var(--header-gap) / 2); }
 .game-fullscreen, .game-fullscreen body { background: #000; overflow: hidden; }
 .game-fullscreen #site-header { display: none; }
 .game-fullscreen #play { width: 100%; }

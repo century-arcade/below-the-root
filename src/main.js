@@ -34,13 +34,14 @@ const CANVAS_PADDING = 8; // Keep the full picture inside the bowed screen surro
 function fit() {
   const full = fullscreenMode.matches || document.fullscreenElement !== null;
   document.documentElement.classList.toggle('game-fullscreen', full);
+  const outerGap = full ? 0 : parseFloat(getComputedStyle(game).marginTop);
   let availableHeight;
   if (full) {
     game.style.width = '';
     availableHeight = game.clientHeight;
   } else {
     const chrome = document.getElementById('site-header').offsetHeight;
-    availableHeight = window.innerHeight - chrome - parseFloat(getComputedStyle(game).marginTop);
+    availableHeight = window.innerHeight - chrome - 2 * outerGap;
   }
   const replayControls = document.getElementById('replay-controls');
   if (!replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
@@ -48,7 +49,7 @@ function fit() {
   const shellWidth = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
   const shellHeight = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--chin'));
   const padding = full ? 0 : CANVAS_PADDING;
-  const scale = fitScale((full ? game.clientWidth : window.innerWidth) - shellWidth, availableHeight - shellHeight, HEIGHT + band, padding);
+  const scale = fitScale((full ? game.clientWidth : window.innerWidth - 2 * outerGap) - shellWidth, availableHeight - shellHeight, HEIGHT + band, padding);
   canvas.parentElement.style.setProperty('--canvas-padding', `${padding * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
   canvas.style.height = (HEIGHT + band) * scale + 'px';
