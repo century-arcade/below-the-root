@@ -1,13 +1,13 @@
-const PAGES = ['about', 'play', 'help', 'links'];
+const PAGES = ['about', 'play', 'help', 'resources'];
 
 export function startPage(hash) {
-  const page = hash === '#resources' ? 'links' : hash.slice(1);
+  const page = hash === '#links' ? 'resources' : hash.slice(1);
   return PAGES.includes(page) ? page : 'play';
 }
 
 export function enterSite() {
   const page = startPage(location.hash);
-  if (page === 'about' || page === 'links') {
+  if (page === 'about' || page === 'resources') {
     location.replace(`/${page}${location.search}`);
     return false;
   }

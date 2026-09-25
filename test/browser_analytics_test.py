@@ -45,7 +45,7 @@ def intercept(page, origin=ORIGIN, mode='mock'):
                 route.fulfill(json={'configured': False})
                 return
             path = parsed.path.strip('/') or 'index'
-            if path in ('index', 'play', 'map', 'about', 'links'):
+            if path in ('index', 'play', 'map', 'about', 'resources'):
                 path += '.html'
             target = BUILD / path
             assert target.is_file(), url
@@ -71,7 +71,7 @@ with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     for path, canonical in [('/', '/'), ('/index.html', '/'), ('/play', '/'),
                             ('/play.html', '/'), ('/map', '/map'), ('/map.html', '/map'),
-                            ('/about', '/about'), ('/links', '/links')]:
+                            ('/about', '/about'), ('/resources', '/resources')]:
         page = browser.new_page()
         scripts, counts, unexpected, pending, errors = intercept(page)
         with page.expect_request(ENDPOINT + '?*'):
@@ -84,7 +84,7 @@ with sync_playwright() as p:
         page.close()
 
     for entry in ['/', '/index.html']:
-        for fragment, destination in [('about', 'about'), ('links', 'links'), ('resources', 'links')]:
+        for fragment, destination in [('about', 'about'), ('links', 'resources'), ('resources', 'resources')]:
             page = browser.new_page()
             scripts, counts, unexpected, pending, errors = intercept(page)
             with page.expect_request(ENDPOINT + '?*'):

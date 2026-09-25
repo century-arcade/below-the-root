@@ -15,18 +15,18 @@ with sync_playwright() as p:
         expect(page).to_have_url(BASE + '/')
         expect(page.locator('#screen')).to_be_visible()
         expect(page.locator('#site-header a[aria-current]')).to_have_text('Play')
-        expect(page.get_by_role('navigation').get_by_role('link')).to_have_text(['Play', 'Map', 'About', 'Links'])
-        page.get_by_role('navigation').get_by_role('link', name='Links').click()
-        expect(page).to_have_url(BASE + '/links')
-        expect(page.get_by_role('heading', name='Links', exact=True)).to_be_visible()
-        expect(page.locator('#site-header a[aria-current]')).to_have_text('Links')
+        expect(page.get_by_role('navigation').get_by_role('link')).to_have_text(['Play', 'Map', 'About', 'Resources'])
+        page.get_by_role('navigation').get_by_role('link', name='Resources').click()
+        expect(page).to_have_url(BASE + '/resources')
+        expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
+        expect(page.locator('#site-header a[aria-current]')).to_have_text('Resources')
         expect(page.get_by_role('link', name='Phil Salvador: Below the Root', exact=True)).to_be_visible()
         page.go_back()
         expect(page).to_have_url(BASE + '/')
         page.go_forward()
-        expect(page).to_have_url(BASE + '/links')
+        expect(page).to_have_url(BASE + '/resources')
         page.reload()
-        expect(page.get_by_role('heading', name='Links', exact=True)).to_be_visible()
+        expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
         page.goto(BASE + '/play#help')
         expect(page).to_have_url(BASE + '/play#help')
         expect(page.locator('#help-screen')).to_be_visible()
@@ -51,7 +51,7 @@ with sync_playwright() as p:
         page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
         before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
         assert before, 'Leaving Play saves the quest'
-        for name in ['About', 'Links']:
+        for name in ['About', 'Resources']:
             page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
             expect(page.locator('#screen')).to_have_count(0)
             expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
@@ -77,7 +77,7 @@ with sync_playwright() as p:
         expect(page.locator('#screen')).to_have_count(0)
         expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
         expect(page.get_by_role('button', name='Fullscreen', exact=True)).to_have_count(0)
-        for name in ['about', 'links', 'play']:
+        for name in ['about', 'resources', 'play']:
             response = page.goto(BASE + '/' + name + '/')
             assert response.ok
             expect(page).to_have_url(BASE + '/' + name + '/')
@@ -100,7 +100,7 @@ with sync_playwright() as p:
     expect(page.get_by_role('slider', name='Volume')).to_have_count(0)
     expect(page.get_by_role('link', name='Source on GitHub')).to_be_visible()
     assert not data_requests, 'reading-page controls must not load or start the game'
-    for source, tool in [('about', 'download-record'), ('links', 'load-record')]:
+    for source, tool in [('about', 'download-record'), ('resources', 'load-record')]:
         page.goto(BASE + '/' + source)
         page.locator('#' + tool).click()
         expect(page).to_have_url(BASE + '/play?debug#' + tool)
@@ -109,7 +109,7 @@ with sync_playwright() as p:
     page.close()
     # Reading pages are complete HTML and work without JavaScript or storage.
     page = browser.new_page(java_script_enabled=False)
-    for name in ['about', 'links']:
+    for name in ['about', 'resources']:
         response = page.goto(BASE + '/' + name)
         assert response.ok
         expect(page.locator('main h1')).to_be_visible()

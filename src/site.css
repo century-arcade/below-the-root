@@ -71,9 +71,23 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 .archive-download[aria-disabled="true"] { opacity: .7; }
 .reading-page h2 { font-size: 25px; margin: 24px 0 12px; }
 .box-back { float: right; width: 150px; margin: 0 0 18px 24px !important; }
-.extras, #links ul { list-style: none; padding: 0; }
+.extras { list-style: none; padding: 0; }
 .extras li { margin: 5px 0; }
-#links li { margin: 0 0 14px; }
+#resources .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; list-style: none; margin: 0 0 12px; padding: 0; }
+#resources .cards li { position: relative; display: flex; flex-direction: column; overflow: hidden; padding: 16px 18px; background: #faf5e9; border: 2px solid #202b42; }
+#resources .cards li:hover { background: #fffdf6; }
+#resources .cards li:has(.caption > a:first-child:focus-visible) { outline: 2px solid #202b42; outline-offset: 3px; }
+#resources .cards img { display: block; width: calc(100% + 36px); aspect-ratio: 2 / 1; margin: -16px -18px 14px; object-fit: cover; border-bottom: 2px solid #202b42; }
+#resources .cards img[src$=".png"] { image-rendering: pixelated; }
+#resources .cards img[src*="/box/"] { object-position: 50% 30%; }
+#resources blockquote { margin: 0 0 12px; font-size: 18px; font-style: italic; line-height: 1.4; }
+#resources blockquote p { margin: 0; }
+#resources blockquote cite { display: block; margin-top: 4px; font-size: 14px; font-style: normal; font-variant: small-caps; }
+#resources .caption { margin: auto 0 0; font-size: 15px; line-height: 1.4; }
+#resources .caption > a:first-child { display: block; margin-bottom: 4px; font-size: 17px; font-weight: bold; text-decoration: none; }
+#resources .caption > a:first-child:focus-visible { outline: none; }
+#resources .caption > a:first-child::after { content: ""; position: absolute; inset: 0; }
+#resources .caption a:not(:first-child) { position: relative; z-index: 1; }
 @media (max-width: 899px) {
   .reading-page { padding: 30px 26px; font-size: 17px; }
   .about-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
@@ -81,6 +95,9 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   #site-header { padding: 8px 4px; column-gap: 4px; }
   #site-header nav a { padding: 0 6px; }
   .box-back { width: 110px; margin-left: 16px !important; }
+}
+@media (max-width: 599px) {
+  #resources .cards { grid-template-columns: 1fr; }
 }
 
 #debug-tools { max-width: 55vw; overflow-x: auto; }

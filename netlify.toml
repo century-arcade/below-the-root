@@ -33,18 +33,18 @@ status = 301
 force = true
 
 [[redirects]]
-from = "/links"
-to = "/links.html"
+from = "/resources"
+to = "/resources.html"
 status = 200
 
 [[redirects]]
-from = "/resources"
-to = "/links"
+from = "/links"
+to = "/resources"
 status = 301
 force = true
 
 [[redirects]]
-from = "/resources.html"
-to = "/links"
+from = "/links.html"
+to = "/resources"
 status = 301
 force = true

@@ -25,13 +25,13 @@ class Handler(SimpleHTTPRequestHandler):
 
     def send_head(self):
         url = urlsplit(self.path)
-        if url.path in ('/resources', '/resources/', '/resources.html'):
+        if url.path in ('/links', '/links/', '/links.html'):
             self.send_response(301)
-            self.send_header('Location', '/links' + ('?' + url.query if url.query else ''))
+            self.send_header('Location', '/resources' + ('?' + url.query if url.query else ''))
             self.send_header('Content-Length', '0')
             self.end_headers()
             return None
-        if url.path.rstrip('/') in ('/about', '/play', '/map', '/links'):
+        if url.path.rstrip('/') in ('/about', '/play', '/map', '/resources'):
             self.path = url.path.rstrip('/') + '.html' + ('?' + url.query if url.query else '')
         return super().send_head()
 

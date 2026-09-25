@@ -47,8 +47,8 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             expect(page).to_have_url(address + '/')
             expect(page.locator('#screen')).to_be_visible()
             page.evaluate('document.fonts.ready')
-            page.locator('nav a[href="/links"]').click()
-            expect(page).to_have_url(address + '/links')
+            page.locator('nav a[href="/resources"]').click()
+            expect(page).to_have_url(address + '/resources')
             page.goto(address + '/?player=0&debug')
             until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
             assert observe(page)['quest']

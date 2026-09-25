@@ -11,7 +11,7 @@ with sync_playwright() as p:
     page = browser.new_page(java_script_enabled=False)
     for path, canonical, title in [('/', '/', 'Play'), ('/play', '/', 'Play'),
                                    ('/about', '/about', 'About'),
-                                   ('/links', '/links', 'Links'), ('/map', '/map', 'Map')]:
+                                   ('/resources', '/resources', 'Resources'), ('/map', '/map', 'Map')]:
         response = page.goto(BASE + path)
         assert response.ok
         expect(page).to_have_title(f'{title} — Below the Root')

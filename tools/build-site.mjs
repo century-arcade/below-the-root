@@ -15,10 +15,10 @@ const pages = {
     description: 'Learn about Below the Root, its Green-Sky setting, and the browser restoration of the 1984 Commodore 64 game.',
     canonical: `${origin}/about`,
   },
-  links: {
-    title: 'Links — Below the Root',
+  resources: {
+    title: 'Resources — Below the Root',
     description: 'Find original materials, creator interviews, reviews, playthroughs, and guides for Below the Root.',
-    canonical: `${origin}/links`,
+    canonical: `${origin}/resources`,
   },
   map: {
     title: 'Map — Below the Root',
@@ -33,6 +33,14 @@ export function renderPage(template, metadata, fragments = {}) {
     ? fragments[key] : metadata[key].replace(/[&<>"']/g, char => entities[char]));
 }
 
+export function cardList(html) {
+  return html.replace(/<ul>/g, '<ul class="cards">').replace(/<li>([\s\S]*?)<\/li>/g, (_, body) => {
+    const visuals = [];
+    const caption = body.replace(/<blockquote>[\s\S]*?<\/blockquote>|<img [^>]*>/g, visual => (visuals.push(visual), '')).replace(/<\/?p>/g, '').trim();
+    return `<li>${visuals.join('')}<p class="caption">${caption}</p></li>`;
+  });
+}
+
 export function buildSite(out) {
   const read = name => readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8');
   const template = read('page.html');
@@ -44,7 +52,7 @@ export function buildSite(out) {
     /<h2>Developer mode<\/h2>[\s\S]*?(?=<h2>|$)/,
     section => `<section id="developer-help" hidden>${section}</section>`);
   mkdirSync(out, { recursive: true });
-  for (const output of ['index', 'play', 'about', 'links', 'map']) {
+  for (const output of ['index', 'play', 'about', 'resources', 'map']) {
     const page = output === 'index' || output === 'map' ? 'play' : output;
     const values = {
       nav: read('nav.html').replace(`href="/${page === 'play' ? '' : page}"`, '$& aria-current="page"'),
@@ -52,7 +60,7 @@ export function buildSite(out) {
       helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
       styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
       content: page === 'play' ? read('play.html').replace('{{help}}', () => help)
-        : `<main id="${page}" class="reading-page">\n${marked.parse(read(`${page}.md`))}</main>`,
+        : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(`${page}.md`)))}</main>`,
       scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>
 <script type="module">import { startAnalytics } from "/analytics.js"; startAnalytics();</script>`,
     };

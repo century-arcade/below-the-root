@@ -192,13 +192,13 @@ Chromium with external requests blocked, run
 `make release-public` using a Python environment with Playwright and its Chromium
 installed. Pass the preservation ZIP path to check that archive instead.
 
-The site has `/about`, `/play`, `/map`, and `/links` routes. Edit
-`src/about.md` and `src/links.md` for the reading pages; About retains a few
+The site has `/about`, `/play`, `/map`, and `/resources` routes. Edit
+`src/about.md` and `src/resources.md` for the reading pages; About retains a few
 HTML wrappers for its box art and styling. `tools/build-site.mjs` renders Markdown
 with Marked into the shared `src/page.html` template. `make build` installs the
 pinned npm build dependency when needed; the published pages need no Markdown
-runtime. The homepage opens Play; old `#about`, `#play`, `#resources` and game query
-links still work. `/resources` and `/resources.html` redirect to `/links`.
+runtime. The homepage opens Play; old `#about`, `#play`, `#links`, `#resources` and game query
+links still work. `/links` and `/links.html` redirect to `/resources`.
 Returning to Play restores the latest quest-start, room-entry or completion
 boundary; leaving mid-room does not save that unfinished progress.
 

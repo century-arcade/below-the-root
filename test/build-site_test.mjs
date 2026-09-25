@@ -35,7 +35,7 @@ test('a fresh build gives every public page canonical metadata and bundled image
   const out = outputDirectory(t);
   execFileSync('make', ['build', `BUILD=${out}`], { cwd: root, stdio: 'pipe' });
   const heads = {};
-  for (const [page, canonical] of Object.entries({ index: '/', play: '/', about: '/about', links: '/links', map: '/map' })) {
+  for (const [page, canonical] of Object.entries({ index: '/', play: '/', about: '/about', resources: '/resources', map: '/map' })) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
     assert.doesNotMatch(html, /{{\w+}}/);
     const head = heads[page] = headValues(html);
@@ -60,17 +60,17 @@ test('a fresh build gives every public page canonical metadata and bundled image
     }
   }
   assert.deepEqual(heads.index, heads.play);
-  assert.equal(new Set(['play', 'about', 'links', 'map'].map(page => heads[page].description)).size, 4);
+  assert.equal(new Set(['play', 'about', 'resources', 'map'].map(page => heads[page].description)).size, 4);
 });
 
 test('map retains the game markup and only index bootstraps legacy hash routes', t => {
   const out = outputDirectory(t);
   buildSite(out);
-  const pages = Object.fromEntries(['index', 'play', 'map', 'about', 'links']
+  const pages = Object.fromEntries(['index', 'play', 'map', 'about', 'resources']
     .map(page => [page, readFileSync(join(out, `${page}.html`), 'utf8')]));
   assert.equal(pages.map.split('<body>')[1], pages.play.split('<body>')[1]);
   assert.match(pages.index, /if \(enterSite\(\)\) \{ import\("\/main.js"\); startAnalytics\(\); \}/);
-  for (const page of ['play', 'map', 'about', 'links']) {
+  for (const page of ['play', 'map', 'about', 'resources']) {
     assert.doesNotMatch(pages[page], /enterSite/);
     assert.ok(pages[page].includes(`src="/${page === 'play' || page === 'map' ? 'main' : 'reading'}.js"`));
   }
@@ -79,7 +79,7 @@ test('map retains the game markup and only index bootstraps legacy hash routes',
 test('every public page initializes the shared analytics loader once', t => {
   const out = outputDirectory(t);
   buildSite(out);
-  for (const page of ['index', 'play', 'map', 'about', 'links']) {
+  for (const page of ['index', 'play', 'map', 'about', 'resources']) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
     assert.equal(html.match(/from "\/analytics.js"/g)?.length, 1);
     assert.equal(html.match(/startAnalytics\(\)/g)?.length, 1);
