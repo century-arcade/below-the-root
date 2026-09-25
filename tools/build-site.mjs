@@ -36,7 +36,7 @@ export function renderPage(template, metadata, fragments = {}) {
 export function cardList(html) {
   return html.replace(/<ul>/g, '<ul class="cards">').replace(/<li>([\s\S]*?)<\/li>/g, (_, body) => {
     const visuals = [];
-    const caption = body.replace(/<blockquote>[\s\S]*?<\/blockquote>|<img [^>]*>/g, visual => (visuals.push(visual), '')).replace(/<\/?p>/g, '').trim();
+    const caption = body.replace(/<blockquote>[\s\S]*?<\/blockquote>|<img [^>]*>/g, visual => (visuals.push(visual), '')).replace(/<\/p>\s*<p>/g, ' ').replace(/<\/?p>/g, '').trim();
     return `<li>${visuals.join('')}<p class="caption">${caption}</p></li>`;
   });
 }

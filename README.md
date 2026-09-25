@@ -46,7 +46,7 @@ disassembly's `verb_done`; M6.2 had STATUS staying up).
 The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
 script, `?room=T1` to start somewhere else).
 Play is the default page, with autosave resume when available. About introduces
-the game; Links collects interviews, reviews, guides and original materials.
+the game; Resources collects interviews, reviews, guides and original materials.
 Map opens the world map, also available directly at `/map`.
 
 Keys: arrows/WASD move; Space or Enter is the button; F opens the command menu; Escape closes the command menu, map or help, otherwise it pauses. P pauses; M or Tab toggles the map; ? or H toggles help. - and = (or _ and +) step the volume. Use the volume slider to mute and the fullscreen button to expand the game. Clicking or tapping the menu area below the scene also opens the command menu.
@@ -129,7 +129,7 @@ The original demo scripts retain their original command layout.
 There is no options dialog. The saved `btr.classic` preference remains supported
 without a UI selector; it suppresses the modern status/inventory display and
 tune skipping. The default surround is “Monitor in darkness”. Developer mode
-and CRT preferences carry across pages; recording controls on About or Links
+and CRT preferences carry across pages; recording controls on About or Resources
 open Play. Preferences persist in localStorage.
 
 Port note: carrying a shuba, push sideways after falling two rows to glide;

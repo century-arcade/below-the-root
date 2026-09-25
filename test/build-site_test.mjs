@@ -4,7 +4,8 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { buildSite, renderPage } from '../tools/build-site.mjs';
+import { marked } from 'marked';
+import { buildSite, cardList, renderPage } from '../tools/build-site.mjs';
 
 const root = new URL('../', import.meta.url);
 const origin = 'https://below-the-root.netlify.app';
@@ -100,4 +101,20 @@ test('the renderer escapes metadata while preserving HTML fragments', () => {
   }
   assert.ok(html.includes(content));
   assert.doesNotMatch(html, /{{\w+}}/);
+});
+
+test('resource cards put the quote or image first and keep every link in one caption', () => {
+  const html = cardList(marked.parse(`- [A](https://a) Caption [more](https://m).
+  > “Quote”
+- [B](https://b) First.
+
+  Second.
+- [C](https://c) Plain.
+  ![alt](/x.png)
+`));
+  const items = [...html.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(match => match[1]);
+  assert.match(html, /<ul class="cards">/);
+  assert.match(items[0], /^<blockquote>[\s\S]*<\/blockquote><p class="caption"><a href="https:\/\/a">A<\/a> Caption <a href="https:\/\/m">more<\/a>\.<\/p>$/);
+  assert.equal(items[1], '<p class="caption"><a href="https://b">B</a> First. Second.</p>');
+  assert.equal(items[2], '<img src="/x.png" alt="alt"><p class="caption"><a href="https://c">C</a> Plain.</p>');
 });
