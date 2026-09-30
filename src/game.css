@@ -70,7 +70,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 #monitor {
   --rim: 0px; --chin: 42px; --side: 0px; --radius: 12px;
-  --bezel: #12120f; --bezel-step: #383636;
+  --lip: #77481a; --bezel: #12120f; --bezel-step: #383636;
   display: grid; grid-template-columns: auto; grid-template-rows: auto var(--chin);
   padding: var(--rim); border-radius: var(--radius);
   color: #403a30; background: #a4928a;
@@ -81,7 +81,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #glass-surround { position: relative; isolation: isolate; }
 #monitor:not([data-surround="portable"]) #glass-surround::before {
   content: ""; position: absolute; z-index: -1; inset: calc(-40 * var(--mm));
-  border-radius: calc(10 * var(--mm)); background: var(--bezel);
+  border: calc(3 * var(--mm)) solid var(--lip); border-radius: calc(10 * var(--mm)); background: var(--bezel);
   box-shadow: inset 0 0 0 calc(11 * var(--mm)) var(--bezel), inset 0 0 0 calc(27 * var(--mm)) var(--bezel-step);
   pointer-events: none;
 }
@@ -109,7 +109,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor[data-surround="portable"] #monitor-controls { flex: 1; flex-direction: column; padding: 8px 0 4px 20px; gap: 18px; }
 #monitor[data-surround="portable"] #volume { accent-color: #ded0b5; }
 #monitor[data-surround="dark"] {
-  --bezel: #0b0e0b; --bezel-step: #1f241f;
+  --lip: #3a3d36; --bezel: #0b0e0b; --bezel-step: #1f241f;
   color: #9d9d90; background: #232723;
   box-shadow: inset 0 1px 0 #666b5c, inset 0 -4px 0 #090d09;
 }
