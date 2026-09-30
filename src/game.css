@@ -70,7 +70,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 #monitor {
   --rim: 0px; --chin: 42px; --side: 0px; --radius: 12px;
-  --lip: #77481a; --bezel: #12120f; --bezel-step: #383636;
   display: grid; grid-template-columns: auto; grid-template-rows: auto var(--chin);
   padding: var(--rim); border-radius: var(--radius);
   color: #403a30; background: #a4928a;
@@ -79,15 +78,36 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #glass { position: relative; display: flex; align-items: center; justify-content: center; background: #000; clip-path: url(#screen-outline); }
 #monitor #canvas-box { clip-path: none; }
 #glass-surround { position: relative; isolation: isolate; }
-#monitor:not([data-surround="portable"]) #glass-surround::before {
-  content: ""; position: absolute; z-index: -1; inset: calc(-40 * var(--mm));
-  border: calc(3 * var(--mm)) solid var(--lip); border-radius: calc(10 * var(--mm)); background: var(--bezel);
-  box-shadow: inset 0 0 0 calc(11 * var(--mm)) var(--bezel), inset 0 0 0 calc(27 * var(--mm)) var(--bezel-step);
-  pointer-events: none;
-}
 #monitor #glass { border-radius: calc(6px * var(--scale)); }
+#monitor.cabinet {
+  --clip: 0px; position: relative; display: block; box-sizing: border-box;
+  width: calc(360 * var(--mm)); height: calc(364.5 * var(--mm)); padding: 0; border-radius: 0;
+  background: url(/assets/monitor/1702.svg) 0 0 / 100% 100% no-repeat; box-shadow: none;
+}
+#monitor.cabinet[data-surround="dark"] { background: url(/assets/monitor/1702-dark.svg) 0 0 / 100% 100% no-repeat; box-shadow: none; }
+#monitor.cabinet #glass-surround { position: absolute; left: calc(45.5 * var(--mm)); top: calc(72.5 * var(--mm)); }
+#monitor.cabinet #glass { border-radius: 0; clip-path: url(#glass-1702); }
+#monitor.cabinet #monitor-sidebar { position: absolute; inset: 0; pointer-events: none; }
+#monitor.cabinet #monitor-controls {
+  position: absolute; top: calc(329 * var(--mm)); height: var(--chin); gap: calc(4 * var(--mm));
+  left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px)); right: max(calc(70 * var(--mm)), calc(var(--clip) + 8px));
+  pointer-events: auto;
+}
+#monitor.cabinet #monitor-controls #fullscreen { margin: 0; }
+#monitor.cabinet #monitor-power {
+  position: absolute; top: calc(-13 * var(--mm)); transform: translate(-50%, -50%);
+  left: calc(335.25 * var(--mm) - max(calc(12 * var(--mm)), calc(var(--clip) + 8px)));
+  width: max(32px, calc(13.5 * var(--mm))); height: max(32px, calc(10 * var(--mm))); padding: 0;
+}
+#monitor.cabinet .power-switch, #monitor.cabinet.powered-off .power-switch { width: 100%; height: 100%; background: none; border: 0; box-shadow: none; transform: none; }
+#monitor.cabinet .power-light {
+  position: absolute; left: calc(50% - 120.75 * var(--mm)); top: calc(50% - 4.5 * var(--mm));
+  width: calc(5 * var(--mm)); height: calc(1 * var(--mm)); border-radius: 0;
+}
+.narrow-play #monitor.cabinet #monitor-power { position: static; transform: none; flex: none; }
+.narrow-play #monitor.cabinet .power-switch { width: 27px; height: 17px; background: #5e5749; border: 1px solid #40392d; box-shadow: inset 0 2px 0 #0006; }
+.narrow-play #monitor.cabinet .power-light { position: static; width: 5px; height: 5px; border-radius: 50%; }
 #monitor-sidebar { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-#monitor:not([data-surround="portable"]) #monitor-sidebar { position: relative; top: calc(.85 * var(--rim)); }
 #navigation-toggle { display: none; }
 #monitor-controls { display: flex; align-items: center; gap: 20px; font: 9px/1.4 Arial, sans-serif; letter-spacing: .12em; }
 #monitor #volume { width: 88px; height: 32px; accent-color: #514c40; cursor: pointer; }
@@ -109,7 +129,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor[data-surround="portable"] #monitor-controls { flex: 1; flex-direction: column; padding: 8px 0 4px 20px; gap: 18px; }
 #monitor[data-surround="portable"] #volume { accent-color: #ded0b5; }
 #monitor[data-surround="dark"] {
-  --lip: #3a3d36; --bezel: #0b0e0b; --bezel-step: #1f241f;
   color: #9d9d90; background: #232723;
   box-shadow: inset 0 1px 0 #666b5c, inset 0 -4px 0 #090d09;
 }
@@ -141,7 +160,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 }
 .narrow-play #play { width: 100%; overflow-x: clip; }
 .narrow-play #play-area { align-items: center; }
-:is(.game-fullscreen, .landscape-play) #monitor #glass-surround::before { display: none; }
 .game-fullscreen #monitor { --rim: 0px; --chin: 0px; --side: 0px; display: block; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 .game-fullscreen #monitor-controls { display: none; }
 .game-fullscreen #monitor #glass { border-radius: 0; box-shadow: none; clip-path: none; }

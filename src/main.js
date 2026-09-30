@@ -73,13 +73,17 @@ function fit() {
   }
   if (!landscape && !replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
   const padding = bare ? 0 : narrow ? 2 : CANVAS_PADDING;
-  for (const name of ['mm', 'rim', 'chin', 'radius']) monitor.style.removeProperty(`--${name}`);
+  for (const name of ['mm', 'chin', 'clip']) monitor.style.removeProperty(`--${name}`);
+  const cabinetFit = !bare && cabinetSurround;
+  monitor.classList.toggle('cabinet', cabinetFit);
   let scale, width, glassHeight;
-  if (!bare && cabinetSurround) {
-    const cabinet = fitCabinet(narrow ? document.documentElement.clientWidth : availableWidth,
-      availableHeight, padding, { fillWidth: narrow });
+  if (cabinetFit) {
+    const viewport = document.documentElement.clientWidth;
+    const cabinet = fitCabinet(narrow ? viewport : availableWidth, availableHeight, padding, { fillWidth: narrow });
     ({ scale, width, glassHeight } = cabinet);
-    for (const name of ['mm', 'rim', 'chin', 'radius']) monitor.style.setProperty(`--${name}`, `${cabinet[name]}px`);
+    monitor.style.setProperty('--mm', `${cabinet.mm}px`);
+    monitor.style.setProperty('--chin', `${cabinet.chin}px`);
+    monitor.style.setProperty('--clip', `${Math.max(0, (width - viewport) / 2)}px`);
   } else {
     const shell = getComputedStyle(monitor);
     const shellWidth = bare ? (landscape ? sidebar.offsetWidth : 0)

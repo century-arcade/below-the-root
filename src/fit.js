@@ -6,22 +6,17 @@ export function fitScale(width, height, rows = HEIGHT, padding = 0) {
   return Math.max(0.25, Math.min(width / columns, height / rows));
 }
 
-// 1702 Commons JVC front photo: 48 mm rim; Saul's 90 mm lower margin.
-const CASE_WIDTH = 360;
-const GLASS_WIDTH = 264, GLASS_HEIGHT = 198;
-const RIM = (CASE_WIDTH - GLASS_WIDTH) / 2;
-const CHIN = 42, CASE_HEIGHT = GLASS_HEIGHT + 2 * RIM + CHIN;
-const MIN_CHIN = 42;
+// 1702 front traced from a product photo: assets/monitor/1702.svg, in mm.
+export const CASE = { width: 360, height: 364.5 };
+export const GLASS = { x: 45.5, y: 72.5, width: 269.5, height: 196.5 };
+export const CONTROL_STRIP = { x: 12, y: 329, width: 278, height: 24.5 };
 
 export function fitCabinet(width, height, padding = 0, { fillWidth = false } = {}) {
-  const mm = fillWidth ? width * (WIDTH + 2 * padding) / WIDTH / GLASS_WIDTH
-    : Math.max(0, Math.min(width / CASE_WIDTH, height / CASE_HEIGHT,
-      (height - MIN_CHIN) / (CASE_HEIGHT - CHIN)));
-  const scale = GLASS_WIDTH * mm / (WIDTH + 2 * padding);
-  const rim = RIM * mm, chin = Math.max(MIN_CHIN, CHIN * mm);
-  return { mm, scale, rim, chin, radius: 6 * mm,
-    width: CASE_WIDTH * mm, height: (CASE_HEIGHT - CHIN) * mm + chin,
-    glassWidth: GLASS_WIDTH * mm, glassHeight: GLASS_HEIGHT * mm };
+  const mm = fillWidth ? width * (WIDTH + 2 * padding) / WIDTH / GLASS.width
+    : Math.max(0, Math.min(width / CASE.width, height / CASE.height));
+  return { mm, scale: GLASS.width * mm / (WIDTH + 2 * padding),
+    width: CASE.width * mm, height: CASE.height * mm,
+    glassWidth: GLASS.width * mm, glassHeight: GLASS.height * mm, chin: CONTROL_STRIP.height * mm };
 }
 
 // CRT stripes: one device pixel per phosphor colour at native density.
