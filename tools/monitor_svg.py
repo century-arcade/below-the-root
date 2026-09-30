@@ -1,7 +1,6 @@
-"""Derive the dark 1702 surround and the glass clip path from assets/monitor/1702.svg."""
+"""Derive the dark 1702 surround from assets/monitor/1702.svg."""
 import colorsys
 import re
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,21 +34,6 @@ def dark_svg(text):
                   lambda m: '#' + darken(expand(m.group(1).lower())), text)
 
 
-def glass_clip(text):
-    d = re.search(r'<path id="glass"[^>]*\bd="([^"]+)"', text).group(1)
-    origin, size = (45.5, 72.5), (269.5, 196.5)
-    out, axis = [], 0
-    for token in re.findall(r'[A-Za-z]|-?\d+(?:\.\d+)?', d):
-        if token.isalpha():
-            out.append(token)
-            axis = 0
-        else:
-            out.append(f'{(float(token) - origin[axis]) / size[axis]:.4f}'.rstrip('0').rstrip('.'))
-            axis ^= 1
-    return ' '.join(out)
-
 if __name__ == '__main__':
     text = SOURCE.read_text()
     DARK.write_text(dark_svg(text))
-    if '--clip' in sys.argv:
-        print(glass_clip(text))

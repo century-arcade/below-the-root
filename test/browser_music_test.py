@@ -7,6 +7,7 @@ BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     page = browser.new_page()
+    page.add_init_script("localStorage.setItem('btr.notes', '1')")
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(BASE + '/?menu')
