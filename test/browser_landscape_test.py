@@ -12,13 +12,11 @@ def choose_inventory(page):
     for key in ['ArrowDown', 'ArrowRight', 'ArrowRight', 'ArrowRight', 'f']:
         page.keyboard.press(key)
         page.clock.run_for(32)
-    panel_has(page, 'YOU HAVE')
+    until(page, 's => s.state.itemPicker?.readOnly')
 
 
 def close_inventory(page):
     page.keyboard.press('ArrowUp')
-    panel_has(page, 'NOTHING')
-    page.keyboard.press('Space')
     until(page, 's => !s.state.verb')
 
 
@@ -54,7 +52,7 @@ with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_t
     for _ in range(2):
         page.touchscreen.tap(box['x'] + box['width'] * 24 / 40,
                              box['y'] + box['height'] * 22.5 / 25)
-    panel_has(page, 'YOU HAVE')
+    until(page, 's => s.state.itemPicker?.readOnly')
     page.clock.run_for(32)
     close_inventory(page)
     page.get_by_role('button', name='Fullscreen', exact=True).tap()

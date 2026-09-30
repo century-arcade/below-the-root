@@ -1,7 +1,7 @@
 // docs/spec/player.md, What you carry; and the item pager the five verbs share
 
 import { cell, role } from './world.js';
-import { print, PANEL_ROW, PANEL_COLS } from './panel.js';
+import { print, clearPanel, panelText, PANEL_ROW, PANEL_ROWS, PANEL_COLS } from './panel.js';
 import { fireUp, directionPress } from './input.js';
 import { CLASS } from './data.js';
 
@@ -75,10 +75,103 @@ export function objectUnder(state) {
   return null;
 }
 
+const GRID_WIDTH = PANEL_COLS / 2;
+
+function gridChoice(picker, index) {
+  return { col: Math.floor(index / picker.rows), row: index % picker.rows };
+}
+
+function gridIndex(picker, choice) {
+  if (!choice || !Number.isInteger(choice.col) || !Number.isInteger(choice.row)
+      || choice.col < 0 || choice.col > 1 || choice.row < 0 || choice.row >= picker.rows) return -1;
+  const index = choice.col * picker.rows + choice.row;
+  return index < picker.entries.length ? index : -1;
+}
+
+function drawGrid(state) {
+  const p = state.itemPicker;
+  clearPanel(state);
+  if (p.header) print(state, PANEL_ROW, 1, p.prompt);
+  if (p.rows > p.visibleRows) print(state, PANEL_ROW, 32, 'MORE', p.selected.col === 2);
+  p.entries.forEach(({ label }, index) => {
+    const choice = gridChoice(p, index);
+    const row = choice.row - p.offset;
+    if (row < 0 || row >= p.visibleRows) return;
+    print(state, PANEL_ROW + p.header + row, choice.col * GRID_WIDTH,
+      label.slice(0, GRID_WIDTH).padEnd(GRID_WIDTH),
+      !p.readOnly && choice.col === p.selected.col && choice.row === p.selected.row);
+  });
+}
+
+export function itemChoiceAt(state, col, row) {
+  const p = state.itemPicker;
+  if (!p || col < 0 || col >= PANEL_COLS) return null;
+  if (p.rows > p.visibleRows && row === 0 && col >= 32 && col < 36) {
+    return { col: 2, row: p.offset };
+  }
+  const choice = { col: Math.floor(col / GRID_WIDTH), row: row - p.header + p.offset };
+  return row >= p.header && row < p.header + p.visibleRows && gridIndex(p, choice) >= 0 ? choice : null;
+}
+
+export function highlightItemChoice(state, choice) {
+  const p = state.itemPicker;
+  if (!p || p.readOnly || !(gridIndex(p, choice) >= 0 || choice?.col === 2)) return;
+  p.selected = { ...choice };
+  drawGrid(state);
+}
+
+function* pickGrid(state, items, { noFire, perClass }) {
+  const labels = new Map(inventoryEntries(state).map(({ item, label }) => [item.class, label]));
+  const entries = items.map(item => ({ item,
+    label: perClass ? labels.get(item.class) : item.name.replace(/^(?:A|AN|THE) /, '') }));
+  if (!noFire || !entries.length) entries.push({ item: null, label: 'NOTHING' });
+  const header = !noFire || entries.length > PANEL_ROWS * 2 ? 1 : 0;
+  const visibleRows = PANEL_ROWS - header;
+  const picker = state.itemPicker = { entries, readOnly: noFire, header, visibleRows,
+    rows: Math.max(visibleRows, Math.ceil(entries.length / 2)), offset: 0,
+    selected: { col: 0, row: 0 }, prompt: noFire ? 'YOU HAVE' : panelText(state, PANEL_ROW).trim() };
+  const moved = directionPress();
+  drawGrid(state);
+  try {
+    let first = yield* fireUp();
+    for (;;) {
+      const j = first ?? (yield { policy: 'press' });
+      first = null;
+      if (j.menuChoice) highlightItemChoice(state, j.menuChoice);
+      if (j.cancel) return null;
+      if (j.fire && (j.menuChoice?.col === 2 || (!noFire && picker.selected.col === 2))) {
+        picker.offset = picker.offset + visibleRows < picker.rows ? picker.offset + visibleRows : 0;
+        picker.selected = { col: 0, row: picker.offset };
+      } else if (noFire && (j.fire || j.dx || j.dy)) {
+        clearPanel(state);
+        return null;
+      } else if (j.fire) {
+        const item = entries[gridIndex(picker, picker.selected)]?.item ?? null;
+        if (state.commandChoice && item) state.commandChoice.item = item.object;
+        clearPanel(state);
+        return item;
+      } else if (!noFire) {
+        const move = moved(j);
+        if (move.dx || move.dy) {
+          const col = Math.max(0, Math.min(1, picker.selected.col + move.dx));
+          const lastRow = Math.min(picker.rows, entries.length - col * picker.rows) - 1;
+          if (lastRow >= 0) {
+            const row = Math.max(0, Math.min(lastRow, picker.selected.row + move.dy));
+            picker.selected = { col, row };
+            picker.offset = Math.floor(row / visibleRows) * visibleRows;
+          }
+        }
+      }
+      drawGrid(state);
+    }
+  } finally {
+    state.itemPicker = null;
+  }
+}
+
 const ENTRY_WIDTH = 16;
 export const CANCELLED = Symbol('item choice cancelled');
 
-// Down pages forward, up pages back, and fire takes the entry showing.
 export function* pickItem(state, { accept = () => true, perClass = false, col = 10, noFire = false, counted = false } = {}) {
   const entries = [];
   const seen = new Set();
@@ -93,6 +186,9 @@ export function* pickItem(state, { accept = () => true, perClass = false, col = 
     const entry = entries.find(o => o.object === state.commandChoice.item);
     if (!entry) throw new Error('Command item is not an available choice');
     return entry;
+  }
+  if (!state.classic && !state.demo) {
+    return yield* pickGrid(state, entries, { noFire, perClass: perClass || counted });
   }
   let first = yield* fireUp();
   if (state.demo) first = null;

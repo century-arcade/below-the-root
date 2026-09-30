@@ -102,13 +102,9 @@ for device in ['touch', 'mouse']:
         assert selected() == 'INVENTORY'
         page.keyboard.press('f')
         until(page, 's => !s.state.commandMenuOpen')
-        assert session_eval(page, '''s => Array.from(s.state.panel)
-            .map(c => String.fromCharCode(c & 127)).join('').includes('YOU HAVE')''')
+        assert session_eval(page, 's => s.state.itemPicker.readOnly')
 
         page.keyboard.press('ArrowUp')
-        until(page, '''s => Array.from(s.state.panel)
-            .map(c => String.fromCharCode(c & 127)).join('').includes('NOTHING')''')
-        page.keyboard.press('Enter')
         until(page, 's => !s.state.verb')
         page.keyboard.press('p')
         tap(screen_point(anchor))

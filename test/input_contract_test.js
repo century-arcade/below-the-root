@@ -9,6 +9,7 @@ import { startTune } from '../src/audio.js';
 import { tick, newState, startQuest } from '../src/game.js';
 import { pickItem } from '../src/inventory.js';
 import { highlightMenuChoice } from '../src/verbs.js';
+import { statusRows } from '../src/status.js';
 
 const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
 const data = await loadTestData();
@@ -475,8 +476,11 @@ for (const hasItem of [false, true]) {
     const objects = structuredClone(state.objects);
     const food = state.player.food;
     choose(session, keys, 1, 3); // EAT
-    if (hasItem) tap(keys, 'ArrowUp');
-    until(session, () => /\bNOTHING$/.test(lines(state)[0]), 'the cancellation entry appears');
+    if (hasItem) tap(keys, 'ArrowDown');
+    until(session, () => {
+      const p = state.itemPicker;
+      return p && p.entries[p.selected.col * p.rows + p.selected.row]?.item === null;
+    }, 'the cancellation entry is selected');
     tap(keys, 'Enter');
     until(session, () => !state.verb, 'one press closes the item picker', 30);
     assert.equal(state.commandMenuOpen, false);
@@ -525,6 +529,53 @@ test("queued navigation and confirmation select the intended character", async (
   assert.equal(characters.state.quest, true);
 });
 
+test('gamepad item navigation moves once per press and confirms the selected object', async () => {
+  const { fixture, choose, until, advance } = await inputContractFixture();
+  const { keys, session, state } = fixture(s => { give(s, CLASS.BREAD); give(s, CLASS.FRUIT); });
+  const fruit = state.objects.find(o => o.carried && o.class === CLASS.FRUIT);
+  const pad = { connected: true, axes: [0, 0], buttons: Array.from({ length: 16 }, () => ({ pressed: false })) };
+  const gamepad = new Gamepad(keys, { getGamepads: () => [pad] });
+  choose(session, keys, 1, 3);
+  until(session, () => !!state.itemPicker, 'EAT opens the picker');
+  pad.buttons[13].pressed = true;
+  gamepad.poll();
+  advance(session);
+  const p = state.itemPicker;
+  assert.equal(p.entries[p.selected.col * p.rows + p.selected.row].item.object, fruit.object);
+  gamepad.poll();
+  advance(session);
+  assert.equal(p.entries[p.selected.col * p.rows + p.selected.row].item.object, fruit.object);
+  pad.buttons[13].pressed = false;
+  pad.buttons[0].pressed = true;
+  gamepad.poll();
+  until(session, () => !fruit.exists, 'the selected fruit is eaten');
+  assert.equal(session.record.events.filter(e => e.command === 'EAT').length, 1);
+  assert.equal(session.record.events.find(e => e.command === 'EAT').item, fruit.object);
+  gamepad.cancel();
+});
+
+test('inventory hides status and consumes its dismissing movement until release', async () => {
+  const { fixture, choose, until, key, advance, tap } = await inputContractFixture();
+  const { keys, session, state } = fixture(s => { give(s, CLASS.BREAD); give(s, CLASS.FRUIT); });
+  assert.ok(statusRows(state).length);
+  choose(session, keys, 3, 1);
+  until(session, () => state.itemPicker?.readOnly, 'inventory is open');
+  assert.deepEqual(statusRows(state), []);
+  assert.ok(lines(state).join(' ').includes('PAN BREAD'));
+  assert.ok(lines(state).join(' ').includes('FRUIT & NUTS'));
+  const before = session.record.events.length;
+  key(keys, 'ArrowRight');
+  until(session, () => !state.verb, 'one press dismisses inventory');
+  assert.equal(state.itemPicker, null);
+  assert.ok(statusRows(state).length);
+  advance(session);
+  assert.ok(!session.record.events.slice(before).some(e => e.stick?.[0] || e.stick?.[2]));
+  key(keys, 'ArrowRight', true);
+  tap(keys, 'ArrowRight');
+  advance(session);
+  assert.ok(session.record.events.slice(before).some(e => e.stick?.[0] === 1));
+});
+
 test("the item chooser preserves its opening press and consumes rapid taps", async () => {
   const { data, key, tap } = await inputContractFixture();
   const keyboard = new Keyboard({ addEventListener() {} });
@@ -537,10 +588,14 @@ test("the item chooser preserves its opening press and consumes rapid taps", asy
   key(keyboard, 'ArrowDown');
   for (let i = 0; i < 10; i++) chooser.next(keyboard.read('press'));
   key(keyboard, 'ArrowDown', true);
-  assert.match(lines(itemState)[0], new RegExp(`${secondItem.name}$`), 'item chooser keeps its opening press');
+  const selected = () => {
+    const p = itemState.itemPicker;
+    return p.entries[p.selected.col * p.rows + p.selected.row].item;
+  };
+  assert.equal(selected(), secondItem, 'item chooser keeps its opening press');
   tap(keyboard, 'ArrowUp');
   tap(keyboard, 'ArrowDown');
   tap(keyboard, 'ArrowUp');
   for (let i = 0; i < 10; i++) chooser.next(keyboard.read('press'));
-  assert.match(lines(itemState)[0], new RegExp(`${firstItem.name}$`), 'item chooser consumes rapid taps exactly once');
+  assert.equal(selected(), firstItem, 'item chooser consumes rapid taps exactly once');
 });

@@ -19,7 +19,7 @@ test('walking to INVENTORY opens the carried-item display', async () => {
   const { run, data, pomma } = await talkFixture();
   const s = questState(data, pomma);
   give(s, CLASS.BREAD);
-  assert.match(run(s, menu('INVENTORY'))[0], /YOU HAVE/);
+  assert.match(run(s, menu('INVENTORY'))[0], /PAN BREAD/);
 });
 
 test('pointing at INVENTORY opens the carried-item display', async () => {
@@ -32,7 +32,7 @@ test('pointing at INVENTORY opens the carried-item display', async () => {
   g.next(J.idle);
   assert.ok(pointed.commandMenuOpen, 'highlighting does not run the verb');
   g.next(J.fire);
-  assert.match(lines(pointed)[0], /YOU HAVE/);
+  assert.ok(pointed.itemPicker?.readOnly);
 });
 
 test('keyboard navigation continues from the pointer highlight', async () => {
@@ -44,7 +44,7 @@ test('keyboard navigation continues from the pointer highlight', async () => {
   g.next(J.right);
   assert.deepEqual(state.commandMenuSelection, { col: 3, row: 1 });
   g.next(J.fire);
-  assert.match(lines(state)[0], /YOU HAVE/);
+  assert.ok(state.itemPicker?.readOnly);
 });
 
 test('blank menu cells refuse pointer and directional selection', async () => {
@@ -63,7 +63,7 @@ test('blank menu cells refuse pointer and directional selection', async () => {
   g.next(J.left);
   g.next(J.idle);
   g.next(J.fire);
-  assert.match(lines(walked)[0], /YOU HAVE/);
+  assert.ok(walked.itemPicker?.readOnly);
 });
 
 test('SPEAK with nobody facing', async () => {

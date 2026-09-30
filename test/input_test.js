@@ -67,6 +67,45 @@ async function gamepadFixture() {
   return Object.assign(mock, { keys, gamepad, pad, read });
 }
 
+test('context keys release their original action after the context changes', async () => {
+  const { keys } = await keyboardFixture();
+  keys.contextKey = () => 'fire';
+  keys.map({ key: 'ArrowRight', code: 'ArrowRight' });
+  assert.equal(keys.read('press').fire, true);
+  keys.handoff({ movement: true });
+  keys.contextKey = () => null;
+  keys.map({ key: 'ArrowRight', code: 'ArrowRight' }, true);
+  assert.deepEqual(keys.read(), IDLE);
+  keys.map({ key: 'ArrowRight', code: 'ArrowRight' });
+  assert.equal(keys.read().dx, 1);
+  keys.map({ key: 'ArrowRight', code: 'ArrowRight' }, true);
+  keys.contextKey = key => key === 'Escape' ? 'cancel' : null;
+  keys.map({ key: 'Escape', code: 'Escape' });
+  assert.equal(keys.read('press').cancel, true);
+  assert.equal(keys.read('press').cancel, undefined);
+  keys.contextKey = () => null;
+  keys.map({ key: 'Escape', code: 'Escape' }, true);
+  assert.deepEqual(keys.read(), IDLE);
+});
+
+test('direct mouse choosers highlight on hover and select an unhighlighted click', async t => {
+  const f = await pointerFixture(t);
+  const chooser = f.model.chooser = {
+    id: {}, mouseDirect: true, selected: { col: 0, row: 0 },
+    hit: x => x < 100 ? { col: 0, row: 0 } : { col: 1, row: 0 },
+    highlight(choice) { this.selected = choice; },
+  };
+  const mouse = (name, x) => f.canvas.send(name, { button: 0, pointerId: 1,
+    pointerType: 'mouse', clientX: x, clientY: 100, preventDefault() {} });
+  mouse('pointermove', 150);
+  assert.deepEqual(chooser.selected, { col: 1, row: 0 });
+  assert.equal(f.keys.read('press').fire, false);
+  mouse('pointerdown', 50);
+  mouse('pointerup', 50);
+  assert.deepEqual(f.keys.read('press').menuChoice, { col: 0, row: 0 });
+  assert.equal(f.keys.read('press').fire, false);
+});
+
 test("gamepad directions combine the d-pad and stick with a dead zone", async () => {
   const mock = await gamepadFixture();
   const { pad, read } = mock;

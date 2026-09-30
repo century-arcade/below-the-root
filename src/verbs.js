@@ -425,6 +425,7 @@ function* status(state) {
 function* inventory(state) {
   say(state, 'YOU HAVE');
   yield* pickItem(state, { col: 10, noFire: true, counted: !state.demo });
+  if (!state.classic && !state.demo) return WOKE;
 }
 
 function* renew(state) {
@@ -524,6 +525,7 @@ function* chooseCommand(state, name) {
     if (result.value !== CANCELLED && (result.done || (name !== 'KINIPORT' && draft.commandChoice.item != null))) apply();
     state.panel.set(draft.panel);
     state.pointer = draft.pointer;
+    state.itemPicker = draft.itemPicker;
     state.events.push(...draft.events.splice(0));
     if (draft.stall) {
       state.stall = draft.stall;
@@ -534,6 +536,7 @@ function* chooseCommand(state, name) {
     result = gen.next(yield result.value);
   }
   state.pointer = null;
+  state.itemPicker = null;
   if (result.value === CANCELLED) return CANCELLED;
   if (state.resting || state.progress.won) return WOKE;
   return result.value;

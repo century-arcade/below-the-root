@@ -1,4 +1,4 @@
-"""Touch prompts retain confirmation, steering and live tune skipping."""
+"""Classic item prompts and live dialogue retain touch confirmation and steering."""
 from browser_helpers import browser_page, session_eval, until
 
 
@@ -61,7 +61,8 @@ def hold_direction(page, dx, dy, predicate):
 
 
 for cancel in [False, True]:
-    with browser_page('/play?player=0', has_touch=True) as page:
+    with browser_page('/play?player=0', has_touch=True,
+                      setup=lambda p: p.add_init_script("localStorage.setItem('btr.classic', '1')")) as page:
         item = session_eval(page, '''async s => {
             const {CLASS} = await import('/data.js');
             const item = s.state.objects.find(o => o.exists && o.class === CLASS.BREAD);

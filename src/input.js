@@ -43,19 +43,22 @@ export class Keyboard {
     this.pace = 5;
     this.onKey = null;
     this.selectWithF = () => false;
+    this.contextKey = () => null;
     target.addEventListener('keydown', (e) => { if (this.map(e)) e.preventDefault(); });
     target.addEventListener('keyup', (e) => { this.map(e, true); });
     target.addEventListener('blur', () => this.reset());
   }
 
   map(e, up = false) {
-    if (!up && e.key.toLowerCase() === 'f' && !this.selectWithF()) return false;
+    const contextKey = this.contextKey(e.key);
+    if (!up && !contextKey && e.key.toLowerCase() === 'f' && !this.selectWithF()) return false;
     if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
     if (!up && e.key === 'Enter' && e.target?.closest?.('a[href], button, [role="button"]')) return false;
-    const key = KEYS[e.key];
+    const source = e.code || e.key;
+    const key = up ? this.sources.get(source)?.down.keys().next().value ?? KEYS[e.key]
+      : contextKey ?? KEYS[e.key];
     if (!key) return false;
     if (!up && e.repeat) return true;
-    const source = e.code || e.key;
     if (up) this.release(key, source); else this.press(key, source);
     // onKey after press/release: the callback may reset what this key set
     if (!e.repeat) this.onKey?.(up ? 'keyup' : 'keydown', source);
@@ -161,6 +164,7 @@ export class Keyboard {
     if (policy === 'press' || policy === 'trigger') {
       const move = axes(pressed);
       return { ...move, fire: pressed.has('fire'), move, observed: true,
+        ...(pressed.has('cancel') ? { cancel: true } : {}),
         ...(policy === 'press' && event?.menuChoice ? { menuChoice: event.menuChoice } : {}) };
     }
     // Direction holds remain continuous, while a completed tap gets one read.
@@ -322,7 +326,8 @@ export class Pointer {
       this.pending = null;
       const choice = chooser.hit(...this.pixel(e));
       this.choicePress = { id: chooser.id, choice, started: performance.now(),
-        confirm: !!choice && sameChoice(choice, chooser.selected) };
+        confirm: !!choice && ((e.pointerType === 'mouse' && chooser.mouseDirect)
+          || chooser.dismiss || sameChoice(choice, chooser.selected)) };
       if (choice) chooser.highlight(choice);
       return;
     }
@@ -338,6 +343,14 @@ export class Pointer {
   }
 
   move(e) {
+    if (this.pointerId == null && e.pointerType === 'mouse') {
+      const chooser = this.chooser();
+      if (chooser?.mouseDirect) {
+        const choice = chooser.hit(...this.pixel(e));
+        if (choice) chooser.highlight(choice);
+      }
+      return;
+    }
     if (e.pointerId !== this.pointerId) return;
     if (this.choicePress) {
       const chooser = this.chooser();
@@ -359,7 +372,7 @@ export class Pointer {
       if (chooser?.id === press.id && press.confirm
           && performance.now() - press.started <= TAP_MS
           && sameChoice(press.choice, chooser.hit(...this.pixel(e)))
-          && sameChoice(press.choice, chooser.selected)) this.keys.gesture(['fire'], 'pointer', press.choice);
+          && (chooser.dismiss || sameChoice(press.choice, chooser.selected))) this.keys.gesture(['fire'], 'pointer', press.choice);
     } else if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;

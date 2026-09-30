@@ -3,6 +3,7 @@ import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
+import { itemChoiceAt, highlightItemChoice } from './inventory.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
@@ -181,6 +182,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const freshStart = !session && initial.mode === 'cold';
   session ||= new Session(data, stick, { initial, seed });
   let state = session.state;
+  state.classic = options.classic;
+  stick.contextKey = key => {
+    if (!powered || paused || overlay || startupHelp || session.playback || !state.itemPicker) return null;
+    return state.itemPicker.readOnly ? 'fire' : key === 'Escape' ? 'cancel' : null;
+  };
   stick.selectWithF = () => state.title || !!state.verb;
   let returnSession = null;
   let seekRoom = null;
@@ -190,7 +196,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row), window, {
     menu: () => commandMenu(),
     player: () => !session.playback && canOpenCommandMenu(state) ? state.player : null,
-    chooser: () => state.commandMenuOpen && !state.demo && !session.playback ? {
+    chooser: () => state.itemPicker && !session.playback ? {
+      id: state.itemPicker,
+      selected: state.itemPicker.selected,
+      mouseDirect: true,
+      dismiss: state.itemPicker.readOnly,
+      hit: (x, y) => powered && !paused && !overlay && !startupHelp
+        ? itemChoiceAt(state, Math.floor(x / 8), Math.floor(y / 8) - PANEL_ROW)
+          ?? (state.itemPicker.readOnly ? { col: -1, row: -1 } : null) : null,
+      highlight: choice => highlightItemChoice(state, choice),
+    } : state.commandMenuOpen && !state.demo && !session.playback ? {
       id: state.verb,
       selected: state.commandMenuSelection,
       hit: (x, y) => powered && !paused && !overlay && !startupHelp && !session.playback
@@ -570,6 +585,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }, true);
   addEventListener('keydown', e => {
     if (!powered || paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
+    if (state.itemPicker && !session.playback && !overlay
+        && (state.itemPicker.readOnly || e.key === 'Escape')) return;
     if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
         && (e.target === canvas || e.target === document.body)) {
       e.preventDefault(); rewindRoomButton.click(); return;
@@ -684,6 +701,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       if (seekRoom == null && acc < delay) break;
       const idleScreen = session.playback && delay === 0 && seekRoom == null ? screenKey(state) : null;
       session.skippable = !options.classic;
+      state.classic = options.classic;
       const previousRoom = state.room;
       const previousTitle = state.title;
       try { session.step({ presentation: seekRoom == null }); }
