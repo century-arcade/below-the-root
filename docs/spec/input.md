@@ -74,8 +74,11 @@ editing fields own their inputs. Clicking the canvas restores gameplay focus.
 
 ## Pointer gestures
 
-Mouse and touch share these live-play gestures. Holding longer than 150 ms steers
-toward the pointer. A single tap walks after a 200 ms double-tap window;
+Mouse and touch share these locomotion gestures. Item prompts, dialogue,
+KINIPORT and live tune waits retain their trigger taps and held steering;
+self-taps confirm or skip rather than request the command menu there.
+Holding longer than 150 ms steers toward the pointer. A single tap walks
+after a 200 ms double-tap window;
 the first tap of a double never starts a walk. A door tap walks immediately
 to the door and triggers on arrival. Walks stop on arrival, after 1.2 seconds
 without progress, or after 15 seconds; a downward walk that only stoops is

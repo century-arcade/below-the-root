@@ -189,7 +189,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekRepeatAt = 0;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row), window, {
     menu: () => commandMenu(),
-    player: () => state.title || state.demo || session.playback ? null : state.player,
+    player: () => !session.playback && canOpenCommandMenu(state) ? state.player : null,
     chooser: () => state.commandMenuOpen && !state.demo && !session.playback ? {
       id: state.verb,
       selected: state.commandMenuSelection,
