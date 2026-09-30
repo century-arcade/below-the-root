@@ -64,6 +64,7 @@ export function newState(data, input, opts = {}) {
     timeUp: false,
     character: null,
     pointer: null,
+    itemPicker: null,
     verb: null,
     commandMenuOpen: false,
     verbWait: 0,
@@ -97,7 +98,7 @@ export function startQuest(state, character) {
   Object.assign(state, {
     objects: newObjects(state.data), flags: newFlags(), clock: newClock(),
     simticks: 0, visit: 0, resting: null, title: false, stop: null,
-    stall: 0, tuneWait: null, verbWait: 0, commandMenuOpen: false,
+    stall: 0, tuneWait: null, verbWait: 0, commandMenuOpen: false, itemPicker: null,
     character: character.id, sample: false, fallaKey: false, berriesOffered: 0,
     visions: 0, animalsPensed: 0, lamp: null, dream: DREAM.none, timeUp: false, ended: null, quest: true,
     player: newPlayer(character.sprite_sheet, character.start.stamina),
@@ -175,7 +176,7 @@ function stopped(state) {
 
 // the script is over, or the button cut it short: the stick is a stick again and the shell owns the screen
 export function endDemo(state) {
-  Object.assign(state, { demo: null, input: state.stick || state.input, active: false, stall: 0, tuneWait: null, stop: null, verb: null });
+  Object.assign(state, { demo: null, input: state.stick || state.input, active: false, stall: 0, tuneWait: null, stop: null, verb: null, itemPicker: null });
 }
 
 // a verb or shell message is a generator: one read per yield, paced for a hand unless the yield names its wait
@@ -183,6 +184,7 @@ export function startVerb(state, gen, carryMovement = false) {
   state.verbCarryMovement = carryMovement;
   state.verbUnread = false;
   state.commandMenuOpen = false;
+  state.itemPicker = null;
   state.verb = gen;
   state.verbWait = 0;
   advanceVerb(state, gen.next());
@@ -204,6 +206,7 @@ function advanceVerb(state, r) {
 
 function endVerb(state) {
   state.verb = null;
+  state.itemPicker = null;
   state.commands?.handoff({ movement: !state.verbCarryMovement, unread: state.verbUnread });
   if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);

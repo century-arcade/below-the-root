@@ -2,9 +2,23 @@ import { talkFixture, questState, J, menuReads as menu, page, lines, give, timeF
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CLASS } from '../src/data.js';
-import { tick } from '../src/game.js';
-import { carriedOf } from '../src/inventory.js';
+import { tick, startVerb, endDemo, startQuest } from '../src/game.js';
+import { carriedOf, pickItem } from '../src/inventory.js';
 import { TICKS_PER_HOUR } from '../src/clock.js';
+
+for (const transition of ['abandon', 'replace', 'new quest']) {
+  test(`${transition} releases the previous verb's item picker`, async () => {
+    const { data, pomma } = await talkFixture();
+    const state = questState(data, pomma);
+    assert.equal(state.itemPicker, null);
+    startVerb(state, pickItem(state));
+    assert.ok(state.itemPicker);
+    if (transition === 'abandon') endDemo(state);
+    else if (transition === 'replace') startVerb(state, (function* () { yield; })());
+    else startQuest(state, pomma);
+    assert.equal(state.itemPicker, null);
+  });
+}
 
 test('the outer gate: locked, then paid with a wissenberry', async () => {
   const { run, faceCreature, data, pomma } = await talkFixture();

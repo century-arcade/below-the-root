@@ -106,6 +106,44 @@ test('direct mouse choosers highlight on hover and select an unhighlighted click
   assert.equal(f.keys.read('press').fire, false);
 });
 
+for (const [device, mouseDirect, confirms] of [
+  ['mouse', true, true], ['touch', true, false], ['mouse', false, false],
+]) test(`${device} long chooser press ${mouseDirect ? 'with direct selection' : 'on a command menu'} ${confirms ? 'confirms once' : 'does not confirm'}`, async t => {
+  const f = await pointerFixture(t);
+  f.model.chooser = {
+    id: {}, mouseDirect, selected: { col: 0, row: 0 },
+    hit: () => ({ col: 0, row: 0 }),
+    highlight(choice) { this.selected = choice; },
+  };
+  const event = { button: 0, pointerId: 1, pointerType: device,
+    clientX: 100, clientY: 100, preventDefault() {} };
+  f.canvas.send('pointerdown', event);
+  f.advance(200);
+  assert.equal(f.keys.read('press').fire, false);
+  f.canvas.send('pointerup', event);
+  assert.equal(f.keys.read('press').fire, confirms);
+  assert.equal(f.keys.read('press').fire, false);
+});
+
+for (const device of ['mouse', 'touch']) test(`${device} direct chooser drag cannot confirm even after returning to its first cell`, async t => {
+  const f = await pointerFixture(t);
+  f.model.chooser = {
+    id: {}, mouseDirect: true, selected: { col: 0, row: 0 },
+    hit: x => ({ col: x < 120 ? 0 : 1, row: 0 }),
+    highlight(choice) { this.selected = choice; },
+  };
+  const send = (name, x = 100) => f.canvas.send(name, {
+    button: 0, pointerId: 1, pointerType: device,
+    clientX: x, clientY: 100, preventDefault() {},
+  });
+  send('pointerdown');
+  send('pointermove', 130);
+  assert.equal(f.model.chooser.selected.col, 1);
+  send('pointermove');
+  send('pointerup');
+  assert.equal(f.keys.read('press').fire, false);
+});
+
 test("gamepad directions combine the d-pad and stick with a dead zone", async () => {
   const mock = await gamepadFixture();
   const { pad, read } = mock;

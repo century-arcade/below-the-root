@@ -325,9 +325,9 @@ export class Pointer {
       clearTimeout(this.pending);
       this.pending = null;
       const choice = chooser.hit(...this.pixel(e));
-      this.choicePress = { id: chooser.id, choice, started: performance.now(),
-        confirm: !!choice && ((e.pointerType === 'mouse' && chooser.mouseDirect)
-          || chooser.dismiss || sameChoice(choice, chooser.selected)) };
+      const mouseDirect = e.pointerType === 'mouse' && chooser.mouseDirect;
+      this.choicePress = { id: chooser.id, choice, started: performance.now(), mouseDirect,
+        confirm: !!choice && (mouseDirect || chooser.dismiss || sameChoice(choice, chooser.selected)) };
       if (choice) chooser.highlight(choice);
       return;
     }
@@ -370,7 +370,7 @@ export class Pointer {
       this.choicePress = null;
       const chooser = this.chooser();
       if (chooser?.id === press.id && press.confirm
-          && performance.now() - press.started <= TAP_MS
+          && (press.mouseDirect || performance.now() - press.started <= TAP_MS)
           && sameChoice(press.choice, chooser.hit(...this.pixel(e)))
           && (chooser.dismiss || sameChoice(press.choice, chooser.selected))) this.keys.gesture(['fire'], 'pointer', press.choice);
     } else if (this.timer) {
