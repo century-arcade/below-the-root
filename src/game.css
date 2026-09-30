@@ -87,6 +87,8 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor.cabinet[data-surround="dark"] { background: url(/assets/monitor/1702-dark.svg) 0 0 / 100% 100% no-repeat; box-shadow: none; }
 #monitor.cabinet #glass-surround { position: absolute; left: calc(45.5 * var(--mm)); top: calc(72.5 * var(--mm)); }
 #monitor.cabinet #glass { border-radius: 0; clip-path: url(#glass-1702); }
+#screen-focus .glass-1702-outline, #monitor.cabinet #screen-focus .generic-outline { display: none; }
+#monitor.cabinet #screen-focus .glass-1702-outline { display: inline; }
 #monitor.cabinet #monitor-sidebar { position: absolute; inset: 0; pointer-events: none; }
 #monitor.cabinet #monitor-controls {
   position: absolute; top: calc(329 * var(--mm)); height: var(--chin); gap: calc(4 * var(--mm));
