@@ -1,4 +1,4 @@
-"""Monitor power clears the game and restarts at the menu."""
+"""Monitor controls remain operable on desktop and touch phones."""
 from browser_helpers import browser_page, observe, held, until, session_eval
 from playwright.sync_api import expect
 
@@ -42,3 +42,29 @@ with browser_page('/play?room=B8') as page:
     page.evaluate('document.exitFullscreen()')
     expect(page.get_by_role('group', name='Monitor controls')).to_be_visible()
 print('browser_monitor_test: power and volume passed')
+
+for surround in ['commodore', 'dark']:
+    for width, height in [(320, 800), (360, 800), (400, 800), (412, 915)]:
+        def setup(page):
+            page.add_init_script(f"localStorage.setItem('btr.surround', '{surround}')")
+
+        with browser_page('/play?room=B8', setup=setup, viewport={'width': width, 'height': height},
+                          is_mobile=True, has_touch=True, device_scale_factor=2.625) as page:
+            power = page.get_by_role('button', name='Monitor power', exact=True)
+            power.tap()
+            expect(power).to_have_attribute('aria-pressed', 'false')
+            power.tap()
+            expect(power).to_have_attribute('aria-pressed', 'true')
+            volume = page.get_by_role('slider', name='Volume', exact=True)
+            volume.tap()
+            volume.fill('70')
+            expect(volume).to_have_attribute('aria-valuetext', '70%')
+            page.evaluate('window.scrollTo(1000, 0)')
+            assert page.evaluate('window.scrollX') == 0, 'the clipped case cannot pan the page sideways'
+            page.get_by_role('button', name='Fullscreen', exact=True).tap()
+            page.wait_for_function('document.fullscreenElement !== null')
+            page.evaluate('document.exitFullscreen()')
+            page.wait_for_function('document.fullscreenElement === null')
+            power.tap()
+            expect(power).to_have_attribute('aria-pressed', 'false')
+        print(f'browser_monitor_test: {surround} controls at {width}x{height} passed')

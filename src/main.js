@@ -58,6 +58,9 @@ function fit() {
   document.documentElement.classList.toggle('landscape-play', landscape);
   if (!landscape) closeNavigation();
   const bare = full || landscape;
+  const cabinetSurround = monitor.dataset.surround !== 'portable';
+  const narrow = !bare && cabinetSurround && window.innerWidth <= 400;
+  document.documentElement.classList.toggle('narrow-play', narrow);
   const outerGap = bare ? 0 : parseFloat(getComputedStyle(game).marginTop);
   const chrome = bare ? 0 : document.getElementById('site-header').offsetHeight;
   let availableHeight = window.innerHeight - chrome - 2 * outerGap;
@@ -69,13 +72,14 @@ function fit() {
     document.getElementById('play-area').insertBefore(replayControls, document.getElementById('help-screen'));
   }
   if (!landscape && !replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
-  const padding = bare ? 0 : CANVAS_PADDING;
-  for (const name of ['rim', 'chin', 'radius']) monitor.style.removeProperty(`--${name}`);
+  const padding = bare ? 0 : narrow ? 2 : CANVAS_PADDING;
+  for (const name of ['mm', 'rim', 'chin', 'radius']) monitor.style.removeProperty(`--${name}`);
   let scale, width, glassHeight;
-  if (!bare && monitor.dataset.surround !== 'portable') {
-    const cabinet = fitCabinet(availableWidth, availableHeight, padding);
+  if (!bare && cabinetSurround) {
+    const cabinet = fitCabinet(narrow ? document.documentElement.clientWidth : availableWidth,
+      availableHeight, padding, { fillWidth: narrow });
     ({ scale, width, glassHeight } = cabinet);
-    for (const name of ['rim', 'chin', 'radius']) monitor.style.setProperty(`--${name}`, `${cabinet[name]}px`);
+    for (const name of ['mm', 'rim', 'chin', 'radius']) monitor.style.setProperty(`--${name}`, `${cabinet[name]}px`);
   } else {
     const shell = getComputedStyle(monitor);
     const shellWidth = bare ? (landscape ? sidebar.offsetWidth : 0)
@@ -94,7 +98,7 @@ function fit() {
   canvas.parentElement.style.width = canvas.style.width;
   canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
   canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
-  game.style.width = bare ? '' : `${width}px`;
+  game.style.width = bare || narrow ? '' : `${width}px`;
   monitor.style.setProperty('--scale', scale);
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
