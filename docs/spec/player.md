@@ -453,6 +453,17 @@ The blank cell does nothing and returns you to the cursor.  PAUSE
 closes the menu.  MENU leaves the quest where it is and goes back to the main
 menu.
 
+The live port omits STATUS and MENU, leaving their cells unavailable.
+INVENTORY stays between SELL and RENEW in the second row. Moving into an
+unavailable cell is refused; pointer selection uses the same grid. The demos
+retain the original layout above.
+
+The port's canvas is 320 × 200. In modern mode the bottom two rows of an
+otherwise empty text panel show day, time and name, then stamina, food, rest
+and spirit. Menus, messages, prompts and verbs own the panel until they clear.
+After victory those rows show play time and completion. Inventory is available
+through its command, not permanently displayed. Classic mode adds no rows.
+
 **Picking an item.**  Five verbs share one paging interface: push up to
 page forward through what you carry, press the button to choose what is
 showing.  Past the last entry comes "NOTHING", and past that the first

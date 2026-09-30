@@ -1,18 +1,52 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { J, talkFixture, questState, menuReads as menu, place, lines, give, stick as reader, page, timeFixture } from './helpers.js';
-import { MENU, runMenu, paintStatus } from '../src/verbs.js';
+import { MENU, menuChoiceAt, runMenu, paintStatus } from '../src/verbs.js';
 import { CLASS } from '../src/data.js';
 import { startVerb, tick } from '../src/game.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 
-test('the live command menu omits status, inventory and title navigation', () => {
+test('the live command menu offers inventory but omits status and title navigation', () => {
   assert.deepEqual(MENU.flat().sort(), [
-    'PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'SPEAK', 'BUY', 'SELL', 'RENEW',
+    'PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW',
     'PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'OFFER', 'EAT', 'REST', 'KINIPORT',
   ].sort());
+});
+
+test('walking to INVENTORY opens the carried-item display', async () => {
+  const { run, data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  give(s, CLASS.BREAD);
+  assert.match(run(s, menu('INVENTORY'))[0], /YOU HAVE/);
+});
+
+test('pointing at INVENTORY opens the carried-item display', async () => {
+  const { run, data, pomma } = await talkFixture();
+  const pointed = questState(data, pomma);
+  pointed.commandMenuClick = menuChoiceAt(20, 1);
+  assert.deepEqual(pointed.commandMenuClick, { col: 3, row: 1 });
+  assert.match(run(pointed, [J.idle, J.fire])[0], /YOU HAVE/);
+});
+
+test('blank menu cells refuse pointer and directional selection', async () => {
+  const { data, pomma } = await talkFixture();
+  assert.equal(menuChoiceAt(32, 0), null);
+  assert.equal(menuChoiceAt(32, 2), null);
+  assert.equal(menuChoiceAt(32, 3), null);
+  assert.deepEqual(menuChoiceAt(32, 1), { col: 4, row: 1 });
+  const walked = questState(data, pomma);
+  const g = runMenu(walked);
+  g.next();
+  for (const input of menu('RENEW').slice(0, -1)) g.next(input);
+  const current = g.next(J.up);
+  assert.equal(current.done, false);
+  g.next(J.idle);
+  g.next(J.left);
+  g.next(J.idle);
+  g.next(J.fire);
+  assert.match(lines(walked)[0], /YOU HAVE/);
 });
 
 test('SPEAK with nobody facing', async () => {

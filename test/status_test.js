@@ -1,5 +1,3 @@
-import { acquired } from '../src/progress.js';
-import { paintStatus } from '../src/verbs.js';
 import { give, loadTestData } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -20,46 +18,51 @@ test('status is absent outside a quest and its rows fit the panel', () => {
   state.clock.day = 51;
   state.clock.hour = 2;
   const rows = statusRows(state);
-  assert.ok(rows.length > 0);
+  assert.deepEqual(rows.slice(0, 2), ['', '']);
+  assert.match(rows[2], /DAY 51.*NERIC/);
+  assert.match(rows[3], /STAMINA 30.*FOOD 30.*REST 30.*SPIRIT 30\/30/);
+  assert.ok(!rows.some(row => /BREAD|ROPE|TOKEN/.test(row)));
   assert.ok(rows.every(row => row.length <= PANEL_COLS));
   state.title = true;
   assert.deepEqual(statusRows(state), []);
 });
 
-test('menus and messages hide inventory until they close', () => {
+test('menus, verbs and messages own the panel until they close', () => {
   const state = newState(data, { read: () => IDLE });
   startQuest(state, data.characters[0]);
   give(state, CLASS.BREAD);
-  const showsInventory = () => statusRows(state).some(row => row.includes('PAN BREAD'));
-  assert.ok(showsInventory());
+  const showsStatus = () => statusRows(state).some(row => row.includes('STAMINA'));
+  assert.ok(showsStatus());
   state.commandMenuOpen = true;
-  assert.ok(!showsInventory());
+  assert.ok(!showsStatus());
   state.commandMenuOpen = false;
-  assert.ok(showsInventory());
+  assert.ok(showsStatus());
   state.verb = {};
-  assert.ok(!showsInventory());
+  assert.ok(!showsStatus());
   state.verb = null;
   say(state, 'A MESSAGE');
-  assert.ok(!showsInventory());
+  assert.ok(!showsStatus());
   clearPanel(state);
-  assert.ok(showsInventory());
+  assert.ok(showsStatus());
 });
 
-test('STATUS shows live completion and elapsed time without replay room counts', async () => {
+test('classic mode adds no status rows during or after a quest', () => {
   const s = newState(data, { read: () => IDLE });
   startQuest(s, data.characters[3]);
-  s.progress.spirit = 35;
-  s.progress.elixirs = 5;
-  for (const cls of [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY, CLASS.WAND]) acquired(s, { class: cls });
-  for (const token of s.objects.filter(o => o.class === CLASS.TOKEN && o.exists)) acquired(s, token);
+  assert.deepEqual(statusRows(s, { classic: true }), []);
+  s.progress.won = true;
+  assert.deepEqual(statusRows(s, { classic: true }), []);
+});
+
+test('victory replaces idle status with completion and play time', () => {
+  const s = newState(data, { read: () => IDLE });
+  startQuest(s, data.characters[3]);
+  s.progress.won = true;
   s.simticks = 223380;
-  paintStatus(s);
-  assert.ok(statusRows(s).includes('01:02:03 PLAY / 65% COMPLETE'));
-  s.simticks += 60;
-  assert.ok(statusRows(s, { classic: true }).includes('01:02:04 PLAY / 65% COMPLETE'));
+  assert.deepEqual(statusRows(s).slice(0, 3), ['', '', 'PLAY TIME 01:02:03']);
+  assert.match(statusRows(s)[3], /% GAME COMPLETE$/);
+  say(s, 'VICTORY');
+  assert.deepEqual(statusRows(s), [], 'the victory message owns the panel');
   clearPanel(s);
-  assert.deepEqual(statusRows(s, { classic: true }), [], 'leaving STATUS clears its details');
-  assert.ok(!statusRows(s, { playback: { roomChanges: 54, totalRoomChanges: 130 } }).includes('54/130'));
-  assert.deepEqual(statusRows(s, { classic: true, playback: { roomChanges: 0, totalRoomChanges: 0 } }),
-    [], 'replay progress belongs outside the canvas');
+  assert.match(statusRows(s)[3], /% GAME COMPLETE$/);
 });

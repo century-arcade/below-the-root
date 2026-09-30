@@ -14,7 +14,7 @@ import { acquired } from './progress.js';
 
 export const MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE'],
-  ['SPEAK', 'BUY', 'SELL', 'RENEW'],
+  ['SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW'],
   ['PENSE', 'USE', 'HEAL', 'GRUNSPREKE'],
   ['OFFER', 'EAT', 'REST', 'KINIPORT'],
 ];
@@ -76,8 +76,12 @@ export function* runMenu(state) {
     }
     if (j.fire) break;
     const move = state.demo ? j : moved(j);
-    col = Math.max(0, Math.min(choices[row].length - 1, col + move.dx));
-    row = Math.max(0, Math.min(3, row + move.dy));
+    const nextCol = Math.max(0, Math.min(choices[row].length - 1, col + move.dx));
+    const nextRow = Math.max(0, Math.min(3, row + move.dy));
+    if (state.demo || choices[nextRow][nextCol]) {
+      col = nextCol;
+      row = nextRow;
+    }
     drawMenu(state, col, row);
   }
   const verb = choices[row][col];

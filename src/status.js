@@ -1,20 +1,11 @@
 import { timeOfDay } from './clock.js';
 import { PANEL_COLS, PANEL_ROWS } from './panel.js';
 import { completion, playTime } from './progress.js';
-import { inventoryEntries } from './inventory.js';
 
 export function statusRows(state, { classic = false } = {}) {
-  const rows = [];
-  if (state.statusVisible) rows.push(`${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
-  if (!classic && state.quest && !state.title && !state.demo && state.room
-      && !state.commandMenuOpen && !state.verb && !state.panel?.some(Boolean)) {
-    const inventory = inventoryEntries(state).map(entry => entry.label);
-    const columnRows = PANEL_ROWS - rows.length;
-    for (let i = 0; i < Math.min(inventory.length, columnRows); i++) {
-      rows.push(place(inventory[i], PANEL_COLS / 2, inventory[i + columnRows] || ''));
-    }
-  }
-  return rows.concat(classic ? [] : permanentRows(state));
+  if (classic || state.commandMenuOpen || state.verb || state.panel?.some(Boolean)) return [];
+  const rows = permanentRows(state);
+  return rows.length ? Array(PANEL_ROWS - rows.length).fill('').concat(rows) : [];
 }
 
 function permanentRows(state) {

@@ -10,7 +10,6 @@ import { carried, weightCarried, destroy, mintToken } from '../src/inventory.js'
 import { enterRoom } from '../src/world.js';
 import { runMenu } from '../src/verbs.js';
 import { Session } from '../src/record.js';
-import { statusRows } from '../src/status.js';
 
 test("every character can collect their permitted tokens and reach full completion", async () => {
   const data = await loadTestData();
@@ -116,7 +115,6 @@ test("earned milestones persist through spending and new quests reset progress",
     [216000, '01:00:00'], [21600000, '100:00:00'], [223380, '01:02:03']]) {
     s.simticks = simticks;
     assert.equal(playTime(s), display);
-    assert.ok(statusRows(s).includes(`PLAY TIME ${display}`));
   }
   s.progress.won = false;
   startQuest(s, data.characters[0]);

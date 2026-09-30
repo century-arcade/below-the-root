@@ -30,7 +30,7 @@ scans) is the copyrighted input and is not tracked; `build/` and
 | M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
 | M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
 | M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider, the ? help panel; monitor power/reset and developer tools with CRT effect (CSS overlay); modern status rows and tune skipping; palette choice parked | done |
+| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to push toward the pointer, tap for the button that way, tap a door or double-tap a spot to walk there); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider, the ? help panel; monitor power/reset and developer tools with CRT effect (CSS overlay); idle-panel status, INVENTORY command, proportional 1702 surround, landscape phone controls and tune skipping; palette choice parked | done |
 | M6.5 ship -- verified winning recordings for all five characters; public and preservation packaging includes every winning fixture; release verification remains | **in progress** |
 
 The spec has 10 unknowns, listed under "Unknowns" at the end of most area files;
@@ -49,7 +49,7 @@ Play is the default page, with autosave resume when available. About introduces
 the game; Resources collects interviews, reviews, guides and original materials.
 Map opens the world map, also available directly at `/map`.
 
-Keys: arrows/WASD move; Space or Enter is the button; F opens the command menu; Escape closes the command menu, map or help, otherwise it pauses. P pauses; M or Tab toggles the map; ? or H toggles help. - and = (or _ and +) step the volume. Use the volume slider to mute and the fullscreen button to expand the game. Clicking or tapping the menu area below the scene also opens the command menu.
+Keys: arrows/WASD move; Space or Enter is the button; F opens the command menu or selects a choice, including INVENTORY; Escape closes navigation, the command menu, map or help, otherwise it pauses. P pauses; M or Tab toggles the map; ? or H toggles help. - and = (or _ and +) step the volume. Use the volume slider to mute and the fullscreen button to expand the game. Clicking or tapping the menu area below the scene also opens the command menu.
 
 Menus move once per direction press. Item and character choices use Down for
 next and Up for previous; item choices wrap through NOTHING to cancel.
@@ -120,14 +120,19 @@ entry and discards the later timeline. Developer mode also enables R for
 GitHub issue reporting. Messages about files, storage and replay errors go to
 the browser console.
 
-The default display shows carried items in the message area while it is idle,
-and a status band with day, time, name, stamina, food, rest and spirit during a
-quest. At victory the band shows play time and completion. STATUS, INVENTORY
-and MENU are absent from the live command menu; Play opens the title menu.
-The original demo scripts retain their original command layout.
+The 320 × 200 display shows day, time, name, stamina, food, rest and spirit
+in the bottom two rows of the idle text panel during a quest. Messages, menus
+and verbs take precedence. At victory these rows show play time and completion.
+INVENTORY follows SELL in the command menu; STATUS and MENU are absent.
+Play opens the title menu. The original demos retain their command layout.
+
+The Commodore and dark surrounds use 1702 cabinet and glass proportions.
+Landscape viewports at most 500 CSS pixels high omit the shell and put monitor
+and replay controls beside the picture, including in fullscreen. The navigation
+button opens the site links and help without reserving header space.
 
 There is no options dialog. The saved `btr.classic` preference remains supported
-without a UI selector; it suppresses the modern status/inventory display and
+without a UI selector; it suppresses the modern status rows and
 tune skipping. The default surround is “Monitor in darkness”. Developer mode
 and CRT preferences carry across pages; recording controls on About or Resources
 open Play. Preferences persist in localStorage.

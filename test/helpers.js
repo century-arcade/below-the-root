@@ -34,8 +34,8 @@ export function menuReads(verb) {
   const col = MENU[row].indexOf(verb);
   return [
     J.idle,
-    ...Array(col).fill([J.right, J.idle]).flat(),
     ...Array(row).fill([J.down, J.idle]).flat(),
+    ...Array(col).fill([J.right, J.idle]).flat(),
     J.fire,
   ];
 }

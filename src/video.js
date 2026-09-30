@@ -1,6 +1,6 @@
 import { colorOf } from './data.js';
 import { isLit } from './world.js';
-import { PANEL_ROW, PANEL_ROWS, PANEL_COLS } from './panel.js';
+import { PANEL_ROW, PANEL_COLS } from './panel.js';
 
 const TITLE_ROOM = 'T4';
 
@@ -19,28 +19,6 @@ export function renderIndexed(state, panelRows = []) {
 
 export function render(state, panelRows = []) {
   return toRGBA(renderIndexed(state, panelRows), state.data.palette);
-}
-
-// The modern status band is always present and its permanent rows are bottom-aligned.
-// Transient information uses the same four-row panel as messages and menus.
-const STATUS_MARGIN = 4;
-const STATUS_ROWS = 3;
-export const statusHeight = () => STATUS_ROWS * 8 + STATUS_MARGIN * 2;
-
-export function renderStatus(state, rows) {
-  const px = new Uint8Array(WIDTH * statusHeight());
-  const text = px.subarray(WIDTH * STATUS_MARGIN);
-  drawRows(text, state, rows, 0);
-  return toRGBA(px, state.data.palette);
-}
-
-export function statusLayout(state, rows, { classic = false } = {}) {
-  const permanent = !classic && state.quest && !state.title && !state.demo && state.room ? 2 : 0;
-  const split = Math.max(0, rows.length - permanent);
-  const panelRows = !state.commandMenuOpen && state.panel && !state.panel.some(Boolean)
-    ? rows.slice(0, Math.min(split, PANEL_ROWS)) : [];
-  const fixed = rows.slice(split);
-  return { panelRows, bandRows: Array(STATUS_ROWS - fixed.length).fill('').concat(fixed) };
 }
 
 function drawRows(px, state, rows, firstRow) {

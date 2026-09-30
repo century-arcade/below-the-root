@@ -1,5 +1,5 @@
 import { loadData } from './data.js';
-import { render, renderStatus, figureOrigin, WIDTH, HEIGHT, statusHeight, statusLayout } from './video.js';
+import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt } from './verbs.js';
@@ -9,7 +9,7 @@ import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosav
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
-import { fitScale, crtVars } from './fit.js';
+import { fitScale, fitCabinet, crtVars } from './fit.js';
 import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
@@ -26,37 +26,75 @@ const monitor = document.getElementById('monitor');
 const fullscreenMode = matchMedia('(display-mode: fullscreen)');
 const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
-const band = statusHeight();
-canvas.height = HEIGHT + band;
-const image = ctx.createImageData(WIDTH, HEIGHT + band);
-const CANVAS_PADDING = 8; // Keep the full picture inside the bowed screen surround.
+canvas.height = HEIGHT;
+const image = ctx.createImageData(WIDTH, HEIGHT);
+const CANVAS_PADDING = 8;
+const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px)');
+const navigationToggle = document.getElementById('navigation-toggle');
+function closeNavigation() {
+  document.documentElement.classList.remove('navigation-open');
+  navigationToggle.setAttribute('aria-expanded', 'false');
+}
+navigationToggle.onclick = () => {
+  const open = document.documentElement.classList.toggle('navigation-open');
+  navigationToggle.setAttribute('aria-expanded', String(open));
+};
+document.getElementById('site-header').addEventListener('click', e => {
+  if (e.target.closest('a, button')) closeNavigation();
+});
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || navigationToggle.getAttribute('aria-expanded') !== 'true') return;
+  closeNavigation();
+  navigationToggle.focus({ preventScroll: true });
+  e.preventDefault();
+  e.stopImmediatePropagation();
+}, true);
 
 function fit() {
   const full = fullscreenMode.matches || document.fullscreenElement !== null;
   document.documentElement.classList.toggle('game-fullscreen', full);
-  const outerGap = full ? 0 : parseFloat(getComputedStyle(game).marginTop);
-  let availableHeight;
-  if (full) {
-    game.style.width = '';
-    availableHeight = game.clientHeight;
-  } else {
-    const chrome = document.getElementById('site-header').offsetHeight;
-    availableHeight = window.innerHeight - chrome - 2 * outerGap;
-  }
+  const landscape = landscapeMode.matches;
+  document.documentElement.classList.toggle('landscape-play', landscape);
+  if (!landscape) closeNavigation();
+  const bare = full || landscape;
+  const outerGap = bare ? 0 : parseFloat(getComputedStyle(game).marginTop);
+  const chrome = bare ? 0 : document.getElementById('site-header').offsetHeight;
+  let availableHeight = window.innerHeight - chrome - 2 * outerGap;
+  const availableWidth = window.innerWidth - 2 * outerGap;
   const replayControls = document.getElementById('replay-controls');
-  if (!replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
-  const shell = getComputedStyle(monitor);
-  const shellWidth = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
-  const shellHeight = 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--chin'));
-  const padding = full ? 0 : CANVAS_PADDING;
-  const scale = fitScale((full ? game.clientWidth : window.innerWidth - 2 * outerGap) - shellWidth, availableHeight - shellHeight, HEIGHT + band, padding);
+  const sidebar = document.getElementById('monitor-sidebar');
+  if (landscape && replayControls.parentElement !== sidebar) sidebar.append(replayControls);
+  else if (!landscape && replayControls.parentElement === sidebar) {
+    document.getElementById('play-area').insertBefore(replayControls, document.getElementById('help-screen'));
+  }
+  if (!landscape && !replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
+  const padding = bare ? 0 : CANVAS_PADDING;
+  for (const name of ['rim', 'chin', 'radius']) monitor.style.removeProperty(`--${name}`);
+  let scale, width, glassHeight;
+  if (!bare && monitor.dataset.surround !== 'portable') {
+    const cabinet = fitCabinet(availableWidth, availableHeight, padding);
+    ({ scale, width, glassHeight } = cabinet);
+    for (const name of ['rim', 'chin', 'radius']) monitor.style.setProperty(`--${name}`, `${cabinet[name]}px`);
+  } else {
+    const shell = getComputedStyle(monitor);
+    const shellWidth = bare ? (landscape ? sidebar.offsetWidth : 0)
+      : 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
+    const shellHeight = bare ? 0 : 2 * parseFloat(shell.getPropertyValue('--rim'));
+    scale = fitScale(availableWidth - shellWidth, availableHeight - shellHeight, HEIGHT, padding);
+    width = (WIDTH + 2 * padding) * scale + shellWidth;
+    glassHeight = (HEIGHT + 2 * padding) * scale;
+  }
+  const glass = document.getElementById('glass');
+  glass.style.width = `${(WIDTH + 2 * padding) * scale}px`;
+  glass.style.height = `${glassHeight}px`;
   canvas.parentElement.style.setProperty('--canvas-padding', `${padding * scale}px`);
   canvas.style.width = WIDTH * scale + 'px';
-  canvas.style.height = (HEIGHT + band) * scale + 'px';
+  canvas.style.height = HEIGHT * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
   canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
-  if (!full) game.style.width = ((WIDTH + 2 * padding) * scale + shellWidth) + 'px';
+  game.style.width = bare ? '' : `${width}px`;
+  monitor.style.setProperty('--scale', scale);
   const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
@@ -99,6 +137,7 @@ catch (err) { options = loadOptions({ getItem: () => null }); log(`Browser stora
 monitor.dataset.surround = options.surround;
 addEventListener('resize', fit);
 fullscreenMode.addEventListener('change', fit);
+landscapeMode.addEventListener('change', fit);
 document.addEventListener('fullscreenchange', fit);
 fit();
 monitor.classList.remove('unfitted');
@@ -616,10 +655,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     rewindRoomButton.hidden = !debug || session.playback;
     rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
-    const rows = statusRows(state, { classic: options.classic });
-    const { panelRows, bandRows } = statusLayout(state, rows, { classic: options.classic });
-    image.data.set(render(state, panelRows));
-    image.data.set(renderStatus(state, bandRows), WIDTH * HEIGHT * 4);
+    image.data.set(render(state, statusRows(state, { classic: options.classic })));
     ctx.putImageData(image, 0, 0);
     const activeTab = overlay?.screen === mapScreen ? mapButton : homeButton;
     if (currentTab !== activeTab) {
