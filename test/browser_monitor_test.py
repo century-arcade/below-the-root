@@ -4,7 +4,7 @@ from playwright.sync_api import expect
 
 
 with browser_page('/play?room=B8') as page:
-    expect(page.locator('#monitor')).to_have_attribute('data-surround', 'dark')
+    expect(page.locator('#monitor')).to_have_attribute('data-surround', 'commodore')
     power = page.get_by_role('button', name='Monitor power', exact=True)
     until(page, 's => s.state.quest')
     session_eval(page, 's => window.oldSession = s')
@@ -46,7 +46,7 @@ print('browser_monitor_test: power and volume passed')
 for surround in ['commodore', 'dark']:
     for width, height in [(320, 800), (360, 800), (400, 800), (412, 915)]:
         def setup(page):
-            page.add_init_script(f"localStorage.setItem('btr.surround', '{surround}')")
+            page.add_init_script(f"localStorage.setItem('btr.surround.v2', '{surround}')")
 
         with browser_page('/play?room=B8', setup=setup, viewport={'width': width, 'height': height},
                           is_mobile=True, has_touch=True, device_scale_factor=2.625) as page:

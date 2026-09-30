@@ -12,7 +12,7 @@ with sync_playwright() as p:
         page = browser.new_page()
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
-        page.add_init_script(f"localStorage.setItem('btr.surround', '{surround}')")
+        page.add_init_script(f"localStorage.setItem('btr.surround.v2', '{surround}')")
         modules, data = [], []
         page.route('**/main.js', lambda route: modules.append(route))
         page.route('**/data/rooms.json', lambda route: data.append(route))

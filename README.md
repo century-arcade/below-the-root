@@ -133,7 +133,7 @@ button opens the site links and help without reserving header space.
 
 There is no options dialog. The saved `btr.classic` preference remains supported
 without a UI selector; it suppresses the modern status rows and
-tune skipping. The default surround is “Monitor in darkness”. Developer mode
+tune skipping. The default surround is the Commodore 1702. Developer mode
 and CRT preferences carry across pages; recording controls on About or Resources
 open Play. Preferences persist in localStorage.
 
