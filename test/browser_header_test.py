@@ -27,12 +27,20 @@ with browser_page('/') as page:
     expect(developer).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#file-issue')).to_have_count(0)
     crt = page.get_by_role('button', name='CRT effect', exact=True)
-    crt.click()
     expect(crt).to_have_attribute('aria-pressed', 'true')
-    page.reload()
-    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-    expect(crt).to_have_attribute('aria-pressed', 'true')
-    crt.click()
+    expect(page.locator('#crt')).to_be_visible()
+    assert page.evaluate("localStorage.getItem('btr.crt')") is None
+    for enabled in [False, True]:
+        crt.click()
+        pressed = str(enabled).lower()
+        stored = '1' if enabled else '0'
+        expect(crt).to_have_attribute('aria-pressed', pressed)
+        assert page.locator('#crt').is_visible() == enabled
+        assert page.evaluate("localStorage.getItem('btr.crt')") == stored
+        page.reload()
+        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+        expect(crt).to_have_attribute('aria-pressed', pressed)
+        assert page.locator('#crt').is_visible() == enabled
     developer.click()
     expect(page.locator('#debug-tools')).to_be_hidden()
     page.keyboard.press('r')

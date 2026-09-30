@@ -114,7 +114,7 @@ The Play monitor has fullscreen, volume and power controls. Volume starts at
 50%; gain is squared for quiet low levels, and zero mutes. Powering off resets
 the game and deletes the autosave while preserving preferences; powering on
 starts at the main menu. The version button toggles developer mode, exposing
-recording tools, room rewind and a CRT effect toggle (off by default).
+recording tools, room rewind and a CRT effect toggle (on by default).
 Backspace or Delete with canvas focus rewinds live play to the previous room
 entry and discards the later timeline. Developer mode also enables R for
 GitHub issue reporting. Messages about files, storage and replay errors go to

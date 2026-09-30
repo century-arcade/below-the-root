@@ -14,9 +14,9 @@ test("empty storage supplies defaults and stored options override them", () => {
 
   storage.setItem('btr.volume.v2', '0.8');
   storage.setItem('btr.muted', '1');
-  storage.setItem('btr.crt', '1');
+  storage.setItem('btr.crt', '0');
   storage.setItem('btr.debug', 'nonsense');
-  assert.deepEqual(loadOptions(storage), { surround: 'dark', volume: 0.8, muted: true, crt: true, classic: false, debug: false },
+  assert.deepEqual(loadOptions(storage), { surround: 'dark', volume: 0.8, muted: true, crt: false, classic: false, debug: false },
     'stored values override the defaults; anything but 1 is off');
 
   for (const surround of ['commodore', 'portable', 'dark']) {
@@ -30,6 +30,16 @@ test("empty storage supplies defaults and stored options override them", () => {
   assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');
   storage.setItem('btr.volume.v2', '7');
   assert.equal(loadOptions(storage).volume, 1, 'volume is clamped');
+});
+
+test("CRT defaults on and remembers explicit off and on preferences", () => {
+  const storage = memory();
+  assert.equal(loadOptions(storage).crt, true);
+  for (const enabled of [false, true]) {
+    storeOption(storage, 'crt', enabled);
+    assert.equal(storage.getItem('btr.crt'), enabled ? '1' : '0');
+    assert.equal(loadOptions(storage).crt, enabled);
+  }
 });
 
 test("options serialize booleans and volume and tolerate storage failure", () => {
