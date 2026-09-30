@@ -13,11 +13,13 @@ ENDPOINT = 'https://saulpw.goatcounter.com/count'
 MOCK = '''
 const endpoint = document.currentScript.dataset.goatcounter;
 window.analyticsInitializations = (window.analyticsInitializations || 0) + 1;
-window.goatcounter = {count() {
-    const path = new URL(document.querySelector('link[rel="canonical"]').href).pathname;
+const settings = window.goatcounter || {};
+window.goatcounter = Object.assign(settings, {count() {
+    let path = new URL(document.querySelector('link[rel="canonical"]').href).pathname;
+    if (settings.path) path = settings.path(path);
     const pixel = new Image();
     pixel.src = endpoint + '?p=' + encodeURIComponent(path);
-}};
+}});
 window.goatcounter.count();
 '''
 
@@ -79,7 +81,7 @@ with sync_playwright() as p:
         restart_analytics(page)
         assert page.evaluate('window.analyticsInitializations') == 1
         expect(page.locator('script[data-goatcounter]')).to_have_count(1)
-        assert scripts == [SCRIPT] and counts == [canonical], (scripts, counts)
+        assert scripts == [SCRIPT] and counts == ['root.saul.pw' + canonical], (scripts, counts)
         assert not unexpected and not errors, (unexpected, errors)
         page.close()
 
@@ -91,7 +93,7 @@ with sync_playwright() as p:
                 page.goto(f'{ORIGIN}{entry}?source=legacy#{fragment}')
             expect(page).to_have_url(f'{ORIGIN}/{destination}?source=legacy')
             page.wait_for_load_state('load')
-            assert scripts == [SCRIPT] and counts == ['/' + destination], (scripts, counts)
+            assert scripts == [SCRIPT] and counts == ['root.saul.pw/' + destination], (scripts, counts)
             assert not unexpected and not errors, (unexpected, errors)
             page.close()
 
@@ -113,7 +115,7 @@ with sync_playwright() as p:
         restart_analytics(page)
         page.clock.run_for(1000)
         assert scripts == [SCRIPT], scripts
-        assert counts == (['/'] if mode == 'mock' else []), counts
+        assert counts == (['root.saul.pw/'] if mode == 'mock' else []), counts
         assert len(pending) == (1 if mode == 'stalled' else 0)
         assert not unexpected and not errors, (unexpected, errors)
         for route in pending:

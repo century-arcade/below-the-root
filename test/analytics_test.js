@@ -17,6 +17,7 @@ test('analytics appends one async script even when started repeatedly', t => {
   t.after(() => {
     delete globalThis.location;
     delete globalThis.document;
+    delete globalThis.goatcounter;
   });
   globalThis.location = new URL('https://below-the-root.netlify.app');
   const scripts = [];
@@ -35,4 +36,5 @@ test('analytics appends one async script even when started repeatedly', t => {
   startAnalytics();
   assert.deepEqual(scripts, [{ dataset: { goatcounter: 'https://saulpw.goatcounter.com/count' },
     async: true, src: 'https://gc.zgo.at/count.js' }]);
+  assert.equal(globalThis.goatcounter.path('/map'), 'root.saul.pw/map');
 });
