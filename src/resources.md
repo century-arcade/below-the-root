@@ -32,6 +32,9 @@
 
 ## Reviews and recollections
 
+- [Computer Entertainer, Vol. 3 No. 10, p. 155](https://archive.org/details/computer-entertainer-3-10). A contemporary C64 review rating the game four stars out of four for both measures and marking it “Recommended”.
+  > “We found the game delightfully different, and we really enjoyed the lush and gentle world of Green Sky.”
+  > <cite>Computer Entertainer</cite>
 - [Justin Stahlman: Below the Root: a story, a computer game and my lifelong obsession](https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/) (2015). Childhood discoveries, a proposed remake, a complete 10240×2560 map and extracted sprites.
   > “It may not look like much now, but in 1984, this cloud level left us in a state of awe.”
 - [Phil Salvador: Below the Root](https://obscuritory.com/platform/below-the-root/) (The Obscuritory, 2020). On hospitality, trust and the game’s kindness.
