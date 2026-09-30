@@ -45,3 +45,20 @@ until [ -z "$(find .meta/todo/agent-queue .meta/issue-loop/active -mindepth 1 -p
 While a task is active, leave `master` alone: the loop needs the
 checkout clean and fast-forwards `master` when a review passes, so a
 commit made meanwhile returns the task.
+
+## Completing reviewed work
+
+These steps belong to the supervising session after review passes, not to an
+issue-loop stage. Before reporting the work complete:
+
+1. Integrate the reviewed commits into the main checkout's `master`.
+   Fast-forward linear history; when a rebase is needed, preserve the individual
+   commits rather than squashing them.
+2. Run `make build` from the main checkout. A build in the temporary `_cbox`
+   worktree does not update the main checkout's `_build/`, which is what the
+   existing localhost server serves.
+3. Load the served page and confirm that it reflects the integrated change.
+
+This check follows the failure seen with commit `78c5277`: the commit was
+fast-forwarded, but `_build/play.html` remained stale because the build had run
+only in the temporary worktree, so `localhost:8000` still showed ASCII arrows.
