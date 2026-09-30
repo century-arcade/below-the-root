@@ -4,7 +4,23 @@ Do not add content to project Markdown files without Saul's explicit approval. T
 
 Keep layout fixes visual: do not add unrequested loading banners, reload instructions, or other gameplay-page copy; propose new messaging separately.
 
-Issue-loop stages (triage, diagnose, fix, review) run in a temporary worktree and must not modify the main checkout; only the fix stage writes and commits. After review, the supervising session follows the main-checkout completion steps in `docs/issue-loop.md`. Do not push or open PRs.
+## Completing reviewed work
+
+After review passes, before reporting the work complete:
+
+1. Integrate the reviewed commits into the main checkout's `master`.
+   Fast-forward linear history; when a rebase is needed, preserve the individual
+   commits rather than squashing them.
+2. Run `make build` from the main checkout. A build in the temporary `_cbox`
+   worktree does not update the main checkout's `_build/`, which is what the
+   existing localhost server serves.
+3. Load the served page and confirm that it reflects the integrated change.
+
+This check follows the failure seen with commit `78c5277`: the commit was
+fast-forwarded, but `_build/play.html` remained stale because the build had run
+only in the temporary worktree, so `localhost:8000` still showed ASCII arrows.
+
+Do not push or open PRs.
 
 Tests assert behaviour, never layout geometry: no pixel positions, element widths, or viewport-dependent coordinates. A test that only breaks when CSS changes is deleted, not updated.
 
