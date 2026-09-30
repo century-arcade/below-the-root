@@ -70,7 +70,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 
 #monitor {
   --rim: 0px; --chin: 42px; --side: 0px; --radius: 12px;
-  --lip: #ded2b8; --bezel-top: #393831; --bezel-bottom: #777263;
+  --lip: #ded2b8; --bezel: #58554a;
   display: grid; grid-template-columns: auto; grid-template-rows: auto var(--chin);
   padding: var(--rim); border-radius: var(--radius);
   color: #403a30; background: linear-gradient(115deg, #d2c9b4, #b0a58e);
@@ -82,13 +82,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor:not([data-surround="portable"]) #glass-surround::before {
   content: ""; position: absolute; z-index: -1; inset: calc(-40 * var(--mm));
   border: calc(2 * var(--mm)) solid var(--lip); border-radius: calc(10 * var(--mm));
-  background: radial-gradient(ellipse at center, #0009 45%, transparent 75%), linear-gradient(135deg, var(--bezel-top), var(--bezel-bottom));
-  box-shadow: inset calc(2 * var(--mm)) calc(3 * var(--mm)) calc(5 * var(--mm)) #0008, 0 0 calc(1 * var(--mm)) #0009;
-  pointer-events: none;
-}
-#monitor:not([data-surround="portable"]) #glass-surround::after {
-  content: ""; position: absolute; inset: 0; border-radius: calc(6 * var(--mm)); clip-path: url(#screen-outline);
-  box-shadow: inset calc(2 * var(--mm)) calc(3 * var(--mm)) calc(4 * var(--mm)) #000b, inset calc(-1 * var(--mm)) calc(-1 * var(--mm)) calc(2 * var(--mm)) #fff2;
+  background: var(--bezel);
   pointer-events: none;
 }
 #monitor #glass { border-radius: calc(6px * var(--scale)); }
@@ -115,7 +109,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor[data-surround="portable"] #monitor-controls { flex: 1; flex-direction: column; padding: 8px 0 4px 20px; gap: 18px; }
 #monitor[data-surround="portable"] #volume { accent-color: #ded0b5; }
 #monitor[data-surround="dark"] {
-  --lip: #53594e; --bezel-top: #080c09; --bezel-bottom: #252b24;
+  --lip: #53594e; --bezel: #161b16;
   color: #9d9d90; background: linear-gradient(120deg, #30332f, #151a16);
   box-shadow: inset 0 1px 1px #666b5c, inset 0 -4px 2px #090d09, 0 12px 30px #000b;
 }
@@ -147,8 +141,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 }
 .narrow-play #play { width: 100%; overflow-x: clip; }
 .narrow-play #play-area { align-items: center; }
-:is(.game-fullscreen, .landscape-play) #monitor #glass-surround::before,
-:is(.game-fullscreen, .landscape-play) #monitor #glass-surround::after { display: none; }
+:is(.game-fullscreen, .landscape-play) #monitor #glass-surround::before { display: none; }
 .game-fullscreen #monitor { --rim: 0px; --chin: 0px; --side: 0px; display: block; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 .game-fullscreen #monitor-controls { display: none; }
 .game-fullscreen #monitor #glass { border-radius: 0; box-shadow: none; clip-path: none; }
