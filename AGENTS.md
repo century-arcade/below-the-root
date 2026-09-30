@@ -2,6 +2,8 @@ After completing work Saul requests, commit the task's changes without waiting f
 
 Do not add content to project Markdown files without Saul's explicit approval. This does not apply to `.meta` or workflow Markdown files; send those updates via inbox.
 
+Do not edit the in-game help (`src/help.md`) without Saul's explicit approval for that change; propose help text separately.
+
 Keep layout fixes visual: do not add unrequested loading banners, reload instructions, or other gameplay-page copy; propose new messaging separately.
 
 No gradients anywhere: flat fills only, and shadows or bevels as hard-edged bands with no blur.  Match period hardware colours by sampling a reference photo.
