@@ -4,6 +4,8 @@ Do not add content to project Markdown files without Saul's explicit approval. T
 
 Keep layout fixes visual: do not add unrequested loading banners, reload instructions, or other gameplay-page copy; propose new messaging separately.
 
+No gradients anywhere: flat fills only, and shadows or bevels as hard-edged bands with no blur.  Match period hardware colours by sampling a reference photo.
+
 ## Completing reviewed work
 
 After review passes, before reporting the work complete:
