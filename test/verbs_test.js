@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { J, talkFixture, questState, menuReads as menu, place, lines, give, stick as reader, page, timeFixture } from './helpers.js';
-import { MENU, menuChoiceAt, runMenu, paintStatus } from '../src/verbs.js';
+import { MENU, menuChoiceAt, highlightMenuChoice, runMenu, paintStatus } from '../src/verbs.js';
 import { CLASS } from '../src/data.js';
 import { startVerb, tick } from '../src/game.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
@@ -23,11 +23,28 @@ test('walking to INVENTORY opens the carried-item display', async () => {
 });
 
 test('pointing at INVENTORY opens the carried-item display', async () => {
-  const { run, data, pomma } = await talkFixture();
+  const { data, pomma } = await talkFixture();
   const pointed = questState(data, pomma);
-  pointed.commandMenuClick = menuChoiceAt(20, 1);
-  assert.deepEqual(pointed.commandMenuClick, { col: 3, row: 1 });
-  assert.match(run(pointed, [J.idle, J.fire])[0], /YOU HAVE/);
+  const g = runMenu(pointed);
+  g.next();
+  highlightMenuChoice(pointed, menuChoiceAt(20, 1));
+  assert.deepEqual(pointed.commandMenuSelection, { col: 3, row: 1 });
+  g.next(J.idle);
+  assert.ok(pointed.commandMenuOpen, 'highlighting does not run the verb');
+  g.next(J.fire);
+  assert.match(lines(pointed)[0], /YOU HAVE/);
+});
+
+test('keyboard navigation continues from the pointer highlight', async () => {
+  const { data, pomma } = await talkFixture();
+  const state = questState(data, pomma);
+  const g = runMenu(state);
+  g.next(); g.next(J.idle);
+  highlightMenuChoice(state, menuChoiceAt(14, 1));
+  g.next(J.right);
+  assert.deepEqual(state.commandMenuSelection, { col: 3, row: 1 });
+  g.next(J.fire);
+  assert.match(lines(state)[0], /YOU HAVE/);
 });
 
 test('blank menu cells refuse pointer and directional selection', async () => {

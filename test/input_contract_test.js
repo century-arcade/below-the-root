@@ -8,6 +8,7 @@ import { CLASS } from '../src/data.js';
 import { startTune } from '../src/audio.js';
 import { tick, newState, startQuest } from '../src/game.js';
 import { pickItem } from '../src/inventory.js';
+import { highlightMenuChoice } from '../src/verbs.js';
 
 const selected = state => Array.from(state.panel).filter(c => c & 128).map(c => String.fromCharCode(c & 127)).join('').trim();
 const data = await loadTestData();
@@ -35,7 +36,7 @@ async function inputContractFixture() {
   function choose(session, keys, col, row) {
     assert.ok(session.commandMenu());
     advance(session, 8);
-    session.state.commandMenuClick = { col, row };
+    highlightMenuChoice(session.state, { col, row });
     tap(keys, 'Enter');
   }
 
@@ -67,6 +68,7 @@ async function inputContractFixture() {
       () => [100, 100],
       () => ({ here: 0, own: 0 }),
       target,
+      { player: () => f.state.player, menu: () => f.session.commandMenu() },
     );
     const event = { button: 0, pointerId: 1, clientX: 200, clientY: 100, preventDefault() {} };
     const tapPointer = (e = event) => {
@@ -339,7 +341,7 @@ test('REST ignores its selecting hold and wakes on the first fresh input', async
 
   const { keys, session, state } = fixture();
   session.commandMenu(); advance(session, 8);
-  state.commandMenuClick = { col: 2, row: 3 };
+  highlightMenuChoice(state, { col: 2, row: 3 });
   key(keys, 'Enter');
   until(session, () => !!state.resting, 'REST begins');
   advance(session, 30);
@@ -364,7 +366,7 @@ test('one observed trigger interrupts a demo without selecting the main menu', a
   assert.ok(lines(session.state).some(line => line.includes('NERIC')), 'fresh confirmation opens character chooser');
 });
 
-test("pointer single tap is a coherent delayed gameplay gesture", async t => {
+test("pointer single tap waits before walking without a trigger", async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { advance, pointerFixture } = await inputContractFixture();
 
@@ -374,12 +376,28 @@ test("pointer single tap is a coherent delayed gameplay gesture", async t => {
   assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'first tap waits for double-tap recognition');
   t.mock.timers.tick(230);
   advance(f.session, 12);
-  assert.ok(f.session.record.events.some(e => String(e.stick) === '1,0,1'), 'direction and trigger reach gameplay together');
-  assert.ok(f.state.player.leaping, 'single directional tap jumps');
+  assert.ok(f.session.record.events.some(e => String(e.stick) === '1,0,0'), 'single tap walks');
+  assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'single tap never fires');
+  assert.ok(!f.state.player.leaping);
   f.pointer.cancel();
 });
 
-test("pointer double tap, stop, focus reset and cancellation", async t => {
+for (const direction of [1, -1]) test(`pointer double tap ${direction === 1 ? 'ahead' : 'behind'} starts one leap`, async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { until, pointerFixture } = await inputContractFixture();
+  const f = pointerFixture();
+  t.after(() => f.pointer.cancel());
+  f.state.player.facing = 1;
+  const event = { ...f.event, clientX: 100 + direction * 24 };
+  f.tapPointer(event); f.tapPointer(event);
+  until(f.session, () => f.state.player.leaping, 'double tap turns if necessary and leaps');
+  assert.equal(f.state.player.facing, direction);
+  assert.equal(f.pointer.walk, null);
+  assert.deepEqual(f.keys.read(), IDLE, 'the leap gesture has been consumed');
+  assert.equal(f.session.record.events.filter(e => e.stick?.[2]).length, 1, 'only one trigger sample');
+});
+
+test("pointer far double tap, stop, focus reset and cancellation", async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { advance, pointerFixture } = await inputContractFixture();
 

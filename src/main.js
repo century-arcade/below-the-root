@@ -2,7 +2,7 @@ import { loadData } from './data.js';
 import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
 import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
-import { menuChoiceAt } from './verbs.js';
+import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
 import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
@@ -187,19 +187,17 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekKey = null;
   let seekAmount = 1;
   let seekRepeatAt = 0;
-  const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row));
-  canvas.addEventListener('pointerdown', e => {
-    if (!state.commandMenuOpen || e.button !== 0) return;
-    const rect = canvas.getBoundingClientRect();
-    const col = Math.floor((e.clientX - rect.left) * canvas.width / rect.width / 8);
-    const row = Math.floor((e.clientY - rect.top) * canvas.height / rect.height / 8) - PANEL_ROW;
-    const choice = menuChoiceAt(col, row);
-    if (!choice) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    state.commandMenuClick = choice;
-    stick.tap('fire', 'menu-pointer');
-  }, true);
+  const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row), window, {
+    menu: () => commandMenu(),
+    player: () => state.title || state.demo || session.playback ? null : state.player,
+    chooser: () => state.commandMenuOpen && !state.demo && !session.playback ? {
+      id: state.verb,
+      selected: state.commandMenuSelection,
+      hit: (x, y) => powered && !paused && !overlay && !startupHelp && !session.playback
+        ? menuChoiceAt(Math.floor(x / 8), Math.floor(y / 8) - PANEL_ROW) : null,
+      highlight: choice => highlightMenuChoice(state, choice),
+    } : null,
+  });
   const gamepad = new Gamepad(stick);
   const autosave = new Autosave({ setItem: (k, v) => localStorage.setItem(k, v) }, log);
   const speaker = new Speaker(data.music);

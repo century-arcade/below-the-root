@@ -57,34 +57,36 @@ function drawMenu(state, selCol, selRow) {
   }));
 }
 
-// read counts are the demo replay contract (player.md, How often the stick is read)
+export function highlightMenuChoice(state, choice) {
+  if (!state.commandMenuOpen || !MENU[choice.row]?.[choice.col]) return;
+  Object.assign(state.commandMenuSelection, choice);
+  drawMenu(state, choice.col, choice.row);
+}
+
+// read-counts: original demos depend on the menu's joystick-read cadence
 export function* runMenu(state) {
   state.commandMenuOpen = true;
   const choices = state.demo ? DEMO_MENU : MENU;
-  let col = 0, row = 0;
+  const selection = state.commandMenuSelection = { col: 0, row: 0 };
   const moved = directionPress();
   let first = yield* fireUp();
   if (state.demo) first = null;
-  drawMenu(state, col, row);
+  drawMenu(state, selection.col, selection.row);
   for (;;) {
     const j = first ?? (yield);
     first = null;
-    if (state.commandMenuClick) {
-      ({ col, row } = state.commandMenuClick);
-      state.commandMenuClick = null;
-      drawMenu(state, col, row);
-    }
+    if (j.menuChoice) highlightMenuChoice(state, j.menuChoice);
     if (j.fire) break;
     const move = state.demo ? j : moved(j);
-    const nextCol = Math.max(0, Math.min(choices[row].length - 1, col + move.dx));
-    const nextRow = Math.max(0, Math.min(3, row + move.dy));
+    const nextCol = Math.max(0, Math.min(choices[selection.row].length - 1, selection.col + move.dx));
+    const nextRow = Math.max(0, Math.min(3, selection.row + move.dy));
     if (state.demo || choices[nextRow][nextCol]) {
-      col = nextCol;
-      row = nextRow;
+      selection.col = nextCol;
+      selection.row = nextRow;
     }
-    drawMenu(state, col, row);
+    drawMenu(state, selection.col, selection.row);
   }
-  const verb = choices[row][col];
+  const verb = choices[selection.row][selection.col];
   state.commandMenuOpen = false;
   sfx(state, SFX.confirm);
   clearPanel(state);

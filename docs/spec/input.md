@@ -74,12 +74,31 @@ editing fields own their inputs. Clicking the canvas restores gameplay focus.
 
 ## Pointer gestures
 
-Hold steers toward the pointer. A directional single tap supplies direction
-and trigger. Double-tap walking must not also perform the first tap's jump;
-the recognition window is approximately 200 ms. A door tap walks to the door
-and triggers on arrival. Tapping the figure acts immediately, or stops an
-active walk; tapping elsewhere during a walk re-aims it. Preserve existing
-walk cancellation and stopping rules while fixing input delivery.
+Mouse and touch share these live-play gestures. Holding longer than 150 ms steers
+toward the pointer. A single tap walks after a 200 ms double-tap window;
+the first tap of a double never starts a walk. A door tap walks immediately
+to the door and triggers on arrival. Walks stop on arrival, after 1.2 seconds
+without progress, or after 15 seconds; a downward walk that only stoops is
+undone. Keyboard input, focus loss and pointer cancellation cancel gestures.
+
+Tapping the figure opens the command menu through the same route as F or
+the menu-area button, with the same refusals. Its 24 × 42 native-pixel box
+has 12 pixels of padding on each side; the outer boundary is excluded.
+On a doorway, self-tap requests the door instead. During a walk, self-tap
+only stops it; another tap opens the menu. Other taps re-aim an active walk.
+
+Double-tapping outside the self area leaps toward the target only within
+one leap's reach: four columns below stamina 20, five at 20–29, six at 30
+or above. The target must be within two rows above or below the figure's
+body centre, allowing lower-ledge landings. A target behind the figure
+first supplies a turn, then direction plus trigger. Out-of-range doubles
+walk instead. The game still owns support, collision and ladder/vine rules.
+
+In the command menu, pressing a choice highlights it immediately; dragging
+moves the highlight. Release alone does not select. A short tap on the
+already-highlighted choice confirms it; a hold or drag never confirms.
+Outside the choices does nothing. Keyboard and gamepad navigation continue
+from the pointer highlight, and Escape and F retain their usual meanings.
 
 ## Recording and verification
 

@@ -51,8 +51,9 @@ with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_t
     page.keyboard.press('f')
     panel_has(page, 'INVENTORY')
     box = page.locator('#screen').bounding_box()
-    page.touchscreen.tap(box['x'] + box['width'] * 24 / 40,
-                         box['y'] + box['height'] * 22.5 / 25)
+    for _ in range(2):
+        page.touchscreen.tap(box['x'] + box['width'] * 24 / 40,
+                             box['y'] + box['height'] * 22.5 / 25)
     panel_has(page, 'YOU HAVE')
     page.clock.run_for(32)
     close_inventory(page)
@@ -101,8 +102,9 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     box = page.locator('#screen').bounding_box()
     page.touchscreen.tap(box['x'] + box['width'] * anchor[0] / 320,
                          box['y'] + box['height'] * anchor[1] / 200)
-    until(page, 's => s.record.events.some(e => e.stick?.[2])')
-    assert session_eval(page, 's => s.record.events.find(e => e.stick?.[2]).stick') == [0, 0, 1]
+    until(page, 's => s.state.commandMenuOpen')
+    assert session_eval(page, 's => !s.record.events.some(e => e.stick?.[2])')
+    page.keyboard.press('Escape')
     page.clock.run_for(300)
     session_eval(page, 's => Object.assign(s.state.player, {col: 26, row: 15})')
     page.touchscreen.tap(box['x'] + box['width'] * 26.5 / 40,

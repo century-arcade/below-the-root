@@ -81,8 +81,9 @@ export class Keyboard {
     if (released) this.events.push({ keys: [key], source, id: ++this.sequence, down: false });
   }
   tap(key, source = 'pointer') { this.gesture([key], source); }
-  gesture(keys, source = 'pointer') {
-    this.events.push({ keys: [...keys], source, id: ++this.sequence, down: true });
+  gesture(keys, source = 'pointer', menuChoice) {
+    this.events.push({ keys: [...keys], source, id: ++this.sequence, down: true,
+      ...(menuChoice ? { menuChoice: { ...menuChoice } } : {}) });
   }
   reset(source) {
     if (!source) for (const device of this.devices) device.cancel(true);
@@ -159,7 +160,8 @@ export class Keyboard {
     const pressed = new Set(event?.keys || []);
     if (policy === 'press' || policy === 'trigger') {
       const move = axes(pressed);
-      return { ...move, fire: pressed.has('fire'), move, observed: true };
+      return { ...move, fire: pressed.has('fire'), move, observed: true,
+        ...(policy === 'press' && event?.menuChoice ? { menuChoice: event.menuChoice } : {}) };
     }
     // Direction holds remain continuous, while a completed tap gets one read.
     const movement = new Set(held);
@@ -196,6 +198,8 @@ export function directionPress() {
 
 const TAP_MS = 150;
 const DOUBLE_MS = 200;
+const SELF_PADDING = 12;
+const LEAP_ROWS = 2;
 const WALK_POLL_MS = 50;
 const WALK_MAX_MS = 15000;
 const WALK_STALL_MS = 1200;
@@ -203,13 +207,14 @@ const DEAD_W = 14;
 const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
 
-// the stick from a mouse or finger: a hold pushes toward the pointer, a tap presses the button that way;
-// anywhere on the figure's own 24x42 box counts as centred and presses at once, a tap elsewhere
-// waits out the double-tap window first.  A tap on a doorway, or a double tap anywhere, keeps
-// pushing toward that spot until the figure gets there or stops making progress (a push down
-// that only stooped is undone); while walking, a tap re-aims and a tap on the figure stops.
 export class Pointer {
-  constructor(canvas, keys, anchor, doors, target = window) {
+  constructor(canvas, keys, anchor, doors, target = window, {
+    menu = () => {}, player = () => null, chooser = () => null,
+  } = {}) {
+    this.menu = menu;
+    this.player = player;
+    this.chooser = chooser;
+    this.choicePress = null;
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -300,6 +305,7 @@ export class Pointer {
     this.stopWalk();
     this.holding = false;
     this.pointerId = null;
+    this.choicePress = null;
     this.held.clear();
     this.keys.reset('pointer');
   }
@@ -309,6 +315,17 @@ export class Pointer {
     this.pointerId = e.pointerId;
     e.preventDefault();
     this.canvas.setPointerCapture(e.pointerId);
+    const chooser = this.chooser();
+    if (chooser) {
+      this.stopWalk();
+      clearTimeout(this.pending);
+      this.pending = null;
+      const choice = chooser.hit(...this.pixel(e));
+      this.choicePress = { id: chooser.id, choice, started: performance.now(),
+        confirm: !!choice && sameChoice(choice, chooser.selected) };
+      if (choice) chooser.highlight(choice);
+      return;
+    }
     this.timer = setTimeout(() => {
       this.timer = null;
       this.stopWalk();
@@ -322,14 +339,28 @@ export class Pointer {
 
   move(e) {
     if (e.pointerId !== this.pointerId) return;
-    if (this.timer) this.last = e;
+    if (this.choicePress) {
+      const chooser = this.chooser();
+      if (!chooser || chooser.id !== this.choicePress.id) return this.cancel();
+      const choice = chooser.hit(...this.pixel(e));
+      if (!sameChoice(choice, this.choicePress.choice)) this.choicePress.confirm = false;
+      if (choice) chooser.highlight(choice);
+    } else if (this.timer) this.last = e;
     else if (this.holding) this.hold(this.direction(e));
   }
 
   up(e) {
     if (e.pointerId !== this.pointerId) return;
     this.pointerId = null;
-    if (this.timer) {
+    if (this.choicePress) {
+      const press = this.choicePress;
+      this.choicePress = null;
+      const chooser = this.chooser();
+      if (chooser?.id === press.id && press.confirm
+          && performance.now() - press.started <= TAP_MS
+          && sameChoice(press.choice, chooser.hit(...this.pixel(e)))
+          && sameChoice(press.choice, chooser.selected)) this.keys.gesture(['fire'], 'pointer', press.choice);
+    } else if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
       this.tap(e);
@@ -341,26 +372,51 @@ export class Pointer {
 
   tap(e) {
     const [x, y] = this.pixel(e);
-    const keys = this.directionTo(x, y);
+    const [ax, ay] = this.anchor();
+    const self = Math.abs(x - ax) < 12 + SELF_PADDING && Math.abs(y - ay) < 21 + SELF_PADDING;
     const d = this.doors(Math.floor(x / 8), Math.floor(y / 8));
-    if (this.pending) {
-      clearTimeout(this.pending);
-      this.pending = null;
+    const double = !!this.pending;
+    clearTimeout(this.pending);
+    this.pending = null;
+    if (this.walk) {
+      if (self) return this.stopWalk();
       return this.walkTo(x, y);
     }
-    if (this.walk) {
-      if (keys.size) return this.walkTo(x, y);
-      return this.stopWalk();
+    const player = this.player();
+    if (!player) {
+      if (double || (d.here && d.own !== d.here)) return this.walkTo(x, y);
+      const keys = this.directionTo(x, y);
+      if (!keys.size || d.here) return this.keys.tap('fire');
+      this.pending = setTimeout(() => {
+        this.pending = null;
+        this.keys.gesture([...keys, 'fire']);
+      }, DOUBLE_MS);
+      return;
     }
-    this.stopWalk();
-    if (d.here && d.own !== d.here) return this.walkTo(x, y);
-    if (!keys.size || d.here) return this.keys.tap('fire');
+    if (self) {
+      if (d.own) return this.keys.tap('fire');
+      return this.menu();
+    }
+    if (d.here) return this.walkTo(x, y);
+    if (double) {
+      const columns = player.stamina >= 30 ? 6 : player.stamina >= 20 ? 5 : 4;
+      if (x !== ax && Math.abs(x - ax) <= columns * 8 && Math.abs(y - ay) <= LEAP_ROWS * 8) {
+        const direction = x > ax ? 'right' : 'left';
+        if (Math.sign(x - ax) !== player.facing) this.keys.gesture([direction]);
+        return this.keys.gesture([direction, 'fire']);
+      }
+      return this.walkTo(x, y);
+    }
     this.pending = setTimeout(() => {
       this.pending = null;
-      this.keys.gesture([...keys, 'fire']);
+      this.walkTo(x, y);
     }, DOUBLE_MS);
   }
 
+}
+
+function sameChoice(a, b) {
+  return !!a && !!b && a.col === b.col && a.row === b.row;
 }
 
 const PAD_DEAD = 0.5;

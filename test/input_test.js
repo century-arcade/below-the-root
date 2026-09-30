@@ -29,6 +29,25 @@ async function keyboardFixture() {
   return { Target, target, canvas, keys, read };
 }
 
+async function pointerFixture(t) {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
+  let now = 0;
+  t.mock.method(performance, 'now', () => now);
+  const f = await keyboardFixture();
+  const model = { anchor: [100, 100], player: { stamina: 20, facing: 1 },
+    doors: { here: 0, own: 0 }, menus: 0, chooser: null };
+  const pointer = new Pointer(f.canvas, f.keys, () => model.anchor, () => model.doors, f.target, {
+    player: () => model.player, menu: () => model.menus++, chooser: () => model.chooser,
+  });
+  const send = (name, x = 100, y = 100, pointerId = 1) => f.canvas.send(name, {
+    button: 0, pointerId, clientX: x, clientY: y, preventDefault() {},
+  });
+  const tap = (x, y) => { send('pointerdown', x, y); send('pointerup', x, y); };
+  const advance = ms => { now += ms; t.mock.timers.tick(ms); };
+  t.after(() => pointer.cancel());
+  return { ...f, model, pointer, send, tap, advance };
+}
+
 async function gamepadFixture() {
   const mock = { pads: [] };
 
@@ -249,6 +268,170 @@ test("keyboard aliases and focus changes preserve independent input", async () =
   assert.equal(keys.map({ key: 'd', code: 'KeyD', target: { closest: selector => selector.includes('button') ? {} : null } }), true);
   assert.equal(keys.read().dx, 1, 'a focused debug button must not disable the game keys');
   keys.reset();
+});
+
+test('a self tap inside the padded figure opens the menu without firing', async t => {
+  const f = await pointerFixture(t);
+  f.tap(122, 130);
+  assert.equal(f.model.menus, 1);
+  assert.deepEqual(f.keys.read(), IDLE);
+  f.advance(250);
+  assert.equal(f.pointer.walk, null);
+});
+
+test('a tap twenty pixels beyond the figure waits, then walks', async t => {
+  const f = await pointerFixture(t);
+  f.tap(132, 100);
+  f.advance(199);
+  assert.deepEqual(f.keys.read(), IDLE);
+  assert.equal(f.pointer.walk, null);
+  f.advance(1);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: 1 });
+  assert.ok(f.pointer.walk);
+});
+
+for (const [offset, stamina, leap] of [[24, 15, true], [-24, 15, true], [80, 30, false],
+  [32, 15, true], [40, 15, false], [40, 20, true], [40, 30, true], [48, 30, true], [49, 30, false]]) {
+  test(`double tap at offset ${offset} with stamina ${stamina} ${leap ? 'leaps' : 'walks'}`, async t => {
+    const f = await pointerFixture(t);
+    f.model.player.stamina = stamina;
+    f.tap(100 + offset, 100); f.tap(100 + offset, 100);
+    const dx = Math.sign(offset);
+    if (leap && dx < 0) assert.deepEqual(f.keys.read(), { ...IDLE, dx }, 'turn before leaping');
+    assert.deepEqual(f.keys.read(), { dx, dy: 0, fire: leap });
+    if (leap) {
+      assert.deepEqual(f.keys.read(), IDLE, 'exactly one leap gesture');
+      assert.equal(f.pointer.walk, null);
+      f.advance(250);
+      assert.deepEqual(f.keys.read(), IDLE, 'no delayed first-tap walk');
+    } else assert.ok(f.pointer.walk);
+  });
+}
+
+for (const [dy, leap] of [[-16, true], [16, true], [-17, false], [17, false]]) {
+  test(`double tap ${Math.abs(dy)} pixels ${dy < 0 ? 'above' : 'below'} ${leap ? 'leaps' : 'walks'}`, async t => {
+    const f = await pointerFixture(t);
+    f.tap(132, 100 + dy); f.tap(132, 100 + dy);
+    assert.equal(f.keys.read().fire, leap);
+    assert.equal(!!f.pointer.walk, !leap);
+  });
+}
+
+test('self tap requests the occupied door even above its tile', async t => {
+  const f = await pointerFixture(t);
+  f.model.doors = { here: 0, own: 1 };
+  f.tap();
+  assert.deepEqual(f.keys.read(), { ...IDLE, fire: true });
+  assert.deepEqual(f.keys.read(), IDLE);
+  assert.equal(f.model.menus, 0);
+});
+
+test('a door tap walks immediately and triggers once on arrival', async t => {
+  const f = await pointerFixture(t);
+  f.model.doors = { here: 1, own: 0 };
+  f.tap(180, 100);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: 1 });
+  f.model.doors.own = 1;
+  f.advance(50);
+  assert.deepEqual(f.keys.read(), { ...IDLE, fire: true });
+  assert.equal(f.pointer.walk, null);
+  assert.deepEqual(f.keys.read(), IDLE);
+});
+
+test('self tap stops a walk without opening the menu or firing', async t => {
+  const f = await pointerFixture(t);
+  f.pointer.walkTo(180, 100);
+  f.keys.read();
+  f.tap(120, 100);
+  assert.equal(f.pointer.walk, null);
+  assert.deepEqual(f.keys.read(), IDLE);
+  assert.equal(f.model.menus, 0);
+});
+
+test('walking can be re-aimed and stalls undo a pure downward stoop', async t => {
+  const f = await pointerFixture(t);
+  f.pointer.walkTo(180, 100);
+  f.keys.read();
+  f.tap(40, 100);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 });
+  f.tap(100, 150);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dy: 1 });
+  f.advance(1200);
+  assert.equal(f.pointer.walk, null);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dy: -1 });
+});
+
+test('holding still steers without walking or opening the menu', async t => {
+  const f = await pointerFixture(t);
+  f.send('pointerdown', 150, 100);
+  f.advance(151);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: 1 });
+  f.send('pointermove', 50, 100);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 });
+  f.send('pointerup', 50, 100);
+  assert.deepEqual(f.keys.read(), IDLE);
+  assert.equal(f.pointer.walk, null);
+  assert.equal(f.model.menus, 0);
+});
+
+test('shell and playback contexts retain their existing trigger taps', async t => {
+  const f = await pointerFixture(t);
+  f.model.player = null;
+  f.tap();
+  assert.equal(f.keys.read().fire, true);
+  assert.deepEqual(f.keys.read(), IDLE);
+  f.tap(160, 100);
+  f.advance(200);
+  assert.deepEqual(f.keys.read(), { dx: 1, dy: 0, fire: true });
+  assert.equal(f.model.menus, 0);
+});
+
+test('chooser presses highlight and only a fresh tap on the selection confirms', async t => {
+  const f = await pointerFixture(t);
+  const chooser = f.model.chooser = {
+    id: {}, selected: { col: 0, row: 0 },
+    hit: x => x >= 100 && x < 160 ? { col: Math.floor((x - 100) / 20), row: 0 } : null,
+    highlight(choice) { this.selected = choice; },
+  };
+  f.send('pointerdown', 125);
+  assert.deepEqual(chooser.selected, { col: 1, row: 0 });
+  f.send('pointerup', 125);
+  assert.deepEqual(f.keys.read(), IDLE, 'first press only highlights');
+  f.tap(145);
+  assert.deepEqual(chooser.selected, { col: 2, row: 0 });
+  assert.deepEqual(f.keys.read(), IDLE, 'a different choice only highlights');
+  f.tap(145);
+  f.tap(125);
+  const confirmed = f.keys.read('press');
+  assert.equal(confirmed.fire, true);
+  assert.deepEqual(confirmed.menuChoice, { col: 2, row: 0 }, 'confirmation retains its choice across later highlights');
+  assert.deepEqual(f.keys.read(), IDLE, 'confirmation fires once');
+  f.tap(180);
+  assert.deepEqual(chooser.selected, { col: 1, row: 0 });
+  f.advance(250);
+  assert.deepEqual(f.keys.read(), IDLE, 'outside does not become a walk');
+  assert.equal(f.pointer.walk, null);
+});
+
+test('chooser holds, drags, cancellation and context changes cannot confirm', async t => {
+  const f = await pointerFixture(t);
+  const chooser = f.model.chooser = {
+    id: {}, selected: { col: 0, row: 0 },
+    hit: x => ({ col: x < 120 ? 0 : 1, row: 0 }),
+    highlight(choice) { this.selected = choice; },
+  };
+  f.send('pointerdown'); f.advance(151); f.send('pointerup');
+  assert.deepEqual(f.keys.read(), IDLE, 'holding the selection does not confirm');
+  f.send('pointerdown'); f.send('pointermove', 130);
+  assert.equal(chooser.selected.col, 1, 'dragging highlights');
+  f.send('pointermove'); f.send('pointerup');
+  assert.deepEqual(f.keys.read(), IDLE, 'dragging back to the initial selection does not confirm');
+  f.send('pointerdown'); f.canvas.send('pointercancel'); f.send('pointerup');
+  assert.deepEqual(f.keys.read(), IDLE, 'cancelled tap does not confirm');
+  f.send('pointerdown'); chooser.id = {}; f.send('pointerup');
+  assert.deepEqual(f.keys.read(), IDLE, 'replacement menu rejects old tap');
+  f.send('pointerdown'); f.target.send('blur'); f.send('pointerup');
+  assert.deepEqual(f.keys.read(), IDLE, 'blur cancels confirmation');
 });
 
 test("blur cancels a pointer walk", async () => {
