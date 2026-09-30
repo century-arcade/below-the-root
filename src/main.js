@@ -60,7 +60,7 @@ function fit() {
   const outerGap = bare ? 0 : parseFloat(getComputedStyle(game).marginTop);
   const chrome = bare ? 0 : document.getElementById('site-header').offsetHeight;
   let availableHeight = window.innerHeight - chrome - 2 * outerGap;
-  const availableWidth = window.innerWidth - 2 * outerGap;
+  const availableWidth = document.documentElement.clientWidth - 2 * outerGap;
   const replayControls = document.getElementById('replay-controls');
   const sidebar = document.getElementById('monitor-sidebar');
   if (landscape && replayControls.parentElement !== sidebar) sidebar.append(replayControls);
