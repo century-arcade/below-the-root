@@ -45,16 +45,25 @@ test("the authored map reveals exteriors and explored caverns but hides interior
   assert.equal(cells.length, defaults.size);
   assert.equal(cells.filter(c => c.current).length, 1);
   assert.deepEqual(cells.find(c => c.code === 'B8').signs, ['BROAD GRUND', 'SHOPS']);
-  const explored = new Set([...defaults, '0C', 'P2', 'T1', 'U5', 'AC']);
+  const explored = new Set([...defaults, '0C', 'P2', 'T1', 'U5', 'GE']);
   const revealed = mapCells(data, explored, '0C').flat().filter(Boolean);
   assert.ok(revealed.some(c => c.code === '0C' && c.current && c.kind === 'underground'),
     'visited cavern passages appear');
   assert.ok(revealed.some(c => c.code === 'P2'), 'visited Temple Grund rooms appear');
-  assert.ok(!revealed.some(c => ['T1', 'U5', 'AC'].includes(c.code)),
+  assert.ok(revealed.some(c => c.code === 'GE'), "Raamo's cavern appears even with its outdoor bit clear");
+  assert.ok(!revealed.some(c => ['T1', 'U5'].includes(c.code)),
     'visited interiors remain blank');
   assert.ok(!revealed.some(c => c.code === '1C'), 'unvisited passages stay blank');
   assert.ok(!mapCells(data, explored, 'T1').flat().some(c => c?.current),
     'an indoor room cannot receive the location marker');
+});
+
+test("developer mode reveals the whole map and marks unvisited rooms", async () => {
+  const { data, defaults } = await mapFixture();
+  const cells = mapCells(data, defaults, 'M5', new Set(), true).flat().filter(Boolean);
+  assert.ok(cells.find(c => c.code === 'M5').visited);
+  assert.equal(cells.find(c => c.code === 'GE').visited, false);
+  assert.ok(!cells.some(c => c.code === 'T1'), 'parked interiors stay off the map');
 });
 
 test("exploration tracks empty sky and resets for each new quest", async () => {
@@ -117,6 +126,8 @@ test("the location marker preserves the last exterior when moving indoors", asyn
     'being carried home preserves the actual last exterior, not the nid doorway');
   assert.equal(mapLocation(data, [entry('0C'), entry('01')], at('01')), '0C');
   assert.equal(mapLocation(data, [entry('M5')], at('P2')), 'P2');
+  assert.equal(mapLocation(data, [entry('FE'), entry('GE')], at('GE')), 'GE',
+    "walking into Raamo's cavern moves the marker there");
   assert.equal(mapLocation(data, [entry('P2'), entry('T1', { questStart: true })], at('T1')), 'M5',
     'starting indoors uses its exit, never an outdoor visit from the previous quest');
   assert.equal(mapLocation(data, [entry('M5'), entry('02', { blank: true }), entry('T1')], at('T1')), '02',

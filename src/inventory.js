@@ -125,7 +125,7 @@ function* pickGrid(state, items, { noFire, perClass }) {
   const entries = items.map(item => ({ item,
     label: perClass ? labels.get(item.class) : item.name.replace(/^(?:A|AN|THE) /, '') }));
   if (!noFire || !entries.length) entries.push({ item: null, label: 'NOTHING' });
-  const header = !noFire || entries.length > PANEL_ROWS * 2 ? 1 : 0;
+  const header = !noFire ? 2 : entries.length > PANEL_ROWS * 2 ? 1 : 0;
   const visibleRows = PANEL_ROWS - header;
   const picker = state.itemPicker = { entries, readOnly: noFire, header, visibleRows,
     rows: Math.max(visibleRows, Math.ceil(entries.length / 2)), offset: 0,

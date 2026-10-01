@@ -12,8 +12,8 @@ export function mapRoom(state, room) {
   return render(view).subarray(0, WIDTH * MAP_ROOM_HEIGHT * 4);
 }
 
-export function drawMap(state, visited, current, grid, empty = new Set()) {
-  const cells = mapCells(state.data, visited, current, empty);
+export function drawMap(state, visited, current, grid, empty = new Set(), all = false) {
+  const cells = mapCells(state.data, visited, current, empty, all);
   grid.style.gridTemplateColumns = `repeat(${cells[0].length}, minmax(0, 1fr))`;
   const source = document.createElement('canvas');
   source.width = WIDTH;
@@ -29,7 +29,7 @@ export function drawMap(state, visited, current, grid, empty = new Set()) {
       return element;
     }
     element.setAttribute('role', 'img');
-    element.className = c.current ? 'current' : '';
+    element.className = [c.current && 'current', !c.visited && 'unvisited'].filter(Boolean).join(' ');
     element.setAttribute('aria-label', describe(c));
     if (c.current) element.setAttribute('aria-current', 'location');
     element.title = describe(c);
@@ -46,6 +46,11 @@ export function drawMap(state, visited, current, grid, empty = new Set()) {
   }));
 }
 
+// underground: cavern slots are walked into indoors, so the outdoor bit is moot
+export function onMap(room) {
+  return !!(room?.outdoor_bit || room?.underground);
+}
+
 export function roomKind(room) {
   if (room.underground) return 'underground';
   // The cloud interiors have the same flags as ordinary sky interiors.
@@ -55,7 +60,7 @@ export function roomKind(room) {
 
 // Exploration adds to the authored starting map.
 export function defaultMapRooms(data) {
-  return new Set(data.initialMap.rooms.filter(code => data.roomByCode.get(code)?.outdoor_bit));
+  return new Set(data.initialMap.rooms.filter(code => onMap(data.roomByCode.get(code))));
 }
 
 export function visitedRooms(path, data) {
@@ -92,10 +97,10 @@ export function mapLocation(data, path, room) {
       if (home) last = mapLocation(data, [], home);
     }
     if (entry.quest && !entry.title
-        && (entry.blank || data.roomByCode.get(entry.room)?.outdoor_bit)) last = entry.room;
+        && (entry.blank || onMap(data.roomByCode.get(entry.room)))) last = entry.room;
   }
   if (!room) return last;
-  if (room.blank || room.outdoor_bit) return room.code;
+  if (room.blank || onMap(room)) return room.code;
   if (last) return last;
   // A new quest starts inside a nid, before there is any outdoor history.
   for (const door of room.doors) {
@@ -105,7 +110,7 @@ export function mapLocation(data, path, room) {
   return null;
 }
 
-export function mapCells(data, visited, current, empty = new Set()) {
+export function mapCells(data, visited, current, empty = new Set(), all = false) {
   const signs = new Map();
   for (const { room, text } of data.map.signs) {
     if (!signs.has(room)) signs.set(room, []);
@@ -114,11 +119,11 @@ export function mapCells(data, visited, current, empty = new Set()) {
   return data.map.cells.map((row, y) => row.map((room, x) => {
     const code = data.map.codes[y][x] ?? (x.toString(32) + y.toString(32)).toUpperCase();
     // Empty exterior space can share a grid slot with a hidden interior.
-    if (empty.has(code) && (room == null || !data.roomById.get(room).outdoor_bit)) {
+    if (empty.has(code) && (room == null || !onMap(data.roomById.get(room)))) {
       return { code, empty: true, kind: 'empty', visited: true, current: code === current, signs: [] };
     }
     if (room == null) return null;
-    if (!data.roomById.get(room).outdoor_bit || !visited.has(code)) return null;
+    if (!onMap(data.roomById.get(room)) || !(all || visited.has(code))) return null;
     return { room, code, kind: roomKind(data.roomById.get(room)),
       visited: visited.has(code), current: code === current, signs: signs.get(room) || [] };
   }));

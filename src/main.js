@@ -442,13 +442,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (startupHelp) { startupHelp = false; release(); }
     fit();
   }
-  function openMap() {
-    if (paused) return;
-    closeHelp();
+  function paintMap() {
     const path = state.quest ? session.path : [];
     const view = state.quest ? state : { ...state, room: null, objects: data.objects };
     drawMap(view, visitedRooms(path, data),
-      state.quest ? mapLocation(data, path, state.room) : null, mapGrid, visitedEmptyRooms(path));
+      state.quest ? mapLocation(data, path, state.room) : null, mapGrid, visitedEmptyRooms(path), debug);
+  }
+  function openMap() {
+    if (paused) return;
+    closeHelp();
+    paintMap();
     openOverlay(mapScreen, mapButton);
     helpButton.hidden = true;
     centerMap();
@@ -491,6 +494,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     document.getElementById('developer-help').hidden = !on;
+    if (overlay?.screen === mapScreen) paintMap();
     if (on && !debugReady) {
       debugReady = true;
       setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, log,
