@@ -511,6 +511,30 @@ test("blur cancels a pointer walk", async () => {
   assert.equal(pointer.walk, null); assert.deepEqual(keys.read(), IDLE);
 });
 
+test('a second finger tapped during a hold jumps without ending the hold', async t => {
+  const f = await pointerFixture(t, { latch: true });
+  f.send('pointerdown', 40, 100);
+  f.advance(150);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 });
+  f.send('pointerdown', 200, 150, 2);
+  f.send('pointerup', 200, 150, 2);
+  f.canvas.send('lostpointercapture', { pointerId: 2 });
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1, fire: true }, 'the tap fires once with the held direction');
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 }, 'the hold keeps walking');
+  f.send('pointerup', 40, 100);
+  assert.deepEqual(f.keys.read(), IDLE);
+  assert.equal(f.model.menus, 0);
+});
+
+test('a second finger before a hold is ignored', async t => {
+  const f = await pointerFixture(t);
+  f.send('pointerdown', 150, 100);
+  f.send('pointerdown', 200, 150, 2);
+  f.send('pointerup', 200, 150, 2);
+  f.advance(151);
+  assert.deepEqual(f.keys.read(), { ...IDLE, dx: 1 });
+});
+
 test('a latched hold keeps its direction after the figure reaches the finger', async t => {
   const f = await pointerFixture(t, { latch: true });
   f.send('pointerdown', 40, 100);

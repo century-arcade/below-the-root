@@ -142,6 +142,15 @@ monitor.dataset.surround = options.surround;
 addEventListener('resize', fit);
 fullscreenMode.addEventListener('change', fit);
 landscapeMode.addEventListener('change', fit);
+// landscape-fullscreen: browsers grant it only inside a tap or keypress
+let fullscreenOnGesture = landscapeMode.matches;
+landscapeMode.addEventListener('change', e => { fullscreenOnGesture = e.matches; });
+for (const ev of ['pointerup', 'keydown']) addEventListener(ev, () => {
+  if (!fullscreenOnGesture) return;
+  fullscreenOnGesture = false;
+  if (!landscapeMode.matches || document.fullscreenElement || !document.documentElement.requestFullscreen) return;
+  document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+}, true);
 document.addEventListener('fullscreenchange', fit);
 fit();
 monitor.classList.remove('unfitted');
