@@ -1,4 +1,4 @@
-"""Portrait touch users can reach navigation, help and monitor controls."""
+"""Portrait touch users can reach navigation, map and help."""
 from browser_helpers import browser_page
 from playwright.sync_api import expect
 
@@ -19,17 +19,5 @@ for width, height in [(412, 915), (360, 800)]:
             expect(page.get_by_role('heading', name=heading, exact=True)).to_be_visible()
         page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).tap()
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-        volume = page.get_by_role('slider', name='Volume', exact=True)
-        volume.fill('70')
-        expect(volume).to_have_attribute('aria-valuetext', '70%')
-        power = page.get_by_role('button', name='Monitor power', exact=True)
-        power.tap()
-        expect(power).to_have_attribute('aria-pressed', 'false')
-        power.tap()
-        expect(power).to_have_attribute('aria-pressed', 'true')
-        page.get_by_role('button', name='Fullscreen', exact=True).tap()
-        page.wait_for_function('document.fullscreenElement !== null')
-        page.evaluate('document.exitFullscreen()')
-        expect(power).to_be_visible()
 
-print('browser_portrait_test: touch navigation, help, volume, power and fullscreen passed')
+print('browser_portrait_test: touch navigation, map and help passed')

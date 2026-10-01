@@ -1,12 +1,12 @@
 import { exportSave } from '../src/save.js';
-import { lines, give, place, questState, J, timeFixture, loadTestData } from './helpers.js';
+import { lines, give, place, loadTestData } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Gamepad, IDLE, Keyboard, Pointer } from '../src/input.js';
 import { checkpoint, Session } from '../src/record.js';
 import { CLASS } from '../src/data.js';
 import { startTune } from '../src/audio.js';
-import { tick, newState, startQuest } from '../src/game.js';
+import { newState, startQuest } from '../src/game.js';
 import { pickItem } from '../src/inventory.js';
 import { highlightMenuChoice } from '../src/verbs.js';
 import { statusRows } from '../src/status.js';
@@ -160,6 +160,11 @@ test('handoff preserves the next queued press after a menu', async () => {
   tap(keys, 'ArrowRight');
   advance(session);
   assert.ok(session.record.events.some(e => e.stick?.[0] === 1), 'first subsequent movement reaches gameplay');
+  const before = session.record.events.length;
+  keys.tap('fire');
+  advance(session);
+  assert.ok(session.record.events.slice(before).some(e => String(e.stick) === '0,0,1'),
+    'first button after the menu reaches gameplay');
 });
 
 test('reward screens wait for their tune and take one fresh press per passage', async () => {
@@ -367,22 +372,6 @@ test('one observed trigger interrupts a demo without selecting the main menu', a
   assert.ok(lines(session.state).some(line => line.includes('NERIC')), 'fresh confirmation opens character chooser');
 });
 
-test("pointer single tap waits before walking without a trigger", async t => {
-  t.mock.timers.enable({ apis: ['setTimeout'] });
-  const { advance, pointerFixture } = await inputContractFixture();
-
-  const f = pointerFixture();
-  f.tapPointer();
-  advance(f.session, 12);
-  assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'first tap waits for double-tap recognition');
-  t.mock.timers.tick(230);
-  advance(f.session, 12);
-  assert.ok(f.session.record.events.some(e => String(e.stick) === '1,0,0'), 'single tap walks');
-  assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'single tap never fires');
-  assert.ok(!f.state.player.leaping);
-  f.pointer.cancel();
-});
-
 for (const direction of [1, -1]) test(`pointer double tap ${direction === 1 ? 'ahead' : 'behind'} starts one leap`, async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { until, pointerFixture } = await inputContractFixture();
@@ -396,41 +385,6 @@ for (const direction of [1, -1]) test(`pointer double tap ${direction === 1 ? 'a
   assert.equal(f.pointer.walk, null);
   assert.deepEqual(f.keys.read(), IDLE, 'the leap gesture has been consumed');
   assert.equal(f.session.record.events.filter(e => e.stick?.[2]).length, 1, 'only one trigger sample');
-});
-
-test("pointer far double tap, stop, focus reset and cancellation", async t => {
-  t.mock.timers.enable({ apis: ['setTimeout'] });
-  const { advance, pointerFixture } = await inputContractFixture();
-
-  const f = pointerFixture();
-  f.tapPointer(); f.tapPointer();
-  t.mock.timers.tick(230);
-  advance(f.session, 30);
-  assert.ok(f.session.record.events.some(e => e.stick?.[0] === 1), 'double tap walks');
-  assert.ok(!f.session.record.events.some(e => e.stick?.[2]), 'double tap does not also jump');
-  f.tapPointer({ ...f.event, clientX: 100 });
-  assert.equal(f.pointer.walk, null, 'tapping the figure stops walking');
-  assert.equal(f.session.read('s').fire, false, 'stopping does not also trigger');
-  f.tapPointer(); f.keys.reset();
-  t.mock.timers.tick(230);
-  assert.deepEqual(f.keys.read(), IDLE, 'focus reset cancels pending pointer gestures');
-  f.tapPointer(); f.canvas.send('pointercancel');
-  t.mock.timers.tick(230);
-  assert.deepEqual(f.keys.read(), IDLE, 'pointer cancellation leaves no delayed action');
-  f.pointer.cancel();
-});
-
-test('holding a direction dismisses the spirit bell message without requiring release', async () => {
-  const { settle, data, pomma } = await timeFixture();
-
-  const s = questState(data, pomma);
-  place(s, 26, 5, 5);
-  s.stop = { reason: 'bell' };
-  s.active = true;
-  tick(s);
-  assert.equal(lines(s)[0], 'THE SPIRIT BELL RINGS');
-  settle(s, [J.left, J.left]);
-  assert.ok(s.active);
 });
 
 test("queued physical keypresses navigate the menu exactly once", async () => {

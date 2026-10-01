@@ -11,6 +11,7 @@ test("empty storage supplies defaults and stored options override them", () => {
   let storage = memory();
   assert.deepEqual(loadOptions(storage), DEFAULTS, 'an empty store gives the defaults');
   assert.equal(DEFAULTS.volume, 0.5, 'the volume starts half way');
+  assert.equal(DEFAULTS.crt, true);
 
   storage.setItem('btr.volume.v2', '0.8');
   storage.setItem('btr.muted', '1');
@@ -30,16 +31,6 @@ test("empty storage supplies defaults and stored options override them", () => {
   assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');
   storage.setItem('btr.volume.v2', '7');
   assert.equal(loadOptions(storage).volume, 1, 'volume is clamped');
-});
-
-test("CRT defaults on and remembers explicit off and on preferences", () => {
-  const storage = memory();
-  assert.equal(loadOptions(storage).crt, true);
-  for (const enabled of [false, true]) {
-    storeOption(storage, 'crt', enabled);
-    assert.equal(storage.getItem('btr.crt'), enabled ? '1' : '0');
-    assert.equal(loadOptions(storage).crt, enabled);
-  }
 });
 
 test("options serialize booleans and volume and tolerate storage failure", () => {

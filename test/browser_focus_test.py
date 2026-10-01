@@ -38,7 +38,6 @@ with browser_page('/play?player=0', setup=setup, has_touch=True) as page:
         page.keyboard.down('ArrowRight')
         until(page, '(s, start) => s.record.events.slice(start).some(e => e.stick?.[0] === 1)', before)
         page.keyboard.up('ArrowRight')
-        assert any(entry['stick'][0] == 1 for entry in record()['events'][before:]), 'canvas returns arrows to play'
         expect(volume).to_have_value(level)
         until(page, 's => s.lastJoy.dx === 0')
 
@@ -85,7 +84,6 @@ with browser_page('/play?player=0', setup=setup, has_touch=True) as page:
         before = len(record()['events'])
         page.keyboard.press(key)
         until(page, '(s, [start, stick]) => s.record.events.slice(start).some(e => JSON.stringify(e.stick) === JSON.stringify(stick))', [before, joystick])
-        assert any(entry['stick'] == joystick for entry in record()['events'][before:]), 'first key after blur reaches play'
         running(True)
 
     # Hovering back onto the game returns keyboard control from a native slider.

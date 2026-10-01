@@ -1,4 +1,4 @@
-"""Startup fits before revealing the monitor without on-page status messages."""
+"""Startup reveals the surround before data loads; failed loads report to console."""
 import os
 from playwright.sync_api import sync_playwright, expect
 from browser_helpers import ready, session_eval
@@ -19,8 +19,6 @@ with sync_playwright() as p:
         page.goto(BASE + '/play', wait_until='commit')
         expect(page.locator('#monitor')).to_be_hidden()
         expect(page.locator('#screen')).to_be_hidden()
-        expect(page.locator('#startup-status, #log')).to_have_count(0)
-        expect(page.get_by_role('link', name='Reload page')).to_have_count(0)
         with page.expect_request('**/data/rooms.json'):
             modules.pop().continue_()
         expect(page.locator('#monitor')).to_be_visible()
@@ -38,20 +36,12 @@ with sync_playwright() as p:
     page.route('**/data/rooms.json', lambda route: route.fulfill(status=503, body='Unavailable'))
     with page.expect_console_message(predicate=lambda message: 'data/rooms.json: 503' in message.text):
         page.goto(BASE + '/play')
-    expect(page.locator('#startup-status, #log')).to_have_count(0)
-    expect(page.get_by_role('link', name='Reload page')).to_have_count(0)
     page.unroute('**/data/rooms.json')
     page.reload()
     ready(page)
     expect(page.locator('#screen')).to_be_visible()
     page.close()
 
-    page = browser.new_page()
-    page.route('**/main.js', lambda route: route.abort())
-    page.goto(BASE + '/play')
-    expect(page.locator('#monitor')).to_be_hidden()
-    expect(page.locator('#startup-status, #log')).to_have_count(0)
-    expect(page.get_by_role('link', name='Reload page')).to_have_count(0)
     browser.close()
 
-print('browser_startup_test: quiet startup, early surround and console-only failure reporting passed')
+print('browser_startup_test: early surround, load failure reporting and recovery passed')

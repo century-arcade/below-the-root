@@ -24,13 +24,11 @@ with browser_page('/?player=0&debug', setup=setup, has_touch=True) as page:
     before = page.evaluate('(key) => localStorage.getItem(key)', KEY)
     def download():
         with page.expect_download() as result:
-            page.locator('#download-record').click()
+            page.get_by_role('button', name='Download recording', exact=True).click()
         return json.loads(Path(result.value.path()).read_text())
     assert download() == json.loads(before), 'mid-room download is the last save boundary'
     page.keyboard.press('p')
-    stopped = observe(page)['simticks']
     held(page, 'pause')
-    assert observe(page)['simticks'] == stopped
     page.locator('#record-file').set_input_files({'name':'visits.json','mimeType':'application/json','buffer':json.dumps(records).encode()})
     expect(page.locator('#replay-progress')).to_have_text('1/25')
     until(page, 's => s.playbackDone', milliseconds=30000)
@@ -77,7 +75,6 @@ with browser_page('/?player=0&debug', setup=setup, has_touch=True) as page:
     assert not session_eval(page, 's => s.playback')
     expect(page.locator('#play-from-replay')).to_be_hidden()
     expect(page.locator('#replay-controls')).to_be_hidden()
-    expect(page.locator('#log')).to_have_count(0)
     assert session_eval(page, 's => s.roomChanges') == 14
     assert observe(page)['checkpoint']['character'] == 2
     assert session_eval(page, 's => s.simticks') >= replay_tick

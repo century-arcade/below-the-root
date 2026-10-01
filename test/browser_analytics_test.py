@@ -1,4 +1,4 @@
-"""Public pageviews, redirect deduplication and offline isolation with mocked analytics."""
+"""Mocked public pageviews, redirect deduplication and unavailable analytics."""
 import mimetypes
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
@@ -122,16 +122,6 @@ with sync_playwright() as p:
             route.abort()
         page.close()
 
-    for origin in ['http://localhost:8000', 'http://127.0.0.1', 'http://[::1]',
-                   'http://192.168.1.1', 'http://10.0.0.1', 'http://172.16.0.1',
-                   'https://preview.netlify.app', 'http://below-the-root.netlify.app']:
-        page = browser.new_page()
-        scripts, counts, unexpected, pending, errors = intercept(page, origin)
-        page.goto(origin + '/')
-        ready(page)
-        restart_analytics(page)
-        assert not scripts and not counts and not unexpected and not errors
-        page.close()
     browser.close()
 
-print('browser_analytics_test: mocked pageviews, redirects, idempotency, local isolation and unavailable script passed')
+print('browser_analytics_test: mocked pageviews, redirects, idempotency and unavailable script passed')

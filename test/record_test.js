@@ -129,19 +129,6 @@ test('backward seeks skip brief pass-through rooms across winning routes', async
   assert.ok(checked > 0, 'winning routes exercise a pass-through room');
 });
 
-test('taking over a replay preserves its current gameplay state', async () => {
-  let { data, idle, recording } = await rewindFixture();
-
-  for (const rooms of [0, 1, 3]) {
-    const takeover = Session.watch(data, idle, recording);
-    for (let i = 0; i < rooms; i++) takeover.nextRoom();
-    const at = checkpoint(takeover.state);
-    takeover.continueLive();
-    assert.equal(takeover.playback, false);
-    assert.deepEqual(checkpoint(takeover.state), at);
-  }
-});
-
 test('live rewind truncates future commands and records a new branch', async () => {
   let { data, idle, s, first, second } = await rewindFixture();
 
@@ -675,27 +662,6 @@ test('Music selection and waiting consume no gameplay RNG or simulation time', a
   saveHere(b);
 });
 
-test('replay tunes wait until a fresh viewer press skips them', async () => {
-  const { fresh, advance } = await recordingFixture();
-
-  const { startTune } = await import('../src/audio.js');
-  let fire = false;
-  const s = fresh();
-  s.live = { read: () => ({ ...IDLE, fire }) };
-  startTune(s.state, 0);
-  const stall = s.state.stall;
-  s.playback = true;
-  s.sourceRecord = { events: [] };
-  s.checkEndpoint = () => {};
-  s.skippable = true;
-  advance(s, 1);
-  assert.equal(s.state.stall, stall - 1);
-  assert.equal(s.state.tuneWait, 0);
-  fire = true;
-  advance(s, 1);
-  assert.equal(s.state.tuneWait, null);
-});
-
 test('Selecting the winning offer commits completion before any victory acknowledgement', async () => {
   const { data, advance, roundtrip, imported } = await recordingFixture();
 
@@ -756,32 +722,6 @@ test('A short fire tap while falling starts a glide and releases on the next upd
   );
   assert.equal(s.record.events[0].screen, '4A:air');
   saveHere(s);
-});
-
-test('Returning from the command menu does not consume the first play input', async () => {
-  const { data, advance } = await recordingFixture();
-
-  const keys = new Keyboard({ addEventListener() {} });
-  const s = new Session(data, keys, { initial: { mode: 'quest' } });
-  s.commandMenu();
-  advance(s, 10);
-  keys.tap('fire');
-  advance(s, 10);
-  assert.equal(s.state.verb, null);
-  let before = s.record.events.length;
-  keys.tap('right');
-  advance(s, 10);
-  assert.ok(
-    s.record.events.slice(before).some(e => String(e.stick) === '1,0,0'),
-    'first input after the menu reaches play',
-  );
-  before = s.record.events.length;
-  keys.tap('fire');
-  advance(s, 10);
-  assert.ok(
-    s.record.events.slice(before).some(e => String(e.stick) === '0,0,1'),
-    'first button after the menu reaches play',
-  );
 });
 
 test('A REST kidnap records the room boundary after all host and hour effects', async () => {

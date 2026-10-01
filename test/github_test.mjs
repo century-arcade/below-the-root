@@ -104,13 +104,6 @@ test("OAuth uses PKCE and rejects callbacks with a mismatched state", async () =
   assert.match(bad.headers.get('Location'), /failed/); assert.equal(mock.calls.length, 0);
 });
 
-test("an encrypted session cookie identifies the authenticated user", async () => {
-  const mock = await authenticatedGithubFixture();
-  const { handler, req, cookie } = mock;
-  const info = await handler(req('session', { Cookie: cookie }));
-  assert.deepEqual(await info.json(), { configured: true, login: 'tester' });
-});
-
 test("issue reports reject cross-origin, unauthenticated, and invalid requests", async () => {
   const mock = await authenticatedGithubFixture();
   const { origin, handler, req, headers, body, post } = mock;
@@ -224,11 +217,11 @@ test("both repository and gist scopes are required and logout expires the cookie
 
   mock.issueStatus = 201;
   mock.gistStatus = 201;
-  for (const granted of ['public_repo', undefined, 'public_repo notgist', 'public_repo gist']) {
+  for (const granted of ['public_repo', undefined, 'public_repo notgist', 'public_repo gist', 'public_repo,gist']) {
     mock.scope = granted;
     const value = await sessionCookie();
     const session = await handler(req('session', { Cookie: value }));
-    const allowed = granted === 'public_repo gist';
+    const allowed = ['public_repo gist', 'public_repo,gist'].includes(granted);
     assert.equal((await session.json()).login, allowed ? 'tester' : null);
     const before = mock.calls.length;
     assert.equal((await handler(req('issue', { ...headers, Cookie: value }, body))).status, allowed ? 200 : 401);

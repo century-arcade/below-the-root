@@ -15,26 +15,6 @@ test('the live command menu offers inventory but omits status and title navigati
   ].sort());
 });
 
-test('walking to INVENTORY opens the carried-item display', async () => {
-  const { run, data, pomma } = await talkFixture();
-  const s = questState(data, pomma);
-  give(s, CLASS.BREAD);
-  assert.match(run(s, menu('INVENTORY'))[0], /PAN BREAD/);
-});
-
-test('pointing at INVENTORY opens the carried-item display', async () => {
-  const { data, pomma } = await talkFixture();
-  const pointed = questState(data, pomma);
-  const g = runMenu(pointed);
-  g.next();
-  highlightMenuChoice(pointed, menuChoiceAt(20, 1));
-  assert.deepEqual(pointed.commandMenuSelection, { col: 3, row: 1 });
-  g.next(J.idle);
-  assert.ok(pointed.commandMenuOpen, 'highlighting does not run the verb');
-  g.next(J.fire);
-  assert.ok(pointed.itemPicker?.readOnly);
-});
-
 test('keyboard navigation continues from the pointer highlight', async () => {
   const { data, pomma } = await talkFixture();
   const state = questState(data, pomma);

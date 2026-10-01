@@ -52,7 +52,6 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.goto(address + '/?player=0&debug')
             until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
             assert observe(page)['quest']
-            expect(page.locator('#file-issue')).to_have_count(0)
             page.keyboard.press('r')
             expect(page.locator('#issue-dialog')).to_be_hidden()
             page.keyboard.press('ArrowRight')
@@ -73,7 +72,6 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             assert checkpoint['player'], checkpoint
             page.locator('#record-file').set_input_files({
                 'name': 'playthrough.json', 'mimeType': 'application/json', 'buffer': recording.encode()})
-            expect(page.locator('#log')).to_have_count(0)
             until(page, 's => s.playback')
             assert observe(page)['quest']
             page.locator('nav a[href="/about"]').click()

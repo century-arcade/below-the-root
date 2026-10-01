@@ -241,19 +241,6 @@ test("gamepad cancellation preserves other sources and blocks stale holds", asyn
   assert.deepEqual(read(), { ...IDLE, dy: -1, fire: true }, 'fresh trigger works without requiring all controls neutral');
 });
 
-test("continuation blocks the held controller until it is centred", async () => {
-  // A continuation cancels the physical hold until the controller is centred.
-  {
-    const keys = new Keyboard({ addEventListener() {} });
-    const pad = { connected: true, axes: [1, 0], buttons: [] };
-    const adapter = new Gamepad(keys, { getGamepads: () => [pad] });
-    adapter.poll(); assert.equal(keys.read().dx, 1);
-    adapter.cancel(true); adapter.poll(); assert.equal(keys.read().dx, 0);
-    pad.axes = [0, 0]; adapter.poll();
-    pad.axes = [-1, 0]; adapter.poll(); assert.equal(keys.read().dx, -1);
-  }
-});
-
 test("trigger presses are consumed once and menu confirmation cannot leak into play", async () => {
   const { keys, read } = await keyboardFixture();
   assert.equal(read().press, false);

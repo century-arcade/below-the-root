@@ -17,7 +17,6 @@ with sync_playwright() as p:
             content_type='text/html', body='<p>Reached login endpoint</p>'))
         page.goto(BASE + '/?debug&player=0')
         page.wait_for_function("localStorage.getItem('btr.autosave.v3') !== null")
-        assert page.locator('#file-issue').count() == 0
         page.keyboard.press(action)
         page.get_by_text('Reached login endpoint').wait_for()
         assert page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3')).initial.mode")

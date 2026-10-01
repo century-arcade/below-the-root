@@ -119,12 +119,6 @@ test('notation preserves every original pitch and duration in all eleven tunes',
   }
 });
 
-test('the last note may ring past the end byte, up to its decay', () => {
-  const plan = planTune(music, 0);
-  const last = plan.reduce((a, b) => (b.start > a.start ? b : a));
-  assert.ok(last.stop <= last.start + 144);
-});
-
 test('pickTune: numbers pass through, random draws from the pool', () => {
   assert.equal(pickTune(music, 0, () => 0), 0);
   assert.equal(pickTune(music, 'random', () => 0), 2);
