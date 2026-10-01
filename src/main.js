@@ -66,11 +66,6 @@ function fit() {
   let availableHeight = window.innerHeight - chrome - 2 * outerGap;
   const availableWidth = document.documentElement.clientWidth - 2 * outerGap;
   const replayControls = document.getElementById('replay-controls');
-  const sidebar = document.getElementById('monitor-sidebar');
-  if (landscape && replayControls.parentElement !== sidebar) sidebar.append(replayControls);
-  else if (!landscape && replayControls.parentElement === sidebar) {
-    document.getElementById('play-area').insertBefore(replayControls, document.getElementById('help-screen'));
-  }
   if (!landscape && !replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
   const padding = bare ? 0 : narrow ? 2 : CANVAS_PADDING;
   for (const name of ['mm', 'chin', 'clip']) monitor.style.removeProperty(`--${name}`);
@@ -86,7 +81,7 @@ function fit() {
     monitor.style.setProperty('--clip', `${Math.max(0, (width - viewport) / 2)}px`);
   } else {
     const shell = getComputedStyle(monitor);
-    const shellWidth = bare ? (landscape ? sidebar.offsetWidth : 0)
+    const shellWidth = bare ? 0
       : 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
     const shellHeight = bare ? 0 : 2 * parseFloat(shell.getPropertyValue('--rim'));
     scale = fitScale(availableWidth - shellWidth, availableHeight - shellHeight, HEIGHT, padding);
@@ -203,6 +198,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekRepeatAt = 0;
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row), window, {
     menu: () => commandMenu(),
+    surface: document.getElementById('play'),
+    latch: options.latch,
     player: () => !session.playback && canOpenCommandMenu(state) ? state.player : null,
     chooser: () => state.itemPicker && !session.playback ? {
       id: state.itemPicker,

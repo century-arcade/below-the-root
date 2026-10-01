@@ -200,6 +200,7 @@ export function directionPress() {
   };
 }
 
+const OFF_PICTURE_IGNORE = 'button, input, select, textarea, a, dialog, #help-screen, #map-screen, #replay-controls, #monitor-controls';
 const TAP_MS = 150;
 const DOUBLE_MS = 200;
 const SELF_PADDING = 12;
@@ -210,11 +211,23 @@ const WALK_STALL_MS = 1200;
 const DEAD_W = 14;
 const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
+const LATCH_DRAG = 16;
+const ROOM_JUMP = 96;
+
+function sectorKeys(dx, dy) {
+  const keys = new Set();
+  if (Math.abs(dy) < Math.abs(dx) * SECTOR) keys.add(dx > 0 ? 'right' : 'left');
+  else if (Math.abs(dx) < Math.abs(dy) * SECTOR) keys.add(dy > 0 ? 'down' : 'up');
+  else { keys.add(dx > 0 ? 'right' : 'left'); keys.add(dy > 0 ? 'down' : 'up'); }
+  return keys;
+}
 
 export class Pointer {
   constructor(canvas, keys, anchor, doors, target = window, {
-    menu = () => {}, player = () => null, chooser = () => null,
+    menu = () => {}, player = () => null, chooser = () => null, surface = null, latch = false,
   } = {}) {
+    this.latch = latch;
+    this.latched = null;
     this.menu = menu;
     this.player = player;
     this.chooser = chooser;
@@ -233,6 +246,9 @@ export class Pointer {
     this.last = null;
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => this.down(e));
+    surface?.addEventListener('pointerdown', (e) => {
+      if (e.target !== canvas && !e.target.closest?.(OFF_PICTURE_IGNORE)) this.down(e);
+    });
     canvas.addEventListener('pointermove', (e) => this.move(e));
     canvas.addEventListener('pointerup', (e) => this.up(e));
     canvas.addEventListener('pointercancel', () => this.cancel());
@@ -251,12 +267,8 @@ export class Pointer {
     const [ax, ay] = this.anchor();
     const dx = x - ax;
     const dy = y - ay;
-    const keys = new Set();
-    if (Math.abs(dx) < DEAD_W && Math.abs(dy) < DEAD_H) return keys;
-    if (Math.abs(dy) < Math.abs(dx) * SECTOR) keys.add(dx > 0 ? 'right' : 'left');
-    else if (Math.abs(dx) < Math.abs(dy) * SECTOR) keys.add(dy > 0 ? 'down' : 'up');
-    else { keys.add(dx > 0 ? 'right' : 'left'); keys.add(dy > 0 ? 'down' : 'up'); }
-    return keys;
+    if (Math.abs(dx) < DEAD_W && Math.abs(dy) < DEAD_H) return new Set();
+    return sectorKeys(dx, dy);
   }
 
   direction(e) {
@@ -282,8 +294,14 @@ export class Pointer {
     const w = this.walk;
     if (!w) return;
     const now = performance.now();
-    const at = String(this.anchor());
-    if (at !== w.at) { w.at = at; w.moved = now; }
+    const anchor = this.anchor();
+    const at = String(anchor);
+    if (at !== w.at) {
+      const [px, py] = w.at.split(',').map(Number);
+      if (Math.abs(anchor[0] - px) > ROOM_JUMP || Math.abs(anchor[1] - py) > ROOM_JUMP) return this.stopWalk();
+      w.at = at;
+      w.moved = now;
+    }
     if (w.door) {
       const d = this.doors(Math.floor(w.x / 8), Math.floor(w.y / 8));
       if (d.here && d.own === d.here) { this.stopWalk(); this.keys.tap('fire'); return; }
@@ -310,6 +328,7 @@ export class Pointer {
     this.holding = false;
     this.pointerId = null;
     this.choicePress = null;
+    this.latched = null;
     this.held.clear();
     this.keys.reset('pointer');
   }
@@ -337,7 +356,9 @@ export class Pointer {
       clearTimeout(this.pending);
       this.pending = null;
       this.holding = true;
-      this.hold(this.direction(this.last));
+      const keys = this.direction(this.last);
+      if (this.latch) this.latched = { keys, at: this.pixel(this.last) };
+      this.hold(keys);
     }, TAP_MS);
     this.last = e;
   }
@@ -359,7 +380,16 @@ export class Pointer {
       if (!sameChoice(choice, this.choicePress.choice)) this.choicePress.confirm = false;
       if (choice) chooser.highlight(choice);
     } else if (this.timer) this.last = e;
-    else if (this.holding) this.hold(this.direction(e));
+    else if (this.holding) this.steer(e);
+  }
+
+  steer(e) {
+    if (!this.latched) return this.hold(this.direction(e));
+    const [x, y] = this.pixel(e);
+    const [lx, ly] = this.latched.at;
+    if (Math.hypot(x - lx, y - ly) < LATCH_DRAG) return;
+    this.latched = { keys: sectorKeys(x - lx, y - ly), at: [x, y] };
+    this.hold(this.latched.keys);
   }
 
   up(e) {
@@ -379,6 +409,7 @@ export class Pointer {
       this.tap(e);
     } else if (this.holding) {
       this.holding = false;
+      this.latched = null;
       this.hold(new Set());
     }
   }
@@ -387,7 +418,8 @@ export class Pointer {
     const [x, y] = this.pixel(e);
     const [ax, ay] = this.anchor();
     const self = Math.abs(x - ax) < 12 + SELF_PADDING && Math.abs(y - ay) < 21 + SELF_PADDING;
-    const d = this.doors(Math.floor(x / 8), Math.floor(y / 8));
+    const inside = x >= 0 && y >= 0 && x < this.canvas.width && y < this.canvas.height;
+    const d = inside ? this.doors(Math.floor(x / 8), Math.floor(y / 8)) : { here: 0, own: 0, side: 0 };
     const double = !!this.pending;
     clearTimeout(this.pending);
     this.pending = null;
@@ -396,6 +428,7 @@ export class Pointer {
       return this.walkTo(x, y);
     }
     const player = this.player();
+    if (!player && !inside) return;
     if (!player) {
       if (double || (d.here && d.own !== d.here)) return this.walkTo(x, y);
       const keys = this.directionTo(x, y);

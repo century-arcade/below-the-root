@@ -1,4 +1,4 @@
-"""Touch navigation, inventory and replay remain usable on landscape phones."""
+"""Landscape phones show the bare picture with only site navigation; touch play still works."""
 from pathlib import Path
 from browser_helpers import browser_page, until, session_eval
 from playwright.sync_api import expect
@@ -39,9 +39,8 @@ with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_t
     expect(page.get_by_role('complementary', name='Input help')).to_be_visible()
     page.keyboard.press('Escape')
     expect(page.get_by_role('complementary', name='Input help')).to_be_hidden()
-    volume = page.get_by_role('slider', name='Volume', exact=True)
-    volume.fill('70')
-    expect(volume).to_have_attribute('aria-valuetext', '70%')
+    for control in ['Volume', 'Fullscreen', 'Monitor power']:
+        expect(page.get_by_label(control, exact=True)).to_be_hidden()
     page.locator('#command-menu').tap()
     panel_has(page, 'INVENTORY')
     choose_inventory(page)
@@ -55,17 +54,6 @@ with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_t
     until(page, 's => s.state.itemPicker?.readOnly')
     page.clock.run_for(32)
     close_inventory(page)
-    page.get_by_role('button', name='Fullscreen', exact=True).tap()
-    page.wait_for_function('document.fullscreenElement !== null')
-    expect(navigation).to_be_visible()
-    expect(volume).to_be_visible()
-    page.get_by_role('button', name='Fullscreen', exact=True).tap()
-    page.wait_for_function('document.fullscreenElement === null')
-    power = page.get_by_role('button', name='Monitor power', exact=True)
-    power.tap()
-    expect(power).to_have_attribute('aria-pressed', 'false')
-    power.tap()
-    expect(power).to_have_attribute('aria-pressed', 'true')
 
     recording = Path('test/fixtures/neric-win.json').read_text()
     page.evaluate('''text => {
@@ -74,11 +62,7 @@ with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_t
         window.dispatchEvent(new DragEvent('drop', {dataTransfer}));
     }''', recording)
     until(page, 's => s.playback')
-    expect(page.get_by_role('group', name='Replay room navigation')).to_be_visible()
-    page.get_by_role('button', name='Forward one room', exact=True).tap()
-    until(page, 's => s.roomChanges > 0')
-    page.get_by_role('button', name='Play from here', exact=True).tap()
-    assert session_eval(page, 's => !s.playback')
+    expect(page.get_by_role('group', name='Replay room navigation')).to_be_hidden()
 
 with browser_page('/play?room=B8', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
     expect(page.get_by_role('button', name='Site navigation', exact=True)).to_be_hidden()
@@ -110,4 +94,4 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, 's => !s.state.player.indoors')
     assert session_eval(page, 's => s.state.room.code') == 'M5'
 
-print('browser_landscape_test: touch navigation, inventory, fullscreen, replay and door input passed')
+print('browser_landscape_test: bare landscape picture, touch navigation, inventory and door input passed')

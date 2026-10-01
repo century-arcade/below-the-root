@@ -29,15 +29,17 @@ async function keyboardFixture() {
   return { Target, target, canvas, keys, read };
 }
 
-async function pointerFixture(t) {
+async function pointerFixture(t, { latch = false } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
   let now = 0;
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
+  const surface = new f.Target();
   const model = { anchor: [100, 100], player: { stamina: 20, facing: 1 },
     doors: { here: 0, own: 0 }, menus: 0, chooser: null };
   const pointer = new Pointer(f.canvas, f.keys, () => model.anchor, () => model.doors, f.target, {
     player: () => model.player, menu: () => model.menus++, chooser: () => model.chooser,
+    surface, latch,
   });
   const send = (name, x = 100, y = 100, pointerId = 1) => f.canvas.send(name, {
     button: 0, pointerId, clientX: x, clientY: y, preventDefault() {},
@@ -45,7 +47,11 @@ async function pointerFixture(t) {
   const tap = (x, y) => { send('pointerdown', x, y); send('pointerup', x, y); };
   const advance = ms => { now += ms; t.mock.timers.tick(ms); };
   t.after(() => pointer.cancel());
-  return { ...f, model, pointer, send, tap, advance };
+  const offPicture = (x, y, target = { closest: () => null }) => {
+    surface.send('pointerdown', { button: 0, pointerId: 1, clientX: x, clientY: y, target, preventDefault() {} });
+    send('pointerup', x, y);
+  };
+  return { ...f, model, pointer, send, tap, advance, offPicture };
 }
 
 async function gamepadFixture() {
@@ -516,4 +522,46 @@ test("blur cancels a pointer walk", async () => {
   const pointer = new Pointer(canvas, keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
   pointer.walkTo(200, 100); target.send('blur');
   assert.equal(pointer.walk, null); assert.deepEqual(keys.read(), IDLE);
+});
+
+test('a latched hold keeps its direction after the figure reaches the finger', async t => {
+  const f = await pointerFixture(t, { latch: true });
+  f.send('pointerdown', 40, 100);
+  f.advance(150);
+  assert.equal(f.keys.read().dx, -1);
+  f.model.anchor = [40, 100];
+  f.send('pointermove', 42, 101);
+  assert.equal(f.keys.read().dx, -1, 'still walking left at the finger');
+  f.send('pointermove', 42, 80);
+  assert.deepEqual([f.keys.read().dx, f.keys.read().dy], [0, -1], 'a clear drag up re-latches');
+  f.send('pointerup', 42, 80);
+  assert.deepEqual(f.keys.read(), IDLE);
+});
+
+test('an unlatched hold stops once the figure reaches the finger', async t => {
+  const f = await pointerFixture(t);
+  f.send('pointerdown', 40, 100);
+  f.advance(150);
+  assert.equal(f.keys.read().dx, -1);
+  f.model.anchor = [40, 100];
+  f.send('pointermove', 42, 101);
+  assert.equal(f.keys.read().dx, 0);
+});
+
+test('an off-picture tap walks past the edge and stops in the next room', async t => {
+  const f = await pointerFixture(t);
+  f.model.anchor = [20, 100];
+  f.offPicture(-30, 100);
+  f.advance(200);
+  assert.equal(f.keys.read().dx, -1);
+  f.model.anchor = [300, 100];
+  f.advance(50);
+  assert.equal(f.keys.read().dx, 0);
+});
+
+test('presses on controls outside the picture do not steer', async t => {
+  const f = await pointerFixture(t);
+  f.offPicture(-30, 100, { closest: () => ({}) });
+  f.advance(200);
+  assert.deepEqual(f.keys.read(), IDLE);
 });
