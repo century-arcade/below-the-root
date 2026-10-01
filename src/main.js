@@ -729,7 +729,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
         session.playbackError = err.message;
         seekRoom = null; log(err.message);
       }
-      if (previousRoom !== state.room || previousTitle !== state.title) pointer.cancel();
+      if (previousTitle !== state.title) pointer.cancel();
+      else if (previousRoom !== state.room) pointer.changeRoom();
       autosave.save(session);
       if (seekRoom != null) state.events.length = 0;
       else speaker.frame(state);

@@ -51,7 +51,7 @@ async function pointerFixture(t, { latch = false } = {}) {
     surface.send('pointerdown', { button: 0, pointerId: 1, clientX: x, clientY: y, target, preventDefault() {} });
     send('pointerup', x, y);
   };
-  return { ...f, model, pointer, send, tap, advance, offPicture };
+  return { ...f, model, pointer, send, tap, advance, offPicture, surface };
 }
 
 async function gamepadFixture() {
@@ -568,6 +568,46 @@ test('an off-picture tap walks past the edge and stops in the next room', async 
   f.model.anchor = [300, 100];
   f.advance(50);
   assert.equal(f.keys.read().dx, 0);
+});
+
+test('a sidebar hold climbs above the figure, descends below it and walks level with it', async t => {
+  const f = await pointerFixture(t, { latch: true });
+  const hold = (x, y) => {
+    f.surface.send('pointerdown', { button: 0, pointerId: 1, clientX: x, clientY: y,
+      target: { closest: () => null }, preventDefault() {} });
+    f.advance(151);
+    const { dx, dy } = f.keys.read();
+    f.send('pointerup', x, y);
+    f.keys.read();
+    return [dx, dy];
+  };
+  f.model.anchor = [100, 100];
+  assert.deepEqual(hold(-30, 70), [0, -1], 'a little above the figure climbs');
+  assert.deepEqual(hold(350, 130), [0, 1], 'a little below the figure descends');
+  assert.deepEqual(hold(-30, 110), [-1, 0], 'level with the figure walks toward that side');
+});
+
+test('a finger still down keeps moving across a room change; a walk does not', async t => {
+  const f = await pointerFixture(t, { latch: true });
+  f.send('pointerdown', 40, 100);
+  f.advance(151);
+  assert.equal(f.keys.read().dx, -1);
+  f.model.anchor = [300, 100];
+  f.pointer.changeRoom();
+  assert.equal(f.keys.read().dx, -1, 'still walking left in the next room');
+  f.send('pointerup', 40, 100);
+  assert.deepEqual(f.keys.read(), IDLE);
+  f.send('pointerdown', 40, 100);
+  f.pointer.changeRoom();
+  f.advance(151);
+  assert.equal(f.keys.read().dx, -1, 'a press made just before the change still becomes a hold');
+  f.send('pointerup', 40, 100);
+  f.keys.read();
+  f.tap(40, 100);
+  f.advance(200);
+  assert.equal(f.keys.read().dx, -1, 'the tap walks');
+  f.pointer.changeRoom();
+  assert.deepEqual(f.keys.read(), IDLE, 'the walk ends in the new room');
 });
 
 test('presses on controls outside the picture do not steer', async t => {

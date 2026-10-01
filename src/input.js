@@ -280,6 +280,16 @@ export class Pointer {
     return this.directionTo(...this.pixel(e));
   }
 
+  // sidebar-hold: beside the picture, height against the figure picks up or down
+  holdDirection(e) {
+    const [x, y] = this.pixel(e);
+    if (x >= 0 && x < this.canvas.width) return this.directionTo(x, y);
+    const [, ay] = this.anchor();
+    if (y < ay - DEAD_H) return new Set(['up']);
+    if (y > ay + DEAD_H) return new Set(['down']);
+    return new Set([x < 0 ? 'left' : 'right']);
+  }
+
   hold(keys) {
     for (const k of this.held) if (!keys.has(k)) this.keys.release(k, 'pointer');
     for (const k of keys) if (!this.held.has(k)) this.keys.press(k, 'pointer');
@@ -323,6 +333,13 @@ export class Pointer {
     clearInterval(this.walk.poll);
     this.walk = null;
     this.hold(new Set());
+  }
+
+  // room-change: a walk target belongs to the old room, a finger still down does not
+  changeRoom() {
+    this.stopWalk();
+    clearTimeout(this.pending);
+    this.pending = null;
   }
 
   cancel() {
@@ -376,7 +393,7 @@ export class Pointer {
       clearTimeout(this.pending);
       this.pending = null;
       this.holding = true;
-      const keys = this.direction(this.last);
+      const keys = this.holdDirection(this.last);
       if (this.latch) this.latched = { keys, at: this.pixel(this.last) };
       this.hold(keys);
     }, TAP_MS);
@@ -404,7 +421,7 @@ export class Pointer {
   }
 
   steer(e) {
-    if (!this.latched) return this.hold(this.direction(e));
+    if (!this.latched) return this.hold(this.holdDirection(e));
     const [x, y] = this.pixel(e);
     const [lx, ly] = this.latched.at;
     if (Math.hypot(x - lx, y - ly) < LATCH_DRAG) return;
