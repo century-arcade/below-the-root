@@ -50,7 +50,15 @@ body:has(#map-screen:not([hidden])) { overflow: hidden; }
 #paper-map { box-sizing: border-box; width: min(100% - 32px, 1600px); margin: 24px auto; cursor: zoom-in; }
 #paper-map .current { outline-width: 1px; }
 .map-grid .unseen.current { outline-color: #b0302a; }
-.game-fullscreen #paper-map, .landscape-play #paper-map { display: none; }
+.game-fullscreen #paper-map, .landscape-play #paper-map,
+.game-fullscreen #manual, .landscape-play #manual { display: none; }
+#manual { width: min(100% - 32px, 900px); margin: 32px auto; }
+#manual h2 { text-align: center; }
+.manual-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; }
+.manual-controls button, .manual-controls select { min-height: 44px; font: inherit; }
+#manual [data-manual-image] { display: block; cursor: zoom-in; }
+#manual img { display: block; width: 100%; height: auto; }
+#manual p { text-align: center; }
 #crt, #crt > div { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; }
 #crt { z-index: 1; }
 #scanlines { opacity: var(--scan, 1); background-position: 0 var(--scan-shift, 0); background-image: repeating-linear-gradient(to bottom, #fff 0, #fff calc(var(--row) * .5), #cecece calc(var(--row) * .5), #cecece var(--row)); }

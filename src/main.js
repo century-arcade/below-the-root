@@ -17,6 +17,9 @@ import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
 import { setupDeveloper, GAME_TOOLS } from './header.js';
+import { setupManual } from './manual.js';
+
+setupManual(document.getElementById('manual'));
 
 const log = text => console.log(text);
 
