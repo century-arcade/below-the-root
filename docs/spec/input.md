@@ -84,6 +84,14 @@ to the door and triggers on arrival. Walks stop on arrival, after 1.2 seconds
 without progress, or after 15 seconds; a downward walk that only stoops is
 undone. Keyboard input, focus loss and pointer cancellation cancel gestures.
 
+Beside the picture, a press steers from the moment it lands until it
+lifts; a tap is a single nudge and never sets a walk target or a
+double-tap leap.  Above the figure's body it climbs, below it descends,
+level with it walks toward that side; drags re-latch as on the picture.
+While a hold steers, a second finger is the trigger for as long as it is
+down.  A finger still down keeps steering across room changes; walk
+targets and pending double taps do not.
+
 Tapping the figure opens the command menu through the same route as F or
 the menu-area button, with the same refusals. Its 24 × 42 native-pixel box
 has 12 pixels of padding on each side; the outer boundary is excluded.

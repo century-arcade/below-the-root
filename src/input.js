@@ -387,6 +387,18 @@ export class Pointer {
       if (choice) chooser.highlight(choice);
       return;
     }
+    const [x] = this.pixel(e);
+    if (x < 0 || x >= this.canvas.width) {
+      if (!this.player()) return;
+      this.stopWalk();
+      clearTimeout(this.pending);
+      this.pending = null;
+      this.holding = true;
+      const keys = this.holdDirection(e);
+      if (this.latch) this.latched = { keys, at: this.pixel(e) };
+      this.hold(keys);
+      return;
+    }
     this.timer = setTimeout(() => {
       this.timer = null;
       this.stopWalk();

@@ -559,15 +559,23 @@ test('an unlatched hold stops once the figure reaches the finger', async t => {
   assert.equal(f.keys.read().dx, 0);
 });
 
-test('an off-picture tap walks past the edge and stops in the next room', async t => {
+test('a sidebar tap nudges once and sets no destination', async t => {
   const f = await pointerFixture(t);
   f.model.anchor = [20, 100];
   f.offPicture(-30, 100);
+  assert.equal(f.keys.read().dx, -1, 'the press moves at once');
+  assert.deepEqual(f.keys.read(), IDLE, 'the release stops it');
   f.advance(200);
-  assert.equal(f.keys.read().dx, -1);
-  f.model.anchor = [300, 100];
-  f.advance(50);
-  assert.equal(f.keys.read().dx, 0);
+  assert.deepEqual(f.keys.read(), IDLE, 'no walk starts afterwards');
+  assert.equal(f.pointer.walk, null);
+});
+
+test('sidebar presses do nothing without a figure to steer', async t => {
+  const f = await pointerFixture(t);
+  f.model.player = null;
+  f.offPicture(-30, 100);
+  f.advance(200);
+  assert.deepEqual(f.keys.read(), IDLE);
 });
 
 test('a sidebar hold climbs above the figure, descends below it and walks level with it', async t => {
