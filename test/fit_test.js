@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fitScale, fitCabinet, CASE, GLASS, CONTROL_STRIP } from '../src/fit.js';
+import { fitScale, fitCabinet, CASE, GLASS, CONTROL_STRIP, ASPECTS } from '../src/fit.js';
 
 test('scaling fills the limiting dimension without whole-step drops', () => {
   assert.equal(fitScale(1920, 1080), 5.4, 'height limits the scale');
@@ -33,4 +33,13 @@ test('picture-width fitting retains padding and ignores the case height limit', 
   assert.equal(cabinet.scale, 1);
   assert.equal(cabinet.glassWidth, 324);
   assert.ok(cabinet.width > 320);
+});
+
+test('a narrower pixel aspect fills the glass height instead of its width', () => {
+  const square = fitCabinet(CASE.width, CASE.height, 3);
+  const ntsc = fitCabinet(CASE.width, CASE.height, 3, { aspect: ASPECTS.ntsc });
+  assert.equal(ntsc.mm, square.mm, 'the cabinet does not change size');
+  assert.ok(ntsc.scale > square.scale, 'taller pixels make the picture taller');
+  assert.ok((200 + 6) * ntsc.scale <= ntsc.glassHeight + 1e-9, 'the picture stays inside the glass');
+  assert.ok((320 * ASPECTS.ntsc + 6) * ntsc.scale <= ntsc.glassWidth + 1e-9);
 });

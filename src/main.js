@@ -10,7 +10,7 @@ import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosav
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
-import { fitScale, fitCabinet, crtVars } from './fit.js';
+import { fitScale, fitCabinet, crtVars, ASPECTS } from './fit.js';
 import { loaderScreen } from './loader.js';
 import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelZoom } from './map.js';
 import { loadOptions, storeOption } from './options.js';
@@ -82,11 +82,12 @@ function fit() {
     navHome.prepend(mainNav);
     focused?.focus({ preventScroll: true });
   }
-  let scale, width, glassHeight;
+  const aspect = ASPECTS[options.aspect] ?? 1;
+  let scale, width, glassWidth, glassHeight;
   if (cabinetFit) {
     const viewport = document.documentElement.clientWidth;
-    const cabinet = fitCabinet(narrow ? viewport : availableWidth, availableHeight, padding, { fillWidth: narrow });
-    ({ scale, width, glassHeight } = cabinet);
+    const cabinet = fitCabinet(narrow ? viewport : availableWidth, availableHeight, padding, { fillWidth: narrow, aspect });
+    ({ scale, width, glassWidth, glassHeight } = cabinet);
     monitor.style.setProperty('--mm', `${cabinet.mm}px`);
     monitor.style.setProperty('--chin', `${cabinet.chin}px`);
     monitor.style.setProperty('--clip', `${Math.max(0, (width - viewport) / 2)}px`);
@@ -95,15 +96,16 @@ function fit() {
     const shellWidth = bare ? 0
       : 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
     const shellHeight = bare ? 0 : 2 * parseFloat(shell.getPropertyValue('--rim'));
-    scale = fitScale(availableWidth - shellWidth, availableHeight - shellHeight, HEIGHT, padding);
-    width = (WIDTH + 2 * padding) * scale + shellWidth;
+    scale = fitScale(availableWidth - shellWidth, availableHeight - shellHeight, HEIGHT, padding, aspect);
+    glassWidth = (WIDTH * aspect + 2 * padding) * scale;
+    width = glassWidth + shellWidth;
     glassHeight = (HEIGHT + 2 * padding) * scale;
   }
   const glass = document.getElementById('glass');
-  glass.style.width = `${(WIDTH + 2 * padding) * scale}px`;
+  glass.style.width = `${glassWidth}px`;
   glass.style.height = `${glassHeight}px`;
   canvas.parentElement.style.setProperty('--canvas-padding', `${padding * scale}px`);
-  canvas.style.width = WIDTH * scale + 'px';
+  canvas.style.width = WIDTH * aspect * scale + 'px';
   canvas.style.height = HEIGHT * scale + 'px';
   canvas.parentElement.style.width = canvas.style.width;
   canvas.parentElement.style.setProperty('--menu-top', `${PANEL_ROW * 8 * scale}px`);
@@ -718,7 +720,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (document.hidden) suspendFocus();
     else if (document.hasFocus()) restoreFocus();
   });
-  setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused });
+  setupDeveloper({ options: { ...options, debug }, onDebug: setDebug, canChangeDebug: () => !paused,
+    onAspect: value => { options.aspect = value; fit(); } });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
     screenFocus.toggleAttribute('hidden', !isRunning());

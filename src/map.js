@@ -29,7 +29,7 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
       return element;
     }
     element.setAttribute('role', 'img');
-    element.className = [c.unseen && 'unseen', c.blank && 'blank', c.current && 'current', !c.visited && !c.unseen && 'unvisited']
+    element.className = [c.unseen && 'unseen', c.blank && 'blank', c.kind === 'rock' && 'rock', c.current && 'current', !c.visited && !c.unseen && 'unvisited']
       .filter(Boolean).join(' ');
     element.setAttribute('aria-label', describe(c));
     if (c.current) element.setAttribute('aria-current', 'location');
@@ -119,7 +119,8 @@ export function mapCells(data, visited, current, empty = new Set(), all = false)
       return { code, empty: true, kind: 'empty', visited: true, current: code === current, signs: [] };
     }
     if (room == null || !onMap(data.roomById.get(room))) {
-      return all ? { code, blank: true, kind: 'blank', visited: false, current: code === current, signs: [] } : null;
+      return all ? { code, blank: true, kind: data.map.bands[y]?.underground ? 'rock' : 'blank',
+        visited: false, current: code === current, signs: [] } : null;
     }
     if (!(all || visited.has(code))) {
       return code === current ? { code, kind: 'unseen', unseen: true, visited: false, current: true, signs: [] } : null;

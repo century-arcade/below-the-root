@@ -17,7 +17,7 @@ test("empty storage supplies defaults and stored options override them", () => {
   storage.setItem('btr.muted', '1');
   storage.setItem('btr.crt', '0');
   storage.setItem('btr.debug', 'nonsense');
-  assert.deepEqual(loadOptions(storage), { surround: 'commodore', volume: 0.8, muted: true, crt: false, classic: false, notes: false, latch: true, debug: false },
+  assert.deepEqual(loadOptions(storage), { surround: 'commodore', volume: 0.8, muted: true, crt: false, classic: false, notes: false, latch: true, debug: false, aspect: 'pal' },
     'stored values override the defaults; anything but 1 is off');
 
   for (const surround of ['commodore', 'portable', 'dark']) {
@@ -26,6 +26,13 @@ test("empty storage supplies defaults and stored options override them", () => {
   }
   storage.setItem('btr.surround.v2', 'unknown');
   assert.equal(loadOptions(storage).surround, 'commodore');
+
+  for (const aspect of ['square', 'ntsc', 'pal']) {
+    storeOption(storage, 'aspect', aspect);
+    assert.equal(loadOptions(storage).aspect, aspect);
+  }
+  storage.setItem('btr.aspect', 'wide');
+  assert.equal(loadOptions(storage).aspect, 'pal', 'an unknown pixel aspect falls back to PAL');
 
   storage.setItem('btr.volume.v2', 'loud');
   assert.equal(loadOptions(storage).volume, 0.5, 'an unreadable volume falls back to the default');

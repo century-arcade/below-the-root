@@ -1,6 +1,6 @@
-export const DEFAULTS = Object.freeze({ surround: 'commodore', volume: 0.5, muted: false, crt: true, classic: false, notes: false, latch: true, debug: false });
+export const DEFAULTS = Object.freeze({ surround: 'commodore', volume: 0.5, muted: false, crt: true, classic: false, notes: false, latch: true, debug: false, aspect: 'pal' });
 
-const KEYS = { surround: 'btr.surround.v2', volume: 'btr.volume.v2', muted: 'btr.muted', crt: 'btr.crt', classic: 'btr.classic', notes: 'btr.notes', latch: 'btr.latch', debug: 'btr.debug' };
+const KEYS = { surround: 'btr.surround.v2', volume: 'btr.volume.v2', muted: 'btr.muted', crt: 'btr.crt', classic: 'btr.classic', notes: 'btr.notes', latch: 'btr.latch', debug: 'btr.debug', aspect: 'btr.aspect' };
 
 export function loadOptions(storage) {
   const out = { ...DEFAULTS };
@@ -9,6 +9,8 @@ export function loadOptions(storage) {
     if (value == null) continue;
     if (name === 'surround') {
       if (['commodore', 'portable', 'dark'].includes(value)) out.surround = value;
+    } else if (name === 'aspect') {
+      if (['square', 'ntsc', 'pal'].includes(value)) out.aspect = value;
     } else if (name === 'volume') {
       const level = parseFloat(value);
       if (Number.isFinite(level)) out.volume = Math.min(1, Math.max(0, level));
@@ -20,5 +22,5 @@ export function loadOptions(storage) {
 }
 
 export function storeOption(storage, name, value) {
-  try { storage.setItem(KEYS[name], ['volume', 'surround'].includes(name) ? String(value) : value ? '1' : '0'); } catch {}
+  try { storage.setItem(KEYS[name], ['volume', 'surround', 'aspect'].includes(name) ? String(value) : value ? '1' : '0'); } catch {}
 }

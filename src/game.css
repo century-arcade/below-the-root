@@ -43,9 +43,9 @@ body:has(#map-screen:not([hidden])) { overflow: hidden; }
 .map-grid { position: absolute; left: calc(48 / 2656 * 100%); top: calc(80 / 976 * 100%); width: calc(2560 / 2656 * 100%); height: calc(640 / 976 * 100%); display: grid; grid-template-rows: repeat(16, 1fr); }
 .map-grid > span { min-width: 0; min-height: 0; background: #000; }
 .map-grid > .unseen { background: transparent; }
-.map-grid > .blank { opacity: 0.5; }
 .map-grid canvas { display: block; width: 100%; height: 100%; }
-.map-grid .unvisited canvas { opacity: 0.5; }
+.map-grid > .unvisited { opacity: 0.5; }
+.map-grid > .rock { background: #444; }
 .map-grid .current { outline: 2px solid #fff; outline-offset: -2px; }
 #paper-map { box-sizing: border-box; width: min(100% - 32px, 1600px); margin: 24px auto; cursor: zoom-in; }
 #paper-map .current { outline-width: 1px; }

@@ -66,6 +66,8 @@ test("developer mode reveals the whole map and marks unvisited rooms", async () 
   const t1 = cells.find(c => c.code === 'T1');
   assert.ok(t1.blank && t1.room == null, 'a slot holding a parked interior shows as blank air');
   assert.ok(cells.find(c => c.code === '53').blank, 'empty slots show as blank air');
+  const rock = cells.filter(c => c.blank && data.map.bands[parseInt(c.code[1], 32)].underground);
+  assert.ok(rock.length && rock.every(c => c.kind === 'rock'), 'underground blanks show as solid rock');
   assert.ok(!mapCells(data, defaults, 'M5').flat().some(c => c?.blank), 'blank air is shown only in developer mode');
 });
 
