@@ -167,6 +167,7 @@ fit();
 monitor.classList.remove('unfitted');
 canvas.focus({ preventScroll: true });
 
+const POWER_KEY = 'btr.power';
 loadData((path) => fetch(`/${path}`).then((r) => {
   if (!r.ok) throw new Error(`${path}: ${r.status}`);
   return r.json();
@@ -185,6 +186,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   } else {
     initial = { mode: 'cold' };
   }
+  const coldLaunch = initial.mode === 'cold';
   if (!data.characters[initial.character || 0]) initial.character = 0;
   if (initial.mode === 'demo' && !data.demo.scripts.some(s => s.name === initial.demo)) initial.demo = 'quest';
   let existing = null;
@@ -279,7 +281,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   fullscreenButton.hidden = !canFullscreen;
   fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => { if (powered) speaker.unlock(state); });
-  let powered = true;
+  let wasOn = false;
+  try { wasOn = sessionStorage.getItem(POWER_KEY) === 'on'; } catch {}
+  let powered = !coldLaunch || wasOn;
+  let booting = !powered;
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -400,14 +405,25 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const dropInput = () => { seekKey = null; stick.reset(); };
   addEventListener('hashchange', dropInput);
   const power = document.getElementById('monitor-power');
-  power.onclick = () => {
-    powered = !powered;
-    dropInput(); acc = 0; last = performance.now();
+  function showPower() {
+    try { sessionStorage.setItem(POWER_KEY, powered ? 'on' : 'off'); } catch {}
     monitor.classList.toggle('powered-off', !powered);
     canvas.parentElement.inert = !powered;
     power.setAttribute('aria-pressed', String(powered));
     power.title = powered ? 'Power off (reset game)' : 'Turn on';
-    if (powered) { speaker.unlock(state); speaker.resume(); startupTitle = true; hold(); }
+  }
+  showPower();
+  if (!powered) power.focus({ preventScroll: true });
+  power.onclick = () => {
+    powered = !powered;
+    dropInput(); acc = 0; last = performance.now();
+    showPower();
+    if (powered) {
+      speaker.unlock(state); speaker.resume();
+      if (booting) booting = false;
+      else { startupTitle = true; hold(); }
+      canvas.focus({ preventScroll: true });
+    }
     else {
       closeHelp(); release();
       paused = false;

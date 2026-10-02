@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from zipfile import ZipFile
 
 from playwright.sync_api import expect
-from browser_helpers import browser_page, observe, held, until
+from browser_helpers import browser_page, observe, held, until, power_on
 
 archive_path = Path(sys.argv[1] if len(sys.argv) > 1 else 'dist/below-the-root-preservation.zip')
 with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:

@@ -1,7 +1,7 @@
 """Input help, startup intro hold, toggles and keyboard/touch controls."""
 import json
 import os
-from browser_helpers import browser_page, observe, held, until
+from browser_helpers import browser_page, observe, held, until, power_on
 import re
 from pathlib import Path
 from playwright.sync_api import expect
@@ -26,6 +26,8 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
 
     help_screen = page.locator('#help-screen')
     expect(help_screen).to_be_hidden()
+    held(page, 'power')
+    power_on(page)
     stopped = snapshot()
     assert stopped['frame'] == 0, 'The title precedes the first intro frame'
     held(page, 'title')

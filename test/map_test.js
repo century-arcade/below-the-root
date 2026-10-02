@@ -63,7 +63,10 @@ test("developer mode reveals the whole map and marks unvisited rooms", async () 
   const cells = mapCells(data, defaults, 'M5', new Set(), true).flat().filter(Boolean);
   assert.ok(cells.find(c => c.code === 'M5').visited);
   assert.equal(cells.find(c => c.code === 'GE').visited, false);
-  assert.ok(!cells.some(c => c.code === 'T1'), 'parked interiors stay off the map');
+  const t1 = cells.find(c => c.code === 'T1');
+  assert.ok(t1.blank && t1.room == null, 'a slot holding a parked interior shows as blank air');
+  assert.ok(cells.find(c => c.code === '53').blank, 'empty slots show as blank air');
+  assert.ok(!mapCells(data, defaults, 'M5').flat().some(c => c?.blank), 'blank air is shown only in developer mode');
 });
 
 test("exploration tracks empty sky and resets for each new quest", async () => {

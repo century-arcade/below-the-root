@@ -29,12 +29,12 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
       return element;
     }
     element.setAttribute('role', 'img');
-    element.className = [c.unseen && 'unseen', c.current && 'current', !c.visited && !c.unseen && 'unvisited']
+    element.className = [c.unseen && 'unseen', c.blank && 'blank', c.current && 'current', !c.visited && !c.unseen && 'unvisited']
       .filter(Boolean).join(' ');
     element.setAttribute('aria-label', describe(c));
     if (c.current) element.setAttribute('aria-current', 'location');
     element.title = describe(c);
-    if (c.empty || c.unseen) return element;
+    if (c.empty || c.unseen || c.blank) return element;
     const room = state.data.roomById.get(c.room);
     paint(room);
     const thumbnail = document.createElement('canvas');
@@ -118,8 +118,9 @@ export function mapCells(data, visited, current, empty = new Set(), all = false)
     if (empty.has(code) && (room == null || !onMap(data.roomById.get(room)))) {
       return { code, empty: true, kind: 'empty', visited: true, current: code === current, signs: [] };
     }
-    if (room == null) return null;
-    if (!onMap(data.roomById.get(room))) return null;
+    if (room == null || !onMap(data.roomById.get(room))) {
+      return all ? { code, blank: true, kind: 'blank', visited: false, current: code === current, signs: [] } : null;
+    }
     if (!(all || visited.has(code))) {
       return code === current ? { code, kind: 'unseen', unseen: true, visited: false, current: true, signs: [] } : null;
     }

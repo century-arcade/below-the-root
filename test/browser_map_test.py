@@ -1,6 +1,6 @@
 """World map controls and game hold; run against make serve."""
 import os
-from browser_helpers import browser_page, observe, held, until
+from browser_helpers import browser_page, observe, held, until, power_on
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 

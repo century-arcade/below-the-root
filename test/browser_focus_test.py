@@ -1,6 +1,6 @@
 """Pointer focus returns arrows to play; the screen indicator follows game time."""
 import os
-from browser_helpers import browser_page, observe, held, until
+from browser_helpers import browser_page, observe, held, until, power_on
 from playwright.sync_api import expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -110,8 +110,9 @@ with browser_page('/play?player=0', setup=setup, has_touch=True) as page:
         running(True)
 
     page.goto(BASE + '/about')
-    page.evaluate('localStorage.clear()')
+    page.evaluate('localStorage.clear(); sessionStorage.clear()')
     page.goto(BASE + '/play')
+    power_on(page)
     expect(page.locator('#help-screen')).to_be_hidden()
     expect(indicator).to_have_attribute('hidden', '')
     page.evaluate("dispatchEvent(new Event('blur')); dispatchEvent(new Event('focus'))")

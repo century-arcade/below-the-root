@@ -1,7 +1,7 @@
 """Startup reveals the surround before data loads; failed loads report to console."""
 import os
 from playwright.sync_api import sync_playwright, expect
-from browser_helpers import ready, session_eval
+from browser_helpers import ready, session_eval, power_on
 
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -27,6 +27,7 @@ with sync_playwright() as p:
         assert session_eval(page, 's => s == null'), 'the monitor appears before game data arrives'
         data.pop().continue_()
         ready(page)
+        power_on(page)
         expect(page.locator('#help-screen')).to_be_hidden()
         expect(page.locator('#screen')).to_be_visible()
         assert not errors, errors
@@ -39,6 +40,7 @@ with sync_playwright() as p:
     page.unroute('**/data/rooms.json')
     page.reload()
     ready(page)
+    power_on(page)
     expect(page.locator('#screen')).to_be_visible()
     page.close()
 

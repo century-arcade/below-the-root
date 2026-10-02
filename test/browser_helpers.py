@@ -1,7 +1,7 @@
 """Observe the site's module instance and control browser simulation time."""
 from contextlib import contextmanager
 import os
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 
 def session_eval(page, expression, arg=None):
@@ -84,3 +84,11 @@ def browser_page(path, *, setup=None, base=None, **options):
             assert not errors, errors
         finally:
             browser.close()
+
+
+def power_on(page):
+    """Plain launches start with the monitor off."""
+    power = page.get_by_role('button', name='Monitor power', exact=True)
+    expect(power).to_have_attribute('aria-pressed', 'false')
+    power.click()
+    expect(power).to_have_attribute('aria-pressed', 'true')

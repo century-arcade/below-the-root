@@ -1,8 +1,9 @@
 """Header controls adjust volume, persist CRT preference, gate developer tools and enter fullscreen."""
-from browser_helpers import browser_page
+from browser_helpers import browser_page, power_on
 from playwright.sync_api import expect
 
 with browser_page('/') as page:
+    power_on(page)
     assert not page.locator('#debug-tools').is_visible()
     volume = page.get_by_role('slider', name='Volume', exact=True)
     expect(volume).to_have_value('50')

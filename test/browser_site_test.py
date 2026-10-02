@@ -2,6 +2,7 @@
 import json
 import os
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import power_on
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
@@ -119,6 +120,7 @@ with sync_playwright() as p:
     page.goto(BASE + '/')
     expect(page).to_have_url(BASE + '/')
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    power_on(page)
     expect(page.locator('#screen')).to_be_visible()
     expect(page.locator('#help-screen')).to_be_hidden()
     browser.close()
