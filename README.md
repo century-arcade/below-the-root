@@ -127,7 +127,7 @@ INVENTORY follows SELL in the command menu; STATUS and MENU are absent.
 Play opens the title menu. The original demos retain their command layout.
 
 The Commodore and dark surrounds use 1702 cabinet and glass proportions,
-relabelled as a saul.pw model 2026; the badge links to saul.pw.  On the full
+relabelled as a model 2026 with the Commodore badge.  On the full
 cabinet the site links sit centred on the lower chin (back in the header while
 the map is open), fullscreen is a second chin push button left of the badge,
 and volume is a slide control in place of the video and audio jacks.  Phones

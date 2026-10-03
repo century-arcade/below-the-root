@@ -200,7 +200,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 .narrow-play #monitor.cabinet #monitor-power { position: static; transform: none; flex: none; }
 .narrow-play #monitor.cabinet .power-switch { width: 27px; height: 17px; background: #5e5749; border: 1px solid #40392d; box-shadow: inset 0 2px 0 #0006; }
 .narrow-play #monitor.cabinet .power-light { position: static; width: 5px; height: 5px; border-radius: 50%; }
-#badge-link { display: none; }
 #monitor { position: relative; }
 #monitor-developer {
   --key: calc(var(--chin) * .42); position: absolute; bottom: 0; right: 40%; height: var(--chin);
@@ -224,11 +223,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor-developer [aria-pressed="true"] { color: #f6b824; }
 #monitor-developer :is(button, .github-link):active { background: #6e5e56; }
 #monitor-developer :is(button, .github-link):focus-visible { outline: 2px solid #d6f897; outline-offset: 2px; }
-#monitor.cabinet #badge-link {
-  display: block; position: absolute; left: calc(121 * var(--mm)); top: calc(265.5 * var(--mm));
-  width: calc(88 * var(--mm)); height: calc(16 * var(--mm)); pointer-events: auto;
-}
-#monitor.cabinet #badge-link:focus-visible { outline: 2px solid #d6f897; outline-offset: 2px; }
 #monitor.faceplate #monitor-controls {
   --left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px));
   right: max(calc(72.5 * var(--mm)), calc(var(--clip) + 8px)); justify-content: center;
