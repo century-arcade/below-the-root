@@ -1,39 +1,42 @@
 import { WIDTH, HEIGHT } from './video.js';
 
-const INK = 0;
-const TEXT = [
-  [1, 'BELOW THE ROOT'],
-  [11, 'COPYRIGHT (C) 1984'],
-  [12, '2026 RESTORATION BY SAUL PWANSON'],
-  [21, 'ARROWS/WASD MOVE  SPACE/ENTER BUTTON'],
-  [22, 'F COMMAND MENU   M MAP   ? HELP'],
-  [24, 'PRESS ANY KEY OR TAP TO BEGIN'],
+const PAPER = 0;
+const INK = 1;
+const TITLE = [
+  [3, 'BELOW THE ROOT'],
+  [5, 'COPYRIGHT (C) 1984'],
+  [6, '2026 RESTORATION BY SAUL PWANSON'],
 ];
+const COMMANDS = [
+  ['ARROWS/WASD', 'MOVE'],
+  ['SPACE/ENTER', 'BUTTON'],
+  ['F', 'COMMAND MENU'],
+  ['M', 'MAP'],
+  ['?', 'THIS SCREEN'],
+];
+const COMMANDS_ROW = 9;
+const PROMPT = [21, 'PRESS ANY KEY OR TAP TO BOOT'];
 
-// wind's title screen: TEXT rows overwrite the stripes in the game's font
+function lines() {
+  const key = Math.max(...COMMANDS.map(([k]) => k.length)) + 2;
+  const list = COMMANDS.map(([k, action]) => k.padEnd(key) + action);
+  const width = Math.max(...list.map(line => line.length));
+  return [...TITLE, ...list.map((line, i) => [COMMANDS_ROW + 2 * i, line.padEnd(width)]), PROMPT];
+}
+
+// Title screen, white on black; the commands are one left-aligned list.
 export function loaderScreen(data) {
-  const { masks, colors, background } = data.loader;
-  const px = new Uint8Array(WIDTH * HEIGHT).fill(background);
-  const cell = (col, row, color, on) => {
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) if (on(x, y)) px[(row * 8 + y) * WIDTH + col * 8 + x] = color;
-    }
-  };
-  for (let row = 0; row < 25; row++) {
-    for (let col = 0; col < 40; col++) {
-      const mask = parseInt(masks[row][col], 16);
-      cell(col, row, parseInt(colors[row][col], 16),
-        (x, y) => mask & (y < 4 ? (x < 4 ? 8 : 4) : (x < 4 ? 2 : 1)));
-    }
-  }
+  const px = new Uint8Array(WIDTH * HEIGHT).fill(PAPER);
   const glyphs = data.charsets.text.glyphs;
-  for (const [row, text] of TEXT) {
-    const line = ` ${text} `;
-    const first = Math.floor((40 - line.length) / 2);
-    for (let i = 0; i < line.length; i++) {
-      const base = (line.charCodeAt(i) & 0x7f) * 8;
-      cell(first + i, row, background, () => true);
-      cell(first + i, row, INK, (x, y) => glyphs[base + y] & (0x80 >> x));
+  for (const [row, text] of lines()) {
+    const first = Math.floor((40 - text.length) / 2);
+    for (let i = 0; i < text.length; i++) {
+      const base = (text.charCodeAt(i) & 0x7f) * 8;
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          if (glyphs[base + y] & (0x80 >> x)) px[(row * 8 + y) * WIDTH + (first + i) * 8 + x] = INK;
+        }
+      }
     }
   }
   const rgba = new Uint8ClampedArray(WIDTH * HEIGHT * 4);

@@ -316,7 +316,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let wasOn = false;
   try { wasOn = sessionStorage.getItem(POWER_KEY) === 'on'; } catch {}
   let powered = !coldLaunch || wasOn;
-  let booting = !powered;
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -441,8 +440,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     showPower();
     if (powered) {
       speaker.unlock(state); speaker.resume();
-      if (booting) booting = false;
-      else { startupTitle = true; hold(); }
+      startupTitle = true; hold();
       canvas.focus({ preventScroll: true });
     }
     else {
@@ -470,10 +468,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     document.documentElement.classList.toggle('monitor-away', !playing);
     fit();
     if (!playing) { if (powered) hold(); return; }
-    if (!powered) power.click();
+    if (!powered && !landing) power.click();
     canvas.focus({ preventScroll: true });
   };
-  if (powered) desk.show('play');
+  let landing = true;
+  desk.show('play');
+  landing = false;
   const suspendFocus = () => { inactive = true; dropInput(); };
   const restoreFocus = () => {
     if (!inactive || document.hidden) return;
@@ -496,6 +496,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (startup) helpButton.focus({ preventScroll: true });
     else if (document.activeElement !== helpButton) helpScreen.focus({ preventScroll: true });
     fit();
+  }
+  function toggleTitle() {
+    if (startupTitle) return release();
+    closeHelp();
+    startupTitle = true;
+    hold();
+    if (away()) desk.show('play');
   }
   function closeHelp() {
     if (helpScreen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
@@ -664,7 +671,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       }
       return;
     }
-    if (e.key === '?' || (e.key.toLowerCase() === 'h' && !e.shiftKey)) { openHelp(); e.preventDefault(); return; }
+    if (e.key === '?' || (e.key.toLowerCase() === 'h' && !e.shiftKey)) { toggleTitle(); e.preventDefault(); return; }
     if (e.key.toLowerCase() === 'f' && !e.shiftKey) {
       if (!stick.selectWithF()) commandMenu();
       e.preventDefault(); return;
