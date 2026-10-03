@@ -3,7 +3,7 @@ from browser_helpers import browser_page, session_eval, until
 
 
 for device in ['touch', 'mouse']:
-    with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_touch=True) as page:
+    with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
         canvas = page.locator('#screen')
         cdp = page.context.new_cdp_session(page)
 

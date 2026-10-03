@@ -1,4 +1,4 @@
-"""Touch inventory and doorway input work in both phone orientations."""
+"""Portrait touch reaches the inventory; landscape touch works only beside the picture."""
 from browser_helpers import browser_page, until, session_eval
 
 
@@ -20,10 +20,52 @@ with browser_page('/play?room=B8', viewport={'width': 412, 'height': 915}, has_t
 
 with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_touch=True) as page:
     box = page.locator('#screen').bounding_box()
+    cdp = page.context.new_cdp_session(page)
+    left = {'x': box['x'] - 20, 'y': box['y'] + box['height'] / 2, 'id': 1}
+    right = {'x': box['x'] + box['width'] + 20, 'y': box['y'] + box['height'] / 2, 'id': 2}
+
+    def touch(kind, *points):
+        cdp.send('Input.dispatchTouchEvent', {
+            'type': kind, 'touchPoints': [{'x': p['x'], 'y': p['y'], 'id': p['id']} for p in points]})
+
+    def side_tap(point):
+        touch('touchStart', point)
+        touch('touchEnd')
+
+    def chord():
+        touch('touchStart', left)
+        touch('touchStart', left, right)
+        touch('touchEnd')
+
     session_eval(page, 's => Object.assign(s.state.player, {col: 26, row: 15})')
-    page.touchscreen.tap(box['x'] + box['width'] * 26.5 / 40,
-                         box['y'] + box['height'] * 14.5 / 25)
+    page.touchscreen.tap(box['x'] + box['width'] * 26.5 / 40, box['y'] + box['height'] * 14.5 / 25)
+    page.clock.run_for(1000)
+    assert session_eval(page, 's => s.state.player.indoors'), 'the picture ignores touch in landscape'
+
+    side_tap(left)
     until(page, 's => !s.state.player.indoors')
     assert session_eval(page, 's => s.state.room.code') == 'M5'
 
-print('browser_landscape_test: touch inventory and door input passed')
+    chord()
+    until(page, 's => s.state.commandMenuOpen')
+    chord()
+    until(page, 's => !s.state.commandMenuOpen')
+
+    col = session_eval(page, 's => s.state.player.col')
+    touch('touchStart', left)
+    page.clock.run_for(1500)
+    touch('touchEnd')
+    assert session_eval(page, 's => s.state.player.col') < col
+
+    page.locator('#touch-map').tap()
+    page.clock.run_for(100)
+    assert page.locator('#desk').get_attribute('data-stage') == 'map'
+    page.locator('#touch-map').tap()
+    page.clock.run_for(100)
+    assert page.locator('#desk').get_attribute('data-stage') == 'play'
+
+    assert page.locator('#developer-mode').is_hidden()
+    page.evaluate("document.documentElement.classList.add('navigation-open')")
+    assert page.locator('#developer-mode').is_hidden(), 'no version label in landscape play'
+
+print('browser_landscape_test: portrait touch inventory, landscape side touches, map and version label passed')

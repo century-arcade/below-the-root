@@ -226,7 +226,9 @@ function sectorKeys(dx, dy) {
 export class Pointer {
   constructor(canvas, keys, anchor, doors, target = window, {
     menu = () => {}, player = () => null, chooser = () => null, surface = null, latch = false,
+    ignore = () => false,
   } = {}) {
+    this.ignore = ignore;
     this.latch = latch;
     this.latched = null;
     this.menu = menu;
@@ -363,7 +365,7 @@ export class Pointer {
   }
 
   down(e) {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || this.ignore(e)) return;
     if (this.pointerId != null) {
       if (!this.holding || this.firePointer != null) return;
       e.preventDefault();
@@ -509,6 +511,167 @@ export class Pointer {
     }, DOUBLE_MS);
   }
 
+}
+
+const SIDE_TAP_MS = 120;
+const CHORD_MS = 250;
+const SLIDE = 24;
+const SIDE_SOURCE = 'touch';
+const SIDE_FIRE = 'touch:fire';
+
+// Fullscreen and landscape touch: only the outer eighths of the picture and beyond take input.
+export class SideTouch {
+  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {} } = {}) {
+    this.canvas = canvas;
+    this.keys = keys;
+    keys.attach(this);
+    this.active = active;
+    this.jog = jog;
+    this.onChord = chord;
+    this.fingers = new Map();
+    this.chord = null;
+    this.held = new Set();
+    surface.addEventListener('pointerdown', e => this.down(e));
+    surface.addEventListener('pointermove', e => this.move(e));
+    surface.addEventListener('pointerup', e => this.up(e));
+    surface.addEventListener('pointercancel', e => this.lift(e));
+  }
+
+  claims(e) {
+    return e.pointerType !== 'mouse' && this.active();
+  }
+
+  side(e) {
+    const r = this.canvas.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (this.canvas.width / r.width);
+    if (x < this.canvas.width / 8) return 'left';
+    if (x >= this.canvas.width * 7 / 8) return 'right';
+    return null;
+  }
+
+  down(e) {
+    if (!this.claims(e) || e.target?.closest?.(OFF_PICTURE_IGNORE)) return;
+    const side = this.side(e);
+    if (!side) return;
+    e.preventDefault();
+    e.target?.setPointerCapture?.(e.pointerId);
+    const jog = this.jog();
+    const f = { id: e.pointerId, side, x: e.clientX, y: e.clientY, jog, vertical: null };
+    const live = [...this.fingers.values()].filter(g => g.role !== 'dead');
+    const pending = live.find(g => g.role === 'pending');
+    this.fingers.set(f.id, f);
+    if (!live.length) {
+      f.role = 'pending';
+      if (!jog) f.timer = setTimeout(() => this.resolve(f), SIDE_TAP_MS);
+    } else if (pending && pending.side !== side && !this.chord && live.length === 1) {
+      clearTimeout(pending.timer);
+      f.role = 'pending';
+      this.chord = { fingers: [pending, f], timer: setTimeout(() => this.resolveChord(), CHORD_MS) };
+    } else if (jog) {
+      f.role = 'dead';
+    } else {
+      f.role = 'button';
+      this.update();
+    }
+  }
+
+  move(e) {
+    const f = this.fingers.get(e.pointerId);
+    if (!f || f.role === 'dead') return;
+    const dx = e.clientX - f.x, dy = e.clientY - f.y;
+    if (f.jog) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < SLIDE) return;
+      if (this.chord) this.breakChord();
+      f.role = 'jog';
+      if (Math.abs(dx) > Math.abs(dy)) { f.x = e.clientX; this.keys.tap(dx > 0 ? 'right' : 'left', SIDE_SOURCE); }
+      else { f.y = e.clientY; this.keys.tap(dy > 0 ? 'down' : 'up', SIDE_SOURCE); }
+      return;
+    }
+    const vertical = dy <= -SLIDE ? 'up' : dy >= SLIDE ? 'down' : Math.abs(dy) < SLIDE / 2 ? null : f.vertical;
+    if (f.role === 'pending' && vertical) {
+      if (this.chord) this.resolveChord();
+      if (f.role === 'pending') { f.vertical = vertical; return this.resolve(f); }
+    }
+    if (f.role !== 'stick' || vertical === f.vertical) return;
+    f.vertical = vertical;
+    this.update();
+  }
+
+  up(e) {
+    const f = this.fingers.get(e.pointerId);
+    if (!f) return;
+    this.fingers.delete(f.id);
+    clearTimeout(f.timer);
+    if (this.chord?.fingers.includes(f)) {
+      f.lifted = true;
+      if (this.chord.fingers.every(g => g.lifted)) {
+        clearTimeout(this.chord.timer);
+        this.chord = null;
+        this.onChord();
+      }
+      return;
+    }
+    if (f.role === 'pending') this.keys.tap('fire', SIDE_SOURCE);
+    else if (f.role === 'stick' || f.role === 'button') this.update();
+  }
+
+  lift(e) {
+    const f = this.fingers.get(e.pointerId);
+    if (!f) return;
+    if (this.chord?.fingers.includes(f)) this.breakChord();
+    clearTimeout(f.timer);
+    this.fingers.delete(f.id);
+    this.update();
+  }
+
+  resolve(f) {
+    clearTimeout(f.timer);
+    f.role = 'stick';
+    this.update();
+  }
+
+  // chord-timeout: one finger walks and the other is the button, as if pressed in turn
+  resolveChord() {
+    const { fingers, timer } = this.chord;
+    clearTimeout(timer);
+    this.chord = null;
+    if (fingers[0].jog) { for (const g of fingers) g.role = 'dead'; return; }
+    const [stick, button] = fingers.every(g => !g.lifted) ? fingers : [fingers.find(g => !g.lifted), null];
+    stick.role = 'stick';
+    if (button) button.role = 'button';
+    this.update();
+    if (fingers.some(g => g.lifted)) this.keys.tap('fire', SIDE_SOURCE);
+  }
+
+  breakChord() {
+    clearTimeout(this.chord.timer);
+    for (const g of this.chord.fingers) if (g.role === 'pending') g.role = g.jog ? 'jog' : 'dead';
+    this.chord = null;
+  }
+
+  wanted() {
+    const keys = new Set();
+    const stick = [...this.fingers.values()].find(f => f.role === 'stick');
+    if (stick) keys.add(stick.vertical ?? stick.side);
+    if ([...this.fingers.values()].some(f => f.role === 'button')) keys.add('fire');
+    return keys;
+  }
+
+  update() {
+    const keys = this.wanted();
+    for (const k of this.held) if (!keys.has(k)) this.keys.release(k, k === 'fire' ? SIDE_FIRE : SIDE_SOURCE);
+    for (const k of keys) if (!this.held.has(k)) this.keys.press(k, k === 'fire' ? SIDE_FIRE : SIDE_SOURCE);
+    this.held = keys;
+  }
+
+  cancel() {
+    if (this.chord) clearTimeout(this.chord.timer);
+    this.chord = null;
+    for (const f of this.fingers.values()) { clearTimeout(f.timer); f.role = 'dead'; }
+    this.held = new Set();
+    this.keys.reset(SIDE_SOURCE);
+    this.keys.reset(SIDE_FIRE);
+  }
 }
 
 function sameChoice(a, b) {

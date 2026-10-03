@@ -4,7 +4,7 @@ import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
 import { itemChoiceAt, highlightItemChoice } from './inventory.js';
-import { Keyboard, Pointer, Gamepad, isEditing } from './input.js';
+import { Keyboard, Pointer, SideTouch, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
@@ -250,9 +250,19 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekKey = null;
   let seekAmount = 1;
   let seekRepeatAt = 0;
+  const playSurface = document.getElementById('play');
+  const sideTouch = new SideTouch(playSurface, canvas, stick, {
+    active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
+    jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
+    chord: () => {
+      if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
+      else commandMenu(!!state.commandMenuOpen);
+    },
+  });
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row), window, {
     menu: () => commandMenu(),
-    surface: document.getElementById('play'),
+    ignore: e => sideTouch.claims(e),
+    surface: playSurface,
     latch: options.latch,
     player: () => !session.playback && canOpenCommandMenu(state) ? state.player : null,
     chooser: () => state.itemPicker && !session.playback ? {
@@ -577,6 +587,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     draw();
   }
   menuButton.onclick = () => commandMenu();
+  document.getElementById('touch-pause').onclick = e => { if (held) release(); else hold(); e.currentTarget.blur(); };
+  document.getElementById('touch-map').onclick = e => { desk.show(desk.stage === 'map' ? 'play' : 'map'); e.currentTarget.blur(); };
   for (const type of ['keydown', 'keyup']) menuButton.addEventListener(type, e => {
     if (e.key === ' ') e.stopPropagation();
   });
@@ -610,6 +622,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     // Pointer steering prevents the browser's default focus transfer.
     if (type === 'pointerdown' && e.button === 0) canvas.focus({ preventScroll: true });
     if (held) { if (type === 'pointerdown') release(); return; }
+  });
+  playSurface.addEventListener('pointerdown', e => {
+    if (!paused && held && e.target !== canvas && sideTouch.claims(e) && !e.target.closest('button')) release();
   });
   stick.onKey = (type, source) => {
     if (!powered) { dropInput(); return; }

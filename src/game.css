@@ -211,7 +211,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor:not(.cabinet) #monitor-developer #debug-tools, .narrow-play #monitor-developer #debug-tools { position: absolute; bottom: 100%; right: 0; padding: calc(var(--key) / 6); background: #a4928a; }
 .narrow-play #monitor-developer #debug-tools { right: auto; left: 0; background: #baa9a2; }
 #monitor-developer #debug-tools { gap: inherit; }
-:is(.game-fullscreen, .landscape-play:not(.navigation-open)) #monitor-developer { display: none; }
+:is(.game-fullscreen, .landscape-play) #monitor-developer { display: none; }
 #monitor-developer :is(button, .github-link) {
   box-sizing: border-box; display: grid; place-items: center; width: var(--key); height: var(--key); padding: 0;
   color: #d8d7db; background: #74655a; border: max(1px, calc(var(--key) / 20)) solid #4b3a31; border-radius: 0; box-shadow: inset calc(var(--key) / 12) 0 0 #6e5e56, 0 1px 0 #b7a69c;
@@ -323,6 +323,12 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 .landscape-play #monitor-sidebar { width: 0; }
 .landscape-play #monitor-controls > :not(#navigation-toggle), .landscape-play #replay-controls { display: none; }
 .landscape-play #navigation-toggle { display: block; position: fixed; top: 8px; right: 8px; z-index: 4; min-width: 32px; min-height: 32px; font-size: 18px; }
+#touch-corner { display: none; }
+@media (any-pointer: coarse) {
+  :is(.game-fullscreen, .landscape-play) #touch-corner { display: flex; gap: 8px; position: fixed; top: 8px; left: 8px; z-index: 4; }
+}
+#touch-corner button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; touch-action: manipulation; }
+#touch-corner svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .landscape-play #help-screen { position: fixed; z-index: 2; inset: 64px 0 0 0; width: auto; overflow-y: auto; background: #101910; align-self: auto; }
 .landscape-play #screen-focus { display: none; }
 
