@@ -1,248 +1,118 @@
 # Below the Root
 
-A reverse-engineering of the 1984 C64 game *Below the Root* (Windham
-Classics, from Zilpha Keatley Snyder's Green-sky books), and a
-reimplementation of it in JavaScript from the resulting spec.
+Play the 1984 C64 game *Below the Root* (Windham Classics) in your browser,
+based on Zilpha Keatley Snyder's Green-sky books.
 
-| where | what |
-|-------|------|
-| `disasm/` + `tools/` | the 6502 disassembly, the disk decoder, the emulator harness, the asset extractors |
-| `docs/*.md` | the original explained in C64 terms: addresses, tables, hardware; `code-map.md` indexes every labelled address against the port |
-| `docs/spec/` | the game in plain English plus JSON tables, no 6502 needed; the port reads only this |
-| `src/` | the port: ES modules, no bundler, built into `_build/` |
+[Play](https://below-the-root.netlify.app/) ·
+[About](https://below-the-root.netlify.app/about) ·
+[Resources](https://below-the-root.netlify.app/resources)
 
-`assets/` holds the extracted art and text (charsets, sprites, screens,
-messages, music) as JSON and PNG.  `iso/` (disk images, manual, box
-scans) is the copyrighted input and is not tracked; `build/` and
-`disasm/out/` regenerate from it.
+## The monitor and desk
 
-## Where we are
+The monitor starts powered off unless this tab remembers it on. Turn it on if
+needed; at the text-only boot screen, press a movement key or tap to start the
+intro or resume your saved quest. Powering off resets the game and deletes its
+autosave; it keeps your preferences.
+To take a break without losing your quest, use P or browse the desk instead.
 
-| milestone | state |
-|-----------|-------|
-| M0 tooling -- VICE 3.9 built from source, scripted monitor, `tools/btr` | done |
-| M1 disk archaeology -- G64 decoder, both sides mapped | done |
-| M2 boot and trace -- memory map, loader, coverage | done |
-| M3 assets -- charsets, sprites, screens, messages, music extracted | done |
-| M4 the code -- room format, physics, verbs, NPCs, dialog, clock, demo, menus and saves, all in `docs/*.md` | done |
-| M5 the spec -- `docs/spec/`: overview + six area files + 15 JSON tables, generators, cross-checks; rewritten as plain-English functional prose | done |
-| M6.0 render -- `src/` draws any room; three pixel-exact golden tests against the original | done |
-| M6.1 move -- the player state machine, edges, doors, drowning; both attract scripts replay against VICE read for read (room, position, facing; movement flags and period are logged but not asserted) up to REST | done |
-| M6.2 talk -- creatures spawn and patrol, contact and ambush, the whole dialog tree, every verb, inventory and weight, the spirit skills, the gate guards; 23 scripted talk/ending tests, both demo replays still read for read | done |
-| M6.3 time -- the 8960-tick hour, food/rest and the fatigue lap, REST's chime loop and the nid hosts, the cloud world, losing a day, both endings, the C64 save image both ways; 17 time tests, the quest replay now matches VICE through REST to the end (1330/1330) | done |
-| M6.4 polish -- the shell is in: title over `T4`, main menu, character select (DISK STORAGE dropped in the port: the autosave is the save), SAMPLE QUEST and the cold-start attract flow, 14 shell tests; music and sfx on WebAudio (the game waits for its own tunes, as the original does); mouse and touch as a stick (hold to steer, tap to walk, double-tap within leap range to jump, self-tap for the menu or door; press a menu choice to highlight, tap again to select); pause on Escape/P or leaving the tab, while music continues; atomic save/input fixes, autosave and replayable playthrough records, debug GitHub issue UI; the world map on Tab (a port extra), gamepad, fullscreen, volume slider, the ? help panel; monitor power/reset and developer tools with CRT effect (CSS overlay); idle-panel status, INVENTORY command, proportional 1702 surround, landscape phone controls and tune skipping; palette choice parked | done |
-| M6.5 ship -- verified winning recordings for all five characters; public and preservation packaging includes every winning fixture; release verification remains | **in progress** |
+The desk below the monitor holds the box, original manual, paper map, game disk
+and curator's note. Turn box and manual pages with their arrow buttons,
+Left/Right or a click on the page. Browsing holds the game; choose the disk, then
+press a movement key or tap the picture to resume. The desk compacts or hides when space is tight.
 
-The spec has 10 unknowns, listed under "Unknowns" at the end of most area files;
-none blocks M6.4.  Still read from the code but never watched in the
-emulator: the dialog tree, both endings, the save layout (no real C64
-save has been imported yet), the cloud world.  Two things worth a VICE
-session: DROP wants the cell in front of you to be solid, and every
-verb's message now clears at your next push of the stick (the
-disassembly's `verb_done`; M6.2 had STATUS staying up).
+The monitor has fullscreen and volume controls. Volume starts at 50%; slide it
+to zero to mute. Sound needs a keypress or click/tap before the browser allows it.
+Fullscreen and short landscape views hide the cabinet and desk; M still opens
+the map.
 
-## Running it
+## Controls
 
-The current build is at <https://below-the-root.netlify.app> (`?demo` for the attract
-script, `?room=T1` to start somewhere else).
-Play is the default page, with autosave resume when available. About introduces
-the game; Resources collects interviews, reviews, guides and original materials.
-Map opens the world map, also available directly at `/map`.
+| Input | Action |
+|-------|--------|
+| Arrows or WASD | Move |
+| Space or Enter | Joystick button: jump, run or enter |
+| F | Open the command menu or select a choice |
+| P | Pause; press P again, press a movement key or tap the picture to resume |
+| M or Tab | Toggle the map while powered on; Tab works when the game has focus |
+| ? or H | Toggle the text-only boot screen, holding gameplay while it is shown |
+| − / = (or _ / +) | Lower / raise volume |
+| Escape | Dismiss navigation, a chooser or the command menu first; otherwise return to the box |
 
-Keys: arrows/WASD move; Space or Enter is the button; F opens the command menu or selects a choice, including INVENTORY; Escape closes navigation, the command menu, map or help, otherwise it pauses. P pauses; M or Tab toggles the map; ? or H toggles help. - and = (or _ and +) step the volume. Use the volume slider to mute and the fullscreen button to expand the game. Clicking or tapping yourself or the menu area below the scene opens the command menu; self-tap on a door goes through, and self-tap while walking stops first. Mouse/touch: hold to steer, tap to walk, double-tap within leap range to jump (farther targets walk). Press or drag over menu choices to highlight; tap the highlighted choice to select.
+Escape from the map returns to the monitor in fullscreen or the short landscape
+view. Leaving the browser tab holds gameplay; music can keep playing while paused.
+Menus move once per direction press. Up/Down browse item and character choices;
+item choices wrap through NOTHING to cancel.
 
-Menus move once per direction press. Item and character choices use Down for
-next and Up for previous; item choices wrap through NOTHING to cancel.
+Mouse/touch: hold to steer, tap to walk, double-tap within leap range to jump
+(farther targets walk). Tap yourself or the menu area below the scene for the
+command menu. Self-tap on a door goes through; self-tap while walking stops first.
+Press or drag over menu choices to highlight; tap the highlighted choice to select.
+Gamepad: d-pad or left stick moves, any face button fires.
 
-Uploading a JSON recording in developer tools plays it from the beginning.
-The room buttons seek one or ten room changes; Left/Right does the same with
-canvas focus, Shift selects ten, and holding an arrow repeats. Backward seeking
-skips brief pass-through visits. Grounded idle periods accelerate; movement,
-falls, creatures, REST and tunes retain normal pacing, with brief pauses for
-messages. A fresh button press skips a waited tune in the default display.
-Playback stops at its verified endpoint. **Play** returns to the title menu,
-where **CONTINUE** resumes the original live quest. Watching preserves its
-autosave. **Play from here** takes over the replay and replaces that autosave
-with the replay's latest boundary. C64 `.prg` uploads load a saved position.
+With a shuba, press Left or Right while falling to glide; you don't need to hold
+the button.
+The idle panel shows day, time, name, stamina, food, rest and spirit. Messages and
+menus take its place. INVENTORY follows SELL in the command menu.
 
-Winning shows simulation play time and game completion. Time is gameplay
-updates divided by 60, including REST, and freezes when Raamo is saved.
-Menus, dialogue waits, tunes, pauses and the map add no simulation time.
-Loading a C64 save starts a partial timer, marked `>=`, because the save has
-no elapsed-time history.
+## Map
 
-Completion totals 100%:
+M, Tab or the desk's map opens the paper map, even before starting a quest.
+Room pictures appear over the poster as you explore exteriors, caverns and empty
+sky; a new quest starts with none revealed, including your home exterior.
+Developer mode also shows unexplored areas, dimmed. Interiors stay hidden. The red outline marks your last outdoor location while indoors,
+or your nid's exit at the start; there is no marker before a quest.
 
-| Milestone | Max | Completion |
-|-----------|-----|------------|
-| Raamo saved | 1 rescue | 35% |
-| Spirit bell, spirit lamp, temple key and D'ol Falla's key acquired | 4 items | 5% each, up to 20% |
-| Animals pensed for spirit | 10 animals | 1% each, up to 10% |
-| Leaders spoken to for spirit (blessers) | 5 leaders | 5% each, up to 25% |
-| Elixirs consumed | 5 elixirs | 1% each, up to 5% |
-| Wand of Befal acquired | 1 wand | 1% |
-| World tokens collected | 39–48 tokens | Up to 4%, proportional to the character’s obtainable tokens, rounded down |
+Use the +/− buttons or scroll to zoom; double-click a room to zoom in on it.
+Drag or use arrows/WASD to pan. Opening the map centres your location.
 
+## Saves and recordings
 
-The world has 62 currency tokens, but characters can take only some of them.  Pomma can get 48 while Neric and Genaa can only get 39 (and Herd/Charn 41) tokens.
+Autosave keeps the latest quest start, room entry or completion. Returning later
+restores that point, not unfinished progress within a room.
 
-Everyone is barred from the 12 tokens in the other four characters' nids and
-the two in `I2`, whose resident never offers them.
+The version key on the monitor opens developer tools, including recording
+download and upload. Upload a JSON recording to watch it from the beginning,
+or a C64 `.prg` save to load its position. Watching preserves your live autosave;
+reload the page to return to it. The desk's disk returns to the monitor without
+ending playback. **Play from here** lets you take control; its latest save point replaces your
+previous autosave.
 
-Starting spirit does not count. Dropping items, spending spirit, or spending
-or losing tokens does not remove earned points. Each world token counts once;
-selling items does not create extra collectible tokens. Room exploration is
-not scored. JSON recordings reconstruct collection history by replaying it.
-C64 imports recover spirit gifts, consumed elixirs and currently carried quest
-items and world tokens; earlier dropped-item and spent-token history is unknown.
+Use the room buttons or Left/Right to move backward or forward through the
+recording. Hold Shift to skip ten room changes; hold an arrow to keep skipping.
+Backward skips ignore brief visits. Playback speeds through standing still but
+shows action and music at normal speed, with short pauses for messages. Press
+Space or Enter to skip a tune. Playback stops when the recording ends.
 
-See [testing](docs/testing.md) for winning-recording regressions and how to run them.
+## Completion
 
-M or Tab (or Map in the top bar) shows the world map, a port extra in place of the boxed paper map; the game holds while it is up.
-The map is generated when opened from the original room tiles and current quest objects.
-The map is available from the menu and intro, even before starting a quest.
-It starts with the exterior rooms selected in `assets/initial-map.json`, plus the
-current character's home exterior. Other rooms appear as you visit them.
-Interiors stay blank. The white marker stays at your last outdoor
-location while indoors (or your nid's exit on a new quest); there is no marker before a quest.
-Use +/− to zoom around the view's centre, or double-click a room to zoom in on it.
-Drag or use arrows/WASD to pan; scroll to zoom. Opening the map centres the marker.
+Victory shows play time and completion. Time includes REST but excludes menus,
+dialogue waits, tunes, pauses and the map, and freezes when Raamo is saved.
+C64 saves have no elapsed-time history, so their partial timer is marked `>=`.
 
-? (or H, or Help in the navbar) toggles help beside the canvas, or below it on narrow screens. The game keeps running while help is open; focus the canvas to keep playing. Recording playback adds replay commands to help.
+| Milestone | Completion |
+|-----------|------------|
+| Save Raamo | 35% |
+| Acquire spirit bell, spirit lamp, temple key and D'ol Falla's key | 5% each, up to 20% |
+| Pense animals for spirit | 1% each, up to 10% |
+| Speak to spirit-giving leaders | 5% each, up to 25% |
+| Consume elixirs | 1% each, up to 5% |
+| Acquire the Wand of Befal | 1% |
+| Collect world tokens | Up to 4%, proportional to your character's obtainable tokens, rounded down |
 
-The Play monitor has fullscreen, volume and power controls. Volume starts at
-50%; gain is squared for quiet low levels, and zero mutes. Powering off resets
-the game and deletes the autosave while preserving preferences; powering on
-starts at the main menu. The version button toggles developer mode, exposing
-recording tools, room rewind and a CRT effect toggle (on by default).
-Backspace or Delete with canvas focus rewinds live play to the previous room
-entry and discards the later timeline. Developer mode also enables R for
-GitHub issue reporting. Messages about files, storage and replay errors go to
-the browser console.
+Pomma can collect 48 tokens, Neric and Genaa 39, Herd and Charn 41.
+Starting spirit and room exploration do not count. Earned points survive dropping
+items, spending spirit, and spending or losing tokens. Each world token counts
+once; selling items creates no extra collectible tokens. C64 imports recover
+spirit gifts, consumed elixirs and carried quest items and tokens, but cannot
+recover earlier dropped-item or spent-token history.
 
-The 320 × 200 display shows day, time, name, stamina, food, rest and spirit
-in the bottom two rows of the idle text panel during a quest. Messages, menus
-and verbs take precedence. At victory these rows show play time and completion.
-INVENTORY follows SELL in the command menu; STATUS and MENU are absent.
-Play opens the title menu. The original demos retain their command layout.
+## Offline play
 
-The Commodore and dark surrounds use 1702 cabinet and glass proportions,
-relabelled as a model 2026 with the Commodore badge.  On the full
-cabinet the site links sit centred on the lower chin (back in the header while
-the map is open), fullscreen is a second chin push button left of the badge,
-and volume is a slide control in place of the video and audio jacks.  Phones
-of 400 CSS pixels or less keep the links in the header and a plain slider.
-Landscape viewports at most 500 CSS pixels high omit the shell and put monitor
-and replay controls beside the picture, including in fullscreen. The navigation
-button opens the site links and help without reserving header space.
+In an unpacked release, run `python3 serve.py` (Windows: `py -3 serve.py`).
+It opens the game in your browser. Use `--port 8888` if the default port is busy.
+Python and a modern browser are all you need. Gameplay, autosave, the map and
+recording import/export work offline; external links and GitHub reporting need
+an internet connection. The archive's `README.txt` has verification instructions;
+`recordings/` contains winning runs for all five characters.
 
-There is no options dialog. The saved `btr.classic` preference remains supported
-without a UI selector; it suppresses the modern status rows and
-tune skipping. The default surround is the Commodore 1702. Developer mode
-and CRT preferences carry across pages; recording controls on About or Resources
-open Play. Preferences persist in localStorage.
-
-Port note: carrying a shuba, push sideways after falling two rows to glide;
-the button is optional, unlike the original.
-
-Gamepad: d-pad or left stick moves, any face button fires; sound starts only after a keypress or canvas touch/click, since the browser needs a real gesture to unlock audio.
-
-```
-make build                    # render Markdown pages and copy game assets
-make release-public
-make release                  # dist/below-the-root-preservation.zip: original media, offline site, source
-make serve                    # Netlify Dev: game + functions at http://localhost:8000 (no-op if one is up)
-make test                     # release packaging, game tests, demo replay vs build/traces; Python 3 + Node.js
-make screenshot               # regenerate assets/box/screen.png from Broad Grund (make serve first)
-make browser-test             # the Playwright suites in test/browser_*.py against BTR_URL (make serve first)
-tools/shot.py --keys o out.png '?menu'  # headless screenshot after keys; --wait MS adds a delay; --select '#canvas-box' crops
-tools/trace_demo.py           # regenerate the VICE traces (both scripts, ~4 min)
-python3 tools/spec_check.py   # cross-check the spec tables
-tools/btr -f tools/scenarios/ingame.txt   # the original in VICE, first room
-```
-
-`make serve` uses an installed Netlify CLI, or downloads/runs the pinned
-CLI through `npx` if none is available (Node.js 22.13+ and npm required; first use
-needs network access). Use `netlify login` / `netlify link` for this site,
-or `npx --yes --package=netlify-cli@27.5.0 netlify login` / `link` without
-a global installation. It uses the `dev` environment by default; use
-`make serve CONTEXT=production` for production-context variables, or
-`make serve PORT=8888` to change the local port. Re-run `make build`
-after editing source while the server is running.
-
-`make release-public` requires Python 3.9+, Git, and the normal build
-dependencies. It builds a fresh site from Git-tracked working files and writes
-`dist/below-the-root.zip`, without requiring or including `iso/`. Override the
-output with `make release-public PUBLIC_RELEASE=/path/to/archive.zip`.
-The ZIP contains a ready-to-run `site/` with bundled fonts, every winning
-`test/fixtures/*-win.json` in `recordings/`, and a `source/` snapshot including
-research, disassembly, assets, and tools. Stage new source files before releasing
-so they are included. Git history, private state, local secrets, dependencies,
-untracked files, and generated development output are excluded.
-`release.json` records the archive mode, base commit and tracked changes;
-`SHA256SUMS` covers every other file.
-
-`make release` retains the full preservation archive at
-`dist/below-the-root-preservation.zip`. It additionally requires and includes
-the complete original `iso/` directory unchanged. Override paths with
-`make release ISO=/path/to/iso RELEASE=/path/to/archive.zip`. Missing original
-materials fail preservation packaging instead of producing an incomplete archive.
-Both modes are available directly via `python3 tools/release.py --mode public`
-or `--mode preservation` (the default), with `--output` to override the ZIP path.
-
-Extract the ZIP and run `python3 serve.py` (Windows: `py -3 serve.py`). It opens
-the local copy at `http://127.0.0.1:8000/`; Python and a modern browser are the
-only runtime requirements. Use `--port 8888` for another port. Gameplay, autosave,
-the map, help, and recording import/export work offline. External links and
-GitHub issue reporting still require online services. The archive's `README.txt`
-includes instructions for playing and verification, plus original-media
-instructions in preservation mode. To verify an extracted public release in
-Chromium with external requests blocked, run
-`python test/browser_release_test.py dist/below-the-root.zip` after
-`make release-public` using a Python environment with Playwright and its Chromium
-installed. Pass the preservation ZIP path to check that archive instead.
-
-The site has `/about`, `/play`, `/map`, and `/resources` routes. Edit
-`src/about.md` and `src/resources.md` for the reading pages; About retains a few
-HTML wrappers for its box art and styling. `tools/build-site.mjs` renders Markdown
-with Marked into the shared `src/page.html` template. `make build` installs the
-pinned npm build dependency when needed; the published pages need no Markdown
-runtime. The homepage opens Play; old `#about`, `#play`, `#links`, `#resources` and game query
-links still work. `/links` and `/links.html` redirect to `/resources`.
-Returning to Play restores the latest quest-start, room-entry or completion
-boundary; leaving mid-room does not save that unfinished progress.
-
-Edit `src/help.md` for the in-game **?** Help screen, then run `make build`.
-Help appears before the intro on a fresh launch; saved games resume directly.
-The `Recording playback` section appears only while watching a recording.
-Its web font comes from the game's extracted `assets/charset_text.json` glyphs.
-To regenerate `assets/game-text.woff`, install Python's `fonttools` and `skia-pathops` packages and run
-`python tools/text_font.py`. The generated font is committed, so normal builds
-need no Python font tools.
-
-Regenerating the spec tables and the emulator setup: `docs/spec/README.md`
-and `docs/tooling.md`.
-
-## Recordings and release readiness
-
-Autosaves and recording downloads retain the latest quest-start, room-entry or
-completion boundary. Return to `/` or `/?debug` to resume it. `?debug` enables
-recording download/import and R for GitHub login/issue filing, including
-playthrough uploads to secret gists. The hosted service needs the one-time
-OAuth setup in [docs/github-issues.md](docs/github-issues.md).
-
-Current recordings use version 3 with engine `btr-quest-1`: seeded initial
-conditions, effective stick changes, semantic commands and a verified gameplay
-checkpoint. Older browser recording formats are unsupported. Verify a recording
-with `node tools/playthrough.mjs run.json`; see
-[docs/playthrough.md](docs/playthrough.md) for the schema and winning fixtures.
-
-Neric, Genaa, Pomma, Herd and Charn each have a verified winning recording.
-Release readiness still requires manual real-device checks, an offline archive
-browser check, deployed analytics verification and authenticated GitHub issue
-submission. Automated browser tests use mocked GitHub responses. Show HN has
-already been submitted.
-
-Mobile playability and a conversation journal are next-round work, not release
-requirements. Palette choice, named saves and authentic delays are deferred.
-Room rewind is available; seconds-based rewind was cancelled.
+For source, build and release commands, see [Port internals](docs/port.md).
