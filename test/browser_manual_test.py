@@ -1,10 +1,20 @@
-"""Manual navigation, lazy page fetching, and native enlargement."""
+"""The desk sequence, manual navigation and lazy page fetching."""
 from browser_helpers import browser_page
 from playwright.sync_api import expect
 
 
 with browser_page('/') as page:
     reader = page.locator('#manual')
+    expect(page.locator('#box')).to_be_visible()
+    expect(reader).to_be_hidden()
+    tabs = page.get_by_role('navigation', name='Desk')
+    expect(tabs).to_be_hidden()
+    page.get_by_role('button', name='Turn the box over').click()
+    expect(page.locator('#box')).to_be_hidden()
+    page.get_by_role('button', name='Open the box').click()
+    expect(tabs).to_be_visible()
+    page.get_by_role('button', name='Read the manual').click()
+    expect(reader).to_be_visible()
     image = reader.locator('img')
     previous = reader.get_by_role('button', name='Previous manual page')
     next_page = reader.get_by_role('button', name='Next manual page')
@@ -24,13 +34,6 @@ with browser_page('/') as page:
     expect(select).to_have_value('19')
     expect(next_page).to_be_enabled()
     select.select_option('5')
-    page.wait_for_function("document.querySelector('#manual img').complete && document.querySelector('#manual img').naturalWidth > 0")
-    with page.expect_popup() as popup_info:
-        reader.get_by_role('link', name='Enlarge manual page (opens in a new tab)').click()
-    popup = popup_info.value
-    popup.wait_for_load_state()
-    assert popup.url.endswith('/assets/manual/05.webp'), popup.url
-    popup.close()
     next_page.focus()
     page.keyboard.press('Space')
     expect(select).to_have_value('6')
@@ -38,5 +41,25 @@ with browser_page('/') as page:
     page.keyboard.press('m')
     expect(page.locator('#map-screen')).to_be_hidden()
     assert not any(url.endswith('/10.webp') for url in requests), requests
+    reader.get_by_role('link', name='Turn the page').click()
+    expect(select).to_have_value('7')
+    tabs.get_by_role('button', name='Map').click()
+    expect(reader).to_be_hidden()
+    expect(page.locator('#paper-map')).to_be_visible()
+    tabs.get_by_role('button', name='Box').click()
+    expect(page.locator('#box-open')).to_be_visible()
+    page.get_by_role('button', name='Close the box').click()
+    expect(page.locator('#box')).to_be_visible()
+    expect(tabs).to_be_hidden()
 
-print('pass: manual navigation, on-demand scans, and enlargement')
+with browser_page('/') as page:
+    page.get_by_role('button', name='Turn the box over').click()
+    page.get_by_role('button', name='Open the box').click()
+    power = page.locator('#monitor-power')
+    expect(power).to_have_attribute('aria-pressed', 'false')
+    expect(page.locator('#play')).to_be_hidden()
+    page.get_by_role('button', name='Put the disk in the computer').click()
+    expect(power).to_have_attribute('aria-pressed', 'true')
+    expect(page.locator('#screen')).to_be_focused()
+
+print('pass: desk sequence, desk tabs, disk power-on, manual navigation and on-demand scans')

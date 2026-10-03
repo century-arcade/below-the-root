@@ -1,0 +1,29 @@
+const STAGES = ['outside', 'note', 'manual', 'map'];
+
+// One item held up at a time, the bench's or the monitor; the strip's items choose which.
+export function setupDesk(desk) {
+  document.documentElement.dataset.bench = new URLSearchParams(location.search).get('bench') || 'mat';
+  const items = new Map(STAGES.map(stage => [stage, desk.querySelector(`[data-desk="${stage}"]`)]));
+  let stage = 'outside';
+  const api = { show, back: goBack, onChange: () => {}, get stage() { return stage; } };
+  function show(next) {
+    stage = next;
+    desk.dataset.stage = stage;
+    for (const [name, item] of items) item.hidden = name !== stage;
+    for (const tray of desk.querySelectorAll('.tray-item')) {
+      tray.classList.toggle('taken', tray.dataset.deskGo === stage);
+    }
+    api.onChange(stage);
+  }
+  function goBack() {
+    if (stage !== 'outside') show('outside');
+  }
+  for (const button of desk.querySelectorAll('[data-desk-go]')) {
+    button.onclick = () => show(button.dataset.deskGo);
+  }
+  for (const button of desk.querySelectorAll('button')) {
+    for (const type of ['keydown', 'keyup']) button.addEventListener(type, e => { if (e.key !== 'Escape') e.stopPropagation(); });
+  }
+  show(stage);
+  return api;
+}

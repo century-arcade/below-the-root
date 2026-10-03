@@ -1,3 +1,61 @@
+<div id="table">
+<div id="desk" class="desk" aria-label="On the bench">
+<div class="bench-stage">
+<section id="box" data-desk="outside" aria-label="The box">
+  <div class="book-spread">
+    <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
+    <a data-book-image href="/assets/box/front.jpg" target="_blank" rel="noopener" aria-label="Turn the box">
+      <img alt="" decoding="async">
+      <img src="/assets/box/front.jpg" width="454" height="599" alt="" decoding="async">
+    </a>
+    <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+  </div>
+</section>
+<section id="note" data-desk="note" hidden aria-label="Curator's Note">
+{{note}}
+</section>
+<section id="manual" data-desk="manual" hidden aria-label="Original manual">
+  <div class="book-spread">
+    <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
+    <a data-book-image href="/assets/manual/01.webp" target="_blank" rel="noopener" aria-label="Turn the page">
+      <img alt="" loading="lazy" decoding="async">
+      <img src="/assets/manual/01.webp" alt="Original Below the Root manual, cover" loading="lazy" decoding="async">
+    </a>
+    <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+  </div>
+  <output class="page-number" aria-live="polite">Page 0 / 18</output>
+</section>
+<section id="paper-map" data-desk="map" hidden aria-label="World map" aria-keyshortcuts="M Tab">
+  <div id="map-viewport"><div id="map-sheet" class="map-sheet"><div id="map-grid" class="map-grid"></div></div></div>
+  <div id="map-tools">
+    <button type="button" id="map-zoom-out" aria-label="Zoom out" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/></svg></button>
+    <button type="button" id="map-zoom-in" aria-label="Zoom in"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M10 4v12"/></svg></button>
+  </div>
+</section>
+</div>
+<div class="bench-strip">
+  <button type="button" class="tray-item tray-closed" data-desk-go="outside" aria-label="Box"><span class="closed-box"><img src="/assets/box/front.jpg" width="454" height="599" alt=""></span></button>
+  <button type="button" class="tray-item tray-manual" data-desk-go="manual" aria-label="Game Manual"><img src="/assets/manual/01.webp" width="1400" height="1880" loading="lazy" alt=""></button>
+  <button type="button" class="tray-item tray-map" data-desk-go="map" aria-label="World Map"><img src="/assets/box/map.png" width="2656" height="976" loading="lazy" alt=""></button>
+  <button type="button" class="tray-item tray-disk" data-desk-go="play" aria-label="Play Game"><svg viewBox="0 0 104 124" aria-hidden="true">
+    <g transform="translate(2 0)">
+    <rect width="100" height="100" fill="#1d1c1f"/>
+    <rect x="8" y="6" width="84" height="22" fill="#ece5d2"/>
+    <rect x="8" y="10" width="84" height="3" fill="#2f6f3a"/>
+    <rect x="14" y="17" width="44" height="2" fill="#4a4f7a"/>
+    <rect x="14" y="22" width="30" height="2" fill="#4a4f7a"/>
+    <rect x="96" y="20" width="4" height="9" fill="#5a4329"/>
+    <circle cx="50" cy="58" r="13" fill="#3a3632"/>
+    <circle cx="50" cy="58" r="8" fill="#5a4329"/>
+    </g>
+    <path d="M0 44H38A14 14 0 0 0 66 44H104V124H0Z" fill="#e8e2d2"/>
+    <rect x="0" y="120" width="104" height="4" fill="#c9c0aa"/>
+    <rect x="0" y="44" width="38" height="2" fill="#f6f2e8"/>
+    <rect x="66" y="44" width="38" height="2" fill="#f6f2e8"/>
+  </svg></button>
+  <button type="button" class="tray-item tray-note" data-desk-go="note" aria-label="Curator's Note"><span class="booklet-cover"><img src="/assets/box/front.jpg" width="454" height="599" alt=""></span></button>
+</div>
+</div>
 <section id="play" aria-label="Play Below the Root">
 <div id="game">
   <div id="play-area">
@@ -22,19 +80,6 @@
       <button id="monitor-power" type="button" aria-label="Monitor power" aria-pressed="true" title="Power off (reset game)"><span class="power-switch" aria-hidden="true"><span class="power-light"></span></span></button>
     </div>
     </div>
-    </div>
-    <div id="map-screen" hidden role="dialog" aria-label="World map">
-      <div id="map-heading">
-        <h2>World map</h2>
-        <div id="map-tools">
-          <button id="map-zoom-out" aria-label="Zoom out" disabled>−</button>
-          <output id="map-zoom" aria-live="polite">1×</output>
-          <button id="map-zoom-in" aria-label="Zoom in">+</button>
-        </div>
-        <button id="close-map">Close</button>
-      </div>
-      <div id="map-viewport"><div id="map-sheet" class="map-sheet"><div id="map-grid" class="map-grid"></div></div></div>
-      <p id="map-hint">WASD / arrows to pan · Scroll to zoom · Drag to explore</p>
     </div>
     <div id="replay-controls" hidden>
       <div id="replay-navigation" role="group" aria-label="Replay room navigation">
@@ -64,18 +109,4 @@
   </dialog>
 </div>
 </section>
-<section id="paper-map" class="map-sheet" role="button" tabindex="0" aria-label="World map" aria-controls="map-screen" aria-expanded="false" aria-keyshortcuts="M Tab"><div id="paper-map-grid" class="map-grid"></div></section>
-<section id="manual" aria-labelledby="manual-heading">
-  <h2 id="manual-heading">Original manual</h2>
-  <div class="manual-controls" role="group" aria-label="Manual pages">
-    <button type="button" data-manual-previous disabled aria-label="Previous manual page">Previous</button>
-    <label for="manual-page">Scan</label>
-    <select id="manual-page" aria-label="Manual scan"></select>
-    <output aria-live="polite">1 / 20</output>
-    <button type="button" data-manual-next aria-label="Next manual page">Next</button>
-  </div>
-  <a data-manual-image href="/assets/manual/01.webp" target="_blank" rel="noopener" aria-label="Enlarge manual page (opens in a new tab)">
-    <img src="/assets/manual/01.webp" alt="Original Below the Root manual, scan 1 of 20" loading="lazy" decoding="async">
-  </a>
-  <p><a href="https://archive.org/details/below-the-root-game-manual-1984">Full-resolution original at Internet Archive</a></p>
-</section>
+</div>

@@ -1,6 +1,6 @@
 """World map controls and game hold; run against make serve."""
 import os
-from browser_helpers import browser_page, observe, held, until, power_on
+from browser_helpers import browser_page, observe, held, until, power_on, unfold_map
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
@@ -12,10 +12,9 @@ def setup(page):
 with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) as page:
     page.locator('#map-screen').wait_for()
     assert page.url.endswith('/map')
-    assert page.locator('#paper-map').is_visible()
     assert page.locator('#map-grid [aria-current="location"]').count() == 0
     page.locator('#home').click()
-    assert page.locator('#paper-map').is_visible()
+    unfold_map(page)
     page.locator('#paper-map').press('Enter')
     page.locator('#map-screen').wait_for()
     page.locator('#close-map').click()
@@ -34,6 +33,7 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     until(page, '(s, frame) => s.frame > frame', stopped)
 
     # Outside the map, Tab on a control keeps browser focus navigation.
+    unfold_map(page)
     page.locator('#paper-map').focus()
     page.keyboard.press('Tab')
     assert not page.locator('#map-screen').is_visible()
@@ -109,7 +109,8 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     for query in ['?menu', '?demo']:
         page.goto(BASE + '/' + query)
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-        assert page.locator('#paper-map').is_visible()
+        unfold_map(page)
+        page.locator('#screen').focus()
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
         assert page.locator('#map-grid [aria-current="location"]').count() == 0

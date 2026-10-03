@@ -80,6 +80,7 @@ def browser_page(path, *, setup=None, base=None, **options):
                 setup(page)
             page.goto((base or os.environ.get('BTR_URL', 'http://localhost:8000')) + path)
             ready(page)
+            page.evaluate("document.getElementById('monitor')?.scrollIntoView({ block: 'end' })")
             yield page
             assert not errors, errors
         finally:
@@ -87,8 +88,24 @@ def browser_page(path, *, setup=None, base=None, **options):
 
 
 def power_on(page):
-    """Plain launches start with the monitor off."""
-    power = page.get_by_role('button', name='Monitor power', exact=True)
+    """Plain launches hide the monitor, switched off, until the disk goes in."""
+    power = page.locator('#monitor-power')
     expect(power).to_have_attribute('aria-pressed', 'false')
-    power.click()
+    expect(page.locator('#screen')).to_be_hidden()
+    open_box(page)
+    page.get_by_role('button', name='Put the disk in the computer').click()
     expect(power).to_have_attribute('aria-pressed', 'true')
+
+
+def open_box(page):
+    for selector in ['#box button', '#box-back button']:
+        item = page.locator(selector)
+        if item.is_visible():
+            item.click()
+
+
+def unfold_map(page):
+    """Open the box on the desk and unfold the paper map."""
+    open_box(page)
+    page.get_by_role('button', name='Unfold the map').click()
+    expect(page.locator('#paper-map')).to_be_visible()

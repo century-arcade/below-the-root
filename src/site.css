@@ -53,6 +53,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 .reading-page h1, .reading-page h2, #about .play-button { font-family: 'Cinzel', Georgia, serif; }
 .reading-page h1 { margin: 0; font-size: clamp(36px, 5.5vw, 66px); line-height: 1.1; font-weight: 400; letter-spacing: -.035em; }
 .about-heading { text-align: center; }
+.references { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; margin: 32px 0 0; padding: 0; list-style: none; }
 .computer-line { font: 12px/1.6 monospace; text-transform: uppercase; letter-spacing: .08em; }
 .about-images { display: grid; grid-template-columns: .85fr 1.3fr; gap: 50px; align-items: center; margin: 38px 0; }
 #about figure { margin: 0; }
@@ -65,6 +66,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 #about figcaption { margin-top: 14px; font-size: 14px; line-height: 1.35; font-variant: small-caps; }
 .about-copy { display: flow-root; max-width: 730px; margin: auto; }
 .about-copy p { margin: 0 0 16px; }
+.about-copy p:last-child { margin-top: 1.5em; text-align: right; }
 .about-action { text-align: center; margin: 26px 0; }
 #about .play-button { display: block; width: fit-content; margin: 0 auto 12px; padding: 10px 70px; background: #202b42; color: #f2ead8; font-size: 30px; font-weight: 700; letter-spacing: .12em; text-decoration: none; border: 4px double #f2ead8; outline: 2px solid #202b42; }
 .about-action > a:not(.play-button) { display: block; margin-top: 8px; font-size: 16px; }

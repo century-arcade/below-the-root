@@ -3,15 +3,6 @@
 <h1 id="about-title">Below the Root</h1>
 <p class="computer-line">Commodore 64, © 1984 Windham Classics<br>Javascript port, 2026 <a href="https://saul.pw">Saul Pwanson</a></p>
 </div>
-<div class="about-images">
-<figure class="box-front">
-<img src="/assets/box/front.jpg" width="454" height="599" alt="The original box: William Groetzinger’s painting of treetop houses, bridges and a gliding figure above a hidden underground city.">
-<figcaption>Box and game art by William Groetzinger.</figcaption>
-</figure>
-<figure>
-<div class="monitor"><img src="/assets/box/screen.png" width="960" height="672" alt="A screenshot of the shops of Broad Grund"></div>
-</figure>
-</div>
 <div class="about-copy">
 
 Below the Root is an underknown work of art. It shares the calm, thoughtful play of
@@ -25,8 +16,6 @@ This project brings the original Commodore 64 game to the browser through automa
 deconstruction, analysis, and reconstruction of its original program. The art, words, and music were extracted and
 preserved with complete fidelity, but the code has been updated with modern controls, autosave, and an in-game map that make Green-Sky easier to visit and explore.
 
-<figure class="box-back"><a href="/assets/box/back.jpg"><img src="/assets/box/back.jpg" width="454" height="604" loading="lazy" alt="The original box back. The world of Green-Sky—lush and verdant, rich with wildlife, covered with gigantic trees. Here live the Kindar, high in the interwoven branches; here too live the Erdling, once banished to the tunnels below the root. Yet the peace that has existed between these peoples is now threatened. Green-Sky seems headed for certain disaster—unless someone can discover the secret of its survival. In this adventure game, you’ll set off on a fantastic and challenging quest for the secret of Green-Sky. You’ll explore its vast tree-world, and you’ll venture below the root to probe its maze of mysterious tunnels. You’ll talk with the inhabitants of Green-Sky, whose advice will help you in your quest. But be careful, for some are not as friendly as they seem. BELOW THE ROOT combines the story-building aspects of a text adventure with hundreds of colorful graphics. It also combines fast-paced excitement with a unique text menu—a first in the field of adventure games. And it lets you play as one of five characters—each with different abilities and strengths. Based on Zilpha Snyder’s recently published Green-Sky Trilogy, BELOW THE ROOT begins where the final book leaves off. The program is by Dale Disharoon, Inc., specialists in educational software. Designed for ages 10–Adult."></a><figcaption>The original box back</figcaption></figure>
-
 The creators of the Below the Root game put a lot of love into it, and it
 deserves to be remembered and appreciated. Perhaps you played this game as a
 kid and remember looking for a trencher beak. Perhaps you’ve just read the
@@ -39,10 +28,10 @@ Whoever you are, please enjoy this restoration of a beloved game from my childho
 -- [Saul Pwanson](mailto:btr@saul.pw)
 
 </div>
-<div class="about-action">
-<a class="play-button" href="/play">Play</a>
-<!-- When released, add href="https://github.com/century-arcade/below-the-root/releases/latest/download/below-the-root-preservation.zip" and remove aria-disabled and the coming-soon label. -->
-<!--a class="archive-download" role="link" aria-disabled="true">Download archival ZIP (coming soon)</a-->
-<a href="/play?demo">Watch the demo</a>
-</div>
+<ul class="references">
+<li><a href="https://www.mobygames.com/game/602/below-the-root/">MobyGames</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Below_the_Root_(video_game)">Wikipedia</a></li>
+<li><a href="https://www.lemon64.com/game/below-the-root">Lemon64</a></li>
+<li><a href="https://www.mocagh.org/loadpage.php?getgame=belowtheroot">MOCAGH</a></li>
+</ul>
 </article>

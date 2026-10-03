@@ -17,10 +17,15 @@ import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
 import { setupDeveloper, GAME_TOOLS } from './header.js';
-import { setupManual } from './manual.js';
+import { setupBook, BOX, MANUAL, manualCaption } from './book.js';
+import { setupDesk } from './desk.js';
 
-setupManual(document.getElementById('manual'));
-
+setupBook(document.getElementById('box'), BOX);
+setupBook(document.getElementById('manual'), MANUAL, manualCaption);
+const desk = setupDesk(document.getElementById('desk'));
+const away = () => desk.stage !== 'play';
+const benchStrip = document.querySelector('.bench-strip');
+document.documentElement.classList.add('monitor-away');
 const log = text => console.log(text);
 
 const canvas = document.getElementById('screen');
@@ -37,7 +42,6 @@ const CANVAS_PADDING = 3;
 const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px)');
 const navigationToggle = document.getElementById('navigation-toggle');
 const mainNav = document.getElementById('main-nav');
-const mapScreen = document.getElementById('map-screen');
 function closeNavigation() {
   document.documentElement.classList.remove('navigation-open');
   navigationToggle.setAttribute('aria-expanded', 'false');
@@ -57,6 +61,25 @@ addEventListener('keydown', e => {
   e.stopImmediatePropagation();
 }, true);
 
+function sizeMonitor(mode, availableWidth, availableHeight, aspect, bare, floor = 0) {
+  const padding = bare ? 0 : mode === 'cropped' ? 2 : CANVAS_PADDING;
+  for (const name of ['mm', 'chin', 'clip']) monitor.style.removeProperty(`--${name}`);
+  monitor.classList.toggle('cabinet', mode !== 'caseless');
+  if (mode !== 'caseless') {
+    const cabinet = fitCabinet(availableWidth, availableHeight, padding, { fillWidth: mode === 'cropped', aspect });
+    const scale = mode === 'cropped' && cabinet.height > availableHeight ? 0 : cabinet.scale;
+    return { mode, padding, ...cabinet, scale };
+  }
+  const shell = getComputedStyle(monitor);
+  const shellWidth = bare ? 0
+    : 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
+  const shellHeight = bare ? 0
+    : 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--chin'));
+  const scale = Math.max(floor, fitScale(availableWidth - shellWidth, availableHeight - shellHeight, HEIGHT, padding, aspect));
+  const glassWidth = (WIDTH * aspect + 2 * padding) * scale;
+  return { mode, padding, scale, width: glassWidth + shellWidth, glassWidth, glassHeight: (HEIGHT + 2 * padding) * scale };
+}
+
 function fit() {
   const full = fullscreenMode.matches || document.fullscreenElement !== null;
   document.documentElement.classList.toggle('game-fullscreen', full);
@@ -65,44 +88,44 @@ function fit() {
   if (!landscape) closeNavigation();
   const bare = full || landscape;
   const cabinetSurround = monitor.dataset.surround !== 'portable';
-  const narrow = !bare && cabinetSurround && window.innerWidth <= 400;
-  document.documentElement.classList.toggle('narrow-play', narrow);
   const outerGap = bare ? 0 : parseFloat(getComputedStyle(game).marginTop);
-  const chrome = bare ? 0 : document.getElementById('site-header').offsetHeight;
-  let availableHeight = window.innerHeight - chrome - 2 * outerGap;
-  const availableWidth = document.documentElement.clientWidth - 2 * outerGap;
+  const table = getComputedStyle(document.getElementById('table'));
+  const inset = side => bare ? 0 : parseFloat(table[`padding${side}`]) + parseFloat(table[`margin${side}`]);
+  let availableHeight = window.innerHeight - 2 * outerGap - inset('Top') - inset('Bottom');
+  const availableWidth = document.documentElement.clientWidth - 2 * outerGap - inset('Left') - inset('Right');
   const replayControls = document.getElementById('replay-controls');
   if (!landscape && !replayControls.hidden) availableHeight -= replayControls.offsetHeight + 8;
-  const padding = bare ? 0 : narrow ? 2 : CANVAS_PADDING;
-  for (const name of ['mm', 'chin', 'clip']) monitor.style.removeProperty(`--${name}`);
-  const cabinetFit = !bare && cabinetSurround;
-  monitor.classList.toggle('cabinet', cabinetFit);
+  const aspect = ASPECTS[options.aspect] ?? 1;
+  const playing = !document.documentElement.classList.contains('monitor-away');
+  const strips = bare || !playing ? ['none'] : ['full', 'compact', 'none'];
+  const cases = bare || !cabinetSurround ? ['caseless'] : ['cabinet', 'cropped', 'caseless'];
+  let fitted;
+  // 1x screen floor: give up the case before the desk strip.
+  search: for (const band of strips) {
+    document.documentElement.dataset.strip = band;
+    const height = availableHeight - (band === 'none' ? 0 : benchStrip.getBoundingClientRect().height);
+    for (const mode of cases) {
+      fitted = sizeMonitor(mode, availableWidth, height, aspect, bare);
+      if (fitted.scale >= 1) break search;
+    }
+  }
+  if (fitted.scale < 1) fitted = sizeMonitor('caseless', availableWidth, availableHeight, aspect, bare, 1);
+  const { mode, padding, scale, width, glassWidth, glassHeight } = fitted;
+  const narrow = mode === 'cropped';
+  document.documentElement.classList.toggle('narrow-play', narrow);
+  const cabinetFit = mode !== 'caseless';
   const faceplate = cabinetFit && !narrow;
   monitor.classList.toggle('faceplate', faceplate);
-  const navHome = document.getElementById(faceplate && mapScreen.hidden ? 'monitor-controls' : 'navigation-controls');
+  const navHome = document.getElementById(faceplate ? 'monitor-controls' : 'navigation-controls');
   if (mainNav.parentElement !== navHome) {
     const focused = mainNav.contains(document.activeElement) ? document.activeElement : null;
     navHome.prepend(mainNav);
     focused?.focus({ preventScroll: true });
   }
-  const aspect = ASPECTS[options.aspect] ?? 1;
-  let scale, width, glassWidth, glassHeight;
   if (cabinetFit) {
-    const viewport = document.documentElement.clientWidth;
-    const cabinet = fitCabinet(narrow ? viewport : availableWidth, availableHeight, padding, { fillWidth: narrow, aspect });
-    ({ scale, width, glassWidth, glassHeight } = cabinet);
-    monitor.style.setProperty('--mm', `${cabinet.mm}px`);
-    monitor.style.setProperty('--chin', `${cabinet.chin}px`);
-    monitor.style.setProperty('--clip', `${Math.max(0, (width - viewport) / 2)}px`);
-  } else {
-    const shell = getComputedStyle(monitor);
-    const shellWidth = bare ? 0
-      : 2 * parseFloat(shell.getPropertyValue('--rim')) + parseFloat(shell.getPropertyValue('--side'));
-    const shellHeight = bare ? 0 : 2 * parseFloat(shell.getPropertyValue('--rim'));
-    scale = fitScale(availableWidth - shellWidth, availableHeight - shellHeight, HEIGHT, padding, aspect);
-    glassWidth = (WIDTH * aspect + 2 * padding) * scale;
-    width = glassWidth + shellWidth;
-    glassHeight = (HEIGHT + 2 * padding) * scale;
+    monitor.style.setProperty('--mm', `${fitted.mm}px`);
+    monitor.style.setProperty('--chin', `${fitted.chin}px`);
+    monitor.style.setProperty('--clip', `${Math.max(0, (width - availableWidth) / 2)}px`);
   }
   const glass = document.getElementById('glass');
   glass.style.width = `${glassWidth}px`;
@@ -218,7 +241,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let state = session.state;
   state.classic = options.classic;
   stick.contextKey = key => {
-    if (!powered || paused || overlay || startupHelp || session.playback || !state.itemPicker) return null;
+    if (!powered || paused || away() || startupHelp || session.playback || !state.itemPicker) return null;
     return state.itemPicker.readOnly ? 'fire' : key === 'Escape' ? 'cancel' : null;
   };
   stick.selectWithF = () => state.title || !!state.verb;
@@ -237,14 +260,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       selected: state.itemPicker.selected,
       mouseDirect: true,
       dismiss: state.itemPicker.readOnly,
-      hit: (x, y) => powered && !paused && !overlay && !startupHelp && !startupTitle
+      hit: (x, y) => powered && !paused && !away() && !startupHelp && !startupTitle
         ? itemChoiceAt(state, Math.floor(x / 8), Math.floor(y / 8) - PANEL_ROW)
           ?? (state.itemPicker.readOnly ? { col: -1, row: -1 } : null) : null,
       highlight: choice => highlightItemChoice(state, choice),
     } : state.commandMenuOpen && !state.demo && !session.playback ? {
       id: state.verb,
       selected: state.commandMenuSelection,
-      hit: (x, y) => powered && !paused && !overlay && !startupHelp && !startupTitle && !session.playback
+      hit: (x, y) => powered && !paused && !away() && !startupHelp && !startupTitle && !session.playback
         ? menuChoiceAt(Math.floor(x / 8), Math.floor(y / 8) - PANEL_ROW) : null,
       highlight: choice => highlightMenuChoice(state, choice),
     } : null,
@@ -300,11 +323,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let inactive = false;
   holdReasons = () => [
     !powered && 'power', paused && 'dialog',
-    held && (startupTitle ? 'title' : startupHelp ? 'startup-help' : overlay ? 'map' : 'pause'),
+    held && (startupTitle ? 'title' : startupHelp ? 'startup-help' : desk.stage === 'map' ? 'map' : 'pause'),
     inactive && 'focus', document.hidden && 'hidden', session.playbackDone && 'playback-done',
   ].filter(Boolean);
   const isRunning = () => holdReasons().length === 0;
-  let overlay = null;
   const helpScreen = document.getElementById('help-screen');
   const replayHelp = document.getElementById('replay-help');
   const playFromReplay = document.getElementById('play-from-replay');
@@ -322,7 +344,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let startupHelp = false;
   let startupTitle = false;
   let titleImage = null;
-  const mapButton = document.getElementById('paper-map');
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
   const rewindRoomButton = document.getElementById('rewind-room');
@@ -338,14 +359,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let currentTab = document.querySelector('#main-nav [aria-current]');
   const mapGrid = document.getElementById('map-grid');
   const mapSheet = document.getElementById('map-sheet');
-  const paperGrid = document.getElementById('paper-map-grid');
   let paperKey = null;
-  mapButton.addEventListener('keydown', e => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault();
-    e.stopPropagation();
-    openMap();
-  });
   const mapViewport = document.getElementById('map-viewport');
   let mapZoom = 1;
   const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
@@ -359,7 +373,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const fy = (cy - before.top) / before.height;
     mapZoom = Math.max(1, Math.min(8, mapZoom * factor));
     mapSheet.style.width = `${mapZoom * 100}%`;
-    document.getElementById('map-zoom').textContent = `${mapZoom}×`;
     document.getElementById('map-zoom-out').disabled = mapZoom === 1;
     document.getElementById('map-zoom-in').disabled = mapZoom === 8;
     // Include the grid's automatic margins when it is shorter than the viewport.
@@ -422,7 +435,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     power.title = powered ? 'Power off (reset game)' : 'Turn on';
   }
   showPower();
-  if (!powered) power.focus({ preventScroll: true });
   power.onclick = () => {
     powered = !powered;
     dropInput(); acc = 0; last = performance.now();
@@ -452,6 +464,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
   const hold = () => { held = true; dropInput(); };
+  desk.onChange = stage => {
+    if (stage === 'map') { paperKey = null; paintPaperMap(); centerMap(); }
+    const playing = stage === 'play';
+    document.documentElement.classList.toggle('monitor-away', !playing);
+    fit();
+    if (!playing) { if (powered) hold(); return; }
+    if (!powered) power.click();
+    canvas.focus({ preventScroll: true });
+  };
+  if (powered) desk.show('play');
   const suspendFocus = () => { inactive = true; dropInput(); };
   const restoreFocus = () => {
     if (!inactive || document.hidden) return;
@@ -460,26 +482,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     dropInput(); inactive = false; last = performance.now();
   };
   const release = () => {
-    if (overlay) {
-      if (overlay.screen.contains(document.activeElement)) canvas.focus({ preventScroll: true });
-      overlay.screen.hidden = true;
-      overlay.button?.setAttribute('aria-expanded', 'false');
-      overlay = null;
-      helpButton.hidden = false;
-      fit();
-    }
     dropInput(); held = false; startupTitle = false; inactive = false; last = performance.now();
   };
-  function openOverlay(screen, button) {
-    if (overlay) release();
-    overlay = { screen, button };
-    hold();
-    screen.hidden = false;
-    button?.setAttribute('aria-expanded', 'true');
-    fit();
-  }
   function openHelp(startup = false) {
-    if (paused || overlay?.screen === mapScreen) return;
+    if (paused) return;
     if (!helpScreen.hidden) return closeHelp();
     startupHelp = startup;
     if (startup) hold();
@@ -508,15 +514,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const key = [state.quest, session.path.length, state.room?.code, debug].join();
     if (key === paperKey || seekRoom != null) return;
     paperKey = key;
-    paintMap(paperGrid);
-  }
-  function openMap() {
-    if (paused) return;
-    closeHelp();
     paintMap();
-    openOverlay(mapScreen, mapButton);
-    helpButton.hidden = true;
-    centerMap();
   }
   function showView(view) {
     if (paused) return;
@@ -528,10 +526,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       session.menu();
       speaker.silence();
       saveNow();
-    } else if (view === 'map') openMap();
-    if (!overlay) canvas.focus({ preventScroll: true });
+    } else if (view === 'map') desk.show('map');
+    if (!away()) canvas.focus({ preventScroll: true });
   }
-  for (const [button, view] of [[homeButton, 'home'], [mapButton, 'map'], [helpButton, 'help']]) {
+  for (const [button, view] of [[homeButton, 'home'], [helpButton, 'help']]) {
     button.onclick = e => {
       if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       e.preventDefault();
@@ -556,7 +554,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     document.getElementById('developer-help').hidden = !on;
-    if (overlay?.screen === mapScreen) paintMap();
+    if (desk.stage === 'map') paintMap();
     if (on && !debugReady) {
       debugReady = true;
       setupDebug({ getSession: () => session, saveNow, pause, resume, importFile, log,
@@ -564,9 +562,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     }
     fit();
   }
-  document.getElementById('close-map').onclick = release;
   function commandMenu(close = false) {
-    if (!powered || paused || overlay || startupHelp || !session.commandMenu(close)) return;
+    if (!powered || paused || away() || startupHelp || !session.commandMenu(close)) return;
     release();
     canvas.focus({ preventScroll: true });
     saveNow();
@@ -585,7 +582,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   };
   // Capture map movement before joystick input and recording playback shortcuts.
   for (const type of ['keydown', 'keyup']) addEventListener(type, e => {
-    if (paused || overlay?.screen !== mapScreen || isEditing(e.target)) return;
+    if (paused || desk.stage !== 'map' || isEditing(e.target)) return;
     if (e.key === 'Shift') { e.stopImmediatePropagation(); return; }
     if (e.metaKey || e.altKey || e.ctrlKey) return;
     // Physical WASD positions stay stable across layout and modifier changes.
@@ -597,14 +594,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (type === 'keydown') mapViewport.scrollBy({ left: direction[0] * 80, top: direction[1] * 80, behavior: 'instant' });
   }, true);
   // Help permits play while its links and the startup intro keep native activation.
-  for (const screen of [mapScreen, helpScreen]) {
-    for (const type of ['keydown', 'keyup']) screen.addEventListener(type, e => {
-      if (screen === helpScreen && !startupHelp) {
-        if (e.key !== ' ' || !e.target.closest('button, a[href]')) return;
-      }
-      if (!['Escape', 'Tab', '?', 'h', 'H', 'm', 'M'].includes(e.key)) e.stopPropagation();
-    });
-  }
+  for (const type of ['keydown', 'keyup']) helpScreen.addEventListener(type, e => {
+    if (!startupHelp && (e.key !== ' ' || !e.target.closest('button, a[href]'))) return;
+    if (!['Escape', 'Tab', '?', 'h', 'H', 'm', 'M'].includes(e.key)) e.stopPropagation();
+  });
   for (const type of ['pointerdown', 'pointerup']) canvas.addEventListener(type, e => {
     if (paused) return;
     // Pointer steering prevents the browser's default focus transfer.
@@ -657,16 +650,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }, true);
   addEventListener('keydown', e => {
     if (!powered || paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
-    if (state.itemPicker && !session.playback && !overlay
+    if (state.itemPicker && !session.playback && !away()
         && (state.itemPicker.readOnly || e.key === 'Escape')) return;
     if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
         && (e.target === canvas || e.target === document.body)) {
       e.preventDefault(); rewindRoomButton.click(); return;
     }
     if (e.key === 'Tab' || e.key.toLowerCase() === 'm') {
-      const mapOpen = overlay?.screen === mapScreen;
+      const mapOpen = desk.stage === 'map';
       if (e.key !== 'Tab' || mapOpen || e.target === document.body || e.target === canvas) {
-        if (mapOpen) release(); else openMap();
+        desk.show(mapOpen ? 'play' : 'map');
         e.preventDefault();
       }
       return;
@@ -680,11 +673,18 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (e.key === '=' || e.key === '+') { stepVolume(0.1); e.preventDefault(); return; }
     if (e.key !== 'Escape' && e.key.toLowerCase() !== 'p') return;
     if (e.key === 'Escape') {
-      if (overlay) { release(); e.preventDefault(); return; }
       if (state.commandMenuOpen && !session.playback) { commandMenu(true); e.preventDefault(); return; }
       if (!helpScreen.hidden) { closeHelp(); e.preventDefault(); return; }
+      if (desk.stage === 'play') { desk.back(); e.preventDefault(); }
+      return;
     }
     if (held) release(); else hold();
+    e.preventDefault();
+  });
+  addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || e.defaultPrevented || isEditing(e.target) || desk.stage === 'play') return;
+    if (desk.stage === 'map' && document.documentElement.matches('.game-fullscreen, .landscape-play')) desk.show('play');
+    else desk.back();
     e.preventDefault();
   });
   addEventListener('blur', suspendFocus);
@@ -698,7 +698,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   });
   canvas.addEventListener('pointerdown', restoreFocus, true);
   async function importFile(file) {
-    if (overlay) release();
     pause();
     try {
       if (file.size > 5 * 1024 * 1024) throw new Error('Recording is too large (maximum 5 MiB).');

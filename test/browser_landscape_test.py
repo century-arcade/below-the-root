@@ -1,5 +1,5 @@
 """Touch navigation, inventory and doorway input work in both phone orientations."""
-from browser_helpers import browser_page, until, session_eval
+from browser_helpers import browser_page, until, session_eval, unfold_map
 from playwright.sync_api import expect
 
 
@@ -32,6 +32,7 @@ with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_t
     expect(page.get_by_role('complementary', name='Input help')).to_be_hidden()
 
 with browser_page('/play?room=B8', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
+    unfold_map(page)
     page.locator('#paper-map').tap()
     expect(page.get_by_role('dialog', name='World map')).to_be_visible()
     page.get_by_role('button', name='Close', exact=True).tap()

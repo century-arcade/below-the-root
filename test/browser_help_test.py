@@ -1,7 +1,7 @@
 """Input help, startup intro hold, toggles and keyboard/touch controls."""
 import json
 import os
-from browser_helpers import browser_page, observe, held, until, power_on
+from browser_helpers import browser_page, observe, held, until, power_on, unfold_map
 import re
 from pathlib import Path
 from playwright.sync_api import expect
@@ -52,6 +52,7 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
 
     question_mark()
     expect(help_screen).to_be_visible()
+    unfold_map(page)
     page.locator('#paper-map').click()
     expect(page.locator('#map-screen')).to_be_visible()
     expect(page.locator('#help')).to_be_hidden()
@@ -93,7 +94,7 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
 
     page.goto(BASE + '/?player=0')
     until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
-    expect(page.locator('#paper-map')).to_be_visible()
+    expect(page.locator('#box')).to_be_visible()
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(help_screen).to_be_hidden()  # a saved quest resumes directly

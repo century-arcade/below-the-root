@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from zipfile import ZipFile
 
 from playwright.sync_api import expect
-from browser_helpers import browser_page, observe, held, until, power_on
+from browser_helpers import browser_page, observe, held, until, power_on, unfold_map
 
 archive_path = Path(sys.argv[1] if len(sys.argv) > 1 else 'dist/below-the-root-preservation.zip')
 with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
@@ -55,6 +55,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.keyboard.press('r')
             expect(page.locator('#issue-dialog')).to_be_hidden()
             page.keyboard.press('ArrowRight')
+            unfold_map(page)
             page.locator('#paper-map').click()
             expect(page.locator('#map-screen')).to_be_visible()
             held(page, 'map')
