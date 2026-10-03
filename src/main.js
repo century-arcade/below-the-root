@@ -254,6 +254,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const sideTouch = new SideTouch(playSurface, canvas, stick, {
     active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
+    anywhere: () => !canOpenCommandMenu(state) && !state.title && !state.commandMenuOpen && !state.pointer
+      && (!state.itemPicker || state.itemPicker.readOnly),
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
       else commandMenu(!!state.commandMenuOpen);

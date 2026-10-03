@@ -58,9 +58,9 @@ async function sideFixture(t) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0 };
+  const model = { active: true, jog: false, chords: 0, anywhere: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
-    active: () => model.active, jog: () => model.jog, chord: () => model.chords++,
+    active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -149,6 +149,16 @@ test("the picture's middle, mice and inactive layouts are not side touches", asy
   send('pointerdown', LEFT, 100, 2);
   advance(200);
   assert.deepEqual(keys.read(), IDLE);
+});
+
+test("outside free play a tap on the picture's middle is the button", async t => {
+  const { keys, model, send, advance } = await sideFixture(t);
+  model.anywhere = true;
+  send('pointerdown', 160);
+  advance(500);
+  assert.deepEqual(keys.read(), IDLE, 'a held middle press never steers');
+  send('pointerup', 160);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
 });
 
 test("in choosers a side slide steps once per distance and a tap confirms", async t => {

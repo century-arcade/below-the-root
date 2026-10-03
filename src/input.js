@@ -519,16 +519,18 @@ const SLIDE = 24;
 const SIDE_SOURCE = 'touch';
 const SIDE_FIRE = 'touch:fire';
 
-// Fullscreen and landscape touch: only the outer eighths of the picture and beyond take input.
+// Fullscreen and landscape touch: the outer eighths steer; the middle can only tap.
 export class SideTouch {
-  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {} } = {}) {
+  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
     this.active = active;
     this.jog = jog;
     this.onChord = chord;
+    this.anywhere = anywhere;
     this.fingers = new Map();
+    this.taps = new Set();
     this.chord = null;
     this.held = new Set();
     surface.addEventListener('pointerdown', e => this.down(e));
@@ -552,9 +554,10 @@ export class SideTouch {
   down(e) {
     if (!this.claims(e) || e.target?.closest?.(OFF_PICTURE_IGNORE)) return;
     const side = this.side(e);
-    if (!side) return;
+    if (!side && !this.anywhere()) return;
     e.preventDefault();
     e.target?.setPointerCapture?.(e.pointerId);
+    if (!side) return this.taps.add(e.pointerId);
     const jog = this.jog();
     const f = { id: e.pointerId, side, x: e.clientX, y: e.clientY, jog, vertical: null };
     const live = [...this.fingers.values()].filter(g => g.role !== 'dead');
@@ -598,6 +601,7 @@ export class SideTouch {
   }
 
   up(e) {
+    if (this.taps.delete(e.pointerId)) return this.keys.tap('fire', SIDE_SOURCE);
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
     this.fingers.delete(f.id);
@@ -616,6 +620,7 @@ export class SideTouch {
   }
 
   lift(e) {
+    this.taps.delete(e.pointerId);
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
     if (this.chord?.fingers.includes(f)) this.breakChord();
@@ -667,6 +672,7 @@ export class SideTouch {
   cancel() {
     if (this.chord) clearTimeout(this.chord.timer);
     this.chord = null;
+    this.taps.clear();
     for (const f of this.fingers.values()) { clearTimeout(f.timer); f.role = 'dead'; }
     this.held = new Set();
     this.keys.reset(SIDE_SOURCE);

@@ -51,6 +51,20 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     chord()
     until(page, 's => !s.state.commandMenuOpen')
 
+    middle = {'x': box['x'] + box['width'] / 2, 'y': box['y'] + box['height'] / 2, 'id': 3}
+    chord()
+    until(page, 's => s.state.commandMenuOpen')
+    touch('touchStart', right)
+    for step in range(1, 4):
+        touch('touchMove', {**right, 'x': right['x'] + 30 * step})
+    touch('touchMove', {**right, 'x': right['x'] + 30 * 3, 'y': right['y'] + 30})
+    touch('touchEnd')
+    until(page, 's => s.state.commandMenuSelection.row === 1 && s.state.commandMenuSelection.col === 3')
+    side_tap(right)
+    until(page, 's => s.state.itemPicker?.readOnly')
+    side_tap(middle)
+    until(page, 's => !s.state.itemPicker')
+
     col = session_eval(page, 's => s.state.player.col')
     touch('touchStart', left)
     page.clock.run_for(1500)
@@ -68,4 +82,4 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     page.evaluate("document.documentElement.classList.add('navigation-open')")
     assert page.locator('#developer-mode').is_hidden(), 'no version label in landscape play'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, map and version label passed')
+print('browser_landscape_test: portrait touch inventory, landscape side touches, picture taps outside play, map and version label passed')
