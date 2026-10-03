@@ -51,15 +51,16 @@ export function buildSite(out) {
     section => `<section id="replay-help" hidden>${section}</section>`).replace(
     /<h2>Developer mode<\/h2>[\s\S]*?(?=<h2>|$)/,
     section => `<section id="developer-help" hidden>${section}</section>`);
+  const developer = read('developer.html').replaceAll('{{version}}', version);
   mkdirSync(out, { recursive: true });
   for (const output of ['index', 'play', 'about', 'resources', 'map']) {
     const page = output === 'index' || output === 'map' ? 'play' : output;
     const values = {
       nav: read('nav.html').replace(`href="/${page === 'play' ? '' : page}"`, '$& aria-current="page"'),
-      developer: read('developer.html').replaceAll('{{version}}', version),
+      developer: page === 'play' ? '' : developer,
       helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
       styles: page === 'play' ? '<link rel="stylesheet" href="/game.css">' : '',
-      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{note}}', () => marked.parse(read('about.md')))
+      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(read('about.md')))
         : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(`${page}.md`)))}</main>`,
       scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>
 <script type="module">import { startAnalytics } from "/analytics.js"; startAnalytics();</script>`,
