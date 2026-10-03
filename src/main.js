@@ -587,7 +587,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     draw();
   }
   menuButton.onclick = () => commandMenu();
-  document.getElementById('touch-pause').onclick = e => { if (held) release(); else hold(); e.currentTarget.blur(); };
   document.getElementById('touch-map').onclick = e => { desk.show(desk.stage === 'map' ? 'play' : 'map'); e.currentTarget.blur(); };
   for (const type of ['keydown', 'keyup']) menuButton.addEventListener(type, e => {
     if (e.key === ' ') e.stopPropagation();
