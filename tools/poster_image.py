@@ -152,6 +152,73 @@ def remove_poster_blemishes(image):
     return image
 
 
+def clean_poster_outline(image):
+    palette = np.array(image.getpalette()).reshape(-1, 3)
+    paper = int(np.argmin(((palette - PAPER) ** 2).sum(1)))
+    ink = int(np.argmin(((palette - INK) ** 2).sum(1)))
+    grid_rgb = np.round(PAPER * (1 - GRID_INK) + INK * GRID_INK)
+    grid = int(np.argmin(((palette - grid_rgb) ** 2).sum(1)))
+    image = image.copy()
+    draw = ImageDraw.Draw(image)
+
+    background = Image.new('1', image.size)
+    mask = ImageDraw.Draw(background)
+    mask.rectangle((1930, 721, image.width - 1, image.height - 1), fill=1)
+    mask.rectangle((1800, 928, image.width - 1, image.height - 1), fill=1)
+    mask.rectangle((1930, 0, image.width - 1, 37), fill=1)
+    legend_content = [
+        (1790, 730, 1980, 757),
+        (2044, 724, 2057, 752),
+        (2192, 725, 2450, 755),
+        (2579, 720, 2589, 730),
+        (2577, 731, 2590, 748),
+        (2002, 765, 2063, 803),
+        (1975, 804, 2096, 831),
+        (2181, 765, 2247, 802),
+        (2142, 801, 2285, 828),
+        (2359, 756, 2420, 801),
+        (2323, 800, 2436, 827),
+        (2488, 799, 2542, 826),
+        (2543, 797, 2580, 823),
+        (1860, 848, 2230, 865),
+        (1860, 868, 2118, 915),
+        (2561, 923, 2607, 947),
+    ]
+    for box in legend_content:
+        mask.rectangle(box, fill=0)
+    spirit_bell = [(2527, 754), (2542, 754), (2542, 770), (2564, 788),
+                   (2564, 798), (2548, 801), (2533, 801), (2525, 797),
+                   (2508, 797), (2508, 786), (2525, 773)]
+    skill_levels = [(2248, 849), (2377, 849), (2377, 861), (2448, 861),
+                    (2448, 874), (2512, 874), (2512, 887), (2542, 887),
+                    (2542, 912), (2248, 912)]
+    mask.polygon(spirit_bell, fill=0)
+    mask.polygon(skill_levels, fill=0)
+    mask.rectangle((14, 826, 2612, 843), fill=0)
+    mask.polygon([(1840, 841), (2050, 842), (2250, 839), (2609, 831),
+                  (2614, 920), (1840, 928), (1840, 910), (2594, 904),
+                  (2594, 845), (2250, 850), (2050, 852), (1840, 852)], fill=0)
+    image.paste(paper, mask=background)
+
+    draw.rectangle((10, 54, 1890, 96), fill=paper)
+    draw.rectangle((1891, 67, 2632, 96), fill=paper)
+    draw.rectangle((7, 67, 29, 843), fill=paper)
+    bottom_bands = [
+        (18, 827, 400, 837), (401, 829, 720, 839),
+        (721, 831, 800, 841), (801, 834, 1520, 843),
+        (1521, 831, 1840, 841), (1841, 833, 2130, 842),
+        (2131, 829, 2380, 838), (2381, 826, 2612, 836),
+    ]
+    for box in bottom_bands:
+        draw.rectangle(box, fill=paper)
+    draw.rectangle((2609, 67, image.width - 1, 843), fill=paper)
+    for x in range(MARGIN['left'], MARGIN['left'] + COLUMNS * CELL_W + 1, CELL_W):
+        draw.rectangle((x - 1, 79, x, 96), fill=grid)
+    draw.rectangle((47, 79, 2608, 80), fill=grid)
+    draw.rectangle((14, 69, 2631, 835), outline=ink, width=4)
+    return image
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image', default=os.path.join(ROOT, 'iso/map.jpg'))
@@ -190,7 +257,8 @@ def main():
     ink = redraw_grid(flat.transform(size, Transform.MESH, mesh, Resampling.BICUBIC), out_x, out_y)
     rgb = PAPER * (1 - ink[..., None]) + INK * ink[..., None]
     image = Image.fromarray(rgb.round().astype(np.uint8)).quantize(16, dither=Image.Dither.NONE)
-    remove_poster_blemishes(image).save(args.output, optimize=True)
+    image = clean_poster_outline(remove_poster_blemishes(image))
+    image.save(args.output, optimize=True)
     print(f'{args.output}: {size[0]}x{size[1]}, grid at {MARGIN}')
 
 
