@@ -515,6 +515,7 @@ export class Pointer {
 
 const SIDE_TAP_MS = 120;
 const CHORD_MS = 250;
+const CHORD_GAP_MS = 80;
 const SLIDE = 24;
 const SIDE_SOURCE = 'touch';
 const SIDE_FIRE = 'touch:fire';
@@ -561,7 +562,7 @@ export class SideTouch {
     e.target?.setPointerCapture?.(e.pointerId);
     if (!side) return this.taps.add(e.pointerId);
     const jog = this.jog();
-    const f = { id: e.pointerId, side, x: e.clientX, y: e.clientY, jog, vertical: null };
+    const f = { id: e.pointerId, side, x: e.clientX, y: e.clientY, at: performance.now(), jog, vertical: null };
     const live = [...this.fingers.values()].filter(g => g.role !== 'dead');
     const pending = live.find(g => g.role === 'pending');
     this.fingers.set(f.id, f);
@@ -571,13 +572,15 @@ export class SideTouch {
     } else if (!live.length) {
       f.role = 'pending';
       if (!jog) f.timer = setTimeout(() => this.resolve(f), SIDE_TAP_MS);
-    } else if (pending && pending.side !== side && !this.chord && live.length === 1) {
+    } else if (pending && pending.side !== side && !this.chord && live.length === 1
+        && (jog || f.at - pending.at <= CHORD_GAP_MS)) {
       clearTimeout(pending.timer);
       f.role = 'pending';
       this.chord = { fingers: [pending, f], timer: setTimeout(() => this.resolveChord(), CHORD_MS) };
     } else if (jog) {
       f.role = 'dead';
     } else {
+      if (pending && !this.chord) { clearTimeout(pending.timer); pending.role = 'stick'; }
       f.role = 'button';
       this.update();
     }

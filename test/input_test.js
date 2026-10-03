@@ -56,6 +56,8 @@ async function pointerFixture(t, { latch = false } = {}) {
 
 async function sideFixture(t) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
+  let now = 0;
+  t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
   const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false };
@@ -68,7 +70,7 @@ async function sideFixture(t) {
     button: 0, pointerId, pointerType, clientX: x, clientY: y, target, preventDefault() {},
   });
   const LEFT = 10, RIGHT = 310;
-  return { ...f, model, sides, send, LEFT, RIGHT, advance: ms => t.mock.timers.tick(ms) };
+  return { ...f, model, sides, send, LEFT, RIGHT, advance: ms => { now += ms; t.mock.timers.tick(ms); } };
 }
 
 test("holding a side walks that way until the finger lifts", async t => {
@@ -115,6 +117,17 @@ test("sliding a side finger up or down replaces the walk with a climb", async t 
   advance(10);
   send('pointerup', LEFT, 105);
   assert.deepEqual(keys.read(), IDLE);
+});
+
+test("a tap on the other side soon after the first touch leaps at once", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  send('pointerdown', LEFT);
+  advance(90);
+  send('pointerdown', RIGHT, 100, 2);
+  send('pointerup', RIGHT, 100, 2);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true });
+  assert.equal(model.chords, 0);
+  assert.equal(keys.read().dx, -1, 'the first finger keeps walking');
 });
 
 test("tapping both sides together is a chord, not movement or the button", async t => {
