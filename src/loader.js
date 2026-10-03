@@ -4,15 +4,15 @@ const PAPER = 0;
 const INK = 1;
 const TITLE = [
   [3, 'BELOW THE ROOT'],
-  [5, 'COPYRIGHT (C) 1984'],
-  [6, '2026 RESTORATION BY SAUL PWANSON'],
+  [4, 'COPYRIGHT (C) 1984'],
+  [6, 'RESTORED BY SAUL PWANSON 2026'],
 ];
 const COMMANDS = [
   ['ARROWS/WASD', 'MOVE'],
-  ['SPACE/ENTER', 'BUTTON'],
-  ['F', 'COMMAND MENU'],
-  ['M', 'MAP'],
-  ['?', 'THIS SCREEN'],
+  ['SPACE/ENTER', 'JUMP/RUN/ENTER'],
+  ['F', 'GAME MENU'],
+  ['M', 'WORLD MAP'],
+  ['?', 'TOGGLE THIS SCREEN'],
 ];
 const COMMANDS_ROW = 9;
 const PROMPT = [21, 'PRESS ANY KEY OR TAP TO BOOT'];
