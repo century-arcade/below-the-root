@@ -9,8 +9,8 @@ body { min-height: 100dvh; box-sizing: border-box; padding: 0; display: flex; fl
 a { color: #c7f5ae; }
 #site-header { position: sticky; top: 0; z-index: 3; background: #0b130d; box-sizing: border-box; width: 100%; height: 85px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #354537; }
 #navigation-controls { display: flex; flex: 1; min-width: 0; align-items: center; gap: 8px; overflow-x: auto; }
-#site-header nav { display: flex; gap: 6px; flex-shrink: 0; align-items: center; padding: 4px 3px 9px; white-space: nowrap; font: var(--game-font-size)/1 'Open Gorton', sans-serif; text-transform: uppercase; }
-#site-header nav a {
+#main-nav { display: flex; gap: 6px; flex-shrink: 0; align-items: center; padding: 4px 3px 9px; white-space: nowrap; font: var(--game-font-size)/1 'Open Gorton', sans-serif; text-transform: uppercase; }
+#main-nav a {
   display: grid; place-items: center; box-sizing: border-box; min-height: 44px; padding: 0 12px;
   color: #f2ead8; background: #453f38;
   border: 1px solid; border-color: #766d60 #29241f #211d19 #62594e; border-radius: 5px 5px 7px 7px;
@@ -18,18 +18,18 @@ a { color: #c7f5ae; }
   text-decoration: none; text-shadow: 0 1px 0 #00000080; letter-spacing: .04em;
   transition: transform 100ms ease, box-shadow 100ms ease;
 }
-#site-header nav a:hover { background: #564e43; }
-#site-header nav a[aria-current], #site-header nav a[aria-expanded="true"] {
+#main-nav a:hover { background: #564e43; }
+#main-nav a[aria-current], #main-nav a[aria-expanded="true"] {
   color: #302a23; background: #ccbfa5; border-color: #f0e5cd #96866d #8b795f #d4c6a9;
   text-shadow: 0 1px 0 #ffffff40;
 }
-#site-header nav a:active, #site-header nav a[aria-expanded="true"] {
+#main-nav a:active, #main-nav a[aria-expanded="true"] {
   transform: translateY(3px);
   box-shadow: inset 0 2px 0 #ffffff18, inset 0 -2px 0 #00000030, 0 2px 0 #211d19, 0 3px 0 #776957;
 }
-#site-header nav a:focus-visible { outline-color: #d6f897; }
+#main-nav a:focus-visible { outline-color: #d6f897; }
 @media (prefers-reduced-motion: reduce) {
-  #site-header nav a { transition: none; }
+  #main-nav a { transition: none; }
 }
 #site-header .github-link { display: grid; place-items: center; flex-shrink: 0; padding: 8px; }
 #developer-mode { flex-shrink: 0; }
@@ -93,7 +93,7 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
   .about-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
   .box-front img { width: min(270px, 90%); }
   #site-header { padding: 8px 4px; column-gap: 4px; }
-  #site-header nav a { padding: 0 6px; }
+  #main-nav a { padding: 0 6px; }
   .box-back { width: 110px; margin-left: 16px !important; }
 }
 @media (max-width: 599px) {

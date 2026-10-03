@@ -14,12 +14,12 @@ with sync_playwright() as p:
         page.goto(BASE + '/')
         expect(page).to_have_url(BASE + '/')
         expect(page.locator('#screen')).to_be_visible()
-        expect(page.locator('#site-header a[aria-current]')).to_have_text('Play')
+        expect(page.locator('#main-nav a[aria-current]')).to_have_text('Play')
         expect(page.get_by_role('navigation').get_by_role('link')).to_have_text(['Play', 'Map', 'About', 'Resources'])
         page.get_by_role('navigation').get_by_role('link', name='Resources').click()
         expect(page).to_have_url(BASE + '/resources')
         expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
-        expect(page.locator('#site-header a[aria-current]')).to_have_text('Resources')
+        expect(page.locator('#main-nav a[aria-current]')).to_have_text('Resources')
         expect(page.get_by_role('link', name='Phil Salvador: Below the Root', exact=True)).to_be_visible()
         mocagh = page.locator('#resources .cards li').filter(has_text='Museum of Computer Adventure')
         mocagh.get_by_role('link', name='manual as a PDF').click(trial=True)
@@ -40,7 +40,7 @@ with sync_playwright() as p:
         page.keyboard.press('Enter')
         expect(page.locator('#help-screen')).to_be_hidden()
         expect(page.locator('#help')).to_be_focused()
-        expect(page.locator('#site-header a[aria-current]')).to_have_text('Play')
+        expect(page.locator('#main-nav a[aria-current]')).to_have_text('Play')
         page.go_back()
         expect(page).to_have_url(BASE + '/about')
         # Query entry links still work, with all game assets loaded from the site root.
@@ -84,7 +84,7 @@ with sync_playwright() as p:
             assert response.ok
             expect(page).to_have_url(BASE + '/' + name + '/')
             page.reload()
-            expect(page.locator('#site-header a[aria-current]')).to_have_text(name.capitalize())
+            expect(page.locator('#main-nav a[aria-current]')).to_have_text(name.capitalize())
         assert not errors, errors
         page.close()
     # Reading-page developer controls work without loading a game.

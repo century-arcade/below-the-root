@@ -29,9 +29,11 @@ const ctx = canvas.getContext('2d');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
-const CANVAS_PADDING = 8;
+const CANVAS_PADDING = 3;
 const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px)');
 const navigationToggle = document.getElementById('navigation-toggle');
+const mainNav = document.getElementById('main-nav');
+const mapScreen = document.getElementById('map-screen');
 function closeNavigation() {
   document.documentElement.classList.remove('navigation-open');
   navigationToggle.setAttribute('aria-expanded', 'false');
@@ -71,6 +73,14 @@ function fit() {
   for (const name of ['mm', 'chin', 'clip']) monitor.style.removeProperty(`--${name}`);
   const cabinetFit = !bare && cabinetSurround;
   monitor.classList.toggle('cabinet', cabinetFit);
+  const faceplate = cabinetFit && !narrow;
+  monitor.classList.toggle('faceplate', faceplate);
+  const navHome = document.getElementById(faceplate && mapScreen.hidden ? 'monitor-controls' : 'navigation-controls');
+  if (mainNav.parentElement !== navHome) {
+    const focused = mainNav.contains(document.activeElement) ? document.activeElement : null;
+    navHome.prepend(mainNav);
+    focused?.focus({ preventScroll: true });
+  }
   let scale, width, glassHeight;
   if (cabinetFit) {
     const viewport = document.documentElement.clientWidth;
@@ -295,7 +305,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   };
   const menuButton = document.getElementById('command-menu');
   let startupHelp = false;
-  const mapScreen = document.getElementById('map-screen');
   const mapButton = document.getElementById('map');
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
@@ -310,7 +319,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   mapButton.setAttribute('aria-controls', 'map-screen');
   helpButton.setAttribute('aria-controls', 'help-screen');
   helpButton.setAttribute('aria-expanded', 'false');
-  let currentTab = document.querySelector('#site-header nav [aria-current]');
+  let currentTab = document.querySelector('#main-nav [aria-current]');
   const mapGrid = document.getElementById('map-grid');
   const mapViewport = document.getElementById('map-viewport');
   let mapZoom = 1;
@@ -421,6 +430,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       overlay.button?.setAttribute('aria-expanded', 'false');
       overlay = null;
       helpButton.hidden = false;
+      fit();
     }
     dropInput(); held = false; inactive = false; last = performance.now();
   };
@@ -430,6 +440,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     hold();
     screen.hidden = false;
     button?.setAttribute('aria-expanded', 'true');
+    fit();
   }
   function openHelp(startup = false) {
     if (paused || overlay?.screen === mapScreen) return;

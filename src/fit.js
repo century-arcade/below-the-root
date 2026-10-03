@@ -6,10 +6,10 @@ export function fitScale(width, height, rows = HEIGHT, padding = 0) {
   return Math.max(0.25, Math.min(width / columns, height / rows));
 }
 
-// 1702 front traced from a product photo: assets/monitor/1702.svg, in mm.
-export const CASE = { width: 360, height: 364.5 };
-export const GLASS = { x: 45.5, y: 72.5, width: 269.5, height: 196.5 };
-export const CONTROL_STRIP = { x: 12, y: 329, width: 278, height: 24.5 };
+// 1702 front traced from a product photo: assets/monitor/1702.svg, in mm from the front face top.
+export const CASE = { width: 360, height: 325.5 };
+export const GLASS = { x: 45.5, y: 33.5, width: 269.5, height: 196.5 };
+export const CONTROL_STRIP = { x: 12, y: 290, width: 278, height: 24.5 };
 
 export function fitCabinet(width, height, padding = 0, { fillWidth = false } = {}) {
   const mm = fillWidth ? width * (WIDTH + 2 * padding) / WIDTH / GLASS.width

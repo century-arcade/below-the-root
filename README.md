@@ -126,7 +126,12 @@ and verbs take precedence. At victory these rows show play time and completion.
 INVENTORY follows SELL in the command menu; STATUS and MENU are absent.
 Play opens the title menu. The original demos retain their command layout.
 
-The Commodore and dark surrounds use 1702 cabinet and glass proportions.
+The Commodore and dark surrounds use 1702 cabinet and glass proportions,
+relabelled as a saul.pw model 2026; the badge links to saul.pw.  On the full
+cabinet the site links sit centred on the lower chin (back in the header while
+the map is open), fullscreen is a second chin push button left of the badge,
+and volume is a slide control in place of the video and audio jacks.  Phones
+of 400 CSS pixels or less keep the links in the header and a plain slider.
 Landscape viewports at most 500 CSS pixels high omit the shell and put monitor
 and replay controls beside the picture, including in fullscreen. The navigation
 button opens the site links and help without reserving header space.
