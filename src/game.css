@@ -112,7 +112,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 .book-spread { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .book-spread [data-book-image] { display: flex; cursor: pointer; }
 .book-spread img { display: block; width: auto; height: min(var(--box-height), (100vw - 144px) / 1.49); object-fit: fill; }
-#box img { aspect-ratio: 640 / 861; filter: drop-shadow(var(--depth)); }
+#box img { aspect-ratio: auto 454 / 599; filter: drop-shadow(var(--depth)); }
 #manual img { aspect-ratio: 1400 / 1880; filter: drop-shadow(var(--paper)); }
 .book-spread button { display: grid; place-items: center; width: 44px; height: 88px; padding: 0; color: #f2ede0; background: #2b2d2e; border: 0; box-shadow: 0 4px 0 #111213; }
 .book-spread button:active { transform: translateY(3px); box-shadow: 0 1px 0 #111213; }
