@@ -8,8 +8,8 @@ with sync_playwright() as p:
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(os.environ.get('BTR_URL', 'http://localhost:8000') + '/')
-    page.wait_for_selector('#box [data-book-image] img', state='attached')
     left = "document.querySelector('#box [data-book-image] img')"
+    page.wait_for_function(f"{left}.style.visibility === 'hidden'", polling=50)
     turned = page.evaluate(f"""() => {{
         document.querySelector('#box [data-book-image]').click();
         return [{left}.getAttribute('src'), {left}.style.visibility];
