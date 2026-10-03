@@ -7,16 +7,31 @@ export function setupBook(root, spreads, caption = () => '') {
   const status = root.querySelector('output');
   const last = spreads.length - 1;
   let current = 0;
+  const loaded = new Map();
+  const load = src => {
+    if (!loaded.has(src)) {
+      const image = new Image();
+      image.src = src;
+      loaded.set(src, image.decode().catch(() => {}));
+    }
+    return loaded.get(src);
+  };
   function show(spread) {
     current = Math.max(0, Math.min(last, spread));
+    const shown = current;
     const pages = spreads[current];
+    // alt-flash: a page swaps only once decoded, or its alt text shows while loading
     images.forEach((image, i) => {
       const page = pages[i];
-      image.style.visibility = page ? '' : 'hidden';
-      if (!page) return;
-      image.src = page.src;
-      image.alt = page.alt;
+      if (!page) { image.style.visibility = 'hidden'; return; }
+      load(page.src).then(() => {
+        if (current !== shown) return;
+        image.src = page.src;
+        image.alt = page.alt;
+        image.style.visibility = '';
+      });
     });
+    for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
     link.href = (pages[1] ?? pages[0]).src;
     previous.disabled = current === 0;
     next.disabled = current === last;
