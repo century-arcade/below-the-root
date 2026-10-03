@@ -2,7 +2,7 @@
 
 import { enterRoom } from './world.js';
 import { lieDown, idleFrame } from './player.js';
-import { say } from './panel.js';
+import { sayWrapped } from './panel.js';
 
 // creatures.md, Ambush and Nid traps: the two kidnaps cost no time
 const KIDNAP = {
@@ -87,13 +87,13 @@ export function refill(state) {
   p.spiritEnergy = p.spiritLimit;
 }
 
-export function loseDay(state, ...lines) {
+export function loseDay(state, ...statements) {
   const p = state.player;
   state.clock.day += 1;
   refill(state);
   p.indoors = true;
   sendTo(state, state.nidPlace);
-  say(state, ...lines);
+  sayWrapped(state, ...statements);
 }
 
 export function kidnap(state, which) {
@@ -101,7 +101,7 @@ export function kidnap(state, which) {
   sendTo(state, { room: state.data.roomByCode.get(to.code).room, col: to.col, row: to.row });
   state.player.indoors = true;
   state.player.frame = idleFrame(state.player);
-  say(state, state.data.fixed[to.text].text);
+  sayWrapped(state, state.data.fixed[to.text].text);
 }
 
 export function sendTo(state, place) {

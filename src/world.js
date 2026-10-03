@@ -2,7 +2,7 @@
 
 import { CLASS } from './data.js';
 import { spawnCreature } from './creatures.js';
-import { clearPanel, say } from './panel.js';
+import { clearPanel, sayWrapped } from './panel.js';
 import { DREAM } from './clock.js';
 import { startTune } from './audio.js';
 
@@ -183,7 +183,7 @@ export function useDoor(state, n) {
   const dest = state.data.roomById.get(door.to_room);
   if (!dest) return false;
   if (gateLocked(state, door)) {
-    say(state, state.data.fixed.door_is_locked.text);
+    sayWrapped(state, state.data.fixed.door_is_locked.text);
     return true;
   }
   p.facing = -p.facing;

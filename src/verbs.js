@@ -4,7 +4,7 @@ import { CLASS } from './data.js';
 import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world.js';
 import { lieDown, idleFrame } from './player.js';
 import { fireUp, anyInput, isIdle, directionPress } from './input.js';
-import { say, print, clearPanel, PANEL_ROW } from './panel.js';
+import { say, sayWrapped, print, clearPanel, PANEL_ROW } from './panel.js';
 import { objectUnder, pickItem, canCarry, weightOf, destroy, carried, CANCELLED } from './inventory.js';
 import { creatureInReach, banish, flagsOf } from './creatures.js';
 import { speak, pense, buy, sell, offer } from './dialog.js';
@@ -105,11 +105,11 @@ export function* runMenu(state) {
 function lacksSkill(state, limit, energy) {
   const p = state.player;
   if (p.spiritLimit < limit) {
-    say(state, 'YOU LACK THE SPIRIT SKILL');
+    sayWrapped(state, 'YOU LACK THE SPIRIT SKILL');
     return true;
   }
   if (p.spiritEnergy < energy) {
-    say(state, 'YOU NEED MORE SPIRIT ENERGY');
+    sayWrapped(state, 'YOU NEED MORE SPIRIT ENERGY');
     return true;
   }
   return false;
@@ -117,7 +117,7 @@ function lacksSkill(state, limit, energy) {
 
 function* examine(state) {
   const o = objectUnder(state);
-  if (!o) return say(state, 'THERE IS NOTHING OF INTEREST HERE');
+  if (!o) return sayWrapped(state, 'THERE IS NOTHING OF INTEREST HERE');
   say(state, 'IT LOOKS LIKE');
   print(state, PANEL_ROW, 15, o.name);
 }
@@ -131,9 +131,9 @@ function mayTake(state, o) {
 
 function* take(state) {
   const o = objectUnder(state);
-  if (!o) return say(state, 'NOTHING HERE TO TAKE');
-  if (!mayTake(state, o)) return say(state, 'IT WAS NOT OFFERED TO YOU');
-  if (!canCarry(state, weightOf(state, o))) return say(state, 'YOU CAN CARRY NO MORE');
+  if (!o) return sayWrapped(state, 'NOTHING HERE TO TAKE');
+  if (!mayTake(state, o)) return sayWrapped(state, 'IT WAS NOT OFFERED TO YOU');
+  if (!canCarry(state, weightOf(state, o))) return sayWrapped(state, 'YOU CAN CARRY NO MORE');
   o.carried = true;
   acquired(state, o);
   state.offered = null;
@@ -161,14 +161,14 @@ function dropTarget(state) {
 
 function* drop(state) {
   const target = dropTarget(state);
-  if (!target) return say(state, 'NOT HERE');
+  if (!target) return sayWrapped(state, 'NOT HERE');
   say(state, 'WHAT WILL YOU DROP?');
   const o = yield* pickItem(state, { col: 22 });
   if (!o) return CANCELLED;
   if (state.lamp && state.lamp.object === o.object) {
     destroy(o);
     state.lamp = null;
-    say(state, 'YOUR LAMP VANISHES');
+    sayWrapped(state, 'YOUR LAMP VANISHES');
     return;
   }
   o.carried = false;
@@ -207,31 +207,31 @@ function* use(state) {
   const bramble = tileWithRole(state, 'bramble');
   switch (o.class) {
     case CLASS.HONEYLAMP:
-      if (state.lamp) return say(state, 'YOUR LAMP IS ALREADY LIT');
+      if (state.lamp) return sayWrapped(state, 'YOUR LAMP IS ALREADY LIT');
       state.lamp = { object: o.object, fuel: 10 + Math.floor(state.rng() * 4) };
-      return say(state, 'YOUR LAMP IS LIT');
+      return sayWrapped(state, 'YOUR LAMP IS LIT');
     case CLASS.WAND: {
       const c = creatureInReach(state);
       if (c) banish(state, c);
-      return say(state, cut(state, bramble) ? 'THE WAND CUTS SWIFTLY' : 'THE WAND IS USELESS HERE');
+      return sayWrapped(state, cut(state, bramble) ? 'THE WAND CUTS SWIFTLY' : 'THE WAND IS USELESS HERE');
     }
     case CLASS.BEAK:
-      if (!cut(state, bramble)) return say(state, 'THE BEAK IS USELESS HERE');
+      if (!cut(state, bramble)) return sayWrapped(state, 'THE BEAK IS USELESS HERE');
       if (Math.floor(state.rng() * 16) === 0) {
         destroy(o);
         sfx(state, SFX.knockdown);
-        return say(state, 'THE TRENCHER BEAK BREAKS');
+        return sayWrapped(state, 'THE TRENCHER BEAK BREAKS');
       }
-      return say(state, 'THE BEAK CUTS SLOWLY');
+      return sayWrapped(state, 'THE BEAK CUTS SLOWLY');
     case CLASS.ROPE:
       return layRope(state, o);
     case CLASS.TEMPLE_KEY:
     case CLASS.FALLA_KEY: {
       const inChamber = state.room.room === CHAMBER_ROOM;
-      if (inChamber !== (o.class === CLASS.FALLA_KEY)) return say(state, 'THE KEY IS USELESS HERE');
+      if (inChamber !== (o.class === CLASS.FALLA_KEY)) return sayWrapped(state, 'THE KEY IS USELESS HERE');
       const wall = tileWithRole(state, 'wall', (t) => /temple/.test(t.note));
-      if (!cut(state, wall)) return say(state, 'THE KEY IS USELESS HERE');
-      if (o.class === CLASS.FALLA_KEY && p.facing > 0) say(state, 'ENTER THE CHAMBER OF THE FORGOTTEN');
+      if (!cut(state, wall)) return sayWrapped(state, 'THE KEY IS USELESS HERE');
+      if (o.class === CLASS.FALLA_KEY && p.facing > 0) sayWrapped(state, 'ENTER THE CHAMBER OF THE FORGOTTEN');
       startTune(state, 'random');
       return;
     }
@@ -244,9 +244,9 @@ function layRope(state, o) {
   const row = p.row + 1;
   const isEmpty = (col) => col >= 0 && col < COLS && cell(state, col, row) === 0;
   let col = p.col + 2 * p.facing;
-  if (!isEmpty(col)) return say(state, 'THE ROPE IS USELESS HERE');
+  if (!isEmpty(col)) return sayWrapped(state, 'THE ROPE IS USELESS HERE');
   while (isEmpty(col)) col += p.facing;
-  if (col < 0 || col >= COLS) return say(state, 'THE ROPE IS USELESS HERE');
+  if (col < 0 || col >= COLS) return sayWrapped(state, 'THE ROPE IS USELESS HERE');
   for (let c = p.col + p.facing; c !== col; c += p.facing) state.screen[row * COLS + c] = VINE_ROPE_TILE;
   destroy(o);
 }
@@ -266,27 +266,27 @@ function* eat(state) {
   destroy(o);
   switch (o.class) {
     case CLASS.LAPAN:
-      if (p.people === 'Erdling') say(state, 'THE LAPAN IS GOOD');
+      if (p.people === 'Erdling') sayWrapped(state, 'THE LAPAN IS GOOD');
       else {
-        say(state, 'THE LAPAN HAS A STRANGE TASTE');
+        sayWrapped(state, 'THE LAPAN HAS A STRANGE TASTE');
         p.spiritEnergy = Math.max(0, p.spiritEnergy - 15);
       }
       return feed(state, 5);
     case CLASS.BREAD:
-      say(state, 'THE PAN BREAD IS GOOD');
+      sayWrapped(state, 'THE PAN BREAD IS GOOD');
       return feed(state, 5);
     case CLASS.FRUIT:
-      say(state, 'THE FRUIT & NUTS ARE GOOD');
+      sayWrapped(state, 'THE FRUIT & NUTS ARE GOOD');
       return feed(state, 5);
     case CLASS.BERRIES:
       advanceHour(state);
       advanceHour(state);
-      say(state, 'YOU FEEL STRANGE.  TIME PASSES.');
+      sayWrapped(state, 'YOU FEEL STRANGE.  TIME PASSES.');
       p.spiritEnergy = Math.max(0, p.spiritEnergy - 15);
       return;
     case CLASS.ELIXER:
       state.progress.elixirs += 1;
-      say(state, 'YOU FEEL MUCH STRONGER');
+      sayWrapped(state, 'YOU FEEL MUCH STRONGER');
       p.stamina += 5;
       p.foodCap = p.restCap = Math.floor(p.stamina / 2);
       p.food = p.foodCap;
@@ -301,7 +301,7 @@ function* heal(state) {
   p.spiritEnergy -= 5;
   p.food = Math.min(p.foodCap, p.food + 2);
   p.rest = Math.min(p.restCap, p.rest + 2);
-  say(state, 'YOU HEAL YOURSELF');
+  sayWrapped(state, 'YOU HEAL YOURSELF');
 }
 
 const LIMB = new Set(['limb_top', 'grown_limb']);
@@ -313,11 +313,11 @@ function* grunspreke(state) {
   if (state.room.tileset !== 'outdoor' || !LIMB.has(role(state, cell(state, p.col, p.row + 1)))
       || LIMB.has(role(state, cell(state, target.col, target.row)))
       || target.col < 0 || target.col >= COLS || target.row >= ROWS) {
-    return say(state, "GRUNSPREKING DOESN'T WORK HERE");
+    return sayWrapped(state, "GRUNSPREKING DOESN'T WORK HERE");
   }
   state.screen[target.row * COLS + target.col] = GROWN_LIMB_TILE;
   p.spiritEnergy -= 2;
-  say(state, 'THE LIMB GROWS');
+  sayWrapped(state, 'THE LIMB GROWS');
 }
 
 function* point(state, choice) {
@@ -349,12 +349,12 @@ function* kiniport(state) {
   if (lacksSkill(state, 25, 5)) return;
   state.pointer = { col: p.col, row: p.row };
   try {
-    say(state, 'WHAT DO YOU WANT TO KINIPORT?');
+    sayWrapped(state, 'WHAT DO YOU WANT TO KINIPORT?');
     const at = yield* point(state, 'source');
     if (at.col === p.col && at.row <= p.row && at.row >= p.row - 2) {
       if (lacksSkill(state, 30, 10)) return;
       for (;;) {
-        say(state, 'KINIPORT YOUR BODY WHERE?');
+        sayWrapped(state, 'KINIPORT YOUR BODY WHERE?');
         const to = yield* point(state, 'destination');
         if (!isSupport(state, cell(state, to.col, to.row + 1))
             || NOT_A_LANDING.has(role(state, cell(state, to.col, to.row)))) {
@@ -369,18 +369,18 @@ function* kiniport(state) {
       }
     }
     const code = cell(state, at.col, at.row);
-    if (role(state, code) !== 'object') return say(state, "YOU CAN'T KINIPORT THAT");
+    if (role(state, code) !== 'object') return sayWrapped(state, "YOU CAN'T KINIPORT THAT");
     if (state.data.tiles[code].object.half === 'right') at.col -= 1;
     const o = state.objects.find((x) => x.exists && !x.carried && x.room === state.room.room
       && x.col === at.col && x.row === at.row);
-    if (!o) return say(state, "YOU CAN'T KINIPORT THAT");
+    if (!o) return sayWrapped(state, "YOU CAN'T KINIPORT THAT");
     if (state.commandChoice) {
       if (state.commandChoice.applying) state.commandChoice.used.add('item');
       if (state.commandChoice.applying && state.commandChoice.item !== o.object) throw new Error('KINIPORT object mismatch');
       state.commandChoice.item = o.object;
     }
     for (;;) {
-      say(state, 'KINIPORT THE OBJECT WHERE?');
+      sayWrapped(state, 'KINIPORT THE OBJECT WHERE?');
       const to = yield* point(state, 'destination');
       const halves = [role(state, cell(state, to.col, to.row)), role(state, cell(state, to.col + 1, to.row))];
       if (to.col === COLS - 1 || halves.some((r) => r === 'wall' || r === 'object')
@@ -453,10 +453,10 @@ function* rest(state) {
   if (!state.demo && state.commandChoice) return beginRest(state);
   const p = state.player;
   if (!p.indoors || role(state, cell(state, p.col, p.row - 1)) !== 'nid_left') {
-    return say(state, 'THERE IS NO NID HERE');
+    return sayWrapped(state, 'THERE IS NO NID HERE');
   }
   const own = state.room.room === state.nidPlace.room || state.room.room === SKY_NID_ROOM;
-  if (!own && state.offered !== 'nid') return say(state, 'NO ONE OFFERED YOU A NID');
+  if (!own && state.offered !== 'nid') return sayWrapped(state, 'NO ONE OFFERED YOU A NID');
   if (state.room.room === SKY_NID_ROOM) state.dream = DREAM.marked;
   while (role(state, cell(state, p.col, p.row - 1)) !== 'nid_right') p.col += 1;
   p.col -= 1;
@@ -581,10 +581,10 @@ export function executeCommand(state, name, choices = {}, passage = null) {
 function beginRest(state) {
   const p = state.player;
   if (!p.indoors || role(state, cell(state, p.col, p.row - 1)) !== 'nid_left') {
-    return say(state, 'THERE IS NO NID HERE');
+    return sayWrapped(state, 'THERE IS NO NID HERE');
   }
   const own = state.room.room === state.nidPlace.room || state.room.room === SKY_NID_ROOM;
-  if (!own && state.offered !== 'nid') return say(state, 'NO ONE OFFERED YOU A NID');
+  if (!own && state.offered !== 'nid') return sayWrapped(state, 'NO ONE OFFERED YOU A NID');
   if (state.room.room === SKY_NID_ROOM) state.dream = DREAM.marked;
   while (role(state, cell(state, p.col, p.row - 1)) !== 'nid_right') {
     if (++p.col >= COLS) throw new Error('Invalid nid');

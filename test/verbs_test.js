@@ -311,7 +311,7 @@ test('oversleeping starves you silently; the debt comes due at the next hour', a
   assert.equal(s.clock.day, 1);
   s.clock.ticks = TICKS_PER_HOUR - 1;
   ticks(s, 1);
-  assert.equal(lines(s)[2], 'FOOD');
+  assert.deepEqual(lines(s).join(' ').match(/\S+/g), 'YOU SPENT A DAY RECOVERING FROM A LACK OF FOOD'.split(' '));
   assert.equal(s.clock.day, 2);
 });
 
@@ -354,7 +354,7 @@ test('wissenberries cost two hours', async () => {
   place(s, 26, 5, 5);
   give(s, CLASS.BERRIES);
   const out = run(s, [...menu('EAT'), ...page(0), J.idle, J.idle]);
-  assert.equal(out[0], 'YOU FEEL STRANGE.  TIME PASSES.');
+  assert.deepEqual(out.join(' ').match(/\S+/g), 'YOU FEEL STRANGE. TIME PASSES.'.split(' '));
   assert.equal(s.clock.hour, 2);
 });
 

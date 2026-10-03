@@ -2,11 +2,148 @@ import { talkFixture, questState, menuReads as menu, J, lines, give } from './he
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { startVerb } from '../src/game.js';
-import { gainSpirit, pense, offer } from '../src/dialog.js';
+import { gainSpirit, pense, offer, speak, tell } from '../src/dialog.js';
 import { CLASS } from '../src/data.js';
 import { completion, playTime } from '../src/progress.js';
+import { flagsOf } from '../src/creatures.js';
+import { newPanel, say, sayWrapped } from '../src/panel.js';
+import { executeCommand } from '../src/verbs.js';
 
 const words = text => text.match(/\S+/g) || [];
+
+function assertPassage(state, text) {
+  assert.deepEqual(words(lines(state).join(' ')), words(text));
+}
+
+test('every vision preserves its heading and all words without splitting or truncation', async () => {
+  const { data, pomma } = await talkFixture();
+  for (const [index, vision] of data.quest.visions.entries()) {
+    const state = questState(data, pomma);
+    state.player.spiritLimit = 35;
+    state.visions = index;
+    gainSpirit(state, 5).next();
+    assertPassage(state, `A VISION COMES TO YOU: ${vision.text}`);
+    assert.equal(state.visions, index + 1);
+  }
+});
+
+test('every spirit skill is announced as a complete statement', async () => {
+  const { data, pomma } = await talkFixture();
+  for (const skill of data.skills) {
+    const state = questState(data, pomma);
+    state.player.spiritLimit = skill.spirit_limit - 5;
+    gainSpirit(state, 5).next();
+    assertPassage(state, `CONGRATULATIONS QUESTER, YOU HAVE GAINED THE POWER TO ${skill.display_name}`);
+  }
+});
+
+test('both standing gates of every creature retain every spoken word and punctuation', async () => {
+  const { data, pomma, faceCreature } = await talkFixture();
+  for (const def of data.creatures) {
+    for (const [gate, dialogue] of Object.entries(def.dialog)) {
+      const state = questState(data, pomma);
+      const creature = faceCreature(state, def.room);
+      const standing = def.gate.stat === 'standing_kindar' ? 'standingKindar' : 'standingErdling';
+      state.player[standing] = def.gate.level - (gate === 'gate_failed' ? 1 : 0);
+      flagsOf(state, creature.def).gift = true;
+      speak(state).next();
+      const expected = dialogue.speak.filter(Boolean).map(id => data.messages[id]).join(' ');
+      assertPassage(state, expected || 'NO RESPONSE');
+    }
+  }
+});
+
+test('continued speech forms whole statements while verse and greetings keep their breaks', async () => {
+  const { data, pomma, faceCreature } = await talkFixture();
+  for (const first of [57, 64, 145, 53]) {
+    const def = data.creatures.find(c => Object.values(c.dialog).some(d => d.speak[0] === first));
+    const [gate, dialogue] = Object.entries(def.dialog).find(([, d]) => d.speak[0] === first);
+    const state = questState(data, pomma);
+    const creature = faceCreature(state, def.room);
+    const standing = def.gate.stat === 'standing_kindar' ? 'standingKindar' : 'standingErdling';
+    state.player[standing] = def.gate.level - (gate === 'gate_failed' ? 1 : 0);
+    flagsOf(state, creature.def).gift = true;
+    const statements = dialogue.speak.filter(Boolean).map(id => data.messages[id]);
+    const expected = { panel: newPanel() };
+    sayWrapped(expected, ...([57, 64].includes(first) ? [statements.join(' ')] : statements));
+    speak(state).next();
+    assert.deepEqual(state.panel, expected.panel);
+  }
+});
+
+test('demo speech retains its original literal lines including continued sentences', async () => {
+  const { data, pomma, faceCreature } = await talkFixture();
+  for (const def of data.creatures) {
+    const state = questState(data, pomma);
+    const creature = faceCreature(state, def.room);
+    state.player.standingKindar = state.player.standingErdling = 10;
+    state.demo = { name: 'quest' };
+    flagsOf(state, creature.def).gift = true;
+    const statements = def.dialog.gate_passed.speak.filter(Boolean).map(id => data.messages[id]);
+    const expected = { panel: newPanel(), data };
+    if (statements.length) say(expected, ...statements);
+    else tell(expected, 'no_response_line1');
+    speak(state).next();
+    assert.deepEqual(state.panel, expected.panel);
+  }
+});
+
+test('fixed prose replies retain their complete wording through SPEAK, PENSE, BUY, SELL and OFFER', async () => {
+  const { data, pomma, faceCreature } = await talkFixture();
+  const cases = [
+    ['SPEAK', 'speak_with_whom', s => { s.creature = null; }],
+    ['SPEAK', 'nothing_more_to_give', s => { faceCreature(s, 4); s.objects = []; }],
+    ['SPEAK', 'come_back_tomorrow', s => {
+      const c = faceCreature(s, 4);
+      flagsOf(s, c.def).day = s.clock.day;
+    }],
+    ['PENSE', 'pense_whom', s => { s.creature = null; }],
+    ['PENSE', 'pense_lacks_skill', s => { faceCreature(s, 4); s.player.spiritLimit = 0; }],
+    ['PENSE', 'pense_needs_energy', s => { faceCreature(s, 4); s.player.spiritEnergy = 0; }],
+    ['BUY', 'no_merchant_here', s => { s.creature = null; }],
+    ['BUY', 'buy_needs_tokens', s => {
+      faceCreature(s, 26);
+      for (const o of s.objects) o.carried = false;
+    }],
+    ['BUY', 'buy_too_heavy', s => {
+      faceCreature(s, 26);
+      for (const o of s.objects) if (o.exists) o.carried = true;
+    }],
+    ['BUY', 'buy_granted', s => { faceCreature(s, 26); give(s, CLASS.TOKEN); }],
+    ['SELL', 'sell_refused', s => {
+      faceCreature(s, 26);
+      for (const o of s.objects) if (o.class === CLASS.TOKEN) o.exists = true;
+      return { item: give(s, CLASS.SHUBA).object };
+    }],
+    ['SELL', 'sell_paid', s => { faceCreature(s, 26); return { item: give(s, CLASS.SHUBA).object }; }],
+    ['OFFER', 'offer_to_whom', s => { s.creature = null; }],
+    ['OFFER', 'offer_refused', s => { faceCreature(s, 352); return { item: give(s, CLASS.SHUBA).object }; }],
+    ['OFFER', 'offer_gate_accepted', s => { faceCreature(s, 352); return { item: give(s, CLASS.BERRIES).object }; }],
+  ];
+  for (const [verb, name, setup] of cases) {
+    const state = questState(data, pomma);
+    executeCommand(state, verb, setup(state) || {});
+    assertPassage(state, data.fixed[name].text);
+  }
+});
+
+test('every PENSE reply fits the preserved emotion and message labels without losing words', async () => {
+  const { data, pomma, faceCreature } = await talkFixture();
+  for (const def of data.creatures) {
+    for (const [gate, dialogue] of Object.entries(def.dialog)) {
+      const state = questState(data, pomma);
+      faceCreature(state, def.room);
+      const standing = def.gate.stat === 'standing_kindar' ? 'standingKindar' : 'standingErdling';
+      state.player[standing] = def.gate.level - (gate === 'gate_failed' ? 1 : 0);
+      pense(state).next();
+      const emotion = data.messages[dialogue.emotion];
+      const message = data.messages[dialogue.message];
+      assertPassage(state, emotion
+        ? `EMOTION: ${emotion} MESSAGE: ${message || 'NO RESPONSE'}`
+        : 'EMOTION: NO RESPONSE');
+    }
+  }
+});
 
 for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.'], [30, 'GIFTED QUESTER.']]) {
   test(`victory on day ${day} preserves both passages, ${rank} and the footer`, async () => {

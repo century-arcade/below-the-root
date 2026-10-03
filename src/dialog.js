@@ -10,11 +10,17 @@ import { completion, playTime } from './progress.js';
 
 const STANDING = { standing_kindar: 'standingKindar', standing_erdling: 'standingErdling' };
 const GIFT_KINDS = new Set(['gift_giver', 'blesser', 'key_revealer']);
+// speech 57/64: continued sentences; other pairs retain statement breaks
+const CONTINUED_SPEECH = new Set([57, 64]);
 
 export function tell(state, name, clear = true) {
   const f = state.data.fixed[name];
   if (clear) clearPanel(state);
   print(state, f.row, f.col, f.text);
+}
+
+function reply(state, name) {
+  sayWrapped(state, state.data.fixed[name].text);
 }
 
 function passes(state, def) {
@@ -35,17 +41,19 @@ function givesItem(def) {
 
 export function* speak(state) {
   const c = facingCreature(state);
-  if (!c) return tell(state, 'speak_with_whom');
+  if (!c) return reply(state, 'speak_with_whom');
   const def = c.def;
   const flags = flagsOf(state, def);
   const passed = passes(state, def);
   if (def.kind === 'gift_giver' && passed) {
-    if (givesItem(def) && onFloor(state).length === 0) return tell(state, 'nothing_more_to_give');
-    if (flags.day === state.clock.day) return tell(state, 'come_back_tomorrow');
+    if (givesItem(def) && onFloor(state).length === 0) return reply(state, 'nothing_more_to_give');
+    if (flags.day === state.clock.day) return reply(state, 'come_back_tomorrow');
   }
   const lines = chosen(state, def).speak;
   if (!lines[0]) return tell(state, 'no_response_line1');
-  say(state, ...lines.filter(Boolean).map((id) => state.data.messages[id]));
+  const statements = lines.filter(Boolean).map((id) => state.data.messages[id]);
+  if (state.demo) say(state, ...statements);
+  else sayWrapped(state, ...(CONTINUED_SPEECH.has(lines[0]) ? [statements.join(' ')] : statements));
   flags.day = state.clock.day;
   if (passed && (GIFT_KINDS.has(def.kind) || offersNid(def))) {
     state.offered = offersNid(def) ? 'nid' : def.params.offers_item_class;
@@ -60,9 +68,9 @@ export function* speak(state) {
 export function* pense(state) {
   const p = state.player;
   const c = state.creature;
-  if (!c) return tell(state, 'pense_whom');
-  if (p.spiritLimit < 5) return tell(state, 'pense_lacks_skill');
-  if (p.spiritEnergy === 0) return tell(state, 'pense_needs_energy');
+  if (!c) return reply(state, 'pense_whom');
+  if (p.spiritLimit < 5) return reply(state, 'pense_lacks_skill');
+  if (p.spiritEnergy === 0) return reply(state, 'pense_needs_energy');
   const def = c.def;
   const flags = flagsOf(state, def);
   const d = chosen(state, def);
@@ -90,7 +98,7 @@ export function* pense(state) {
 function merchant(state) {
   const c = state.creature;
   if (!c || c.def.kind !== 'merchant') {
-    tell(state, 'no_merchant_here');
+    reply(state, 'no_merchant_here');
     return null;
   }
   if (facingCreature(state) !== c) {
@@ -104,14 +112,14 @@ export function* buy(state) {
   const c = merchant(state);
   if (!c) return;
   const token = carriedOf(state, CLASS.TOKEN);
-  if (!token) return tell(state, 'buy_needs_tokens');
+  if (!token) return reply(state, 'buy_needs_tokens');
   const stock = c.def.params.stock_item_class;
   // Reserve room for the stock after payment.
   const reserve = state.data.items[stock].weight - weightOf(state, token);
-  if (!canCarry(state, reserve)) return tell(state, 'buy_too_heavy');
+  if (!canCarry(state, reserve)) return reply(state, 'buy_too_heavy');
   destroy(token);
   state.offered = stock;
-  tell(state, 'buy_granted');
+  reply(state, 'buy_granted');
 }
 
 export function* sell(state) {
@@ -122,21 +130,21 @@ export function* sell(state) {
     accept: (x) => state.data.items[x.class].sellable, perClass: true, col: state.data.fixed.sell_nothing.col,
   });
   if (!o) return CANCELLED;
-  if (!state.objects.some((x) => x.class === CLASS.TOKEN && !x.exists)) return tell(state, 'sell_refused');
+  if (!state.objects.some((x) => x.class === CLASS.TOKEN && !x.exists)) return reply(state, 'sell_refused');
   destroy(o);
   mintToken(state);
-  tell(state, 'sell_paid');
+  reply(state, 'sell_paid');
 }
 
 export function* offer(state) {
   const c = facingCreature(state);
-  if (!c) return tell(state, 'offer_to_whom');
+  if (!c) return reply(state, 'offer_to_whom');
   tell(state, 'offer_what');
   const o = yield* pickItem(state, { perClass: true, col: state.data.fixed.offer_nothing.col });
   if (!o) return CANCELLED;
   const target = c.def.params.offer_target;
   if (!target) return tell(state, 'no_response_line1');
-  if (!target.accepts_item_classes.includes(o.class)) return tell(state, 'offer_refused');
+  if (!target.accepts_item_classes.includes(o.class)) return reply(state, 'offer_refused');
   if (target.result === 'quest_complete') return yield* win(state);
   destroy(o);
   state.paid = true;
@@ -144,7 +152,7 @@ export function* offer(state) {
     state.berriesOffered += 1;
     if (state.berriesOffered >= c.def.params.offers_needed_for_permanent) flagsOf(state, c.def).banished = true;
   }
-  tell(state, 'offer_gate_accepted');
+  reply(state, 'offer_gate_accepted');
 }
 
 // time.md, The endings: the whole score
@@ -181,14 +189,14 @@ function* announce(state) {
   if (p.spiritLimit >= 35 && state.visions >= visions.length) return startTune(state, 'random');
   if (p.spiritLimit < 35) {
     const skill = state.data.skills[Math.floor(p.spiritLimit / 5) - 1];
-    say(state, 'CONGRATULATIONS QUESTER, YOU HAVE', `GAINED THE POWER TO ${skill.display_name}`);
+    sayWrapped(state, `CONGRATULATIONS QUESTER, YOU HAVE GAINED THE POWER TO ${skill.display_name}`);
     startTune(state, 'random');
     // Live commands leave the final passage to the menu's result dismissal.
     // Standalone and demo scripts retain their original acknowledgement reads.
     if (!state.commandChoice || state.visions < visions.length) yield* buttonPress();
   }
   if (state.visions < visions.length) {
-    say(state, 'A VISION COMES TO YOU:', visions[state.visions].text);
+    sayWrapped(state, 'A VISION COMES TO YOU:', visions[state.visions].text);
     state.visions += 1;
     startTune(state, 'random');
     if (!state.commandChoice) yield* buttonPress();

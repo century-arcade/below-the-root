@@ -72,6 +72,28 @@ test('stepping in water: a day lost, home in the nid', async () => {
   assert.equal(s.room.room, s.nidPlace.room);
 });
 
+test('timeout preserves every sentence without splitting the final word across rows', async () => {
+  const { data, pomma } = await timeFixture();
+  const state = questState(data, pomma);
+  state.stop = { reason: 'timeout' };
+  tick(state);
+  assert.deepEqual(lines(state).join(' ').match(/\S+/g), (
+    'THE LIGHT FADES INTO DARKNESS... THE TIME FOR YOUR QUEST HAS ENDED. '
+    + 'GREEN-SKY AWAITS THE RISE OF ANOTHER QUESTER.'
+  ).match(/\S+/g));
+});
+
+for (const outcome of ['attack_salaat', 'attack_nekom', 'kidnap_salaat', 'kidnap_nekom']) {
+  test(`${outcome} preserves its complete prose rather than original screen padding`, async () => {
+    const { data, pomma } = await timeFixture();
+    const state = questState(data, pomma);
+    state.stop = { reason: 'ambush', outcome };
+    tick(state);
+    const name = outcome.replace('attack_', 'attacked_').replace('kidnap_', 'kidnapped_');
+    assert.deepEqual(lines(state).join(' ').match(/\S+/g), data.fixed[name].text.match(/\S+/g));
+  });
+}
+
 test('a honeylamp burns per edge crossed, not per doorway', async () => {
   const { run, useDoor, data, pomma } = await timeFixture();
 

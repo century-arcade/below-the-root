@@ -5,10 +5,9 @@ import { newPlayer, step, figureOf, haltAtEdge, idleFrame } from './player.js';
 import { enterRoom, leaveByEdge, useDoor } from './world.js';
 import { runMenu, restTick } from './verbs.js';
 import { DemoInput, buttonPress, anyInput, isIdle } from './input.js';
-import { newPanel, say, clearPanel } from './panel.js';
+import { newPanel, say, sayWrapped, clearPanel } from './panel.js';
 import { newFlags, creatureTick, creatureFigure } from './creatures.js';
 import { newClock, clockTick, loseDay, kidnap, DREAM } from './clock.js';
-import { tell } from './dialog.js';
 import { startTune, TUNE } from './audio.js';
 import { newProgress } from './progress.js';
 
@@ -251,9 +250,9 @@ function resolveStop(state) {
     case 'drown':
       return startVerb(state, message(state, () => loseDay(state, 'YOU WERE FOUND NEAR THE WATER.', 'TIME HAS PASSED.')));
     case 'collapse':
-      return startVerb(state, message(state, () => loseDay(state, 'YOU SPENT A DAY RECOVERING', 'FROM A LACK OF', COLLAPSE[stop.cause])));
+      return startVerb(state, message(state, () => loseDay(state, `YOU SPENT A DAY RECOVERING FROM A LACK OF ${COLLAPSE[stop.cause]}`)));
     case 'bell':
-      return startVerb(state, message(state, () => say(state, 'THE SPIRIT BELL RINGS'), false), true);
+      return startVerb(state, message(state, () => sayWrapped(state, 'THE SPIRIT BELL RINGS'), false), true);
     case 'timeout':
       return startVerb(state, timeOver(state));
     case 'demo_room':
@@ -291,13 +290,13 @@ function* ambushed(state, outcome) {
   yield* message(state, () => {
     if (outcome.startsWith('kidnap')) return kidnap(state, outcome);
     loseDay(state);
-    tell(state, ATTACK[outcome]);
+    sayWrapped(state, state.data.fixed[ATTACK[outcome]].text);
   });
 }
 
 // time.md, The endings: running out of time
 function* timeOver(state) {
-  say(state, 'THE LIGHT FADES INTO DARKNESS...', 'THE TIME FOR YOUR QUEST HAS ENDED.',
+  sayWrapped(state, 'THE LIGHT FADES INTO DARKNESS...', 'THE TIME FOR YOUR QUEST HAS ENDED.',
     'GREEN-SKY AWAITS THE RISE OF ANOTHER QUESTER.');
   startTune(state, TUNE.over);
   yield* buttonPress();

@@ -30,7 +30,7 @@ test('food running out costs a day', async () => {
   ticks(s, 1);
   assert.equal(s.stop, null);
   assert.ok(s.verb, 'message up');
-  assert.deepEqual(lines(s).slice(0, 3), ['YOU SPENT A DAY RECOVERING', 'FROM A LACK OF', 'FOOD']);
+  assert.equal(lines(s).join(' ').trim().replace(/\s+/g, ' '), 'YOU SPENT A DAY RECOVERING FROM A LACK OF FOOD');
   assert.equal(s.clock.day, 2);
   assert.equal(s.room.room, s.nidPlace.room);
   assert.equal(p.food, p.foodCap);
