@@ -9,7 +9,7 @@ import argparse
 import os
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 from PIL.Image import Resampling, Transform
 
 from common import ROOT
@@ -122,6 +122,36 @@ def redraw_grid(ink, out_x, out_y):
     return ink
 
 
+def remove_poster_blemishes(image):
+    mask = Image.new('1', image.size)
+    draw = ImageDraw.Draw(mask)
+    left, top = MARGIN['left'], MARGIN['top']
+    right, bottom = left + COLUMNS * CELL_W, top + ROWS * CELL_H
+    empty_right_columns = (left + 25 * CELL_W, top, right, bottom)
+    empty_ground_below_grunds = (left + 9 * CELL_W, top + 12 * CELL_H,
+                                left + 18 * CELL_W, bottom)
+    crease_between_legend_items = [(1180, 760), (1258, 760), (1258, 804), (1248, 804),
+                                  (1248, 830), (1210, 830), (1210, 802), (1180, 802)]
+    draw.rectangle(empty_right_columns, fill=1)
+    draw.rectangle(empty_ground_below_grunds, fill=1)
+    draw.polygon(crease_between_legend_items, fill=1)
+    pixels = np.asarray(image).copy()
+    palette = np.array(image.getpalette()).reshape(-1, 3)
+    paper_index = np.argmin(((palette - PAPER) ** 2).sum(1))
+    grid_rgb = np.round(PAPER * (1 - GRID_INK) + INK * GRID_INK)
+    grid_index = np.argmin(((palette - grid_rgb) ** 2).sum(1))
+    selected = np.asarray(mask)
+    pixels[selected] = paper_index
+    y, x = np.indices(pixels.shape)
+    grid = ((x >= left - 1) & (x <= right) &
+            (y >= top - 1) & (y <= bottom) &
+            (((x - left + 1) % CELL_W < 2) | ((y - top + 1) % CELL_H < 2)))
+    pixels[selected & grid] = grid_index
+    image = image.copy()
+    image.putdata(pixels.ravel())
+    return image
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image', default=os.path.join(ROOT, 'iso/map.jpg'))
@@ -159,7 +189,8 @@ def main():
     size = (out_x[-1], out_y[-1])
     ink = redraw_grid(flat.transform(size, Transform.MESH, mesh, Resampling.BICUBIC), out_x, out_y)
     rgb = PAPER * (1 - ink[..., None]) + INK * ink[..., None]
-    Image.fromarray(rgb.round().astype(np.uint8)).quantize(16, dither=Image.Dither.NONE).save(args.output, optimize=True)
+    image = Image.fromarray(rgb.round().astype(np.uint8)).quantize(16, dither=Image.Dither.NONE)
+    remove_poster_blemishes(image).save(args.output, optimize=True)
     print(f'{args.output}: {size[0]}x{size[1]}, grid at {MARGIN}')
 
 
