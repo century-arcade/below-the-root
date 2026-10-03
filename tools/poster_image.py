@@ -19,7 +19,7 @@ CELL_W, CELL_H = 80, 40
 MARGIN = {'left': 48, 'right': 48, 'top': 80, 'bottom': 256}
 PAPER = np.array([236, 230, 208], float)
 INK = np.array([38, 82, 52], float)
-GRID_INK = 0.4
+FAINT = 0.45
 
 
 def line_peaks(dark, expected, bands, axis, window=5):
@@ -98,16 +98,31 @@ def erase_line(ink, x0, x1, y0, y1, axis):
             along = ink[y0 - reach:y0 + reach, x0:x1].T
         profile = (along > 0.3).sum(0)
         k = int(np.argmax(profile))
-        if profile[k] >= 0.25 * along.shape[0]:
-            along[:, max(k - 2, 0):k + 3] = 0
+        if profile[k] >= 0.12 * along.shape[0]:
+            a, b = max(k - 3, 0), min(k + 4, along.shape[1] - 1)
+            along[:, a:b] = np.minimum(along[:, a - 1:a], along[:, b:b + 1]) if a else 0
             return
 
 
-def redraw_grid(ink, out_x, out_y):
-    """Erase the photographed grid, then rule a clean one on the cell edges."""
+def erase_strokes(band, reach):
+    """Blank long thin vertical strokes in a band: rule remnants, not drawing."""
+    lit = band > 0.3
+    for c in range(3, band.shape[1] - 3):
+        side = lit[:, c - 3] | lit[:, c + 3]
+        run = 0
+        for y in range(band.shape[0] + 1):
+            if y < band.shape[0] and lit[y, c] and not side[y]:
+                run += 1
+                continue
+            if run >= reach:
+                band[y - run:y, c - 2:c + 3] = 0
+            run = 0
+
+
+def erase_grid(ink, out_x, out_y):
+    """Erase the photographed grid; the map has no ruled cell edges."""
     ink = np.asarray(ink).astype(float) / 255
-    top, bottom = out_y[1], out_y[-2]
-    left, right = out_x[1], out_x[-2]
+    right = out_x[-2]
     for x in out_x[1:-1]:
         for y0, y1 in zip(out_y[1:-2], out_y[2:-1]):
             erase_line(ink, x, None, y0, y1, 0)
@@ -115,9 +130,15 @@ def redraw_grid(ink, out_x, out_y):
         for x0, x1 in zip(out_x[1:-2], out_x[2:-1]):
             erase_line(ink, x0, x1, y, None, 1)
     for x in out_x[1:-1]:
-        ink[top - 1:bottom + 1, x - 1:x + 1] = np.maximum(ink[top - 1:bottom + 1, x - 1:x + 1], GRID_INK)
+        erase_strokes(ink[:, x - 12:x + 12], 20)
     for y in out_y[1:-1]:
-        ink[y - 1:y + 1, left - 1:right + 1] = np.maximum(ink[y - 1:y + 1, left - 1:right + 1], GRID_INK)
+        erase_strokes(ink[y - 12:y + 12, :right + 24].T, 20)
+    for x in out_x[1:-1]:
+        band = ink[:, x - 6:x + 6]
+        band[band < FAINT] = 0
+    for y in out_y[1:-1]:
+        band = ink[y - 6:y + 6, :right + 24]
+        band[band < FAINT] = 0
     ink[:, right + 24:] = 0
     return ink
 
@@ -138,15 +159,7 @@ def remove_poster_blemishes(image):
     pixels = np.asarray(image).copy()
     palette = np.array(image.getpalette()).reshape(-1, 3)
     paper_index = np.argmin(((palette - PAPER) ** 2).sum(1))
-    grid_rgb = np.round(PAPER * (1 - GRID_INK) + INK * GRID_INK)
-    grid_index = np.argmin(((palette - grid_rgb) ** 2).sum(1))
-    selected = np.asarray(mask)
-    pixels[selected] = paper_index
-    y, x = np.indices(pixels.shape)
-    grid = ((x >= left - 1) & (x <= right) &
-            (y >= top - 1) & (y <= bottom) &
-            (((x - left + 1) % CELL_W < 2) | ((y - top + 1) % CELL_H < 2)))
-    pixels[selected & grid] = grid_index
+    pixels[np.asarray(mask)] = paper_index
     image = image.copy()
     image.putdata(pixels.ravel())
     return image
@@ -156,8 +169,6 @@ def clean_poster_outline(image):
     palette = np.array(image.getpalette()).reshape(-1, 3)
     paper = int(np.argmin(((palette - PAPER) ** 2).sum(1)))
     ink = int(np.argmin(((palette - INK) ** 2).sum(1)))
-    grid_rgb = np.round(PAPER * (1 - GRID_INK) + INK * GRID_INK)
-    grid = int(np.argmin(((palette - grid_rgb) ** 2).sum(1)))
     image = image.copy()
     draw = ImageDraw.Draw(image)
 
@@ -212,9 +223,6 @@ def clean_poster_outline(image):
     for box in bottom_bands:
         draw.rectangle(box, fill=paper)
     draw.rectangle((2609, 67, image.width - 1, 843), fill=paper)
-    for x in range(MARGIN['left'], MARGIN['left'] + COLUMNS * CELL_W + 1, CELL_W):
-        draw.rectangle((x - 1, 79, x, 96), fill=grid)
-    draw.rectangle((47, 79, 2608, 80), fill=grid)
     draw.rectangle((14, 69, 2631, 835), outline=ink, width=4)
     return image
 
@@ -254,12 +262,12 @@ def main():
             box = (out_x[i], out_y[j], out_x[i + 1], out_y[j + 1])
             mesh.append((box, (*nw, *sw, *se, *ne)))
     size = (out_x[-1], out_y[-1])
-    ink = redraw_grid(flat.transform(size, Transform.MESH, mesh, Resampling.BICUBIC), out_x, out_y)
+    ink = erase_grid(flat.transform(size, Transform.MESH, mesh, Resampling.BICUBIC), out_x, out_y)
     rgb = PAPER * (1 - ink[..., None]) + INK * ink[..., None]
     image = Image.fromarray(rgb.round().astype(np.uint8)).quantize(16, dither=Image.Dither.NONE)
     image = clean_poster_outline(remove_poster_blemishes(image))
     image.save(args.output, optimize=True)
-    print(f'{args.output}: {size[0]}x{size[1]}, grid at {MARGIN}')
+    print(f'{args.output}: {size[0]}x{size[1]}, cells at {MARGIN}')
 
 
 if __name__ == '__main__':
