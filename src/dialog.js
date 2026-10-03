@@ -3,7 +3,7 @@
 import { CLASS } from './data.js';
 import { facingCreature, flagsOf, isAnimal } from './creatures.js';
 import { carriedOf, destroy, mintToken, onFloor, canCarry, pickItem, weightOf, CANCELLED } from './inventory.js';
-import { say, print, clearPanel, PANEL_ROW } from './panel.js';
+import { say, sayWrapped, print, clearPanel, PANEL_ROW } from './panel.js';
 import { buttonPress } from './input.js';
 import { startTune, TUNE } from './audio.js';
 import { completion, playTime } from './progress.js';
@@ -152,12 +152,12 @@ function* win(state) {
   state.progress.won = true;
   state.progress.finishedAt = state.simticks;
   const day = state.clock.day;
-  say(state, 'I AM RAAMO, THE SPIRIT GIFTED.',
+  sayWrapped(state, 'I AM RAAMO, THE SPIRIT GIFTED.',
     'YOU HAVE SAVED MY LIFE AND FULFILLED THE PROPHESY.  THE QUEST IS COMPLETE.  GREEN-SKY IS SAVED.');
   startTune(state, TUNE.over);
   yield* buttonPress();
   const rank = day < 15 ? 'MASTER QUESTER.' : day < 30 ? 'HIGHLY GIFTED QUESTER.' : 'GIFTED QUESTER.';
-  say(state, `YOU HAVE FINISHED THE QUEST IN ${day} DAYS. YOU ARE A`, '', rank);
+  sayWrapped(state, `YOU HAVE FINISHED THE QUEST IN ${day} DAYS. YOU ARE A ${rank}`);
   print(state, PANEL_ROW + 3, 1, `${playTime(state)} PLAY / ${completion(state)}% COMPLETE`);
   startTune(state, TUNE.rank);
   yield* buttonPress();

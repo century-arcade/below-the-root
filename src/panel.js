@@ -28,6 +28,22 @@ export function say(state, ...lines) {
   lines.forEach((line, i) => print(state, PANEL_ROW + i, 1, line));
 }
 
+export function sayWrapped(state, ...paragraphs) {
+  const lines = paragraphs.flatMap(text => {
+    const wrapped = [''];
+    for (const word of text.match(/\S+/g) || []) {
+      if (word.length > PANEL_COLS - 1) throw new RangeError('Dialogue word exceeds panel width');
+      const last = wrapped.length - 1;
+      const next = wrapped[last] ? `${wrapped[last]} ${word}` : word;
+      if (next.length > PANEL_COLS - 1) wrapped.push(word);
+      else wrapped[last] = next;
+    }
+    return wrapped;
+  });
+  if (lines.length > PANEL_ROWS) throw new RangeError('Dialogue exceeds panel capacity');
+  say(state, ...lines);
+}
+
 export function panelText(state, row) {
   let s = '';
   for (let i = 0; i < PANEL_COLS; i++) {

@@ -1,8 +1,43 @@
-import { talkFixture, questState, menuReads as menu, J, lines } from './helpers.js';
+import { talkFixture, questState, menuReads as menu, J, lines, give } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { startVerb } from '../src/game.js';
-import { gainSpirit, pense } from '../src/dialog.js';
+import { gainSpirit, pense, offer } from '../src/dialog.js';
+import { CLASS } from '../src/data.js';
+import { completion, playTime } from '../src/progress.js';
+
+const words = text => text.match(/\S+/g) || [];
+
+for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.'], [30, 'GIFTED QUESTER.']]) {
+  test(`victory on day ${day} preserves both passages, ${rank} and the footer`, async () => {
+    const { faceCreature, data, pomma } = await talkFixture();
+    const s = questState(data, pomma);
+    faceCreature(s, data.roomByCode.get('GE').room);
+    s.clock.day = day;
+    s.simticks = 60 * (3600 + 2 * 60 + 3);
+    s.progress.partialTime = true;
+    give(s, CLASS.ROPE);
+    const dialogue = offer(s);
+    dialogue.next();
+    dialogue.next(J.idle);
+    dialogue.next(J.fire);
+    assert.deepEqual(words(lines(s).join(' ')), words(
+      'I AM RAAMO, THE SPIRIT GIFTED. YOU HAVE SAVED MY LIFE AND FULFILLED THE PROPHESY. '
+      + 'THE QUEST IS COMPLETE. GREEN-SKY IS SAVED.'
+    ));
+    dialogue.next(J.idle);
+    dialogue.next(J.fire);
+    const shown = lines(s);
+    const footer = `${playTime(s)} PLAY / ${completion(s)}% COMPLETE`;
+    assert.equal(shown.at(-1), footer);
+    assert.deepEqual(words(shown.join(' ')), words(
+      `YOU HAVE FINISHED THE QUEST IN ${day} DAYS. YOU ARE A ${rank} ${footer}`
+    ));
+    dialogue.next(J.idle);
+    assert.equal(dialogue.next(J.fire).done, true);
+    assert.equal(s.ended, 'won');
+  });
+}
 
 test('PENSE prints the emotion and the message and costs 2', async () => {
   const { run, faceCreature, data, pomma } = await talkFixture();
