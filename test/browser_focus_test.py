@@ -58,13 +58,6 @@ with browser_page('/play?player=0', setup=setup, has_touch=True) as page:
     running(False)  # Canvas still has focus while paused.
     page.keyboard.press('Space')
     running(True)
-    page.keyboard.press('m')
-    running(False)
-    page.locator('#close-map').click()
-    running(True)
-    page.keyboard.press('h')
-    running(True)  # Help permits live play.
-    page.keyboard.press('Escape')
     page.evaluate("dispatchEvent(new Event('blur'))")
     running(False)
     canvas.click()
@@ -95,19 +88,13 @@ with browser_page('/play?player=0', setup=setup, has_touch=True) as page:
     expect(canvas).to_be_focused()
     running(True)
 
-    # Explicit pauses and the map survive both window focus and pointer return.
-    for key in ['p', 'm']:
-        page.keyboard.press(key)
-        running(False)
-        page.evaluate("dispatchEvent(new Event('blur')); dispatchEvent(new Event('focus'))")
-        canvas.dispatch_event('pointerenter', {'pointerType': 'mouse'})
-        running(False)
-        if key == 'm':
-            expect(page.locator('#map-screen')).to_be_visible()
-            page.locator('#close-map').click()
-        else:
-            page.keyboard.press('p')
-        running(True)
+    page.keyboard.press('p')
+    running(False)
+    page.evaluate("dispatchEvent(new Event('blur')); dispatchEvent(new Event('focus'))")
+    canvas.dispatch_event('pointerenter', {'pointerType': 'mouse'})
+    running(False)
+    page.keyboard.press('p')
+    running(True)
 
     page.goto(BASE + '/about')
     page.evaluate('localStorage.clear(); sessionStorage.clear()')

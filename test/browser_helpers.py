@@ -88,24 +88,9 @@ def browser_page(path, *, setup=None, base=None, **options):
 
 
 def power_on(page):
-    """Plain launches hide the monitor, switched off, until the disk goes in."""
+    """Switch on a cold launch through the monitor's power control."""
     power = page.locator('#monitor-power')
     expect(power).to_have_attribute('aria-pressed', 'false')
     expect(page.locator('#screen')).to_be_hidden()
-    open_box(page)
-    page.get_by_role('button', name='Put the disk in the computer').click()
+    power.click()
     expect(power).to_have_attribute('aria-pressed', 'true')
-
-
-def open_box(page):
-    for selector in ['#box button', '#box-back button']:
-        item = page.locator(selector)
-        if item.is_visible():
-            item.click()
-
-
-def unfold_map(page):
-    """Open the box on the desk and unfold the paper map."""
-    open_box(page)
-    page.get_by_role('button', name='Unfold the map').click()
-    expect(page.locator('#paper-map')).to_be_visible()

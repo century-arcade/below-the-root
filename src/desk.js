@@ -22,7 +22,10 @@ export function setupDesk(desk) {
     button.onclick = () => show(button.dataset.deskGo);
   }
   for (const button of desk.querySelectorAll('button')) {
-    for (const type of ['keydown', 'keyup']) button.addEventListener(type, e => { if (e.key !== 'Escape') e.stopPropagation(); });
+    for (const type of ['keydown', 'keyup']) button.addEventListener(type, e => {
+      if (e.key === 'Escape' || (stage === 'map' && ['Tab', 'm', 'M'].includes(e.key))) return;
+      e.stopPropagation();
+    });
   }
   show(stage);
   return api;

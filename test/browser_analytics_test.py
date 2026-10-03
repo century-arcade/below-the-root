@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 from playwright.sync_api import sync_playwright, expect
-from browser_helpers import ready, observe, until, unfold_map
+from browser_helpers import ready, observe, until
 
 BUILD = Path(__file__).resolve().parents[1] / '_build'
 ORIGIN = 'https://below-the-root.netlify.app'
@@ -106,13 +106,10 @@ with sync_playwright() as p:
         ready(page)
         until(page, 's => s.frame > 0')
         assert observe(page)['quest']
-        unfold_map(page)
-        page.locator('#paper-map').click()
-        expect(page.locator('#map-screen')).to_be_visible()
-        page.keyboard.press('Escape')
-        page.locator('#help').click()
-        expect(page.locator('#help-screen')).to_be_visible()
-        page.keyboard.press('Escape')
+        page.keyboard.press('m')
+        expect(page.locator('#paper-map')).to_be_visible()
+        page.keyboard.press('m')
+        expect(page.locator('#paper-map')).to_be_hidden()
         restart_analytics(page)
         page.clock.run_for(1000)
         assert scripts == [SCRIPT], scripts

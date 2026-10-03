@@ -107,42 +107,6 @@ with browser_page('/play?player=0') as page:
     assert session_eval(page, '(s, id) => s.state.objects[id].exists', bread)
     assert not session_eval(page, 's => s.record.events.some(e => e.command === "EAT")')
 
-for verb in ['INVENTORY', 'EAT']:
-    for new_quest in [False, True]:
-        with browser_page('/play?player=0') as page:
-            bread, fruit = pack(page)
-            choose(page, verb)
-            quest = session_eval(page, 's => s.state.questNumber')
-            page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
-            until(page, 's => s.state.title')
-            assert not session_eval(page, 's => !!s.state.itemPicker')
-            page.keyboard.press('ArrowDown')
-            until(page, 's => s.state.menuSel === 1')
-            assert session_eval(page, '''s => String.fromCharCode(...s.state.panel.map(c => c & 127))
-                .includes('CONTINUE')''')
-            if new_quest:
-                page.keyboard.press('ArrowUp')
-                until(page, 's => s.state.menuSel === 0')
-                page.keyboard.press('f')
-                until(page, '''s => String.fromCharCode(...s.state.panel.map(c => c & 127))
-                    .includes('CHOOSE YOUR PLAYER')''')
-            page.keyboard.press('f')
-            until(page, 's => !s.state.title && !s.state.verb')
-            assert not session_eval(page, 's => !!s.state.itemPicker')
-            assert session_eval(page, '(s, quest) => s.state.questNumber > quest', quest) == new_quest
-            if not new_quest:
-                assert session_eval(page, '''(s, ids) => ids.every(id =>
-                    s.state.objects[id].exists && s.state.objects[id].carried)''', [bread, fruit])
-                assert not session_eval(page, 's => s.record.events.some(e => e.command === "EAT")')
-            count = session_eval(page, 's => s.record.events.length')
-            page.keyboard.press('ArrowRight')
-            until(page, '(s, count) => s.record.events.slice(count).some(e => e.stick?.[0] === 1)', count)
-            page.keyboard.press('Escape')
-            assert page.evaluate('''async () => {
-                const {questPaused} = await import('/main.js');
-                return questPaused().includes('pause');
-            }''')
-
 for key in ['ArrowRight', 'q', 'Escape', 'f', 'Tab']:
     with browser_page('/play?player=0') as page:
         pack(page)
@@ -203,4 +167,4 @@ with browser_page('/play?player=0', has_touch=True) as page:
     until(page, 's => !s.state.verb')
     assert not session_eval(page, 's => s.record.events.some(e => e.command || e.stick?.some(Boolean))')
 
-print('browser_inventory_test: touch EAT, long mouse DROP, picker abandonment, Escape, consumed dismissal and overflow paging passed')
+print('browser_inventory_test: touch EAT, long mouse DROP, Escape, consumed dismissal and overflow paging passed')

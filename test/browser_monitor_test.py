@@ -7,14 +7,12 @@ with browser_page('/play?room=B8') as page:
     power = page.get_by_role('button', name='Monitor power', exact=True)
     until(page, 's => s.state.quest')
     session_eval(page, 's => window.oldSession = s')
-    expect(page.locator('#paper-map-grid canvas')).not_to_have_count(0)
     page.keyboard.press('p')
     power.click()
     expect(power).to_have_attribute('aria-pressed', 'false')
     expect(page.locator('#screen')).not_to_be_visible()
     before = observe(page)
     assert not before['quest'], 'power off discards the quest'
-    expect(page.locator('#paper-map-grid canvas')).to_have_count(0)
     assert session_eval(page, 's => s !== oldSession'), 'power creates a fresh session'
     assert session_eval(page, 's => s.record == null && !s.canBackRoom')
     assert page.evaluate("localStorage.getItem('btr.autosave.v3')") is None

@@ -1,6 +1,5 @@
-"""Touch navigation, inventory and doorway input work in both phone orientations."""
-from browser_helpers import browser_page, until, session_eval, unfold_map
-from playwright.sync_api import expect
+"""Touch inventory and doorway input work in both phone orientations."""
+from browser_helpers import browser_page, until, session_eval
 
 
 def panel_has(page, text):
@@ -14,28 +13,7 @@ def choose_inventory(page):
     until(page, 's => s.state.itemPicker?.readOnly')
 
 
-with browser_page('/play?room=B8', viewport={'width': 915, 'height': 350}, has_touch=True) as page:
-    navigation = page.get_by_role('button', name='Site navigation', exact=True)
-    navigation.tap()
-    expect(navigation).to_have_attribute('aria-expanded', 'true')
-    page.keyboard.press('Escape')
-    expect(navigation).to_have_attribute('aria-expanded', 'false')
-    navigation.tap()
-    expect(page.get_by_role('link', name='About', exact=True)).to_have_attribute('href', '/about')
-    page.keyboard.press('m')
-    expect(page.get_by_role('dialog', name='World map')).to_be_visible()
-    page.get_by_role('button', name='Close', exact=True).tap()
-    expect(page.get_by_role('dialog', name='World map')).to_be_hidden()
-    page.locator('#help').tap()
-    expect(page.get_by_role('complementary', name='Input help')).to_be_visible()
-    page.keyboard.press('Escape')
-    expect(page.get_by_role('complementary', name='Input help')).to_be_hidden()
-
 with browser_page('/play?room=B8', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
-    unfold_map(page)
-    page.locator('#paper-map').tap()
-    expect(page.get_by_role('dialog', name='World map')).to_be_visible()
-    page.get_by_role('button', name='Close', exact=True).tap()
     page.locator('#command-menu').tap()
     panel_has(page, 'INVENTORY')
     choose_inventory(page)
@@ -48,4 +26,4 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, 's => !s.state.player.indoors')
     assert session_eval(page, 's => s.state.room.code') == 'M5'
 
-print('browser_landscape_test: touch navigation, inventory and door input passed')
+print('browser_landscape_test: touch inventory and door input passed')

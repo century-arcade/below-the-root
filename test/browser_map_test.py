@@ -1,57 +1,30 @@
-"""World map controls and game hold; run against make serve."""
+"""World map keyboard controls, game hold and quest location."""
 import os
-from browser_helpers import browser_page, observe, held, until, power_on, unfold_map
+from browser_helpers import browser_page, observe, held, until
+from playwright.sync_api import expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
+
 def setup(page):
-    # Keep authored-map experiments independent of the exploration scenarios.
     page.route('**/assets/initial-map.json', lambda route: route.fulfill(
         json={'rooms': ['M5', 'M8', 'B8']}))
 
+
 with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) as page:
-    page.locator('#map-screen').wait_for()
+    paper = page.locator('#paper-map')
+    expect(paper).to_be_visible()
     assert page.url.endswith('/map')
-    assert page.locator('#map-grid [aria-current="location"]').count() == 0
-    page.locator('#home').click()
-    unfold_map(page)
-    page.locator('#paper-map').press('Enter')
-    page.locator('#map-screen').wait_for()
-    page.locator('#close-map').click()
+    expect(page.locator('#map-grid [aria-current="location"]')).to_have_count(0)
     page.goto(BASE + '/?player=0')
-    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-
-    def record():
-        return observe(page)
-
+    until(page, 's => s.frame > 0')
     page.keyboard.press('Tab')
-    page.locator('#map-screen').wait_for()
-    stopped = record()['frame']
+    expect(paper).to_be_visible()
     held(page, 'map')
-    page.keyboard.press('Tab')
-    page.locator('#map-screen').wait_for(state='hidden')
-    until(page, '(s, frame) => s.frame > frame', stopped)
-
-    # Outside the map, Tab on a control keeps browser focus navigation.
-    unfold_map(page)
-    page.locator('#paper-map').focus()
-    page.keyboard.press('Tab')
-    assert not page.locator('#map-screen').is_visible()
-    page.locator('#paper-map').press('Enter')
-    page.locator('#map-screen').wait_for()
-    page.locator('#map-zoom-in').focus()
-    page.keyboard.press('Space')
+    expect(page.locator('#map-zoom-out')).to_be_disabled()
+    page.locator('#map-zoom-in').press('Space')
+    expect(page.locator('#map-zoom-out')).to_be_enabled()
     held(page, 'map')
-    page.keyboard.press('Escape')
-    page.locator('#map-screen').wait_for(state='hidden')
-
-    page.keyboard.press('Tab')  # closing returns focus to the canvas
-    page.locator('#map-screen').wait_for()
-    page.locator('#close-map').click()
-    page.locator('#map-screen').wait_for(state='hidden')
-    page.keyboard.press('Tab')
-    page.locator('#map-screen').wait_for()
-    # Observe pan requests, without depending on CSS or viewport geometry.
     page.evaluate('''() => {
         window.mapPans = [];
         const viewport = document.getElementById('map-viewport');
@@ -61,18 +34,16 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
             scrollBy(options);
         };
     }''')
-    stopped = record()['frame']
-    for control in ['#screen', '#close-map', '#map-zoom-in']:
+    stopped = observe(page)['frame']
+    for control in ['#map-zoom-in', '#map-zoom-out']:
         page.locator(control).focus()
         for key in ['ArrowRight', 'd', 'ArrowLeft', 'a', 'ArrowUp', 'w', 'ArrowDown', 's', 'Shift+D']:
             page.keyboard.press(key)
-        assert page.locator('#map-screen').is_visible(), 'movement pans without dismissing the map'
+        expect(paper).to_be_visible()
     assert page.evaluate('window.mapPans') == [[1, 0], [1, 0], [-1, 0], [-1, 0],
-                                               [0, -1], [0, -1], [0, 1], [0, 1], [1, 0]] * 3
-    # Physical keys retain their direction when the typed character changes,
-    # including repeats while focus moves among map controls.
+                                               [0, -1], [0, -1], [0, 1], [0, 1], [1, 0]] * 2
     page.evaluate('window.mapPans = []')
-    for control in ['#close-map', '#map-zoom-in', '#map-viewport']:
+    for control in ['#map-zoom-in', '#map-zoom-out', '#map-viewport']:
         page.locator(control).evaluate("""target => {
             for (const [code, key] of [['KeyD', 's'], ['KeyS', 'd']]) {
                 for (const repeat of [false, true, true]) {
@@ -86,40 +57,45 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
             }
         }""")
     assert page.evaluate('window.mapPans') == ([[1, 0]] * 3 + [[0, 1]] * 3) * 3
-    assert record()['frame'] == stopped, 'map navigation keeps the game held'
-    page.keyboard.press('Escape')
-    page.locator('#map-screen').wait_for(state='hidden')
-    page.clock.run_for(200)  # Let gameplay sample the released map keys.
-    assert all(r['stick'] == [0, 0, 0] for r in record()['events']), 'resuming from the map drops the movement key'
+    assert observe(page)['frame'] == stopped, 'map navigation keeps the game held'
+    page.keyboard.press('Tab')
+    expect(paper).to_be_hidden()
+    expect(page.locator('#screen')).to_be_focused()
+    page.keyboard.press('p')
+    until(page, '(s, frame) => s.frame > frame', stopped)
+    assert all(r['stick'] == [0, 0, 0] for r in observe(page)['events']), 'map keys do not steer'
+
+    for key in ['m', 'Shift+M']:
+        page.keyboard.press('m')
+        expect(paper).to_be_visible()
+        page.locator('#map-zoom-in').focus()
+        page.keyboard.press(key)
+        expect(paper).to_be_hidden()
+        expect(page.locator('#screen')).to_be_focused()
 
     page.get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement !== null')
+    page.locator('#screen').focus()
     page.keyboard.press('Tab')
-    page.locator('#map-screen').wait_for()
-    assert page.locator('#map-screen').is_visible(), 'the map is available in fullscreen'
+    expect(paper).to_be_visible()
     page.keyboard.press('Tab')
-    page.locator('#map-screen').wait_for(state='hidden')
+    expect(paper).to_be_hidden()
     page.evaluate('document.exitFullscreen()')
+    page.wait_for_function('document.fullscreenElement === null')
 
-    page.locator('#home').click()
-    page.locator('#paper-map').click()
-    page.locator('#map-screen').wait_for()
+    page.keyboard.press('m')
+    expect(paper).to_be_visible()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
-
     for query in ['?menu', '?demo']:
         page.goto(BASE + '/' + query)
-        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-        unfold_map(page)
-        page.locator('#screen').focus()
+        until(page, 's => !!s')
         page.keyboard.press('Tab')
-        page.locator('#map-screen').wait_for()
-        assert page.locator('#map-grid [aria-current="location"]').count() == 0
-        page.keyboard.press('Tab')
-        page.locator('#map-screen').wait_for(state='hidden')
+        expect(paper).to_be_visible()
+        expect(page.locator('#map-grid [aria-current="location"]')).to_have_count(0)
     page.goto(BASE + '/?player=1')
-    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    until(page, 's => s.state.quest')
     page.keyboard.press('Tab')
-    page.locator('#map-screen').wait_for()
+    expect(paper).to_be_visible()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
-    assert page.locator('#map-grid [aria-label^="I5 ·"]').count() == 0
-    print('browser_map_test: Tab dismissal, hold/resume, control isolation, panning and location passed')
+    expect(page.locator('#map-grid [aria-label^="I5 ·"]')).to_have_count(0)
+    print('browser_map_test: keyboard dismissal, hold, control isolation, panning and location passed')

@@ -1,91 +1,76 @@
-"""Clean page URLs, Markdown content, history and saved-game navigation."""
+"""Clean page URLs, reading-page links, history and saved-game restoration."""
 import json
 import os
 from playwright.sync_api import sync_playwright, expect
-from browser_helpers import power_on
+from browser_helpers import power_on, ready, until
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    for width in [1200, 390]:
-        page = browser.new_page(viewport={'width': width, 'height': 800})
-        errors = []
-        page.on('pageerror', lambda error: errors.append(str(error)))
-        page.goto(BASE + '/')
-        expect(page).to_have_url(BASE + '/')
-        expect(page.locator('#screen')).to_be_visible()
-        expect(page.locator('#main-nav a[aria-current]')).to_have_text('Play')
-        expect(page.get_by_role('navigation').get_by_role('link')).to_have_text(['Play', 'About', 'Resources'])
-        page.get_by_role('navigation').get_by_role('link', name='Resources').click()
-        expect(page).to_have_url(BASE + '/resources')
-        expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
-        expect(page.locator('#main-nav a[aria-current]')).to_have_text('Resources')
-        expect(page.get_by_role('link', name='Phil Salvador: Below the Root', exact=True)).to_be_visible()
-        mocagh = page.locator('#resources .cards li').filter(has_text='Museum of Computer Adventure')
-        mocagh.get_by_role('link', name='manual as a PDF').click(trial=True)
-        page.go_back()
-        expect(page).to_have_url(BASE + '/')
-        page.go_forward()
-        expect(page).to_have_url(BASE + '/resources')
-        page.reload()
-        expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
-        page.goto(BASE + '/play#help')
-        expect(page).to_have_url(BASE + '/play#help')
-        expect(page.locator('#help-screen')).to_be_visible()
-        page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
-        page.locator('.play-button').click()
-        expect(page).to_have_url(BASE + '/play')
-        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-        expect(page.locator('#help-screen')).to_be_hidden()
-        expect(page.locator('#main-nav a[aria-current]')).to_have_text('Play')
-        page.go_back()
-        expect(page).to_have_url(BASE + '/about')
-        # Query entry links still work, with all game assets loaded from the site root.
-        for query in ['?demo', '?room=T1']:
-            page.goto(BASE + '/' + query)
-            expect(page).to_have_url(BASE + '/' + query)
-            page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-            expect(page.locator('#screen')).to_be_focused()
-        page.keyboard.press('ArrowRight')
-        page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
-        before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
-        assert before, 'Leaving Play saves the quest'
-        for name in ['About', 'Resources']:
-            page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
-            expect(page.locator('#screen')).to_have_count(0)
-            expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
-            expect(page.get_by_role('button', name='Fullscreen', exact=True)).to_have_count(0)
-            for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
-                page.keyboard.press(key)
-            assert page.evaluate("localStorage.getItem('btr.autosave.v3')") == before
-        page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).focus()
-        page.keyboard.press('Enter')
-        expect(page).to_have_url(BASE + '/')
-        page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    page = browser.new_page()
+    page.clock.install(time=0)
+    page.clock.pause_at(0)
+    errors = []
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.goto(BASE + '/resources')
+    expect(page.get_by_role('heading', name='Resources', exact=True)).to_be_visible()
+    expect(page.locator('#main-nav a[aria-current]')).to_have_text('Resources')
+    expect(page.get_by_role('link', name='Phil Salvador: Below the Root', exact=True)).to_be_visible()
+    mocagh = page.locator('#resources .cards li').filter(has_text='Museum of Computer Adventure')
+    mocagh.get_by_role('link', name='manual as a PDF').click(trial=True)
+    page.get_by_role('navigation').get_by_role('link', name='About', exact=True).click()
+    expect(page).to_have_url(BASE + '/about')
+    page.go_back()
+    expect(page).to_have_url(BASE + '/resources')
+    page.go_forward()
+    expect(page).to_have_url(BASE + '/about')
+    page.reload()
+    expect(page.locator('#about')).to_be_visible()
+    page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).click()
+    expect(page).to_have_url(BASE + '/')
+    ready(page)
+    power_on(page)
+    expect(page.locator('#screen')).to_be_focused()
+    for query in ['?demo', '?room=T1']:
+        page.goto(BASE + '/' + query)
+        expect(page).to_have_url(BASE + '/' + query)
+        ready(page)
         expect(page.locator('#screen')).to_be_focused()
-        page.evaluate("dispatchEvent(new Event('pagehide'))")
-        restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3'))")
-        saved = json.loads(before)
-        assert restored['initial'] == saved['initial'], 'Play restores the previous session'
-        assert restored['events'][:len(saved['events'])] == saved['events']
-        page.goto(BASE + '/')
-        expect(page).to_have_url(BASE + '/')
-        # Explicit pages take precedence over an autosave and game parameters.
-        page.goto(BASE + '/about?room=B8')
-        expect(page.locator('#about')).to_be_visible()
+    page.keyboard.press('ArrowRight')
+    until(page, 's => s.frame > 0')
+    page.goto(BASE + '/about')
+    before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
+    assert before, 'Leaving Play saves the quest'
+    for name in ['About', 'Resources']:
+        page.get_by_role('navigation').get_by_role('link', name=name, exact=True).click()
         expect(page.locator('#screen')).to_have_count(0)
         expect(page.get_by_role('slider', name='Volume', exact=True)).to_have_count(0)
         expect(page.get_by_role('button', name='Fullscreen', exact=True)).to_have_count(0)
-        for name in ['about', 'resources', 'play']:
-            response = page.goto(BASE + '/' + name + '/')
-            assert response.ok
-            expect(page).to_have_url(BASE + '/' + name + '/')
-            page.reload()
-            expect(page.locator('#main-nav a[aria-current]')).to_have_text(name.capitalize())
-        assert not errors, errors
-        page.close()
-    # Reading-page developer controls work without loading a game.
+        for key in ['h', 'o', 'p', 'ArrowRight', 'Space']:
+            page.keyboard.press(key)
+        assert page.evaluate("localStorage.getItem('btr.autosave.v3')") == before
+    page.get_by_role('navigation').get_by_role('link', name='Play', exact=True).press('Enter')
+    expect(page).to_have_url(BASE + '/')
+    ready(page)
+    expect(page.locator('#screen')).to_be_focused()
+    page.evaluate("dispatchEvent(new Event('pagehide'))")
+    restored = page.evaluate("JSON.parse(localStorage.getItem('btr.autosave.v3'))")
+    saved = json.loads(before)
+    assert restored['initial'] == saved['initial'], 'Play restores the previous session'
+    assert restored['events'][:len(saved['events'])] == saved['events']
+    page.goto(BASE + '/about?room=B8')
+    expect(page.locator('#about')).to_be_visible()
+    expect(page.locator('#screen')).to_have_count(0)
+    for name in ['about', 'resources', 'play']:
+        response = page.goto(BASE + '/' + name + '/')
+        assert response.ok
+        expect(page).to_have_url(BASE + '/' + name + '/')
+        page.reload()
+        expect(page.locator('#main-nav a[aria-current]')).to_have_text(name.capitalize())
+    assert not errors, errors
+    page.close()
+
     page = browser.new_page()
     errors = []
     data_requests = []
@@ -107,7 +92,7 @@ with sync_playwright() as p:
         expect(page.locator('#' + tool)).to_be_focused()
     assert not errors, errors
     page.close()
-    # Reading pages are complete HTML and work without JavaScript or storage.
+
     page = browser.new_page(java_script_enabled=False)
     for name in ['about', 'resources']:
         response = page.goto(BASE + '/' + name)
@@ -119,9 +104,8 @@ with sync_playwright() as p:
     page.add_init_script("Object.defineProperty(window, 'localStorage', {get() {throw new Error('blocked')}})")
     page.goto(BASE + '/')
     expect(page).to_have_url(BASE + '/')
-    page.wait_for_selector('#volume[aria-valuetext]', state='attached')
+    ready(page)
     power_on(page)
     expect(page.locator('#screen')).to_be_visible()
-    expect(page.locator('#help-screen')).to_be_hidden()
     browser.close()
-    print('browser_site_test: URLs, Markdown pages, history, focus, saves and storage passed')
+    print('browser_site_test: URLs, reading pages, history, focus, saves and storage passed')

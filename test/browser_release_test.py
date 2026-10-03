@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from zipfile import ZipFile
 
 from playwright.sync_api import expect
-from browser_helpers import browser_page, observe, held, until, power_on, unfold_map
+from browser_helpers import browser_page, observe, held, until, power_on
 
 archive_path = Path(sys.argv[1] if len(sys.argv) > 1 else 'dist/below-the-root-preservation.zip')
 with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
@@ -42,12 +42,16 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.on('response', lambda response: failed.append(response.url) if response.status >= 400 else None)
 
         with browser_page('/', base=address, setup=setup, accept_downloads=True) as page:
-            held(page, 'startup-help')
+            held(page, 'power')
             assert observe(page)['frame'] == 0
             expect(page).to_have_url(address + '/')
+            power_on(page)
+            held(page, 'title')
+            page.keyboard.press('Space')
+            until(page, 's => s.frame > 0')
             expect(page.locator('#screen')).to_be_visible()
             page.evaluate('document.fonts.ready')
-            page.locator('nav a[href="/resources"]').click()
+            page.goto(address + '/resources')
             expect(page).to_have_url(address + '/resources')
             page.goto(address + '/?player=0&debug')
             until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
@@ -55,17 +59,11 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.keyboard.press('r')
             expect(page.locator('#issue-dialog')).to_be_hidden()
             page.keyboard.press('ArrowRight')
-            unfold_map(page)
-            page.locator('#paper-map').click()
-            expect(page.locator('#map-screen')).to_be_visible()
+            page.keyboard.press('m')
+            expect(page.locator('#paper-map')).to_be_visible()
             held(page, 'map')
-            page.keyboard.press('Escape')
-            expect(page.locator('#map-screen')).to_be_hidden()
-            page.locator('#help').click()
-            expect(page.locator('#help-screen')).to_be_visible()
-            page.keyboard.press('Escape')
-            expect(page.locator('#help-screen')).to_be_hidden()
-            page.keyboard.press('p')
+            page.keyboard.press('m')
+            expect(page.locator('#paper-map')).to_be_hidden()
             with page.expect_download() as download:
                 page.locator('#download-record').click()
             recording = Path(download.value.path()).read_text()
@@ -75,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
                 'name': 'playthrough.json', 'mimeType': 'application/json', 'buffer': recording.encode()})
             until(page, 's => s.playback')
             assert observe(page)['quest']
-            page.locator('nav a[href="/about"]').click()
+            page.goto(address + '/about')
             before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
             page.goto(address)
             expect(page).to_have_url(address + '/')
@@ -89,4 +87,4 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
         server.terminate()
         server.wait(timeout=10)
         server.stdout.close()
-print('browser_release_test: checksums, offline pages, gameplay, map, help, recording and resume passed')
+print('browser_release_test: checksums, offline pages, gameplay, map, recording and resume passed')
