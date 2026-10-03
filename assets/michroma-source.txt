@@ -1,0 +1,6 @@
+Michroma regular, the typeface of the monitor's model plate lettering.
+Copyright 2011 The Michroma Project Authors (https://github.com/googlefonts/Michroma-font).
+License: michroma-OFL.txt (SIL Open Font License 1.1).
+
+Unmodified font file (Version 1.100), from the Google Fonts family:
+https://fonts.google.com/specimen/Michroma

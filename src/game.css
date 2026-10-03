@@ -207,7 +207,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
   display: flex; align-items: center; gap: calc(var(--key) / 6); pointer-events: auto;
 }
 #monitor.cabinet #monitor-developer { top: calc(290 * var(--mm)); bottom: auto; right: auto; left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px)); }
-#monitor-developer #developer-mode { order: -1; }
+#monitor-developer #developer-mode { order: -1; width: auto; min-width: var(--key); padding: 0 calc(var(--key) / 6); font-family: 'Michroma', sans-serif; }
 .narrow-play #monitor.cabinet #monitor-developer { right: auto; left: 25%; }
 #monitor:not(.cabinet) #monitor-developer #debug-tools, .narrow-play #monitor-developer #debug-tools { position: absolute; bottom: 100%; right: 0; padding: calc(var(--key) / 6); background: #a4928a; }
 .narrow-play #monitor-developer #debug-tools { right: auto; left: 0; background: #baa9a2; }

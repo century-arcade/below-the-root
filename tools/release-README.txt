@@ -72,3 +72,4 @@ The original game and materials retain their original copyrights and notices.
 See iso/LEGAL and iso/readme.txt for the included original materials.
 [/preservation]
 Cinzel's SIL Open Font License is included in site/assets/cinzel-OFL.txt.
+Michroma's SIL Open Font License is included in site/assets/michroma-OFL.txt.
