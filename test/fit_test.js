@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fitScale, fitCabinet, CASE, GLASS, CONTROL_STRIP, ASPECTS } from '../src/fit.js';
+import { fitScale, fitCabinet, crtVars, FINE_SCAN, CASE, GLASS, CONTROL_STRIP, ASPECTS } from '../src/fit.js';
 
 test('scaling fills the limiting dimension without whole-step drops', () => {
   assert.equal(fitScale(1920, 1080), 5.4, 'height limits the scale');
@@ -42,4 +42,16 @@ test('a narrower pixel aspect fills the glass height instead of its width', () =
   assert.ok(ntsc.scale > square.scale, 'taller pixels make the picture taller');
   assert.ok((200 + 6) * ntsc.scale <= ntsc.glassHeight + 1e-9, 'the picture stays inside the glass');
   assert.ok((320 * ASPECTS.ntsc + 6) * ntsc.scale <= ntsc.glassWidth + 1e-9);
+});
+
+test('scanlines follow game rows only when a row spans four device pixels', () => {
+  assert.deepEqual([crtVars(2, 2).row, crtVars(2, 2).scan], [2, 1], 'four device pixels a row draws game rows at full strength');
+  assert.deepEqual([crtVars(5, 1).row, crtVars(5, 1).scan], [5, 1], 'larger rows stay game rows');
+});
+
+test('smaller rows get a whole-device-pixel period, faint only at two pixels', () => {
+  assert.deepEqual([crtVars(3.4, 1).row, crtVars(3.4, 1).scan], [3, 1], 'just under four keeps full strength on a three-pixel period');
+  assert.deepEqual([crtVars(1.7, 1).row, crtVars(1.7, 1).scan], [2, FINE_SCAN], 'small rows alternate device pixels, fainter');
+  assert.deepEqual([crtVars(1.5, 2).row, crtVars(1.5, 2).scan], [1.5, 1], 'the period is counted in device pixels');
+  assert.deepEqual([crtVars(1, 2).row, crtVars(1, 2).scan], [1, FINE_SCAN], 'two device pixels at any density is the faint pattern');
 });

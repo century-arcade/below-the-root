@@ -112,8 +112,12 @@ function fit() {
   canvas.parentElement.style.setProperty('--menu-height', `${PANEL_ROWS * 8 * scale}px`);
   game.style.width = bare || narrow ? '' : `${width}px`;
   monitor.style.setProperty('--scale', scale);
-  const { row, stripe, stripes, blur } = crtVars(scale, window.devicePixelRatio || 1);
+  const dpr = window.devicePixelRatio || 1;
+  const { row, scan, stripe, stripes, blur } = crtVars(scale, dpr);
+  const top = canvas.getBoundingClientRect().top * dpr;
+  canvas.parentElement.style.setProperty('--scan-shift', `${(Math.ceil(top) - top) / dpr}px`);
   canvas.parentElement.style.setProperty('--row', `${row}px`);
+  canvas.parentElement.style.setProperty('--scan', scan);
   canvas.parentElement.style.setProperty('--stripe', `${stripe}px`);
   canvas.parentElement.style.setProperty('--blur', `${blur}px`);
   canvas.parentElement.classList.toggle('stripes', stripes);

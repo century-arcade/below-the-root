@@ -23,7 +23,12 @@ export function fitCabinet(width, height, padding = 0, { fillWidth = false, aspe
     glassWidth: GLASS.width * mm, glassHeight: GLASS.height * mm, chin: CONTROL_STRIP.height * mm };
 }
 
-// CRT stripes: one device pixel per phosphor colour at native density.
+// CRT: game-row scanlines under 4 device px alias, so use a whole-pixel period near it.
+export const FINE_SCAN = 0.5;
+
 export function crtVars(scale, dpr = 1) {
-  return { row: scale, stripe: 3 / dpr, stripes: scale * dpr >= 3, blur: 0.3 * scale };
+  const pixels = scale * dpr;
+  const period = Math.max(2, Math.round(pixels));
+  return { row: pixels >= 4 ? scale : period / dpr, scan: pixels >= 4 || period > 2 ? 1 : FINE_SCAN,
+    stripe: 3 / dpr, stripes: pixels >= 3, blur: 0.3 * scale };
 }
