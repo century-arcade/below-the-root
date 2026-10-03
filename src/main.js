@@ -11,7 +11,8 @@ import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
 import { fitScale, fitCabinet, crtVars } from './fit.js';
-import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation } from './map.js';
+import { loaderScreen } from './loader.js';
+import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelZoom } from './map.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
@@ -225,14 +226,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       selected: state.itemPicker.selected,
       mouseDirect: true,
       dismiss: state.itemPicker.readOnly,
-      hit: (x, y) => powered && !paused && !overlay && !startupHelp
+      hit: (x, y) => powered && !paused && !overlay && !startupHelp && !startupTitle
         ? itemChoiceAt(state, Math.floor(x / 8), Math.floor(y / 8) - PANEL_ROW)
           ?? (state.itemPicker.readOnly ? { col: -1, row: -1 } : null) : null,
       highlight: choice => highlightItemChoice(state, choice),
     } : state.commandMenuOpen && !state.demo && !session.playback ? {
       id: state.verb,
       selected: state.commandMenuSelection,
-      hit: (x, y) => powered && !paused && !overlay && !startupHelp && !session.playback
+      hit: (x, y) => powered && !paused && !overlay && !startupHelp && !startupTitle && !session.playback
         ? menuChoiceAt(Math.floor(x / 8), Math.floor(y / 8) - PANEL_ROW) : null,
       highlight: choice => highlightMenuChoice(state, choice),
     } : null,
@@ -285,7 +286,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let inactive = false;
   holdReasons = () => [
     !powered && 'power', paused && 'dialog',
-    held && (startupHelp ? 'startup-help' : overlay ? 'map' : 'pause'),
+    held && (startupTitle ? 'title' : startupHelp ? 'startup-help' : overlay ? 'map' : 'pause'),
     inactive && 'focus', document.hidden && 'hidden', session.playbackDone && 'playback-done',
   ].filter(Boolean);
   const isRunning = () => holdReasons().length === 0;
@@ -305,7 +306,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   };
   const menuButton = document.getElementById('command-menu');
   let startupHelp = false;
-  const mapButton = document.getElementById('map');
+  let startupTitle = false;
+  let titleImage = null;
+  const mapButton = document.getElementById('paper-map');
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
   const rewindRoomButton = document.getElementById('rewind-room');
@@ -316,11 +319,19 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     speaker.silence(); release(); saveNow(); draw();
     canvas.focus({ preventScroll: true });
   };
-  mapButton.setAttribute('aria-controls', 'map-screen');
   helpButton.setAttribute('aria-controls', 'help-screen');
   helpButton.setAttribute('aria-expanded', 'false');
   let currentTab = document.querySelector('#main-nav [aria-current]');
   const mapGrid = document.getElementById('map-grid');
+  const mapSheet = document.getElementById('map-sheet');
+  const paperGrid = document.getElementById('paper-map-grid');
+  let paperKey = null;
+  mapButton.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    e.stopPropagation();
+    openMap();
+  });
   const mapViewport = document.getElementById('map-viewport');
   let mapZoom = 1;
   const centerMap = () => mapGrid.querySelector('[aria-current="location"]')
@@ -329,16 +340,16 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const viewportRect = mapViewport.getBoundingClientRect();
     const cx = anchor?.x ?? viewportRect.left + mapViewport.clientLeft + mapViewport.clientWidth / 2;
     const cy = anchor?.y ?? viewportRect.top + mapViewport.clientTop + mapViewport.clientHeight / 2;
-    const before = mapGrid.getBoundingClientRect();
+    const before = mapSheet.getBoundingClientRect();
     const fx = (cx - before.left) / before.width;
     const fy = (cy - before.top) / before.height;
     mapZoom = Math.max(1, Math.min(8, mapZoom * factor));
-    mapGrid.style.width = `${mapZoom * 100}%`;
+    mapSheet.style.width = `${mapZoom * 100}%`;
     document.getElementById('map-zoom').textContent = `${mapZoom}×`;
     document.getElementById('map-zoom-out').disabled = mapZoom === 1;
     document.getElementById('map-zoom-in').disabled = mapZoom === 8;
     // Include the grid's automatic margins when it is shorter than the viewport.
-    const after = mapGrid.getBoundingClientRect();
+    const after = mapSheet.getBoundingClientRect();
     mapViewport.scrollLeft += after.left + fx * after.width - cx;
     mapViewport.scrollTop += after.top + fy * after.height - cy;
     mapViewport.style.cursor = mapZoom > 1 ? 'grab' : '';
@@ -358,10 +369,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const now = performance.now();
     if (now - lastWheel > 200 || Math.sign(e.deltaY) !== Math.sign(wheelDelta)) wheelDelta = 0;
     lastWheel = now;
-    wheelDelta += e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? mapViewport.clientHeight : 1);
-    if (Math.abs(wheelDelta) < 100) return;
-    zoomMap(wheelDelta < 0 ? 2 : .5, { x: e.clientX, y: e.clientY });
-    wheelDelta = 0;
+    const { total, step } = wheelZoom(wheelDelta, e.deltaY, e.deltaMode, mapViewport.clientHeight);
+    wheelDelta = total;
+    if (step) zoomMap(step < 0 ? 2 : .5, { x: e.clientX, y: e.clientY });
   }, { passive: false });
   let mapDrag = null;
   const endMapDrag = e => {
@@ -396,16 +406,17 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     monitor.classList.toggle('powered-off', !powered);
     canvas.parentElement.inert = !powered;
     power.setAttribute('aria-pressed', String(powered));
-    power.title = powered ? 'Power off (reset game)' : 'Turn on — start at menu';
-    if (powered) { speaker.unlock(state); speaker.resume(); }
+    power.title = powered ? 'Power off (reset game)' : 'Turn on';
+    if (powered) { speaker.unlock(state); speaker.resume(); startupTitle = true; hold(); }
     else {
       closeHelp(); release();
       paused = false;
       returnSession = null; seekRoom = null;
       session = new Session(data, stick, {
-        initial: { mode: 'menu' }, seed: crypto.getRandomValues(new Uint32Array(1))[0],
+        initial: { mode: 'cold' }, seed: crypto.getRandomValues(new Uint32Array(1))[0],
       });
       state = session.state;
+      paperKey = null;
       speaker.silence(); speaker.suspend();
       try { clearAutosave(localStorage); }
       catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
@@ -432,7 +443,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       helpButton.hidden = false;
       fit();
     }
-    dropInput(); held = false; inactive = false; last = performance.now();
+    dropInput(); held = false; startupTitle = false; inactive = false; last = performance.now();
   };
   function openOverlay(screen, button) {
     if (overlay) release();
@@ -462,11 +473,17 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (startupHelp) { startupHelp = false; release(); }
     fit();
   }
-  function paintMap() {
+  function paintMap(grid = mapGrid) {
     const path = state.quest ? session.path : [];
     const view = state.quest ? state : { ...state, room: null, objects: data.objects };
     drawMap(view, visitedRooms(path, data),
-      state.quest ? mapLocation(data, path, state.room) : null, mapGrid, visitedEmptyRooms(path), debug);
+      state.quest ? mapLocation(data, path, state.room) : null, grid, visitedEmptyRooms(path), debug);
+  }
+  function paintPaperMap() {
+    const key = [state.quest, session.path.length, state.room?.code, debug].join();
+    if (key === paperKey || seekRoom != null) return;
+    paperKey = key;
+    paintMap(paperGrid);
   }
   function openMap() {
     if (paused) return;
@@ -700,13 +717,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     rewindRoomButton.hidden = !debug || session.playback;
     rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
-    image.data.set(render(state, statusRows(state, { classic: options.classic })));
+    image.data.set(startupTitle ? (titleImage ||= loaderScreen(data))
+      : render(state, statusRows(state, { classic: options.classic })));
     ctx.putImageData(image, 0, 0);
-    const activeTab = overlay?.screen === mapScreen ? mapButton : homeButton;
-    if (currentTab !== activeTab) {
+    paintPaperMap();
+    if (currentTab !== homeButton) {
       currentTab?.removeAttribute('aria-current');
-      activeTab.setAttribute('aria-current', 'page');
-      currentTab = activeTab;
+      homeButton.setAttribute('aria-current', 'page');
+      currentTab = homeButton;
     }
   }
 
@@ -764,7 +782,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   else if (debug && GAME_TOOLS.includes(location.hash.slice(1))) {
     document.getElementById(location.hash.slice(1)).focus();
   }
-  else if (freshStart) openHelp(true);
+  else if (freshStart) { startupTitle = true; hold(); }
   fit();
   draw();
   requestAnimationFrame(frame);

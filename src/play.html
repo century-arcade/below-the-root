@@ -33,7 +33,7 @@
         </div>
         <button id="close-map">Close</button>
       </div>
-      <div id="map-viewport"><div id="map-grid"></div></div>
+      <div id="map-viewport"><div id="map-sheet" class="map-sheet"><div id="map-grid" class="map-grid"></div></div></div>
       <p id="map-hint">WASD / arrows to pan · Scroll to zoom · Drag to explore</p>
     </div>
     <div id="replay-controls" hidden>
@@ -64,3 +64,4 @@
   </dialog>
 </div>
 </section>
+<section id="paper-map" class="map-sheet" role="button" tabindex="0" aria-label="World map" aria-controls="map-screen" aria-expanded="false" aria-keyshortcuts="M Tab"><div id="paper-map-grid" class="map-grid"></div></section>

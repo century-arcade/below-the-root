@@ -12,12 +12,11 @@ def setup(page):
 with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) as page:
     page.locator('#map-screen').wait_for()
     assert page.url.endswith('/map')
-    assert page.locator('#map').get_attribute('href') == '/map'
-    assert page.locator('#map').is_visible()
+    assert page.locator('#paper-map').is_visible()
     assert page.locator('#map-grid [aria-current="location"]').count() == 0
     page.locator('#home').click()
-    assert page.locator('#map').is_visible()
-    page.locator('#map').press('Enter')
+    assert page.locator('#paper-map').is_visible()
+    page.locator('#paper-map').press('Enter')
     page.locator('#map-screen').wait_for()
     page.locator('#close-map').click()
     page.goto(BASE + '/?player=0')
@@ -35,10 +34,10 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     until(page, '(s, frame) => s.frame > frame', stopped)
 
     # Outside the map, Tab on a control keeps browser focus navigation.
-    page.locator('#map').focus()
+    page.locator('#paper-map').focus()
     page.keyboard.press('Tab')
     assert not page.locator('#map-screen').is_visible()
-    page.locator('#map').press('Enter')
+    page.locator('#paper-map').press('Enter')
     page.locator('#map-screen').wait_for()
     page.locator('#map-zoom-in').focus()
     page.keyboard.press('Space')
@@ -103,14 +102,14 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     page.evaluate('document.exitFullscreen()')
 
     page.locator('#home').click()
-    page.locator('#map').click()
+    page.locator('#paper-map').click()
     page.locator('#map-screen').wait_for()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
 
     for query in ['?menu', '?demo']:
         page.goto(BASE + '/' + query)
         page.wait_for_selector('#volume[aria-valuetext]', state='attached')
-        assert page.locator('#map').is_visible()
+        assert page.locator('#paper-map').is_visible()
         page.keyboard.press('Tab')
         page.locator('#map-screen').wait_for()
         assert page.locator('#map-grid [aria-current="location"]').count() == 0

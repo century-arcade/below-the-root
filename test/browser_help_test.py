@@ -25,27 +25,21 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
         return observe(page)
 
     help_screen = page.locator('#help-screen')
-    expect(help_screen).to_be_visible()
-    expect(page.locator('#developer-help')).to_be_visible()
-    expect(page.get_by_role('button', name='Help', exact=True)).to_be_focused()
-    stopped = snapshot()
-    assert stopped['frame'] == 0, 'Help precedes the first intro frame'
-    help_screen.focus()
-    page.keyboard.press('ArrowDown')
-    page.keyboard.press('Space')
-    held(page, 'startup-help')
-    page.get_by_role('button', name='Help', exact=True).tap()
     expect(help_screen).to_be_hidden()
-    expect(page.locator('#help')).to_be_focused()
+    stopped = snapshot()
+    assert stopped['frame'] == 0, 'The title precedes the first intro frame'
+    held(page, 'title')
+    page.locator('#screen').focus()
+    page.keyboard.press('Space')
     until(page, 's => s.frame > 0')
     intro = snapshot()
-    assert intro['frame'] > 0
-    assert intro['demo'] == 'intro', 'Closing startup help starts the intro without skipping it'
-    assert all(r['stick'] == [0, 0, 0] for r in intro['events']), 'Toggling help does not send a joystick press'
+    assert intro['demo'] == 'intro', 'Leaving the title starts the intro without skipping it'
+    assert all(r['stick'] == [0, 0, 0] for r in intro['events']), 'Leaving the title does not send a joystick press'
     page.locator('#screen').focus()
     expect(page.locator('#screen')).to_have_attribute('aria-label', re.compile(r'Press \? for all controls'))
     page.keyboard.press('h')
     expect(help_screen).to_be_visible()
+    expect(page.locator('#developer-help')).to_be_visible()
     page.keyboard.press('Space')
     page.keyboard.press('ArrowRight')
     expect(help_screen).to_be_visible()
@@ -56,7 +50,7 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
 
     question_mark()
     expect(help_screen).to_be_visible()
-    page.locator('#map').click()
+    page.locator('#paper-map').click()
     expect(page.locator('#map-screen')).to_be_visible()
     expect(page.locator('#help')).to_be_hidden()
     expect(help_screen).to_be_hidden()
@@ -97,7 +91,7 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
 
     page.goto(BASE + '/?player=0')
     until(page, "s => localStorage.getItem('btr.autosave.v3') !== null")
-    expect(page.locator('#map')).to_be_visible()
+    expect(page.locator('#paper-map')).to_be_visible()
     page.reload()
     page.wait_for_selector('#volume[aria-valuetext]', state='attached')
     expect(help_screen).to_be_hidden()  # a saved quest resumes directly
@@ -156,12 +150,10 @@ with browser_page('/play?debug', setup=setup, viewport={"width": 900, "height": 
     expect(page.locator('#map-screen')).to_be_visible()
     expect(help_screen).to_be_hidden()
     expect(page.locator('#help')).to_be_hidden()
-    expect(page.locator('#map')).to_have_attribute('aria-expanded', 'true')
-    page.locator('#map').click()
-    expect(help_screen).to_be_hidden()
+    expect(page.locator('#paper-map')).to_have_attribute('aria-expanded', 'true')
     expect(page.locator('#map-screen')).to_be_visible()
     held(page, 'map')
-    expect(page.locator('#map')).to_have_attribute('aria-current', 'page')
+    expect(page.locator('#home')).to_have_attribute('aria-current', 'page')
     page.keyboard.press('Escape')
     expect(page.locator('#map-screen')).to_be_hidden()
     expect(page.locator('#help')).to_be_visible()

@@ -55,7 +55,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
             page.keyboard.press('r')
             expect(page.locator('#issue-dialog')).to_be_hidden()
             page.keyboard.press('ArrowRight')
-            page.locator('#map').click()
+            page.locator('#paper-map').click()
             expect(page.locator('#map-screen')).to_be_visible()
             held(page, 'map')
             page.keyboard.press('Escape')

@@ -8,7 +8,7 @@ const PORT_MENU = ['START GAME', 'CONTINUE', 'SAMPLE QUEST'];
 
 export async function loadData(read) {
   const [assets, roomsFile, tilesFile, map, poster, itemsFile, charactersFile, demo,
-    creaturesFile, messagesFile, skillsFile, quest, save, shell, music, initialMap] = await Promise.all([
+    creaturesFile, messagesFile, skillsFile, quest, save, shell, music, initialMap, loader] = await Promise.all([
     read('data/assets.json'),
     read('data/rooms.json'),
     read('data/tiles.json'),
@@ -25,6 +25,7 @@ export async function loadData(read) {
     read('data/shell.json'),
     read('data/music.json'),
     read('assets/initial-map.json'),
+    read('assets/loader.json'),
   ]);
 
   const at = {};
@@ -96,7 +97,7 @@ export async function loadData(read) {
     .map((item, index) => ({ ...item, index, row: 21 + index }));
 
   return {
-    assets, palette, charsets, sheets, map, poster, initialMap,
+    assets, palette, charsets, sheets, map, poster, initialMap, loader,
     rooms, roomById, roomByCode, tiles: tileByCode,
     grid: roomsFile.grid,
     animations: assets.player_animations,

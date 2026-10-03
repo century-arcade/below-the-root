@@ -27,7 +27,7 @@ with sync_playwright() as p:
         assert session_eval(page, 's => s == null'), 'the monitor appears before game data arrives'
         data.pop().continue_()
         ready(page)
-        expect(page.locator('#help-screen')).to_be_visible()
+        expect(page.locator('#help-screen')).to_be_hidden()
         expect(page.locator('#screen')).to_be_visible()
         assert not errors, errors
         page.close()

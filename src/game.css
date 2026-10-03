@@ -38,12 +38,18 @@ body:has(#map-screen:not([hidden])) { overflow: hidden; }
 #map-tools button { min-width: 32px; padding: 4px 8px; }
 #map-tools button:disabled { opacity: .4; cursor: default; }
 #map-viewport { display: flex; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; touch-action: pan-x pan-y; }
-#map-grid { display: grid; width: 100%; flex-shrink: 0; margin-block: auto; user-select: none; }
-#map-grid > span { min-width: 0; aspect-ratio: 2; background: #000; }
-#map-grid > .unseen { background: transparent; }
-#map-grid canvas { width: 100%; height: 100%; }
-#map-grid .unvisited canvas { opacity: 0.5; }
-#map-grid .current { outline: 2px solid #fff; outline-offset: -2px; }
+#map-sheet { width: 100%; flex-shrink: 0; margin-block: auto; user-select: none; }
+.map-sheet { position: relative; aspect-ratio: 2656 / 976; background: #ece6d0 url(/assets/box/map.png) 0 0 / 100% 100% no-repeat; }
+.map-grid { position: absolute; left: calc(48 / 2656 * 100%); top: calc(80 / 976 * 100%); width: calc(2560 / 2656 * 100%); height: calc(640 / 976 * 100%); display: grid; grid-template-rows: repeat(16, 1fr); }
+.map-grid > span { min-width: 0; min-height: 0; background: #000; }
+.map-grid > .unseen { background: transparent; }
+.map-grid canvas { display: block; width: 100%; height: 100%; }
+.map-grid .unvisited canvas { opacity: 0.5; }
+.map-grid .current { outline: 2px solid #fff; outline-offset: -2px; }
+#paper-map { box-sizing: border-box; width: min(100% - 32px, 1600px); margin: 24px auto; cursor: zoom-in; }
+#paper-map .current { outline-width: 1px; }
+.map-grid .unseen.current { outline-color: #b0302a; }
+.game-fullscreen #paper-map, .landscape-play #paper-map { display: none; }
 #crt, #crt > div { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; }
 #crt { z-index: 1; }
 #scanlines { background: repeating-linear-gradient(to bottom, #fff 0, #fff calc(var(--row) * .5), #cecece calc(var(--row) * .5), #cecece var(--row)); }

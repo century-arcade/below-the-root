@@ -29,11 +29,12 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
       return element;
     }
     element.setAttribute('role', 'img');
-    element.className = [c.current && 'current', !c.visited && 'unvisited'].filter(Boolean).join(' ');
+    element.className = [c.unseen && 'unseen', c.current && 'current', !c.visited && !c.unseen && 'unvisited']
+      .filter(Boolean).join(' ');
     element.setAttribute('aria-label', describe(c));
     if (c.current) element.setAttribute('aria-current', 'location');
     element.title = describe(c);
-    if (c.empty) return element;
+    if (c.empty || c.unseen) return element;
     const room = state.data.roomById.get(c.room);
     paint(room);
     const thumbnail = document.createElement('canvas');
@@ -65,23 +66,18 @@ export function defaultMapRooms(data) {
 
 export function visitedRooms(path, data) {
   const defaults = data ? defaultMapRooms(data) : new Set();
-  return collectVisits(path, defaults, false, data);
+  return collectVisits(path, defaults, false);
 }
 
 export function visitedEmptyRooms(path) {
   return collectVisits(path, new Set(), true);
 }
 
-function collectVisits(path, defaults, blank, data) {
+function collectVisits(path, defaults, blank) {
   let visited = new Set(defaults);
   for (const entry of path) {
     if (entry.quest === false || entry.questStart) visited = new Set(defaults);
     if (entry.quest && !entry.title && !!entry.blank === blank && entry.room != null) visited.add(entry.room);
-    if (data && entry.questStart && entry.quest && !entry.title && !entry.blank) {
-      const home = data.roomByCode.get(entry.room);
-      const exterior = home && mapLocation(data, [], home);
-      if (exterior) visited.add(exterior);
-    }
   }
   return visited;
 }
@@ -123,8 +119,20 @@ export function mapCells(data, visited, current, empty = new Set(), all = false)
       return { code, empty: true, kind: 'empty', visited: true, current: code === current, signs: [] };
     }
     if (room == null) return null;
-    if (!onMap(data.roomById.get(room)) || !(all || visited.has(code))) return null;
+    if (!onMap(data.roomById.get(room))) return null;
+    if (!(all || visited.has(code))) {
+      return code === current ? { code, kind: 'unseen', unseen: true, visited: false, current: true, signs: [] } : null;
+    }
     return { room, code, kind: roomKind(data.roomById.get(room)),
       visited: visited.has(code), current: code === current, signs: signs.get(room) || [] };
   }));
+}
+
+// notch: Firefox reports 90 to 138 px for one, depending on the scroll target
+export function wheelZoom(total, deltaY, deltaMode, pageHeight) {
+  const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? pageHeight : 1);
+  if (deltaMode !== 0 || Math.abs(pixels) >= 50) return { total: 0, step: Math.sign(pixels) };
+  total += pixels;
+  if (Math.abs(total) < 100) return { total, step: 0 };
+  return { total: 0, step: Math.sign(total) };
 }

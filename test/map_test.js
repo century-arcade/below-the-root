@@ -1,7 +1,7 @@
 import { loadTestData, J } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapCells, visitedRooms, defaultMapRooms, visitedEmptyRooms, mapLocation, mapRoom } from '../src/map.js';
+import { mapCells, visitedRooms, defaultMapRooms, visitedEmptyRooms, mapLocation, mapRoom, wheelZoom } from '../src/map.js';
 import { Session } from '../src/record.js';
 import { enterRoom, leaveByEdge } from '../src/world.js';
 import { startQuest } from '../src/game.js';
@@ -93,24 +93,21 @@ test("exploration tracks empty sky and resets for each new quest", async () => {
   assert.deepEqual(visitedRooms([entry('0C'), entry(null, { quest: false })], data), defaults);
 });
 
-test("each character starts with their own home exterior revealed", async () => {
+test("a new quest shows only the authored map, not the home exterior", async () => {
   const { data, defaults, entry } = await mapFixture();
-  // Each character knows their own home exterior in addition to the authored map.
-  const homes = ['M5', 'E6', 'A6', '16', 'I5'];
-  for (const [character, home] of homes.entries()) {
+  for (const character of data.characters.keys()) {
     const quest = new Session(data, { read: () => J.idle }, { initial: { mode: 'quest', character } });
-    const known = visitedRooms(quest.path, data);
-    assert.ok(known.has(home), `${data.characters[character].name} knows their home`);
-    for (const other of homes.filter(code => code !== home && !defaults.has(code))) {
-      assert.ok(!known.has(other), `${other} is not this character's home`);
-    }
-    assert.deepEqual(new Set(mapCells(data, known, home).flat().filter(Boolean).map(c => c.code)),
-      new Set([...defaults, home]), 'only authored defaults and the home exterior are initially shown');
+    const shown = mapCells(data, visitedRooms(quest.path, data), null).flat().filter(Boolean).map(c => c.code);
+    assert.deepEqual(new Set(shown), defaults, `${data.characters[character].name} starts unseen`);
   }
-  const newHome = data.roomById.get(data.characters[1].nid_place.room).code;
-  assert.deepEqual(visitedRooms([entry('16', { questStart: true }), entry('0C'),
-    entry(newHome, { questStart: true })], data), new Set([...defaults, newHome, 'E6']),
-    'a new character forgets the previous home and exploration');
+  const nid = data.roomById.get(data.characters[1].nid_place.room).code;
+  assert.deepEqual(visitedRooms([entry('16', { questStart: true }), entry('0C'), entry(nid, { questStart: true })], data),
+    new Set([...defaults, nid]), 'a new character forgets the previous exploration');
+});
+
+test("the shipped map starts with every room unseen", async () => {
+  const data = await loadTestData();
+  assert.deepEqual(visitedRooms([], data), new Set());
 });
 
 test("the location marker preserves the last exterior when moving indoors", async () => {
@@ -222,4 +219,24 @@ test("map art reflects live objects and terrain without changing the quest", asy
   assert.deepEqual(mapRoom({ ...state, room: cave, screen: cave.screen, lamp: null }, cave),
     render({ data, room: cave, tick: state.tick }).subarray(0, art.length),
     'underground map rooms are visible without a lamp');
+});
+
+test("one mouse wheel notch zooms one level at any size Firefox reports", () => {
+  for (const deltaY of [53, 90, 100, 138]) {
+    assert.deepEqual(wheelZoom(0, deltaY, 0, 600), { total: 0, step: 1 });
+    assert.deepEqual(wheelZoom(0, -deltaY, 0, 600), { total: 0, step: -1 });
+  }
+  assert.deepEqual(wheelZoom(0, 3, 1, 600), { total: 0, step: 1 });
+});
+
+test("small trackpad deltas add up to one zoom level", () => {
+  let total = 0;
+  const steps = [];
+  for (let i = 0; i < 12; i++) {
+    const result = wheelZoom(total, -10, 0, 600);
+    total = result.total;
+    steps.push(result.step);
+  }
+  assert.deepEqual(steps.filter(Boolean), [-1]);
+  assert.equal(steps.indexOf(-1), 9);
 });

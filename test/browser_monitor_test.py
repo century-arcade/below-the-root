@@ -7,12 +7,14 @@ with browser_page('/play?room=B8') as page:
     power = page.get_by_role('button', name='Monitor power', exact=True)
     until(page, 's => s.state.quest')
     session_eval(page, 's => window.oldSession = s')
+    expect(page.locator('#paper-map-grid canvas')).not_to_have_count(0)
     page.keyboard.press('p')
     power.click()
     expect(power).to_have_attribute('aria-pressed', 'false')
     expect(page.locator('#screen')).not_to_be_visible()
     before = observe(page)
-    assert before['title'] and not before['quest'], 'power off discards the quest'
+    assert not before['quest'], 'power off discards the quest'
+    expect(page.locator('#paper-map-grid canvas')).to_have_count(0)
     assert session_eval(page, 's => s !== oldSession'), 'power creates a fresh session'
     assert session_eval(page, 's => s.record == null && !s.canBackRoom')
     assert page.evaluate("localStorage.getItem('btr.autosave.v3')") is None
@@ -27,11 +29,12 @@ with browser_page('/play?room=B8') as page:
     page.keyboard.press('Space')
     expect(power).to_have_attribute('aria-pressed', 'true')
     expect(page.locator('#screen')).to_be_visible()
+    held(page, 'title')
+    page.locator('#screen').focus()
+    page.keyboard.press('Space')
     until(page, '(s, frame) => s.frame > frame', arg=before['frame'])
-    menu = observe(page)
-    assert menu['title'] and not menu['quest'], 'power on resumes at a fresh menu'
-    until(page, 's => String.fromCharCode(...s.state.panel.map(value => value & 127)).includes("START GAME")')
-    assert 'CONTINUE' not in ''.join(chr(value & 127) for value in observe(page)['panel'])
+    fresh = observe(page)
+    assert fresh['demo'] == 'intro' and not fresh['quest'], 'power on is a fresh launch'
     expect(volume).to_have_value('70')
     page.get_by_role('button', name='Fullscreen', exact=True).click()
     page.wait_for_function('document.fullscreenElement !== null')

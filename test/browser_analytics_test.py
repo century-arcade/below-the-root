@@ -106,7 +106,7 @@ with sync_playwright() as p:
         ready(page)
         until(page, 's => s.frame > 0')
         assert observe(page)['quest']
-        page.locator('#map').click()
+        page.locator('#paper-map').click()
         expect(page.locator('#map-screen')).to_be_visible()
         page.keyboard.press('Escape')
         page.locator('#help').click()
