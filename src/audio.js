@@ -101,7 +101,6 @@ export class Speaker {
       this.master.connect(this.ctx.destination);
       this.effectAnalyser = this.ctx.createAnalyser();
       this.effectAnalyser.fftSize = 512;
-      this.effectSamples = new Float32Array(this.effectAnalyser.fftSize);
       this.effectAnalyser.connect(this.master);
       this.pulse = this.makePulse(this.music.driver.duty);
       this.square = this.makePulse(0.5);
@@ -183,13 +182,6 @@ export class Speaker {
       measures.push({ measure, at: t0 + measure * duration });
     }
     return measures;
-  }
-
-  // Read only effects, before the volume control, so muted sounds remain visible.
-  effectWaveform() {
-    if (!this.ready || !this.effect || this.ctx.currentTime >= this.effectEnd) return null;
-    this.effectAnalyser.getFloatTimeDomainData(this.effectSamples);
-    return this.effectSamples;
   }
 
   // one voice, muted under a tune, a new effect cuts the old one
