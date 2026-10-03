@@ -254,6 +254,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const sideTouch = new SideTouch(playSurface, canvas, stick, {
     active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
+    gliding: () => !!state.player?.gliding && !state.title && !state.demo,
     anywhere: () => !canOpenCommandMenu(state) && !state.title && !state.commandMenuOpen && !state.pointer
       && (!state.itemPicker || state.itemPicker.readOnly),
     chord: () => {

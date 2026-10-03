@@ -58,9 +58,10 @@ async function sideFixture(t) {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
+    gliding: () => model.gliding,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -159,6 +160,25 @@ test("outside free play a tap on the picture's middle is the button", async t =>
   assert.deepEqual(keys.read(), IDLE, 'a held middle press never steers');
   send('pointerup', 160);
   assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
+});
+
+test("while gliding, touching only one side faces that way at once", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  send('pointerdown', LEFT);
+  advance(130);
+  assert.equal(keys.read().dx, -1);
+  model.gliding = true;
+  send('pointerdown', RIGHT, 100, 2);
+  assert.deepEqual(keys.read(), IDLE, 'both sides leave the glide as it is');
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false }, 'the remaining side turns at once');
+  send('pointerup', RIGHT, 100, 2);
+  assert.deepEqual(keys.read(), IDLE);
+  send('pointerdown', LEFT);
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'a quick tap turns without pressing the button');
+  advance(300);
+  assert.deepEqual(keys.read(), IDLE);
 });
 
 test("in choosers a side slide steps once per distance and a tap confirms", async t => {

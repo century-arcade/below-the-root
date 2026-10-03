@@ -521,7 +521,8 @@ const SIDE_FIRE = 'touch:fire';
 
 // Fullscreen and landscape touch: the outer eighths steer; the middle can only tap.
 export class SideTouch {
-  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false } = {}) {
+  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
+    gliding = () => false } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -529,6 +530,7 @@ export class SideTouch {
     this.jog = jog;
     this.onChord = chord;
     this.anywhere = anywhere;
+    this.gliding = gliding;
     this.fingers = new Map();
     this.taps = new Set();
     this.chord = null;
@@ -563,7 +565,10 @@ export class SideTouch {
     const live = [...this.fingers.values()].filter(g => g.role !== 'dead');
     const pending = live.find(g => g.role === 'pending');
     this.fingers.set(f.id, f);
-    if (!live.length) {
+    if (this.gliding() && !jog) {
+      f.role = 'stick';
+      this.update();
+    } else if (!live.length) {
       f.role = 'pending';
       if (!jog) f.timer = setTimeout(() => this.resolve(f), SIDE_TAP_MS);
     } else if (pending && pending.side !== side && !this.chord && live.length === 1) {
@@ -615,7 +620,8 @@ export class SideTouch {
       }
       return;
     }
-    if (f.role === 'pending') this.keys.tap('fire', SIDE_SOURCE);
+    if (this.gliding()) this.update();
+    else if (f.role === 'pending') this.keys.tap('fire', SIDE_SOURCE);
     else if (f.role === 'stick' || f.role === 'button') this.update();
   }
 
@@ -656,6 +662,11 @@ export class SideTouch {
 
   wanted() {
     const keys = new Set();
+    if (this.gliding()) {
+      const sides = new Set([...this.fingers.values()].filter(f => f.role !== 'dead').map(f => f.side));
+      if (sides.size === 1) keys.add([...sides][0]);
+      return keys;
+    }
     const stick = [...this.fingers.values()].find(f => f.role === 'stick');
     if (stick) keys.add(stick.vertical ?? stick.side);
     if ([...this.fingers.values()].some(f => f.role === 'button')) keys.add('fire');
