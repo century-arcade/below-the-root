@@ -65,3 +65,18 @@ for surround in ['commodore', 'dark']:
             power.tap()
             expect(power).to_have_attribute('aria-pressed', 'false')
         print(f'browser_monitor_test: {surround} controls at {width}x{height} passed')
+
+
+def record_locks(page):
+    page.add_init_script('''
+        window.orientationLocks = [];
+        screen.orientation.lock = type => { orientationLocks.push(type); return Promise.resolve(); };
+    ''')
+
+
+with browser_page('/play?room=B8', setup=record_locks, viewport={'width': 915, 'height': 412},
+                  is_mobile=True, has_touch=True) as page:
+    page.locator('#screen').tap()
+    page.wait_for_function('document.fullscreenElement !== null')
+    assert page.evaluate('orientationLocks') == ['landscape'], 'landscape fullscreen holds landscape'
+print('browser_monitor_test: landscape fullscreen orientation lock passed')

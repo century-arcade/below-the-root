@@ -194,7 +194,10 @@ for (const ev of ['pointerup', 'keydown']) addEventListener(ev, () => {
   if (!landscapeMode.matches || document.fullscreenElement || !document.documentElement.requestFullscreen) return;
   document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
 }, true);
-document.addEventListener('fullscreenchange', fit);
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement) screen.orientation?.lock?.(screen.orientation.type.split('-')[0]).catch(() => {});
+  fit();
+});
 fit();
 monitor.classList.remove('unfitted');
 canvas.focus({ preventScroll: true });
