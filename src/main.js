@@ -451,7 +451,18 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const dropInput = () => { seekKey = null; stick.reset(); };
   addEventListener('hashchange', dropInput);
   const power = document.getElementById('monitor-power');
+  let wakeLock = null;
+  function keepAwake() {
+    const want = powered && !document.hidden;
+    if (want && !wakeLock) {
+      wakeLock = navigator.wakeLock?.request('screen').then(lock => {
+        lock.onrelease = () => { wakeLock = null; };
+        return lock;
+      }, () => { wakeLock = null; }) ?? null;
+    } else if (!want && wakeLock) wakeLock.then(lock => lock?.release());
+  }
   function showPower() {
+    keepAwake();
     try { sessionStorage.setItem(POWER_KEY, powered ? 'on' : 'off'); } catch {}
     monitor.classList.toggle('powered-off', !powered);
     canvas.parentElement.inert = !powered;
@@ -759,6 +770,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   addEventListener('dragover', e => e.preventDefault());
   addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
   document.addEventListener('visibilitychange', () => {
+    keepAwake();
     if (document.hidden) suspendFocus();
     else if (document.hasFocus()) restoreFocus();
   });

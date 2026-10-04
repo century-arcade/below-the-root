@@ -80,3 +80,23 @@ with browser_page('/play?room=B8', setup=record_locks, viewport={'width': 915, '
     page.wait_for_function('document.fullscreenElement !== null')
     assert page.evaluate('orientationLocks') == ['landscape'], 'landscape fullscreen holds landscape'
 print('browser_monitor_test: landscape fullscreen orientation lock passed')
+
+
+def record_wake_locks(page):
+    page.add_init_script('''
+        window.wakeLocks = [];
+        Object.defineProperty(navigator, 'wakeLock', { value: { request(type) {
+            const lock = { type, released: false, release() { this.released = true; this.onrelease?.(); } };
+            wakeLocks.push(lock);
+            return Promise.resolve(lock);
+        } } });
+    ''')
+
+
+with browser_page('/play?room=B8', setup=record_wake_locks) as page:
+    page.wait_for_function('wakeLocks.length === 1 && wakeLocks[0].type === "screen"')
+    page.get_by_role('button', name='Monitor power', exact=True).click()
+    page.wait_for_function('wakeLocks[0].released')
+    page.get_by_role('button', name='Monitor power', exact=True).click()
+    page.wait_for_function('wakeLocks.length === 2 && !wakeLocks[1].released')
+print('browser_monitor_test: the screen stays awake while the monitor is on')
