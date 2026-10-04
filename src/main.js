@@ -259,7 +259,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       && (!state.itemPicker || state.itemPicker.readOnly),
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
-      else commandMenu(!!state.commandMenuOpen);
+      else if (state.commandMenuOpen || canOpenCommandMenu(state)) commandMenu(!!state.commandMenuOpen);
+      else if (!session.playback && !state.demo && !state.title) stick.gesture(['fire', 'down'], 'touch');
     },
   });
   const pointer = new Pointer(canvas, stick, () => stickAnchor(state), (col, row) => doorsAt(state, col, row), window, {

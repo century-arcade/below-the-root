@@ -20,6 +20,7 @@ with browser_page('/play?room=B8', viewport={'width': 412, 'height': 915}, has_t
 
 with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_touch=True) as page:
     box = page.locator('#screen').bounding_box()
+    assert box
     cdp = page.context.new_cdp_session(page)
     left = {'x': box['x'] - 20, 'y': box['y'] + box['height'] / 2, 'id': 1}
     right = {'x': box['x'] + box['width'] + 20, 'y': box['y'] + box['height'] / 2, 'id': 2}
@@ -46,6 +47,18 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, 's => !s.state.player.indoors')
     assert session_eval(page, 's => s.state.room.code') == 'M5'
 
+    chord()
+    until(page, 's => s.state.commandMenuOpen')
+    chord()
+    until(page, 's => !s.state.commandMenuOpen')
+
+    chord()
+    until(page, 's => s.state.commandMenuOpen')
+    for key in ['ArrowDown', 'f']:
+        page.keyboard.press(key)
+        page.clock.run_for(32)
+    panel_has(page, 'SPEAK WITH WHOM')
+    until(page, 's => !s.state.commandMenuOpen && !!s.state.verb')
     chord()
     until(page, 's => s.state.commandMenuOpen')
     chord()
