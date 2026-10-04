@@ -517,14 +517,14 @@ const SIDE_TAP_MS = 120;
 const CHORD_MS = 250;
 const CHORD_GAP_MS = 80;
 const SLIDE = 24;
-const CLIMB_POLL_MS = 50;
+const STEER_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
 const SIDE_FIRE = 'touch:fire';
 
 // Fullscreen and landscape touch: the outer eighths steer; the middle can only tap.
 export class SideTouch {
   constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
-    gliding = () => false, facing = () => null, climbable = () => true } = {}) {
+    gliding = () => false, facing = () => null, climbable = () => true, onLadder = () => false } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -535,6 +535,8 @@ export class SideTouch {
     this.gliding = gliding;
     this.facing = facing;
     this.climbable = climbable;
+    this.onLadder = onLadder;
+    this.lastClimb = 'up';
     this.poll = null;
     this.fingers = new Map();
     this.taps = new Set();
@@ -693,7 +695,13 @@ export class SideTouch {
     const stick = [...this.fingers.values()].find(f => f.role === 'stick');
     // slide-off-ladder: the game reads the slide once (crouch, stand), then the hold walks
     const unread = stick?.slid == null || this.keys.consumed < stick.slid;
-    if (stick) keys.add(stick.vertical && (unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side);
+    if (stick) {
+      let key = stick.vertical && (unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side;
+      // ladder-hold: the game ignores sideways on a ladder, so climb on until a side opens
+      if (key === stick.side && this.onLadder()) key = this.lastClimb;
+      if (key === 'up' || key === 'down') this.lastClimb = key;
+      keys.add(key);
+    }
     if ([...this.fingers.values()].some(f => f.role === 'button')) keys.add('fire');
     return keys;
   }
@@ -705,8 +713,8 @@ export class SideTouch {
     this.held = keys;
     const slid = [...this.fingers.values()].find(f => f.role === 'stick' && f.vertical && f.slid == null);
     if (slid) slid.slid = this.keys.sequence;
-    const climbing = [...this.fingers.values()].some(f => f.role === 'stick' && f.vertical);
-    if (climbing && !this.poll) this.poll = setTimeout(() => { this.poll = null; this.update(); }, CLIMB_POLL_MS);
+    const steering = [...this.fingers.values()].some(f => f.role === 'stick');
+    if (steering && !this.poll) this.poll = setTimeout(() => { this.poll = null; this.update(); }, STEER_POLL_MS);
   }
 
   cancel() {

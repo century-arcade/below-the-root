@@ -135,4 +135,24 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, '(s, col) => s.state.player.col < col - 2', arg=col)
     touch('touchEnd', left)
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, picture taps outside play, map and version label passed')
+    right = {'x': box['x'] + box['width'] + 20, 'y': left['y'], 'id': 2}
+    page.evaluate('''async () => {
+        const { questSession } = await import('/main.js');
+        const { enterRoom } = await import('/world.js');
+        const s = questSession().state;
+        Object.assign(s.player, { facing: 1 });
+        enterRoom(s, [...s.data.roomById.values()].find(r => r.code === 'E4'), 12, 9);
+    }''')
+    page.clock.run_for(300)
+    touch('touchStart', right)
+    page.clock.run_for(48)
+    touch('touchMove', {**right, 'y': right['y'] - 40})
+    until(page, 's => s.state.room.code === "E3"')
+    touch('touchEnd', right)
+    page.clock.run_for(300)
+    col = session_eval(page, 's => s.state.player.col')
+    touch('touchStart', left)
+    until(page, '(s, col) => s.state.player.col < col - 1', arg=col)
+    touch('touchEnd', left)
+
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, side hold on a ladder, picture taps outside play, map and version label passed')

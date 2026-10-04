@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false, facing: null, ladder: true };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false, facing: null, ladder: true, onLadder: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
-    gliding: () => model.gliding, facing: () => model.facing, climbable: () => model.ladder,
+    gliding: () => model.gliding, facing: () => model.facing, climbable: () => model.ladder, onLadder: () => model.onLadder,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -134,6 +134,24 @@ test("a slid side finger climbs only while there is a ladder, then walks its sid
   assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'the next ladder climbs again');
   send('pointerup', LEFT, 70);
   assert.deepEqual(keys.read(), IDLE);
+});
+
+test("a side hold on a ladder climbs on the way it last went, then walks", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  model.onLadder = true;
+  send('pointerdown', RIGHT);
+  advance(130);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'up when nothing was climbed yet');
+  send('pointermove', RIGHT, 135);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false });
+  send('pointerup', RIGHT, 135);
+  keys.read();
+  send('pointerdown', LEFT);
+  advance(130);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'a new hold climbs on down');
+  model.onLadder = false;
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'off the ladder the hold walks');
 });
 
 test("a slide away from a ladder still sends its direction once", async t => {
