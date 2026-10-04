@@ -16,8 +16,18 @@ export function setupBook(root, spreads, caption = () => '') {
     }
     return loaded.get(src);
   };
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  // The turned leaf swings down from the spine onto the side it lands on.
+  function turn(image, side) {
+    if (still.matches) return;
+    image.style.transformOrigin = side ? 'left' : 'right';
+    image.animate({ transform: [`perspective(2000px) rotateY(${side ? -90 : 90}deg)`, 'none'] },
+      { duration: 350, easing: 'ease-out' });
+  }
   function show(spread) {
+    const previousSpread = current;
     current = Math.max(0, Math.min(last, spread));
+    const landing = current > previousSpread ? 0 : current < previousSpread ? 1 : -1;
     const shown = current;
     const pages = spreads[current];
     // alt-flash: a page swaps only once decoded, or its alt text shows while loading
@@ -29,6 +39,7 @@ export function setupBook(root, spreads, caption = () => '') {
         image.src = page.src;
         image.alt = page.alt;
         image.style.visibility = '';
+        if (i === landing) turn(image, i);
       });
     });
     for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
