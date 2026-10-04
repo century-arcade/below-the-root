@@ -109,4 +109,30 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     page.evaluate("document.documentElement.classList.add('navigation-open')")
     assert page.locator('#developer-mode').is_hidden(), 'no version label in landscape play'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, picture taps outside play, map and version label passed')
+with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_touch=True) as page:
+    box = page.locator('#screen').bounding_box()
+    assert box
+    cdp = page.context.new_cdp_session(page)
+    left = {'x': box['x'] - 20, 'y': box['y'] + box['height'] / 2, 'id': 1}
+
+    def touch(kind, *points):
+        cdp.send('Input.dispatchTouchEvent', {'type': kind, 'touchPoints': list(points)})
+
+    page.clock.run_for(500)
+    page.evaluate('''async () => {
+        const { questSession } = await import('/main.js');
+        const { enterRoom } = await import('/world.js');
+        const s = questSession().state;
+        Object.assign(s.player, { indoors: false, facing: -1 });
+        enterRoom(s, [...s.data.roomById.values()].find(r => r.code === 'K0'), 26, 15);
+    }''')
+    page.clock.run_for(300)
+    row, col = session_eval(page, 's => [s.state.player.row, s.state.player.col]')
+    touch('touchStart', left)
+    page.clock.run_for(48)
+    touch('touchMove', {**left, 'y': left['y'] - 40})
+    until(page, '(s, row) => s.state.player.row < row - 4', arg=row)
+    until(page, '(s, col) => s.state.player.col < col - 2', arg=col)
+    touch('touchEnd', left)
+
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, picture taps outside play, map and version label passed')

@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false, facing: null };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false, facing: null, ladder: true };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
-    gliding: () => model.gliding, facing: () => model.facing,
+    gliding: () => model.gliding, facing: () => model.facing, climbable: () => model.ladder,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -117,6 +117,36 @@ test("sliding a side finger up or down replaces the walk with a climb", async t 
   advance(10);
   send('pointerup', LEFT, 105);
   assert.deepEqual(keys.read(), IDLE);
+});
+
+test("a slid side finger climbs only while there is a ladder, then walks its side", async t => {
+  const { keys, model, send, advance, LEFT } = await sideFixture(t);
+  send('pointerdown', LEFT, 100);
+  advance(130);
+  keys.read();
+  send('pointermove', LEFT, 70);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'on a ladder the slide climbs');
+  model.ladder = false;
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'off the top the same hold walks');
+  model.ladder = true;
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'the next ladder climbs again');
+  send('pointerup', LEFT, 70);
+  assert.deepEqual(keys.read(), IDLE);
+});
+
+test("a slide away from a ladder still sends its direction once", async t => {
+  const { keys, model, send, advance, LEFT } = await sideFixture(t);
+  model.ladder = false;
+  send('pointerdown', LEFT, 100);
+  advance(130);
+  keys.read();
+  send('pointermove', LEFT, 135);
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'held until the game reads it, to crouch');
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'then the hold walks');
 });
 
 test("a tap on the other side soon after the first touch leaps at once", async t => {

@@ -517,13 +517,14 @@ const SIDE_TAP_MS = 120;
 const CHORD_MS = 250;
 const CHORD_GAP_MS = 80;
 const SLIDE = 24;
+const CLIMB_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
 const SIDE_FIRE = 'touch:fire';
 
 // Fullscreen and landscape touch: the outer eighths steer; the middle can only tap.
 export class SideTouch {
   constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
-    gliding = () => false, facing = () => null } = {}) {
+    gliding = () => false, facing = () => null, climbable = () => true } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -533,6 +534,8 @@ export class SideTouch {
     this.anywhere = anywhere;
     this.gliding = gliding;
     this.facing = facing;
+    this.climbable = climbable;
+    this.poll = null;
     this.fingers = new Map();
     this.taps = new Set();
     this.chord = null;
@@ -603,10 +606,10 @@ export class SideTouch {
     const vertical = dy <= -SLIDE ? 'up' : dy >= SLIDE ? 'down' : Math.abs(dy) < SLIDE / 2 ? null : f.vertical;
     if (f.role === 'pending' && vertical) {
       if (this.chord) this.resolveChord();
-      if (f.role === 'pending') { f.vertical = vertical; return this.resolve(f); }
+      if (f.role === 'pending') { this.slide(f, vertical); return this.resolve(f); }
     }
     if (f.role !== 'stick' || vertical === f.vertical) return;
-    f.vertical = vertical;
+    this.slide(f, vertical);
     this.update();
   }
 
@@ -638,6 +641,11 @@ export class SideTouch {
     clearTimeout(f.timer);
     this.fingers.delete(f.id);
     this.update();
+  }
+
+  slide(f, vertical) {
+    f.vertical = vertical;
+    f.slid = null;
   }
 
   resolve(f) {
@@ -683,7 +691,9 @@ export class SideTouch {
       return keys;
     }
     const stick = [...this.fingers.values()].find(f => f.role === 'stick');
-    if (stick) keys.add(stick.vertical ?? stick.side);
+    // slide-off-ladder: the game reads the slide once (crouch, stand), then the hold walks
+    const unread = stick?.slid == null || this.keys.consumed < stick.slid;
+    if (stick) keys.add(stick.vertical && (unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side);
     if ([...this.fingers.values()].some(f => f.role === 'button')) keys.add('fire');
     return keys;
   }
@@ -693,9 +703,15 @@ export class SideTouch {
     for (const k of this.held) if (!keys.has(k)) this.keys.release(k, k === 'fire' ? SIDE_FIRE : SIDE_SOURCE);
     for (const k of keys) if (!this.held.has(k)) this.keys.press(k, k === 'fire' ? SIDE_FIRE : SIDE_SOURCE);
     this.held = keys;
+    const slid = [...this.fingers.values()].find(f => f.role === 'stick' && f.vertical && f.slid == null);
+    if (slid) slid.slid = this.keys.sequence;
+    const climbing = [...this.fingers.values()].some(f => f.role === 'stick' && f.vertical);
+    if (climbing && !this.poll) this.poll = setTimeout(() => { this.poll = null; this.update(); }, CLIMB_POLL_MS);
   }
 
   cancel() {
+    clearTimeout(this.poll);
+    this.poll = null;
     if (this.chord) clearTimeout(this.chord.timer);
     this.chord = null;
     this.taps.clear();

@@ -5,7 +5,7 @@ import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
 import { itemChoiceAt, highlightItemChoice } from './inventory.js';
 import { Keyboard, Pointer, SideTouch, Gamepad, isEditing } from './input.js';
-import { cell, doorNumber } from './world.js';
+import { cell, doorNumber, isClimbable } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { Speaker } from './audio.js';
@@ -259,6 +259,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     gliding: () => !!state.player?.gliding && !state.title && !state.demo,
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
+    climbable: dir => {
+      const p = state.player;
+      return !p || isClimbable(state, cell(state, p.col, dir === 'up' ? p.row : p.row + 1));
+    },
     anywhere: () => !canOpenCommandMenu(state) && !state.title && !state.commandMenuOpen && !state.pointer
       && (!state.itemPicker || state.itemPicker.readOnly),
     chord: () => {
