@@ -1,4 +1,4 @@
-"""A book page stays hidden until its image is decoded, so alt text never shows."""
+"""A book page stays hidden until its image is decoded, so alt text never shows; clicking the left page turns back."""
 import os
 from playwright.sync_api import sync_playwright
 
@@ -17,7 +17,13 @@ with sync_playwright() as p:
     assert turned == [None, 'hidden'], turned
     page.wait_for_function(f"{left}.style.visibility === '' && {left}.src.endsWith('inside_l.jpg')", polling=50)
     assert page.evaluate(f"{left}.complete && {left}.naturalWidth > 0")
+    page.click('[data-desk-go="manual"]')
+    caption = "document.querySelector('#manual output').textContent"
+    page.click('#manual [data-book-image] img + img')
+    page.wait_for_function(f"{caption} === 'Page 1 / 18'", polling=50)
+    page.click('#manual [data-book-image] img')
+    page.wait_for_function(f"{caption} === 'Page 0 / 18'", polling=50)
     assert not errors, errors
     browser.close()
 
-print('browser_book_test: box pages stay hidden until their images are decoded passed')
+print('browser_book_test: book pages stay hidden until decoded, and the left page turns back passed')

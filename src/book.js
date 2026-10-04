@@ -76,7 +76,8 @@ export function setupBook(root, spreads, caption = () => '') {
   link.addEventListener('click', event => {
     if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    show(current === last ? 0 : current + 1);
+    const leftPage = event.clientX < images[1].getBoundingClientRect().left;
+    show(leftPage && current > 0 ? current - 1 : current === last ? 0 : current + 1);
   });
   addEventListener('keydown', event => {
     if (root.hidden || event.metaKey || event.ctrlKey || event.altKey) return;
