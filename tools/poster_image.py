@@ -227,6 +227,109 @@ def clean_poster_outline(image):
     return image
 
 
+def clean_poster_details(image, photographed_ink):
+    palette = np.array(image.getpalette()).reshape(-1, 3)
+    paper = int(np.argmin(((palette - PAPER) ** 2).sum(1)))
+    image = image.copy()
+    draw = ImageDraw.Draw(image)
+    empty_paper = [
+        (30, 97, 2047, 180),
+        (400, 181, 1100, 226),
+        (1486, 181, 2047, 247),
+        (1317, 225, 1485, 236),
+        (30, 556, 2047, 719),
+        (0, 935, 1799, 975),
+        (1325, 870, 1420, 917),
+        (1348, 837, 1420, 847),
+        (1360, 918, 1420, 928),
+        (37, 407, 58, 554),
+        (133, 405, 141, 419),
+        (132, 455, 141, 479),
+        (1808, 305, 1826, 386),
+        (1810, 471, 1827, 555),
+        (1596, 445, 1616, 479),
+        (294, 410, 301, 433),
+        (224, 440, 273, 452),
+        (298, 439, 347, 442),
+        (925, 443, 975, 453),
+        (1975, 400, 2047, 470),
+    ]
+    for box in empty_paper:
+        draw.rectangle(box, fill=paper)
+    paper_polygons = [
+        [(550, 444), (584, 444), (584, 453), (550, 453)],
+        [(595, 445), (647, 445), (647, 455), (595, 455)],
+        [(658, 445), (665, 445), (665, 455), (658, 455)],
+        [(876, 438), (978, 438), (978, 444), (883, 444)],
+        [(685, 443), (850, 443), (850, 489), (685, 489)],
+        [(1629, 439), (1803, 439), (1803, 455), (1780, 454),
+         (1770, 458), (1770, 460), (1755, 460), (1755, 464),
+         (1740, 464), (1740, 470), (1629, 477)],
+        [(1858, 434), (1929, 434), (1929, 443), (1874, 443),
+         (1874, 451), (1858, 451)],
+        [(1948, 435), (1969, 435), (1969, 465), (1951, 465)],
+        [(1478, 427), (1505, 427), (1505, 440), (1478, 440)],
+        [(2450, 0), (2655, 0), (2655, 68), (2643, 68),
+         (2643, 56), (2637, 56), (2637, 42), (2628, 42),
+         (2628, 47), (2476, 47), (2476, 43), (2450, 43)],
+    ]
+    for polygon in paper_polygons:
+        draw.polygon(polygon, fill=paper)
+
+    source_ink = np.asarray(photographed_ink).astype(float) / 255
+    rgb = PAPER * (1 - source_ink[..., None]) + INK * source_ink[..., None]
+    source = Image.fromarray(rgb.round().astype(np.uint8)).quantize(
+        palette=image, dither=Image.Dither.NONE)
+    artwork = Image.new('1', image.size)
+    mask = ImageDraw.Draw(artwork)
+    continuous_strokes = [
+        [(858, 419), (877, 423), (889, 427), (998, 424),
+         (998, 435), (889, 436), (871, 431), (858, 431)],
+        [(1210, 441), (1235, 430), (1240, 430), (1327, 431),
+         (1327, 438), (1241, 438), (1210, 448)],
+        [(1235, 440), (1253, 444), (1253, 456), (1235, 449)],
+        [(1327, 432), (1370, 431), (1399, 431), (1420, 431),
+         (1470, 431), (1470, 438), (1420, 438), (1399, 439),
+         (1370, 436), (1327, 439)],
+        [(1318, 441), (1358, 437), (1382, 438), (1392, 442),
+         (1387, 447), (1379, 443), (1360, 442), (1320, 447)],
+        [(2625, 44), (2635, 44), (2635, 57), (2642, 57),
+         (2642, 62), (2625, 62)],
+    ]
+    for polygon in continuous_strokes:
+        mask.polygon(polygon, fill=1)
+    stroke_paths = [
+        ([(160, 429), (180, 433), (200, 436), (220, 437), (274, 437),
+          (300, 436), (320, 435), (350, 434), (360, 434), (380, 432),
+          (400, 430), (420, 429), (430, 429)], 5),
+        ([(160, 437), (180, 442), (190, 443), (200, 446),
+          (210, 448), (215, 451), (220, 460)], 4),
+        ([(284, 453), (290, 447), (310, 446), (340, 445), (360, 444),
+          (380, 440), (400, 436), (420, 433), (430, 433)], 4),
+        ([(543, 434), (544, 440), (546, 450)], 5),
+        ([(548, 473), (550, 478), (551, 484)], 5),
+        ([(653, 432), (653, 449)], 5),
+        ([(685, 468), (700, 467), (708, 466)], 3),
+        ([(685, 473), (700, 471), (710, 470)], 3),
+        ([(714, 466), (720, 465), (723, 465)], 5),
+        ([(860, 472), (860, 480), (860, 486)], 7),
+        ([(880, 448), (898, 448), (908, 447), (917, 455),
+          (918, 460), (915, 472), (915, 483), (916, 488)], 5),
+        ([(980, 470), (980, 475), (984, 480)], 5),
+        ([(1480, 434), (1490, 432), (1502, 428)], 3),
+    ]
+    for points, width in stroke_paths:
+        mask.line(points, fill=1, width=width)
+    image.paste(source, mask=artwork)
+    crease_bridges = [
+        ([(653, 441), (653, 448)], 3, (653, 450)),
+        ([(979, 474), (984, 482)], 3, (982, 481)),
+    ]
+    for points, width, sample in crease_bridges:
+        draw.line(points, fill=image.getpixel(sample), width=width)
+    return image
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image', default=os.path.join(ROOT, 'iso/map.jpg'))
@@ -262,10 +365,12 @@ def main():
             box = (out_x[i], out_y[j], out_x[i + 1], out_y[j + 1])
             mesh.append((box, (*nw, *sw, *se, *ne)))
     size = (out_x[-1], out_y[-1])
-    ink = erase_grid(flat.transform(size, Transform.MESH, mesh, Resampling.BICUBIC), out_x, out_y)
+    photographed_ink = flat.transform(size, Transform.MESH, mesh, Resampling.BICUBIC)
+    ink = erase_grid(photographed_ink, out_x, out_y)
     rgb = PAPER * (1 - ink[..., None]) + INK * ink[..., None]
     image = Image.fromarray(rgb.round().astype(np.uint8)).quantize(16, dither=Image.Dither.NONE)
     image = clean_poster_outline(remove_poster_blemishes(image))
+    image = clean_poster_details(image, photographed_ink)
     image.save(args.output, optimize=True)
     print(f'{args.output}: {size[0]}x{size[1]}, cells at {MARGIN}')
 
