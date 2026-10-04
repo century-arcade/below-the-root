@@ -258,6 +258,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     gliding: () => !!state.player?.gliding && !state.title && !state.demo,
+    facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
     anywhere: () => !canOpenCommandMenu(state) && !state.title && !state.commandMenuOpen && !state.pointer
       && (!state.itemPicker || state.itemPicker.readOnly),
     chord: () => {

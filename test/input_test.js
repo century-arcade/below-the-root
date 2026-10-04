@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false, facing: null };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
-    gliding: () => model.gliding,
+    gliding: () => model.gliding, facing: () => model.facing,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -128,6 +128,25 @@ test("a tap on the other side soon after the first touch leaps at once", async t
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true });
   assert.equal(model.chords, 0);
   assert.equal(keys.read().dx, -1, 'the first finger keeps walking');
+});
+
+test("a button tap while holding the side behind the figure turns, then leaps", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  model.facing = 1;
+  send('pointerdown', LEFT);
+  advance(100);
+  send('pointerdown', RIGHT, 100, 2);
+  send('pointerup', RIGHT, 100, 2);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'the turn is a read of its own');
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true }, 'the button is left for the leap');
+});
+
+test("a quick side tap behind the figure is still the button alone", async t => {
+  const { keys, model, send, LEFT } = await sideFixture(t);
+  model.facing = 1;
+  send('pointerdown', LEFT);
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
 });
 
 test("tapping both sides together is a chord, not movement or the button", async t => {

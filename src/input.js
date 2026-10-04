@@ -523,7 +523,7 @@ const SIDE_FIRE = 'touch:fire';
 // Fullscreen and landscape touch: the outer eighths steer; the middle can only tap.
 export class SideTouch {
   constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
-    gliding = () => false } = {}) {
+    gliding = () => false, facing = () => null } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -532,6 +532,7 @@ export class SideTouch {
     this.onChord = chord;
     this.anywhere = anywhere;
     this.gliding = gliding;
+    this.facing = facing;
     this.fingers = new Map();
     this.taps = new Set();
     this.chord = null;
@@ -582,6 +583,7 @@ export class SideTouch {
     } else {
       if (pending && !this.chord) { clearTimeout(pending.timer); pending.role = 'stick'; }
       f.role = 'button';
+      this.turnFirst();
       this.update();
     }
   }
@@ -653,8 +655,18 @@ export class SideTouch {
     const [stick, button] = fingers.every(g => !g.lifted) ? fingers : [fingers.find(g => !g.lifted), null];
     stick.role = 'stick';
     if (button) button.role = 'button';
+    this.turnFirst();
     this.update();
     if (fingers.some(g => g.lifted)) this.keys.tap('fire', SIDE_SOURCE);
+  }
+
+  // turn-first: a turning read spends the button, so the leap needs a read after it
+  turnFirst() {
+    const stick = [...this.fingers.values()].find(f => f.role === 'stick');
+    const facing = this.facing();
+    if (stick && !stick.vertical && facing && facing !== (stick.side === 'left' ? -1 : 1)) {
+      this.keys.gesture([stick.side], SIDE_SOURCE);
+    }
   }
 
   breakChord() {

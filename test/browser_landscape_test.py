@@ -78,6 +78,20 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     side_tap(middle)
     until(page, 's => !s.state.itemPicker')
 
+    page.clock.run_for(500)
+    session_eval(page, 's => { s.state.player.facing = 1; }')
+    col = session_eval(page, 's => s.state.player.col')
+    touch('touchStart', left)
+    for _ in range(6):
+        page.clock.run_for(16)
+    touch('touchStart', left, right)
+    page.clock.run_for(32)
+    touch('touchEnd', right)
+    until(page, 's => s.state.player.leaping')
+    touch('touchEnd', left)
+    assert session_eval(page, 's => s.state.player.facing') == -1, 'holding the side behind turns before the leap'
+    assert session_eval(page, 's => s.state.player.col') in (col, col - 1), 'the leap starts from where the figure stood'
+
     col = session_eval(page, 's => s.state.player.col')
     touch('touchStart', left)
     page.clock.run_for(1500)
@@ -95,4 +109,4 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     page.evaluate("document.documentElement.classList.add('navigation-open')")
     assert page.locator('#developer-mode').is_hidden(), 'no version label in landscape play'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, picture taps outside play, map and version label passed')
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, picture taps outside play, map and version label passed')
