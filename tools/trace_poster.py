@@ -18,7 +18,6 @@ import numpy as np
 from PIL import Image, ImageFilter
 from PIL.Image import Resampling, Transform
 
-import poster_image
 from common import ROOT
 
 COLUMNS, ROWS = 32, 16
@@ -317,11 +316,61 @@ def even_pitch(centres):
     return np.polyval(coef, index)
 
 
+def line_peaks(dark, expected, bands, axis, window=5):
+    lines = []
+    for guess in expected:
+        points = []
+        for a, b in bands:
+            profile = dark[a:b].mean(0) if axis == 0 else dark[:, a:b].mean(1)
+            lo = int(round(guess)) - window
+            seg = profile[lo:lo + 2 * window + 1]
+            k = int(np.argmax(seg))
+            if 0 < k < 2 * window and seg[k] - np.median(seg) > 3:
+                y0, y1, y2 = seg[k - 1], seg[k], seg[k + 1]
+                curve = y0 - 2 * y1 + y2
+                offset = 0.5 * (y0 - y2) / curve if curve else 0
+                points.append(((a + b) / 2, lo + k + offset))
+        lines.append(points)
+    return lines
+
+
+def fit_lines(lines, pivot, count):
+    """Each line as position = centre + slope * (across - pivot), smoothed."""
+    centres, slopes, weights = [], [], []
+    for points in lines:
+        if len(points) < 2:
+            centres.append(np.nan)
+            slopes.append(0)
+            weights.append(0)
+            continue
+        p = np.array(points)
+        a = np.vstack([np.ones(len(p)), p[:, 0] - pivot]).T
+        (centre, slope), *_ = np.linalg.lstsq(a, p[:, 1], rcond=None)
+        centres.append(centre)
+        slopes.append(slope)
+        weights.append(len(p))
+    index = np.arange(count)
+    centres = np.array(centres)
+    known = ~np.isnan(centres)
+    centres = np.interp(index, index[known], centres[known])
+    smooth = np.polyfit(index, slopes, 2, w=np.sqrt(weights))
+    return centres, np.polyval(smooth, index)
+
+
+def grid_lines(grey):
+    dark = 255 - grey
+    columns = line_peaks(dark, [68.5 + i * 45.75 for i in range(COLUMNS + 1)],
+                         [(60, 130), (140, 250), (260, 380), (420, 520), (540, 600), (600, 686)], 0)
+    rows = line_peaks(dark, [51 + j * 40.05 for j in range(ROWS + 1)],
+                      [(74, 200), (300, 400), (600, 700), (900, 1000), (1150, 1250), (1300, 1525)], 1)
+    return fit_lines(columns, 370, COLUMNS + 1), fit_lines(rows, 800, ROWS + 1)
+
+
 def grid_mesh(photo, dark, split=4):
     """Photo positions of a lattice over the world grid, `split` points per
     cell edge, following the traced rules between their crossings."""
-    _, grey = poster_image.clean(photo)
-    (cx, sx), (cy, sy) = poster_image.grid_lines(grey)
+    grey = np.asarray(photo.convert('L')).astype(float)
+    (cx, sx), (cy, sy) = grid_lines(grey)
     cx, cy = even_pitch(cx), even_pitch(cy)
     ys = np.arange(int(cy[0]) - 6, int(cy[-1]) + 7, dtype=float)
     xs = np.arange(int(cx[0]) - 6, int(cx[-1]) + 7, dtype=float)
