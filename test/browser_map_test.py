@@ -1,6 +1,6 @@
 """World map keyboard controls, game hold and quest location."""
 import os
-from browser_helpers import browser_page, observe, held, until
+from browser_helpers import browser_page, observe, held, until, session_eval
 from playwright.sync_api import expect
 
 BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
@@ -99,6 +99,22 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
     expect(page.locator('#map-grid [aria-label^="I5 ·"]')).to_have_count(0)
 
+with browser_page('/play?player=0', viewport={"width": 900, "height": 750}) as page:
+    until(page, 's => s.state.quest && s.state.room.code === "T1"')
+    page.evaluate('''() => {
+        window.mapPaints = 0;
+        new MutationObserver(() => mapPaints++).observe(document.getElementById('map-grid'), { childList: true });
+    }''')
+    session_eval(page, 's => Object.assign(s.state.player, {col: 26, row: 15})')
+    page.locator('#screen').focus()
+    page.keyboard.press('Enter')
+    until(page, 's => s.state.room.code === "M5"')
+    page.clock.run_for(300)
+    assert page.evaluate('mapPaints') == 0, 'a room change leaves the hidden map alone'
+    page.keyboard.press('m')
+    expect(page.locator('#paper-map')).to_be_visible()
+    assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
+
 with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, has_touch=True, is_mobile=True) as page:
     expect(page.locator('#map-tools')).to_be_hidden()
     viewport = page.locator('#map-viewport').bounding_box()
@@ -118,4 +134,4 @@ with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, h
     expect(page.locator('#map-zoom-out')).to_be_enabled()
     pinch(80, 10)
     expect(page.locator('#map-zoom-out')).to_be_disabled()
-    print('browser_map_test: keyboard dismissal, hold, control isolation, panning, location and pinch zoom passed')
+    print('browser_map_test: keyboard dismissal, hold, control isolation, panning, location, hidden map and pinch zoom passed')

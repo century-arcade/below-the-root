@@ -565,6 +565,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       state.quest ? mapLocation(data, path, state.room) : null, grid, visitedEmptyRooms(path), debug);
   }
   function paintPaperMap() {
+    if (desk.stage !== 'map') return;
     const key = [state.quest, session.path.length, state.room?.code, debug].join();
     if (key === paperKey || seekRoom != null) return;
     paperKey = key;
