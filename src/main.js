@@ -413,46 +413,36 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     wheelDelta = total;
     if (step) zoomMap(step < 0 ? 2 : .5, { x: e.clientX, y: e.clientY });
   }, { passive: false });
-  let pinch = null;
-  const pinchOf = ([a, b]) => ({ spread: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
-    x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 });
-  mapViewport.addEventListener('touchstart', e => {
-    pinch = e.touches.length === 2 ? pinchOf(e.touches) : null;
-  }, { passive: true });
-  mapViewport.addEventListener('touchmove', e => {
-    if (!pinch || e.touches.length !== 2) return;
-    e.preventDefault();
-    const next = pinchOf(e.touches);
-    mapViewport.scrollLeft -= next.x - pinch.x;
-    mapViewport.scrollTop -= next.y - pinch.y;
-    if (pinch.spread && next.spread) zoomMap(next.spread / pinch.spread, next);
-    pinch = next;
-  }, { passive: false });
-  for (const event of ['touchend', 'touchcancel']) {
-    mapViewport.addEventListener(event, e => { if (e.touches.length < 2) pinch = null; });
-  }
-  let mapDrag = null;
-  const endMapDrag = e => {
-    if (mapDrag?.id !== e.pointerId) return;
-    mapDrag = null;
+  const mapPointers = new Map();
+  const mapGesture = () => {
+    const [a, b = a] = mapPointers.values();
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, spread: Math.hypot(a.x - b.x, a.y - b.y) };
+  };
+  const endMapPointer = e => {
+    if (!mapPointers.delete(e.pointerId)) return;
     if (mapViewport.hasPointerCapture(e.pointerId)) mapViewport.releasePointerCapture(e.pointerId);
     mapViewport.style.cursor = mapZoom > 1 ? 'grab' : '';
   };
   mapViewport.addEventListener('pointerdown', e => {
-    if (mapZoom === 1 || e.pointerType === 'touch' || e.button !== 0 || mapDrag) return;
-    mapDrag = { id: e.pointerId, x: e.clientX, y: e.clientY,
-      left: mapViewport.scrollLeft, top: mapViewport.scrollTop };
+    if (e.pointerType === 'mouse' && (mapZoom === 1 || e.button !== 0 || mapPointers.size)) return;
+    mapPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (e.pointerType !== 'mouse') return;
     mapViewport.setPointerCapture(e.pointerId);
     mapViewport.style.cursor = 'grabbing';
   });
   mapViewport.addEventListener('pointermove', e => {
-    if (mapDrag?.id !== e.pointerId) return;
-    if (!(e.buttons & 1)) return endMapDrag(e);
-    mapViewport.scrollLeft = mapDrag.left - (e.clientX - mapDrag.x);
-    mapViewport.scrollTop = mapDrag.top - (e.clientY - mapDrag.y);
+    const pointer = mapPointers.get(e.pointerId);
+    if (!pointer) return;
+    if (e.pointerType === 'mouse' && !(e.buttons & 1)) return endMapPointer(e);
+    const before = mapGesture();
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    const after = mapGesture();
+    mapViewport.scrollLeft -= after.x - before.x;
+    mapViewport.scrollTop -= after.y - before.y;
+    if (before.spread && after.spread) zoomMap(after.spread / before.spread, after);
   });
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-    mapViewport.addEventListener(event, endMapDrag);
+    mapViewport.addEventListener(event, endMapPointer);
   }
   const saveNow = () => autosave.save(session).reason !== 'failed';
   const dropInput = () => { seekKey = null; stick.reset(); };

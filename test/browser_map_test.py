@@ -99,7 +99,8 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
     expect(page.locator('#map-grid [aria-label^="I5 ·"]')).to_have_count(0)
 
-with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, has_touch=True) as page:
+with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, has_touch=True, is_mobile=True) as page:
+    expect(page.locator('#map-tools')).to_be_hidden()
     viewport = page.locator('#map-viewport').bounding_box()
     assert viewport
     cdp = page.context.new_cdp_session(page)
