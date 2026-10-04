@@ -81,6 +81,6 @@
       <rect x="299.5" y="337" width="47" height="3" rx="1.5" fill="#605146"/>
       <rect x="300" y="337.6" width="46" height="1.8" rx="0.9" fill="#1e1617"/>
     </g>
-    <text x="323" y="350.5" font-family="Arial, sans-serif" font-size="3" fill="#433530" text-anchor="middle">VOLUME</text>
+    <text x="323" y="346.3" font-family="Arial, sans-serif" font-size="3" fill="#433530" text-anchor="middle">VOLUME</text>
   </g>
 </svg>
