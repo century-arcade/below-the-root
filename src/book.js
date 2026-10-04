@@ -17,31 +17,54 @@ export function setupBook(root, spreads, caption = () => '') {
     return loaded.get(src);
   };
   const still = matchMedia('(prefers-reduced-motion: reduce)');
-  // The turned leaf swings down from the spine onto the side it lands on.
-  function turn(image, side) {
-    if (still.matches) return;
-    image.style.transformOrigin = side ? 'left' : 'right';
-    image.animate({ transform: [`perspective(2000px) rotateY(${side ? -90 : 90}deg)`, 'none'] },
-      { duration: 350, easing: 'ease-out' });
+  // Each side counts its immediate swaps, so a leaf landing late cannot
+  // overwrite a page that a later turn has already placed there.
+  const placed = [0, 0];
+  // alt-flash: a page swaps only once decoded, or its alt text shows while loading
+  function place(side, page, stamp = ++placed[side]) {
+    const image = images[side];
+    if (!page) { image.style.visibility = 'hidden'; return; }
+    load(page.src).then(() => {
+      if (placed[side] !== stamp) return;
+      image.src = page.src;
+      image.alt = page.alt;
+      image.style.visibility = '';
+    });
+  }
+  // A turn is a two-sided leaf over the departing page that swings across the
+  // spine; the landing side changes underneath once the leaf has covered it.
+  // Leaves are independent, so quick turns flap over each other.
+  function turn(departing, front, back) {
+    const landing = 1 - departing;
+    const stamp = placed[landing];
+    const page = images[departing];
+    const leaf = document.createElement('div');
+    leaf.className = 'book-leaf';
+    Object.assign(leaf.style, { left: `${page.offsetLeft}px`, top: `${page.offsetTop}px`,
+      width: `${page.offsetWidth}px`, height: `${page.offsetHeight}px`,
+      transformOrigin: departing ? 'left' : 'right' });
+    for (const face of [front, back]) leaf.append(Object.assign(new Image(), { src: face.src, alt: '', decoding: 'sync' }));
+    link.append(leaf);
+    const angle = departing ? -180 : 180;
+    leaf.animate({ transform: ['perspective(2000px) rotateY(0deg)', `perspective(2000px) rotateY(${angle}deg)`] },
+      { duration: 450, easing: 'ease-in-out' }).finished.then(() => {
+      place(landing, back, stamp);
+      load(back.src).then(() => leaf.remove());
+    });
   }
   function show(spread) {
-    const previousSpread = current;
+    const from = current;
     current = Math.max(0, Math.min(last, spread));
-    const landing = current > previousSpread ? 0 : current < previousSpread ? 1 : -1;
-    const shown = current;
     const pages = spreads[current];
-    // alt-flash: a page swaps only once decoded, or its alt text shows while loading
-    images.forEach((image, i) => {
-      const page = pages[i];
-      if (!page) { image.style.visibility = 'hidden'; return; }
-      load(page.src).then(() => {
-        if (current !== shown) return;
-        image.src = page.src;
-        image.alt = page.alt;
-        image.style.visibility = '';
-        if (i === landing) turn(image, i);
-      });
-    });
+    const departing = current === from + 1 ? 1 : current === from - 1 ? 0 : -1;
+    const front = spreads[from][departing];
+    const back = pages[1 - departing];
+    if (departing >= 0 && front && back && !still.matches) {
+      place(departing, pages[departing]);
+      turn(departing, front, back);
+    } else {
+      images.forEach((image, i) => place(i, pages[i]));
+    }
     for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
     link.href = (pages[1] ?? pages[0]).src;
     previous.disabled = current === 0;
