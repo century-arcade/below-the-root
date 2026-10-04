@@ -98,4 +98,23 @@ with browser_page('/map', setup=setup, viewport={"width": 900, "height": 750}) a
     expect(paper).to_be_visible()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('E6 ·')
     expect(page.locator('#map-grid [aria-label^="I5 ·"]')).to_have_count(0)
-    print('browser_map_test: keyboard dismissal, hold, control isolation, panning and location passed')
+
+with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, has_touch=True) as page:
+    viewport = page.locator('#map-viewport').bounding_box()
+    assert viewport
+    cdp = page.context.new_cdp_session(page)
+    cx, cy = viewport['x'] + viewport['width'] / 2, viewport['y'] + viewport['height'] / 2
+
+    def pinch(start, end):
+        for i, spread in enumerate([start, (start + end) / 2, end]):
+            cdp.send('Input.dispatchTouchEvent', {
+                'type': 'touchStart' if i == 0 else 'touchMove',
+                'touchPoints': [{'x': cx - spread, 'y': cy, 'id': 1}, {'x': cx + spread, 'y': cy, 'id': 2}]})
+        cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+
+    expect(page.locator('#map-zoom-out')).to_be_disabled()
+    pinch(20, 80)
+    expect(page.locator('#map-zoom-out')).to_be_enabled()
+    pinch(80, 10)
+    expect(page.locator('#map-zoom-out')).to_be_disabled()
+    print('browser_map_test: keyboard dismissal, hold, control isolation, panning, location and pinch zoom passed')

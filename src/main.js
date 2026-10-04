@@ -412,6 +412,24 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     wheelDelta = total;
     if (step) zoomMap(step < 0 ? 2 : .5, { x: e.clientX, y: e.clientY });
   }, { passive: false });
+  let pinch = null;
+  const pinchOf = ([a, b]) => ({ spread: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+    x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 });
+  mapViewport.addEventListener('touchstart', e => {
+    pinch = e.touches.length === 2 ? pinchOf(e.touches) : null;
+  }, { passive: true });
+  mapViewport.addEventListener('touchmove', e => {
+    if (!pinch || e.touches.length !== 2) return;
+    e.preventDefault();
+    const next = pinchOf(e.touches);
+    mapViewport.scrollLeft -= next.x - pinch.x;
+    mapViewport.scrollTop -= next.y - pinch.y;
+    if (pinch.spread && next.spread) zoomMap(next.spread / pinch.spread, next);
+    pinch = next;
+  }, { passive: false });
+  for (const event of ['touchend', 'touchcancel']) {
+    mapViewport.addEventListener(event, e => { if (e.touches.length < 2) pinch = null; });
+  }
   let mapDrag = null;
   const endMapDrag = e => {
     if (mapDrag?.id !== e.pointerId) return;
