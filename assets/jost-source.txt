@@ -1,0 +1,9 @@
+Jost variable (wght 100-900), the poster map's item names, credits and copyright line.
+Copyright 2020 The Jost Project Authors (https://github.com/indestructible-type).
+License: jost-OFL.txt (SIL Open Font License 1.1).
+
+Unmodified font file, retrieved 2026-10-03:
+https://github.com/google/fonts/raw/main/ofl/jost/Jost%5Bwght%5D.ttf
+
+License source:
+https://github.com/google/fonts/raw/main/ofl/jost/OFL.txt
