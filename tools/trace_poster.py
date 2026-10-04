@@ -7,7 +7,7 @@ them are bridged), and the remaining drawing is outline-traced into one
 filled path.  The frame, boxes, title underline and all small lettering are
 redrawn from tools/trace_poster.json: straight rules, and type set in the
 fonts it names, fitted to the measured extent of each printed line.
-Writes assets/box/map.svg.
+Writes assets/box/map.svg and the game's raster of it, assets/box/map.png.
 """
 import argparse
 import json
@@ -892,6 +892,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image', default=os.path.join(ROOT, 'iso/map.jpg'))
     parser.add_argument('--output', default=os.path.join(ROOT, 'assets/box/map.svg'))
+    parser.add_argument('--png', default=os.path.join(ROOT, 'assets/box/map.png'))
     parser.add_argument('--layout', default=os.path.join(ROOT, 'tools/trace_poster.json'),
                         help='ruled lines and lettering redrawn over the trace')
     parser.add_argument('--preview', help='directory for full.png and compare.png renders')
@@ -913,6 +914,7 @@ def main():
     for x0, y0, x1, y1 in layout['erase']:
         drawing[int(y0 * SCALE):int(y1 * SCALE), int(x0 * SCALE):int(x1 * SCALE)] = 0
     write_svg(args.output, drawing_paths(drawing, near_rule, SCALE), layout, fonts)
+    render(args.output, args.png)
     if args.preview:
         preview(args.output, warp(photo, lattice, 1), args.preview)
     if args.debug:
