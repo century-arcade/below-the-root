@@ -85,7 +85,9 @@ print('browser_monitor_test: landscape fullscreen orientation lock passed')
 def record_wake_locks(page):
     page.add_init_script('''
         window.wakeLocks = [];
+        window.wakeRefusals = 1;
         Object.defineProperty(navigator, 'wakeLock', { value: { request(type) {
+            if (wakeRefusals-- > 0) return Promise.reject(new DOMException('no', 'NotAllowedError'));
             const lock = { type, released: false, release() { this.released = true; this.onrelease?.(); } };
             wakeLocks.push(lock);
             return Promise.resolve(lock);
@@ -94,9 +96,13 @@ def record_wake_locks(page):
 
 
 with browser_page('/play?room=B8', setup=record_wake_locks) as page:
+    page.locator('#screen').click()
     page.wait_for_function('wakeLocks.length === 1 && wakeLocks[0].type === "screen"')
-    page.get_by_role('button', name='Monitor power', exact=True).click()
-    page.wait_for_function('wakeLocks[0].released')
-    page.get_by_role('button', name='Monitor power', exact=True).click()
+    page.evaluate('wakeLocks[0].release()')
+    page.locator('#screen').click()
     page.wait_for_function('wakeLocks.length === 2 && !wakeLocks[1].released')
+    page.get_by_role('button', name='Monitor power', exact=True).click()
+    page.wait_for_function('wakeLocks[1].released')
+    page.get_by_role('button', name='Monitor power', exact=True).click()
+    page.wait_for_function('wakeLocks.length === 3 && !wakeLocks[2].released')
 print('browser_monitor_test: the screen stays awake while the monitor is on')

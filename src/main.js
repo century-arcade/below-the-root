@@ -471,6 +471,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       }, () => { wakeLock = null; }) ?? null;
     } else if (!want && wakeLock) wakeLock.then(lock => lock?.release());
   }
+  for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, keepAwake, true);
   function showPower() {
     keepAwake();
     try { sessionStorage.setItem(POWER_KEY, powered ? 'on' : 'off'); } catch {}
