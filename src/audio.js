@@ -12,6 +12,14 @@ export const SFX = {
   fall: 9, door: 10, glideTurn: 11, bell: 12, chime: 13,
 };
 
+// the monitor's own sounds, recorded: assets/sound/sources.txt
+export const CLIPS = ['power-on', 'power-off'];
+
+export async function loadClip(name) {
+  const bytes = await (await fetch(`/assets/sound/${name}.mp3`)).arrayBuffer();
+  return new OfflineAudioContext(1, 1, 44100).decodeAudioData(bytes);
+}
+
 export function sfx(state, id) {
   state.events.push({ sfx: id });
 }
@@ -76,6 +84,7 @@ export class Speaker {
     this.pending = null;
     this.playing = null;
     this.paused = null;
+    this.clips = {};
   }
 
   // squared slider: 10% on it is 1% of the gain
@@ -197,6 +206,16 @@ export class Speaker {
       output: this.effectAnalyser,
     });
     this.effectEnd = now + (s.attack_ms + s.decay_ms) / 1000 + RELEASE_S;
+  }
+
+  // hardware: full volume past the slider and mute; silence() leaves it ringing
+  clip(name) {
+    const buffer = this.clips[name];
+    if (!this.ctx || !buffer) return;
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(this.ctx.destination);
+    src.start(this.ctx.currentTime);
   }
 
   // gate on at `at`: linear attack to full, exponential decay to the 8-bit floor; `cut` is the gate going off

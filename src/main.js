@@ -8,7 +8,7 @@ import { Keyboard, Pointer, SideTouch, Gamepad, isEditing } from './input.js';
 import { cell, doorNumber, isClimbable, isLadderCentre } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
-import { Speaker } from './audio.js';
+import { CLIPS, loadClip, Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
 import { fitScale, fitCabinet, crtVars, ASPECTS } from './fit.js';
 import { loaderScreen } from './loader.js';
@@ -305,6 +305,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const musicStaff = document.getElementById('music-notes');
   musicStaff.classList.toggle('off', !options.notes);
   const musicTrail = createMusicTrail(musicStaff);
+  for (const name of CLIPS) {
+    loadClip(name).then(buffer => { speaker.clips[name] = buffer; },
+      err => log(`Sound ${name} could not be loaded: ${err.message}`));
+  }
   speaker.setVolume(options.volume);
   speaker.mute(options.muted);
   const volume = document.getElementById('volume');
@@ -486,7 +490,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     dropInput(); acc = 0; last = performance.now();
     showPower();
     if (powered) {
-      speaker.unlock(state); speaker.resume();
+      speaker.unlock(state); speaker.clip('power-on'); speaker.resume();
       startupTitle = true; hold();
       canvas.focus({ preventScroll: true });
     }
@@ -500,6 +504,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       state = session.state;
       paperKey = null;
       speaker.silence(); speaker.suspend();
+      speaker.unlock(state); speaker.clip('power-off');
       try { clearAutosave(localStorage); }
       catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
       draw();

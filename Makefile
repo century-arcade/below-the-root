@@ -38,6 +38,7 @@ build: node_modules/.package-lock.json
 	cp assets/*.otf assets/*-LICENSE.txt $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
 	mkdir -p $(BUILD)/assets/manual && cp assets/manual/*.webp $(BUILD)/assets/manual/
+	mkdir -p $(BUILD)/assets/sound && cp assets/sound/*.mp3 $(BUILD)/assets/sound/
 
 release:
 	$(PYTHON) tools/release.py --iso "$(ISO)" --output "$(RELEASE)"

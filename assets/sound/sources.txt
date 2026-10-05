@@ -1,0 +1,13 @@
+power-on.mp3, power-off.mp3: the Commodore 1702 monitor's push-button power switch.
+
+Button: recorded by iiiDIY in "A reasonable person would have thrown this out -
+Restoring the Commodore 1702 for some retro gaming",
+https://www.youtube.com/watch?v=SQE4ViGvLes at 25:18.97-25:20.15.
+No reuse permission has been obtained.
+Cleaned: 100 Hz high-pass, room tone turned down 30 dB outside the press,
++5 dB at 280 Hz, -3 dB above 7 kHz.
+
+Degauss (power-on only): synthesized for this port, modelled on real
+degauss recordings.
+
+Same press for on and off: a push-push switch sounds alike both ways.
