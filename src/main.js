@@ -347,6 +347,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let wasOn = false;
   try { wasOn = sessionStorage.getItem(POWER_KEY) === 'on'; } catch {}
   let powered = !coldLaunch || wasOn;
+  // frozen: the last picture stays up through the power-off click and fade
+  let frozen = false;
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
   let held = false;
@@ -485,12 +487,24 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     power.title = powered ? 'Power off (reset game)' : 'Turn on';
   }
   showPower();
+  monitor.classList.toggle('screen-dark', !powered);
+  const SCREEN_FADE_MS = 200;
+  let screenTimer = 0;
+  function screenAfter(seconds, on) {
+    clearTimeout(screenTimer);
+    screenTimer = setTimeout(() => {
+      monitor.classList.toggle('screen-dark', !on);
+      if (!on) screenTimer = setTimeout(() => { frozen = false; }, SCREEN_FADE_MS);
+    }, Math.max(0, seconds * 1000 - (on ? SCREEN_FADE_MS : 0)));
+  }
   power.onclick = () => {
     powered = !powered;
     dropInput(); acc = 0; last = performance.now();
     showPower();
     if (powered) {
-      speaker.unlock(state); speaker.clip('power-on'); speaker.resume();
+      frozen = false;
+      monitor.classList.add('screen-dark');
+      speaker.unlock(state); screenAfter(speaker.clip('power-on'), true); speaker.resume();
       startupTitle = true; hold();
       canvas.focus({ preventScroll: true });
     }
@@ -504,7 +518,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       state = session.state;
       paperKey = null;
       speaker.silence(); speaker.suspend();
-      speaker.unlock(state); speaker.clip('power-off');
+      frozen = true;
+      speaker.unlock(state); screenAfter(speaker.clip('power-off'), false);
       try { clearAutosave(localStorage); }
       catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
       draw();
@@ -795,6 +810,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     onAspect: value => { options.aspect = value; fit(); } });
   if (params.get('github') === 'failed') log('GitHub login was cancelled or failed. Your quest is saved; try again.');
   function draw() {
+    if (frozen) return;
     screenFocus.toggleAttribute('hidden', !isRunning());
     menuButton.hidden = session.playback || !canOpenCommandMenu(state);
     if (replayHelp) replayHelp.hidden = !session.playback;

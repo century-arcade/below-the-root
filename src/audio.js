@@ -211,11 +211,12 @@ export class Speaker {
   // hardware: full volume past the slider and mute; silence() leaves it ringing
   clip(name) {
     const buffer = this.clips[name];
-    if (!this.ctx || !buffer) return;
+    if (!this.ctx || !buffer) return 0;
     const src = this.ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(this.ctx.destination);
     src.start(this.ctx.currentTime);
+    return buffer.duration;
   }
 
   // gate on at `at`: linear attack to full, exponential decay to the 8-bit floor; `cut` is the gate going off

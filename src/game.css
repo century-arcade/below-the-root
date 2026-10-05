@@ -267,7 +267,8 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 .power-switch { display: grid; place-items: center; width: 27px; height: 17px; background: #5e5749; border: 1px solid #40392d; box-shadow: inset 0 2px 0 #0006; border-radius: 2px; }
 #monitor.powered-off .power-light { background: #562e25; }
 #monitor.powered-off .power-switch { background: #787060; box-shadow: 0 2px 0 #342d21; transform: translateY(-2px); }
-#monitor.powered-off #canvas-box > *, #monitor.powered-off #screen-focus { visibility: hidden; }
+#canvas-box > *, #screen-focus { transition: opacity .2s linear, visibility 0s; }
+#monitor.screen-dark #canvas-box > *, #monitor.screen-dark #screen-focus { opacity: 0; visibility: hidden; transition: opacity .2s linear, visibility 0s .2s; }
 #monitor.powered-off #canvas-box { background: #000; }
 #monitor[data-surround="portable"] {
   --rim: 20px; --chin: 0px; --side: 112px;
