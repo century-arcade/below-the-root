@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { marked } from 'marked';
-import { buildSite, cardList, renderPage } from '../tools/build-site.mjs';
+import { buildSite, cardList, renderPage, renderDevNotes } from '../tools/build-site.mjs';
 
 const root = new URL('../', import.meta.url);
 const origin = 'https://below-the-root.netlify.app';
@@ -82,9 +82,10 @@ test('every public page initializes the shared analytics loader once', t => {
   buildSite(out);
   for (const page of ['index', 'play', 'map', 'about', 'resources']) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
-    assert.equal(html.match(/from "\/analytics.js"/g)?.length, 1);
-    assert.equal(html.match(/startAnalytics\(\)/g)?.length, 1);
-    assert.doesNotMatch(html, /gc\.zgo\.at|goatcounter\.com/);
+    const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)].map(match => match[0]).join('\n');
+    assert.equal(scripts.match(/from "\/analytics.js"/g)?.length, 1);
+    assert.equal(scripts.match(/startAnalytics\(\)/g)?.length, 1);
+    assert.doesNotMatch(scripts, /gc\.zgo\.at|goatcounter\.com/);
   }
 });
 
@@ -101,6 +102,14 @@ test('the renderer escapes metadata while preserving HTML fragments', () => {
   }
   assert.ok(html.includes(content));
   assert.doesNotMatch(html, /{{\w+}}/);
+});
+
+test('development prompts are dated literal text, never executable HTML or Markdown', () => {
+  const html = renderDevNotes([{ timestamp: '2026-10-05T01:02:03Z', text: '<script>alert("x")</script>\n**original words** & $&' }]);
+  assert.match(html, /datetime="2026-10-05T01:02:03.000Z"/);
+  assert.match(html, /2026-10-05 · 01:02 UTC/);
+  assert.ok(html.includes('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;\n**original words** &amp; $&'));
+  assert.doesNotMatch(html, /<script>|<strong>/);
 });
 
 test('resource cards put the quote or image first and keep every link in one caption', () => {

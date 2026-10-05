@@ -25,6 +25,15 @@
   </div>
   <output class="page-number" aria-live="polite">Page 0 / 18</output>
 </section>
+<section id="dev-notes" data-desk="dev-notes" hidden aria-label="Dev notes">
+  <div class="greenbar-tools">
+    <button type="button" data-paper-pause aria-label="Pause paper feed" aria-pressed="false" title="Pause paper feed"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="paper-pause" d="M7 4v12M13 4v12"/><path class="paper-resume" d="m7 4 8 6-8 6z"/></svg></button>
+    <button type="button" data-desk-back aria-label="Close dev notes" title="Close (Escape)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
+  </div>
+  <div class="greenbar-viewport" tabindex="0" role="region" aria-label="Dated development prompts">
+    <div class="greenbar-paper">{{devNotes}}</div>
+  </div>
+</section>
 <section id="paper-map" data-desk="map" hidden aria-label="World map" aria-keyshortcuts="M Tab">
   <div id="map-viewport"><div id="map-sheet" class="map-sheet"><div id="map-grid" class="map-grid"></div></div></div>
   <div id="map-tools">
@@ -54,11 +63,13 @@
     <rect x="66" y="44" width="38" height="2" fill="#f6f2e8"/>
   </svg></button>
   <button type="button" class="tray-item tray-note" data-desk-go="note" aria-label="Curator's Note"><span class="booklet-cover"><img src="/assets/box/front.jpg" width="454" height="599" alt=""></span></button>
+  <button type="button" class="tray-item tray-dev-notes" data-desk-go="dev-notes" aria-label="Dev notes"><span class="greenbar-stack-sheet"></span></button>
 </div>
 </div>
 <section id="play" aria-label="Play Below the Root">
 <div id="game">
   <div id="play-area">
+    <button id="dev-notes-stack" type="button" data-desk-go="dev-notes" aria-label="Dev notes" title="Dev notes"><span class="greenbar-stack-sheet"><span>DEV NOTES</span></span></button>
     <div id="monitor" class="unfitted" data-surround="commodore">
     <div id="glass-surround">
     <div id="glass">
