@@ -18,7 +18,7 @@ TEST_TIMEOUT ?= 60
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve release release-public test browser-test poster screenshot clean install-hooks
+.PHONY: build serve release release-public test browser-test poster screenshot clean install-hooks dev-notes
 
 install-hooks:
 	git config core.hooksPath .githooks
@@ -74,3 +74,11 @@ browser-test: build
 
 clean:
 	rm -rf $(BUILD)
+
+DEV_NOTES ?= .meta/notes/dev-notes/prompts.jsonl
+
+dev-notes:
+	node tools/dev-notes.mjs extract $(DEV_NOTES) .meta/sessions .meta/session-archive/codex $(PI)
+	$(PYTHON) tools/label-dev-notes.py $(DEV_NOTES)
+	node tools/dev-notes.mjs publish $(DEV_NOTES) assets/dev-notes.json
+	$(PYTHON) tools/dev-effort.py .meta $(DEV_NOTES)

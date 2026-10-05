@@ -140,10 +140,6 @@
     "label": "core"
   },
   {
-    "timestamp": "2026-09-05T08:13:41.433Z",
-    "text": "client id=[redacted]"
-  },
-  {
     "timestamp": "2026-09-05T17:35:43.179Z",
     "text": "and where do i get session secret from?  these are being set at netlify envvars, right?  I can't find \"Production / Functions\"",
     "label": "bug"
@@ -162,10 +158,6 @@
     "timestamp": "2026-09-05T17:54:41.135Z",
     "text": "netlify dev --dir _build --port 8000 --context dev --no-open\nmake: netlify: Permission denied",
     "label": "bug"
-  },
-  {
-    "timestamp": "2026-09-06T19:05:56.267Z",
-    "text": "i can't launch a local webserver for testing this.  outside the cbox i get: % make serve    \nmkdir -p _build/data _build/assets\ncp src/index.html src/*.js _build/\ncp docs/spec/data/*.json _build/data/\ncp assets/*.json assets/*.png _build/assets/\nnpx --yes --package=netlify-cli@27.5.0 netlify dev --dir _build --port 8000 --context dev --no-open\n⬥ Injecting environment variable values for all scopes\n ›   Error: Failed retrieving addons for site 4cd9314f-c1e1-4c9d-a331-032df84f6c49: Unauthorized. Double-check your login status with 'netlify status' or contact support with details of your error.\nmake: *** [Makefile:18: serve] Error 1\n\n% netlify status     \nzsh: permission denied: netlify\nsaul@stdio:~/git/below-the-root (master) % which netlify\nnetlify not found\n\nsend an inbox msg to workflow to install netlify on host correctly fo rme"
   },
   {
     "timestamp": "2026-09-06T23:34:59.856Z",
@@ -2411,5 +2403,35 @@
     "timestamp": "2026-10-05T01:31:42.188Z",
     "text": "something is screwy with the steering.  mostly it works but sometimes it does steer immedaitely when e.g. falling; when gliding it's super important that any press/hold/tap on one side only steers that way immediately.\n\nwe also need a way to crouch/stand without moving left/right. i'm thinking maybe that there are 'up' regions on top of both sides, and down on the bottoms, and only the actual sides actually move left/right.  can we get those regions to show on fullscreen mobile mode, as a test?",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-10-05T04:24:34.452Z",
+    "text": "that char's name is NERIC.\n\npressing down to crouch opens the menu, i thought we disabled screen clicking in fullscreen/mobile mode?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T04:37:43.608Z",
+    "text": "just impl'd a dev notes, let's clean it up.  stop the autoscroll, ditch that code.  move the table thumbnail 'back'/up on the desk so that it stands apart.  extend the desk surface out so the side edges of the desktop aren't visible.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T05:12:19.381Z",
+    "text": "great, let's make the visible devnotes have: no junk entries; bug and design entries tagged unbold italic \"(bug)\" and \"(design)\" after timestamp.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T05:24:29.445Z",
+    "text": "let's add another category, \"meta\", like \"i'm curious if the text from opus is as reasonable as with fable.\" \"where is the summary of where we're at, on disk? we should have it in the toplevel README and update it as we go\".  like \"process\" if you think that'll be easier for sonnet to understand.  \"let's do @.meta/todo/m6-js-port.md\"  \"meta\" should be overridden by the other categories; this is for things which are only meta.  let's also elide meta items from the dev notes.  i want \"(core)\" after timestamps too.  finally, let's put at the top of the doc as a summary, the total number of human hours and AI tokens that were spent on this project.  with \"[This is a slightly-abridged transcript of what it took to put this project together.  With all of the experiments and misdirections and back-and-forths that I explored as I figured out what it was I wanted to say.  I offer this as both \"proof of human\" and also in my perpetual hope that someday, someone will find it useful.]\" at the top.  I'd like that to be in a .md that I can edit.  in fact how is this whole thing put together, is devnotes.md made via a make build step and just saved into the repo like i kinda want it to be?",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-05T05:27:32.973Z",
+    "text": "great, you know the power light on this kind of monitor is actually green? let's fix it",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T05:39:02.310Z",
+    "text": "yes, make dev-notes is the right idea.  the full/working json should be saved into .meta, only the public dev-notes gets commited to main repo, yes?\n\nlet's rework the summary. this whole top section should be in bold.  actually let's increase the weight of the font a bit too.  \"Human time: 115 hours (109 sittings); LLM tokens: 1.2 billion (50m cached, 5m output)\"",
+    "label": "design"
   }
 ]

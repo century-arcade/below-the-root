@@ -22,14 +22,14 @@
 .greenbar-viewport { flex: 1; min-width: 0; height: 100%; overflow-y: auto; overscroll-behavior: contain; min-height: 0; touch-action: pan-y; box-shadow: 5px 7px 0 #0005; scrollbar-width: thin; scrollbar-color: #8e9e80 #f2efdc; }
 .greenbar-viewport:focus-visible { outline: 2px solid #d6f897; outline-offset: 3px; }
 .greenbar-paper {
-  position: relative; color: #344b3b; background: #f2efdc; font: 14px/22px 'Courier New', monospace;
+  position: relative; color: #344b3b; background: #f2efdc; font: 14px/22px 'Courier New', monospace; text-shadow: .35px 0 currentColor;
 }
 .greenbar-day {
   padding: 22px 48px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='44'%3E%3Cpath fill='%23dbe7ce' d='M0 0h20v22H0z'/%3E%3C/svg%3E");
 }
 .greenbar-day + .greenbar-day { border-top: 1px dashed #a3b397; }
-.greenbar-intro { padding: 22px 48px 0; }
+.greenbar-intro { padding: 22px 48px 0; font-weight: bold; }
 .greenbar-paper .greenbar-intro p { margin: 0 0 22px; }
 .greenbar-paper h1 { margin: 0 0 22px; font: bold 18px/22px 'Courier New', monospace; text-transform: uppercase; letter-spacing: .12em; }
 .greenbar-paper h2 { margin: 0 0 22px; font: bold 16px/22px 'Courier New', monospace; }

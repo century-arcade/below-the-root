@@ -1,7 +1,3 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
-
 const generated = /^(?:# AGENTS\.md instructions|<environment_context>|<recommended_plugins>|<turn_aborted>|<system-reminder>|<task-notification>|\[Request interrupted by user|This session is being continued from a previous conversation)/;
 
 function textContent(content) {
@@ -41,21 +37,4 @@ export function extractPrompts(records, { allowPi = false } = {}) {
 export function combinePrompts(prompts) {
   const unique = new Map(prompts.map(prompt => [`${prompt.timestamp}\0${prompt.text}`, prompt]));
   return [...unique.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-}
-
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const [output, ...sources] = process.argv.slice(2);
-  if (!output || !sources.length) throw new Error('Usage: node tools/extract-prompts.mjs OUTPUT.json SOURCE... (Pi: explicitly name human session files)');
-  const prompts = [];
-  for (const source of sources) {
-    const directory = statSync(source).isDirectory();
-    const files = directory ? readdirSync(source).filter(name => name.endsWith('.jsonl')).map(name => join(source, name)) : [source];
-    for (const file of files) {
-      const records = readFileSync(file, 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
-      prompts.push(...extractPrompts(records, { allowPi: !directory }));
-    }
-  }
-  const combined = combinePrompts(prompts);
-  writeFileSync(output, JSON.stringify(combined, null, 2) + '\n');
-  console.error(`Extracted ${combined.length} prompts. Review this private draft before copying it into assets/dev-notes.json.`);
 }
