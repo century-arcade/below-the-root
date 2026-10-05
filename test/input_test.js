@@ -154,7 +154,20 @@ test("a side hold on a ladder climbs on the way it last went, then walks", async
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'off the ladder the hold walks');
 });
 
-test("a slide away from a ladder still sends its direction once", async t => {
+test("a slide up away from a ladder still sends its direction once", async t => {
+  const { keys, model, send, advance, LEFT } = await sideFixture(t);
+  model.ladder = false;
+  send('pointerdown', LEFT, 100);
+  advance(130);
+  keys.read();
+  send('pointermove', LEFT, 65);
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'held until the game reads it, to stand');
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'then the hold walks');
+});
+
+test("a slide down away from a ladder only crouches, never walks", async t => {
   const { keys, model, send, advance, LEFT } = await sideFixture(t);
   model.ladder = false;
   send('pointerdown', LEFT, 100);
@@ -162,9 +175,11 @@ test("a slide away from a ladder still sends its direction once", async t => {
   keys.read();
   send('pointermove', LEFT, 135);
   advance(60);
-  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'held until the game reads it, to crouch');
-  advance(60);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'then the hold walks');
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false });
+  advance(300);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'the hold stays down');
+  send('pointerup', LEFT, 135);
+  assert.deepEqual(keys.read(), IDLE);
 });
 
 test("a tap on the other side soon after the first touch leaps at once", async t => {

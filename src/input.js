@@ -713,7 +713,8 @@ export class SideTouch {
     // slide-off-ladder: the game reads the slide once (crouch, stand), then the hold walks
     const unread = stick?.slid == null || this.keys.consumed < stick.slid;
     if (stick) {
-      let key = stick.vertical && (stick.zone || unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side;
+      const crouch = stick.vertical === 'down';
+      let key = stick.vertical && (crouch || stick.zone || unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side;
       // ladder-hold: the game ignores sideways on a ladder, so climb on until a side opens
       if (key === stick.side && this.onLadder()) key = this.lastClimb;
       if (key === 'up' || key === 'down') this.lastClimb = key;
