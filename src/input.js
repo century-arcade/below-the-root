@@ -116,6 +116,12 @@ export class Keyboard {
       if (s.down.has('fire') && s.down.get('fire') <= through) s.blocked.add('fire');
     }
   }
+  // stand-up: taps made while the figure could not act are stale; holds still count
+  flush() {
+    this.events = [];
+    this.lastEvent = null;
+    this.consumed = this.sequence;
+  }
   // A control-seizing message rejects input that predates its appearance.
   fresh() {
     for (const device of this.devices) device.cancel(true);

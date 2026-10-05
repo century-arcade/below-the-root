@@ -124,3 +124,25 @@ test('a button tap during a leap that lands lower leaps again from the landing',
   assert.ok(p.leaping, 'the queued tap leaps from the landing');
   assert.equal(p.leapPhase, 1);
 });
+
+test('getting up from a knock-down drops taps made while down but keeps what is held', async () => {
+  const data = await loadTestData();
+  const keys = new Keyboard({ addEventListener() {} });
+  const key = (name, up = false) => keys.map({ key: name, code: name, repeat: false }, up);
+  const state = newState(data, { pace: 5, read: (kind, policy) => keys.read(policy), flush: () => keys.flush() },
+    { rng: () => 0.5 });
+  startQuest(state, data.characters[0]);
+  enterRoom(state, data.roomByCode.get('86'), 12, 11);
+  const p = state.player;
+  p.facing = -1;
+  p.frame = idleFrame(p);
+  p.fallen = 6;
+  step(state);
+  assert.ok(p.knockdown);
+  key('Enter'); key('Enter', true);
+  key('ArrowLeft');
+  while (p.knockdown) step(state);
+  step(state);
+  assert.equal(p.leaping, false, 'the stale tap does not leap');
+  assert.equal(p.stride, 1, 'the held side walks');
+});

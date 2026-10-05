@@ -75,7 +75,7 @@ export class Session {
     this.path = [];
     this.record = null;
     this.boundary = null;
-    const stick = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.() };
+    const stick = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.(), flush: () => !this.playback && this.live.flush?.() };
     this.state = newState(data, stick, { rng: random(seed) });
     this.state.stick = stick;
     this.state.commands = {
@@ -400,7 +400,7 @@ export class Session {
     Object.assign(this, imported);
     Object.assign(state, imported.state);
     this.state = state;
-    state.stick = state.input = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.() };
+    state.stick = state.input = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.(), flush: () => !this.playback && this.live.flush?.() };
     state.commands = { execute: (name, choices, options) => this.command(name, choices, options), handoff: options => this.handoff(options) };
     this.handoff();
   }

@@ -340,6 +340,7 @@ function knockdownStep(state) {
     p.knockdown = 0;
     p.period = 8;
     p.frame = idleFrame(p);
+    state.input.flush?.();
   }
 }
 
