@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false, gliding: false, facing: null, ladder: true, onLadder: false };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, airborne: false, facing: null, ladder: true, onLadder: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
-    gliding: () => model.gliding, facing: () => model.facing, climbable: () => model.ladder, onLadder: () => model.onLadder,
+    airborne: () => model.airborne, facing: () => model.facing, climbable: () => model.ladder, onLadder: () => model.onLadder,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -247,7 +247,7 @@ test("while gliding, touching only one side faces that way at once", async t => 
   send('pointerdown', LEFT);
   advance(130);
   assert.equal(keys.read().dx, -1);
-  model.gliding = true;
+  model.airborne = true;
   send('pointerdown', RIGHT, 100, 2);
   assert.deepEqual(keys.read(), IDLE, 'both sides leave the glide as it is');
   send('pointerup', LEFT);
@@ -258,6 +258,67 @@ test("while gliding, touching only one side faces that way at once", async t => 
   send('pointerup', LEFT);
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'a quick tap turns without pressing the button');
   advance(300);
+  assert.deepEqual(keys.read(), IDLE);
+});
+
+test("while falling, a side tap or hold steers that way at once", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  model.airborne = true;
+  send('pointerdown', RIGHT, 30);
+  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false }, 'a hold needs no tap delay, even in a corner');
+  send('pointerup', RIGHT, 30);
+  send('pointerdown', LEFT);
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'a quick tap turns without pressing the button');
+  advance(300);
+  assert.deepEqual(keys.read(), IDLE);
+});
+
+test("a press that lands before a fall and lifts during it steers its side", async t => {
+  const { keys, model, send, LEFT } = await sideFixture(t);
+  send('pointerdown', LEFT);
+  model.airborne = true;
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false });
+});
+
+test("a leap's held button stays held when the leap becomes a fall", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  send('pointerdown', LEFT);
+  advance(130);
+  send('pointerdown', RIGHT, 100, 2);
+  keys.read();
+  model.airborne = true;
+  advance(60);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
+});
+
+test("the top and bottom of a side stand and crouch without walking", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  model.ladder = false;
+  send('pointerdown', LEFT, 190);
+  send('pointerup', LEFT, 190);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'a bottom tap crouches');
+  send('pointerdown', RIGHT, 10);
+  send('pointerup', RIGHT, 10);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'a top tap stands');
+  send('pointerdown', RIGHT, 190);
+  advance(130);
+  keys.read();
+  advance(300);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'a bottom hold never walks');
+  send('pointermove', RIGHT, 100);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'dragging out of the zone keeps its direction');
+  send('pointerup', RIGHT, 100);
+  assert.deepEqual(keys.read(), IDLE);
+});
+
+test("a hold on the top of a side climbs", async t => {
+  const { keys, send, advance, LEFT } = await sideFixture(t);
+  send('pointerdown', LEFT, 20);
+  advance(130);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false });
+  send('pointerup', LEFT, 20);
   assert.deepEqual(keys.read(), IDLE);
 });
 

@@ -521,10 +521,11 @@ const STEER_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
 const SIDE_FIRE = 'touch:fire';
 
-// Fullscreen and landscape touch: the outer eighths steer; the middle can only tap.
+// Fullscreen and landscape touch: the outer eighths steer, their top and bottom thirds
+// climb or crouch; the middle can only tap.
 export class SideTouch {
   constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
-    gliding = () => false, facing = () => null, climbable = () => true, onLadder = () => false } = {}) {
+    airborne = () => false, facing = () => null, climbable = () => true, onLadder = () => false } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -532,7 +533,7 @@ export class SideTouch {
     this.jog = jog;
     this.onChord = chord;
     this.anywhere = anywhere;
-    this.gliding = gliding;
+    this.airborne = airborne;
     this.facing = facing;
     this.climbable = climbable;
     this.onLadder = onLadder;
@@ -560,6 +561,14 @@ export class SideTouch {
     return null;
   }
 
+  zone(e) {
+    const r = this.canvas.getBoundingClientRect();
+    const y = (e.clientY - r.top) * (this.canvas.height / r.height);
+    if (y < this.canvas.height / 3) return 'up';
+    if (y >= this.canvas.height * 2 / 3) return 'down';
+    return null;
+  }
+
   down(e) {
     if (!this.claims(e) || e.target?.closest?.(OFF_PICTURE_IGNORE)) return;
     const side = this.side(e);
@@ -568,11 +577,12 @@ export class SideTouch {
     e.target?.setPointerCapture?.(e.pointerId);
     if (!side) return this.taps.add(e.pointerId);
     const jog = this.jog();
-    const f = { id: e.pointerId, side, x: e.clientX, y: e.clientY, at: performance.now(), jog, vertical: null };
+    const zone = jog ? null : this.zone(e);
+    const f = { id: e.pointerId, side, zone, x: e.clientX, y: e.clientY, at: performance.now(), jog, vertical: zone };
     const live = [...this.fingers.values()].filter(g => g.role !== 'dead');
     const pending = live.find(g => g.role === 'pending');
     this.fingers.set(f.id, f);
-    if (this.gliding() && !jog) {
+    if (this.airborne() && !jog) {
       f.role = 'stick';
       this.update();
     } else if (!live.length) {
@@ -597,6 +607,7 @@ export class SideTouch {
     const f = this.fingers.get(e.pointerId);
     if (!f || f.role === 'dead') return;
     const dx = e.clientX - f.x, dy = e.clientY - f.y;
+    if (f.zone) return;
     if (f.jog) {
       if (Math.max(Math.abs(dx), Math.abs(dy)) < SLIDE) return;
       if (this.chord) this.breakChord();
@@ -630,8 +641,9 @@ export class SideTouch {
       }
       return;
     }
-    if (this.gliding()) this.update();
-    else if (f.role === 'pending') this.keys.tap('fire', SIDE_SOURCE);
+    if (this.airborne() && f.role === 'pending') this.keys.tap(f.side, SIDE_SOURCE);
+    else if (this.airborne()) this.update();
+    else if (f.role === 'pending') this.keys.tap(f.zone ?? 'fire', SIDE_SOURCE);
     else if (f.role === 'stick' || f.role === 'button') this.update();
   }
 
@@ -687,22 +699,25 @@ export class SideTouch {
 
   wanted() {
     const keys = new Set();
-    if (this.gliding()) {
+    const button = [...this.fingers.values()].some(f => f.role === 'button');
+    if (this.airborne()) {
       const sides = new Set([...this.fingers.values()].filter(f => f.role !== 'dead').map(f => f.side));
       if (sides.size === 1) keys.add([...sides][0]);
+      // fall-button: a leap's held button still opens the glide once it falls
+      else if (button) keys.add('fire');
       return keys;
     }
     const stick = [...this.fingers.values()].find(f => f.role === 'stick');
     // slide-off-ladder: the game reads the slide once (crouch, stand), then the hold walks
     const unread = stick?.slid == null || this.keys.consumed < stick.slid;
     if (stick) {
-      let key = stick.vertical && (unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side;
+      let key = stick.vertical && (stick.zone || unread || this.climbable(stick.vertical)) ? stick.vertical : stick.side;
       // ladder-hold: the game ignores sideways on a ladder, so climb on until a side opens
       if (key === stick.side && this.onLadder()) key = this.lastClimb;
       if (key === 'up' || key === 'down') this.lastClimb = key;
       keys.add(key);
     }
-    if ([...this.fingers.values()].some(f => f.role === 'button')) keys.add('fire');
+    if (button) keys.add('fire');
     return keys;
   }
 
