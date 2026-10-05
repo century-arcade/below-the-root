@@ -1,11 +1,13 @@
 [
   {
     "timestamp": "2026-09-03T22:31:36.209Z",
-    "text": "okay i'm looking to get a clean implementation of this classic c64 game, below the root, here in two .g64 disk files in iso/.  this may be a lengthy process, please track your learning, progress, plans, todos, etc as usual in .meta such that we can stop at appropriate milestones and continue with fresh instances as desired.  use subagents with opus or even sonnet for easy tasks. ultimately we'll probably make a pure js/canvas version of the game but to start i want to decompile it and build copious notes and assets etc so it can be rebuilt on other modern game platforms as well.  share with me your overall immediate plan to review and approve before you burn a trillion tokens."
+    "text": "okay i'm looking to get a clean implementation of this classic c64 game, below the root, here in two .g64 disk files in iso/.  this may be a lengthy process, please track your learning, progress, plans, todos, etc as usual in .meta such that we can stop at appropriate milestones and continue with fresh instances as desired.  use subagents with opus or even sonnet for easy tasks. ultimately we'll probably make a pure js/canvas version of the game but to start i want to decompile it and build copious notes and assets etc so it can be rebuilt on other modern game platforms as well.  share with me your overall immediate plan to review and approve before you burn a trillion tokens.",
+    "label": "core"
   },
   {
-    "timestamp": "2026-09-03T22:41:57.029Z",
-    "text": "d) let's keep notes in .meta for now, but make sure that docs in main repo ultimately include all useful real knowledge/information that's been figured out.  effectively meta is ideas/tactics/experiments whether failed or yet to be tried, and main is only successful/true/known facts (allowing for mistakes which may be inevitable in the short-term, but correct them as they are discovered without leaving the falsehood behind even as a negative).\ne) yes fine, install yourself for M0/M1 and i'll rebuild the cbox after M1"
+    "timestamp": "2026-09-04T03:32:13.293Z",
+    "text": "let's continue on with this mission; from end of last session:   Proposed next batch (M4 remainder, same pattern, four parallel agents):\n  - f) NPC/creature descriptors + $2300/$2380 per-character state + object table/placement ($0D00, $8CA0);\n  - g) verb handlers $AC00+ (TAKE/DROP/USE/EAT/REST/OFFER/BUY/SELL/KINIPORT/GRUNSPREKE/HEAL) and inventory;\n  - h) message-table semantics (which of the 187 strings fires when) + dialog/pense rules;\n  - i) demo script format (demolow), day/time accounting and quest end conditions.\n    After that, M5: docs/spec/ (JSON tables + rules) for the JS port.  Say go, or redirect.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-04T04:35:34.377Z",
@@ -20,12 +22,12 @@
   {
     "timestamp": "2026-09-04T04:52:44.675Z",
     "text": "let's put together an intermediate spec so we can see where we're at before continuing",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-04T05:21:18.369Z",
     "text": "okay so this spec is too detailed in terms of implementation, n mod 32 etc.  we want the functional spec only.  and that first paragraph is all fluff, it's just saying \"see these other docs for the full details\".  plain english!",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-04T05:31:18.933Z",
@@ -34,27 +36,13 @@
   },
   {
     "timestamp": "2026-09-04T05:38:41.829Z",
-    "text": "okay, this is good, let's rewrite any deeper specs to be in this tone and level of detail as well.  basically enough to recreate the entire game without dictating any implementation (at least for the discrete stuff like npc interactions--for movement we may want a little more exactness in specification).  then /close"
-  },
-  {
-    "timestamp": "2026-09-04T05:43:01.883Z",
-    "text": "i'm curious if the text from opus is as reasonable as with fable.",
-    "label": "design"
+    "text": "okay, this is good, let's rewrite any deeper specs to be in this tone and level of detail as well.  basically enough to recreate the entire game without dictating any implementation (at least for the discrete stuff like npc interactions--for movement we may want a little more exactness in specification).  then /close",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-04T05:47:54.216Z",
     "text": "all looks good except looks like you edited out the cap on leap distance?  that seems like important gameplay information, not implementation detail.",
     "label": "design"
-  },
-  {
-    "timestamp": "2026-09-04T06:53:13.810Z",
-    "text": "where is the summary of where we're at, on disk? we should have it in the toplevel README and update it as we go",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-09-04T06:58:16.888Z",
-    "text": "whre is the writing annoying?",
-    "label": "bug"
   },
   {
     "timestamp": "2026-09-04T07:02:33.555Z",
@@ -67,21 +55,14 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-04T07:05:02.225Z",
-    "text": "let's do @.meta/todo/m6-js-port.md"
-  },
-  {
     "timestamp": "2026-09-04T09:16:05.461Z",
     "text": "resume @.meta/todo/m6-js-port.md.  it works in the browser, timing is good, only issues noticed so far are selected menu item is like @speak@ instead of SPEAK, and i saw an npc fall off a ledge.  and of course it starts as charn instead of opening + char select.",
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-04T15:43:57.029Z",
-    "text": "resume @.meta/todo/m6-js-port.md.  it works in the browser, timing is good.  do M6.3"
-  },
-  {
     "timestamp": "2026-09-04T16:09:15.165Z",
-    "text": "okay i'd like to deploy a demo of what we have to a public static site, let's get it set up on netlify.  i've created a github repo century-arcade/below-the-root (added as remote)."
+    "text": "okay i'd like to deploy a demo of what we have to a public static site, let's get it set up on netlify.  i've created a github repo century-arcade/below-the-root (added as remote).",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-04T16:25:27.003Z",
@@ -115,7 +96,8 @@
   },
   {
     "timestamp": "2026-09-05T02:14:09.519Z",
-    "text": "okay we're going to ship this port as a pre-alpha and offer it as a project to the community, set up a loop against the issues list.  announce a development cycle with a release N days afterward.  encourage people who loved the game to play it, host a speedrun tournament.  improve the interface, give it the full treatment."
+    "text": "okay we're going to ship this port as a pre-alpha and offer it as a project to the community, set up a loop against the issues list.  announce a development cycle with a release N days afterward.  encourage people who loved the game to play it, host a speedrun tournament.  improve the interface, give it the full treatment.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-05T03:01:39.230Z",
@@ -144,7 +126,8 @@
   },
   {
     "timestamp": "2026-09-05T05:45:55.982Z",
-    "text": "let's do a full review of this project, tell me what's been done, where it's at, what's up next, and what you think is missing."
+    "text": "let's do a full review of this project, tell me what's been done, where it's at, what's up next, and what you think is missing.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-05T05:48:16.988Z",
@@ -153,11 +136,17 @@
   },
   {
     "timestamp": "2026-09-05T06:04:24.418Z",
-    "text": "do 1 and then let's get set up to do 3.  with ?debug i'd like a login to github button that adds a file an issue button which gives me an instant simple message box to fill out that opens an issue on the repo.  ditch the bottom message entirely and let's just automatically save to localstorage on every screen change.  i think we should expand save state though, to include the entire path?  maybe every click?  and then the save becomes the record which we can clean up by removing any extra clicks and missteps.  turn 5 into a todo.  do you know about .meta yet?"
+    "text": "do 1 and then let's get set up to do 3.  with ?debug i'd like a login to github button that adds a file an issue button which gives me an instant simple message box to fill out that opens an issue on the repo.  ditch the bottom message entirely and let's just automatically save to localstorage on every screen change.  i think we should expand save state though, to include the entire path?  maybe every click?  and then the save becomes the record which we can clean up by removing any extra clicks and missteps.  turn 5 into a todo.  do you know about .meta yet?",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-05T08:13:41.433Z",
     "text": "client id=[redacted]"
+  },
+  {
+    "timestamp": "2026-09-05T17:35:43.179Z",
+    "text": "and where do i get session secret from?  these are being set at netlify envvars, right?  I can't find \"Production / Functions\"",
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-05T17:46:38.966Z",
@@ -173,11 +162,6 @@
     "timestamp": "2026-09-05T17:54:41.135Z",
     "text": "netlify dev --dir _build --port 8000 --context dev --no-open\nmake: netlify: Permission denied",
     "label": "bug"
-  },
-  {
-    "timestamp": "2026-09-05T19:27:09.014Z",
-    "text": "hm i need to run netlify myself, maybe the dir should be renamed, eh?",
-    "label": "design"
   },
   {
     "timestamp": "2026-09-06T19:05:56.267Z",
@@ -201,11 +185,6 @@
   {
     "timestamp": "2026-09-07T00:35:52.490Z",
     "text": "let's make the debug buttons and status stable so they don't change layout based on their length.  put buttons on top, status on bottom.",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-09-07T03:18:08.317Z",
-    "text": "i understand but we should have a general rule about committing after fixing an issue or implementing a feature, is that not in your context?",
     "label": "design"
   },
   {
@@ -239,6 +218,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-07T07:11:54.588Z",
+    "text": "how do i restart the game these days, when it's autosaved?",
+    "label": "bug"
+  },
+  {
     "timestamp": "2026-09-07T17:00:13.076Z",
     "text": "\"report issue\" button should be visible when logged out, and clicking it should try to log in",
     "label": "design"
@@ -246,7 +230,7 @@
   {
     "timestamp": "2026-09-07T20:13:51.584Z",
     "text": "we need to clean up the issues posted on github, the json blob inline is way too much.  what other approaches can we try?  gist?",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-07T20:16:38.061Z",
@@ -259,30 +243,14 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-07T22:43:07.909Z",
-    "text": "okay so the automated loop fired to handle 2 github issues on this project.  the first filed a PR, which was fine and I merged it, but in the future on this project they should be committed to the master branch locally only.  the second diagnosed the issue and reported it in the todo but did not do the work nor make a commit, and it should. let's update the auto process to do these!",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-09-07T22:49:42.130Z",
-    "text": "review the latest commits here by codex, all of them but primarily the changes to improve the auto dev 'loop'.  they seem like a lot of code and possibly way overblown and maybe incorrect.  how can we improve them?  write up a todo.  also how can we insert fable into the loop for the time being to do a review pass against these also"
+    "text": "review the latest commits here by codex, all of them but primarily the changes to improve the auto dev 'loop'.  they seem like a lot of code and possibly way overblown and maybe incorrect.  how can we improve them?  write up a todo.  also how can we insert fable into the loop for the time being to do a review pass against these also",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-07T23:08:28.632Z",
-    "text": "b) codex should be doing triage, not haiku.  c) wow that sounds terrible in multiple ways, agree we should go back to issue-loop.conf instead of sourcing it.  d) let's improve it.  e) let's remove that dead fork and its test.  i think these are already in that todo.\n\nfable is not already automatically in the loop afaik; we didn't ask it to be!  or if it is, that output should be to a todo earmarked for codex (agent-queue?) in a way that doesn't trigger infinite review loopage.  although we may have to revisit to figure out how to do multiple rounds when necessary.\n\ng) let's figure out how to minimze this without losing the entire replay effectively.  h) we need DRY!  i) ergh we should never be testing pixel positions, or having tests that don't test behavior.  j) yes trash bullshit comments.  k) probably but not sure about these.  \n\nupdate the todos if necessary"
-  },
-  {
-    "timestamp": "2026-09-07T23:37:11.886Z",
-    "text": "look at @.meta/todo/issue-loop-slim.md, which was run through by codex and updated.  is it ready to implement or what?  fix the todo to be concrete instructions.  also let's fix the loop process to close an issue on github once it's been implemented."
-  },
-  {
-    "timestamp": "2026-09-07T23:52:57.655Z",
-    "text": "okay from what i've seen so far, i'd like fable to triage and write up the todo, codex astra to implement from that todo, and fable to review, sending it to opus for fixing after review if necessary, and fable posting final review to the todo as summary when it's moved to done.  fable can close for now.  i'd like this system to be somewhat configurable so we can migrate stages to various models as we see fit in the near future, but not too complicated (our system may already be overcompliated and should be simplified, take opportunities to do so).  note that there is the main work on this particular repo, which is what i want to go through codex, and then there is the meta work on the \"loop\", which for now should be done by fable (you).  for now the meta work is only in this cbox, but ultimately will be migrated to workflow for all cboxes to take advantage of."
-  },
-  {
-    "timestamp": "2026-09-08T00:05:19.702Z",
-    "text": "PUBLISH=pr|local.  then implement",
-    "label": "design"
+    "text": "b) codex should be doing triage, not haiku.  c) wow that sounds terrible in multiple ways, agree we should go back to issue-loop.conf instead of sourcing it.  d) let's improve it.  e) let's remove that dead fork and its test.  i think these are already in that todo.\n\nfable is not already automatically in the loop afaik; we didn't ask it to be!  or if it is, that output should be to a todo earmarked for codex (agent-queue?) in a way that doesn't trigger infinite review loopage.  although we may have to revisit to figure out how to do multiple rounds when necessary.\n\ng) let's figure out how to minimze this without losing the entire replay effectively.  h) we need DRY!  i) ergh we should never be testing pixel positions, or having tests that don't test behavior.  j) yes trash bullshit comments.  k) probably but not sure about these.  \n\nupdate the todos if necessary",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-08T00:17:47.775Z",
@@ -305,31 +273,14 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-08T00:49:00.681Z",
-    "text": "okay can claude code drive codex per our loop, but 'manually' with me typing here or similar?  i tell codex to do something but i'm finding i want more of our stages of review and refixing"
-  },
-  {
     "timestamp": "2026-09-08T00:55:05.338Z",
     "text": "let's start with an easy one, currnetly after a \"lost\" saved game it pops up a dialog which obscures the screen, and then restoring the \"lost\" save shows a \"Saved game recovered and paused...\" message which is a) overly verbose (it should just unpause automatically, we don't need the final senetence \"the original save is backed up\" either) and b) can't be dismissed.   also obscures the screen.  but get codex to do it and you review to test our mechanism",
     "label": "design"
   },
   {
-    "timestamp": "2026-09-08T00:59:48.287Z",
-    "text": "yes go.  also though why does astra seem underpowered and missed these things?  can you diagnose that?",
-    "label": "bug"
-  },
-  {
     "timestamp": "2026-09-08T01:30:03.064Z",
-    "text": "let's do a thorough review of all code here, with an eye toward simplification and removing unnecessary code.  don't golf it but let's make it very understandable and straightforward.  use codex to implement changes and leave me a review of how well it did at following instructions (for evaluation) and what all you changed."
-  },
-  {
-    "timestamp": "2026-09-08T06:20:46.021Z",
-    "text": "um, those 'out of scope' items absolutely need a todo",
-    "label": "bug"
-  },
-  {
-    "timestamp": "2026-09-08T06:28:33.522Z",
-    "text": "let's handle all open todos.  ones that are concretely specified can go straight to codex, and you can probably resolve most ambiguous todos for codex to implement.  after firing off the easier ones, ask me about the remaining, let's clear out the todo dir here (do or shelve).  btw can the codex subs work reasonably in parallel?  (do they have their own worktrees?  if so how do they get merged back?)"
+    "text": "let's do a thorough review of all code here, with an eye toward simplification and removing unnecessary code.  don't golf it but let's make it very understandable and straightforward.  use codex to implement changes and leave me a review of how well it did at following instructions (for evaluation) and what all you changed.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-08T06:51:57.992Z",
@@ -339,16 +290,12 @@
   {
     "timestamp": "2026-09-08T08:34:26.864Z",
     "text": "the map is trash, why don't you use the actual assets and generate it on the fly?",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-09-08T15:42:05.160Z",
     "text": "okay so blank out all indoor rooms, and all unvisited rooms.  make all rooms visible on the OG map 'visited' by default.  do not highlight an indoor room as the player's location (highlight the place the indoor room is visited from; i.e. the last outdoor space they were at).  do not show the current room on the bottom.",
     "label": "design"
-  },
-  {
-    "timestamp": "2026-09-08T20:00:24.487Z",
-    "text": "let's do @.meta/todo/0908-interface.md.  do what you can right now and then let's discuss the remainder.  suggest steps for the latter that might get us closer incrementally."
   },
   {
     "timestamp": "2026-09-08T23:18:36.428Z",
@@ -358,7 +305,7 @@
   {
     "timestamp": "2026-09-09T01:08:24.929Z",
     "text": "on this computer i don't have a font for 26f6 fullscreen icon, aren't we specifying the font?  b) the basic instructions are still overlaid on the canvas, i thought we fixed that?  c) let's turn the volume down, let's try 50% for now.  d) let's make Help a \"?\" button up top for consistency.  then let's add a classic 1984 C64 CRT-effect and make a simple options dialog that has \"CRT effect\" checkbox and \"classic\" and \"debug\", and any other options we have.  then let's talk about what else is left to do with the game, and how else we might modernize it",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-09T01:25:27.691Z",
@@ -396,11 +343,6 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-09T02:16:31.717Z",
-    "text": "hm the loop should be running, can you diagnose?",
-    "label": "bug"
-  },
-  {
     "timestamp": "2026-09-09T02:33:44.010Z",
     "text": "remove \"recording diverged\", it's too confusing.  this is in the case when we've changed the recording format, right?  let's instead make a reasonable and limited decision.  ideally we could auto replace the local save with a reasonable checkpoint and cleared replay log so it looks invisible to the player, or osmetihng lke that, is that possible?  also let's audit all 'notices' and 'dialogs' and list their text/buttons",
     "label": "design"
@@ -408,7 +350,7 @@
   {
     "timestamp": "2026-09-09T02:51:03.935Z",
     "text": "d/e) yes remove all; just log to console and return to menu. no modal/dismissable dialog.  c/f fine.  ditch i, turn j/k/n/o/p/q/r/s into a little log scrollwindow at the bottom.  left justified, doom loader style, only a few lines.   u) ditch the \"really reset\", but make reset game more dangerous looking like they do.  so we're going to remove these 'notices' and convert them into a running log that is subtle and doesn't need to be removed.  anyway it will be centralized",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-09T03:21:23.561Z",
@@ -433,15 +375,7 @@
   {
     "timestamp": "2026-09-09T04:01:54.476Z",
     "text": "music still isn't playing, it seems to start for a very split second, i think it's the same debounce issue as with the doorway in/out flickering, we need to refactor this and handle it once and for all",
-    "label": "bug"
-  },
-  {
-    "timestamp": "2026-09-09T04:48:25.796Z",
-    "text": "okay we need a way to see when the queue is finished so you can sum up"
-  },
-  {
-    "timestamp": "2026-09-09T04:52:11.938Z",
-    "text": "yeah this should be a general mechanism, send watcher to workflow to make a script, then /learn"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-09T04:57:53.683Z",
@@ -459,36 +393,19 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-09T05:21:34.099Z",
-    "text": "okay can we analyze all the various runs to see if the diagnose stage is really not worth it?  we're trying to minimize fable usage while not reducing quality, where is fable not needed?"
-  },
-  {
-    "timestamp": "2026-09-09T05:31:50.027Z",
-    "text": "yes but let's move triage to opus 4.8 and diagnose to astra.  skip diagnose when task carries a plan",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-09-09T05:39:35.256Z",
     "text": "we need to look at github-12 and fix the upload process so it auto includes the json, we were talking about using a gist, we just need to get it working, and i'll get you the .json",
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-09T06:10:39.995Z",
-    "text": "yes, do both, and then let's consider how to indicate the next stage in the todo items so we can inspect their state and manually modify the state and inject them back at various points in the process without having to rerun earlier stages.  frontmatter?  it' dlike to keep it very simple.",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-09-09T06:27:17.411Z",
-    "text": "mostly okay, but \"land\"?  i think the stage is \"apply\" or \"merge\"?",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-09-09T06:39:26.693Z",
-    "text": "okay we need to create the framing for this.  a front page that includes the box images and a screenshot, done up like an 80s computer ad.  let's make sure people know what we're accomplished here, the highest quality modern implementation of this classic cult mag 4 computer game from 1984. header tabs on left side (icons on header right when playing): about, play, eventually others.  about should aggregate the essential information and link to the few BTR sites that exist that extol their love of the game.  make it look tight"
+    "text": "okay we need to create the framing for this.  a front page that includes the box images and a screenshot, done up like an 80s computer ad.  let's make sure people know what we're accomplished here, the highest quality modern implementation of this classic cult mag 4 computer game from 1984. header tabs on left side (icons on header right when playing): about, play, eventually others.  about should aggregate the essential information and link to the few BTR sites that exist that extol their love of the game.  make it look tight",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-09T06:55:56.574Z",
-    "text": "let's commit the images, they're small enough and everyone's dead anyway.  d) sounds nice, i have to see it though.  leave out \"tick for tick against VICE\", i want to tout game fidelity, not technological fidelity."
+    "text": "let's commit the images, they're small enough and everyone's dead anyway.  d) sounds nice, i have to see it though.  leave out \"tick for tick against VICE\", i want to tout game fidelity, not technological fidelity.",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-09T06:57:29.134Z",
@@ -503,11 +420,12 @@
   {
     "timestamp": "2026-09-09T16:43:33.202Z",
     "text": "i see a diff with +       \"dbConnectionString\": \"postgres://postgres@localhost:43401/postgres\"  why are we using postgres?",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-09T21:50:51.187Z",
-    "text": "let's look at the new front/landing/about page.  look at all the links listed, and see if you can find any more about this game.  where is the copy on our page taken from?  it doesn't sound fresh to me"
+    "text": "let's look at the new front/landing/about page.  look at all the links listed, and see if you can find any more about this game.  where is the copy on our page taken from?  it doesn't sound fresh to me",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-09T22:07:12.941Z",
@@ -515,9 +433,9 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-09T22:31:43.200Z",
+    "timestamp": "2026-09-09T22:31:46.307Z",
     "text": "write a todo to rewrite the about page to be less technical and more inviting, holistic.  this is a beloved game from my childhood.  we're 'restoring' it, making it accessible.  point out the resources we found (is the text from those resources in a dir in .meta to be easily accessible for the doer of this todo?), and note the common issues people have with revisiting the game.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-09T23:29:43.581Z",
@@ -541,26 +459,33 @@
   },
   {
     "timestamp": "2026-09-11T02:15:54.359Z",
-    "text": "let's consider this project and the relevant platforms/voices that we could represent.  e.g. a review from a period magazine, or a fawning retrospective from a superfan, or a literary dissection of the book + game.  note that these are not projects themselves, only voices, hypothetical platforms we could see this project being presented on.  provide a list of potentials (~10 across a wide variety) and then we'll choose some 3-5 to write the /about page in the style of"
+    "text": "let's consider this project and the relevant platforms/voices that we could represent.  e.g. a review from a period magazine, or a fawning retrospective from a superfan, or a literary dissection of the book + game.  note that these are not projects themselves, only voices, hypothetical platforms we could see this project being presented on.  provide a list of potentials (~10 across a wide variety) and then we'll choose some 3-5 to write the /about page in the style of",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-11T02:28:30.444Z",
     "text": "actually 5 would be better as our own deconstruction and reconstruction process.  we could have a merged 2+8 option.  i'd like to have a 1-2 word slug for each to refer to, and then let's talk through why i would use one voice or another.  like what am i trying to express?",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-11T02:46:03.214Z",
-    "text": "On reflection, my primary impulse  Is that it is an under known work of art. Like the... Last Express. A lot of love was poured into it. And... Yet it's not widely known. Like Tetris, sure. Everyone knows Tetris. Tetris has been done and redone to death. Below the route deserves to exist over decades, not just a few years like it did. Both the books, the series, which are very much from the 70s, and the game, which is a really wonderful... interpretation of the books. I really like puzzle games where the... a fundamental mechanic. is used to solve a puzzle. It's not arbitrary, it's how the world is constructed. And there is at least one point in here. That is like that. And there are so many little rules that make the world just come together. Like... If you kill a lap at a little bun-like creature... If you are a certain kind of character, you will lose all your spirit strength. Actually, I think you will lose it if you are any kind of character. Because it's... ...pad to kill things. It destroys your spirit. And you can eat roast lapen if you are one of the characters, but if you are one of the kind that is vegetarian, you're not allowed to. So, even just concept that a game of... would pick up the vegetarian sensibilities of its... owner. predecessor. It's very 70s idealistic. and... I think a lot of love is poured into this game and it deserves to be... remembered. carried forward. I think my greatest hope would be that some people are like, hey, this actually is a really sweet little thing. Can we make some pixel art to... make it be a more modern accessible game? Like, it really is not accessible. Mag4 games are not accessible. But Mag5 game might be. And so what if we did make it 320x200x256 with some better pixel art? And what if we did update the music? Like, there's a lot here. That we could do. But the core structure of the game is great. So I don't need to think we need to do all of everything over again. The original game only took 4 months to make. And so this could be a little bit of a revival.\n\nthe above was spoken, let's clean it up"
+    "text": "On reflection, my primary impulse  Is that it is an under known work of art. Like the... Last Express. A lot of love was poured into it. And... Yet it's not widely known. Like Tetris, sure. Everyone knows Tetris. Tetris has been done and redone to death. Below the route deserves to exist over decades, not just a few years like it did. Both the books, the series, which are very much from the 70s, and the game, which is a really wonderful... interpretation of the books. I really like puzzle games where the... a fundamental mechanic. is used to solve a puzzle. It's not arbitrary, it's how the world is constructed. And there is at least one point in here. That is like that. And there are so many little rules that make the world just come together. Like... If you kill a lap at a little bun-like creature... If you are a certain kind of character, you will lose all your spirit strength. Actually, I think you will lose it if you are any kind of character. Because it's... ...pad to kill things. It destroys your spirit. And you can eat roast lapen if you are one of the characters, but if you are one of the kind that is vegetarian, you're not allowed to. So, even just concept that a game of... would pick up the vegetarian sensibilities of its... owner. predecessor. It's very 70s idealistic. and... I think a lot of love is poured into this game and it deserves to be... remembered. carried forward. I think my greatest hope would be that some people are like, hey, this actually is a really sweet little thing. Can we make some pixel art to... make it be a more modern accessible game? Like, it really is not accessible. Mag4 games are not accessible. But Mag5 game might be. And so what if we did make it 320x200x256 with some better pixel art? And what if we did update the music? Like, there's a lot here. That we could do. But the core structure of the game is great. So I don't need to think we need to do all of everything over again. The original game only took 4 months to make. And so this could be a little bit of a revival.\n\nthe above was spoken, let's clean it up",
+    "label": "core"
   },
   {
-    "timestamp": "2026-09-11T03:16:00.584Z",
-    "text": "how many NPCs are in the game?  do we have a .md with all the dialogue in it?",
+    "timestamp": "2026-09-11T02:48:27.272Z",
+    "text": "great, condense the 3rd paragraph into one sentence, put 4th para after 2nd and then 3rd condens and ditch 6th para.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-09-11T02:49:38.064Z",
+    "text": "great, swap 3/4 paras, combine 1970s refs",
     "label": "design"
   },
   {
     "timestamp": "2026-09-11T04:19:19.657Z",
     "text": "here's my context/rationale.  this seems like adequate About copy; what's missing? Below the Root is an underknown work of art.  A lot of love went into it, yet few people know about it.  King's Quest and Karateka were also released in 1984; Below the Root is similarly calm and thoughtful as a \"platform-adventure\", but in addition, it's thoroughly embedded in the Green-Sky world that the original trilogy built.\n\nThe world is remarkably open and huge for the time, with a hundred characters you can talk with and \"pense\".\nThere are platform challenges and thoughtful puzzles and an intricate plot to uncover within the world.\nSmall but essential details from the books, like sleeping nids, the shuba for \"flying\", and intoxicating wissenberries, are carried forward not just as world flavor, but also play key roles in the game to advance the plot.\n\nA lot of love went into this game, and it deserves to be remembered and carried forward.  Perhaps some people\nwill be inspired to enter the world of Green-Sky, to read the books, or wander around the game.\nThe original presentation is hard to approach today.  Perhaps a pixel artist or a chiptune musician will be inspired to remake the art or music to be more accessible for a modern player.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-11T04:39:35.039Z",
@@ -660,7 +585,7 @@
   {
     "timestamp": "2026-09-12T08:28:50.320Z",
     "text": "what is up with the square box inside though?  and the bowing is too pronounced, back off a bit",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-12T08:33:18.065Z",
@@ -683,6 +608,11 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-12T08:45:55.889Z",
+    "text": "let's fix the __ in about.md and commit everything",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-09-12T08:46:24.221Z",
     "text": "let's also try the game font for the header text",
     "label": "design"
@@ -694,7 +624,8 @@
   },
   {
     "timestamp": "2026-09-12T08:48:24.733Z",
-    "text": "we also need to create a 'make release' target that generates a .zip file with the original contents and .g64 and all content like in iso/, and also our html/etc for a fully runnable local copy.  a grand preservation."
+    "text": "we also need to create a 'make release' target that generates a .zip file with the original contents and .g64 and all content like in iso/, and also our html/etc for a fully runnable local copy.  a grand preservation.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-12T08:51:31.927Z",
@@ -729,7 +660,7 @@
   {
     "timestamp": "2026-09-13T00:16:06.569Z",
     "text": "huh, it looks really weird. but it's just in the screen data?  we're sure?",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-13T00:18:17.600Z",
@@ -753,7 +684,8 @@
   },
   {
     "timestamp": "2026-09-13T01:02:31.590Z",
-    "text": "We've got a lot of cleanup here. So first of all I want the Wyndham Classics 1984 Commodore 64 line to say published in 1984. For the Commodore 64. Ported in 2026. To JavaScript. Then I think Play should come before  About on  The nav bar.  And let's group the gameplay icons on the tool bar. Such that the. Reset game and map I guess are. Next to each other and separated. And the volume. And full screen. Are. Separate. Dev boat is actually right next to the GitHub Octocad. And. The. Health. Is. I'm not sure. Should be a. That bar item. Actually, how many of these? Which of these should be that bar items? Like that bar means you're going to a place. So help kind of make sense for that."
+    "text": "We've got a lot of cleanup here. So first of all I want the Wyndham Classics 1984 Commodore 64 line to say published in 1984. For the Commodore 64. Ported in 2026. To JavaScript. Then I think Play should come before  About on  The nav bar.  And let's group the gameplay icons on the tool bar. Such that the. Reset game and map I guess are. Next to each other and separated. And the volume. And full screen. Are. Separate. Dev boat is actually right next to the GitHub Octocad. And. The. Health. Is. I'm not sure. Should be a. That bar item. Actually, how many of these? Which of these should be that bar items? Like that bar means you're going to a place. So help kind of make sense for that.",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-13T01:08:08.721Z",
@@ -828,7 +760,7 @@
   {
     "timestamp": "2026-09-13T05:12:04.069Z",
     "text": "\"line-height: 0\" gets me what i want, oddly, but that seems wrogn",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-09-13T05:14:01.173Z",
@@ -868,7 +800,7 @@
   {
     "timestamp": "2026-09-13T06:11:27.174Z",
     "text": "shouldn't show 'continue' if no game is stored.",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-13T06:20:42.285Z",
@@ -877,7 +809,8 @@
   },
   {
     "timestamp": "2026-09-13T06:49:41.008Z",
-    "text": "okay i just won with pomma, see the json i put in this dir.  can we use this as a test replay outside of the browser to test that the game is winnable?  and on win, \"you have finished the quest in 3 days\", let's add the total time the game was unpaused (we'll have to track that), and the % game complete (+1% per spirit point gained, +1% per elixir, +X% for winning; what else might count?)  on upload in dev tools let's start replaying it, with space to fast forward to next room change"
+    "text": "okay i just won with pomma, see the json i put in this dir.  can we use this as a test replay outside of the browser to test that the game is winnable?  and on win, \"you have finished the quest in 3 days\", let's add the total time the game was unpaused (we'll have to track that), and the % game complete (+1% per spirit point gained, +1% per elixir, +X% for winning; what else might count?)  on upload in dev tools let's start replaying it, with space to fast forward to next room change",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-13T07:26:24.838Z",
@@ -887,7 +820,7 @@
   {
     "timestamp": "2026-09-13T07:32:05.769Z",
     "text": "do not pause between moves, just move continuously.",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-13T07:40:53.168Z",
@@ -942,7 +875,7 @@
   {
     "timestamp": "2026-09-14T02:16:44.514Z",
     "text": "let's add tokens collected to the completion metric.  publish the completion metric in the README.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-14T02:20:57.728Z",
@@ -995,17 +928,24 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-14T04:05:45.885Z",
+    "text": "add todo for goatcounter and favicon and opengraph image/desc/etc",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-09-14T04:07:20.665Z",
     "text": "add wand of befal to completion list, 1%, that should now be 100%.  4% for tokens, rest are mod 5",
     "label": "design"
   },
   {
     "timestamp": "2026-09-14T04:09:02.381Z",
-    "text": "let's look at the test fixtures (complete playthroughs) and see how we might optimize them to detect and remove \"mistakes\" (like going in a cycle of screens without making any 'progress'.  we're making a todo plan for astra"
+    "text": "let's look at the test fixtures (complete playthroughs) and see how we might optimize them to detect and remove \"mistakes\" (like going in a cycle of screens without making any 'progress'.  we're making a todo plan for astra",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-14T04:44:45.626Z",
-    "text": "okay, we need to rework the replay mechanism, 60Hz sample of joystick is not what god intended.  at the least there are individual keystrokes or joystick position changes/triggers that happen at certain times, but actually certain places on the screen, and that's what should be recorded.  let's make the todo for that instead, and then i'll play through another one and get one of those recordings to anaylze"
+    "text": "okay, we need to rework the replay mechanism, 60Hz sample of joystick is not what god intended.  at the least there are individual keystrokes or joystick position changes/triggers that happen at certain times, but actually certain places on the screen, and that's what should be recorded.  let's make the todo for that instead, and then i'll play through another one and get one of those recordings to anaylze",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-14T05:06:33.777Z",
@@ -1080,19 +1020,22 @@
   {
     "timestamp": "2026-09-15T00:58:19.789Z",
     "text": "okay let's talk thorugh the save format, it looks pretty complicated but in my mind should be much simpler.  like what is reads vs actions vs path vs gestures?  and outcomes?  and legacyContinueUntil?  where is the spec i can look at?",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-15T01:06:56.072Z",
-    "text": "yes we should remove path/outcomes/gestures/actions/legacyContinueUntil/c64.  probably recoveredFrom and menuNavigationFrom also.  then we'll simplify reads, ideally i want only key down and key up events, stored as joystick repositioning and triggering *changes* only.  we'll need the screen and pos for the character, and replay may have to wait until the character reaches that place to change the input state (if falling for example).  what is missing from this now?"
+    "text": "yes we should remove path/outcomes/gestures/actions/legacyContinueUntil/c64.  probably recoveredFrom and menuNavigationFrom also.  then we'll simplify reads, ideally i want only key down and key up events, stored as joystick repositioning and triggering *changes* only.  we'll need the screen and pos for the character, and replay may have to wait until the character reaches that place to change the input state (if falling for example).  what is missing from this now?",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-15T01:21:45.102Z",
-    "text": "1. i think only the position of monsters/creatures makes a difference here, though i agree it is a large difference.  everything else should be implied by previous actions or the next input itself.  right?  the target should always be reached, with a valid replay; if not, it's either an error (abort), or a teleport to that location (possibly in dev mode).  3. the replay should not care about main menu, importing save, skipping music; those are all 'outside' the game replay.  (the replayer could choose to skip or not skip music independently for example).  opening/dismissing the command menu should actually be a separate command for each item on the menu, with replay auto-opening and moving the cursor to the command, for visual effect only.  if they just open and close it's a no-op (same with pause).   4. when does saving happen currently? it's autosave; i could get by with 'autosave on room change only'.  i don't thikn we need an end tick.  play time should come from simulation ticks, not real elapsed time.  5. yes we need those, agreed.  6.  we don't need conversion for older recordings; we'll just delete them and re-record.  okay what's left for us to figure out before we create the todo?"
+    "text": "1. i think only the position of monsters/creatures makes a difference here, though i agree it is a large difference.  everything else should be implied by previous actions or the next input itself.  right?  the target should always be reached, with a valid replay; if not, it's either an error (abort), or a teleport to that location (possibly in dev mode).  3. the replay should not care about main menu, importing save, skipping music; those are all 'outside' the game replay.  (the replayer could choose to skip or not skip music independently for example).  opening/dismissing the command menu should actually be a separate command for each item on the menu, with replay auto-opening and moving the cursor to the command, for visual effect only.  if they just open and close it's a no-op (same with pause).   4. when does saving happen currently? it's autosave; i could get by with 'autosave on room change only'.  i don't thikn we need an end tick.  play time should come from simulation ticks, not real elapsed time.  5. yes we need those, agreed.  6.  we don't need conversion for older recordings; we'll just delete them and re-record.  okay what's left for us to figure out before we create the todo?",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-15T01:29:28.162Z",
-    "text": "stationary waits: okay, let's add a simticks field to every movement. replay can either wait or 'jump' to that simtick.  commands should include all their choices, yes.  quest start, room entry, and quest completion are sufficient.  everything else looks sufficient.  is there anything tricky with simticks approach to waiting?"
+    "text": "stationary waits: okay, let's add a simticks field to every movement. replay can either wait or 'jump' to that simtick.  commands should include all their choices, yes.  quest start, room entry, and quest completion are sufficient.  everything else looks sufficient.  is there anything tricky with simticks approach to waiting?",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-15T01:33:37.390Z",
@@ -1101,16 +1044,13 @@
   },
   {
     "timestamp": "2026-09-15T01:47:01.922Z",
-    "text": "let's look through this codebase for opportunities to simplify and/or refactor reasonably.  not code golfing but making it mostly DRY.  simplicity and clarity paramount."
-  },
-  {
-    "timestamp": "2026-09-15T02:25:55.220Z",
-    "text": "let's look at the transcript for the most recent codex session, implementing a todo i've given it.  how did it fare?  where has it done something foolish, or a runaround, or just missed something?  @.meta/transcripts/codex-01a09e52-5f70-73b0-a911-e1f63e11700c.md",
-    "label": "design"
+    "text": "let's look through this codebase for opportunities to simplify and/or refactor reasonably.  not code golfing but making it mostly DRY.  simplicity and clarity paramount.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-15T05:17:13.527Z",
-    "text": "kdir -p _build/assets/box && cp assets/box/* _build/assets/box/\n⬥ Injecting environment variable values for all scopes\n⬥ AI Gateway is disabled for this account\n⬥ Ignored general context env var: LANG (defined in process)\n⬥ Ignored project settings env var: GITHUB_CLIENT_ID (defined in .env.local file)\n⬥ Ignored project settings env var: GITHUB_CLIENT_SECRET (defined in .env.local file)\n⬥ Ignored project settings env var: GITHUB_SESSION_SECRET (defined in .env.local file)\n⬥ Injected .env.local file env vars: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_SESSION_SECRET\n ›   Error: Netlify CLI has terminated unexpectedly.\n\nPlease report this problem with reproduction steps at https://ntl.fyi/cli-error including the error details below.\n\nError: EMFILE: too many open files, watch '/home/saul/git/below-the-root/netlify.toml'\n    at FSWatcher.<computed> (node:internal/fs/watchers:321:19)\n    at watch (node:fs:2548:36)\n    at createFsWatchInstance (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:126:16)\n    at setFsWatchListener (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:171:19)\n    at NodeFsHandler._watchWithNodeFs (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:327:22)\n    at NodeFsHandler._handleFile (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:393:29)\n    at NodeFsHandler._addToNodeFs (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:618:31)\n    at async file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/index.js:367:25\n    at async Promise.all (index 0)\n⬥ Using simple static server because '--dir' flag was specified\n⬥ Running static server from \"below-the-root/_build\"\n⬥ Setting up local dev server\n\n  System:\n    OS: Linux 6.19 Debian GNU/Linux 13 (trixie) 13 (trixie)\n    CPU: (24) x64 AMD Ryzen 9 9900X 12-Core Processor\n  Binaries:\n    Node: 24.18.0 - /home/saul/.nvm/versions/node/v24.18.0/bin/node\n    npm: 11.16.0 - /home/saul/.nvm/versions/node/v24.18.0/bin/npm\n  Browsers:\n    Firefox: 140.10.0esr\n\nmake: *** [Makefile:33: serve] Error 1"
+    "text": "kdir -p _build/assets/box && cp assets/box/* _build/assets/box/\n⬥ Injecting environment variable values for all scopes\n⬥ AI Gateway is disabled for this account\n⬥ Ignored general context env var: LANG (defined in process)\n⬥ Ignored project settings env var: GITHUB_CLIENT_ID (defined in .env.local file)\n⬥ Ignored project settings env var: GITHUB_CLIENT_SECRET (defined in .env.local file)\n⬥ Ignored project settings env var: GITHUB_SESSION_SECRET (defined in .env.local file)\n⬥ Injected .env.local file env vars: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_SESSION_SECRET\n ›   Error: Netlify CLI has terminated unexpectedly.\n\nPlease report this problem with reproduction steps at https://ntl.fyi/cli-error including the error details below.\n\nError: EMFILE: too many open files, watch '/home/saul/git/below-the-root/netlify.toml'\n    at FSWatcher.<computed> (node:internal/fs/watchers:321:19)\n    at watch (node:fs:2548:36)\n    at createFsWatchInstance (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:126:16)\n    at setFsWatchListener (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:171:19)\n    at NodeFsHandler._watchWithNodeFs (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:327:22)\n    at NodeFsHandler._handleFile (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:393:29)\n    at NodeFsHandler._addToNodeFs (file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/handler.js:618:31)\n    at async file:///usr/local/lib/node_modules/netlify-cli/node_modules/chokidar/index.js:367:25\n    at async Promise.all (index 0)\n⬥ Using simple static server because '--dir' flag was specified\n⬥ Running static server from \"below-the-root/_build\"\n⬥ Setting up local dev server\n\n  System:\n    OS: Linux 6.19 Debian GNU/Linux 13 (trixie) 13 (trixie)\n    CPU: (24) x64 AMD Ryzen 9 9900X 12-Core Processor\n  Binaries:\n    Node: 24.18.0 - /home/saul/.nvm/versions/node/v24.18.0/bin/node\n    npm: 11.16.0 - /home/saul/.nvm/versions/node/v24.18.0/bin/npm\n  Browsers:\n    Firefox: 140.10.0esr\n\nmake: *** [Makefile:33: serve] Error 1",
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-15T05:27:33.136Z",
@@ -1130,11 +1070,12 @@
   {
     "timestamp": "2026-09-15T05:36:33.392Z",
     "text": "oh it does work, except why gliding maybe?",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-15T05:37:18.414Z",
-    "text": "and i need to be able to resume gameplay after the replay!  this is our save game mechanism"
+    "text": "and i need to be able to resume gameplay after the replay!  this is our save game mechanism",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-15T05:46:35.813Z",
@@ -1174,12 +1115,12 @@
   {
     "timestamp": "2026-09-15T15:43:24.737Z",
     "text": "why can't i use the devtools rewind room or backspace in a live game?  also the 'play from here' for replay should be visible and active for the whole replay, so we can take control at any point in the replay.",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-09-15T16:29:29.544Z",
     "text": "last session said \n  The full suite reached the long-running session_test.js without failures but was stopped\n  after several minutes. \n\nwe need to investigate and fix this; if it's part of our CI test suite it needs to run faster than several minutes, or be disabled and only part of a manual process.  but for now figure out what's going on and make a todo with ideas to fix it",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-15T16:41:18.047Z",
@@ -1204,7 +1145,7 @@
   {
     "timestamp": "2026-09-15T23:45:01.505Z",
     "text": "great, the static inventory has several blank lines above it; a 5 line (9 item) inventory) takes up double the space of the menu",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-15T23:47:12.448Z",
@@ -1232,8 +1173,8 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-16T00:32:21.048Z",
-    "text": "that's weird, which model implemented the newer REST impl",
+    "timestamp": "2026-09-16T00:31:33.380Z",
+    "text": "...and what was the problem?",
     "label": "bug"
   },
   {
@@ -1272,13 +1213,19 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-16T02:26:56.240Z",
+    "text": "saved to genaa-wip.autosave.v3",
+    "label": "bug"
+  },
+  {
     "timestamp": "2026-09-16T02:33:30.430Z",
     "text": "get rid of treble clef SYMBOL and center the treble clef vertically in the top bar.",
     "label": "design"
   },
   {
     "timestamp": "2026-09-16T02:47:09.625Z",
-    "text": "it happened again, \"D\" on map was scrolling map right, but then it stopped and started scrolling down, same as S.  but more importantly i'm thinking we should change the vibe of the map, to escape the confines of the internal crt-like screen and be able to fit the full width of the browser since it's such a wide map.  let's see how it looks, and tune."
+    "text": "it happened again, \"D\" on map was scrolling map right, but then it stopped and started scrolling down, same as S.  but more importantly i'm thinking we should change the vibe of the map, to escape the confines of the internal crt-like screen and be able to fit the full width of the browser since it's such a wide map.  let's see how it looks, and tune.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-16T04:06:43.561Z",
@@ -1317,12 +1264,18 @@
   },
   {
     "timestamp": "2026-09-16T04:39:12.311Z",
-    "text": "we fixed the input and it feels better, but we do want to be able to hold down arrows to slide the kiniport tool as far as it needs to go.  review all transcripts to collect requirements for which key presses need to be debounced or not etc, show them to me, see if there's an easy way to categorize so we can fix this once and for all"
+    "text": "we fixed the input and it feels better, but we do want to be able to hold down arrows to slide the kiniport tool as far as it needs to go.  review all transcripts to collect requirements for which key presses need to be debounced or not etc, show them to me, see if there's an easy way to categorize so we can fix this once and for all",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-16T04:40:24.870Z",
     "text": "walking across a door stops it now too, this is a regression",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-16T04:43:23.836Z",
+    "text": "let's make a spec doc, and a todo to fix it",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-16T04:51:13.622Z",
@@ -1382,7 +1335,7 @@
   {
     "timestamp": "2026-09-16T05:42:24.513Z",
     "text": "we need a little more room around the staff to display notes 2 down from the staff.  also sometimes the lines on the staff are double thickness depending on screen size; how can we make them uniform regardless of screen size?",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-09-16T05:44:45.359Z",
@@ -1446,17 +1399,18 @@
   },
   {
     "timestamp": "2026-09-16T08:18:39.110Z",
-    "text": "let's look at all the tests and determine which ones are itneresting/valuable vs which ones aren't useful, and which ones are overly specific.  create a todo to clean up and simplify these tests"
+    "text": "let's look at all the tests and determine which ones are itneresting/valuable vs which ones aren't useful, and which ones are overly specific.  create a todo to clean up and simplify these tests",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-17T01:25:03.133Z",
     "text": "a) this is so wrong on multiple levels.  we should not be testing the version, obviously, and we should be running make test before every commit.  how can we enforce this for other bots?\n\nd-h) let's make a todo to simplify/consolidate these.  i-o) let's make a todo for better versions of these tests.  p) let's settle on a structure and doc it and make it bte the one true way.  also we need 'make test' to print very little on success.  q) that seems gross, how can we do better?  r) yeah we want no sleeps, what's the better strategy?  let's make a todo for this one.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-17T01:33:59.687Z",
     "text": "d-h) yes, all -win.json should be replayed, none should be hardcoded.  yes, do a), but then do the rest with astra, review the changes for each todo when done",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-18T21:28:46.101Z",
@@ -1471,7 +1425,7 @@
   {
     "timestamp": "2026-09-18T22:02:27.132Z",
     "text": "great, make the arrows be in the C64-esque font, and also the 16/189 count.  also there's an issue with gliding down and pensing an animal, for instance; the animation is stuck on glide (and one square above, just before landing), while the pensing spirit message/song plays.  also if i pause during that spirit message  (mouse leaving canvas) it seems to never progress when the mouse returns to canvas.   let's make the replay message delay 750ms and remove the temp box.  just do this work here.",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-09-18T22:37:04.831Z",
@@ -1530,11 +1484,13 @@
   },
   {
     "timestamp": "2026-09-19T00:59:30.654Z",
-    "text": "oh and besides sharing with subreddits/mastodon/etc, we need to make a release on github, a .zip with the assets and code and playthroughts.  also why is there a test fixture 'herd-landing.json', i don't think we need that"
+    "text": "oh and besides sharing with subreddits/mastodon/etc, we need to make a release on github, a .zip with the assets and code and playthroughts.  also why is there a test fixture 'herd-landing.json', i don't think we need that",
+    "label": "core"
   },
   {
-    "timestamp": "2026-09-19T01:02:38.189Z",
-    "text": "also send msg to saul.pw about goatcounter"
+    "timestamp": "2026-09-19T01:02:00.069Z",
+    "text": "<script data-goatcounter=\"https://saulpw.goatcounter.com/count\"\n        async src=\"//gc.zgo.at/count.js\"></script>",
+    "label": "design"
   },
   {
     "timestamp": "2026-09-19T21:21:44.377Z",
@@ -1549,17 +1505,12 @@
   {
     "timestamp": "2026-09-19T22:36:47.765Z",
     "text": "man why did you fuck up the help tab?  it was so clean and you just added a bunch of bullshit, no one asked you to do that",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-19T23:11:13.031Z",
     "text": "okay.  i thought we had ditched herd-landing.json?!",
     "label": "bug"
-  },
-  {
-    "timestamp": "2026-09-19T23:20:21.297Z",
-    "text": "this is so simple you didn't need to go through a whole loop.  learn that when i say 'do it now' i mean this session",
-    "label": "design"
   },
   {
     "timestamp": "2026-09-20T00:00:03.513Z",
@@ -1579,7 +1530,7 @@
   {
     "timestamp": "2026-09-25T06:22:43.622Z",
     "text": "okay we need a todo to redo the 'links' page, as cards 50% of interior width, each as one of the links, with either a picture or quote and/or caption.  and rename to Resources.  ultimately dropping any copy outside the cards.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-09-25T06:25:27.132Z",
@@ -1592,17 +1543,14 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-25T06:58:25.192Z",
-    "text": "yeah, it didn't notice that quote was attributed to the author of the book, huh",
-    "label": "bug"
-  },
-  {
     "timestamp": "2026-09-30T02:17:02.277Z",
-    "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate."
+    "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-30T02:17:04.641Z",
-    "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate."
+    "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate.",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-30T02:36:47.262Z",
@@ -1637,7 +1585,12 @@
   {
     "timestamp": "2026-09-30T16:40:48.851Z",
     "text": "/blog using actual Commodore 1701 monitor dimensions for the frame of this Below The Root translation.  I had forgotten how small the screen is compared to the casing!  It's only 74% [check] of the area.  [screenshot]\n\nalso then let's /triage",
-    "label": "design"
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-09-30T17:00:35.689Z",
+    "text": "a-f) yes but not entirely  j) move from memory to workflow global.  k/l) we're not ready for a github release yet.  m) can you do that?  n) and this too?  o) and this one?  p) yes try again, how can we prevent that failed runner call?    finally) there was a task to make the bevels matching the 1702 with tan outline, where'd that go?  finally2) include pic of 1702 in blog entry",
+    "label": "core"
   },
   {
     "timestamp": "2026-09-30T20:22:47.236Z",
@@ -1652,7 +1605,7 @@
   {
     "timestamp": "2026-09-30T20:47:15.989Z",
     "text": "why don't you take a screenshot of the current one and see how much it looks like the OG image.  i don't see 'tan' anywhere in ours",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-30T20:52:24.869Z",
@@ -1667,7 +1620,7 @@
   {
     "timestamp": "2026-09-30T22:01:53.433Z",
     "text": "i don't see how you can say the color values already match the photo almost exactly.  they do not. i just took a screenshot in ~/inboxes/screenshots/print--generate-c1702-svg.attachment.png, just try to see what colors it's using.  how come you think that's tan??",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-09-30T22:03:17.563Z",
@@ -1705,13 +1658,9 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-30T23:01:17.215Z",
-    "text": "great.  let's create a screenshot and bundle it with the OG jpg this was based off of, and send them both to saul.pw for a /blog entry: Wrangled Fable and Astra to make the framing look like the actual Commodore 1702 monitor.  Astra was much better at generating an svg likeness from the given image."
-  },
-  {
     "timestamp": "2026-10-01T18:49:47.709Z",
     "text": "a) works.  b) fine.  c) why is this waiting on me?  it's a simple removal.  d) landscape should be auto fullscreen, does not need the side buttons!  the screen should be centered horiz as it was.  \"offscreen\" right/left should be valid tap/holds to move right/left.  e) can't tell because can't go offscreen because can't click past edge of screen. also how can character go 'up' past edge of screen to new area?",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-10-01T18:53:01.821Z",
@@ -1724,10 +1673,6 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-10-01T19:02:39.507Z",
-    "text": "let's review all tests.  some of them do not have a meaningful regression that they would prevent; let's suggest these for removal in a task.  get fable to review, and then i'll review the task before it gets implemented to remove those useless tests."
-  },
-  {
     "timestamp": "2026-10-01T22:21:35.779Z",
     "text": "minor task: 1 line between the \"question\" and the inventory for actions that take an inventory item.  remove green border in fullscreen mode.  also when i go to the final area, the map still highlights the spirit door room, where is the final area on the actual map?",
     "label": "design"
@@ -1735,12 +1680,12 @@
   {
     "timestamp": "2026-10-01T22:32:10.517Z",
     "text": "great.  so on mobile fullscreen in landscape mode, it doesn't go fullscreen automatically like it should--there's still a browser bar and the phone bar on top, and the phone 'bottom' to the left.  can we make it go fullscreen auto?  also, when i go left my holding in the empty space, i should be able to tap while walk to get the char to jump.",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-10-01T22:38:04.442Z",
     "text": "great.  but will this be shitty on iphone then?  how do we deliver a quality experience there?",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-01T22:46:24.393Z",
@@ -1770,7 +1715,7 @@
   {
     "timestamp": "2026-10-02T03:11:19.328Z",
     "text": "let's talk through the major \"sections\" of this site: playing the game, looking at the map, reading about the project itself, \"resources\", and help on playing the game.  we can dive into resources too to break it up, since there are different categories of things.  i'm debating whether to have all of the content inside the monitor as the buttons on the monitor would imply (we only just moved these, they are only an experiment currently).  or whether it's better to have some content, esp the original box content and maps, outside the monitor (like they would have been at the time), and thus structure the site differently.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-02T03:56:31.427Z",
@@ -1779,7 +1724,8 @@
   },
   {
     "timestamp": "2026-10-02T05:24:55.274Z",
-    "text": "no one wants to hear an automatic reverse-engineering story, lay off.  let's play with cleaning up the digitized paper map and using that image as the unseen image, with the real image overlaid on it when you've seen it.  and make everything unseen at the start.  let's try putting the map below the computer always.  and an intro/title screen with \"BELOW THE ROOT\"  \"(C) WINDHAM etc\" where did that go?  we can put the basic help instructions on that, and also a \"2026 restoration by Saul Pwanson\""
+    "text": "no one wants to hear an automatic reverse-engineering story, lay off.  let's play with cleaning up the digitized paper map and using that image as the unseen image, with the real image overlaid on it when you've seen it.  and make everything unseen at the start.  let's try putting the map below the computer always.  and an intro/title screen with \"BELOW THE ROOT\"  \"(C) WINDHAM etc\" where did that go?  we can put the basic help instructions on that, and also a \"2026 restoration by Saul Pwanson\"",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-02T05:55:50.949Z",
@@ -1798,7 +1744,8 @@
   },
   {
     "timestamp": "2026-10-02T06:23:13.105Z",
-    "text": "let's pull apart the pages of the manual from https://archive.org/details/below-the-root-game-manual-1984/page/n19/mode/2up and make it easy to read on the site, perhaps below the map for now"
+    "text": "let's pull apart the pages of the manual from https://archive.org/details/below-the-root-game-manual-1984/page/n19/mode/2up and make it easy to read on the site, perhaps below the map for now",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-02T06:23:26.583Z",
@@ -1823,7 +1770,7 @@
   {
     "timestamp": "2026-10-02T06:56:49.911Z",
     "text": "okay better but they need to be the same visible color as the black in the unseen tiles that aren't blank.  and it wouldn't be a crime if the underlying map bled through for the devtools as long as it's consistent across blank and non-blank tiles.",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-10-02T06:58:57.947Z",
@@ -1843,7 +1790,7 @@
   {
     "timestamp": "2026-10-02T17:32:31.806Z",
     "text": "okay let's keep playing with the box opening sequence.  let's do box top -> box bottom -> open box with map and manual and \"disk\" (for now just a simple square with the word 'disk' inside it), click the map to see the map, manual to page through manual, and disk to go to computer.  you're right, there needs to be a way for us to go back, esp to map but also to the rest, what's a good setup?",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-02T17:45:39.528Z",
@@ -1922,7 +1869,8 @@
   },
   {
     "timestamp": "2026-10-02T21:29:11.106Z",
-    "text": "okay so i'd like to start a new session where we talk about how to frame this site.  the idea is to start out with the game box, open the box, see the stuff, and ultimately play the game.  BUT i want to make it clear what's going on *without additional words*, and make sure that they understand this is a restoration site *by design, without additional words*, and that this is \"another saul.pw project\" but that i am the curator and producer of this restoration and not the original author.  i want a minimum of buttons and things, just the raw joy of discovering something special and all in one place.  and that it's a Thing i put time and effort into and that they should consider sponsoring me.  again, without words.  let's create a todo that i can do in a new session"
+    "text": "okay so i'd like to start a new session where we talk about how to frame this site.  the idea is to start out with the game box, open the box, see the stuff, and ultimately play the game.  BUT i want to make it clear what's going on *without additional words*, and make sure that they understand this is a restoration site *by design, without additional words*, and that this is \"another saul.pw project\" but that i am the curator and producer of this restoration and not the original author.  i want a minimum of buttons and things, just the raw joy of discovering something special and all in one place.  and that it's a Thing i put time and effort into and that they should consider sponsoring me.  again, without words.  let's create a todo that i can do in a new session",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-02T21:41:19.907Z",
@@ -1947,7 +1895,7 @@
   {
     "timestamp": "2026-10-02T21:58:33.046Z",
     "text": "okay this shows promise but we need to fix a lot of things. let's start with this 'bench', it looks like shitty storage unit corrugated metal siding and not wood at all.  let's try your other options.\n\nalso i like the shadow to give the box depth (tho needs to be 'deeper' given that the box was ~1 inch thick) but showing two sides at the same time is kind of confusing.  how can we show that's there's a back side to see, before they click 'into' it?\n\nthen, the artifacts on the 'bench' should not go away when clicked and showing; they should be highlighted instead. i also think they're too small!\n\nthen, the greenbar green/white bars are too thick, they should be half the height!  and why do you have to scroll through it?  it's greenbar, it should at most have perforations at the page markers.\n\nfinally the donation box is too corny/cartoony.  let's brainstorm other ways to do this.",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-10-02T22:08:46.528Z",
@@ -1971,11 +1919,13 @@
   },
   {
     "timestamp": "2026-10-02T23:02:54.377Z",
-    "text": "let's try (b).\n\nalso i'm still wondering about two things: clicking on the disk puts the monitor as the only thing on the page and destroys the desktop mat metaphor, but the mat is still there.  ideally the other items should still be clickable just like with everything else.  i'm wondering if they could/should go above everything?  like a pictorial navbar.\n\nsecondly, how does this entire experience work on mobile?  i think screen space is too limited to have everything 'spread out'; does the 'pictorial navbar' do better here too?"
+    "text": "let's try (b).\n\nalso i'm still wondering about two things: clicking on the disk puts the monitor as the only thing on the page and destroys the desktop mat metaphor, but the mat is still there.  ideally the other items should still be clickable just like with everything else.  i'm wondering if they could/should go above everything?  like a pictorial navbar.\n\nsecondly, how does this entire experience work on mobile?  i think screen space is too limited to have everything 'spread out'; does the 'pictorial navbar' do better here too?",
+    "label": "design"
   },
   {
     "timestamp": "2026-10-02T23:18:13.202Z",
-    "text": "okay so firstly, the monitor is not \"on\" the bench like the other items.  it looks like it's laying down instead of upright which is wrong. \n\nas for pictorial navbar: i think it should be based on the width of the browser, at least; not sure if that's how we detect mobile devices in our css or not.  i think the biggest thing to resolve regarding placement is how the monitor looks in both settings.\n\nand the biggest issue with the monitor, is that the screen needs to be playable inside the monitor; it's like we need to ensure the screen is always at least 320x200 (?) like the C64 monitor.  let's talk about this a bit more"
+    "text": "okay so firstly, the monitor is not \"on\" the bench like the other items.  it looks like it's laying down instead of upright which is wrong. \n\nas for pictorial navbar: i think it should be based on the width of the browser, at least; not sure if that's how we detect mobile devices in our css or not.  i think the biggest thing to resolve regarding placement is how the monitor looks in both settings.\n\nand the biggest issue with the monitor, is that the screen needs to be playable inside the monitor; it's like we need to ensure the screen is always at least 320x200 (?) like the C64 monitor.  let's talk about this a bit more",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-02T23:20:26.105Z",
@@ -1984,7 +1934,8 @@
   },
   {
     "timestamp": "2026-10-02T23:29:13.055Z",
-    "text": "at narrow widths in 'play' mode, everything goes to the bottom of the window, but should stay at the top imo.  the layout at the bottom looks decent i guess but the icons should be larger (at least 2x) and a bit more spread out, and the mat taller.   on the other views, the components look haphazardly placed; i liked when they were in a row like on the play view.  f) open box on the strip is a good idea instead of back view.\n\ngiven this new view though, i'm wondering about making it the only view, with the contents where the monitor is.  kind of like they're being held up to be read. that would solve d/e too."
+    "text": "at narrow widths in 'play' mode, everything goes to the bottom of the window, but should stay at the top imo.  the layout at the bottom looks decent i guess but the icons should be larger (at least 2x) and a bit more spread out, and the mat taller.   on the other views, the components look haphazardly placed; i liked when they were in a row like on the play view.  f) open box on the strip is a good idea instead of back view.\n\ngiven this new view though, i'm wondering about making it the only view, with the contents where the monitor is.  kind of like they're being held up to be read. that would solve d/e too.",
+    "label": "design"
   },
   {
     "timestamp": "2026-10-03T00:00:35.918Z",
@@ -1994,7 +1945,7 @@
   {
     "timestamp": "2026-10-03T00:14:03.979Z",
     "text": "we need to unify the two map views without requiring a click between them",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-03T00:35:21.654Z",
@@ -2004,7 +1955,7 @@
   {
     "timestamp": "2026-10-03T05:55:33.387Z",
     "text": "we're working on .meta/todo/soon/site-framing-without-words.md.  let's take an intermediate screenshot now, and learn to do that anytime before undertaking an interface overhaul (this is a general rule, send to workflow), so we have a nice before/after spread for saul.pw/log.  then i'm thinking that the \"3D desk\" is trying too hard, and maybe it should just be upright and flat again, like the pictorial navbar i had mentioned in the previous session; but for now, just keep it at the bottom.  the green mat is fine for bg for now.\n\nalso bug: the zoomed in map can no longer be dragged to pan it.\n\nalso let's make the 'seen' screens on the map be halfway between the transparency of the devtools unseen screens and the current transparency (which i believe is 0%)",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-03T06:02:15.451Z",
@@ -2034,7 +1985,7 @@
   {
     "timestamp": "2026-10-03T06:33:26.942Z",
     "text": "great, and there's a shadow missing on the top, i believe too.",
-    "label": "design"
+    "label": "bug"
   },
   {
     "timestamp": "2026-10-03T07:00:04.284Z",
@@ -2118,7 +2069,8 @@
   },
   {
     "timestamp": "2026-10-03T08:43:06.022Z",
-    "text": "let's make the boot/help screen white on black instead (inverted colors), and let's make the default landing page the powered off computer, and pressing play game or the power button will go to the boot screen.   where is the boot screen to edit?  i want the commands in a list, not two columns."
+    "text": "let's make the boot/help screen white on black instead (inverted colors), and let's make the default landing page the powered off computer, and pressing play game or the power button will go to the boot screen.   where is the boot screen to edit?  i want the commands in a list, not two columns.",
+    "label": "design"
   },
   {
     "timestamp": "2026-10-03T16:34:18.097Z",
@@ -2128,22 +2080,12 @@
   {
     "timestamp": "2026-10-03T17:54:22.168Z",
     "text": "a) nope!  through the in-game map, i discovered two \"new\" (to me) ways to glide down to the wise child's nid-house, without having to climb up!  i'm sure these were in the original game, but as a child (and even as an adult when i've replayed), i always went up the vine and leapt across the platforms to get there.  not too hard but i had never tried these other ways; at first i thought they would be just out of reach, by design, but now i see they are just in reach...and i think it's by design.  this is not the only place in the game where understanding physical relationships on the map allow you to reach hidden areas.  so this is a /blog item about a present day discovery of someone who has played this game for hundreds of hours, both as a kid and as an adult.  spoiler alert!",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-10-03T18:15:28.329Z",
-    "text": "a) keep it, that instruction was likely about changing other interface elements by changing the text.  this is simple wrapping with the text intact.\n\nfor l) let's combine them, but the gate is not correct.  we're close but there is no automatic gate for release, only my judgement.",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-03T18:39:19.703Z",
     "text": "last l) these are our 'next' things we need to do, outside of triage.  also: replace curator's note thumbnail with something better, move 'volume' label up so it's closer to the slider, and change the version plate to be in a more appropriate font (or size?).  move mobile pass from maybe to soon.  move palette and save-slots to a new task category outside the todo dir, alongside done, like 'nope' except it's more of a soft-nope.  like it's out but not forever against, just not now, not soon, not up for consideration in maybe.  maybe we should just delete but it seems like it's good to track it somewhere more findable in the case that we revisit later for some other reason.",
     "label": "design"
-  },
-  {
-    "timestamp": "2026-10-03T19:01:20.469Z",
-    "text": "our .meta/NEXT says that?  we've already done that, but it's in a separate cbox.  let's fix NEXT.  also i had a codemill serving btr so it looks like it worked on the ready tasks already?  some failed.  let's look at those before wrapping",
-    "label": "bug"
   },
   {
     "timestamp": "2026-10-03T20:58:40.026Z",
@@ -2162,15 +2104,18 @@
   },
   {
     "timestamp": "2026-10-03T23:04:04.953Z",
-    "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself"
+    "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-03T23:04:08.288Z",
-    "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself"
+    "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-03T23:06:30.025Z",
-    "text": "and then really get back to basics on the sidebars.  in landscape i imagine they're holding it so they can get a clean touch on either side.  holding on one side moves the char toward that side indefinitely.  then, tapping on the other side while still holding, should jump.  then, sliding up/down on either side should go up/down a ladder/vine.  or stand/crouch.  then we need to consider how to open the menu, go through a door, etc.  let's talk it through"
+    "text": "and then really get back to basics on the sidebars.  in landscape i imagine they're holding it so they can get a clean touch on either side.  holding on one side moves the char toward that side indefinitely.  then, tapping on the other side while still holding, should jump.  then, sliding up/down on either side should go up/down a ladder/vine.  or stand/crouch.  then we need to consider how to open the menu, go through a door, etc.  let's talk it through",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-03T23:10:39.756Z",
@@ -2220,7 +2165,7 @@
   {
     "timestamp": "2026-10-04T00:07:14.928Z",
     "text": "let's get astra to clean up the world map image some more.  see the original map image (from git history) for reference.  there are: smudges in 2-3 places along the ~3rd screen up from the ground, and some remaining straight vertical lines like esp on star grund, and some stray marks like above garden grund, and some straight horiz lines top of grand grund.  anything else?",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-04T00:12:47.335Z",
@@ -2234,7 +2179,8 @@
   },
   {
     "timestamp": "2026-10-04T00:56:48.631Z",
-    "text": "no, this is too far from the original intent, we'll get dragged.  let's get both opus and astra subagents, can you just orchestrate it?  to take the original iso/map.jpg which is clearly a line drawing, and trace the original lines the author intended, EXCEPT for the grid lines.  these should be evident, let's get them each to figure out how to pull this off, infact maybe we should make the output be svg."
+    "text": "no, this is too far from the original intent, we'll get dragged.  let's get both opus and astra subagents, can you just orchestrate it?  to take the original iso/map.jpg which is clearly a line drawing, and trace the original lines the author intended, EXCEPT for the grid lines.  these should be evident, let's get them each to figure out how to pull this off, infact maybe we should make the output be svg.",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-04T00:59:43.178Z",
@@ -2244,7 +2190,7 @@
   {
     "timestamp": "2026-10-04T07:40:20.263Z",
     "text": "just tried pinch zoom (human todo) on mobile in fullscree/nlandscape and it didn't work.  i think on mobile it doesn't need to zoom in/out buttons, pinch zoom is well-known and expected, and the button clutters and takes up space",
-    "label": "bug"
+    "label": "design"
   },
   {
     "timestamp": "2026-10-04T07:43:39.580Z",
@@ -2309,7 +2255,7 @@
   {
     "timestamp": "2026-10-04T09:00:00.815Z",
     "text": "lettering task, drop it.  remove the old generator completely.  first create before/after screenshots, i want to see 4 in the same image: the OG iso png, the original cleaned up one, the most cleaned up AI one, and the opus one, for the /blog.  otherwise we can close this out",
-    "label": "design"
+    "label": "core"
   },
   {
     "timestamp": "2026-10-04T09:01:43.317Z",
@@ -2352,13 +2298,9 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-10-04T20:14:18.147Z",
-    "text": "for all of the sounds we just got i need the source links.  i've put the filenames in audition-power-on-sound.md, please annotate with the source links.",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-10-04T21:30:55.467Z",
-    "text": "okay i was looking through them, i think we need another strategy, i only found a couple of minorly usable clips.  so i'm thinking we need the monitor button push, degauss noise (can you find REAL sounds of 1701/1702 monitors turning on, just for verification?), c64 switch flip, c64 disk drive noises; was there *any* c64 startup sound like a beep?  and then we'll have to compose them together ourselves."
+    "text": "okay i was looking through them, i think we need another strategy, i only found a couple of minorly usable clips.  so i'm thinking we need the monitor button push, degauss noise (can you find REAL sounds of 1701/1702 monitors turning on, just for verification?), c64 switch flip, c64 disk drive noises; was there *any* c64 startup sound like a beep?  and then we'll have to compose them together ourselves.",
+    "label": "core"
   },
   {
     "timestamp": "2026-10-04T23:03:35.775Z",
@@ -2461,8 +2403,13 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-05T01:23:12.865Z",
+    "text": "no copy.  make the change.",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-05T01:31:42.188Z",
     "text": "something is screwy with the steering.  mostly it works but sometimes it does steer immedaitely when e.g. falling; when gliding it's super important that any press/hold/tap on one side only steers that way immediately.\n\nwe also need a way to crouch/stand without moving left/right. i'm thinking maybe that there are 'up' regions on top of both sides, and down on the bottoms, and only the actual sides actually move left/right.  can we get those regions to show on fullscreen mobile mode, as a test?",
-    "label": "bug"
+    "label": "core"
   }
 ]

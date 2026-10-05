@@ -126,17 +126,24 @@ test('development paper groups prompts at Pacific day changes, not individual me
   assert.deepEqual(days.map(match => [...match[2].matchAll(/<p>(.*?)<\/p>/g)].map(prompt => prompt[1])), [['first', 'second'], ['third', 'fourth']]);
 });
 
-test('bug and design prompts carry their label after the time; other prompts carry none', () => {
+test('core, bug and design prompts carry their label after the time; other prompts carry none', () => {
   const html = renderDevNotes([
     { timestamp: '2026-10-05T01:00:00Z', text: 'broken', label: 'bug' },
     { timestamp: '2026-10-05T01:01:00Z', text: 'tweak', label: 'design' },
-    { timestamp: '2026-10-05T01:02:00Z', text: 'plan' },
-    { timestamp: '2026-10-05T01:03:00Z', text: 'odd', label: '<b>x</b>' },
+    { timestamp: '2026-10-05T01:02:00Z', text: 'plan', label: 'core' },
+    { timestamp: '2026-10-05T01:03:00Z', text: 'plain' },
+    { timestamp: '2026-10-05T01:04:00Z', text: 'odd', label: '<b>x</b>' },
   ]);
   const articles = [...html.matchAll(/<article>([\s\S]*?)<\/article>/g)].map(match => match[1]);
   assert.match(articles[0], /<\/time> <em class="note-label">\(bug\)<\/em><p>broken/);
   assert.match(articles[1], /<\/time> <em class="note-label">\(design\)<\/em><p>tweak/);
-  assert.doesNotMatch(articles[2] + articles[3], /<em|<b>/);
+  assert.match(articles[2], /<\/time> <em class="note-label">\(core\)<\/em><p>plan/);
+  assert.doesNotMatch(articles[3] + articles[4], /<em|<b>/);
+});
+
+test('the authored introduction precedes the first dated day', () => {
+  const html = renderDevNotes([{ timestamp: '2026-10-05T01:00:00Z', text: 'first' }], '<p>Intro</p>');
+  assert.ok(html.indexOf('<p>Intro</p>') < html.indexOf('data-paper-day'));
 });
 
 test('resource cards put the quote or image first and keep every link in one caption', () => {

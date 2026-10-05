@@ -33,7 +33,7 @@ export function renderPage(template, metadata, fragments = {}) {
     ? fragments[key] : metadata[key].replace(/[&<>"']/g, char => entities[char]));
 }
 
-export function renderDevNotes(prompts) {
+export function renderDevNotes(prompts, intro = '') {
   const escape = text => text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const pacific = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' });
   const days = new Map();
@@ -42,10 +42,10 @@ export function renderDevNotes(prompts) {
     const { year, month, day: dayOfMonth, hour, minute, timeZoneName } = Object.fromEntries(pacific.formatToParts(date).map(part => [part.type, part.value]));
     const day = `${year}-${month}-${dayOfMonth}`;
     if (!days.has(day)) days.set(day, []);
-    const tag = ['bug', 'design'].includes(label) ? ` <em class="note-label">(${label})</em>` : '';
+    const tag = ['core', 'bug', 'design'].includes(label) ? ` <em class="note-label">(${label})</em>` : '';
     days.get(day).push(`<article><time datetime="${date.toISOString()}">${hour}:${minute} ${timeZoneName}</time>${tag}<p>${escape(text)}</p></article>`);
   }
-  return '<h1>Dev notes</h1>' + [...days].map(([day, entries]) =>
+  return `<header class="greenbar-intro">${intro}</header>` + [...days].map(([day, entries]) =>
     `<section class="greenbar-day" data-paper-day="${day}" aria-label="${day}"><h2>${day}</h2>${entries.join('\n')}</section>`).join('\n');
 }
 
@@ -68,7 +68,7 @@ export function buildSite(out) {
     /<h2>Developer mode<\/h2>[\s\S]*?(?=<h2>|$)/,
     section => `<section id="developer-help" hidden>${section}</section>`);
   const developer = read('developer.html').replaceAll('{{version}}', version);
-  const devNotes = renderDevNotes(JSON.parse(readFileSync(new URL('../assets/dev-notes.json', import.meta.url), 'utf8')));
+  const devNotes = renderDevNotes(JSON.parse(readFileSync(new URL('../assets/dev-notes.json', import.meta.url), 'utf8')), marked.parse(read('dev-notes.md')));
   mkdirSync(out, { recursive: true });
   for (const output of ['index', 'play', 'about', 'resources', 'map']) {
     const page = output === 'index' || output === 'map' ? 'play' : output;
