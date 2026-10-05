@@ -293,24 +293,30 @@ test("a leap's held button stays held when the leap becomes a fall", async t => 
   assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
 });
 
-test("the top and bottom of a side stand and crouch without walking", async t => {
+test("the top of a side stands without walking; the bottom is an ordinary side", async t => {
   const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
   model.ladder = false;
-  send('pointerdown', LEFT, 190);
-  send('pointerup', LEFT, 190);
-  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'a bottom tap crouches');
   send('pointerdown', RIGHT, 10);
   send('pointerup', RIGHT, 10);
   assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'a top tap stands');
-  send('pointerdown', RIGHT, 190);
+  send('pointerdown', RIGHT, 10);
   advance(130);
   keys.read();
   advance(300);
-  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'a bottom hold never walks');
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'a top hold never walks');
   send('pointermove', RIGHT, 100);
-  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'dragging out of the zone keeps its direction');
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'dragging out of the zone keeps its direction');
   send('pointerup', RIGHT, 100);
   assert.deepEqual(keys.read(), IDLE);
+  send('pointerdown', LEFT, 190);
+  send('pointerup', LEFT, 190);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true }, 'a bottom tap is the button');
+  send('pointerdown', LEFT, 190);
+  advance(130);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'a bottom hold walks');
+  send('pointermove', LEFT, 220);
+  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'a bottom slide down crouches');
+  send('pointerup', LEFT, 220);
 });
 
 test("a hold on the top of a side climbs", async t => {

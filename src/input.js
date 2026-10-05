@@ -523,8 +523,8 @@ const STEER_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
 const SIDE_FIRE = 'touch:fire';
 
-// Fullscreen and landscape touch: the outer eighths steer, their top and bottom thirds
-// climb or crouch; the middle can only tap.
+// Fullscreen and landscape touch: the outer eighths steer, their top quarters only climb;
+// the middle can only tap.
 export class SideTouch {
   constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
     airborne = () => false, facing = () => null, climbable = () => true, onLadder = () => false } = {}) {
@@ -566,9 +566,7 @@ export class SideTouch {
   zone(e) {
     const r = this.canvas.getBoundingClientRect();
     const y = (e.clientY - r.top) * (this.canvas.height / r.height);
-    if (y < this.canvas.height / 3) return 'up';
-    if (y >= this.canvas.height * 2 / 3) return 'down';
-    return null;
+    return y < this.canvas.height / 4 ? 'up' : null;
   }
 
   down(e) {
