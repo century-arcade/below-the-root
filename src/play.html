@@ -25,14 +25,12 @@
   </div>
   <output class="page-number" aria-live="polite">Page 0 / 18</output>
 </section>
-<section id="dev-notes" data-desk="dev-notes" hidden aria-label="Dev notes">
-  <div class="greenbar-tools">
-    <button type="button" data-paper-pause aria-label="Pause paper feed" aria-pressed="false" title="Pause paper feed"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="paper-pause" d="M7 4v12M13 4v12"/><path class="paper-resume" d="m7 4 8 6-8 6z"/></svg></button>
-    <button type="button" data-desk-back aria-label="Close dev notes" title="Close (Escape)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button>
-  </div>
+<section id="dev-notes" class="book-spread" data-desk="dev-notes" hidden aria-label="Dev notes">
+  <button type="button" data-paper-previous aria-label="Previous day" aria-keyshortcuts="ArrowLeft" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
   <div class="greenbar-viewport" tabindex="0" role="region" aria-label="Dated development prompts">
     <div class="greenbar-paper">{{devNotes}}</div>
   </div>
+  <button type="button" data-paper-next aria-label="Next day" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
 </section>
 <section id="paper-map" data-desk="map" hidden aria-label="World map" aria-keyshortcuts="M Tab">
   <div id="map-viewport"><div id="map-sheet" class="map-sheet"><div id="map-grid" class="map-grid"></div></div></div>

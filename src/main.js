@@ -510,13 +510,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
   const hold = () => { held = true; dropInput(); };
-  desk.onChange = (stage, previous) => {
+  desk.onChange = stage => {
     if (stage === 'map') { paperKey = null; paintPaperMap(); centerMap(); }
     const playing = stage === 'play';
     document.documentElement.classList.toggle('monitor-away', !playing);
     fit();
     if (!playing) { if (powered) hold(); return; }
-    if (!powered && !landing && previous !== 'dev-notes') power.click();
+    if (!powered && !landing) power.click();
     canvas.focus({ preventScroll: true });
   };
   let landing = true;

@@ -107,9 +107,23 @@ test('the renderer escapes metadata while preserving HTML fragments', () => {
 test('development prompts are dated literal text, never executable HTML or Markdown', () => {
   const html = renderDevNotes([{ timestamp: '2026-10-05T01:02:03Z', text: '<script>alert("x")</script>\n**original words** & $&' }]);
   assert.match(html, /datetime="2026-10-05T01:02:03.000Z"/);
-  assert.match(html, /2026-10-05 · 01:02 UTC/);
+  assert.match(html, /data-paper-day="2026-10-05"/);
+  assert.match(html, /<h2>2026-10-05<\/h2>/);
+  assert.match(html, />01:02 UTC<\/time>/);
   assert.ok(html.includes('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;\n**original words** &amp; $&'));
   assert.doesNotMatch(html, /<script>|<strong>/);
+});
+
+test('development paper groups prompts at UTC day changes, not individual messages', () => {
+  const html = renderDevNotes([
+    { timestamp: '2026-10-04T23:59:00Z', text: 'first' },
+    { timestamp: '2026-10-04T23:59:30Z', text: 'second' },
+    { timestamp: '2026-10-05T00:00:00Z', text: 'third' },
+    { timestamp: '2026-10-04T20:00:00-07:00', text: 'fourth' },
+  ]);
+  const days = [...html.matchAll(/<section[^>]*data-paper-day="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g)];
+  assert.deepEqual(days.map(match => match[1]), ['2026-10-04', '2026-10-05']);
+  assert.deepEqual(days.map(match => [...match[2].matchAll(/<p>(.*?)<\/p>/g)].map(prompt => prompt[1])), [['first', 'second'], ['third', 'fourth']]);
 });
 
 test('resource cards put the quote or image first and keep every link in one caption', () => {
