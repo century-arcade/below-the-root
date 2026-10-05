@@ -1,0 +1,6 @@
+Doto, the dot-matrix typeface of the dev notes printout.
+Copyright 2024 The Doto Project Authors (https://github.com/oliverlalan/Doto).
+License: doto-OFL.txt (SIL Open Font License 1.1).
+
+Unmodified variable font file (ROND and wght axes), from the Google Fonts family:
+https://fonts.google.com/specimen/Doto

@@ -146,6 +146,11 @@ test('the authored introduction precedes the first dated day', () => {
   assert.ok(html.indexOf('<p>Intro</p>') < html.indexOf('data-paper-day'));
 });
 
+test('each later introduction heading starts its own page ahead of the dated days', () => {
+  const html = renderDevNotes([{ timestamp: '2026-10-05T01:00:00Z', text: 'first' }], '<h1>Notes</h1><p>Intro</p><h1>Prompts</h1>');
+  assert.match(html, /^<header class="greenbar-intro"><h1>Notes<\/h1><p>Intro<\/p><\/header><header class="greenbar-title"><h1>Prompts<\/h1><\/header><section/);
+});
+
 test('resource cards put the quote or image first and keep every link in one caption', () => {
   const html = cardList(marked.parse(`- [A](https://a) Caption [more](https://m).
   > “Quote”

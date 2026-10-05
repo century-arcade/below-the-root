@@ -45,7 +45,8 @@ export function renderDevNotes(prompts, intro = '') {
     const tag = ['core', 'bug', 'design'].includes(label) ? ` <em class="note-label">(${label})</em>` : '';
     days.get(day).push(`<article><time datetime="${date.toISOString()}">${hour}:${minute} ${timeZoneName}</time>${tag}<p>${escape(text)}</p></article>`);
   }
-  return `<header class="greenbar-intro">${intro}</header>` + [...days].map(([day, entries]) =>
+  const [cover = '', ...titles] = intro.split(/(?=<h1)/).filter(Boolean);
+  return `<header class="greenbar-intro">${cover}</header>` + titles.map(title => `<header class="greenbar-title">${title}</header>`).join('') + [...days].map(([day, entries]) =>
     `<section class="greenbar-day" data-paper-day="${day}" aria-label="${day}"><h2>${day}</h2>${entries.join('\n')}</section>`).join('\n');
 }
 
