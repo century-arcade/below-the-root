@@ -538,7 +538,7 @@ const SIDE_FIRE = 'touch:fire';
 // the middle can only tap.
 export class SideTouch {
   constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
-    airborne = () => false, facing = () => null, climbable = () => true, onLadder = () => false } = {}) {
+    airborne = () => false, gliding = () => false, facing = () => null, climbable = () => true, onLadder = () => false } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
@@ -547,6 +547,7 @@ export class SideTouch {
     this.onChord = chord;
     this.anywhere = anywhere;
     this.airborne = airborne;
+    this.gliding = gliding;
     this.facing = facing;
     this.climbable = climbable;
     this.onLadder = onLadder;
@@ -594,7 +595,7 @@ export class SideTouch {
     const pending = live.find(g => g.role === 'pending');
     this.fingers.set(f.id, f);
     if (this.airborne() && !jog) {
-      f.role = live.some(g => g.role === 'stick' && g.side !== side) ? 'button' : 'stick';
+      f.role = !this.gliding() && live.some(g => g.role === 'stick' && g.side !== side) ? 'button' : 'stick';
       this.update();
     } else if (!live.length) {
       f.role = 'pending';
@@ -653,14 +654,13 @@ export class SideTouch {
       return;
     }
     if (this.airborne() && f.role === 'pending') this.keys.tap(f.side, SIDE_SOURCE);
-    else if (this.airborne()) {
+    else if (f.role === 'pending') this.keys.tap(f.zone ?? 'fire', SIDE_SOURCE);
+    else if (f.role === 'stick' || f.role === 'button') {
       const values = [...this.fingers.values()];
       const button = !values.some(g => g.role === 'stick') && values.find(g => g.role === 'button');
       if (button) button.role = 'stick';
       this.update();
     }
-    else if (f.role === 'pending') this.keys.tap(f.zone ?? 'fire', SIDE_SOURCE);
-    else if (f.role === 'stick' || f.role === 'button') this.update();
   }
 
   lift(e) {
@@ -717,8 +717,8 @@ export class SideTouch {
     const keys = new Set();
     const button = [...this.fingers.values()].some(f => f.role === 'button');
     if (this.airborne()) {
-      const sides = new Set([...this.fingers.values()].filter(f => f.role !== 'dead' && f.role !== 'button').map(f => f.side));
-      if (sides.size === 1) keys.add([...sides][0]);
+      const steer = [...this.fingers.values()].filter(f => f.role !== 'dead' && f.role !== 'button').at(-1);
+      if (steer) keys.add(steer.side);
       // fall-button: a held button opens the glide, or leaps from the landing
       if (button) keys.add('fire');
       return keys;

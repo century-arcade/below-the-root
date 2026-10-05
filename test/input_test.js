@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false, airborne: false, facing: null, ladder: true, onLadder: false };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, airborne: false, gliding: false, facing: null, ladder: true, onLadder: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
-    airborne: () => model.airborne, facing: () => model.facing, climbable: () => model.ladder, onLadder: () => model.onLadder,
+    airborne: () => model.airborne, gliding: () => model.gliding, facing: () => model.facing, climbable: () => model.ladder, onLadder: () => model.onLadder,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -257,23 +257,45 @@ test("outside free play a tap on the picture's middle is the button", async t =>
   assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
 });
 
-test("while gliding, touching only one side faces that way at once", async t => {
+test("while gliding, the newest side touch steers at once", async t => {
   const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
   send('pointerdown', LEFT);
   advance(130);
   assert.equal(keys.read().dx, -1);
+  model.airborne = model.gliding = true;
+  send('pointerdown', RIGHT, 100, 2);
+  assert.deepEqual(keys.read('g'), { dx: 1, dy: 0, fire: false }, 'the second side turns with the first still down');
+  send('pointerup', RIGHT, 100, 2);
+  assert.deepEqual(keys.read('g'), { dx: -1, dy: 0, fire: false }, 'lifting it gives the turn back to the first');
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read('g'), IDLE);
+  send('pointerdown', RIGHT);
+  send('pointerup', RIGHT);
+  assert.deepEqual(keys.read('g'), { dx: 1, dy: 0, fire: false }, 'a quick tap turns without pressing the button');
+  advance(300);
+  assert.deepEqual(keys.read('g'), IDLE);
+});
+
+test("while falling, lifting the steering side hands the steer to the button finger", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  send('pointerdown', LEFT);
+  advance(130);
+  keys.read();
   model.airborne = true;
   send('pointerdown', RIGHT, 100, 2);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true }, 'the second side is the button; the first still steers');
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true });
   send('pointerup', LEFT);
-  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false }, 'the remaining side turns at once');
-  send('pointerup', RIGHT, 100, 2);
-  assert.deepEqual(keys.read(), IDLE);
+  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false });
+});
+
+test("on the ground, lifting the walking side hands the walk to the button finger", async t => {
+  const { keys, send, advance, LEFT, RIGHT } = await sideFixture(t);
   send('pointerdown', LEFT);
+  advance(130);
+  send('pointerdown', RIGHT, 100, 2);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true });
   send('pointerup', LEFT);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'a quick tap turns without pressing the button');
-  advance(300);
-  assert.deepEqual(keys.read(), IDLE);
+  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false }, 'the finger still down walks its side');
 });
 
 test("while falling with a side held, a tap on the other side is the button", async t => {

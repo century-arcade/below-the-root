@@ -238,7 +238,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const sideTouch = new SideTouch(playSurface, canvas, stick, {
     active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
-    airborne: () => !!(state.player?.gliding || state.player?.fallen > 0) && !state.title && !state.demo,
+    airborne: () => !!(state.player?.gliding || state.player?.leaping || state.player?.fallen > 0) && !state.title && !state.demo,
+    gliding: () => !!state.player?.gliding && !state.title && !state.demo,
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
     climbable: dir => {
       const p = state.player;
