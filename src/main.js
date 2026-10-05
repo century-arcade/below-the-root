@@ -329,7 +329,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let wasOn = false;
   try { wasOn = sessionStorage.getItem(POWER_KEY) === 'on'; } catch {}
   let powered = !coldLaunch || wasOn;
-  // frozen: the last picture stays up through the power-off click and fade
+  // frozen: the last picture stays up while the power-off fade runs
   let frozen = false;
   let paused = false;
   // held: the player's pause, sticky until they act; paused is the debug dialog's
@@ -476,21 +476,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   monitor.classList.toggle('screen-dark', !powered);
   const SCREEN_FADE_MS = 200;
   let screenTimer = 0;
-  function screenAfter(seconds, on) {
-    clearTimeout(screenTimer);
-    screenTimer = setTimeout(() => {
-      monitor.classList.toggle('screen-dark', !on);
-      if (!on) screenTimer = setTimeout(() => { frozen = false; }, SCREEN_FADE_MS);
-    }, Math.max(0, seconds * 1000 - (on ? SCREEN_FADE_MS : 0)));
-  }
   power.onclick = () => {
     powered = !powered;
     dropInput(); acc = 0; last = performance.now();
     showPower();
     if (powered) {
-      frozen = false;
-      monitor.classList.add('screen-dark');
-      speaker.unlock(state); screenAfter(speaker.clip('power-on'), true); speaker.resume();
+      clearTimeout(screenTimer); frozen = false;
+      monitor.classList.remove('screen-dark');
+      speaker.unlock(state); speaker.clip('power-on'); speaker.resume();
       startupTitle = true; hold();
       canvas.focus({ preventScroll: true });
     }
@@ -505,7 +498,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       paperKey = null;
       speaker.silence(); speaker.suspend();
       frozen = true;
-      speaker.unlock(state); screenAfter(speaker.clip('power-off'), false);
+      monitor.classList.add('screen-dark');
+      clearTimeout(screenTimer); screenTimer = setTimeout(() => { frozen = false; }, SCREEN_FADE_MS);
+      speaker.unlock(state); speaker.clip('power-off');
       try { clearAutosave(localStorage); }
       catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
       draw();
