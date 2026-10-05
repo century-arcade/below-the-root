@@ -138,6 +138,11 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     page.clock.run_for(48)
     touch('touchMove', {**left, 'y': left['y'] - 40})
     until(page, '(s, row) => s.state.player.row < row - 4', arg=row)
+    page.clock.run_for(1500)
+    top = session_eval(page, 's => [s.state.player.row, s.state.player.col]')
+    page.clock.run_for(1500)
+    assert session_eval(page, 's => [s.state.player.row, s.state.player.col]') == top, 'a slide up stands at the top of the ladder'
+    touch('touchMove', left)
     until(page, '(s, col) => s.state.player.col < col - 2', arg=col)
     touch('touchEnd', left)
 
@@ -172,4 +177,4 @@ with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_
     page.clock.run_for(300)
     assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a bottom side tap over the panel crouches without the menu'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, side hold on a ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb and stand at the top, side hold on a ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')

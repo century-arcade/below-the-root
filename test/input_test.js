@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, anywhere: false, airborne: false, gliding: false, facing: null, ladder: true, onLadder: false };
+  const model = { active: true, jog: false, chords: 0, anywhere: false, airborne: false, gliding: false, facing: null, onLadder: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     active: () => model.active, jog: () => model.jog, chord: () => model.chords++, anywhere: () => model.anywhere,
-    airborne: () => model.airborne, gliding: () => model.gliding, facing: () => model.facing, climbable: () => model.ladder, onLadder: () => model.onLadder,
+    airborne: () => model.airborne, gliding: () => model.gliding, facing: () => model.facing, onLadder: () => model.onLadder,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -131,20 +131,20 @@ test("sliding a side finger up or down replaces the walk with a climb", async t 
   assert.deepEqual(keys.read(), IDLE);
 });
 
-test("a slid side finger climbs only while there is a ladder, then walks its side", async t => {
+test("a slid side finger stays latched to its climb past the ladder's end", async t => {
   const { keys, model, send, advance, LEFT } = await sideFixture(t);
+  model.onLadder = true;
   send('pointerdown', LEFT, 100);
   advance(130);
   keys.read();
   send('pointermove', LEFT, 70);
   assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'on a ladder the slide climbs');
-  model.ladder = false;
+  model.onLadder = false;
   advance(60);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'off the top the same hold walks');
-  model.ladder = true;
-  advance(60);
-  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'the next ladder climbs again');
-  send('pointerup', LEFT, 70);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'off the top the hold stands rather than walking');
+  send('pointermove', LEFT, 105);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'sliding back level walks');
+  send('pointerup', LEFT, 105);
   assert.deepEqual(keys.read(), IDLE);
 });
 
@@ -166,22 +166,20 @@ test("a side hold on a ladder climbs on the way it last went, then walks", async
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'off the ladder the hold walks');
 });
 
-test("a slide up away from a ladder still sends its direction once", async t => {
-  const { keys, model, send, advance, LEFT } = await sideFixture(t);
-  model.ladder = false;
+test("a slide up away from a ladder stands and never walks", async t => {
+  const { keys, send, advance, LEFT } = await sideFixture(t);
   send('pointerdown', LEFT, 100);
   advance(130);
   keys.read();
   send('pointermove', LEFT, 65);
   advance(60);
-  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'held until the game reads it, to stand');
-  advance(60);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'then the hold walks');
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false });
+  advance(500);
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false });
 });
 
 test("a slide down away from a ladder only crouches, never walks", async t => {
-  const { keys, model, send, advance, LEFT } = await sideFixture(t);
-  model.ladder = false;
+  const { keys, send, advance, LEFT } = await sideFixture(t);
   send('pointerdown', LEFT, 100);
   advance(130);
   keys.read();
@@ -361,7 +359,6 @@ test("a leap's held button steers on and leaps no more on landing", async t => {
 
 test("the top of a side stands without walking; the bottom is an ordinary side", async t => {
   const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
-  model.ladder = false;
   send('pointerdown', RIGHT, 10);
   send('pointerup', RIGHT, 10);
   assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false }, 'a top tap stands');
