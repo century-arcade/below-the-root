@@ -625,7 +625,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     saveNow();
     draw();
   }
-  menuButton.onclick = () => commandMenu();
+  menuButton.onclick = e => { if (!(e.pointerType && sideTouch.claims(e))) commandMenu(); };
   document.getElementById('touch-map').onclick = e => { desk.show(desk.stage === 'map' ? 'play' : 'map'); e.currentTarget.blur(); };
   for (const type of ['keydown', 'keyup']) menuButton.addEventListener(type, e => {
     if (e.key === ' ') e.stopPropagation();

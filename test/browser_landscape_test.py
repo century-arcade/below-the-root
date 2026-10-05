@@ -161,4 +161,15 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, '(s, col) => s.state.player.col < col - 1', arg=col)
     touch('touchEnd', left)
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, side hold on a ladder, picture taps outside play, map, version label and fullscreen toggle passed')
+with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
+    page.locator('#fullscreen').tap()
+    page.wait_for_function('document.documentElement.classList.contains("game-fullscreen")')
+    page.clock.run_for(500)
+    box = page.locator('#screen').bounding_box()
+    assert box
+    page.touchscreen.tap(box['x'] + 10, box['y'] + box['height'] - 10)
+    until(page, 's => s.state.player.crawling')
+    page.clock.run_for(300)
+    assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a bottom side tap over the panel crouches without the menu'
+
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, side hold on a ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')

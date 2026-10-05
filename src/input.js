@@ -513,6 +513,8 @@ export class Pointer {
 
 }
 
+// panel-button: in side-touch layouts the panel opens the menu by chord, not by touch
+const SIDE_IGNORE = OFF_PICTURE_IGNORE.replace('button', 'button:not(#command-menu)');
 const SIDE_TAP_MS = 120;
 const CHORD_MS = 250;
 const CHORD_GAP_MS = 80;
@@ -570,7 +572,7 @@ export class SideTouch {
   }
 
   down(e) {
-    if (!this.claims(e) || e.target?.closest?.(OFF_PICTURE_IGNORE)) return;
+    if (!this.claims(e) || e.target?.closest?.(SIDE_IGNORE)) return;
     const side = this.side(e);
     if (!side && !this.anywhere()) return;
     e.preventDefault();
