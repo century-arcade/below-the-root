@@ -524,37 +524,33 @@ export class Pointer {
 
 }
 
-// panel-button: in side-touch layouts the panel opens the menu by chord, not by touch
+// panel-button: in side-touch layouts the panel opens the menu by two-finger hold, not by touch
 const SIDE_IGNORE = OFF_PICTURE_IGNORE.replace('button', 'button:not(#command-menu)');
 const SIDE_TAP_MS = 120;
-const CHORD_MS = 250;
-const CHORD_GAP_MS = 80;
+const PAIR_HOLD_MS = 200;
+const PAIR_GAP_MS = 80;
 const SLIDE = 24;
 const STEER_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
+const SIGN = { left: -1, right: 1 };
 
-// Fullscreen and landscape touch: the outer eighths steer, their top quarters only climb;
-// the middle can only tap.
+// Fullscreen and landscape touch: each half of the screen is a stick and a trigger;
+// see "Fullscreen and landscape touch" in docs/spec/input.md.
 export class SideTouch {
-  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {}, anywhere = () => false,
-    airborne = () => false, gliding = () => false, facing = () => null, onLadder = () => false } = {}) {
+  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {},
+    airborne = () => false, facing = () => null } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
     this.active = active;
     this.jog = jog;
     this.onChord = chord;
-    this.anywhere = anywhere;
     this.airborne = airborne;
-    this.gliding = gliding;
     this.facing = facing;
-    this.onLadder = onLadder;
-    this.lastClimb = 'up';
     this.poll = null;
     this.fingers = new Map();
-    this.taps = new Set();
-    this.chord = null;
-    this.unfired = null;
+    this.turn = null;
+    this.unfired = false;
     this.held = new Set();
     surface.addEventListener('pointerdown', e => this.down(e));
     surface.addEventListener('pointermove', e => this.move(e));
@@ -568,51 +564,42 @@ export class SideTouch {
 
   side(e) {
     const r = this.canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) * (this.canvas.width / r.width);
-    if (x < this.canvas.width / 8) return 'left';
-    if (x >= this.canvas.width * 7 / 8) return 'right';
-    return null;
+    return e.clientX < r.left + r.width / 2 ? 'left' : 'right';
   }
 
-  zone(e) {
-    const r = this.canvas.getBoundingClientRect();
-    const y = (e.clientY - r.top) * (this.canvas.height / r.height);
-    return y < this.canvas.height / 4 ? 'up' : null;
+  live() {
+    return [...this.fingers.values()].filter(f => f.role !== 'dead');
   }
 
   down(e) {
     if (!this.claims(e) || e.target?.closest?.(SIDE_IGNORE)) return;
-    const side = this.side(e);
-    if (!side && !this.anywhere()) return;
     e.preventDefault();
     e.target?.setPointerCapture?.(e.pointerId);
-    if (!side) return this.taps.add(e.pointerId);
-    const jog = this.jog();
-    const zone = jog ? null : this.zone(e);
-    const f = { id: e.pointerId, side, zone, x: e.clientX, y: e.clientY, at: performance.now(), jog, vertical: zone };
-    const live = [...this.fingers.values()].filter(g => g.role !== 'dead');
-    const pending = live.find(g => g.role === 'pending');
+    const f = { id: e.pointerId, side: this.side(e), x: e.clientX, y: e.clientY, at: performance.now() };
+    const live = this.live();
     this.fingers.set(f.id, f);
-    if (this.airborne() && !jog) {
-      f.role = !this.gliding() && live.some(g => g.role === 'stick' && g.side !== side) ? 'button' : 'stick';
-      if (f.role === 'button') this.fire(f);
-      this.update();
-    } else if (!live.length) {
-      f.role = 'pending';
-      if (!jog) f.timer = setTimeout(() => this.resolve(f), SIDE_TAP_MS);
-    } else if (pending && pending.side !== side && !this.chord && live.length === 1
-        && (jog || f.at - pending.at <= CHORD_GAP_MS)) {
-      clearTimeout(pending.timer);
-      f.role = 'pending';
-      this.chord = { fingers: [pending, f], timer: setTimeout(() => this.resolveChord(), CHORD_MS) };
-    } else if (jog) {
+    if (live.length > 1) {
       f.role = 'dead';
-    } else {
-      if (pending && !this.chord) { clearTimeout(pending.timer); pending.role = 'stick'; }
-      f.role = 'button';
-      this.turnFirst();
-      this.fire(f);
+    } else if (live.length) {
+      const [other] = live;
+      f.role = 'extra';
+      if (other.role === 'pending' && f.at - other.at <= PAIR_GAP_MS) {
+        clearTimeout(other.timer);
+        other.role = 'extra';
+        other.partner = f;
+        other.timer = setTimeout(() => this.pairHold(other), PAIR_HOLD_MS);
+        f.partner = other;
+      } else if (other.role === 'pending' && !this.jog()) {
+        this.resolve(other);
+      }
+      f.timer = setTimeout(() => this.pairHold(f), PAIR_HOLD_MS);
+      f.since = other.dir;
+    } else if (this.airborne() && !this.jog()) {
+      f.role = 'stick';
       this.update();
+    } else {
+      f.role = 'pending';
+      if (!this.jog()) f.timer = setTimeout(() => this.resolve(f), SIDE_TAP_MS);
     }
   }
 
@@ -620,56 +607,58 @@ export class SideTouch {
     const f = this.fingers.get(e.pointerId);
     if (!f || f.role === 'dead') return;
     const dx = e.clientX - f.x, dy = e.clientY - f.y;
-    if (f.zone) return;
-    if (f.jog) {
+    if (this.jog() && (f.role === 'pending' || f.role === 'jog')) {
       if (Math.max(Math.abs(dx), Math.abs(dy)) < SLIDE) return;
-      if (this.chord) this.breakChord();
       f.role = 'jog';
       if (Math.abs(dx) > Math.abs(dy)) { f.x = e.clientX; this.keys.tap(dx > 0 ? 'right' : 'left', SIDE_SOURCE); }
       else { f.y = e.clientY; this.keys.tap(dy > 0 ? 'down' : 'up', SIDE_SOURCE); }
       return;
     }
-    const vertical = dy <= -SLIDE ? 'up' : dy >= SLIDE ? 'down' : Math.abs(dy) < SLIDE / 2 ? null : f.vertical;
-    if (f.role === 'pending' && vertical) {
-      if (this.chord) this.resolveChord();
-      if (f.role === 'pending') { f.vertical = vertical; return this.resolve(f); }
-    }
-    if (f.role !== 'stick' || vertical === f.vertical) return;
-    f.vertical = vertical;
+    const dir = swipe(f.dir, dx, dy);
+    if (dir === f.dir) return;
+    if (f.role === 'extra') {
+      if (dir === undefined) return;
+      clearTimeout(f.timer);
+      const partner = f.partner;
+      f.partner = null;
+      if (partner) { partner.partner = null; partner.since = dir; }
+      if (!partner || this.jog()) { f.role = 'dead'; return; }
+    } else if (f.role !== 'pending' && f.role !== 'stick') return;
+    clearTimeout(f.timer);
+    f.role = 'stick';
+    f.dir = dir;
     this.update();
   }
 
   up(e) {
-    if (this.taps.delete(e.pointerId)) return this.keys.tap('fire', SIDE_SOURCE);
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
     this.fingers.delete(f.id);
     clearTimeout(f.timer);
-    if (this.chord?.fingers.includes(f)) {
+    if (f.role === 'pending') {
+      if (this.airborne()) this.keys.tap(f.side, SIDE_SOURCE);
+      else this.trigger();
+    } else if (f.role === 'extra' && f.partner) {
       f.lifted = true;
-      if (this.chord.fingers.every(g => g.lifted)) {
-        clearTimeout(this.chord.timer);
-        this.chord = null;
-        this.onChord();
+      if (f.partner.lifted) this.pairTap();
+    } else if (f.role === 'extra') {
+      this.trigger();
+    } else if (f.role === 'stick') {
+      const heir = this.live().find(g => g.role === 'extra' && !g.partner);
+      if (heir) {
+        clearTimeout(heir.timer);
+        heir.role = 'pending';
+        heir.timer = setTimeout(() => this.resolve(heir), Math.max(0, heir.at + SIDE_TAP_MS - performance.now()));
       }
-      return;
-    }
-    if (this.airborne() && f.role === 'pending') this.keys.tap(f.side, SIDE_SOURCE);
-    else if (f.role === 'pending') this.keys.tap(f.zone ?? 'fire', SIDE_SOURCE);
-    else if (f.role === 'stick' || f.role === 'button') {
-      const values = [...this.fingers.values()];
-      const button = !values.some(g => g.role === 'stick') && values.find(g => g.role === 'button');
-      if (button) button.role = 'stick';
       this.update();
     }
   }
 
   lift(e) {
-    this.taps.delete(e.pointerId);
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
-    if (this.chord?.fingers.includes(f)) this.breakChord();
     clearTimeout(f.timer);
+    if (f.partner) f.partner.partner = null;
     this.fingers.delete(f.id);
     this.update();
   }
@@ -680,92 +669,96 @@ export class SideTouch {
     this.update();
   }
 
-  // chord-timeout: one finger walks and the other is the button, as if pressed in turn
-  resolveChord() {
-    const { fingers, timer } = this.chord;
-    clearTimeout(timer);
-    this.chord = null;
-    if (fingers[0].jog) { for (const g of fingers) g.role = 'dead'; return; }
-    const [stick, button] = fingers.every(g => !g.lifted) ? fingers : [fingers.find(g => !g.lifted), null];
-    stick.role = 'stick';
-    if (button) button.role = 'button';
-    this.turnFirst();
-    this.fire(button ?? {});
+  // pair-hold: two still fingers open or close the menu; a finger that let go was a tap
+  pairHold(f) {
+    if (f.role !== 'extra') return;
+    const other = f.partner ?? this.live().find(g => g !== f);
+    if (f.partner?.lifted) {
+      f.partner = null;
+      this.settle(f);
+      return this.trigger();
+    }
+    if (!other || other.dir !== f.since) {
+      if (other) f.role = 'dead';
+      else this.settle(f);
+      return;
+    }
+    for (const g of this.fingers.values()) { clearTimeout(g.timer); g.role = 'dead'; }
+    this.update();
+    this.onChord();
+  }
+
+  settle(f) {
+    if (this.jog()) f.role = 'jog';
+    else this.resolve(f);
+  }
+
+  pairTap() {
+    const facing = this.jog() ? null : this.facing();
+    if (facing) this.keys.tap(facing > 0 ? 'left' : 'right', SIDE_SOURCE);
+    else this.keys.tap('fire', SIDE_SOURCE);
+  }
+
+  stickKey() {
+    const stick = [...this.fingers.values()].find(f => f.role === 'stick');
+    return stick && (stick.dir === undefined ? stick.side : stick.dir);
+  }
+
+  // down-trigger: fire with down is the C64 menu shortcut, which touch has by two-finger hold
+  trigger() {
+    const key = this.stickKey();
+    if (key === 'down') return;
+    this.turn = null;
+    const facing = this.facing();
+    if (SIGN[key] && facing && facing !== SIGN[key]) {
+      const queued = this.keys.events.findLast(e => e.down && e.source === SIDE_SOURCE && e.keys.includes(key));
+      if (!queued) this.keys.gesture([key], SIDE_SOURCE);
+      this.turn = queued ? queued.id : this.keys.sequence;
+    }
+    this.unfired = true;
     this.update();
   }
 
-  // button-tap: one press per touch, so a held button leaps once and then brakes
-  fire(f) {
-    this.unfired = this.queued(this.turn) ? f : null;
-    if (this.unfired) return;
+  // turn-first: a turning read spends the button, so the leap needs a read after it
+  fire() {
+    if (this.queued(this.turn)) return;
+    this.unfired = false;
     this.keys.tap('fire', SIDE_SOURCE);
-    f.fired = this.keys.sequence;
   }
 
   queued(id) {
     return id != null && this.keys.events.some(e => e.id === id);
   }
 
-  braked() {
-    const button = [...this.fingers.values()].find(f => f.role === 'button');
-    return !!button && button !== this.unfired && !this.queued(button.fired);
-  }
-
-  // turn-first: a turning read spends the button, so the leap needs a read after it
-  turnFirst() {
-    const stick = [...this.fingers.values()].find(f => f.role === 'stick');
-    const facing = this.facing();
-    if (stick && !stick.vertical && facing && facing !== (stick.side === 'left' ? -1 : 1)) {
-      this.keys.gesture([stick.side], SIDE_SOURCE);
-      this.turn = this.keys.sequence;
-    }
-  }
-
-  breakChord() {
-    clearTimeout(this.chord.timer);
-    for (const g of this.chord.fingers) if (g.role === 'pending') g.role = g.jog ? 'jog' : 'dead';
-    this.chord = null;
-  }
-
-  wanted() {
-    const keys = new Set();
-    if (this.airborne()) {
-      const steer = [...this.fingers.values()].filter(f => f.role !== 'dead' && f.role !== 'button').at(-1);
-      if (steer) keys.add(steer.side);
-      return keys;
-    }
-    const stick = !this.braked() && [...this.fingers.values()].find(f => f.role === 'stick');
-    if (stick) {
-      let key = stick.vertical ?? stick.side;
-      // ladder-hold: the game ignores sideways on a ladder, so climb on until a side opens
-      if (key === stick.side && this.onLadder()) key = this.lastClimb;
-      if (key === 'up' || key === 'down') this.lastClimb = key;
-      keys.add(key);
-    }
-    return keys;
-  }
-
   update() {
-    if (this.unfired && !this.queued(this.turn)) this.fire(this.unfired);
-    const keys = this.wanted();
+    if (this.unfired) this.fire();
+    const key = this.stickKey();
+    const keys = new Set(key ? [key] : []);
     for (const k of this.held) if (!keys.has(k)) this.keys.release(k, SIDE_SOURCE);
     for (const k of keys) if (!this.held.has(k)) this.keys.press(k, SIDE_SOURCE);
     this.held = keys;
-    const steering = [...this.fingers.values()].some(f => f.role === 'stick');
-    if (steering && !this.poll) this.poll = setTimeout(() => { this.poll = null; this.update(); }, STEER_POLL_MS);
+    if ((key || this.unfired) && !this.poll) this.poll = setTimeout(() => { this.poll = null; this.update(); }, STEER_POLL_MS);
   }
 
   cancel() {
     clearTimeout(this.poll);
     this.poll = null;
-    if (this.chord) clearTimeout(this.chord.timer);
-    this.chord = null;
-    this.unfired = null;
-    this.taps.clear();
+    this.unfired = false;
     for (const f of this.fingers.values()) { clearTimeout(f.timer); f.role = 'dead'; }
     this.held = new Set();
     this.keys.reset(SIDE_SOURCE);
   }
+}
+
+// swipe: vertical outranks sideways; back near the start centres a swiped finger
+function swipe(dir, dx, dy) {
+  if (dy <= -SLIDE) return 'up';
+  if (dy >= SLIDE) return 'down';
+  if ((dir === 'up' && dy <= -SLIDE / 2) || (dir === 'down' && dy >= SLIDE / 2)) return dir;
+  if (Math.abs(dx) >= SLIDE) return dx > 0 ? 'right' : 'left';
+  if ((dir === 'left' && dx <= -SLIDE / 2) || (dir === 'right' && dx >= SLIDE / 2)) return dir;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < SLIDE / 2) return dir === undefined ? undefined : null;
+  return dir;
 }
 
 function sameChoice(a, b) {

@@ -1,4 +1,4 @@
-"""Portrait touch reaches the inventory; landscape touch works only beside the picture."""
+"""Portrait touch reaches the inventory; landscape touch splits the screen into two halves."""
 from browser_helpers import browser_page, until, session_eval
 
 
@@ -36,14 +36,11 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     def chord():
         touch('touchStart', left)
         touch('touchStart', left, right)
+        page.clock.run_for(250)
         touch('touchEnd')
 
     session_eval(page, 's => Object.assign(s.state.player, {col: 26, row: 15})')
     page.touchscreen.tap(box['x'] + box['width'] * 26.5 / 40, box['y'] + box['height'] * 14.5 / 25)
-    page.clock.run_for(1000)
-    assert session_eval(page, 's => s.state.player.indoors'), 'the picture ignores touch in landscape'
-
-    side_tap(left)
     until(page, 's => !s.state.player.indoors')
     assert session_eval(page, 's => s.state.room.code') == 'M5'
 
@@ -142,7 +139,8 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     top = session_eval(page, 's => [s.state.player.row, s.state.player.col]')
     page.clock.run_for(1500)
     assert session_eval(page, 's => [s.state.player.row, s.state.player.col]') == top, 'a slide up stands at the top of the ladder'
-    touch('touchMove', left)
+    touch('touchEnd', left)
+    touch('touchStart', left)
     until(page, '(s, col) => s.state.player.col < col - 2', arg=col)
     touch('touchEnd', left)
 
@@ -161,9 +159,10 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, 's => s.state.room.code === "E3"')
     touch('touchEnd', right)
     page.clock.run_for(300)
-    col = session_eval(page, 's => s.state.player.col')
+    spot = session_eval(page, 's => [s.state.player.row, s.state.player.col]')
     touch('touchStart', left)
-    until(page, '(s, col) => s.state.player.col < col - 1', arg=col)
+    page.clock.run_for(1000)
+    assert session_eval(page, 's => [s.state.player.row, s.state.player.col]') == spot, 'a plain hold mid-ladder waits, as on the C64'
     touch('touchEnd', left)
 
 with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
@@ -172,9 +171,13 @@ with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_
     page.clock.run_for(500)
     box = page.locator('#screen').bounding_box()
     assert box
-    page.touchscreen.tap(box['x'] + 10, box['y'] + box['height'] - 10)
+    cdp = page.context.new_cdp_session(page)
+    panel = {'x': box['x'] + 10, 'y': box['y'] + box['height'] - 40}
+    for kind, y in [('touchStart', panel['y']), ('touchMove', panel['y'] + 30)]:
+        cdp.send('Input.dispatchTouchEvent', {'type': kind, 'touchPoints': [{**panel, 'y': y}]})
     until(page, 's => s.state.player.crawling')
+    cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
     page.clock.run_for(300)
-    assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a bottom side tap over the panel crouches without the menu'
+    assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a swipe down over the panel crouches without the menu'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb and stand at the top, side hold on a ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')

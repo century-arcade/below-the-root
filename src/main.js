@@ -5,7 +5,7 @@ import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
 import { itemChoiceAt, highlightItemChoice } from './inventory.js';
 import { Keyboard, Pointer, SideTouch, Gamepad, isEditing } from './input.js';
-import { cell, doorNumber, isLadderCentre } from './world.js';
+import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { CLIPS, loadClip, Speaker } from './audio.js';
@@ -239,15 +239,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     airborne: () => !!(state.player?.gliding || state.player?.leaping || state.player?.fallen > 0) && !state.title && !state.demo,
-    gliding: () => !!state.player?.gliding && !state.title && !state.demo,
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
-    onLadder: () => {
-      const p = state.player;
-      return !!p && !state.title && !state.demo && isLadderCentre(state, cell(state, p.col, p.row))
-        && isLadderCentre(state, cell(state, p.col, p.row + 1));
-    },
-    anywhere: () => !canOpenCommandMenu(state) && !state.title && !state.commandMenuOpen && !state.pointer
-      && (!state.itemPicker || state.itemPicker.readOnly),
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
       else if (state.commandMenuOpen || canOpenCommandMenu(state)) commandMenu(!!state.commandMenuOpen);

@@ -111,6 +111,33 @@ already-highlighted choice confirms it; a hold or drag never confirms.
 Outside the choices does nothing. Keyboard and gamepad navigation continue
 from the pointer highlight, and Escape and F retain their usual meanings.
 
+## Fullscreen and landscape touch
+
+In fullscreen and landscape play, touch replaces the picture gestures above
+with a virtual joystick and trigger. The screen splits into left and right
+halves. The touch layer does not look at game state except where listed
+below; the game decides what a held direction or a trigger means, as it does
+for a real joystick. Releasing the stick centres it, which stops a walk but
+leaves a glide alone.
+
+| Gesture | Play | Menus, choosers and title |
+| --- | --- | --- |
+| One finger held without a swipe | After 120 ms the stick points to that finger's half; in the air it points at once | Nothing |
+| Swipe 24 px while holding | The stick points the swipe's way. A vertical part outranks a sideways one. A new swipe re-points it; back within 12 px of the start centres it | Steps once per 24 px |
+| Lift the stick finger | Stick centred | Nothing |
+| Lone quick tap | Trigger on the ground; in the air a nudge toward that half | Confirm |
+| Second-finger tap while the stick is held | Trigger when it lifts; nothing while the stick points down | Confirm |
+| Two fingers held 200 ms, neither swiping | Open the command menu (cancel an item prompt) | Close it |
+| Two quick taps landing within 80 ms | Turn the figure around (trigger outside free play) | Confirm |
+
+A trigger with the stick pointing behind the figure first lets the game read
+the turn, then sends the trigger, so the leap is not spent on turning. Of two
+fingers landing together, one tapped and one held, the held one becomes the
+stick and the tap triggers. Lifting the stick hands it to a second finger
+still down. A plain hold mid-ladder points sideways, which the game ignores
+until the figure can step off; swipe up or down to climb. Sideways plus the
+trigger leaps off a ladder.
+
 ## Recording and verification
 
 Input delivery must remain independent of rendering and consumer read
