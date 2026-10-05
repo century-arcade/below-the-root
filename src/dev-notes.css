@@ -1,7 +1,4 @@
-.bench-notes { position: relative; flex: none; width: 190px; height: 255px; zoom: var(--z); }
-.bench-strip .bench-notes .tray-item { position: absolute; zoom: 1; }
-.bench-notes .tray-note { bottom: 0; left: 35px; z-index: 1; }
-.tray-dev-notes { bottom: 175px; left: 0; width: 190px; height: 80px; --tilt: -4deg; color: #344b3b; }
+.tray-dev-notes { width: 190px; height: 80px; --tilt: -4deg; color: #344b3b; }
 .tray-dev-notes::after { content: none; }
 .greenbar-stack-sheet {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -35,6 +32,7 @@
 .greenbar-paper h2 { margin: 0 0 22px; font: bold 16px/22px 'Courier New', monospace; }
 .greenbar-paper article { margin: 0 0 22px; }
 .greenbar-paper time { font-weight: bold; }
+.greenbar-paper a { color: inherit; }
 .note-label { font-weight: normal; font-style: italic; }
 .greenbar-paper p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 899px) {

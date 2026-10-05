@@ -3,12 +3,14 @@
 <div class="bench-stage">
 <section id="box" data-desk="outside" aria-label="The box">
   <div class="book-spread">
+    <button type="button" data-book-first aria-label="First page" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
     <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
     <a data-book-image href="/assets/box/front.jpg" target="_blank" rel="noopener" aria-label="Turn the box">
       <img alt="" decoding="async">
       <img src="/assets/box/front.jpg" width="454" height="599" alt="" decoding="async">
     </a>
     <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+    <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
   </div>
 </section>
 <section id="note" data-desk="note" hidden aria-label="Curator's Note">
@@ -16,21 +18,25 @@
 </section>
 <section id="manual" data-desk="manual" hidden aria-label="Original manual">
   <div class="book-spread">
+    <button type="button" data-book-first aria-label="First page" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
     <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
-    <a data-book-image href="/assets/manual/01.webp" target="_blank" rel="noopener" aria-label="Turn the page">
+    <a data-book-image href="/assets/manual/03.webp" target="_blank" rel="noopener" aria-label="Turn the page">
       <img alt="" loading="lazy" decoding="async">
-      <img src="/assets/manual/01.webp" alt="Original Below the Root manual, cover" loading="lazy" decoding="async">
+      <img src="/assets/manual/03.webp" alt="Original Below the Root manual, page 1" loading="lazy" decoding="async">
     </a>
     <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+    <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
   </div>
-  <output class="page-number" aria-live="polite">Page 0 / 18</output>
+  <output class="page-number" aria-live="polite">Page 1 / 18</output>
 </section>
 <section id="dev-notes" class="book-spread" data-desk="dev-notes" hidden aria-label="Dev notes">
+  <button type="button" data-paper-first aria-label="First day" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
   <button type="button" data-paper-previous aria-label="Previous day" aria-keyshortcuts="ArrowLeft" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
   <div class="greenbar-viewport" tabindex="0" role="region" aria-label="Dated development prompts">
     <div class="greenbar-paper">{{devNotes}}</div>
   </div>
   <button type="button" data-paper-next aria-label="Next day" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+  <button type="button" data-paper-last aria-label="Last day" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
 </section>
 <section id="paper-map" data-desk="map" hidden aria-label="World map" aria-keyshortcuts="M Tab">
   <div id="map-viewport"><div id="map-sheet" class="map-sheet"><div id="map-grid" class="map-grid"></div></div></div>
@@ -42,7 +48,7 @@
 </div>
 <div class="bench-strip">
   <button type="button" class="tray-item tray-closed" data-desk-go="outside" aria-label="Box"><span class="closed-box"><img src="/assets/box/front.jpg" width="454" height="599" alt=""></span></button>
-  <button type="button" class="tray-item tray-manual" data-desk-go="manual" aria-label="Game Manual"><img src="/assets/manual/01.webp" width="1400" height="1880" loading="lazy" alt=""></button>
+  <button type="button" class="tray-item tray-manual" data-desk-go="manual" aria-label="Game Manual"><img src="/assets/manual/03.webp" width="1400" height="1880" loading="lazy" alt=""></button>
   <button type="button" class="tray-item tray-map" data-desk-go="map" aria-label="World Map"><img src="/assets/box/map.png" width="2656" height="976" loading="lazy" alt=""></button>
   <button type="button" class="tray-item tray-disk" data-desk-go="play" aria-label="Play Game"><svg viewBox="0 0 104 124" aria-hidden="true">
     <g transform="translate(2 0)">
@@ -60,10 +66,8 @@
     <rect x="0" y="44" width="38" height="2" fill="#f6f2e8"/>
     <rect x="66" y="44" width="38" height="2" fill="#f6f2e8"/>
   </svg></button>
-  <div class="bench-notes">
-    <button type="button" class="tray-item tray-dev-notes" data-desk-go="dev-notes" aria-label="Dev notes" title="Dev notes"><span class="greenbar-stack-sheet"><span>DEV NOTES</span></span></button>
-    <button type="button" class="tray-item tray-note" data-desk-go="note" aria-label="Curator's Note"><span class="booklet-cover"><img src="/assets/box/front.jpg" width="454" height="599" alt=""></span></button>
-  </div>
+  <button type="button" class="tray-item tray-note" data-desk-go="note" aria-label="Curator's Note"><span class="booklet-cover"><span>Century<br>Arcade</span></span></button>
+  <button type="button" class="tray-item tray-dev-notes" data-desk-go="dev-notes" aria-label="Dev notes" title="Dev notes"><span class="greenbar-stack-sheet"><span>DEV NOTES</span></span></button>
 </div>
 </div>
 <section id="play" aria-label="Play Below the Root">

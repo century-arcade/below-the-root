@@ -47,5 +47,5 @@ bursts = 1 + sum(b - a > GAP_MINUTES * 60 for a, b in zip(times, times[1:]))
 
 detail = {'tokens': totals, 'by_harness': by_harness, 'human_prompts': len(times), 'gap_minutes': GAP_MINUTES}
 print(json.dumps(detail, indent=1), file=sys.stderr)
-print(f"Human time: {round(active / 3600)} hours ({bursts} sittings); "
+print(f"Human time: {round(active / 3600)} hours ({bursts} sittings)\n"
       f"LLM tokens: {sum(totals.values()) / 1e9:.1f} billion ({(totals['input'] + totals['cache_write']) / 1e6:.0f}m uncached, {totals['output'] / 1e6:.0f}m output)")

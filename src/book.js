@@ -4,6 +4,8 @@ export function setupBook(root, spreads, caption = () => '') {
   const link = root.querySelector('[data-book-image]');
   const previous = root.querySelector('[data-book-previous]');
   const next = root.querySelector('[data-book-next]');
+  const first = root.querySelector('[data-book-first]');
+  const final = root.querySelector('[data-book-last]');
   const status = root.querySelector('output');
   const last = spreads.length - 1;
   let current = 0;
@@ -28,6 +30,7 @@ export function setupBook(root, spreads, caption = () => '') {
       if (placed[side] !== stamp) return;
       image.src = page.src;
       image.alt = page.alt;
+      image.className = page.className ?? '';
       image.style.visibility = '';
     });
   }
@@ -43,7 +46,7 @@ export function setupBook(root, spreads, caption = () => '') {
     Object.assign(leaf.style, { left: `${page.offsetLeft}px`, top: `${page.offsetTop}px`,
       width: `${page.offsetWidth}px`, height: `${page.offsetHeight}px`,
       transformOrigin: departing ? 'left' : 'right' });
-    for (const face of [front, back]) leaf.append(Object.assign(new Image(), { src: face.src, alt: '', decoding: 'sync' }));
+    for (const face of [front, back]) leaf.append(Object.assign(new Image(), { src: face.src, alt: '', decoding: 'sync', className: face.className ?? '' }));
     link.append(leaf);
     const angle = departing ? -180 : 180;
     leaf.animate({ transform: ['perspective(2000px) rotateY(0deg)', `perspective(2000px) rotateY(${angle}deg)`] },
@@ -67,12 +70,14 @@ export function setupBook(root, spreads, caption = () => '') {
     }
     for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
     link.href = (pages[1] ?? pages[0]).src;
-    previous.disabled = current === 0;
-    next.disabled = current === last;
+    previous.disabled = first.disabled = current === 0;
+    next.disabled = final.disabled = current === last;
     if (status) status.textContent = caption(pages);
   }
   previous.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
+  first.addEventListener('click', () => show(0));
+  final.addEventListener('click', () => show(last));
   link.addEventListener('click', event => {
     if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
@@ -81,11 +86,11 @@ export function setupBook(root, spreads, caption = () => '') {
   });
   addEventListener('keydown', event => {
     if (root.hidden || event.metaKey || event.ctrlKey || event.altKey) return;
-    const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-    if (!step) return;
+    const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: last }[event.key];
+    if (target === undefined) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    show(current + step);
+    show(target);
   }, true);
   for (const type of ['keydown', 'keyup']) {
     root.addEventListener(type, event => event.stopPropagation());
@@ -93,12 +98,13 @@ export function setupBook(root, spreads, caption = () => '') {
   show(current);
 }
 
-const scanPage = scan => Math.max(0, scan - 2);
-const scanName = scan => ({ 1: 'cover', 2: 'inside cover' })[scan] ?? `page ${scanPage(scan)}`;
+const scanPage = scan => scan - 2;
+const DEPRECATED_PAGES = new Set([3, 4, 5, 6]);
 
-// Scans as printed: cover on the right, inside cover facing page 1, back cover on the left.
-export const MANUAL = Array.from({ length: 11 }, (_, i) => [2 * i, 2 * i + 1].map(scan => scan >= 1 && scan <= 20
-  ? { src: `/assets/manual/${String(scan).padStart(2, '0')}.webp`, alt: `Original Below the Root manual, ${scanName(scan)}`, page: scan === 2 ? null : scanPage(scan) }
+// Scans as printed: page 1 alone on the right, the back cover alone on the left.
+export const MANUAL = Array.from({ length: 10 }, (_, i) => [2 * i + 2, 2 * i + 3].map(scan => scan >= 3 && scan <= 20
+  ? { src: `/assets/manual/${String(scan).padStart(2, '0')}.webp`, alt: `Original Below the Root manual, page ${scanPage(scan)}`,
+    page: scanPage(scan), className: DEPRECATED_PAGES.has(scanPage(scan)) ? 'deprecated' : '' }
   : null));
 
 export function manualCaption(pages) {
