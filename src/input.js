@@ -1,6 +1,7 @@
 // Live consumers select delivery independently of recording/demo read kinds:
 // continuous: movement and held trigger (walking, jumping, gliding, REST);
 // steer: continuous movement with one trigger per press (pointing, spirit bell);
+// falling: continuous movement, leaving queued trigger presses for the landing;
 // press: ordered gestures (menus, choosers, pages, dialogue);
 // trigger: ordered fire only, leaving movement owned by its consumer (music/demo).
 // Sampled demo and replay levels retain their original edge/read contracts.
@@ -132,6 +133,7 @@ export class Keyboard {
   }
   read(policy = 'continuous') {
     const held = this.held();
+    const flowing = policy === 'continuous' || policy === 'falling';
     let event;
     if (policy === 'trigger') {
       // Music/demo interruption owns only triggers, never queued movement.
@@ -140,7 +142,7 @@ export class Keyboard {
     } else {
       while (this.events.length && !this.events[0].down) this.events.shift();
       event = this.events[0];
-      if (policy === 'continuous') {
+      if (flowing) {
         const keys = new Set(), presses = new Set();
         const sideways = held.has('left') !== held.has('right');
         while (this.events.length) {
@@ -151,6 +153,7 @@ export class Keyboard {
           // level-based recording format. Physical holds remain in sources.
           // sideways-fire: leaps and turns ignore the edge, and a gap would walk a step
           if (next.down && next.keys.includes('fire') && this.deliveredFire && !sideways) break;
+          if (next.down && next.keys.includes('fire') && policy === 'falling') break;
           this.events.shift();
           if (!next.down) continue;
           for (const key of next.keys) { keys.add(key); presses.add(`${next.source}:${key}`); }
@@ -179,10 +182,10 @@ export class Keyboard {
       }
     }
     if (pressed.has('fire')) movement.add('fire');
-    if (policy === 'continuous' && !pressed.has('fire')
+    if (flowing && !pressed.has('fire')
         && this.events.some(e => e.down && e.keys.includes('fire'))) movement.delete('fire');
     const fire = policy === 'steer' ? pressed.has('fire') : movement.has('fire');
-    if (policy === 'continuous') this.deliveredFire = fire;
+    if (flowing) this.deliveredFire = fire;
     return { ...axes(movement), fire, ...(policy === 'steer' ? { observed: true } : {}) };
   }
 }
@@ -585,7 +588,7 @@ export class SideTouch {
     const pending = live.find(g => g.role === 'pending');
     this.fingers.set(f.id, f);
     if (this.airborne() && !jog) {
-      f.role = 'stick';
+      f.role = live.some(g => g.role === 'stick' && g.side !== side) ? 'button' : 'stick';
       this.update();
     } else if (!live.length) {
       f.role = 'pending';
@@ -644,7 +647,12 @@ export class SideTouch {
       return;
     }
     if (this.airborne() && f.role === 'pending') this.keys.tap(f.side, SIDE_SOURCE);
-    else if (this.airborne()) this.update();
+    else if (this.airborne()) {
+      const values = [...this.fingers.values()];
+      const button = !values.some(g => g.role === 'stick') && values.find(g => g.role === 'button');
+      if (button) button.role = 'stick';
+      this.update();
+    }
     else if (f.role === 'pending') this.keys.tap(f.zone ?? 'fire', SIDE_SOURCE);
     else if (f.role === 'stick' || f.role === 'button') this.update();
   }
@@ -703,10 +711,10 @@ export class SideTouch {
     const keys = new Set();
     const button = [...this.fingers.values()].some(f => f.role === 'button');
     if (this.airborne()) {
-      const sides = new Set([...this.fingers.values()].filter(f => f.role !== 'dead').map(f => f.side));
+      const sides = new Set([...this.fingers.values()].filter(f => f.role !== 'dead' && f.role !== 'button').map(f => f.side));
       if (sides.size === 1) keys.add([...sides][0]);
-      // fall-button: a leap's held button still opens the glide once it falls
-      else if (button) keys.add('fire');
+      // fall-button: a held button opens the glide, or leaps from the landing
+      if (button) keys.add('fire');
       return keys;
     }
     const stick = [...this.fingers.values()].find(f => f.role === 'stick');

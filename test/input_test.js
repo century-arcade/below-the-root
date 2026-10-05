@@ -264,7 +264,7 @@ test("while gliding, touching only one side faces that way at once", async t => 
   assert.equal(keys.read().dx, -1);
   model.airborne = true;
   send('pointerdown', RIGHT, 100, 2);
-  assert.deepEqual(keys.read(), IDLE, 'both sides leave the glide as it is');
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true }, 'the second side is the button; the first still steers');
   send('pointerup', LEFT);
   assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false }, 'the remaining side turns at once');
   send('pointerup', RIGHT, 100, 2);
@@ -274,6 +274,19 @@ test("while gliding, touching only one side faces that way at once", async t => 
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'a quick tap turns without pressing the button');
   advance(300);
   assert.deepEqual(keys.read(), IDLE);
+});
+
+test("while falling with a side held, a tap on the other side is the button", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  send('pointerdown', LEFT);
+  advance(130);
+  keys.read();
+  model.airborne = true;
+  send('pointerdown', RIGHT, 100, 2);
+  assert.deepEqual(keys.read('falling'), { dx: -1, dy: 0, fire: false }, 'the side stays held and the press waits');
+  send('pointerup', RIGHT, 100, 2);
+  model.airborne = false;
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true }, 'the landing read leaps');
 });
 
 test("while falling, a side tap or hold steers that way at once", async t => {
@@ -305,7 +318,7 @@ test("a leap's held button stays held when the leap becomes a fall", async t => 
   keys.read();
   model.airborne = true;
   advance(60);
-  assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true });
 });
 
 test("the top of a side stands without walking; the bottom is an ordinary side", async t => {

@@ -9,6 +9,7 @@ import { spend } from './clock.js';
 import { carriedOf, destroy } from './inventory.js';
 import { SFX, sfx } from './audio.js';
 
+const KNOCKDOWN_FALL = 6;
 const FRAME = {
   idle: (f) => (f < 0 ? 0 : 3),
   walk: (f, alt) => (f < 0 ? 1 : 4) + alt,
@@ -84,7 +85,7 @@ export function step(state) {
     return;
   }
   if (isSupport(state, s.floor) && p.fallen > 0) {
-    if (p.fallen >= 6) return startKnockdown(state);
+    if (p.fallen >= KNOCKDOWN_FALL) return startKnockdown(state);
     sfx(state, SFX.footA);
     p.fallen = 0;
   }
@@ -92,9 +93,17 @@ export function step(state) {
   if (p.knockdown) return knockdownStep(state);
   if (p.leaping) return leapStep(state, s);
   if (p.gliding) return glideStep(state, s);
-  const input = state.input.read('s');
+  const input = state.input.read('s', fallPolicy(state, s));
   if (input.fire) return fireHeld(state, s, input);
   return fireFree(state, s, input);
+}
+
+// fall-tap: a press the fall would ignore waits for a landing that can leap
+function fallPolicy(state, s) {
+  const p = state.player;
+  if (isSupport(state, s.floor) || p.fallen >= KNOCKDOWN_FALL - 1) return 'continuous';
+  const glides = p.fallen >= 2 && !p.glideInhibited && carriedOf(state, CLASS.SHUBA);
+  return glides ? 'continuous' : 'falling';
 }
 
 function fireHeld(state, s, input) {

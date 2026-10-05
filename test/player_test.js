@@ -1,6 +1,6 @@
 import { enterRoom } from '../src/world.js';
 import { newState, startQuest } from '../src/game.js';
-import { IDLE } from '../src/input.js';
+import { IDLE, Keyboard } from '../src/input.js';
 import { loadTestData, stick } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -98,4 +98,29 @@ test('a sideways push without a shuba keeps falling', async () => {
     assert.equal(state.player.gliding, false);
     assert.equal(state.player.fallen, fallen);
   }
+});
+
+test('a button tap during a leap that lands lower leaps again from the landing', async () => {
+  const data = await loadTestData();
+  const keys = new Keyboard({ addEventListener() {} });
+  const key = (name, up = false) => keys.map({ key: name, code: name, repeat: false }, up);
+  const state = newState(data, { pace: 5, read: (kind, policy) => keys.read(policy) }, { rng: () => 0.5 });
+  startQuest(state, data.characters[0]);
+  enterRoom(state, data.roomByCode.get('86'), 12, 11);
+  const p = state.player;
+  p.facing = -1;
+  p.frame = idleFrame(p);
+  key('ArrowLeft'); key('Enter'); key('Enter', true);
+  step(state);
+  assert.ok(p.leaping);
+  key('Enter'); key('Enter', true);
+  let fell = false;
+  for (let i = 0; i < 20 && !(fell && p.leaping); i += 1) {
+    step(state);
+    fell ||= p.fallen > 0;
+    assert.equal(p.stride, 0, 'no step between the leaps');
+  }
+  assert.ok(fell, 'the first leap ends in a fall');
+  assert.ok(p.leaping, 'the queued tap leaps from the landing');
+  assert.equal(p.leapPhase, 1);
 });
