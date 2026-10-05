@@ -37,12 +37,13 @@ export function renderDevNotes(prompts) {
   const escape = text => text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const pacific = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' });
   const days = new Map();
-  for (const { timestamp, text } of prompts) {
+  for (const { timestamp, text, label } of prompts) {
     const date = new Date(timestamp);
     const { year, month, day: dayOfMonth, hour, minute, timeZoneName } = Object.fromEntries(pacific.formatToParts(date).map(part => [part.type, part.value]));
     const day = `${year}-${month}-${dayOfMonth}`;
     if (!days.has(day)) days.set(day, []);
-    days.get(day).push(`<article><time datetime="${date.toISOString()}">${hour}:${minute} ${timeZoneName}</time><p>${escape(text)}</p></article>`);
+    const tag = ['bug', 'design'].includes(label) ? ` <em class="note-label">(${label})</em>` : '';
+    days.get(day).push(`<article><time datetime="${date.toISOString()}">${hour}:${minute} ${timeZoneName}</time>${tag}<p>${escape(text)}</p></article>`);
   }
   return '<h1>Dev notes</h1>' + [...days].map(([day, entries]) =>
     `<section class="greenbar-day" data-paper-day="${day}" aria-label="${day}"><h2>${day}</h2>${entries.join('\n')}</section>`).join('\n');

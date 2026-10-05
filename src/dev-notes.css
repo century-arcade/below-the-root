@@ -33,6 +33,7 @@
 .greenbar-paper h2 { margin: 0 0 22px; font: bold 16px/22px 'Courier New', monospace; }
 .greenbar-paper article { margin: 0 0 22px; }
 .greenbar-paper time { font-weight: bold; }
+.note-label { font-weight: normal; font-style: italic; }
 .greenbar-paper p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 899px) {
   #desk[data-stage='dev-notes'] .bench-stage { flex: 1; }
