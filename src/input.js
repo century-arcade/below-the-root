@@ -532,7 +532,6 @@ const CHORD_GAP_MS = 80;
 const SLIDE = 24;
 const STEER_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
-const SIDE_FIRE = 'touch:fire';
 
 // Fullscreen and landscape touch: the outer eighths steer, their top quarters only climb;
 // the middle can only tap.
@@ -556,6 +555,7 @@ export class SideTouch {
     this.fingers = new Map();
     this.taps = new Set();
     this.chord = null;
+    this.unfired = null;
     this.held = new Set();
     surface.addEventListener('pointerdown', e => this.down(e));
     surface.addEventListener('pointermove', e => this.move(e));
@@ -596,6 +596,7 @@ export class SideTouch {
     this.fingers.set(f.id, f);
     if (this.airborne() && !jog) {
       f.role = !this.gliding() && live.some(g => g.role === 'stick' && g.side !== side) ? 'button' : 'stick';
+      if (f.role === 'button') this.fire(f);
       this.update();
     } else if (!live.length) {
       f.role = 'pending';
@@ -611,6 +612,7 @@ export class SideTouch {
       if (pending && !this.chord) { clearTimeout(pending.timer); pending.role = 'stick'; }
       f.role = 'button';
       this.turnFirst();
+      this.fire(f);
       this.update();
     }
   }
@@ -694,8 +696,25 @@ export class SideTouch {
     stick.role = 'stick';
     if (button) button.role = 'button';
     this.turnFirst();
+    this.fire(button ?? {});
     this.update();
-    if (fingers.some(g => g.lifted)) this.keys.tap('fire', SIDE_SOURCE);
+  }
+
+  // button-tap: one press per touch, so a held button leaps once and then brakes
+  fire(f) {
+    this.unfired = this.queued(this.turn) ? f : null;
+    if (this.unfired) return;
+    this.keys.tap('fire', SIDE_SOURCE);
+    f.fired = this.keys.sequence;
+  }
+
+  queued(id) {
+    return id != null && this.keys.events.some(e => e.id === id);
+  }
+
+  braked() {
+    const button = [...this.fingers.values()].find(f => f.role === 'button');
+    return !!button && button !== this.unfired && !this.queued(button.fired);
   }
 
   // turn-first: a turning read spends the button, so the leap needs a read after it
@@ -704,6 +723,7 @@ export class SideTouch {
     const facing = this.facing();
     if (stick && !stick.vertical && facing && facing !== (stick.side === 'left' ? -1 : 1)) {
       this.keys.gesture([stick.side], SIDE_SOURCE);
+      this.turn = this.keys.sequence;
     }
   }
 
@@ -715,15 +735,12 @@ export class SideTouch {
 
   wanted() {
     const keys = new Set();
-    const button = [...this.fingers.values()].some(f => f.role === 'button');
     if (this.airborne()) {
       const steer = [...this.fingers.values()].filter(f => f.role !== 'dead' && f.role !== 'button').at(-1);
       if (steer) keys.add(steer.side);
-      // fall-button: a held button opens the glide, or leaps from the landing
-      if (button) keys.add('fire');
       return keys;
     }
-    const stick = [...this.fingers.values()].find(f => f.role === 'stick');
+    const stick = !this.braked() && [...this.fingers.values()].find(f => f.role === 'stick');
     // slide-off-ladder: the game reads the slide once (crouch, stand), then the hold walks
     const unread = stick?.slid == null || this.keys.consumed < stick.slid;
     if (stick) {
@@ -734,14 +751,14 @@ export class SideTouch {
       if (key === 'up' || key === 'down') this.lastClimb = key;
       keys.add(key);
     }
-    if (button) keys.add('fire');
     return keys;
   }
 
   update() {
+    if (this.unfired && !this.queued(this.turn)) this.fire(this.unfired);
     const keys = this.wanted();
-    for (const k of this.held) if (!keys.has(k)) this.keys.release(k, k === 'fire' ? SIDE_FIRE : SIDE_SOURCE);
-    for (const k of keys) if (!this.held.has(k)) this.keys.press(k, k === 'fire' ? SIDE_FIRE : SIDE_SOURCE);
+    for (const k of this.held) if (!keys.has(k)) this.keys.release(k, SIDE_SOURCE);
+    for (const k of keys) if (!this.held.has(k)) this.keys.press(k, SIDE_SOURCE);
     this.held = keys;
     const slid = [...this.fingers.values()].find(f => f.role === 'stick' && f.vertical && f.slid == null);
     if (slid) slid.slid = this.keys.sequence;
@@ -754,11 +771,11 @@ export class SideTouch {
     this.poll = null;
     if (this.chord) clearTimeout(this.chord.timer);
     this.chord = null;
+    this.unfired = null;
     this.taps.clear();
     for (const f of this.fingers.values()) { clearTimeout(f.timer); f.role = 'dead'; }
     this.held = new Set();
     this.keys.reset(SIDE_SOURCE);
-    this.keys.reset(SIDE_FIRE);
   }
 }
 
