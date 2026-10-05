@@ -405,7 +405,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let lastWheel = 0;
   mapViewport.addEventListener('wheel', e => {
     e.preventDefault();
-    if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
+    if (e.shiftKey || e.altKey || e.metaKey) {
       mapViewport.scrollLeft += wheelPixels(e.deltaY || e.deltaX, e.deltaMode, mapViewport.clientWidth);
       return;
     }
