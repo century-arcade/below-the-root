@@ -21,8 +21,8 @@
 .greenbar-paper {
   position: relative; color: #344b3b; background: #f2efdc; font: 14px/22px 'Courier New', monospace; text-shadow: .35px 0 currentColor;
 }
-.greenbar-day {
-  padding: 22px 48px;
+.greenbar-day { padding: 22px 48px; }
+.greenbar-intro, .greenbar-day {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='44'%3E%3Cpath fill='%23dbe7ce' d='M0 0h20v22H0z'/%3E%3C/svg%3E");
 }
 .greenbar-day + .greenbar-day { border-top: 1px dashed #a3b397; }
