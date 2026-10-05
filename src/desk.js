@@ -16,8 +16,7 @@ export function setupDesk(desk) {
       tray.classList.toggle('taken', tray.dataset.deskGo === stage);
     }
     api.onChange(stage);
-    paper.setActive(stage === 'dev-notes');
-    if (stage === 'dev-notes') items.get(stage).querySelector('.greenbar-viewport').focus({ preventScroll: true });
+    if (stage === 'dev-notes') paper.show();
   }
   function goBack() {
     if (stage !== 'outside') show('outside');

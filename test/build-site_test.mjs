@@ -107,19 +107,19 @@ test('the renderer escapes metadata while preserving HTML fragments', () => {
 test('development prompts are dated literal text, never executable HTML or Markdown', () => {
   const html = renderDevNotes([{ timestamp: '2026-10-05T01:02:03Z', text: '<script>alert("x")</script>\n**original words** & $&' }]);
   assert.match(html, /datetime="2026-10-05T01:02:03.000Z"/);
-  assert.match(html, /data-paper-day="2026-10-05"/);
-  assert.match(html, /<h2>2026-10-05<\/h2>/);
-  assert.match(html, />01:02 UTC<\/time>/);
+  assert.match(html, /data-paper-day="2026-10-04"/);
+  assert.match(html, /<h2>2026-10-04<\/h2>/);
+  assert.match(html, />18:02 PDT<\/time>/);
   assert.ok(html.includes('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;\n**original words** &amp; $&'));
   assert.doesNotMatch(html, /<script>|<strong>/);
 });
 
-test('development paper groups prompts at UTC day changes, not individual messages', () => {
+test('development paper groups prompts at Pacific day changes, not individual messages', () => {
   const html = renderDevNotes([
-    { timestamp: '2026-10-04T23:59:00Z', text: 'first' },
-    { timestamp: '2026-10-04T23:59:30Z', text: 'second' },
-    { timestamp: '2026-10-05T00:00:00Z', text: 'third' },
-    { timestamp: '2026-10-04T20:00:00-07:00', text: 'fourth' },
+    { timestamp: '2026-10-05T06:59:00Z', text: 'first' },
+    { timestamp: '2026-10-04T23:59:30-07:00', text: 'second' },
+    { timestamp: '2026-10-05T07:00:00Z', text: 'third' },
+    { timestamp: '2026-10-05T20:00:00-07:00', text: 'fourth' },
   ]);
   const days = [...html.matchAll(/<section[^>]*data-paper-day="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g)];
   assert.deepEqual(days.map(match => match[1]), ['2026-10-04', '2026-10-05']);

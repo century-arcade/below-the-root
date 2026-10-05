@@ -35,12 +35,14 @@ export function renderPage(template, metadata, fragments = {}) {
 
 export function renderDevNotes(prompts) {
   const escape = text => text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+  const pacific = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' });
   const days = new Map();
   for (const { timestamp, text } of prompts) {
-    const date = new Date(timestamp).toISOString();
-    const day = date.slice(0, 10);
+    const date = new Date(timestamp);
+    const { year, month, day: dayOfMonth, hour, minute, timeZoneName } = Object.fromEntries(pacific.formatToParts(date).map(part => [part.type, part.value]));
+    const day = `${year}-${month}-${dayOfMonth}`;
     if (!days.has(day)) days.set(day, []);
-    days.get(day).push(`<article><time datetime="${date}">${date.slice(11, 16)} UTC</time><p>${escape(text)}</p></article>`);
+    days.get(day).push(`<article><time datetime="${date.toISOString()}">${hour}:${minute} ${timeZoneName}</time><p>${escape(text)}</p></article>`);
   }
   return '<h1>Dev notes</h1>' + [...days].map(([day, entries]) =>
     `<section class="greenbar-day" data-paper-day="${day}" aria-label="${day}"><h2>${day}</h2>${entries.join('\n')}</section>`).join('\n');

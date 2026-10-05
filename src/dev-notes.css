@@ -1,8 +1,7 @@
-.bench-notes { position: relative; flex: none; width: 190px; height: 250px; zoom: var(--z); }
+.bench-notes { position: relative; flex: none; width: 190px; height: 255px; zoom: var(--z); }
 .bench-strip .bench-notes .tray-item { position: absolute; zoom: 1; }
 .bench-notes .tray-note { bottom: 0; left: 35px; z-index: 1; }
-.tray-dev-notes { bottom: 180px; left: 0; width: 190px; height: 70px; --tilt: -4deg; color: #344b3b; }
-.tray-dev-notes .greenbar-stack-sheet { bottom: -70px; }
+.tray-dev-notes { bottom: 175px; left: 0; width: 190px; height: 80px; --tilt: -4deg; color: #344b3b; }
 .tray-dev-notes::after { content: none; }
 .greenbar-stack-sheet {
   position: absolute; inset: 0; display: grid; place-items: center;

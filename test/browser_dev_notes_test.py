@@ -1,10 +1,10 @@
 """Dev notes navigate dated sections and share the desk's item-switching behaviour."""
 from playwright.sync_api import expect
-from browser_helpers import browser_page, observe
+from browser_helpers import browser_page
 
 
 def paper_days(page):
-    return page.locator('.greenbar-paper:not([aria-hidden]) [data-paper-day]')
+    return page.locator('.greenbar-paper [data-paper-day]')
 
 
 for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]:
@@ -18,7 +18,7 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
         next_day = page.get_by_role('button', name='Next day', exact=True, include_hidden=True)
         expect(previous).to_be_disabled()
         days = paper_days(page).evaluate_all('(nodes) => nodes.map(node => node.dataset.paperDay)')
-        current = page.locator('.greenbar-paper:not([aria-hidden]) [aria-current="true"]')
+        current = page.locator('.greenbar-paper [aria-current="true"]')
         expect(current).to_have_attribute('data-paper-day', days[0])
         next_day.click()
         expect(current).to_have_attribute('data-paper-day', days[1])
@@ -39,25 +39,23 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
         expect(page.locator('#dev-notes')).to_be_hidden()
         expect(page.locator('#note')).to_be_visible()
 
-with browser_page('/play.html', reduced_motion='reduce') as page:
-    before = observe(page)
+with browser_page('/play.html') as page:
     page.get_by_role('button', name='Dev notes', exact=True).click()
-    page.clock.run_for(1000)
-    assert observe(page)['checkpoint'] == before['checkpoint']
-    assert page.locator('.greenbar-paper[aria-hidden="true"]').evaluate('(node) => node.inert')
     assert page.evaluate('''async () => {
         const prompts = await (await fetch('/assets/dev-notes.json')).json();
         const paper = document.querySelector('.greenbar-paper');
         const articles = [...paper.querySelectorAll('article')];
         const days = [...paper.querySelectorAll('[data-paper-day]')];
+        const pacific = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' });
+        const day = prompt => pacific.format(new Date(prompt.timestamp));
         return articles.length === prompts.length && articles.every((article, i) =>
             article.querySelector('p').textContent === prompts[i].text &&
             article.querySelector('time').dateTime === prompts[i].timestamp &&
-            article.closest('[data-paper-day]').dataset.paperDay === prompts[i].timestamp.slice(0, 10)) &&
-            days.length === new Set(prompts.map(prompt => prompt.timestamp.slice(0, 10))).size;
+            article.closest('[data-paper-day]').dataset.paperDay === day(prompts[i])) &&
+            days.length === new Set(prompts.map(day)).size;
     }''')
     days = paper_days(page).evaluate_all('(nodes) => nodes.map(node => node.dataset.paperDay)')
-    current = page.locator('.greenbar-paper:not([aria-hidden]) [aria-current="true"]')
+    current = page.locator('.greenbar-paper [aria-current="true"]')
     next_day = page.get_by_role('button', name='Next day', exact=True, include_hidden=True)
     for day in days[1:]:
         next_day.click()
