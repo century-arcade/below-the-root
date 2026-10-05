@@ -105,9 +105,15 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     page.clock.run_for(100)
     assert page.locator('#desk').get_attribute('data-stage') == 'play'
 
-    assert page.locator('#developer-mode').is_hidden()
-    page.evaluate("document.documentElement.classList.add('navigation-open')")
     assert page.locator('#developer-mode').is_hidden(), 'no version label in landscape play'
+
+    page.evaluate('document.exitFullscreen?.().catch(() => {})')
+    page.locator('#fullscreen').tap()
+    page.wait_for_function('document.fullscreenElement !== null')
+    assert page.locator('#fullscreen').get_attribute('aria-pressed') == 'true'
+    page.locator('#fullscreen').tap()
+    page.wait_for_function('document.fullscreenElement === null')
+    assert page.locator('#fullscreen').get_attribute('aria-pressed') == 'false', 'fullscreen exits from landscape play'
 
 with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_touch=True) as page:
     box = page.locator('#screen').bounding_box()
@@ -155,4 +161,4 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     until(page, '(s, col) => s.state.player.col < col - 1', arg=col)
     touch('touchEnd', left)
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, side hold on a ladder, picture taps outside play, map and version label passed')
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb then walk on, side hold on a ladder, picture taps outside play, map, version label and fullscreen toggle passed')

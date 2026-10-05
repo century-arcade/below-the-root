@@ -40,26 +40,7 @@ canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
 const CANVAS_PADDING = 3;
 const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px)');
-const navigationToggle = document.getElementById('navigation-toggle');
 const mainNav = document.getElementById('main-nav');
-function closeNavigation() {
-  document.documentElement.classList.remove('navigation-open');
-  navigationToggle.setAttribute('aria-expanded', 'false');
-}
-navigationToggle.onclick = () => {
-  const open = document.documentElement.classList.toggle('navigation-open');
-  navigationToggle.setAttribute('aria-expanded', String(open));
-};
-document.getElementById('site-header').addEventListener('click', e => {
-  if (e.target.closest('a, button')) closeNavigation();
-});
-addEventListener('keydown', e => {
-  if (e.key !== 'Escape' || navigationToggle.getAttribute('aria-expanded') !== 'true') return;
-  closeNavigation();
-  navigationToggle.focus({ preventScroll: true });
-  e.preventDefault();
-  e.stopImmediatePropagation();
-}, true);
 
 function sizeMonitor(mode, availableWidth, availableHeight, aspect, bare, floor = 0) {
   const padding = bare ? 0 : mode === 'cropped' ? 2 : CANVAS_PADDING;
@@ -83,9 +64,9 @@ function sizeMonitor(mode, availableWidth, availableHeight, aspect, bare, floor 
 function fit() {
   const full = fullscreenMode.matches || document.fullscreenElement !== null;
   document.documentElement.classList.toggle('game-fullscreen', full);
+  document.getElementById('fullscreen').setAttribute('aria-pressed', String(document.fullscreenElement !== null));
   const landscape = landscapeMode.matches;
   document.documentElement.classList.toggle('landscape-play', landscape);
-  if (!landscape) closeNavigation();
   const bare = full || landscape;
   const cabinetSurround = monitor.dataset.surround !== 'portable';
   const outerGap = bare ? 0 : parseFloat(getComputedStyle(game).marginTop);
