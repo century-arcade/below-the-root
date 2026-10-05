@@ -302,6 +302,11 @@ test('gameplay aliases, opposites and rapid trigger taps survive different read 
   key(keys, 'ArrowLeft', true);
   assert.equal(session.read('s').dx, 1);
   tap(keys, 'Enter'); tap(keys, 'Enter');
+  assert.deepEqual([session.read('s').fire, session.read('s').fire], [true, true],
+    'with a side held, a second tap leaps again without a walking read between');
+  key(keys, 'd', true, 'KeyD');
+  assert.equal(session.read('s').fire, false);
+  tap(keys, 'Enter'); tap(keys, 'Enter');
   assert.equal(session.read('s').press, true);
   assert.equal(session.read('s').press, false);
   assert.equal(session.read('s').press, true, 'second tap gets a distinct effective gameplay edge');

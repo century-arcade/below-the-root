@@ -142,13 +142,15 @@ export class Keyboard {
       event = this.events[0];
       if (policy === 'continuous') {
         const keys = new Set(), presses = new Set();
+        const sideways = held.has('left') !== held.has('right');
         while (this.events.length) {
           const next = this.events[0];
           if (!next.down && keys.size) break;
           if (next.down && next.keys.some(k => presses.has(`${next.source}:${k}`))) break;
           // A neutral effective sample separates rapid triggers in the existing
           // level-based recording format. Physical holds remain in sources.
-          if (next.down && next.keys.includes('fire') && this.deliveredFire) break;
+          // sideways-fire: leaps and turns ignore the edge, and a gap would walk a step
+          if (next.down && next.keys.includes('fire') && this.deliveredFire && !sideways) break;
           this.events.shift();
           if (!next.down) continue;
           for (const key of next.keys) { keys.add(key); presses.add(`${next.source}:${key}`); }
