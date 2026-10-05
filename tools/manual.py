@@ -1,6 +1,7 @@
 """Convert the Internet Archive manual JP2 ZIP to web-sized pages.
 
 Source: https://archive.org/details/below-the-root-game-manual-1984
+Scans 1-2 (the cover and blank inside cover) are skipped.
 Usage: python3 tools/manual.py INPUT_JP2.zip [OUTPUT_DIRECTORY]
 Requires Pillow with JPEG 2000 and WebP support.
 
@@ -19,6 +20,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 WHITE_POINT = 0.88
+FIRST_SCAN = 3
 
 
 def paper(grey):
@@ -50,6 +52,8 @@ def main():
         if len(pages) != 20:
             raise ValueError(f'Expected 20 pages, found {len(pages)}')
         for number, name in enumerate(pages, 1):
+            if number < FIRST_SCAN:
+                continue
             with Image.open(BytesIO(archive.read(name))) as original:
                 image = original.convert('RGB')
                 image = image.resize((1400, round(image.height * 1400 / image.width)), Image.Resampling.LANCZOS)

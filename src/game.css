@@ -114,7 +114,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 .book-spread img { display: block; width: auto; height: min(var(--box-height), (100vw - 144px) / 1.49); object-fit: fill; }
 #box img { aspect-ratio: auto 454 / 599; filter: drop-shadow(var(--depth)); }
 #manual img { aspect-ratio: 1400 / 1880; filter: drop-shadow(var(--paper)); }
-#manual img.deprecated { opacity: .35; }
+#manual img.deprecated { filter: contrast(.71) brightness(.49) drop-shadow(var(--paper)); }
 .book-leaf { position: absolute; transform-style: preserve-3d; pointer-events: none; }
 .book-spread .book-leaf img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .book-spread .book-leaf img + img { transform: rotateY(180deg); }
@@ -334,15 +334,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 @media (any-pointer: coarse) {
   :is(.game-fullscreen, .landscape-play) #touch-corner { display: flex; position: fixed; top: 8px; left: 8px; z-index: 4; }
 }
-#touch-zones { display: none; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-@media (any-pointer: coarse) {
-  :is(.game-fullscreen, .landscape-play) #touch-zones { display: block; }
-}
-#touch-zones span { position: absolute; display: grid; place-items: center; height: calc(100% / 3); outline: 1px solid #b6e6a466; outline-offset: -1px; color: #b6e6a499; font-size: 14px; }
-#touch-zones span:nth-child(odd) { left: -100vw; right: 87.5%; padding-left: 100vw; }
-#touch-zones span:nth-child(even) { left: 87.5%; right: -100vw; padding-right: 100vw; }
-#touch-zones span:nth-child(n+3) { top: calc(100% / 3); }
-#touch-zones span:nth-child(n+5) { top: calc(200% / 3); }
 #touch-corner button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; touch-action: manipulation; }
 #touch-corner svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 .landscape-play #help-screen { position: fixed; z-index: 2; inset: 64px 0 0 0; width: auto; overflow-y: auto; background: #101910; align-self: auto; }
