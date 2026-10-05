@@ -1,4 +1,4 @@
-.tray-dev-notes { width: 190px; height: 80px; --tilt: -4deg; color: #344b3b; }
+.tray-dev-notes { width: 190px; height: 160px; --tilt: -4deg; color: #344b3b; }
 .tray-dev-notes::after { content: none; }
 .greenbar-stack-sheet {
   position: absolute; inset: 0; display: grid; place-items: center;
