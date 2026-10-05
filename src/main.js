@@ -12,7 +12,7 @@ import { CLIPS, loadClip, Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
 import { fitScale, fitCabinet, crtVars, ASPECTS } from './fit.js';
 import { loaderScreen } from './loader.js';
-import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelZoom } from './map.js';
+import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelPixels, wheelZoom } from './map.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
@@ -385,7 +385,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const fx = (cx - before.left) / before.width;
     const fy = (cy - before.top) / before.height;
     mapZoom = Math.max(1, Math.min(8, mapZoom * factor));
-    mapSheet.style.width = `${mapZoom * 100}%`;
+    mapSheet.style.setProperty('--zoom', mapZoom);
     document.getElementById('map-zoom-out').disabled = mapZoom === 1;
     document.getElementById('map-zoom-in').disabled = mapZoom === 8;
     // Include the grid's automatic margins when it is shorter than the viewport.
@@ -405,6 +405,10 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let lastWheel = 0;
   mapViewport.addEventListener('wheel', e => {
     e.preventDefault();
+    if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) {
+      mapViewport.scrollLeft += wheelPixels(e.deltaY || e.deltaX, e.deltaMode, mapViewport.clientWidth);
+      return;
+    }
     if (!e.deltaY) return;
     const now = performance.now();
     if (now - lastWheel > 200 || Math.sign(e.deltaY) !== Math.sign(wheelDelta)) wheelDelta = 0;

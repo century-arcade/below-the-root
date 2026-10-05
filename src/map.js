@@ -130,9 +130,13 @@ export function mapCells(data, visited, current, empty = new Set(), all = false)
   }));
 }
 
+export function wheelPixels(delta, deltaMode, pageSize) {
+  return delta * (deltaMode === 1 ? 16 : deltaMode === 2 ? pageSize : 1);
+}
+
 // notch: Firefox reports 90 to 138 px for one, depending on the scroll target
 export function wheelZoom(total, deltaY, deltaMode, pageHeight) {
-  const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? pageHeight : 1);
+  const pixels = wheelPixels(deltaY, deltaMode, pageHeight);
   if (deltaMode !== 0 || Math.abs(pixels) >= 50) return { total: 0, step: Math.sign(pixels) };
   total += pixels;
   if (Math.abs(total) < 100) return { total, step: 0 };

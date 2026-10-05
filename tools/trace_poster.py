@@ -21,13 +21,13 @@ from PIL.Image import Resampling, Transform
 from common import ROOT
 
 COLUMNS, ROWS = 32, 16
-CELL_W, CELL_H = 80, 40
+CELL_W, CELL_H = 80, 68
 LEFT, TOP = 48, 80
-WIDTH, HEIGHT = 2656, 976
+WIDTH, HEIGHT = 2656, 1424
 PAPER = '#ece6d0'
 INK = '#265234'
 SCALE = 3
-CREASE = 449
+CREASE = 707
 
 
 class Font:
