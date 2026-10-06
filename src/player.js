@@ -119,7 +119,7 @@ function fireHeld(state, s, input) {
     p.facing = input.dx;
     if (FRAME.climb.includes(p.frame)) return leap(state);
     p.frame = idleFrame(p);
-    return;
+    return afterMove(state, true);
   }
   if (input.dy > 0 && supported) {
     state.stop = { reason: 'menu' };
@@ -148,7 +148,7 @@ function fireFree(state, s, input) {
   if (dx !== 0 && dx !== p.facing) {
     p.facing = dx;
     p.frame = idleFrame(p);
-    return;
+    return afterMove(state, true);
   }
   if (dx !== 0) {
     p.strideAlt = 1 - p.strideAlt;
@@ -181,7 +181,7 @@ function walkHalf(state, s) {
     p.period = p.crawling ? 8 : p.running ? 3 : 6;
     p.frame = p.crawling ? FRAME.crawl(p.facing, p.strideAlt) : FRAME.walk(p.facing, p.strideAlt);
     p.stride = 1;
-    return;
+    return afterMove(state, true);
   }
   p.period = p.crawling ? 8 : p.running ? 2 : 4;
   p.frame = p.crawling ? FRAME.crawlIdle(p.facing) : FRAME.idle(p.facing);

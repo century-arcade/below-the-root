@@ -146,3 +146,16 @@ test('getting up from a knock-down drops taps made while down but keeps what is 
   assert.equal(p.leaping, false, 'the stale tap does not leap');
   assert.equal(p.stride, 1, 'the held side walks');
 });
+
+test('standing in bramble, the first step or turn knocks you down where you stand', async () => {
+  const { at, controls } = await playerFixture();
+  for (const dx of [-1, 1]) {
+    const state = at('F0', 13, 12, -1);
+    const p = state.player;
+    controls.input = { dx, dy: 0, fire: false };
+    step(state);
+    step(state);
+    assert.ok(p.knockdown > 0);
+    assert.deepEqual([p.col, p.row], [13, 12]);
+  }
+});
