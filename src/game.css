@@ -39,9 +39,9 @@ html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] { display: co
 html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] .bench-strip { display: none; }
 html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] .bench-stage { position: fixed; inset: 0; z-index: 2; background: #1c1e1d; }
 .monitor-away:not(.game-fullscreen, .landscape-play) #play { position: absolute; visibility: hidden; }
-html, body { background: #1c1e1d; }
+html, body { background: #652d0c url(/assets/room/paneling.svg) 0 0 / 240px 480px; }
 
-:root { --mat: #2f5b47 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg fill='%23467460'%3E%3Crect x='40' width='1' height='200'/%3E%3Crect x='80' width='1' height='200'/%3E%3Crect x='120' width='1' height='200'/%3E%3Crect x='160' width='1' height='200'/%3E%3Crect y='40' width='200' height='1'/%3E%3Crect y='80' width='200' height='1'/%3E%3Crect y='120' width='200' height='1'/%3E%3Crect y='160' width='200' height='1'/%3E%3C/g%3E%3Cg fill='%23c9b75e' fill-opacity='.4'%3E%3Crect width='2' height='200'/%3E%3Crect width='200' height='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 200px 200px; }
+:root { --mat: #bb813b url(/assets/room/oak.svg) 0 0 / 320px 320px; }
 html[data-bench="grey"] { --mat: #8a8c8d; }
 :root { --desk-tilt: 60deg; --desk-back: 1; } /* tilt the strip back into a 3D desk (the old desk was 48deg); a tilted desk runs on behind it, in strip depths */
 #site-header { position: fixed; z-index: 4; top: 30px; right: 30px; width: auto; height: auto; padding: 0; background: none; border: 0; }
@@ -67,7 +67,7 @@ html:not(.monitor-away) .bench-stage { display: none; }
 }
 .bench-strip::before {
   content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: calc(var(--strip) * var(--desk-back) * clamp(0, var(--w) * 20, 1));
-  background: var(--mat); background-position: 0 100%; border-top: 8px solid #264a3a; pointer-events: none;
+  background: var(--mat); background-position: 0 100%; border-top: 8px solid #2a0300; pointer-events: none;
 }
 .bench-strip .tray-item { zoom: var(--z); }
 html[data-strip="compact"]:not(.monitor-away) #desk { --strip: calc(130px + 10px * var(--w)); --z: calc(.4 + .05 * var(--w)); }
@@ -80,7 +80,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 .tray-item.taken { outline: 3px solid #f2ede0; outline-offset: 8px; }
 .tray-item::after {
   content: attr(aria-label); position: absolute; top: calc(100% + 12px / var(--z)); left: 50%; transform: translateX(-50%) scaleY(calc(1 / cos(var(--plane)))); transform-origin: 50% 0; width: calc(100% + 28px / var(--z)); text-align: center;
-  color: #f2ede0; font: calc(14px / var(--z))/1.15 'Open Gorton', sans-serif; letter-spacing: .06em; text-transform: uppercase;
+  color: #2a0300; font: calc(14px / var(--z))/1.15 'Open Gorton', sans-serif; letter-spacing: .06em; text-transform: uppercase;
 }
 .tray-closed { --tilt: -3deg; width: 140px; }
 .closed-box { box-shadow: 0 16px 0 #34364f; }

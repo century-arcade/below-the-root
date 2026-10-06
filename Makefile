@@ -34,6 +34,7 @@ build: node_modules/.package-lock.json
 	cp assets/*.json assets/*.png assets/*.woff $(BUILD)/assets/
 	cp assets/favicon.svg $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/monitor && cp assets/monitor/*.svg $(BUILD)/assets/monitor/
+	mkdir -p $(BUILD)/assets/room && cp assets/room/*.svg $(BUILD)/assets/room/
 	cp assets/*.ttf assets/*-OFL.txt $(BUILD)/assets/
 	cp assets/*.otf assets/*-LICENSE.txt $(BUILD)/assets/
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
