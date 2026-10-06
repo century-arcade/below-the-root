@@ -2348,5 +2348,280 @@
     "timestamp": "2026-10-05T05:39:02.310Z",
     "text": "yes, make dev-notes is the right idea.  the full/working json should be saved into .meta, only the public dev-notes gets commited to main repo, yes?\n\nlet's rework the summary. this whole top section should be in bold.  actually let's increase the weight of the font a bit too.  \"Human time: 115 hours (109 sittings); LLM tokens: 1.2 billion (50m cached, 5m output)\"",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T05:56:52.071Z",
+    "text": "sorry, 50m uncached, always try to state the smaller number magwise",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T07:00:18.682Z",
+    "text": "- move devnotes thumbnail to the far right of thumbnails.\n   - split Human time/LLM tokens to two lines\n- curator's note thumbnail is \"Century \\n Arcade\" on the front for now.\n- the power light on this kind of monitor is actually green.\n- add << and >> arrows to first/last page in all books.\n- add credits/thanks below token count\n   - include links to all references/sources\n- remove first \"2\" pages (title/blank) from manual.  make thumbnail be first page.\n- \"deprecate\" pages 3,4,5,6 of manual via flexible mechanism (css class?)\n\n- in devtools, separate them into groups: crt+pal; download/upload; rewind; github.  move github almost all the way to the left, right next to the version number; they are a group too.  4 groups (1 solo)",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T08:56:30.656Z",
+    "text": "e) delete those two and remove that test.  f) great but that opacity needs to be applied to the page as it's turning too.  h) i need to edit them, where are they?\n\ndo not show the mobile touch zones anymore.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T17:02:52.496Z",
+    "text": "dev notes top has no green bar backing, oddly.",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T17:06:47.896Z",
+    "text": "great.  for the thumbnail, double the \"height\" of the dev notes",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T17:10:56.345Z",
+    "text": "let's work on the mobile input interface.  the 'up' hitboxes should really be 'up-only' and should be smaller than they are.  so that the left/right tap areas are bigger.  and swipe up/down in those left/right tap areas shuld still work to go up/down with latch as before.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T17:15:43.454Z",
+    "text": "okay so i'm having a problem with starting from still, doing a jump (this works fine), then doing a second jump without an intervening step, this is necessary for some platform areas.  timing critical because monster is there.  should be just a hold right, with immediate left tap to jump (this works), then another tap just as i land (this takes an extra step which is deleterious)",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T17:22:51.968Z",
+    "text": "okay, 'swipe down' should only crouch, not move forward in any direction.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T17:28:16.758Z",
+    "text": "okay, the timing on the jump taps seems tenuous.  i can get it to work from standing but it needs to be more responsive when in the middle of acting.  like a jump tap during a jump should queue another jump?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T20:12:01.119Z",
+    "text": "- map is squat for some reason, see original sizing\n    - https://cdn.mobygames.com/covers/8372546-below-the-root-commodore-64-map.jpg\n  - squares should be square?\n  - 0/5/10 for spirit limit appear to be in a different font from 15/20/25\n  - only plain scrollwheel should zoom in/out; ctrl scrollwheel should scroll left/right as usual?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T20:25:58.309Z",
+    "text": "yes i want pinch to zoom, side shift+scroll is fine",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T20:33:29.308Z",
+    "text": "controls:\n  - i'm playing through the sky nid platform bits, they're some of the trickiest, and difficult to get right due to timing. \n  - sometimes the char will get up after being hurt, i press the left side only, and the char jumps.  NOT CORRECT.\n  - we just fixed the double jump, it works sometimes now, but it needs to feel PERFECT, like every hold and tap matters.  is it possible to sense what's being held at any given moment?  do we get events or do we have to poll?\n  - sometimes it takes a long-press or a couple taps to change direction while gliding, still.",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T20:43:38.987Z",
+    "text": "dev notes:\n\n- HUMAN PROMPTS should start a new page. should be another line before it, and no extra line after it.\n\nhere's a real image of this paper.  can we change the color of the green to be paler, and can we try a more similar dot matrix-ish (but still legible) font?\n  - https://thumbs.dreamstime.com/b/matrix-printer-paper-basic-programm-printed-vector-illustration-vintage-continuous-green-bar-tractor-feed-computer-473544813.jpg",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T22:04:29.262Z",
+    "text": "the screen should start fading in when the poweron button is pressed, not after the sound plays.  same for fadeout.  i thought we addressed this?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T22:08:52.314Z",
+    "text": "okay let's do another pass on mobile movement controls that we've been working on.  consult previous sessions past few days about this.  now if i hold R and then hold L, it starts jumping continuously.  but it should work like this: hold R, press L, single jump; continue holding L, stop.  rule is, press/tap other side while holding to jump; further tap to jump more; two holds = no L/R movement.  while gliding/falling may be a special case.",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T23:11:40.472Z",
+    "text": "okay, let's try this for mobile: just two regions, left and right, and short simple swipe-hold movements on either of them mean the same thing: joystick in that direction at that time.  and tap for trigger, and [swipe]-hold tap[-tap] for move+trigger = jump.  [press]-hold without swipe first faces (beat if so) and then starts moving in the direction of the region L or R.\n\nlet's be rigorous about this.  let's make a list of all the various cases we've defined and discovered, and how we currently handle it, and if that is satisfactory or not (guess if you want but ask me).  compare that list to this new 2-region suggestion (which is itself largely a return to what we had ~2 days ago).",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-05T23:35:06.730Z",
+    "text": "Q1: let's do whole screen split in half.  Q2: not sure, let's explore.  Q3: stand.  Q4: yes.  Q5: yes only vertical part counts.  requires a direct horiz swipe to fling yourself off something you're climbing (is that ever possible?)  Q6: no, must be tap to trigger/jump. let's make any two finger hold (even on same side) open menu.  p) yes i think so.  Q7: no let's disable this.  two-finger hold for menu.  Q8: no, don't keep, we have two-finger hold.  two-finger tap changes the way char is facing.  Q9: every fall.  u) candidate for removal; seems reasonable either way, as long as swipe controls movement like always.  what is simpler?  w/x) for that matter, let's look at this through the lens of simplicity, what could we do that makes this have fewer rows?  like y), \"hold\" means \"latch\", keep doing what i'm doing.  release means unlatch, which may stop e.g. walking/running, but has no effect on gliding for instance.  so maybe an edge-triggered column-based matrix?  think about it, is this a bad idea or what?",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-05T23:43:57.500Z",
+    "text": "yup let's do it all.  v) yes two finger close the menu.  w) select the item, same as single tap.  tbh g) itself is just a test to see if i even notice it or want it, or if it's a dead combo.  x) let's try 200ms, this is dual-hold without swipe, right?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T23:56:29.011Z",
+    "text": "let's investigate load speed which seems slow on mobile, how much data is required for a fresh load, what about caching, etc",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-05T23:59:40.728Z",
+    "text": "let's find session uuid for the previous session in which we just reworked the touch interface , i want to resume it, menu should be only with dual press-and-hold, hold-wait-then-press should be trigger on press (not release).",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T00:02:26.877Z",
+    "text": "yes, and also c and d and f. do this in a worktree and show me results before merging.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T00:03:45.805Z",
+    "text": "okay so it should be two-finger press-and-hold that opens the menu, not hold-wait-then-press which should trigger jump.  and we should be triggering on press, not release.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T00:08:55.622Z",
+    "text": "pass: new effects cut old effects, and tunes suppress effects until silenced\nnode:internal/modules/package_json_reader:301\n  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);\n        ^\n\nError [ERR_MODULE_NOT_FOUND]: Cannot find package 'marked' imported from /home/saul/git/below-the-root/test/build-site_test.mjs\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:768:81)\n    at moduleResolve (node:internal/modules/esm/resolve:859:18)\n    at defaultResolve (node:internal/modules/esm/resolve:992:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)\n    at #resolve (node:internal/modules/esm/loader:683:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33) {\n  code: 'ERR_MODULE_NOT_FOUND'\n}\n\nNode.js v24.18.0\nfail: test/build-site_test.mjs\n[Error: test failed] {\n  code: 'ERR_TEST_FAILURE',\n  failureType: 'testCodeFailure',\n  cause: 'test failed',\n  exitCode: 1,\n  signal: null\n}\npass: automatic version bump preserves minor padding: 1.03 to 1.04",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T00:52:44.161Z",
+    "text": "click zones should include status area; status area should not blink on click!  so i can play one-handed with two fingers on the bottom only.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T00:59:36.186Z",
+    "text": "map: change red border into 50% opacity red thick stroke hollow circle diameter screen height around player.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T01:10:31.524Z",
+    "text": "let's make the diameter bigger by 50% and the and the stroke thicker by 100%  opacity to 75%.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T01:26:58.133Z",
+    "text": "layout of very narrow screens (portrait on mobile and hypernarrow desktop browser) shows wrong kind of controls on bottom; we should update those, we can make it a wee bit responsive so all affordances are available.  volume, power, fullscreen, at least should be stylistically the same, even if they change positions; otherwise it's sloppy.  and power light not showing on center, on power button intead?  all wrong.",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T01:39:50.704Z",
+    "text": "- dev notes\n   - dup = category, should be applied to any that are substantially dupped, keep the latest one (many are cancel/resubmissions)\n   - add \"dev notes\" as label on item beneath like the others.\n   - on mobile, width of devnotes in portrait should be full width; you can still keep the traction feed on the sides\n   for all books/box/manual/devotes put the page next/prev/first/last buttons below the , for all widths.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T01:51:04.290Z",
+    "text": "change \"game manual\" to \"manual\", \"world map\" to \"map\", \"play game\" to \"floppy disk\".  \"curator's note\" to \"about\"?  i'm trying to find the right small name for it.  and \"devnotes\"?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T02:58:36.092Z",
+    "text": "okay so i want to give this a bit more sense of place without a lot of work.  like 70s-era wood paneling as a bg above the 'table'? what kind of surface could we suggest simply for the table?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T03:00:19.329Z",
+    "text": "i like (c)",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T03:32:15.056Z",
+    "text": "at medium widths, the paneling shows below the desk, and it shouldn't. let's put another strip of 'straightened' (vertical) desk  beneath the top, so it forms an edge, and then a dim gray beneath",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T03:41:51.180Z",
+    "text": "foreword; prompts",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T04:24:47.112Z",
+    "text": "foreword should be the leftmost item.  also fullscreening in the browser should only replace with the computer screen if it's already on the computer mode; and only auto in-game-fullscreen on mobile.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T04:30:02.902Z",
+    "text": "let's remove the current click poweron sound effect and insert a very simple click and add the degauss.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T04:32:46.788Z",
+    "text": "let's do some research into the other games around this time, 1984.  kq1, HHGTTG?, karateka. what's the best ^4 game (native on 64k computer)?   what's the first ^5 games, vs the later/best?  doom is ^6.  i just want to have a broad survey to remind myself of the classics for a little video on BTR in context",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T04:53:45.241Z",
+    "text": "can we play the sound sooner?  ideally the click should be as close to the buttonpress as we can make it, in both on/off cases",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T04:57:17.314Z",
+    "text": "okay we have this playable on mobile now, people aren't going to read a bunch of instructions though, so how do we communicate how they can play the game?",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-06T05:01:59.806Z",
+    "text": "> \n\n\n\n  What we're teaching now.  Landscape and fullscreen use a two-half joystick: hold a half to walk, swipe to climb,\n  add a second finger to jump, tap two fingers to turn, and press and hold two fingers to open the menu.\n  Portrait uses tap-to-walk with a self-tap for the menu.\n\n\n\n\"tap two fingers to turn\" is unnecessary and provisional anyway.  portrait shouldn't have any differences; why does it?  so that leaves us 5 things and 1 scheme, of which 2 things are obvious",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:04:43.991Z",
+    "text": "so in essence after fixing, what we need to teach is \"swipe-hold to move, tap second finger to jump, hold two fingers for menu\"",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:05:59.529Z",
+    "text": "b) single tap does nothing except select and skip",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:28:24.759Z",
+    "text": "rename \"floppy disk\" to \"game\" and remove the notch in the sleeve.  text in attractor is not wrapped correctly.\nitem use \"more\" is in a funny place, if there are more than 2 rows, use the empty row after all.  more should be at the bottom right, just a >> though, not a word.  inventory same, doesn't need \"YOU HAVE\", use 4 lines.  also scroll doesn't seem to work with inventory.\n\nwhy are some people green now?  that feels like it's changed ~recently, since the PAL thing?  feels wrong, i thought all chars in the game were white",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:41:07.808Z",
+    "text": "okay.  how do i cancel kiniport on mobile?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:45:26.683Z",
+    "text": "yes let's do esc and two finger hold.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:47:53.381Z",
+    "text": "can we make the \"black\" of the game screen overlays on the map, the same color as the map background?  just to fit in better",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:50:15.690Z",
+    "text": "move prompts thumbnail just a bit back so it's further from the \"Prompts\" text.  move the map zoom in/out button beneath the map, not on the desk.  let's make the box and manual vertically the same position onscreen, so their buttons can also be aligned (and a little bit lower than they are now).  same for devnotes positioning/buttons",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:55:55.051Z",
+    "text": "re: bushes: now you can walk straight through bushes at base of silk grund (should have to crawl), and while stunned at top of grand grund, can fly into bushes and then walk through rest.  let's compare with base game behavior",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T06:11:23.666Z",
+    "text": "yes make the fix and move bushes.md to done",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T06:15:14.355Z",
+    "text": "the winning recordings took advantage of that bug.  fix the bug and tell me which ones i have to rerecord",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T06:22:53.350Z",
+    "text": "i killed someone with wand of befal and it said \"the wand is useless here\", that's not right, what does the game itself do?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T06:44:18.173Z",
+    "text": "i think we have a maybe/soon task to speed up map opening, by not computing entire map each time?",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-06T06:45:29.815Z",
+    "text": "can cache be in memory rather than stoeage?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T06:46:25.428Z",
+    "text": "why do we have to redraw any room ever?  only newly visited rooms",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T06:47:35.622Z",
+    "text": "so items taken change the room, yes, but we don't show items on the map, and bramble regrows.  what else could change on a screen that's persistent?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T06:49:29.309Z",
+    "text": "don't bother invalidating anything, if we're not showing items!  only e/h",
+    "label": "design"
   }
 ]
