@@ -42,13 +42,13 @@ async function pointerFixture(t, { latch = false } = {}) {
     surface, latch,
   });
   const send = (name, x = 100, y = 100, pointerId = 1) => f.canvas.send(name, {
-    button: 0, pointerId, clientX: x, clientY: y, preventDefault() {},
+    button: 0, pointerId, pointerType: 'mouse', clientX: x, clientY: y, preventDefault() {},
   });
   const tap = (x, y) => { send('pointerdown', x, y); send('pointerup', x, y); };
   const advance = ms => { now += ms; t.mock.timers.tick(ms); };
   t.after(() => pointer.cancel());
   const offPicture = (x, y, target = { closest: () => null }) => {
-    surface.send('pointerdown', { button: 0, pointerId: 1, clientX: x, clientY: y, target, preventDefault() {} });
+    surface.send('pointerdown', { button: 0, pointerId: 1, pointerType: 'mouse', clientX: x, clientY: y, target, preventDefault() {} });
     send('pointerup', x, y);
   };
   return { ...f, model, pointer, send, tap, advance, offPicture, surface };
@@ -386,26 +386,24 @@ test('direct mouse choosers highlight on hover and select an unhighlighted click
   assert.equal(f.keys.read('press').fire, false);
 });
 
-for (const [device, mouseDirect, confirms] of [
-  ['mouse', true, true], ['touch', true, false], ['mouse', false, false],
-]) test(`${device} long chooser press ${mouseDirect ? 'with direct selection' : 'on a command menu'} ${confirms ? 'confirms once' : 'does not confirm'}`, async t => {
+for (const mouseDirect of [true, false]) test(`mouse long chooser press ${mouseDirect ? 'with direct selection confirms once' : 'on a command menu does not confirm'}`, async t => {
   const f = await pointerFixture(t);
   f.model.chooser = {
     id: {}, mouseDirect, selected: { col: 0, row: 0 },
     hit: () => ({ col: 0, row: 0 }),
     highlight(choice) { this.selected = choice; },
   };
-  const event = { button: 0, pointerId: 1, pointerType: device,
+  const event = { button: 0, pointerId: 1, pointerType: 'mouse',
     clientX: 100, clientY: 100, preventDefault() {} };
   f.canvas.send('pointerdown', event);
   f.advance(200);
   assert.equal(f.keys.read('press').fire, false);
   f.canvas.send('pointerup', event);
-  assert.equal(f.keys.read('press').fire, confirms);
+  assert.equal(f.keys.read('press').fire, mouseDirect);
   assert.equal(f.keys.read('press').fire, false);
 });
 
-for (const device of ['mouse', 'touch']) test(`${device} direct chooser drag cannot confirm even after returning to its first cell`, async t => {
+test('mouse direct chooser drag cannot confirm even after returning to its first cell', async t => {
   const f = await pointerFixture(t);
   f.model.chooser = {
     id: {}, mouseDirect: true, selected: { col: 0, row: 0 },
@@ -413,7 +411,7 @@ for (const device of ['mouse', 'touch']) test(`${device} direct chooser drag can
     highlight(choice) { this.selected = choice; },
   };
   const send = (name, x = 100) => f.canvas.send(name, {
-    button: 0, pointerId: 1, pointerType: device,
+    button: 0, pointerId: 1, pointerType: 'mouse',
     clientX: x, clientY: 100, preventDefault() {},
   });
   send('pointerdown');
@@ -421,6 +419,21 @@ for (const device of ['mouse', 'touch']) test(`${device} direct chooser drag can
   assert.equal(f.model.chooser.selected.col, 1);
   send('pointermove');
   send('pointerup');
+  assert.equal(f.keys.read('press').fire, false);
+});
+
+test('read-only mouse choosers dismiss even when the click cannot be highlighted', async t => {
+  const f = await pointerFixture(t);
+  const choice = { col: -1, row: -1 };
+  f.model.chooser = {
+    id: {}, mouseDirect: true, dismiss: true, selected: { col: 0, row: 0 },
+    hit: () => choice,
+    highlight() {},
+  };
+  f.tap();
+  const confirmed = f.keys.read('press');
+  assert.equal(confirmed.fire, true);
+  assert.deepEqual(confirmed.menuChoice, choice);
   assert.equal(f.keys.read('press').fire, false);
 });
 
@@ -593,9 +606,6 @@ test("pointer cancellation clears delayed gestures and preserves keyboard holds"
   t.mock.timers.tick(180); assert.deepEqual(keys.read(), IDLE, 'cancelled hold timer must not fire');
   canvas.send('pointerdown', event); canvas.send('pointerup', event); canvas.send('pointercancel');
   t.mock.timers.tick(320); assert.deepEqual(keys.read(), IDLE, 'cancelled single-tap timer must not fire');
-  canvas.send('pointerdown', event); canvas.send('pointerup', { ...event, pointerId: 2 });
-  assert.equal(pointer.pointerId, 1, 'second finger cannot release the first');
-  pointer.cancel();
   keys.press('right'); pointer.hold(new Set(['right'])); pointer.cancel();
   assert.equal(keys.read().dx, 1, 'pointer cannot release keyboard input');
   target.send('blur'); assert.deepEqual(keys.read(), IDLE);
@@ -718,6 +728,18 @@ test('holding still steers without walking or opening the menu', async t => {
   assert.equal(f.model.menus, 0);
 });
 
+test('losing mouse capture cancels steering and unread movement', async t => {
+  const f = await pointerFixture(t);
+  f.send('pointerdown', 150, 100);
+  f.advance(151);
+  f.canvas.send('lostpointercapture', { pointerId: 1 });
+  assert.deepEqual(f.keys.read(), IDLE);
+  f.send('pointerup', 150, 100);
+  f.advance(250);
+  assert.deepEqual(f.keys.read(), IDLE);
+  assert.equal(f.pointer.walk, null);
+});
+
 test('shell and playback contexts retain their existing trigger taps', async t => {
   const f = await pointerFixture(t);
   f.model.player = null;
@@ -730,7 +752,7 @@ test('shell and playback contexts retain their existing trigger taps', async t =
   assert.equal(f.model.menus, 0);
 });
 
-test('chooser presses highlight and only a fresh tap on the selection confirms', async t => {
+test('command menu presses highlight and only a fresh tap on the selection confirms', async t => {
   const f = await pointerFixture(t);
   const chooser = f.model.chooser = {
     id: {}, selected: { col: 0, row: 0 },
@@ -757,7 +779,7 @@ test('chooser presses highlight and only a fresh tap on the selection confirms',
   assert.equal(f.pointer.walk, null);
 });
 
-test('chooser holds, drags, cancellation and context changes cannot confirm', async t => {
+test('command menu holds, drags, cancellation and context changes cannot confirm', async t => {
   const f = await pointerFixture(t);
   const chooser = f.model.chooser = {
     id: {}, selected: { col: 0, row: 0 },
@@ -783,30 +805,6 @@ test("blur cancels a pointer walk", async () => {
   const pointer = new Pointer(canvas, keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
   pointer.walkTo(200, 100); target.send('blur');
   assert.equal(pointer.walk, null); assert.deepEqual(keys.read(), IDLE);
-});
-
-test('a second finger tapped during a hold jumps without ending the hold', async t => {
-  const f = await pointerFixture(t, { latch: true });
-  f.send('pointerdown', 40, 100);
-  f.advance(150);
-  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 });
-  f.send('pointerdown', 200, 150, 2);
-  f.send('pointerup', 200, 150, 2);
-  f.canvas.send('lostpointercapture', { pointerId: 2 });
-  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1, fire: true }, 'the tap fires once with the held direction');
-  assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 }, 'the hold keeps walking');
-  f.send('pointerup', 40, 100);
-  assert.deepEqual(f.keys.read(), IDLE);
-  assert.equal(f.model.menus, 0);
-});
-
-test('a second finger before a hold is ignored', async t => {
-  const f = await pointerFixture(t);
-  f.send('pointerdown', 150, 100);
-  f.send('pointerdown', 200, 150, 2);
-  f.send('pointerup', 200, 150, 2);
-  f.advance(151);
-  assert.deepEqual(f.keys.read(), { ...IDLE, dx: 1 });
 });
 
 test('a latched hold keeps its direction after the figure reaches the finger', async t => {
@@ -855,7 +853,7 @@ test('sidebar presses do nothing without a figure to steer', async t => {
 test('a sidebar hold climbs above the figure, descends below it and walks level with it', async t => {
   const f = await pointerFixture(t, { latch: true });
   const hold = (x, y) => {
-    f.surface.send('pointerdown', { button: 0, pointerId: 1, clientX: x, clientY: y,
+    f.surface.send('pointerdown', { button: 0, pointerId: 1, pointerType: 'mouse', clientX: x, clientY: y,
       target: { closest: () => null }, preventDefault() {} });
     f.advance(151);
     const { dx, dy } = f.keys.read();

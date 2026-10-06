@@ -225,7 +225,6 @@ const DEAD_H = 24;
 const SECTOR = Math.tan(Math.PI / 8);
 const LATCH_DRAG = 16;
 const ROOM_JUMP = 96;
-const FIRE_SOURCE = 'pointer:fire';
 
 function sectorKeys(dx, dy) {
   const keys = new Set();
@@ -258,7 +257,6 @@ export class Pointer {
     this.pending = null;
     this.holding = false;
     this.pointerId = null;
-    this.firePointer = null;
     this.last = null;
     canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', (e) => this.down(e));
@@ -267,10 +265,9 @@ export class Pointer {
     });
     canvas.addEventListener('pointermove', (e) => this.move(e));
     canvas.addEventListener('pointerup', (e) => this.up(e));
-    canvas.addEventListener('pointercancel', (e) => e.pointerId === this.firePointer ? this.releaseFire() : this.cancel());
+    canvas.addEventListener('pointercancel', () => this.cancel());
     canvas.addEventListener('lostpointercapture', (e) => {
-      if (e.pointerId === this.firePointer) this.releaseFire();
-      else if (this.pointerId != null && e.pointerId === this.pointerId) this.cancel();
+      if (this.pointerId != null && e.pointerId === this.pointerId) this.cancel();
     });
     target.addEventListener('keydown', () => this.cancel());
     target.addEventListener('blur', () => this.cancel());
@@ -367,25 +364,10 @@ export class Pointer {
     this.latched = null;
     this.held.clear();
     this.keys.reset('pointer');
-    this.firePointer = null;
-    this.keys.reset(FIRE_SOURCE);
-  }
-
-  releaseFire() {
-    this.firePointer = null;
-    this.keys.release('fire', FIRE_SOURCE);
   }
 
   down(e) {
-    if (e.button !== 0 || this.ignore(e)) return;
-    if (this.pointerId != null) {
-      if (!this.holding || this.firePointer != null) return;
-      e.preventDefault();
-      this.firePointer = e.pointerId;
-      this.canvas.setPointerCapture(e.pointerId);
-      this.keys.press('fire', FIRE_SOURCE);
-      return;
-    }
+    if (e.button !== 0 || this.ignore(e) || this.pointerId != null) return;
     this.pointerId = e.pointerId;
     e.preventDefault();
     this.canvas.setPointerCapture(e.pointerId);
@@ -395,7 +377,7 @@ export class Pointer {
       clearTimeout(this.pending);
       this.pending = null;
       const choice = chooser.hit(...this.pixel(e));
-      const mouseDirect = e.pointerType === 'mouse' && chooser.mouseDirect;
+      const mouseDirect = chooser.mouseDirect;
       this.choicePress = { id: chooser.id, choice, started: performance.now(), mouseDirect,
         confirm: !!choice && (mouseDirect || chooser.dismiss || sameChoice(choice, chooser.selected)) };
       if (choice) chooser.highlight(choice);
@@ -456,7 +438,6 @@ export class Pointer {
   }
 
   up(e) {
-    if (e.pointerId === this.firePointer) return this.releaseFire();
     if (e.pointerId !== this.pointerId) return;
     this.pointerId = null;
     if (this.choicePress) {
