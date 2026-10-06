@@ -51,7 +51,7 @@ serve: build
 	CHOKIDAR_USEPOLLING=$(CHOKIDAR_USEPOLLING) CHOKIDAR_INTERVAL=$(CHOKIDAR_INTERVAL) \
 	$(NETLIFY) dev --dir $(BUILD) --port $(PORT) --context $(CONTEXT) --no-open; fi
 
-test:
+test: node_modules/.package-lock.json
 	@out=$$(mktemp); status=0; trap 'rm -f "$$out"' EXIT HUP INT TERM; \
 	unset $$(git rev-parse --local-env-vars); \
 	timeout $(TEST_TIMEOUT) node --test --test-reporter=./tools/test-reporter.mjs test/*_test.js test/*_test.mjs >"$$out" 2>&1 || { status=$$?; echo "Node tests failed (exit $$status)" >>"$$out"; }; \
