@@ -10,3 +10,4 @@ iso/
 .env.local
 node_modules/
 deno.lock
+.claude/worktrees/
