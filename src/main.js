@@ -97,6 +97,7 @@ function fit() {
   const cabinetFit = mode !== 'caseless';
   const faceplate = cabinetFit && !narrow;
   monitor.classList.toggle('faceplate', faceplate);
+  monitor.classList.toggle('keyed', !bare && cabinetSurround);
   const navHome = document.getElementById(faceplate ? 'monitor-controls' : 'navigation-controls');
   if (mainNav.parentElement !== navHome) {
     const focused = mainNav.contains(document.activeElement) ? document.activeElement : null;

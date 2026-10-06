@@ -189,24 +189,12 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor.cabinet #glass { border-radius: 0; }
 #monitor.cabinet #monitor-sidebar { position: absolute; inset: 0; pointer-events: none; }
 #monitor.cabinet #monitor-controls {
+  --left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px));
   position: absolute; top: calc(290 * var(--mm)); height: var(--chin); gap: calc(4 * var(--mm));
-  left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px)); right: max(calc(70 * var(--mm)), calc(var(--clip) + 8px));
+  left: var(--left); right: max(calc(70 * var(--mm)), calc(var(--clip) + 8px));
   pointer-events: auto;
 }
-#monitor.cabinet #monitor-controls #fullscreen { margin: 0; }
-#monitor.cabinet #monitor-power {
-  position: absolute; top: calc(-13 * var(--mm)); transform: translate(-50%, -50%);
-  left: calc(335.25 * var(--mm) - max(calc(12 * var(--mm)), calc(var(--clip) + 8px)));
-  width: max(32px, calc(13.5 * var(--mm))); height: max(32px, calc(10 * var(--mm))); padding: 0;
-}
-#monitor.cabinet .power-switch, #monitor.cabinet.powered-off .power-switch { width: 100%; height: 100%; background: none; border: 0; box-shadow: none; transform: none; }
-#monitor.cabinet .power-light {
-  position: absolute; left: calc(50% - 120.75 * var(--mm)); top: calc(50% - 4.5 * var(--mm));
-  width: calc(5 * var(--mm)); height: calc(1 * var(--mm)); border-radius: 0;
-}
-.narrow-play #monitor.cabinet #monitor-power { position: static; transform: none; flex: none; }
-.narrow-play #monitor.cabinet .power-switch { width: 27px; height: 17px; background: #5e5749; border: 1px solid #40392d; box-shadow: inset 0 2px 0 #0006; }
-.narrow-play #monitor.cabinet .power-light { position: static; width: 5px; height: 5px; border-radius: 50%; }
+.narrow-play #monitor.cabinet #monitor-controls { --left: 0px; left: 0; right: 0; padding: 0 calc(104 * var(--mm)) 0 calc(50 * var(--mm)); }
 #monitor { position: relative; }
 #monitor-developer {
   --key: calc(var(--chin) * .42); position: absolute; bottom: 0; right: 40%; height: var(--chin);
@@ -215,6 +203,7 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor.cabinet #monitor-developer { top: calc(290 * var(--mm)); bottom: auto; right: auto; left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px)); }
 #monitor-developer #developer-mode { order: -1; width: auto; min-width: var(--key); padding: 0 calc(var(--key) / 6); font-family: 'Michroma', sans-serif; }
 .narrow-play #monitor.cabinet #monitor-developer { right: auto; left: 25%; }
+#monitor.keyed:not(.cabinet) #monitor-developer { right: auto; left: calc(12 * var(--mm) + max(32px, 13.5 * var(--mm))); }
 #monitor:not(.cabinet) #monitor-developer #debug-tools, .narrow-play #monitor-developer #debug-tools { position: absolute; bottom: 100%; right: 0; padding: calc(var(--key) / 6); background: #a4928a; }
 .narrow-play #monitor-developer #debug-tools { right: auto; left: 0; background: #baa9a2; }
 #monitor-developer #debug-tools { gap: inherit; }
@@ -231,34 +220,82 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 #monitor-developer [aria-pressed="true"] { color: #f6b824; }
 #monitor-developer :is(button, .github-link):active { background: #6e5e56; }
 #monitor-developer :is(button, .github-link):focus-visible { outline: 2px solid #d6f897; outline-offset: 2px; }
-#monitor.faceplate #monitor-controls {
-  --left: max(calc(12 * var(--mm)), calc(var(--clip) + 8px));
-  right: max(calc(72.5 * var(--mm)), calc(var(--clip) + 8px)); justify-content: center;
+#monitor.faceplate #monitor-controls { right: max(calc(72.5 * var(--mm)), calc(var(--clip) + 8px)); justify-content: center; }
+#monitor.keyed {
+  --mm: calc(var(--chin) / 24.5); --fullscreen-x: 25.75; --power-x: 335.25;
+  --key-shadow: #4b3a31; --key: #6f5441; --key-top: #74655a; --ink: #433530;
+  --track: #605146; --slot: #1e1617; --panel: #bbaba3; --panel-edge: #74655a; --seam: #514038;
 }
-#monitor.faceplate #monitor-controls #fullscreen {
-  position: absolute; top: calc(-13 * var(--mm)); left: calc(25.75 * var(--mm) - var(--left)); transform: translate(-50%, -50%);
-  width: max(32px, calc(13.5 * var(--mm))); height: max(32px, calc(10 * var(--mm))); padding: 0;
-  background: none; border: 0; box-shadow: none;
+#monitor.keyed[data-surround="dark"] {
+  --key-shadow: #0d0e0d; --key: #121412; --key-top: #151815; --ink: #0b0d0b;
+  --track: #111311; --slot: #050505; --panel: #242824; --panel-edge: #151815; --seam: #0e0f0e;
 }
-#monitor.faceplate #fullscreen svg { display: none; }
+.narrow-play #monitor.keyed { --fullscreen-x: 64; --power-x: 251; }
+#monitor.keyed #monitor-controls { --hit: max(32px, calc(9 * var(--mm))); }
+#monitor.keyed:not(.cabinet) #monitor-controls { padding: 0 calc(6 * var(--mm)); }
+#monitor.keyed :is(#fullscreen, #monitor-power) {
+  position: relative; display: block; flex: none; box-sizing: border-box;
+  width: max(32px, calc(13.5 * var(--mm))); height: max(32px, calc(10 * var(--mm)));
+  margin: 0 0 calc(4 * var(--mm)); padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; touch-action: manipulation;
+}
+#monitor.cabinet :is(#fullscreen, #monitor-power) { position: absolute; top: calc(-13 * var(--mm)); margin: 0; transform: translate(-50%, -50%); }
+#monitor.cabinet #fullscreen { left: calc(var(--fullscreen-x) * var(--mm) - var(--left)); }
+#monitor.cabinet #monitor-power { left: calc(var(--power-x) * var(--mm) - var(--left)); }
+#monitor.keyed :is(#fullscreen, #monitor-power)::before, #monitor.keyed :is(#fullscreen, #monitor-power)::after { content: ''; position: absolute; left: 50%; top: 50%; pointer-events: none; }
+#monitor.keyed :is(#fullscreen, #monitor-power)::before {
+  width: calc(16.5 * var(--mm)); height: calc(10.5 * var(--mm)); margin: calc(-7 * var(--mm)) 0 0 calc(-9.25 * var(--mm));
+  background: var(--key-shadow); clip-path: polygon(calc(1 * var(--mm)) calc(2.5 * var(--mm)), calc(2 * var(--mm)) 0, 100% 0, 100% 100%, 0 100%);
+}
+#monitor.keyed :is(#fullscreen, #monitor-power)::after {
+  width: calc(13.5 * var(--mm)); height: calc(11 * var(--mm)); margin: calc(-6 * var(--mm)) 0 0 calc(-6.75 * var(--mm));
+  background: var(--key); box-shadow: inset 0 calc(1.5 * var(--mm)) 0 var(--key-top);
+}
+#monitor.keyed :is(#fullscreen, #monitor-power):active::after { translate: 0 calc(.5 * var(--mm)); }
+#monitor.keyed :is(#fullscreen, #monitor-power):focus-visible { outline: 2px solid #d6f897; outline-offset: 2px; }
+#monitor.keyed #fullscreen svg, #monitor.keyed .power-switch, .key-label { display: none; }
+#monitor.keyed .key-label {
+  display: block; position: absolute; left: 50%; top: calc(50% + 7.3 * var(--mm)); transform: translateX(-50%);
+  color: var(--ink); font: calc(3.5 * var(--mm))/1 Arial, sans-serif; letter-spacing: 0; text-transform: uppercase; white-space: nowrap; pointer-events: none;
+}
+#monitor.keyed #fullscreen .key-label { transform: translateX(-50%) scaleX(.87); }
+#monitor.keyed .power-light {
+  position: absolute; left: calc(50% - 2.5 * var(--mm)); bottom: calc(var(--chin) / 2 - .5 * var(--mm));
+  width: calc(5 * var(--mm)); height: calc(1 * var(--mm)); border-radius: 0;
+}
+#monitor.cabinet .power-light { left: calc(214.5 * var(--mm) - var(--left)); top: calc(-17.5 * var(--mm)); bottom: auto; }
+#volume-panel { display: contents; }
+.volume-scale { display: none; }
+#monitor.keyed #volume-panel { position: relative; display: block; flex: none; width: calc(59 * var(--mm)); height: calc(23 * var(--mm)); }
+.narrow-play #monitor.keyed #volume-panel {
+  position: absolute; left: calc(256 * var(--mm)); top: 0; width: calc(96.5 * var(--mm));
+  border-top: calc(1 * var(--mm)) solid var(--panel); background: var(--panel); box-shadow: calc(-.5 * var(--mm)) 0 0 var(--panel-edge), 0 calc(-.5 * var(--mm)) 0 var(--seam);
+}
+#monitor.keyed .volume-scale { display: block; position: absolute; left: 0; top: 0; width: calc(59 * var(--mm)); height: calc(23 * var(--mm)); fill: var(--ink); font: 3px Arial, sans-serif; letter-spacing: 0; }
+.volume-scale .ticks { fill: none; stroke: var(--ink); stroke-width: .4; }
+.volume-scale .track { fill: var(--track); }
+.volume-scale .slot { fill: var(--slot); }
+#monitor.keyed #volume {
+  position: absolute; left: calc(6 * var(--mm)); top: calc(8.5 * var(--mm) - var(--hit) / 2);
+  width: calc(47 * var(--mm)); height: var(--hit); margin: 0; appearance: none; background: none;
+}
+#monitor.faceplate #volume-panel { display: contents; }
+#monitor.faceplate #volume { left: calc(299.5 * var(--mm) - var(--left)); top: calc(9.5 * var(--mm) - var(--hit) / 2); }
+#monitor.faceplate :is(#fullscreen, #monitor-power)::before, #monitor.faceplate :is(#fullscreen, #monitor-power)::after,
+#monitor.faceplate .key-label, #monitor.faceplate .volume-scale { display: none; }
 #monitor.faceplate #fullscreen:active { background: #0000002e; }
-#monitor.faceplate #monitor-controls #volume {
-  position: absolute; left: calc(299.5 * var(--mm) - var(--left)); top: calc(5 * var(--mm));
-  width: calc(47 * var(--mm)); height: calc(9 * var(--mm)); margin: 0; appearance: none; background: none;
-}
-#monitor.faceplate #volume::-webkit-slider-runnable-track { height: 100%; background: none; }
-#monitor.faceplate #volume::-moz-range-track { height: 100%; background: none; }
-#monitor.faceplate #volume::-webkit-slider-thumb {
-  appearance: none; width: calc(5 * var(--mm)); height: calc(9 * var(--mm)); border-radius: calc(.6 * var(--mm));
+#monitor.keyed #volume::-webkit-slider-runnable-track { height: 100%; background: none; }
+#monitor.keyed #volume::-moz-range-track { height: 100%; background: none; }
+#monitor.keyed #volume::-webkit-slider-thumb {
+  appearance: none; width: calc(5 * var(--mm)); height: calc(9 * var(--mm)); margin-top: calc((var(--hit) - 9 * var(--mm)) / 2); border-radius: calc(.6 * var(--mm));
   background: linear-gradient(90deg, transparent 46%, #efe6dc 46% 54%, transparent 54%), #6f5441;
   box-shadow: inset 0 calc(1.5 * var(--mm)) 0 #74655a, 0 calc(.6 * var(--mm)) 0 #4b3a31;
 }
-#monitor.faceplate #volume::-moz-range-thumb {
+#monitor.keyed #volume::-moz-range-thumb {
   width: calc(5 * var(--mm)); height: calc(9 * var(--mm)); border: 0; border-radius: calc(.6 * var(--mm));
   background: linear-gradient(90deg, transparent 46%, #efe6dc 46% 54%, transparent 54%), #6f5441;
   box-shadow: inset 0 calc(1.5 * var(--mm)) 0 #74655a, 0 calc(.6 * var(--mm)) 0 #4b3a31;
 }
-#monitor.faceplate #volume:focus-visible { outline: 2px solid #d6f897; outline-offset: 2px; }
+#monitor.keyed #volume:focus-visible { outline: 2px solid #d6f897; outline-offset: 2px; }
 #monitor.faceplate #music-notes.off { display: none; }
 #monitor.faceplate #main-nav { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: calc(4 * var(--mm)); padding: 0 0 calc(1.5 * var(--mm)); font-size: max(10px, calc(7 * var(--mm))); }
 #monitor.faceplate #main-nav a { min-height: max(24px, calc(17 * var(--mm))); padding: 0 calc(5 * var(--mm)); }

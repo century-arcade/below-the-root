@@ -86,10 +86,11 @@
     </div>
     <div id="monitor-sidebar">
     <div id="monitor-controls" role="group" aria-label="Monitor controls">
-      <button id="fullscreen" aria-label="Fullscreen" title="Fullscreen"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="enter" d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/><path class="exit" d="M3 8h5V3M12 3v5h5M17 12h-5v5M8 17v-5H3"/></svg></button>
+      <button id="fullscreen" aria-label="Fullscreen" title="Fullscreen"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="enter" d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/><path class="exit" d="M3 8h5V3M12 3v5h5M17 12h-5v5M8 17v-5H3"/></svg><span class="key-label" aria-hidden="true">Fullscreen</span></button>
       <span id="music-notes" class="monitor-speaker" aria-hidden="true" title="Music"></span>
-      <input id="volume" type="range" min="0" max="100" step="10" aria-label="Volume" title="Volume">
-      <button id="monitor-power" type="button" aria-label="Monitor power" aria-pressed="true" title="Power off (reset game)"><span class="power-switch" aria-hidden="true"><span class="power-light"></span></span></button>
+      <span id="volume-panel"><svg class="volume-scale" viewBox="293.5 330 59 23" aria-hidden="true" focusable="false"><path class="ticks" d="M302 332.2V334.6M306.2 333V334.6M310.4 333V334.6M314.6 333V334.6M318.8 333V334.6M323 332.2V334.6M327.2 333V334.6M331.4 333V334.6M335.6 333V334.6M339.8 333V334.6M344 332.2V334.6"/><rect class="track" x="299.5" y="337" width="47" height="3" rx="1.5"/><rect class="slot" x="300" y="337.6" width="46" height="1.8" rx="0.9"/><text x="323" y="346.3" text-anchor="middle">VOLUME</text></svg><input id="volume" type="range" min="0" max="100" step="10" aria-label="Volume" title="Volume"></span>
+      <button id="monitor-power" type="button" aria-label="Monitor power" aria-pressed="true" title="Power off (reset game)"><span class="power-switch" aria-hidden="true"></span><span class="key-label" aria-hidden="true">Power</span></button>
+      <span class="power-light" aria-hidden="true"></span>
     </div>
     <div id="monitor-developer">
 {{developer}}
