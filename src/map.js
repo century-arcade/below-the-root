@@ -1,27 +1,36 @@
 import { render, WIDTH, PLAYFIELD_ROWS, figureOrigin } from './video.js';
-import { paintScreen } from './world.js';
+import { COLS, ROWS } from './world.js';
 
 export const MAP_ROOM_HEIGHT = PLAYFIELD_ROWS * 8;
 
-// Rebuild from the quest's objects; the current screen also holds temporary
-// changes such as grown limbs and ropes. Map rooms are always shown in light.
-export function mapRoom(state, room) {
-  const view = { data: state.data, room, objects: state.objects, lamp: true, tick: state.tick };
-  if (room === state.room) view.screen = state.screen;
-  else paintScreen(view);
-  return render(view).subarray(0, WIDTH * MAP_ROOM_HEIGHT * 4);
+// Map rooms are always shown in light, from their terrain alone.
+export function mapRoom(data, room) {
+  const screen = new Uint8Array(COLS * ROWS);
+  room.tiles.forEach((row, i) => screen.set(row, i * COLS));
+  return render({ data, room, screen, lamp: true }).subarray(0, WIDTH * MAP_ROOM_HEIGHT * 4);
+}
+
+const thumbnails = new WeakMap();
+
+function thumbnail(data, room) {
+  if (thumbnails.has(room)) return thumbnails.get(room);
+  const source = document.createElement('canvas');
+  source.width = WIDTH;
+  source.height = MAP_ROOM_HEIGHT;
+  source.getContext('2d').putImageData(new ImageData(onParchment(mapRoom(data, room)), WIDTH, MAP_ROOM_HEIGHT), 0, 0);
+  const small = document.createElement('canvas');
+  small.width = WIDTH / 2;
+  small.height = MAP_ROOM_HEIGHT / 2;
+  small.getContext('2d').drawImage(source, 0, 0, small.width, small.height);
+  thumbnails.set(room, small);
+  return small;
 }
 
 export function drawMap(state, visited, current, grid, empty = new Set(), all = false) {
   const cells = mapCells(state.data, visited, current, empty, all);
   grid.style.gridTemplateColumns = `repeat(${cells[0].length}, minmax(0, 1fr))`;
-  const source = document.createElement('canvas');
-  source.width = WIDTH;
-  source.height = MAP_ROOM_HEIGHT;
-  const ctx = source.getContext('2d');
   const describe = c => `${c.code} · ${c.kind} · ${c.visited ? 'visited' : 'unvisited'}`
     + (c.current ? ' · your location' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
-  const paint = room => ctx.putImageData(new ImageData(onParchment(mapRoom(state, room)), WIDTH, MAP_ROOM_HEIGHT), 0, 0);
   grid.replaceChildren(...cells.flat().map(c => {
     const element = document.createElement('span');
     if (!c) {
@@ -38,14 +47,13 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
     }
     element.title = describe(c);
     if (c.empty || c.unseen || c.blank) return element;
-    const room = state.data.roomById.get(c.room);
-    paint(room);
-    const thumbnail = document.createElement('canvas');
-    thumbnail.width = WIDTH / 2;
-    thumbnail.height = MAP_ROOM_HEIGHT / 2;
-    thumbnail.setAttribute('aria-hidden', 'true');
-    thumbnail.getContext('2d').drawImage(source, 0, 0, thumbnail.width, thumbnail.height);
-    element.append(thumbnail);
+    const art = thumbnail(state.data, state.data.roomById.get(c.room));
+    const copy = document.createElement('canvas');
+    copy.width = art.width;
+    copy.height = art.height;
+    copy.setAttribute('aria-hidden', 'true');
+    copy.getContext('2d').drawImage(art, 0, 0);
+    element.append(copy);
     return element;
   }));
 }

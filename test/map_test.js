@@ -204,26 +204,21 @@ test("replay reconstructs exploration and a new quest resets it", async () => {
   assert.equal(session.path.at(-1).questStart, true);
 });
 
-test("map art reflects live objects and terrain without changing the quest", async () => {
+test("map art shows a room's terrain without its objects", async () => {
   const { data } = await mapFixture();
   const session = new Session(data, { read: () => J.idle }, { initial: { mode: 'quest' } });
   const state = session.state;
   const remote = data.rooms.find(r => r !== state.room && r.objects.length && !r.underground);
   const before = JSON.stringify(state);
-  const art = mapRoom(state, remote);
-  assert.deepEqual(art, render({ data, room: remote, tick: state.tick }).subarray(0, art.length),
-    'map art uses the original room tiles, glyphs, objects and palette');
+  const art = mapRoom(data, remote);
+  const terrain = Uint8Array.from(remote.tiles.flat());
+  assert.deepEqual(art, render({ data, room: remote, screen: terrain }).subarray(0, art.length),
+    'map art uses the room tiles, glyphs and palette');
+  assert.notDeepEqual(art, render({ data, room: remote }).subarray(0, art.length),
+    'objects in the room are left off the map');
   assert.equal(JSON.stringify(state), before, 'rendering the map does not change the quest');
-  const objects = state.objects.map(o => o.room === remote.room ? { ...o, carried: true } : o);
-  assert.notDeepEqual(mapRoom({ ...state, objects }, remote), art,
-    'collected objects disappear from the map');
-  const changed = { ...state, screen: new Uint8Array(state.screen.length) };
-  assert.notDeepEqual(mapRoom(changed, state.room), mapRoom(state, state.room),
-    'current-room art reflects live terrain changes');
-  const cave = data.rooms.find(r => r.underground);
-  assert.deepEqual(mapRoom({ ...state, room: cave, screen: cave.screen, lamp: null }, cave),
-    render({ data, room: cave, tick: state.tick }).subarray(0, art.length),
-    'underground map rooms are visible without a lamp');
+  const cave = mapRoom(data, data.rooms.find(r => r.underground));
+  assert.ok(cave.some((v, i) => v !== cave[i % 4]), 'underground map rooms are visible without a lamp');
 });
 
 test("one mouse wheel notch zooms one level at any size Firefox reports", () => {
