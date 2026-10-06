@@ -21,7 +21,7 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
   const ctx = source.getContext('2d');
   const describe = c => `${c.code} · ${c.kind} · ${c.visited ? 'visited' : 'unvisited'}`
     + (c.current ? ' · your location' : '') + (c.signs.length ? ` · ${c.signs.join(' ')}` : '');
-  const paint = room => ctx.putImageData(new ImageData(mapRoom(state, room), WIDTH, MAP_ROOM_HEIGHT), 0, 0);
+  const paint = room => ctx.putImageData(new ImageData(onParchment(mapRoom(state, room)), WIDTH, MAP_ROOM_HEIGHT), 0, 0);
   grid.replaceChildren(...cells.flat().map(c => {
     const element = document.createElement('span');
     if (!c) {
@@ -48,6 +48,14 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
     element.append(thumbnail);
     return element;
   }));
+}
+
+const PARCHMENT = [0xec, 0xe6, 0xd0];
+
+function onParchment(px) {
+  for (let i = 0; i < px.length; i += 4)
+    if (!px[i] && !px[i + 1] && !px[i + 2]) px.set(PARCHMENT, i);
+  return px;
 }
 
 // Centred on the figure's body when it is on this screen; an interior keeps

@@ -24,7 +24,7 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 #map-sheet { width: calc(var(--zoom, 1) * min(100cqw, 100cqh * 2656 / 1424)); flex-shrink: 0; margin: auto; user-select: none; }
 .map-sheet { position: relative; aspect-ratio: 2656 / 1424; background: #ece6d0 url(/assets/box/map.png) 0 0 / 100% 100% no-repeat; }
 .map-grid { position: absolute; left: calc(48 / 2656 * 100%); top: calc(80 / 1424 * 100%); width: calc(2560 / 2656 * 100%); height: calc(1088 / 1424 * 100%); display: grid; grid-template-rows: repeat(16, 1fr); }
-.map-grid > span { min-width: 0; min-height: 0; background: #000; }
+.map-grid > span { min-width: 0; min-height: 0; background: #ece6d0; }
 .map-grid > .unseen { background: transparent; }
 .map-grid canvas { display: block; width: 100%; height: 100%; }
 .map-grid > .unvisited { opacity: 0.5; }
