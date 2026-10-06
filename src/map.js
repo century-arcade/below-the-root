@@ -65,7 +65,7 @@ function locationRing(state, code) {
   ring.style.left = `${x / WIDTH * 100}%`;
   ring.style.top = `${y / MAP_ROOM_HEIGHT * 100}%`;
   const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  Object.entries({ cx: 50, cy: 50, r: 45 }).forEach(([k, v]) => circle.setAttribute(k, v));
+  Object.entries({ cx: 50, cy: 50, r: 43.33 }).forEach(([k, v]) => circle.setAttribute(k, v));
   ring.append(circle);
   return ring;
 }
