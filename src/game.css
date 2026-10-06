@@ -29,7 +29,9 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 .map-grid canvas { display: block; width: 100%; height: 100%; }
 .map-grid > .unvisited { opacity: 0.5; }
 .map-grid > .rock { background: #444; }
-.map-grid .current { outline: 2px solid #b0302a; outline-offset: -2px; }
+.map-grid > .current { position: relative; z-index: 1; overflow: visible; }
+.map-grid .location-ring { position: absolute; height: 100%; aspect-ratio: 1; transform: translate(-50%, -50%); overflow: visible; pointer-events: none; }
+.map-grid .location-ring circle { fill: none; stroke: #b0302a; stroke-width: 10; stroke-opacity: .5; }
 .game-fullscreen #manual, .landscape-play #manual, .game-fullscreen .desk, .landscape-play .desk { display: none; }
 #table { box-sizing: border-box; width: 100%; height: 100dvh; overflow: clip; padding: 16px 16px 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; overflow-x: clip; }
 html.game-fullscreen #table, html.landscape-play #table { display: block; min-height: 0; padding: 0; }

@@ -1,4 +1,4 @@
-import { render, WIDTH, PLAYFIELD_ROWS } from './video.js';
+import { render, WIDTH, PLAYFIELD_ROWS, figureOrigin } from './video.js';
 import { paintScreen } from './world.js';
 
 export const MAP_ROOM_HEIGHT = PLAYFIELD_ROWS * 8;
@@ -32,7 +32,10 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
     element.className = [c.unseen && 'unseen', c.blank && 'blank', c.kind === 'rock' && 'rock', c.current && 'current', !c.visited && !c.unseen && 'unvisited']
       .filter(Boolean).join(' ');
     element.setAttribute('aria-label', describe(c));
-    if (c.current) element.setAttribute('aria-current', 'location');
+    if (c.current) {
+      element.setAttribute('aria-current', 'location');
+      element.append(locationRing(state, c.code));
+    }
     element.title = describe(c);
     if (c.empty || c.unseen || c.blank) return element;
     const room = state.data.roomById.get(c.room);
@@ -45,6 +48,26 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
     element.append(thumbnail);
     return element;
   }));
+}
+
+// Centred on the figure's body when it is on this screen; an interior keeps
+// the ring on the middle of the exterior it was entered from.
+function locationRing(state, code) {
+  let [x, y] = [WIDTH / 2, MAP_ROOM_HEIGHT / 2];
+  if (state.room?.code === code) {
+    const [left, top] = figureOrigin(state.player.col, state.player.row);
+    [x, y] = [left + 12, top + 21];
+  }
+  const ring = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  ring.setAttribute('class', 'location-ring');
+  ring.setAttribute('viewBox', '0 0 100 100');
+  ring.setAttribute('aria-hidden', 'true');
+  ring.style.left = `${x / WIDTH * 100}%`;
+  ring.style.top = `${y / MAP_ROOM_HEIGHT * 100}%`;
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  Object.entries({ cx: 50, cy: 50, r: 45 }).forEach(([k, v]) => circle.setAttribute(k, v));
+  ring.append(circle);
+  return ring;
 }
 
 // underground: cavern slots are walked into indoors, so the outdoor bit is moot
