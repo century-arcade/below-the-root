@@ -333,6 +333,7 @@ function* point(state, choice) {
   for (;;) {
     const j = first ?? (yield { policy: 'steer' });
     first = null;
+    if (j.cancel) return null;
     if (j.fire) {
       if (state.commandChoice) state.commandChoice[choice] = [ptr.col, ptr.row];
       return ptr;
@@ -351,11 +352,13 @@ function* kiniport(state) {
   try {
     sayWrapped(state, 'WHAT DO YOU WANT TO KINIPORT?');
     const at = yield* point(state, 'source');
+    if (!at) return CANCELLED;
     if (at.col === p.col && at.row <= p.row && at.row >= p.row - 2) {
       if (lacksSkill(state, 30, 10)) return;
       for (;;) {
         sayWrapped(state, 'KINIPORT YOUR BODY WHERE?');
         const to = yield* point(state, 'destination');
+        if (!to) return CANCELLED;
         if (!isSupport(state, cell(state, to.col, to.row + 1))
             || NOT_A_LANDING.has(role(state, cell(state, to.col, to.row)))) {
           if (state.commandChoice?.applying) throw new Error('Invalid KINIPORT destination');
@@ -382,6 +385,7 @@ function* kiniport(state) {
     for (;;) {
       sayWrapped(state, 'KINIPORT THE OBJECT WHERE?');
       const to = yield* point(state, 'destination');
+      if (!to) return CANCELLED;
       const halves = [role(state, cell(state, to.col, to.row)), role(state, cell(state, to.col + 1, to.row))];
       if (to.col === COLS - 1 || halves.some((r) => r === 'wall' || r === 'object')
           || !isSupport(state, cell(state, to.col, to.row + 1))) {

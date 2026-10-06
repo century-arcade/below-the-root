@@ -192,7 +192,8 @@ export class Keyboard {
         && this.events.some(e => e.down && e.keys.includes('fire'))) movement.delete('fire');
     const fire = policy === 'steer' ? pressed.has('fire') : movement.has('fire');
     if (flowing) this.deliveredFire = fire;
-    return { ...axes(movement), fire, ...(policy === 'steer' ? { observed: true } : {}) };
+    return { ...axes(movement), fire, ...(policy === 'steer' ? { observed: true } : {}),
+      ...(policy === 'steer' && pressed.has('cancel') ? { cancel: true } : {}) };
   }
 }
 

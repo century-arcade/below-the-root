@@ -113,6 +113,27 @@ for (const cadence of [1, 3, 11]) test(`held KINIPORT source and destination, ca
   assert.equal(state.pointer.col, end, 'release stops destination cursor');
 });
 
+for (const stage of ['source', 'destination']) test(`a cancel at the KINIPORT ${stage} spends nothing`, async () => {
+  const { advance, until, fixture, key, choose } = await inputContractFixture();
+  const { keys, session, state } = fixture(s => { s.player.spiritLimit = s.player.spiritEnergy = 50; });
+  const before = { ...state.player };
+  choose(session, keys, 3, 3);
+  until(session, () => !!state.pointer, 'source selector opens');
+  if (stage === 'destination') {
+    key(keys, 'Enter');
+    until(session, () => lines(state)[0].includes('YOUR BODY WHERE'), 'body chosen');
+    key(keys, 'Enter', true);
+    advance(session);
+  }
+  keys.gesture(['cancel'], 'touch');
+  until(session, () => !state.verb, 'cancel closes KINIPORT');
+  assert.equal(state.pointer, null);
+  assert.deepEqual(lines(state).filter(Boolean), []);
+  assert.deepEqual([state.player.col, state.player.row, state.player.spiritEnergy],
+    [before.col, before.row, before.spiritEnergy]);
+  assert.ok(!session.record.events.some(e => e.command === 'KINIPORT'));
+});
+
 for (const device of ['keyboard', 'gamepad']) test(`${device} walks through a spirit door and its message`, async () => {
   const { until, fixture, key } = await inputContractFixture();
 

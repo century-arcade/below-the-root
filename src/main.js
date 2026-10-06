@@ -229,8 +229,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let state = session.state;
   state.classic = options.classic;
   stick.contextKey = key => {
-    if (!powered || paused || away() || startupHelp || session.playback || !state.itemPicker) return null;
-    return key === 'Escape' ? 'cancel' : state.itemPicker.readOnly ? 'fire' : null;
+    if (!powered || paused || away() || startupHelp || session.playback) return null;
+    if (key === 'Escape' && (state.itemPicker || state.pointer)) return 'cancel';
+    return state.itemPicker?.readOnly ? 'fire' : null;
   };
   stick.selectWithF = () => state.title || !!state.verb;
   let returnSession = null;
@@ -245,6 +246,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
+      else if (state.pointer && !session.playback) stick.gesture(['cancel'], 'touch');
       else if (state.commandMenuOpen || canOpenCommandMenu(state)) commandMenu(!!state.commandMenuOpen);
       else if (!session.playback && !state.demo && !state.title) stick.gesture(['fire', 'down'], 'touch');
     },
@@ -711,8 +713,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }, true);
   addEventListener('keydown', e => {
     if (!powered || paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
-    if (state.itemPicker && !session.playback && !away()
-        && (state.itemPicker.readOnly || e.key === 'Escape')) return;
+    if ((state.itemPicker || state.pointer) && !session.playback && !away()
+        && (state.itemPicker?.readOnly || e.key === 'Escape')) return;
     if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
         && (e.target === canvas || e.target === document.body)) {
       e.preventDefault(); rewindRoomButton.click(); return;
