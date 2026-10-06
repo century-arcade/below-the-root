@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mergePrompts, publicNotes } from '../tools/dev-notes.mjs';
+import { markDuplicates, mergePrompts, publicNotes } from '../tools/dev-notes.mjs';
 
 const row = (date, msg, label = null) => ({ sessionfn: 'sessions/a.jsonl', date, msg, label });
 
@@ -21,4 +21,26 @@ test('only core, design and bug prompts are published; private, junk, meta and u
     { timestamp: '2026-10-06T00:00:00.000Z', text: 'design', label: 'design' },
     { timestamp: '2026-10-07T00:00:00.000Z', text: 'core', label: 'core' },
   ]);
+});
+
+test('a resubmitted prompt keeps only its latest version, marking earlier ones dup', () => {
+  const ask = 'let us fix the screenshot, the character is floating for some reason';
+  const work = [
+    row('2026-10-01T00:00:00.000Z', ask, 'design'),
+    row('2026-10-01T00:01:00.000Z', 'commit it', 'junk'),
+    row('2026-10-01T00:02:00.000Z', `${ask}, and also the sky`, 'bug'),
+    row('2026-10-01T00:03:00.000Z', ask.replace('floating', 'sinking'), 'design'),
+  ];
+  assert.deepEqual(markDuplicates(work).map(note => note.label), ['dup', 'junk', 'dup', 'design']);
+  assert.deepEqual(publicNotes(markDuplicates(work)).map(note => note.timestamp), ['2026-10-01T00:03:00.000Z']);
+});
+
+test('prompts that share only some words, or are too short to judge, both stay published', () => {
+  const work = [
+    row('2026-10-01T00:00:00.000Z', 'okay so what do i do?', 'bug'),
+    row('2026-10-01T00:01:00.000Z', 'okay so what do i do?', 'bug'),
+    row('2026-10-01T00:02:00.000Z', 'the report dialog is overlaid on the game screen, it should be at the top', 'design'),
+    row('2026-10-01T00:03:00.000Z', 'the report dialog should not change the layout of the page at all', 'design'),
+  ];
+  assert.deepEqual(markDuplicates(work).map(note => note.label), ['bug', 'bug', 'design', 'design']);
 });

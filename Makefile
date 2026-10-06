@@ -84,5 +84,6 @@ DEV_NOTES ?= .meta/notes/dev-notes/prompts.jsonl
 dev-notes:
 	node tools/dev-notes.mjs extract $(DEV_NOTES) .meta/sessions .meta/session-archive/codex $(PI)
 	$(PYTHON) tools/label-dev-notes.py $(DEV_NOTES)
+	node tools/dev-notes.mjs dedup $(DEV_NOTES)
 	node tools/dev-notes.mjs publish $(DEV_NOTES) assets/dev-notes.json
 	$(PYTHON) tools/dev-effort.py .meta $(DEV_NOTES)

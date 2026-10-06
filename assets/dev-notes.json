@@ -305,16 +305,6 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-09-09T01:31:56.330Z",
-    "text": "p) we should do this anyway even in classic mode.  note that classic mode does not mean a simulated C64, it means that it does not deviate from the design intent of the game and interface.  mouse clicking is acceptable because it's additional and it's not like they were designing against mice, there just weren't mice at that time.   r) all music should be skippable, at least in modern mode if not in both.  i like n, s otherwise.",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-09-09T01:34:44.705Z",
-    "text": "p) we should do this anyway even in classic mode.  note that classic mode does not mean a simulated C64, it means that it does not deviate from the design intent of the game and interface.  mouse clicking is acceptable because it's additional and it's not like they were designing against mice, there just weren't mice at that time.   r) all music should be skippable, at least in modern mode if not in both.  i like n, s otherwise.  also new volume works, default should be 50% tho now.  remove mute from options, that's just 0% volume (use this interface even  if internally they are actually different).  status looks good but i think should be on bottom instead of top.",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-09-09T01:35:20.909Z",
     "text": "in response to earlier questions: p) we should do this anyway even in classic mode.  note that classic mode does not mean a simulated C64, it means that it does not deviate from the design intent of the game and interface.  mouse clicking is acceptable because it's additional and it's not like they were designing against mice, there just weren't mice at that time.   r) all music should be skippable, at least in modern mode if not in both.  i like n, s otherwise.  also new volume works, default should be 50% tho now.  remove mute from options, that's just 0% volume (use this interface even  if internally they are actually different).  status looks good but i think should be on bottom instead of top.",
     "label": "design"
@@ -348,11 +338,6 @@
     "timestamp": "2026-09-09T03:21:23.561Z",
     "text": "now no music plays in the sky dream when talking to the person (played on entry tho).",
     "label": "bug"
-  },
-  {
-    "timestamp": "2026-09-09T03:47:05.183Z",
-    "text": "include timestamp in game log; disappear messages after some 10 seconds.  b) how come i can click/select on the map, what does it do?",
-    "label": "design"
   },
   {
     "timestamp": "2026-09-09T03:49:13.525Z",
@@ -430,11 +415,6 @@
     "label": "core"
   },
   {
-    "timestamp": "2026-09-09T23:29:43.581Z",
-    "text": "let's fix the screenshot, the character is floating for some reason",
-    "label": "bug"
-  },
-  {
     "timestamp": "2026-09-09T23:43:24.681Z",
     "text": "let's fix the screenshot, the character is floating for some reason",
     "label": "bug"
@@ -487,11 +467,6 @@
   {
     "timestamp": "2026-09-12T07:04:58.600Z",
     "text": "okay look at about.md, let's review the copy overall",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-09-12T07:10:37.258Z",
-    "text": "1 fine, 2: let's find the simplest way to contextualize pense; a hundred is fine because there are also 5 playable chars.  plus no one's counting.  3. i wanted to share it was done largely automatically with computer tools like AI without invoking AI.  4. fix it. 5. fix them.  use 'you' but not 'we'.",
     "label": "design"
   },
   {
@@ -1155,11 +1130,6 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-16T00:22:43.533Z",
-    "text": "- vine rope in inventory not deduped with number; all things should dedup like tokens.\n- inventory should not be shown when message shown.\n  - basically inventory, message, and menu occupy the same space, and only one is shown at a time.\n  - and in particular the status should be at its FIXED location (bottom) so it never jumps around going to the menu or message or inventory. and the screen is always the same size.  screen must stay fixed size is one of the retro rules we should be keeping, yeah?",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-09-16T00:26:57.807Z",
     "text": "regression: the tick-tock sound when resting is no longer played (sound nor waveform)",
     "label": "bug"
@@ -1535,11 +1505,6 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-09-30T02:17:02.277Z",
-    "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate.",
-    "label": "core"
-  },
-  {
     "timestamp": "2026-09-30T02:17:04.641Z",
     "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate.",
     "label": "core"
@@ -1637,11 +1602,6 @@
   {
     "timestamp": "2026-09-30T22:37:11.012Z",
     "text": "great.  there's one 'bezel' on the left side that i guess i just asked you to remove, it should go up same as on the right side, with a little lighter shade than the bottom i guess.",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-09-30T22:56:47.952Z",
-    "text": "great, slightly expand the right triangle shadow and darken it",
     "label": "design"
   },
   {
@@ -1752,11 +1712,6 @@
   {
     "timestamp": "2026-10-02T06:50:08.620Z",
     "text": "let's make PAL the default.  also the unseen black squares are not gray/black when devtools is up, still.  should be.",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-10-02T06:56:38.383Z",
-    "text": "okay better but they need to be the same visible color as the black in the unseen tiles that aren't blank.  and it wouldn't be a crime if the underlying map bled through as long as it's consistent across blank and non-blank tiles",
     "label": "design"
   },
   {
@@ -1875,16 +1830,6 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-10-02T21:56:57.857Z",
-    "text": "okay this shows promise but we need to fix a lot of things. let's start with this 'bench', it looks like shitty storage unit corrugated metal siding and not wood at all.  let's try your other options.\n\nalso i like the shadow to give the box depth (tho needs to be 'deeper' given that the box was ~1 inch thick) but showing two sides at the same time is kind of confusing.  how can we show that's there's a back side to see, before they click 'into' it?\n\nthen, the artifacts on the 'bench' should not go away when clicked and showing; they should be highlighted instead.",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-10-02T21:56:59.165Z",
-    "text": "okay this shows promise but we need to fix a lot of things. let's start with this 'bench', it looks like shitty storage unit corrugated metal siding and not wood at all.  let's try your other options.\n\nalso i like the shadow to give the box depth (tho needs to be 'deeper' given that the box was ~1 inch thick) but showing two sides at the same time is kind of confusing.  how can we show that's there's a back side to see, before they click 'into' it?\n\nthen, the artifacts on the 'bench' should not go away when clicked and showing; they should be highlighted instead.",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-10-02T21:58:33.046Z",
     "text": "okay this shows promise but we need to fix a lot of things. let's start with this 'bench', it looks like shitty storage unit corrugated metal siding and not wood at all.  let's try your other options.\n\nalso i like the shadow to give the box depth (tho needs to be 'deeper' given that the box was ~1 inch thick) but showing two sides at the same time is kind of confusing.  how can we show that's there's a back side to see, before they click 'into' it?\n\nthen, the artifacts on the 'bench' should not go away when clicked and showing; they should be highlighted instead. i also think they're too small!\n\nthen, the greenbar green/white bars are too thick, they should be half the height!  and why do you have to scroll through it?  it's greenbar, it should at most have perforations at the page markers.\n\nfinally the donation box is too corny/cartoony.  let's brainstorm other ways to do this.",
     "label": "design"
@@ -1943,11 +1888,6 @@
     "timestamp": "2026-10-03T00:35:21.654Z",
     "text": "okay let's simplify the whole thing, let's not make them open the box to see all the components, and remove the 'next' arrow on the box (everything's laid out already anyway).\n\nwhen i zoom into the map, it shouldn't be cut off at the top/bottom!  we have a lot more space above/below and it looks bad not to use it.  let's ditch the curator's tag.",
     "label": "design"
-  },
-  {
-    "timestamp": "2026-10-03T05:55:33.387Z",
-    "text": "we're working on .meta/todo/soon/site-framing-without-words.md.  let's take an intermediate screenshot now, and learn to do that anytime before undertaking an interface overhaul (this is a general rule, send to workflow), so we have a nice before/after spread for saul.pw/log.  then i'm thinking that the \"3D desk\" is trying too hard, and maybe it should just be upright and flat again, like the pictorial navbar i had mentioned in the previous session; but for now, just keep it at the bottom.  the green mat is fine for bg for now.\n\nalso bug: the zoomed in map can no longer be dragged to pan it.\n\nalso let's make the 'seen' screens on the map be halfway between the transparency of the devtools unseen screens and the current transparency (which i believe is 0%)",
-    "label": "core"
   },
   {
     "timestamp": "2026-10-03T06:02:15.451Z",
@@ -2095,11 +2035,6 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-10-03T23:04:04.953Z",
-    "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself",
-    "label": "core"
-  },
-  {
     "timestamp": "2026-10-03T23:04:08.288Z",
     "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself",
     "label": "core"
@@ -2225,11 +2160,6 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-10-04T08:24:10.453Z",
-    "text": "i don't see why you think my phoine is running 1.15, i see 1.18",
-    "label": "bug"
-  },
-  {
     "timestamp": "2026-10-04T08:24:21.453Z",
     "text": "i don't see why you think my phoine is running 1.15, i see 1.18.",
     "label": "bug"
@@ -2280,11 +2210,6 @@
     "label": "bug"
   },
   {
-    "timestamp": "2026-10-04T17:10:58.751Z",
-    "text": "clicking on manual left page should go back a page",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-10-04T17:11:03.438Z",
     "text": "clicking on manual/book left page should go back a page",
     "label": "design"
@@ -2315,11 +2240,6 @@
     "label": "design"
   },
   {
-    "timestamp": "2026-10-04T23:41:12.547Z",
-    "text": "better, but i remember a much lower hum, like a 30Hz deep undertone?  could that be a thing?  or 20 or 25GHz?",
-    "label": "design"
-  },
-  {
     "timestamp": "2026-10-04T23:41:15.986Z",
     "text": "better, but i remember a much lower hum, like a 30Hz deep undertone?  could that be a thing?  or 20 or 25Hz?",
     "label": "design"
@@ -2332,11 +2252,6 @@
   {
     "timestamp": "2026-10-04T23:54:06.868Z",
     "text": "okay i'm liking it, let's add a synth'ed click like the luckydog one for on",
-    "label": "design"
-  },
-  {
-    "timestamp": "2026-10-04T23:57:45.457Z",
-    "text": "clicks are too fast, needs more drama.  also too tinny, where's the satisfying CLICL",
     "label": "design"
   },
   {

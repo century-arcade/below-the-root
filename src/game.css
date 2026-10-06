@@ -111,16 +111,17 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 #note .about-copy p:last-child { margin-top: 1.5em; text-indent: 0; text-align: right; }
 #note a { color: inherit; text-underline-offset: 2px; text-decoration-thickness: 1px; }
 #note .references { margin: 1.4em 0 0; gap: .2em 1.2em; font-size: .85em; font-variant: small-caps; }
-.book-spread { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.book-spread { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.page-turns { flex: none; display: flex; justify-content: center; gap: 12px; }
 .book-spread [data-book-image] { position: relative; display: flex; cursor: pointer; }
-.book-spread img { display: block; width: auto; height: min(var(--box-height), (100vw - 144px) / 1.49); object-fit: fill; }
+.book-spread img { display: block; width: auto; height: min(var(--box-height) - 56px, (100vw - 32px) / 1.49); object-fit: fill; }
 #box img { aspect-ratio: auto 454 / 599; filter: drop-shadow(var(--depth)); }
 #manual img { aspect-ratio: 1400 / 1880; filter: drop-shadow(var(--paper)); }
 #manual img.deprecated { filter: contrast(.71) brightness(.49) drop-shadow(var(--paper)); }
 .book-leaf { position: absolute; transform-style: preserve-3d; pointer-events: none; }
 .book-spread .book-leaf img { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .book-spread .book-leaf img + img { transform: rotateY(180deg); }
-.book-spread button { display: grid; place-items: center; width: 44px; height: 88px; padding: 0; color: #f2ede0; background: #2b2d2e; border: 0; box-shadow: 0 4px 0 #111213; }
+.book-spread button { display: grid; place-items: center; width: 64px; height: 44px; padding: 0; color: #f2ede0; background: #2b2d2e; border: 0; box-shadow: 0 4px 0 #111213; }
 .book-spread button:active { transform: translateY(3px); box-shadow: 0 1px 0 #111213; }
 .book-spread button:disabled { visibility: hidden; }
 .book-spread svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
