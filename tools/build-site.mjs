@@ -58,6 +58,22 @@ export function cardList(html) {
   });
 }
 
+export function moduleGraph(read, entry) {
+  const seen = new Set([entry]);
+  for (const name of seen) {
+    for (const [, dep] of read(name).matchAll(/^(?:import|export)\b[^;]*?\bfrom '\.\/([\w-]+\.js)'/gm)) seen.add(dep);
+  }
+  return [...seen];
+}
+
+export function preloads(read) {
+  const assets = JSON.parse(readFileSync(new URL('../docs/spec/data/assets.json', import.meta.url), 'utf8'));
+  const data = [...read('data.js').matchAll(/read\('([^']+\.json)'\)/g)].map(([, path]) => path)
+    .concat(assets.charsets.map(meta => meta.bitmaps), assets.sprite_sheets.map(meta => meta.record_bitmaps));
+  return moduleGraph(read, 'main.js').map(name => `<link rel="modulepreload" href="/${name}">`)
+    .concat(data.map(path => `<link rel="preload" href="/${path}" as="fetch" crossorigin>`)).join('\n');
+}
+
 export function buildSite(out) {
   const read = name => readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8');
   const template = read('page.html');
@@ -71,14 +87,15 @@ export function buildSite(out) {
   const developer = read('developer.html').replaceAll('{{version}}', version);
   const devNotes = renderDevNotes(JSON.parse(readFileSync(new URL('../assets/dev-notes.json', import.meta.url), 'utf8')), marked.parse(read('dev-notes.md')));
   mkdirSync(out, { recursive: true });
+  writeFileSync(join(out, 'dev-notes.html'), devNotes);
   for (const output of ['index', 'play', 'about', 'resources', 'map']) {
     const page = output === 'index' || output === 'map' ? 'play' : output;
     const values = {
       nav: read('nav.html').replace(`href="/${page === 'play' ? '' : page}"`, '$& aria-current="page"'),
       developer: page === 'play' ? '' : developer,
       helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
-      styles: page === 'play' ? '<link rel="stylesheet" href="/game.css"><link rel="stylesheet" href="/dev-notes.css">' : '',
-      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(read('about.md'))).replace('{{devNotes}}', () => devNotes)
+      styles: page === 'play' ? `<link rel="stylesheet" href="/game.css"><link rel="stylesheet" href="/dev-notes.css">\n${preloads(read)}` : '',
+      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(read('about.md')))
         : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(`${page}.md`)))}</main>`,
       scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>
 <script type="module">import { startAnalytics } from "/analytics.js"; startAnalytics();</script>`,

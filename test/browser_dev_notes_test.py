@@ -17,6 +17,7 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
         previous = page.get_by_role('button', name='Previous day', exact=True, include_hidden=True)
         next_day = page.get_by_role('button', name='Next day', exact=True, include_hidden=True)
         expect(previous).to_be_disabled()
+        expect(page.locator('.greenbar-paper [aria-current="true"]')).to_have_count(1)
         days = paper_days(page).evaluate_all('(nodes) => nodes.map(node => node.dataset.paperDay)')
         current = page.locator('.greenbar-paper [aria-current="true"]')
         expect(current).to_have_attribute('data-paper-day', days[0])
@@ -47,6 +48,7 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
 
 with browser_page('/play.html') as page:
     page.get_by_role('button', name='Dev notes', exact=True).click()
+    expect(page.locator('.greenbar-paper [aria-current="true"]')).to_have_count(1)
     assert page.evaluate('''async () => {
         const prompts = await (await fetch('/assets/dev-notes.json')).json();
         const paper = document.querySelector('.greenbar-paper');

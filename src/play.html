@@ -7,7 +7,7 @@
     <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
     <a data-book-image href="/assets/box/front.jpg" target="_blank" rel="noopener" aria-label="Turn the box">
       <img alt="" decoding="async">
-      <img src="/assets/box/front.jpg" width="454" height="599" alt="" decoding="async">
+      <img src="/assets/box/front.jpg" width="454" height="599" alt="" loading="lazy" decoding="async">
     </a>
     <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
     <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
@@ -33,7 +33,7 @@
   <button type="button" data-paper-first aria-label="First day" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
   <button type="button" data-paper-previous aria-label="Previous day" aria-keyshortcuts="ArrowLeft" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
   <div class="greenbar-viewport" tabindex="0" role="region" aria-label="Dated development prompts">
-    <div class="greenbar-paper">{{devNotes}}</div>
+    <div class="greenbar-paper"></div>
   </div>
   <button type="button" data-paper-next aria-label="Next day" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
   <button type="button" data-paper-last aria-label="Last day" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
@@ -47,9 +47,9 @@
 </section>
 </div>
 <div class="bench-strip">
-  <button type="button" class="tray-item tray-closed" data-desk-go="outside" aria-label="Box"><span class="closed-box"><img src="/assets/box/front.jpg" width="454" height="599" alt=""></span></button>
-  <button type="button" class="tray-item tray-manual" data-desk-go="manual" aria-label="Game Manual"><img src="/assets/manual/03.webp" width="1400" height="1880" loading="lazy" alt=""></button>
-  <button type="button" class="tray-item tray-map" data-desk-go="map" aria-label="World Map"><img src="/assets/box/map.png" width="2656" height="1424" loading="lazy" alt=""></button>
+  <button type="button" class="tray-item tray-closed" data-desk-go="outside" aria-label="Box"><span class="closed-box"><img src="/assets/box/front-thumb.webp" width="280" height="369" alt=""></span></button>
+  <button type="button" class="tray-item tray-manual" data-desk-go="manual" aria-label="Game Manual"><img src="/assets/manual/03-thumb.webp" width="300" height="401" alt=""></button>
+  <button type="button" class="tray-item tray-map" data-desk-go="map" aria-label="World Map"><img src="/assets/box/map-thumb.webp" width="840" height="450" alt=""></button>
   <button type="button" class="tray-item tray-disk" data-desk-go="play" aria-label="Play Game"><svg viewBox="0 0 104 124" aria-hidden="true">
     <g transform="translate(2 0)">
     <rect width="100" height="100" fill="#1d1c1f"/>

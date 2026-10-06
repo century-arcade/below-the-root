@@ -1,6 +1,8 @@
 export function setupDevNotes(section) {
   const viewport = section.querySelector('.greenbar-viewport');
-  const days = [...section.querySelectorAll('[data-paper-day]')];
+  const paper = section.querySelector('.greenbar-paper');
+  let days = [];
+  let loading = null;
   const previous = section.querySelector('[data-paper-previous]');
   const next = section.querySelector('[data-paper-next]');
   const first = section.querySelector('[data-paper-first]');
@@ -14,7 +16,7 @@ export function setupDevNotes(section) {
       else day.removeAttribute('aria-current');
     }
     previous.disabled = first.disabled = current === 0;
-    next.disabled = final.disabled = current === days.length - 1;
+    next.disabled = final.disabled = current >= days.length - 1;
   }
   function turn(step) {
     updateDay();
@@ -40,6 +42,11 @@ export function setupDevNotes(section) {
   viewport.addEventListener('scroll', updateDay, { passive: true });
   return {
     show() {
+      loading ||= fetch('/dev-notes.html').then(r => r.ok ? r.text() : Promise.reject(new Error(r.status))).then(html => {
+        paper.innerHTML = html;
+        days = [...paper.querySelectorAll('[data-paper-day]')];
+        updateDay();
+      }, () => { loading = null; });
       updateDay();
       viewport.focus({ preventScroll: true });
     },

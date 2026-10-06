@@ -18,7 +18,7 @@ TEST_TIMEOUT ?= 60
 PY ?= $(HOME)/.venvs/claude/bin/python
 BTR_URL ?= http://localhost:$(PORT)
 
-.PHONY: build serve release release-public test browser-test poster screenshot clean install-hooks dev-notes
+.PHONY: build serve release release-public test browser-test poster thumbs screenshot clean install-hooks dev-notes
 
 install-hooks:
 	git config core.hooksPath .githooks
@@ -39,6 +39,7 @@ build: node_modules/.package-lock.json
 	mkdir -p $(BUILD)/assets/box && cp assets/box/* $(BUILD)/assets/box/
 	mkdir -p $(BUILD)/assets/manual && cp assets/manual/*.webp $(BUILD)/assets/manual/
 	mkdir -p $(BUILD)/assets/sound && cp assets/sound/*.mp3 $(BUILD)/assets/sound/
+	node tools/build-headers.mjs $(BUILD)
 
 release:
 	$(PYTHON) tools/release.py --iso "$(ISO)" --output "$(RELEASE)"
@@ -67,6 +68,9 @@ screenshot: build
 
 poster:
 	$(PY) tools/poster_map.py
+
+thumbs:
+	$(PY) tools/thumbs.py
 
 browser-test: build
 	@if grep -rnE 'wait_for_timeout|setTimeout\(r' test/; then echo "Use deterministic waits or fake clocks in tests"; exit 1; fi

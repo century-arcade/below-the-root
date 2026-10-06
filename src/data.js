@@ -7,9 +7,15 @@ const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
 const PORT_MENU = ['START GAME', 'CONTINUE', 'SAMPLE QUEST'];
 
 export async function loadData(read) {
-  const [assets, roomsFile, tilesFile, map, poster, itemsFile, charactersFile, demo,
+  const assetsFile = read('data/assets.json');
+  const bitmaps = assetsFile.then(assets => Promise.all([
+    Promise.all(assets.charsets.map(meta => read(meta.bitmaps))),
+    Promise.all(assets.sprite_sheets.map(meta => read(meta.record_bitmaps))),
+  ]));
+  const [assets, [charsetBits, sheetBits], roomsFile, tilesFile, map, poster, itemsFile, charactersFile, demo,
     creaturesFile, messagesFile, skillsFile, quest, save, shell, music, initialMap, loader] = await Promise.all([
-    read('data/assets.json'),
+    assetsFile,
+    bitmaps,
     read('data/rooms.json'),
     read('data/tiles.json'),
     read('data/map.json'),
@@ -41,16 +47,10 @@ export async function loadData(read) {
   }
 
   const charsets = {};
-  await Promise.all(assets.charsets.map(async (meta) => {
-    const bits = await read(meta.bitmaps);
-    charsets[shortName(meta.id)] = makeCharset(meta, bits);
-  }));
+  assets.charsets.forEach((meta, i) => { charsets[shortName(meta.id)] = makeCharset(meta, charsetBits[i]); });
 
   const sheets = {};
-  await Promise.all(assets.sprite_sheets.map(async (meta) => {
-    const bits = await read(meta.record_bitmaps);
-    sheets[shortName(meta.id)] = makeSheet(meta, bits);
-  }));
+  assets.sprite_sheets.forEach((meta, i) => { sheets[shortName(meta.id)] = makeSheet(meta, sheetBits[i]); });
 
   const rooms = roomsFile.rooms;
   const roomById = new Map();

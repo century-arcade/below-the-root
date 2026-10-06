@@ -55,6 +55,15 @@ export function setupBook(root, spreads, caption = () => '') {
       load(back.src).then(() => leaf.remove());
     });
   }
+  let visible = false;
+  let engaged = false;
+  const preloadNeighbours = () => {
+    for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
+  };
+  function engage() {
+    engaged = true;
+    if (visible) preloadNeighbours();
+  }
   function show(spread) {
     const from = current;
     current = Math.max(0, Math.min(last, spread));
@@ -62,13 +71,17 @@ export function setupBook(root, spreads, caption = () => '') {
     const departing = current === from + 1 ? 1 : current === from - 1 ? 0 : -1;
     const front = spreads[from][departing];
     const back = pages[1 - departing];
+    if (!visible) return label(pages);
     if (departing >= 0 && front && back && !still.matches) {
       place(departing, pages[departing]);
       turn(departing, front, back);
     } else {
       images.forEach((image, i) => place(i, pages[i]));
     }
-    for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
+    if (engaged) preloadNeighbours();
+    label(pages);
+  }
+  function label(pages) {
     link.href = (pages[1] ?? pages[0]).src;
     previous.disabled = first.disabled = current === 0;
     next.disabled = final.disabled = current === last;
@@ -88,6 +101,7 @@ export function setupBook(root, spreads, caption = () => '') {
     if (root.hidden || event.metaKey || event.ctrlKey || event.altKey) return;
     const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: last }[event.key];
     if (target === undefined) return;
+    engaged = true;
     event.preventDefault();
     event.stopImmediatePropagation();
     show(target);
@@ -95,7 +109,13 @@ export function setupBook(root, spreads, caption = () => '') {
   for (const type of ['keydown', 'keyup']) {
     root.addEventListener(type, event => event.stopPropagation());
   }
+  for (const type of ['pointerover', 'focusin']) root.addEventListener(type, engage, { once: true });
   show(current);
+  new IntersectionObserver(entries => {
+    const was = visible;
+    visible = entries.at(-1).isIntersecting;
+    if (visible && !was) show(current);
+  }).observe(root);
 }
 
 const scanPage = scan => scan - 2;

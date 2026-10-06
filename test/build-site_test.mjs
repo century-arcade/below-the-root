@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -23,7 +23,7 @@ function headValues(html) {
     const attrs = Object.fromEntries([...tag.matchAll(/([\w:-]+)="([^"]*)"/g)]
       .map(([, key, value]) => [key, value]));
     const key = attrs.name || attrs.property || attrs.rel;
-    if (!key || key === 'stylesheet') continue;
+    if (!key || ['stylesheet', 'modulepreload', 'preload'].includes(key)) continue;
     assert.ok(!Object.hasOwn(values, key), `duplicate ${key}`);
     values[key] = attrs.content ?? attrs.href;
   }
@@ -87,6 +87,27 @@ test('every public page initializes the shared analytics loader once', t => {
     assert.equal(scripts.match(/startAnalytics\(\)/g)?.length, 1);
     assert.doesNotMatch(scripts, /gc\.zgo\.at|goatcounter\.com/);
   }
+});
+
+test('game pages hint every boot module and data file, all present in the build', t => {
+  const out = outputDirectory(t);
+  execFileSync('make', ['build', `BUILD=${out}`], { cwd: root, stdio: 'pipe' });
+  for (const page of ['index', 'play', 'map']) {
+    const html = readFileSync(join(out, `${page}.html`), 'utf8');
+    const hints = [...html.matchAll(/<link rel="(?:modulepreload|preload)" href="([^"]+)"/g)].map(([, href]) => href);
+    for (const href of ['/main.js', '/dev-notes.js', '/data/rooms.json', '/assets/charset_text.json', '/assets/sprites_extras.json']) {
+      assert.ok(hints.includes(href), `${page} hints ${href}`);
+    }
+    for (const href of hints) assert.ok(existsSync(join(out, href)), `${href} is built`);
+  }
+  for (const page of ['about', 'resources']) assert.doesNotMatch(readFileSync(join(out, `${page}.html`), 'utf8'), /preload/);
+});
+
+test('dev notes ship as their own fragment, not inside the game pages', t => {
+  const out = outputDirectory(t);
+  buildSite(out);
+  assert.match(readFileSync(join(out, 'dev-notes.html'), 'utf8'), /data-paper-day/);
+  for (const page of ['index', 'play', 'map']) assert.doesNotMatch(readFileSync(join(out, `${page}.html`), 'utf8'), /data-paper-day=/);
 });
 
 test('the renderer escapes metadata while preserving HTML fragments', () => {
