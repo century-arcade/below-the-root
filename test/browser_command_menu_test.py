@@ -1,18 +1,18 @@
-"""Keyboard, mouse and touch open the command menu without repeated activation."""
+"""Keyboard and mouse open the command menu without repeated activation."""
 from browser_helpers import browser_page, observe, until
 from playwright.sync_api import expect
 
 
-with browser_page('/play?player=0', has_touch=True) as page:
+with browser_page('/play?player=0') as page:
     menu_button = page.get_by_role('button', name='Open command menu', exact=True)
     expect(menu_button).to_be_visible()
-    for action in ['f', 'click', 'tap', 'Space', 'Enter']:
+    for action in ['f', 'click', 'Space', 'Enter']:
         if action == 'f':
             page.keyboard.press('f')
         elif action in ['Space', 'Enter']:
             menu_button.press(action)
         else:
-            getattr(menu_button, action)()
+            menu_button.click()
         expect(menu_button).to_be_hidden()
         until(page, 's => String.fromCharCode(...s.state.panel.map(v => v & 127)).includes("GRUNSPREKE")')
         panel = ''.join(chr(value & 127) for value in observe(page)['panel'])
@@ -33,4 +33,4 @@ with browser_page('/play?player=0', has_touch=True) as page:
     until(page, 's => !s.state.commandMenuOpen')
     expect(menu_button).to_be_visible()
 
-print('browser_command_menu_test: keyboard, mouse, touch and held-key activation passed')
+print('browser_command_menu_test: keyboard, mouse and held-key activation passed')

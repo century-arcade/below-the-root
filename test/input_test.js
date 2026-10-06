@@ -60,9 +60,9 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { active: true, jog: false, chords: 0, airborne: false, facing: null };
+  const model = { jog: false, chords: 0, airborne: false, facing: null };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
-    active: () => model.active, jog: () => model.jog, chord: () => model.chords++,
+    jog: () => model.jog, chord: () => model.chords++,
     airborne: () => model.airborne, facing: () => model.facing,
   });
   const target = { closest: () => null, setPointerCapture() {} };
@@ -205,7 +205,7 @@ test("a swipe by either of a pressed-together pair makes it the stick, not the m
   assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false });
 });
 
-test("two quick taps together turn the figure around", async t => {
+test("two quick taps together press the button", async t => {
   const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
   model.facing = 1;
   send('pointerdown', LEFT);
@@ -214,7 +214,7 @@ test("two quick taps together turn the figure around", async t => {
   advance(60);
   send('pointerup', LEFT);
   send('pointerup', RIGHT, 100, 2);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false });
+  assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
   advance(300);
   assert.deepEqual(keys.read(), IDLE);
   assert.equal(model.chords, 0);
@@ -275,11 +275,10 @@ test("a press that lands before a fall and lifts during it steers its side", asy
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false });
 });
 
-test("mice and inactive layouts are not side touches", async t => {
-  const { keys, model, sides, send, advance, LEFT } = await sideFixture(t);
+test("mice are not side touches", async t => {
+  const { keys, sides, send, advance, LEFT } = await sideFixture(t);
   assert.equal(sides.claims({ pointerType: 'mouse' }), false);
-  model.active = false;
-  send('pointerdown', LEFT);
+  send('pointerdown', LEFT, 100, 1, 'mouse');
   advance(200);
   assert.deepEqual(keys.read(), IDLE);
 });

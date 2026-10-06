@@ -240,7 +240,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekRepeatAt = 0;
   const playSurface = document.getElementById('play');
   const sideTouch = new SideTouch(playSurface, canvas, stick, {
-    active: () => document.documentElement.matches('.game-fullscreen, .landscape-play'),
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     airborne: () => !!(state.player?.gliding || state.player?.leaping || state.player?.fallen > 0) && !state.title && !state.demo,
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,

@@ -1,4 +1,4 @@
-"""Classic item prompts and live dialogue retain touch confirmation and steering."""
+"""Classic item prompts and live dialogue retain mouse confirmation and steering."""
 from browser_helpers import browser_page, session_eval, until
 
 
@@ -17,7 +17,7 @@ def anchor(page):
 
 
 def tap_self(page):
-    page.touchscreen.tap(*screen_point(page, anchor(page)))
+    page.mouse.click(*screen_point(page, anchor(page)))
 
 
 def panel_has(page, text):
@@ -41,8 +41,8 @@ def choose(page, name):
         }
         throw Error(`No menu choice ${name}`);
     }''', name))
-    page.touchscreen.tap(*point)
-    page.touchscreen.tap(*point)
+    page.mouse.click(*point)
+    page.mouse.click(*point)
     until(page, 's => !s.state.commandMenuOpen')
     page.clock.run_for(160)
 
@@ -50,18 +50,15 @@ def choose(page, name):
 def hold_direction(page, dx, dy, predicate):
     x, y = anchor(page)
     x, y = screen_point(page, [x + dx * 48, y + dy * 40])
-    cdp = page.context.new_cdp_session(page)
-    cdp.send('Input.dispatchTouchEvent', {
-        'type': 'touchStart', 'touchPoints': [{'x': x, 'y': y}],
-    })
+    page.mouse.move(x, y)
+    page.mouse.down()
     until(page, predicate)
-    cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
-    cdp.detach()
+    page.mouse.up()
     page.clock.run_for(160)
 
 
 for cancel in [False, True]:
-    with browser_page('/play?player=0', has_touch=True,
+    with browser_page('/play?player=0',
                       setup=lambda p: p.add_init_script("localStorage.setItem('btr.classic', '1')")) as page:
         item = session_eval(page, '''async s => {
             const {CLASS} = await import('/data.js');
@@ -91,7 +88,7 @@ for cancel in [False, True]:
         tap_self(page)
         until(page, 's => s.state.commandMenuOpen')
 
-with browser_page('/play?player=0', has_touch=True) as page:
+with browser_page('/play?player=0') as page:
     session_eval(page, '''async s => {
         const {startTune} = await import('/audio.js');
         startTune(s.state, 0);
@@ -103,7 +100,7 @@ with browser_page('/play?player=0', has_touch=True) as page:
     tap_self(page)
     until(page, 's => s.state.commandMenuOpen')
 
-with browser_page('/play?player=0', has_touch=True) as page:
+with browser_page('/play?player=0') as page:
     session_eval(page, '''async s => {
         const {startVerb} = await import('/game.js');
         const {gainSpirit} = await import('/dialog.js');
@@ -130,7 +127,7 @@ with browser_page('/play?player=0', has_touch=True) as page:
     until(page, 's => !s.state.verb')
     assert not session_eval(page, 's => s.state.commandMenuOpen')
 
-with browser_page('/play?player=0', has_touch=True) as page:
+with browser_page('/play?player=0') as page:
     session_eval(page, 's => s.state.player.spiritLimit = s.state.player.spiritEnergy = 50')
     choose(page, 'KINIPORT')
     panel_has(page, 'WHAT DO YOU WANT TO KINIPORT?')
@@ -151,4 +148,4 @@ with browser_page('/play?player=0', has_touch=True) as page:
     assert session_eval(page, 's => s.state.player.spiritEnergy') == 40
     assert not session_eval(page, 's => s.state.pointer || s.state.commandMenuOpen')
 
-print('browser_pointer_prompts_test: touch item confirmation/cancellation, dialogue, tune skips and KINIPORT passed')
+print('browser_pointer_prompts_test: mouse item confirmation/cancellation, dialogue, tune skips and KINIPORT passed')

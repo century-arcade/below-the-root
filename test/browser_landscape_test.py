@@ -1,4 +1,4 @@
-"""Portrait touch reaches the inventory; landscape touch splits the screen into two halves."""
+"""Touch splits the screen into two halves in portrait and landscape."""
 from browser_helpers import browser_page, until, session_eval
 
 
@@ -14,7 +14,32 @@ def choose_inventory(page):
 
 
 with browser_page('/play?room=B8', viewport={'width': 412, 'height': 915}, has_touch=True) as page:
+    box = page.locator('#screen').bounding_box()
+    assert box
+    cdp = page.context.new_cdp_session(page)
+    y = box['y'] + box['height'] / 2
+    left = {'x': box['x'] + box['width'] / 4, 'y': y, 'id': 1}
+    right = {'x': box['x'] + box['width'] * 3 / 4, 'y': y, 'id': 2}
+
+    def portrait_touch(kind, *points):
+        cdp.send('Input.dispatchTouchEvent', {
+            'type': kind, 'touchPoints': [{'x': p['x'], 'y': p['y'], 'id': p['id']} for p in points]})
+
+    until(page, 's => s.state.player.fallen > 0')
+    until(page, 's => s.state.player.fallen === 0 && !s.state.player.knockdown')
+    portrait_touch('touchStart', left)
+    page.clock.run_for(300)
+    portrait_touch('touchEnd')
+    until(page, 's => s.record.events.some(e => e.stick?.[0] === -1)')
+
     page.locator('#command-menu').tap()
+    page.clock.run_for(300)
+    assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a panel tap is not the menu'
+
+    portrait_touch('touchStart', left)
+    portrait_touch('touchStart', left, right)
+    page.clock.run_for(250)
+    portrait_touch('touchEnd')
     panel_has(page, 'INVENTORY')
     choose_inventory(page)
 
@@ -199,4 +224,4 @@ with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_
     page.clock.run_for(300)
     assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a swipe down over the panel crouches without the menu'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, one-handed status-panel touches, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')
+print('browser_landscape_test: portrait side touch and two-finger inventory, landscape side touches, turn-and-leap, one-handed status-panel touches, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')

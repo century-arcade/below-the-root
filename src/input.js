@@ -524,7 +524,7 @@ export class Pointer {
 
 }
 
-// panel-button: in side-touch layouts the panel opens the menu by two-finger hold, not by touch
+// panel-button: touch opens the menu by two-finger hold, not by the panel
 const SIDE_IGNORE = OFF_PICTURE_IGNORE.replace('button', 'button:not(#command-menu)');
 const SIDE_TAP_MS = 120;
 const PAIR_HOLD_MS = 200;
@@ -534,15 +534,13 @@ const STEER_POLL_MS = 50;
 const SIDE_SOURCE = 'touch';
 const SIGN = { left: -1, right: 1 };
 
-// Fullscreen and landscape touch: each half of the screen is a stick and a trigger;
-// see "Fullscreen and landscape touch" in docs/spec/input.md.
+// Touch: each half of the screen is a stick and a trigger; see "Touch" in docs/spec/input.md.
 export class SideTouch {
-  constructor(surface, canvas, keys, { active = () => true, jog = () => false, chord = () => {},
+  constructor(surface, canvas, keys, { jog = () => false, chord = () => {},
     airborne = () => false, facing = () => null } = {}) {
     this.canvas = canvas;
     this.keys = keys;
     keys.attach(this);
-    this.active = active;
     this.jog = jog;
     this.onChord = chord;
     this.airborne = airborne;
@@ -559,7 +557,7 @@ export class SideTouch {
   }
 
   claims(e) {
-    return e.pointerType !== 'mouse' && this.active();
+    return e.pointerType !== 'mouse';
   }
 
   side(e) {
@@ -637,7 +635,7 @@ export class SideTouch {
       else this.trigger();
     } else if (f.role === 'pair') {
       f.lifted = true;
-      if (f.partner.lifted) this.pairTap();
+      if (f.partner.lifted) this.trigger();
     } else if (f.role === 'stick') {
       const heir = this.live().find(g => g.role === 'button');
       if (heir) this.settle(heir);
@@ -686,11 +684,6 @@ export class SideTouch {
     else this.resolve(f);
   }
 
-  pairTap() {
-    const facing = this.jog() ? null : this.facing();
-    if (facing) this.keys.tap(facing > 0 ? 'left' : 'right', SIDE_SOURCE);
-    else this.keys.tap('fire', SIDE_SOURCE);
-  }
 
   stickKey() {
     const stick = [...this.fingers.values()].find(f => f.role === 'stick');

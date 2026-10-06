@@ -43,17 +43,16 @@ view. Leaving the browser tab holds gameplay; music can keep playing while pause
 Menus move once per direction press. Up/Down browse item and character choices;
 item choices wrap through NOTHING to cancel.
 
-Mouse, and touch outside fullscreen and short landscape: hold to steer, tap to
+Mouse: hold to steer, tap to
 walk, double-tap within leap range to jump (farther targets walk). Tap yourself or the menu area below the scene for the
 command menu. Self-tap on a door goes through; self-tap while walking stops first.
 Press or drag over menu choices to highlight; tap the highlighted choice to select.
-In fullscreen and short landscape, touch is a joystick instead. Each half of
+Touch is a joystick. Each half of
 the screen, status panel included, steers and presses the button. Hold a half to
 walk that way; swipe while holding to point another way (up or down to climb,
-crouch or stand; back to where you started stands still). Tap for the button.
+crouch or stand; back to where you started stands still). Tap to select or skip.
 While holding, touch a second finger to jump; each further touch jumps again.
-Press two fingers together and hold to open or close the command menu; tap two
-fingers together to turn around. In menus, swipe to move and tap to select.
+Press two fingers together and hold to open or close the command menu. In menus, swipe to move and tap to select.
 Gamepad: d-pad or left stick moves, any face button fires.
 
 With a shuba, press Left or Right while falling to glide; you don't need to hold

@@ -1,4 +1,4 @@
-"""Modern inventory dismissal and direct touch/mouse item choices preserve input ownership."""
+"""Modern inventory dismissal and direct mouse item choices preserve input ownership."""
 from browser_helpers import browser_page, session_eval, until
 
 
@@ -62,31 +62,6 @@ def selected(page):
     }''')
 
 
-with browser_page('/play?player=0', has_touch=True) as page:
-    bread, fruit = pack(page)
-    choose(page, 'EAT')
-    assert selected(page) == bread
-    point = item_point(page, fruit)
-    cdp = page.context.new_cdp_session(page)
-    cdp.send('Input.dispatchTouchEvent', {
-        'type': 'touchStart', 'touchPoints': [{'x': point[0], 'y': point[1]}],
-    })
-    assert selected(page) == fruit
-    page.clock.run_for(200)
-    assert session_eval(page, '(s, id) => s.state.objects[id].exists', fruit)
-    cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
-    page.clock.run_for(160)
-    assert session_eval(page, '(s, id) => s.state.objects[id].exists', fruit)
-    page.touchscreen.tap(*screen_point(page, [160, 80]))
-    page.clock.run_for(300)
-    assert session_eval(page, 's => !!s.state.itemPicker')
-    assert selected(page) == fruit
-    page.touchscreen.tap(*point)
-    until(page, '(s, id) => !s.state.objects[id].exists', fruit)
-    assert session_eval(page, '(s, id) => s.state.objects[id].exists', bread)
-    assert session_eval(page, 's => s.record.events.filter(e => e.command === "EAT").map(e => e.item)') == [fruit]
-    cdp.detach()
-
 with browser_page('/play?player=0') as page:
     bread, fruit = pack(page)
     choose(page, 'DROP')
@@ -129,7 +104,7 @@ for key in ['ArrowRight', 'q', 'Escape', 'f', 'Tab']:
         page.keyboard.press('ArrowRight')
         until(page, '(s, count) => s.record.events.slice(count).some(e => e.stick?.[0] === 1)', count)
 
-with browser_page('/play?player=0', has_touch=True) as page:
+with browser_page('/play?player=0') as page:
     labels = session_eval(page, '''async s => {
         const {inventoryEntries} = await import('/inventory.js');
         const {CLASS} = await import('/data.js');
@@ -144,11 +119,7 @@ with browser_page('/play?player=0', has_touch=True) as page:
         return inventoryEntries(s.state).map(e => e.label);
     }''')
     choose(page, 'USE')
-    point = item_point(page, 'more')
-    page.touchscreen.tap(*point)
-    page.clock.run_for(160)
-    assert session_eval(page, 's => s.state.itemPicker.selected.col === 2 && s.state.itemPicker.offset === 0')
-    page.touchscreen.tap(*point)
+    page.mouse.click(*item_point(page, 'more'))
     until(page, 's => s.state.itemPicker.offset > 0')
     assert not session_eval(page, 's => s.record.events.some(e => e.command === "USE")')
     page.keyboard.press('Escape')
@@ -158,13 +129,13 @@ with browser_page('/play?player=0', has_touch=True) as page:
     for _ in range(3):
         text = session_eval(page, 's => String.fromCharCode(...s.state.panel.map(c => c & 127))')
         shown.update(label for label in labels if label in text)
-        page.touchscreen.tap(*item_point(page, 'more'))
+        page.mouse.click(*item_point(page, 'more'))
         page.clock.run_for(160)
         assert session_eval(page, 's => s.state.itemPicker?.readOnly')
     assert shown == set(labels)
     assert 'TOKEN x75' in shown
-    page.touchscreen.tap(*screen_point(page, [160, 80]))
+    page.mouse.click(*screen_point(page, [160, 80]))
     until(page, 's => !s.state.verb')
     assert not session_eval(page, 's => s.record.events.some(e => e.command || e.stick?.some(Boolean))')
 
-print('browser_inventory_test: touch EAT, long mouse DROP, Escape, consumed dismissal and overflow paging passed')
+print('browser_inventory_test: long mouse DROP, Escape, consumed dismissal and overflow paging passed')

@@ -72,9 +72,9 @@ must prevent stale actions from leaking into play without swallowing the
 next fresh press. Input help permits play after startup; map navigation and
 editing fields own their inputs. Clicking the canvas restores gameplay focus.
 
-## Pointer gestures
+## Mouse gestures
 
-Mouse and touch share these locomotion gestures. Item prompts, dialogue,
+The mouse uses these locomotion gestures. Item prompts, dialogue,
 KINIPORT and live tune waits retain their trigger taps and held steering;
 self-taps confirm or skip rather than request the command menu there.
 Holding longer than 150 ms steers toward the pointer. A single tap walks
@@ -88,8 +88,7 @@ Beside the picture, a press steers from the moment it lands until it
 lifts; a tap is a single nudge and never sets a walk target or a
 double-tap leap.  Above the figure's body it climbs, below it descends,
 level with it walks toward that side; drags re-latch as on the picture.
-While a hold steers, a second finger is the trigger for as long as it is
-down.  A finger still down keeps steering across room changes; walk
+A press still down keeps steering across room changes; walk
 targets and pending double taps do not.
 
 Tapping the figure opens the command menu through the same route as F or
@@ -111,11 +110,11 @@ already-highlighted choice confirms it; a hold or drag never confirms.
 Outside the choices does nothing. Keyboard and gamepad navigation continue
 from the pointer highlight, and Escape and F retain their usual meanings.
 
-## Fullscreen and landscape touch
+## Touch
 
-In fullscreen and landscape play, touch replaces the picture gestures above
-with a virtual joystick and trigger. The screen splits into left and right
-halves. The touch layer does not look at game state except where listed
+In every layout, touch is a virtual joystick and trigger, not the mouse
+gestures above. The play area splits into left and right halves of the
+picture. The touch layer does not look at game state except where listed
 below; the game decides what a held direction or a trigger means, as it does
 for a real joystick. Releasing the stick centres it, which stops a walk but
 leaves a glide alone.
@@ -125,10 +124,10 @@ leaves a glide alone.
 | One finger held without a swipe | After 120 ms the stick points to that finger's half; in the air it points at once | Nothing |
 | Swipe 24 px while holding | The stick points the swipe's way. A vertical part outranks a sideways one. A new swipe re-points it; back within 12 px of the start centres it | Steps once per 24 px |
 | Lift the stick finger | Stick centred | Nothing |
-| Lone quick tap | Trigger on the ground; in the air a nudge toward that half | Confirm |
+| Lone quick tap | Trigger on the ground, which the game ignores with the stick centred; in the air a nudge toward that half | Confirm |
 | Second finger landing while the first is held | Trigger as it lands, once however long it stays; nothing while the stick points down | Confirm |
 | Two fingers landing within 80 ms and held 200 ms, neither swiping | Open the command menu (cancel an item prompt) | Close it |
-| Two fingers landing within 80 ms and both lifted sooner | Turn the figure around (trigger outside free play) | Confirm |
+| Two fingers landing within 80 ms and both lifted sooner | Trigger | Confirm |
 
 A trigger with the stick pointing behind the figure first lets the game read
 the turn, then sends the trigger, so the leap is not spent on turning. Of two
