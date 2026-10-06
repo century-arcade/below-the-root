@@ -37,7 +37,7 @@ canvas { image-rendering: pixelated; display: block; background: #000; }
 html.game-fullscreen #table, html.landscape-play #table { display: block; min-height: 0; padding: 0; }
 html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] { display: contents; }
 html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] .bench-strip { display: none; }
-html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] .bench-stage { position: fixed; inset: 0; z-index: 2; background: #1c1e1d; }
+html:is(.game-fullscreen, .landscape-play) #desk[data-stage="map"] .bench-stage { position: fixed; inset: 0; z-index: 2; padding-bottom: 24px; background: #1c1e1d; }
 .monitor-away:not(.game-fullscreen, .landscape-play) #play { position: absolute; visibility: hidden; }
 html, body { background: #652d0c url(/assets/room/paneling.svg) 0 0 / 240px 480px; }
 
@@ -51,13 +51,15 @@ html[data-bench="grey"] { --mat: #8a8c8d; }
 #desk {
   display: contents; --plane: var(--desk-tilt); --w: calc(sin(var(--plane)) / sin(48deg));
   --sink: calc(1 - cos(var(--plane)) / (1 + .28 * sin(var(--plane))));
-  --strip: calc(220px + 60px * var(--w)); --spill: 50vw; --z: calc(.7 + .1 * var(--w));
+  --strip-n: calc(220 + 60 * var(--w)); --strip: calc(var(--strip-n) * 1px); --spill: 50vw; --z: calc(.7 + .1 * var(--w));
   --box-height: min((100dvh - 136px - var(--strip) * min(1, 1.2 - 1.2 * var(--sink))) / 1.04, (100vw - 140px) / 1.51);
+  --back-n: calc(var(--strip-n) * (1 + var(--desk-back) * clamp(0, var(--w) * 20, 1)));
+  --desk-overlap: calc((var(--back-n) * cos(var(--plane)) / (1 + var(--back-n) * sin(var(--plane)) / 1000) - var(--strip-n) * (1 - var(--sink))) * 1px);
   --depth: calc(var(--box-height) * .03) calc(var(--box-height) * .04) 0 #00000059; --paper: 2px 3px 0 #00000038;
 }
 #play { order: 1; }
 #play, .bench-stage { position: relative; z-index: 1; }
-.bench-stage { order: 1; flex: 1; align-self: stretch; min-width: 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 24px; }
+.bench-stage { order: 1; flex: 1; align-self: stretch; min-width: 0; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: calc(var(--desk-overlap) + 12px); }
 .bench-stage > * { max-width: 100%; }
 html:not(.monitor-away) .bench-stage { display: none; }
 .bench-strip {
@@ -93,7 +95,8 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 .tray-disk { --tilt: -5deg; width: 130px; }
 .tray-item:focus-visible { outline: 2px solid #f2e4c6; outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { .tray-item { transition: none; } }
-.page-number { display: block; margin-top: 8px; text-align: center; color: #f2e4c6; font-size: 14px; }
+#manual { position: relative; }
+.page-number { position: absolute; bottom: 12px; left: calc(50% + 162px); white-space: nowrap; color: #f2e4c6; font-size: 14px; }
 #note { display: flex; justify-content: center; }
 #note .about-article {
   --page: calc(var(--box-height) * .755); --pad: calc(var(--box-height) * .07);
@@ -146,6 +149,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
   #desk[data-stage="map"] .bench-stage { flex: 1; }
   .bench-strip { flex-wrap: wrap; align-content: center; gap: 44px 22px; padding: 0 calc(16px + var(--spill)) calc(24px - 24px * var(--w)); }
   html[data-strip="compact"]:not(.monitor-away) #desk { --strip: 180px; --z: .4; }
+  .page-number { top: calc(100% + 8px); bottom: auto; left: 50%; transform: translateX(-50%); }
   #note .about-article { --page: calc(100vw - 64px); width: var(--page); height: auto; columns: 1; }
   #note .about-article::before { content: none; }
 }

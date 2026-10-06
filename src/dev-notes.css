@@ -1,7 +1,7 @@
 @font-face { font-family: 'Doto'; src: url('/assets/doto.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
 .tray-dev-notes { width: 190px; height: 160px; --tilt: -4deg; color: #344b3b; }
 .greenbar-stack-sheet {
-  position: absolute; inset: 0; display: grid; place-items: center;
+  position: absolute; inset: -16px 0 16px; display: grid; place-items: center;
   background: #faf7f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='24'%3E%3Cpath fill='%23ecf2e8' d='M0 0h20v12H0z'/%3E%3C/svg%3E");
   border: 1px solid #b5b8a2;
   box-shadow: 0 3px 0 #b5b8a2, 2px 5px 0 #eeecd9, 2px 8px 0 #b5b8a2, 0 10px 0 #eeecd9, 0 13px 0 #b5b8a2, 3px 15px 0 #eeecd9, 3px 18px 0 #b5b8a2, 5px 23px 0 #0005;
