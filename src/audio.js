@@ -12,7 +12,7 @@ export const SFX = {
   fall: 9, door: 10, glideTurn: 11, bell: 12, chime: 13,
 };
 
-// the monitor's own sounds, recorded: assets/sound/sources.txt
+// the monitor's own sounds, synthesized: assets/sound/sources.txt
 export const CLIPS = ['power-on', 'power-off'];
 
 export async function loadClip(name) {

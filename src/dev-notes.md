@@ -12,6 +12,5 @@ Sources:
    - [manual scans](https://archive.org/details/below-the-root-game-manual-1984) from the Internet Archive
    - [inside-lid photograph](https://www.mocagh.org/loadpage.php?getgame=belowtheroot-alt) from the Museum of Computer Adventure Game History
    - [Commodore 1702 photograph](https://c-64.nl/wp-content/uploads/2023/10/1702_monitor_commodore_64.jpg) from c-64.nl
-   - power-button sound from [iiiDIY's 1702 restoration](https://www.youtube.com/watch?v=SQE4ViGvLes)
 
 # Human Prompts
