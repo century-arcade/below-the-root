@@ -181,14 +181,18 @@ for (const half of [0, 1]) test(`KINIPORT selects an object from half ${half}`, 
   assert.equal(s.player.spiritEnergy, 5);
 });
 
-test('the wand of Befal banishes for good', async () => {
+test('the wand of Befal banishes for good, leaving bramble uncut', async () => {
   const { run, faceCreature, data, pomma } = await talkFixture();
 
   const s = questState(data, pomma);
   const c = faceCreature(s, 4);
   give(s, CLASS.WAND);
   s.player.spiritLimit = 20;
-  assert.equal(run(s, [...menu('USE'), ...page(0), J.idle, J.idle])[0], 'THE WAND IS USELESS HERE');
+  const bramble = data.tiles.find((t) => t && t.role === 'bramble').code;
+  const cell = s.player.row * 40 + s.player.col + s.player.facing;
+  s.screen[cell] = bramble;
+  assert.equal(run(s, [...menu('USE'), ...page(0), J.idle, J.idle])[0], 'THE WAND CUTS SWIFTLY');
+  assert.equal(s.screen[cell], bramble);
   assert.equal(s.creature, null);
   assert.equal(s.player.spiritLimit, 15);
   assert.equal(s.player.spiritEnergy, 0);

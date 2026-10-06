@@ -213,7 +213,7 @@ function* use(state) {
     case CLASS.WAND: {
       const c = creatureInReach(state);
       if (c) banish(state, c);
-      return sayWrapped(state, cut(state, bramble) ? 'THE WAND CUTS SWIFTLY' : 'THE WAND IS USELESS HERE');
+      return sayWrapped(state, c || cut(state, bramble) ? 'THE WAND CUTS SWIFTLY' : 'THE WAND IS USELESS HERE');
     }
     case CLASS.BEAK:
       if (!cut(state, bramble)) return sayWrapped(state, 'THE BEAK IS USELESS HERE');

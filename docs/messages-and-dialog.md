@@ -432,7 +432,7 @@ starts two bytes later.
 | `$902C` | `$C354` | NOTHING | USE cycle wrapped; usable classes are the 1s in the table at `$9077`: 2, 3, 9, 11, 12, 13 |
 | `$909C` | `$C349` | YOUR LAMP IS ALREADY LIT | USE honeylamp with `$CA` non-zero |
 | `$90CC` | `$C349` | YOUR LAMP IS LIT | USE honeylamp: `$CA` = the object index, `$CB` = 10..13 (its life in days) |
-| `$90FD` | `$C349` | THE WAND CUTS SWIFTLY | USE wand of befal on a cuttable cell |
+| `$90FD` | `$C349` | THE WAND CUTS SWIFTLY | USE wand of befal on a creature in reach, or on a cuttable cell |
 | `$911B` | `$C349` | THE WAND IS USELESS HERE | USE wand elsewhere |
 | `$9156` | `$C349` | THE BEAK CUTS SLOWLY | USE trencher beak on a cuttable cell, `rnd` < `$F0` |
 | `$9173` | `$C349` | THE BEAK IS USELESS HERE | USE beak elsewhere |
