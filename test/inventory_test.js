@@ -6,6 +6,7 @@ import { pickItem, inventoryEntries, highlightItemChoice, canCarry, weightCarrie
 import { runMenu } from '../src/verbs.js';
 import { paintScreen } from '../src/world.js';
 import { CLASS } from '../src/data.js';
+import { print, PANEL_ROW } from '../src/panel.js';
 
 const data = await loadTestData();
 
@@ -201,4 +202,54 @@ test("inventory counts repeated items once per class", async () => {
   inventory.next(J.idle);
   inventory.next(J.down);
   assert.match(lines(pack)[0], /NOTHING$/, 'duplicate rope is skipped');
+});
+
+test('an item choice that overflows uses three rows under its prompt and pages from >>', () => {
+  const state = questState(data);
+  const items = data.items.slice(0, 9).map(item => give(state, item.class));
+  print(state, PANEL_ROW, 1, 'USE WHAT');
+  const picker = grid(state);
+  const shown = lines(state);
+  assert.equal(shown[0], 'USE WHAT');
+  assert.equal(shown.slice(1).filter(l => /\S/.test(l)).length, 3);
+  assert.match(shown[3], />>$/);
+  assert.ok(!shown.join(' ').includes('MORE'));
+  picker.press({ ...J.fire, menuChoice: { col: 2, row: 0 } });
+  assert.ok(lines(state).join(' ').includes(items[3].name.replace(/^(?:A|AN|THE) /, '')));
+});
+
+test('a short item choice keeps its blank row and offers no >>', () => {
+  const state = questState(data);
+  give(state, CLASS.BREAD);
+  give(state, CLASS.FRUIT);
+  grid(state);
+  const shown = lines(state);
+  assert.equal(shown[1], '');
+  assert.ok(!shown.some(l => l.endsWith('>>')));
+});
+
+test('the inventory fills all four rows and any push pages on before closing', () => {
+  const state = questState(data);
+  const labels = data.items.slice(0, 12).map(item => give(state, item.class))
+    .map(o => o.name.replace(/^(?:A|AN|THE) /, ''));
+  const picker = grid(state, { counted: true, noFire: true });
+  const first = lines(state);
+  assert.ok(!first.join(' ').includes('YOU HAVE'));
+  assert.ok(first.every(l => /\S/.test(l)));
+  assert.match(first[3], />>$/);
+  const shown = new Set(labels.filter(label => first.join(' ').includes(label)));
+  assert.equal(shown.size, 8);
+  assert.equal(picker.press(J.down).done, false);
+  for (const label of labels) if (lines(state).join(' ').includes(label)) shown.add(label);
+  assert.deepEqual(shown, new Set(labels));
+  assert.deepEqual(picker.press(J.down), { done: true, value: null });
+  assert.equal(state.itemPicker, null);
+});
+
+test('Escape closes a paged inventory at once', () => {
+  const state = questState(data);
+  data.items.slice(0, 12).forEach(item => give(state, item.class));
+  const picker = grid(state, { counted: true, noFire: true });
+  assert.deepEqual(picker.press({ ...J.idle, cancel: true }), { done: true, value: null });
+  assert.ok(lines(state).every(l => l === ''));
 });

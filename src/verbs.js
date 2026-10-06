@@ -423,7 +423,7 @@ function* status(state) {
 }
 
 function* inventory(state) {
-  say(state, 'YOU HAVE');
+  if (state.classic || state.demo) say(state, 'YOU HAVE');
   yield* pickItem(state, { col: 10, noFire: true, counted: !state.demo });
   if (!state.classic && !state.demo) return WOKE;
 }

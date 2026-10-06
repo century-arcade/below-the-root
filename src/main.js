@@ -230,7 +230,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   state.classic = options.classic;
   stick.contextKey = key => {
     if (!powered || paused || away() || startupHelp || session.playback || !state.itemPicker) return null;
-    return state.itemPicker.readOnly ? 'fire' : key === 'Escape' ? 'cancel' : null;
+    return key === 'Escape' ? 'cancel' : state.itemPicker.readOnly ? 'fire' : null;
   };
   stick.selectWithF = () => state.title || !!state.verb;
   let returnSession = null;

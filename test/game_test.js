@@ -83,6 +83,18 @@ test('timeout preserves every sentence without splitting the final word across r
   ).match(/\S+/g));
 });
 
+for (const page of ['2', '3', '4']) {
+  test(`intro story page ${page} breaks between words`, async () => {
+    const { data, pomma } = await timeFixture();
+    const state = questState(data, pomma);
+    state.stop = { reason: 'demo_page', page: Number(page) };
+    tick(state);
+    const rows = lines(state).filter(Boolean);
+    assert.ok(rows.length > 1);
+    assert.deepEqual(rows.flatMap(r => r.match(/\S+/g)), data.demo.text_pages[page][0].match(/\S+/g));
+  });
+}
+
 for (const outcome of ['attack_salaat', 'attack_nekom', 'kidnap_salaat', 'kidnap_nekom']) {
   test(`${outcome} preserves its complete prose rather than original screen padding`, async () => {
     const { data, pomma } = await timeFixture();

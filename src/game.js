@@ -272,7 +272,7 @@ function resolveStop(state) {
 function showPage(state, page) {
   const lines = state.data.demo.text_pages[page];
   if (!lines || page === CLEAR_PAGE) return clearPanel(state);
-  say(state, ...lines);
+  sayWrapped(state, ...lines);
 }
 
 // shell.md: every message the shell prints waits for the button or the stick, then clears

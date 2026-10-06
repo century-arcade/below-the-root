@@ -76,6 +76,7 @@ export function objectUnder(state) {
 }
 
 const GRID_WIDTH = PANEL_COLS / 2;
+const MORE_COL = PANEL_COLS - 2;
 
 function gridChoice(picker, index) {
   return { col: Math.floor(index / picker.rows), row: index % picker.rows };
@@ -92,13 +93,15 @@ function drawGrid(state) {
   const p = state.itemPicker;
   clearPanel(state);
   if (p.header) print(state, PANEL_ROW, 1, p.prompt);
-  if (p.rows > p.visibleRows) print(state, PANEL_ROW, 32, 'MORE', p.selected.col === 2);
+  const paged = p.rows > p.visibleRows;
+  if (paged) print(state, PANEL_ROW + PANEL_ROWS - 1, MORE_COL, '>>', p.selected.col === 2);
   p.entries.forEach(({ label }, index) => {
     const choice = gridChoice(p, index);
     const row = choice.row - p.offset;
     if (row < 0 || row >= p.visibleRows) return;
+    const width = paged && choice.col === 1 && row === p.visibleRows - 1 ? MORE_COL - GRID_WIDTH : GRID_WIDTH;
     print(state, PANEL_ROW + p.header + row, choice.col * GRID_WIDTH,
-      label.slice(0, GRID_WIDTH).padEnd(GRID_WIDTH),
+      label.slice(0, width).padEnd(width),
       !p.readOnly && choice.col === p.selected.col && choice.row === p.selected.row);
   });
 }
@@ -106,7 +109,7 @@ function drawGrid(state) {
 export function itemChoiceAt(state, col, row) {
   const p = state.itemPicker;
   if (!p || col < 0 || col >= PANEL_COLS) return null;
-  if (p.rows > p.visibleRows && row === 0 && col >= 32 && col < 36) {
+  if (p.rows > p.visibleRows && row === PANEL_ROWS - 1 && col >= MORE_COL) {
     return { col: 2, row: p.offset };
   }
   const choice = { col: Math.floor(col / GRID_WIDTH), row: row - p.header + p.offset };
@@ -125,11 +128,12 @@ function* pickGrid(state, items, { noFire, perClass }) {
   const entries = items.map(item => ({ item,
     label: perClass ? labels.get(item.class) : item.name.replace(/^(?:A|AN|THE) /, '') }));
   if (!noFire || !entries.length) entries.push({ item: null, label: 'NOTHING' });
-  const header = !noFire ? 2 : entries.length > PANEL_ROWS * 2 ? 1 : 0;
+  const header = noFire ? 0 : entries.length > 4 ? 1 : 2;
   const visibleRows = PANEL_ROWS - header;
   const picker = state.itemPicker = { entries, readOnly: noFire, header, visibleRows,
     rows: Math.max(visibleRows, Math.ceil(entries.length / 2)), offset: 0,
-    selected: { col: 0, row: 0 }, prompt: noFire ? 'YOU HAVE' : panelText(state, PANEL_ROW).trim() };
+    selected: { col: 0, row: 0 }, prompt: panelText(state, PANEL_ROW).trim() };
+  const nextPage = () => picker.offset + visibleRows < picker.rows ? picker.offset + visibleRows : 0;
   const moved = directionPress();
   drawGrid(state);
   try {
@@ -138,10 +142,15 @@ function* pickGrid(state, items, { noFire, perClass }) {
       const j = first ?? (yield { policy: 'press' });
       first = null;
       if (j.menuChoice) highlightItemChoice(state, j.menuChoice);
-      if (j.cancel) return null;
+      if (j.cancel) {
+        if (noFire) clearPanel(state);
+        return null;
+      }
       if (j.fire && (j.menuChoice?.col === 2 || (!noFire && picker.selected.col === 2))) {
-        picker.offset = picker.offset + visibleRows < picker.rows ? picker.offset + visibleRows : 0;
+        picker.offset = nextPage();
         picker.selected = { col: 0, row: picker.offset };
+      } else if (noFire && (j.fire || j.dx || j.dy) && nextPage()) {
+        picker.offset = nextPage();
       } else if (noFire && (j.fire || j.dx || j.dy)) {
         clearPanel(state);
         return null;
