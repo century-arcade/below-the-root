@@ -39,7 +39,7 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
 const CANVAS_PADDING = 3;
-const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px)');
+const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)');
 const mainNav = document.getElementById('main-nav');
 
 function sizeMonitor(mode, availableWidth, availableHeight, aspect, bare, floor = 0) {
@@ -61,8 +61,11 @@ function sizeMonitor(mode, availableWidth, availableHeight, aspect, bare, floor 
   return { mode, padding, scale, width: glassWidth + shellWidth, glassWidth, glassHeight: (HEIGHT + 2 * padding) * scale };
 }
 
+// computer-mode: the map opened from the game keeps the bare fullscreen screen
+let computerMode = false;
 function fit() {
-  const full = fullscreenMode.matches || document.fullscreenElement !== null;
+  if (desk.stage !== 'map') computerMode = desk.stage === 'play';
+  const full = computerMode && (fullscreenMode.matches || document.fullscreenElement !== null);
   document.documentElement.classList.toggle('game-fullscreen', full);
   document.getElementById('fullscreen').setAttribute('aria-pressed', String(document.fullscreenElement !== null));
   const landscape = landscapeMode.matches;

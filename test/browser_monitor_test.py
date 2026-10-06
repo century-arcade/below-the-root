@@ -67,6 +67,31 @@ for surround in ['commodore', 'dark']:
         print(f'browser_monitor_test: {surround} controls at {width}x{height} passed')
 
 
+with browser_page('/play?room=B8') as page:
+    page.get_by_role('button', name='Manual', exact=True).click()
+    page.evaluate('document.documentElement.requestFullscreen()')
+    page.wait_for_function('document.fullscreenElement !== null')
+    expect(page.locator('#manual')).to_be_visible()
+    expect(page.locator('#screen')).to_be_hidden()
+    page.get_by_role('button', name='Map', exact=True).click()
+    expect(page.locator('#paper-map')).to_be_visible()
+    expect(page.get_by_role('button', name='Floppy disk', exact=True)).to_be_visible()
+    page.get_by_role('button', name='Floppy disk', exact=True).click()
+    expect(page.locator('#screen')).to_be_visible()
+    expect(page.get_by_role('group', name='Monitor controls')).to_be_hidden()
+    page.locator('#screen').focus()
+    page.keyboard.press('m')
+    expect(page.locator('#paper-map')).to_be_visible()
+    expect(page.get_by_role('button', name='Floppy disk', exact=True)).to_be_hidden()
+print('browser_monitor_test: fullscreen bares the screen only from the computer, map included')
+
+with browser_page('/play?room=B8', viewport={'width': 915, 'height': 412}) as page:
+    page.locator('#screen').click()
+    expect(page.get_by_role('group', name='Monitor controls')).to_be_visible()
+    assert page.evaluate('document.fullscreenElement') is None, 'a short desktop window never goes fullscreen by itself'
+print('browser_monitor_test: a short desktop window keeps the monitor and desk')
+
+
 def record_locks(page):
     page.add_init_script('''
         window.orientationLocks = [];
