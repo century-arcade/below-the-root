@@ -9,7 +9,7 @@ def paper_days(page):
 
 for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]:
     with browser_page('/play.html', viewport=viewport) as page:
-        opener = page.get_by_role('button', name='Dev notes', exact=True)
+        opener = page.get_by_role('button', name='Prompts', exact=True)
         opener.click()
         expect(page.locator('#dev-notes')).to_be_visible()
         reader = page.get_by_role('region', name='Dated development prompts', exact=True)
@@ -42,12 +42,12 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
         expect(current).to_have_attribute('data-paper-day', days[1])
         expect(page.get_by_role('button', name='Close dev notes', exact=True)).to_have_count(0)
         expect(page.locator('[data-paper-pause]')).to_have_count(0)
-        page.get_by_role('button', name="Curator's Note", exact=True).click()
+        page.get_by_role('button', name='Foreword', exact=True).click()
         expect(page.locator('#dev-notes')).to_be_hidden()
         expect(page.locator('#note')).to_be_visible()
 
 with browser_page('/play.html') as page:
-    page.get_by_role('button', name='Dev notes', exact=True).click()
+    page.get_by_role('button', name='Prompts', exact=True).click()
     expect(page.locator('.greenbar-paper [aria-current="true"]')).to_have_count(1)
     assert page.evaluate('''async () => {
         const prompts = await (await fetch('/assets/dev-notes.json')).json();
