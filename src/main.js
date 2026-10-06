@@ -468,7 +468,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   monitor.classList.toggle('screen-dark', !powered);
   const SCREEN_FADE_MS = 200;
   let screenTimer = 0;
-  power.onclick = () => {
+  function togglePower() {
     powered = !powered;
     dropInput(); acc = 0; last = performance.now();
     showPower();
@@ -497,7 +497,11 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
       draw();
     }
-  };
+  }
+  // press-to-act: the click lands on release; touch presses unlock audio only then
+  power.addEventListener('pointerdown', e => { if (e.button === 0) togglePower(); });
+  power.addEventListener('mousedown', e => e.preventDefault());
+  power.onclick = e => { if (e.detail) speaker.unlock(state); else togglePower(); };
   for (const type of ['keydown', 'keyup']) power.addEventListener(type, e => e.stopPropagation());
   const pause = () => { paused = true; dropInput(); speaker.silence(); };
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
