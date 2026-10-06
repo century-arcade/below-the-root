@@ -126,15 +126,15 @@ leaves a glide alone.
 | Swipe 24 px while holding | The stick points the swipe's way. A vertical part outranks a sideways one. A new swipe re-points it; back within 12 px of the start centres it | Steps once per 24 px |
 | Lift the stick finger | Stick centred | Nothing |
 | Lone quick tap | Trigger on the ground; in the air a nudge toward that half | Confirm |
-| Second-finger tap while the stick is held | Trigger when it lifts; nothing while the stick points down | Confirm |
-| Two fingers held 200 ms, neither swiping | Open the command menu (cancel an item prompt) | Close it |
-| Two quick taps landing within 80 ms | Turn the figure around (trigger outside free play) | Confirm |
+| Second finger landing while the first is held | Trigger as it lands, once however long it stays; nothing while the stick points down | Confirm |
+| Two fingers landing within 80 ms and held 200 ms, neither swiping | Open the command menu (cancel an item prompt) | Close it |
+| Two fingers landing within 80 ms and both lifted sooner | Turn the figure around (trigger outside free play) | Confirm |
 
 A trigger with the stick pointing behind the figure first lets the game read
 the turn, then sends the trigger, so the leap is not spent on turning. Of two
 fingers landing together, one tapped and one held, the held one becomes the
-stick and the tap triggers. Lifting the stick hands it to a second finger
-still down. A plain hold mid-ladder points sideways, which the game ignores
+stick and the tap triggers; if either swipes, it becomes the stick and the
+other adds nothing. Lifting the stick hands it to a second finger still down. A plain hold mid-ladder points sideways, which the game ignores
 until the figure can step off; swipe up or down to climb. Sideways plus the
 trigger leaps off a ladder.
 

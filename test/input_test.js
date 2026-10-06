@@ -136,16 +136,18 @@ test("a tap with a second finger while the stick is held leaps, and each further
   }
 });
 
-test("the second finger triggers when it lifts, not when it lands", async t => {
-  const { keys, send, advance, LEFT, RIGHT } = await sideFixture(t);
+test("a second finger triggers as it lands, and holding it adds nothing", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
   send('pointerdown', LEFT);
   advance(130);
   keys.read();
   send('pointerdown', RIGHT, 100, 2);
-  advance(60);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false });
-  send('pointerup', RIGHT, 100, 2);
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true });
+  advance(500);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false }, 'no second leap');
+  assert.equal(model.chords, 0, 'and no menu');
+  send('pointerup', RIGHT, 100, 2);
+  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false });
 });
 
 test("a tap while the stick points down does nothing", async t => {
@@ -175,37 +177,32 @@ test("a quick tap behind the figure is still the trigger alone", async t => {
   assert.deepEqual(keys.read(), { dx: 0, dy: 0, fire: true });
 });
 
-test("two fingers held still open the menu, even on one half", async t => {
+test("two fingers pressed together and held open the menu, even on one half", async t => {
   const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
   send('pointerdown', LEFT);
-  advance(130);
-  keys.read();
+  advance(40);
   send('pointerdown', LEFT + 20, 100, 2);
   advance(199);
   assert.equal(model.chords, 0);
   advance(1);
   assert.equal(model.chords, 1);
-  assert.deepEqual(keys.read(), IDLE, 'the stick lets go');
+  assert.deepEqual(keys.read(), IDLE, 'neither finger walks or triggers');
   send('pointerup', LEFT);
   send('pointerup', LEFT + 20, 100, 2);
   send('pointerdown', RIGHT);
   send('pointerdown', LEFT, 100, 2);
   advance(200);
-  assert.equal(model.chords, 2, 'landing together counts too');
+  assert.equal(model.chords, 2);
 });
 
-test("a second finger held beside a swiped stick does nothing", async t => {
+test("a swipe by either of a pressed-together pair makes it the stick, not the menu", async t => {
   const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
   send('pointerdown', LEFT, 100);
-  send('pointermove', LEFT, 65);
   send('pointerdown', RIGHT, 100, 2);
-  keys.read();
-  send('pointermove', LEFT, 140);
-  keys.read();
+  send('pointermove', LEFT, 65);
   advance(300);
   assert.equal(model.chords, 0);
-  send('pointerup', RIGHT, 100, 2);
-  assert.deepEqual(keys.read(), { dx: 0, dy: 1, fire: false }, 'nor does its lift');
+  assert.deepEqual(keys.read(), { dx: 0, dy: -1, fire: false });
 });
 
 test("two quick taps together turn the figure around", async t => {
@@ -240,9 +237,9 @@ test("lifting the stick hands it to a second finger still down", async t => {
   advance(130);
   keys.read();
   send('pointerdown', RIGHT, 100, 2);
+  keys.read();
   advance(60);
   send('pointerup', LEFT);
-  advance(60);
   assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false });
 });
 

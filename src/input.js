@@ -582,18 +582,18 @@ export class SideTouch {
       f.role = 'dead';
     } else if (live.length) {
       const [other] = live;
-      f.role = 'extra';
       if (other.role === 'pending' && f.at - other.at <= PAIR_GAP_MS) {
         clearTimeout(other.timer);
-        other.role = 'extra';
-        other.partner = f;
-        other.timer = setTimeout(() => this.pairHold(other), PAIR_HOLD_MS);
-        f.partner = other;
-      } else if (other.role === 'pending' && !this.jog()) {
-        this.resolve(other);
+        for (const [g, h] of [[other, f], [f, other]]) {
+          g.role = 'pair';
+          g.partner = h;
+          g.timer = setTimeout(() => this.pairHold(g), PAIR_HOLD_MS);
+        }
+      } else {
+        if (other.role === 'pending') this.settle(other);
+        f.role = 'button';
+        this.trigger();
       }
-      f.timer = setTimeout(() => this.pairHold(f), PAIR_HOLD_MS);
-      f.since = other.dir;
     } else if (this.airborne() && !this.jog()) {
       f.role = 'stick';
       this.update();
@@ -616,13 +616,10 @@ export class SideTouch {
     }
     const dir = swipe(f.dir, dx, dy);
     if (dir === f.dir) return;
-    if (f.role === 'extra') {
+    if (f.role === 'pair') {
       if (dir === undefined) return;
-      clearTimeout(f.timer);
-      const partner = f.partner;
-      f.partner = null;
-      if (partner) { partner.partner = null; partner.since = dir; }
-      if (!partner || this.jog()) { f.role = 'dead'; return; }
+      this.unpair(f);
+      if (this.jog()) { f.role = 'dead'; return; }
     } else if (f.role !== 'pending' && f.role !== 'stick') return;
     clearTimeout(f.timer);
     f.role = 'stick';
@@ -638,18 +635,12 @@ export class SideTouch {
     if (f.role === 'pending') {
       if (this.airborne()) this.keys.tap(f.side, SIDE_SOURCE);
       else this.trigger();
-    } else if (f.role === 'extra' && f.partner) {
+    } else if (f.role === 'pair') {
       f.lifted = true;
       if (f.partner.lifted) this.pairTap();
-    } else if (f.role === 'extra') {
-      this.trigger();
     } else if (f.role === 'stick') {
-      const heir = this.live().find(g => g.role === 'extra' && !g.partner);
-      if (heir) {
-        clearTimeout(heir.timer);
-        heir.role = 'pending';
-        heir.timer = setTimeout(() => this.resolve(heir), Math.max(0, heir.at + SIDE_TAP_MS - performance.now()));
-      }
+      const heir = this.live().find(g => g.role === 'button');
+      if (heir) this.settle(heir);
       this.update();
     }
   }
@@ -657,10 +648,18 @@ export class SideTouch {
   lift(e) {
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
+    if (f.role === 'pair') this.unpair(f);
     clearTimeout(f.timer);
-    if (f.partner) f.partner.partner = null;
     this.fingers.delete(f.id);
     this.update();
+  }
+
+  unpair(f) {
+    const { partner } = f;
+    clearTimeout(f.timer);
+    clearTimeout(partner.timer);
+    f.partner = partner.partner = null;
+    partner.role = 'button';
   }
 
   resolve(f) {
@@ -669,19 +668,13 @@ export class SideTouch {
     this.update();
   }
 
-  // pair-hold: two still fingers open or close the menu; a finger that let go was a tap
+  // pair-hold: two fingers pressed together and held still open or close the menu
   pairHold(f) {
-    if (f.role !== 'extra') return;
-    const other = f.partner ?? this.live().find(g => g !== f);
-    if (f.partner?.lifted) {
+    if (f.role !== 'pair') return;
+    if (f.partner.lifted) {
       f.partner = null;
       this.settle(f);
       return this.trigger();
-    }
-    if (!other || other.dir !== f.since) {
-      if (other) f.role = 'dead';
-      else this.settle(f);
-      return;
     }
     for (const g of this.fingers.values()) { clearTimeout(g.timer); g.role = 'dead'; }
     this.update();
