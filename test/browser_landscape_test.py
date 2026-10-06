@@ -89,6 +89,25 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     assert session_eval(page, 's => s.state.player.facing') == -1, 'holding the side behind turns before the leap'
     assert session_eval(page, 's => s.state.player.col') in (col, col - 1), 'the leap starts from where the figure stood'
 
+    low = box['y'] + box['height'] - 5
+    thumb = {'x': box['x'] + box['width'] * 0.7, 'y': low, 'id': 4}
+    finger = {'x': box['x'] + box['width'] * 0.6, 'y': low, 'id': 5}
+    page.clock.run_for(500)
+    touch('touchStart', thumb)
+    page.clock.run_for(300)
+    touch('touchStart', thumb, finger)
+    until(page, 's => s.state.player.leaping')
+    touch('touchEnd')
+    page.clock.run_for(1500)
+    touch('touchStart', thumb, finger)
+    page.clock.run_for(250)
+    touch('touchEnd')
+    until(page, 's => s.state.commandMenuOpen')
+    touch('touchStart', thumb, finger)
+    page.clock.run_for(250)
+    touch('touchEnd')
+    until(page, 's => !s.state.commandMenuOpen')
+
     col = session_eval(page, 's => s.state.player.col')
     touch('touchStart', left)
     page.clock.run_for(1500)
@@ -180,4 +199,4 @@ with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_
     page.clock.run_for(300)
     assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a swipe down over the panel crouches without the menu'
 
-print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')
+print('browser_landscape_test: portrait touch inventory, landscape side touches, turn-and-leap, one-handed status-panel touches, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')
