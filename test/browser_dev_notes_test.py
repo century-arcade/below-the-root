@@ -35,7 +35,7 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
         expect(current).to_have_attribute('data-paper-day', days[0])
         reader.press('ArrowRight')
         expect(current).to_have_attribute('data-paper-day', days[1])
-        page.get_by_role('button', name='Game Manual', exact=True).click()
+        page.get_by_role('button', name='Manual', exact=True).click()
         expect(page.locator('#dev-notes')).to_be_hidden()
         expect(page.locator('#manual')).to_be_visible()
         opener.click()
