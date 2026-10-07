@@ -389,6 +389,6 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 .landscape-play #help-screen { position: fixed; z-index: 2; inset: 64px 0 0 0; width: auto; overflow-y: auto; background: #101910; align-self: auto; }
 .landscape-play #screen-focus { display: none; }
 
-#party-banner { position: absolute; z-index: 0; top: 4px; left: 50%; width: 560px; max-width: calc(100% - 32px); height: auto; transform: translateX(-50%); pointer-events: none; overflow: visible; }
-#party-banner text { font: 80px 'Michroma', sans-serif; text-anchor: middle; }
+#party-banner { position: absolute; z-index: 0; top: 0; left: 50%; width: 820px; max-width: calc(100% - 32px); height: auto; transform: translateX(-50%); pointer-events: none; overflow: visible; }
+#party-banner text { font: 700 66px 'Cinzel', Georgia, serif; text-anchor: middle; fill: url(#glitter); stroke: url(#glitter); stroke-width: 2px; }
 html:is(.game-fullscreen, .landscape-play) #party-banner { display: none; }
