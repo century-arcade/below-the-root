@@ -155,8 +155,8 @@ export function setupLeaflet(root) {
   function mark() {
     const width = article.clientWidth;
     if (!width) return;
-    last = Math.max(0, Math.round(article.scrollWidth / width) - 1);
-    current = Math.max(0, Math.min(last, Math.round(article.scrollLeft / width)));
+    last = Math.max(0, Math.ceil(article.scrollWidth / width) - 1);
+    current = Math.max(0, Math.min(last, Math.ceil(article.scrollLeft / width)));
     previous.disabled = first.disabled = current === 0;
     next.disabled = final.disabled = current === last;
   }

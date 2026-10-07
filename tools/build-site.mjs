@@ -95,8 +95,8 @@ export function buildSite(out) {
       developer: page === 'play' ? '' : developer,
       helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
       styles: page === 'play' ? `<link rel="stylesheet" href="/game.css"><link rel="stylesheet" href="/dev-notes.css">\n${preloads(read)}` : '',
-      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(read('about.md')))
-        : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(`${page}.md`)))}</main>`,
+      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(read('foreword.md')))
+        : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(page === 'about' ? 'foreword.md' : `${page}.md`)))}</main>`,
       scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>
 <script type="module">import { startAnalytics } from "/analytics.js"; startAnalytics();</script>`,
     };

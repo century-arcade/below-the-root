@@ -36,7 +36,13 @@ with sync_playwright() as p:
     page.wait_for_function(f"{caption} === 'Page 3 / 18'", polling=50)
     page.click('#manual [data-book-zoom]')
     page.wait_for_function(f"{caption} === 'Pages 2–3 / 18'", polling=50)
+    page.get_by_role('button', name='Foreword', exact=True).click()
+    page.locator('#note [data-book-last]').click()
+    page.locator('#note .references').get_by_role('link', name='MOCAGH', exact=True).click(trial=True)
+    assert page.locator('#note [data-book-last]').is_disabled()
+    page.locator('#note [data-book-first]').click()
+    assert page.locator('#note [data-book-first]').is_disabled()
     assert not errors, errors
     browser.close()
 
-print('browser_book_test: book pages stay hidden until decoded, the left page turns back, first/last jump to the ends, and zoom keeps the place passed')
+print('browser_book_test: book pages stay hidden until decoded, the left page turns back, first/last jump to the ends, zoom keeps the place, and the foreword can turn to its final references passed')

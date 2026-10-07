@@ -77,6 +77,18 @@ test('map retains the game markup and only index bootstraps legacy hash routes',
   }
 });
 
+test('the desk booklet and About page render the same labelled foreword', t => {
+  const out = outputDirectory(t);
+  buildSite(out);
+  const foreword = marked.parse(readFileSync(new URL('../src/foreword.md', import.meta.url), 'utf8'));
+  for (const page of ['index', 'play', 'map', 'about']) {
+    const html = readFileSync(join(out, `${page}.html`), 'utf8');
+    assert.ok(html.includes(foreword), `${page} includes the foreword`);
+    assert.equal([...html.matchAll(/<h1 id="about-title">Foreword<\/h1>/g)].length, 1);
+    assert.match(html, /<article class="about-article" aria-labelledby="about-title">/);
+  }
+});
+
 test('every public page initializes the shared analytics loader once', t => {
   const out = outputDirectory(t);
   buildSite(out);
