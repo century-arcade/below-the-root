@@ -74,7 +74,6 @@ export function setupBook(root, spreads, caption = () => '') {
     const front = view[from][departing];
     const back = pages[1 - departing];
     if (!visible) return label(pages);
-    link.scrollTop = 0;
     if (departing >= 0 && front && back && !still.matches) {
       place(departing, pages[departing]);
       turn(departing, front, back);
@@ -109,15 +108,13 @@ export function setupBook(root, spreads, caption = () => '') {
     const leftPage = event.clientX < left + width / 2;
     show(leftPage && current > 0 ? current - 1 : current === last ? 0 : current + 1);
   });
-  addEventListener('keydown', event => {
-    if (root.hidden || event.metaKey || event.ctrlKey || event.altKey) return;
-    const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: last }[event.key];
-    if (target === undefined) return;
+  onPageKey(root, key => {
+    const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: last }[key];
+    if (target === undefined) return false;
     engaged = true;
-    event.preventDefault();
-    event.stopImmediatePropagation();
     show(target);
-  }, true);
+    return true;
+  });
   for (const type of ['keydown', 'keyup']) {
     root.addEventListener(type, event => event.stopPropagation());
   }
@@ -138,6 +135,48 @@ export function setupZoom(root, onChange = () => {}) {
     button.setAttribute('aria-pressed', zoomed);
     onChange(zoomed);
   });
+  onPageKey(root, key => key === 'Escape' && root.hasAttribute('data-zoom') && (button.click(), true));
+}
+
+function onPageKey(root, handle) {
+  addEventListener('keydown', event => {
+    if (root.hidden || event.metaKey || event.ctrlKey || event.altKey || !handle(event.key)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+}
+
+// Overflowing columns sit one page-width apart, so a turn scrolls one page.
+export function setupLeaflet(root) {
+  const article = root.querySelector('article');
+  const [first, previous, next, final] = ['first', 'previous', 'next', 'last'].map(name => root.querySelector(`[data-book-${name}]`));
+  let current = 0;
+  let last = 0;
+  function mark() {
+    const width = article.clientWidth;
+    if (!width) return;
+    last = Math.max(0, Math.round(article.scrollWidth / width) - 1);
+    current = Math.max(0, Math.min(last, Math.round(article.scrollLeft / width)));
+    previous.disabled = first.disabled = current === 0;
+    next.disabled = final.disabled = current === last;
+  }
+  function show(page) {
+    article.scrollLeft = page * article.clientWidth;
+    mark();
+  }
+  previous.addEventListener('click', () => show(current - 1));
+  next.addEventListener('click', () => show(current + 1));
+  first.addEventListener('click', () => show(0));
+  final.addEventListener('click', () => show(last));
+  setupZoom(root, () => show(0));
+  onPageKey(root, key => {
+    const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: last }[key];
+    if (target === undefined) return false;
+    show(Math.max(0, Math.min(last, target)));
+    return true;
+  });
+  article.addEventListener('scroll', mark, { passive: true });
+  new ResizeObserver(() => show(current)).observe(article);
 }
 
 const scanPage = scan => scan - 2;

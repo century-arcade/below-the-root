@@ -114,12 +114,11 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 #note a { color: inherit; text-underline-offset: 2px; text-decoration-thickness: 1px; }
 #note .references { margin: 1.4em 0 0; gap: .2em 1.2em; font-size: .85em; font-variant: small-caps; }
 .book-spread { --spread-page: min(var(--box-height) - 56px, (100vw - 32px) / 1.49); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-.book-spread[data-zoom] { flex: 1; align-self: stretch; min-height: 0; }
-.book-spread[data-zoom] :is([data-book-image], .about-article) { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.book-spread[data-zoom] [data-book-image] { display: block; width: min(100%, var(--spread-page) * 2 * var(--aspect)); }
-.book-spread[data-zoom] [data-book-image] > img { width: 100%; height: auto; }
+#desk:has(.book-spread[data-zoom]:not([hidden])) .bench-stage { position: fixed; inset: 0; z-index: 5; padding: 16px; background: #1c1e1d; }
+.book-spread[data-zoom] { flex: 1; align-self: stretch; min-height: 0; container-type: size; }
+.book-spread[data-zoom] [data-book-image] > img { height: min(100cqh - 56px, 100cqw / (var(--aspect))); }
 .book-spread[data-zoom] [data-book-image] > img + img { display: none; }
-#note[data-zoom] .about-article { width: min(100%, 32em + var(--pad) * 2); height: auto; columns: 1; font-size: max(16px, var(--box-height) * .032); }
+#note[data-zoom] .about-article { --leaf: min(100cqh - 56px, 100cqw / .755); width: var(--page); overflow: hidden; columns: 1; font-size: max(16px, var(--leaf) * .027); }
 #note[data-zoom] .about-article::before { content: none; }
 [data-book-zoom][aria-pressed="true"] .zoom-in { display: none; }
 .page-turns { flex: none; display: flex; justify-content: center; gap: 12px; }
@@ -154,14 +153,16 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
     border-top: 20px solid #bb813b; border-image: url(/assets/room/oak.svg) 20 0 0 0 / 20px 0 0 0 repeat;
   }
   html:is(.game-fullscreen, .landscape-play) #table::after { content: none; }
-  html.monitor-away #table:has(#desk:is([data-stage="map"], [data-stage="dev-notes"]), [data-zoom]:not([hidden]))::after { flex-grow: 0; }
-  #desk:is([data-stage="map"], :has([data-zoom]:not([hidden]))) .bench-stage { flex: 1; }
+  html.monitor-away #table:has(#desk:is([data-stage="map"], [data-stage="dev-notes"]))::after { flex-grow: 0; }
+  #desk[data-stage="map"] .bench-stage { flex: 1; }
   .page-turns { gap: 8px; }
   .book-spread button { width: 56px; }
   .bench-strip { flex-wrap: wrap; align-content: center; gap: 44px 22px; padding: 0 calc(16px + var(--spill)) calc(24px - 24px * var(--w)); }
   html[data-strip="compact"]:not(.monitor-away) #desk { --strip: 180px; --z: .4; }
   .page-number { top: calc(100% + 8px); bottom: auto; left: 50%; transform: translateX(-50%); }
   #note .about-article { --leaf: var(--box-height); --page: calc(100vw - 64px); width: var(--page); height: auto; columns: 1; }
+  #note[data-zoom] .about-article { --page: calc(var(--leaf) * .755); height: var(--leaf); }
+  .book-spread[data-zoom] .page-number { position: static; transform: none; }
   #note .about-article::before { content: none; }
 }
 #crt, #crt > div { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; }
