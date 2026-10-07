@@ -14,7 +14,7 @@
 .greenbar-stack-sheet::before, .greenbar-paper::before { left: 0; border-right: 1px dashed #a3b397; }
 .greenbar-stack-sheet::after, .greenbar-paper::after { right: 0; border-left: 1px dashed #a3b397; }
 .greenbar-stack-sheet > span { align-self: start; margin-top: 14px; font: bold 14px/1.5 monospace; letter-spacing: .1em; }
-#dev-notes { width: min(912px, 100%); height: min(760px, 100%); min-height: 0; }
+#dev-notes { width: min(912px, 100%); flex: 1; min-height: 0; }
 .greenbar-viewport { flex: 1; align-self: stretch; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; box-shadow: 5px 7px 0 #0005; scrollbar-width: thin; scrollbar-color: #8e9e80 #faf7f2; }
 .greenbar-viewport:focus-visible { outline: 2px solid #d6f897; outline-offset: 3px; }
 .greenbar-paper {

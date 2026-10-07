@@ -56,37 +56,38 @@
 </svg>
 <div id="desk" class="desk" aria-label="On the bench">
 <div class="bench-stage">
-<section id="box" data-desk="outside" aria-label="The box">
-  <div class="book-spread">
-    <a data-book-image href="/assets/box/front.jpg" target="_blank" rel="noopener" aria-label="Turn the box">
-      <img alt="" decoding="async">
-      <img src="/assets/box/front.jpg" width="454" height="599" alt="" loading="lazy" decoding="async">
-    </a>
-    <div class="page-turns">
-      <button type="button" data-book-first aria-label="First page" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
-      <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
-      <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
-      <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
-    </div>
+<section id="box" class="book-spread" data-desk="outside" aria-label="The box">
+  <a data-book-image href="/assets/box/front.jpg" target="_blank" rel="noopener" aria-label="Turn the box">
+    <img alt="" decoding="async">
+    <img src="/assets/box/front.jpg" width="454" height="599" alt="" loading="lazy" decoding="async">
+  </a>
+  <div class="page-turns">
+    <button type="button" data-book-first aria-label="First page" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
+    <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
+    <button type="button" data-book-zoom aria-label="Enlarge pages" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/><path class="zoom-in" d="M10 4v12"/></svg></button>
+    <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+    <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
   </div>
 </section>
-<section id="note" data-desk="note" hidden aria-label="Curator's Note">
+<section id="note" class="book-spread" data-desk="note" hidden aria-label="Curator's Note">
 {{note}}
-</section>
-<section id="manual" data-desk="manual" hidden aria-label="Original manual">
-  <div class="book-spread">
-    <a data-book-image href="/assets/manual/03.webp" target="_blank" rel="noopener" aria-label="Turn the page">
-      <img alt="" loading="lazy" decoding="async">
-      <img src="/assets/manual/03.webp" alt="Original Below the Root manual, page 1" loading="lazy" decoding="async">
-    </a>
-    <div class="page-turns">
-      <button type="button" data-book-first aria-label="First page" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
-      <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
-      <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
-      <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
-    </div>
+  <div class="page-turns">
+    <button type="button" data-book-zoom aria-label="Enlarge pages" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/><path class="zoom-in" d="M10 4v12"/></svg></button>
   </div>
-  <output class="page-number" aria-live="polite">Page 1 / 18</output>
+</section>
+<section id="manual" class="book-spread" data-desk="manual" hidden aria-label="Original manual">
+  <a data-book-image href="/assets/manual/03.webp" target="_blank" rel="noopener" aria-label="Turn the page">
+    <img alt="" loading="lazy" decoding="async">
+    <img src="/assets/manual/03.webp" alt="Original Below the Root manual, page 1" loading="lazy" decoding="async">
+  </a>
+  <div class="page-turns">
+    <button type="button" data-book-first aria-label="First page" aria-keyshortcuts="Home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3l-7 7 7 7M17 3l-7 7 7 7"/></svg></button>
+    <button type="button" data-book-previous aria-label="Previous page" aria-keyshortcuts="ArrowLeft"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13 3l-7 7 7 7"/></svg></button>
+    <button type="button" data-book-zoom aria-label="Enlarge pages" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/><path class="zoom-in" d="M10 4v12"/></svg></button>
+    <button type="button" data-book-next aria-label="Next page" aria-keyshortcuts="ArrowRight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3l7 7-7 7"/></svg></button>
+    <button type="button" data-book-last aria-label="Last page" aria-keyshortcuts="End"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3l7 7-7 7M10 3l7 7-7 7"/></svg></button>
+  </div>
+<output class="page-number" aria-live="polite">Page 1 / 18</output>
 </section>
 <section id="dev-notes" class="book-spread" data-desk="dev-notes" hidden aria-label="Dev notes">
   <div class="greenbar-viewport" tabindex="0" role="region" aria-label="Dated development prompts">

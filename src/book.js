@@ -7,7 +7,9 @@ export function setupBook(root, spreads, caption = () => '') {
   const first = root.querySelector('[data-book-first]');
   const final = root.querySelector('[data-book-last]');
   const status = root.querySelector('output');
-  const last = spreads.length - 1;
+  const singles = spreads.flat().filter(Boolean).map(page => [page, null]);
+  let view = spreads;
+  let last = view.length - 1;
   let current = 0;
   const loaded = new Map();
   const load = src => {
@@ -58,7 +60,7 @@ export function setupBook(root, spreads, caption = () => '') {
   let visible = false;
   let engaged = false;
   const preloadNeighbours = () => {
-    for (const page of [...spreads[current + 1] ?? [], ...spreads[current - 1] ?? []]) if (page) load(page.src);
+    for (const page of [...view[current + 1] ?? [], ...view[current - 1] ?? []]) if (page) load(page.src);
   };
   function engage() {
     engaged = true;
@@ -67,11 +69,12 @@ export function setupBook(root, spreads, caption = () => '') {
   function show(spread) {
     const from = current;
     current = Math.max(0, Math.min(last, spread));
-    const pages = spreads[current];
+    const pages = view[current];
     const departing = current === from + 1 ? 1 : current === from - 1 ? 0 : -1;
-    const front = spreads[from][departing];
+    const front = view[from][departing];
     const back = pages[1 - departing];
     if (!visible) return label(pages);
+    link.scrollTop = 0;
     if (departing >= 0 && front && back && !still.matches) {
       place(departing, pages[departing]);
       turn(departing, front, back);
@@ -90,11 +93,20 @@ export function setupBook(root, spreads, caption = () => '') {
   previous.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
   first.addEventListener('click', () => show(0));
+  setupZoom(root, zoomed => {
+    const anchor = view[current].find(Boolean);
+    view = zoomed ? singles : spreads;
+    last = view.length - 1;
+    current = view.findIndex(pages => pages.includes(anchor));
+    if (visible) images.forEach((image, i) => place(i, view[current][i]));
+    label(view[current]);
+  });
   final.addEventListener('click', () => show(last));
   link.addEventListener('click', event => {
     if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    const leftPage = event.clientX < images[1].getBoundingClientRect().left;
+    const { left, width } = link.getBoundingClientRect();
+    const leftPage = event.clientX < left + width / 2;
     show(leftPage && current > 0 ? current - 1 : current === last ? 0 : current + 1);
   });
   addEventListener('keydown', event => {
@@ -116,6 +128,16 @@ export function setupBook(root, spreads, caption = () => '') {
     visible = entries.at(-1).isIntersecting;
     if (visible && !was) show(current);
   }).observe(root);
+}
+
+export function setupZoom(root, onChange = () => {}) {
+  const button = root.querySelector('[data-book-zoom]');
+  button.addEventListener('click', () => {
+    const zoomed = !root.hasAttribute('data-zoom');
+    root.toggleAttribute('data-zoom', zoomed);
+    button.setAttribute('aria-pressed', zoomed);
+    onChange(zoomed);
+  });
 }
 
 const scanPage = scan => scan - 2;
