@@ -94,7 +94,13 @@ function fit() {
       if (fitted.scale >= 1) break search;
     }
   }
-  if (fitted.scale < 1) fitted = sizeMonitor('caseless', availableWidth, availableHeight, aspect, bare, 1);
+  // width-bound: dropping the desk strip cannot reach 1x, so keep whatever strip still fits beneath
+  if (fitted.scale < 1) for (const band of strips) {
+    document.documentElement.dataset.strip = band;
+    const height = availableHeight - (band === 'none' ? 0 : benchStrip.getBoundingClientRect().height);
+    fitted = sizeMonitor('caseless', availableWidth, height, aspect, bare, 1);
+    if (fitted.glassHeight <= height || band === 'none') break;
+  }
   const { mode, padding, scale, width, glassWidth, glassHeight } = fitted;
   const narrow = mode === 'cropped';
   document.documentElement.classList.toggle('narrow-play', narrow);
