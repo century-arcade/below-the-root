@@ -107,7 +107,8 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 }
 #note > .about-article { overflow: hidden; clip-path: inset(50%); pointer-events: none; }
 #note [data-book-image] { filter: drop-shadow(var(--paper)); }
-#note .sheet { position: relative; box-sizing: border-box; width: var(--sheet-w); height: var(--sheet-h); overflow: hidden; background: #f7f3ea; }
+#note .sheet { box-sizing: border-box; overflow: hidden; background: #f7f3ea; }
+#note [data-book-image] > .sheet { position: relative; width: var(--sheet-w); height: var(--sheet-h); }
 .bench-stage[data-pages="2"] #note:not([data-zoom]) .sheet + .sheet { box-shadow: inset 2px 0 #ddd5c3; }
 #note .focus-mirror { outline: 2px solid #9b2f3a; outline-offset: 2px; }
 #note .booklet-cover { height: 100%; aspect-ratio: auto; }
