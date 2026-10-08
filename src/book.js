@@ -7,22 +7,35 @@ export function pagesFor(width, height) {
   return available > 0 && width / available >= PAGE_ASPECT * 2 * .8 ? 2 : 1;
 }
 
+// A page is a scan ({ src, alt, className }) or markup ({ render }); spreadOnly
+// pages show beside a spread's other page but never alone.
+const singlesOf = spreads => spreads.flat().filter(page => page && !page.spreadOnly).map(page => [page, null]);
+const face = page => {
+  if (!page) return Object.assign(document.createElement('div'), { className: 'sheet blank' });
+  if (page.src) return Object.assign(new Image(), { src: page.src, alt: '', decoding: 'sync', className: page.className ?? '' });
+  const sheet = document.createElement('div');
+  sheet.className = 'sheet';
+  sheet.append(page.render());
+  return sheet;
+};
+
 // Two pages a spread; null leaves a page blank so single pages keep their side.
 export function setupBook(root, spreads, caption = () => '') {
   const stage = root.closest('.bench-stage');
-  const images = root.querySelectorAll('[data-book-image] img');
   const link = root.querySelector('[data-book-image]');
+  const images = link.querySelectorAll(':scope > img, :scope > .sheet');
   const previous = root.querySelector('[data-book-previous]');
   const next = root.querySelector('[data-book-next]');
   const first = root.querySelector('[data-book-first]');
   const final = root.querySelector('[data-book-last]');
   const status = root.querySelector('output');
-  const singles = spreads.flat().filter(Boolean).map(page => [page, null]);
+  let singles = singlesOf(spreads);
   let view = spreads;
   let last = view.length - 1;
   let current = 0;
   const loaded = new Map();
-  const load = src => {
+  const load = ({ src }) => {
+    if (!src) return Promise.resolve();
     if (!loaded.has(src)) {
       const image = new Image();
       image.src = src;
@@ -38,11 +51,10 @@ export function setupBook(root, spreads, caption = () => '') {
   function place(side, page, stamp = ++placed[side]) {
     const image = images[side];
     if (!page) { image.style.visibility = 'hidden'; return; }
-    load(page.src).then(() => {
+    load(page).then(() => {
       if (placed[side] !== stamp) return;
-      image.src = page.src;
-      image.alt = page.alt;
-      image.className = page.className ?? '';
+      if (page.render) image.replaceChildren(page.render());
+      else Object.assign(image, { src: page.src, alt: page.alt, className: page.className ?? '' });
       image.style.visibility = '';
     });
   }
@@ -58,19 +70,37 @@ export function setupBook(root, spreads, caption = () => '') {
     Object.assign(leaf.style, { left: `${page.offsetLeft}px`, top: `${page.offsetTop}px`,
       width: `${page.offsetWidth}px`, height: `${page.offsetHeight}px`,
       transformOrigin: departing ? 'left' : 'right' });
-    for (const face of [front, back]) leaf.append(Object.assign(new Image(), { src: face.src, alt: '', decoding: 'sync', className: face.className ?? '' }));
+    leaf.append(face(front), face(back));
     link.append(leaf);
     const angle = departing ? -180 : 180;
     leaf.animate({ transform: ['perspective(2000px) rotateY(0deg)', `perspective(2000px) rotateY(${angle}deg)`] },
       { duration: 450, easing: 'ease-in-out' }).finished.then(() => {
       place(landing, back, stamp);
-      load(back.src).then(() => leaf.remove());
+      load(back).then(() => leaf.remove());
+    });
+  }
+  // One page at a time, the page turns about its left edge: forward it lifts
+  // off the next page, backward the previous page lays back down over it.
+  function flip(forward, from, to) {
+    const page = images[0];
+    const leaf = document.createElement('div');
+    leaf.className = 'book-leaf';
+    Object.assign(leaf.style, { left: `${page.offsetLeft}px`, top: `${page.offsetTop}px`,
+      width: `${page.offsetWidth}px`, height: `${page.offsetHeight}px`, transformOrigin: 'left' });
+    leaf.append(face(forward ? from : to), face(null));
+    link.append(leaf);
+    const stamp = forward ? ++placed[0] : placed[0];
+    if (forward) place(0, to, stamp);
+    const angles = ['perspective(2000px) rotateY(0deg)', 'perspective(2000px) rotateY(-180deg)'];
+    leaf.animate({ transform: forward ? angles : angles.reverse() }, { duration: 450, easing: 'ease-in-out' }).finished.then(() => {
+      if (!forward) place(0, to, stamp);
+      load(to).then(() => leaf.remove());
     });
   }
   let visible = false;
   let engaged = false;
   const preloadNeighbours = () => {
-    for (const page of [...view[current + 1] ?? [], ...view[current - 1] ?? []]) if (page) load(page.src);
+    for (const page of [...view[current + 1] ?? [], ...view[current - 1] ?? []]) if (page) load(page);
   };
   function engage() {
     engaged = true;
@@ -84,7 +114,9 @@ export function setupBook(root, spreads, caption = () => '') {
     const front = view[from][departing];
     const back = pages[1 - departing];
     if (!visible) return label(pages);
-    if (departing >= 0 && front && back && !still.matches) {
+    if (departing >= 0 && view === singles && !still.matches) {
+      flip(departing === 1, view[from][0], pages[0]);
+    } else if (departing >= 0 && front && back && !still.matches) {
       place(departing, pages[departing]);
       turn(departing, front, back);
     } else {
@@ -94,7 +126,8 @@ export function setupBook(root, spreads, caption = () => '') {
     label(pages);
   }
   function label(pages) {
-    link.href = (pages[1] ?? pages[0]).src;
+    const scan = pages.findLast(page => page?.src);
+    if (scan) link.href = scan.src;
     previous.disabled = first.disabled = current === 0;
     next.disabled = final.disabled = current === last;
     if (status) status.textContent = caption(pages);
@@ -102,22 +135,28 @@ export function setupBook(root, spreads, caption = () => '') {
   previous.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
   first.addEventListener('click', () => show(0));
-  const choose = () => {
-    const wanted = root.hasAttribute('data-zoom') || stage.dataset.pages === '1' ? singles : spreads;
-    if (wanted === view) return;
-    const anchor = view[current].find(Boolean);
-    view = wanted;
-    last = view.length - 1;
-    current = view.findIndex(pages => pages.includes(anchor));
+  const repaint = () => {
     if (visible) images.forEach((image, i) => place(i, view[current][i]));
     label(view[current]);
   };
+  const same = (a, b) => a === b || (a?.key !== undefined && a.key === b?.key);
+  const settle = wanted => {
+    const anchor = view[current].find(page => page && !page.spreadOnly);
+    view = wanted;
+    last = view.length - 1;
+    current = Math.max(0, view.findIndex(pages => pages.some(page => same(page, anchor))));
+    repaint();
+  };
+  const wanted = () => root.hasAttribute('data-zoom') || stage.dataset.pages === '1' ? singles : spreads;
+  const choose = () => { if (wanted() !== view) settle(wanted()); };
   setupZoom(root, choose);
   new MutationObserver(choose).observe(stage, { attributeFilter: ['data-pages'] });
   choose();
   final.addEventListener('click', () => show(last));
   link.addEventListener('click', event => {
     if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const anchor = event.target.closest('a');
+    if (anchor && anchor !== link) return;
     event.preventDefault();
     const { left, width } = link.getBoundingClientRect();
     const leftPage = event.clientX < left + width / 2;
@@ -140,6 +179,17 @@ export function setupBook(root, spreads, caption = () => '') {
     visible = entries.at(-1).isIntersecting;
     if (visible && !was) show(current);
   }).observe(root);
+  return {
+    setSpreads(next) {
+      spreads = next;
+      singles = singlesOf(next);
+      settle(wanted());
+    },
+    showPage(target) {
+      const index = view.findIndex(pages => pages.some(page => same(page, target)));
+      if (index >= 0 && index !== current) show(index);
+    },
+  };
 }
 
 export function setupZoom(root, onChange = () => {}) {
@@ -161,37 +211,90 @@ function onPageKey(root, handle) {
   }, true);
 }
 
-// Overflowing columns sit one page-width apart, so a turn scrolls one page.
-export function setupLeaflet(root) {
-  const article = root.querySelector('article');
-  const [first, previous, next, final] = ['first', 'previous', 'next', 'last'].map(name => root.querySelector(`[data-book-${name}]`));
-  let current = 0;
-  let last = 0;
-  function mark() {
-    const width = article.clientWidth;
-    if (!width) return;
-    last = Math.max(0, Math.ceil(article.scrollWidth / width) - 1);
-    current = Math.max(0, Math.min(last, Math.ceil(article.scrollLeft / width)));
-    previous.disabled = first.disabled = current === 0;
-    next.disabled = final.disabled = current === last;
+// The calendar lies beside the closed cover; text pages pair up after it.
+export function pamphletSpreads(calendar, cover, pages) {
+  const spreads = [[calendar, cover]];
+  for (let i = 0; i < pages.length; i += 2) spreads.push([pages[i], pages[i + 1] ?? null]);
+  return spreads;
+}
+
+// Weeks run Sunday to Saturday; null pads the days outside the month.
+export function monthWeeks(year, month) {
+  const lead = new Date(Date.UTC(year, month, 1)).getUTCDay();
+  const days = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const cells = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
+  while (cells.length % 7) cells.push(null);
+  return Array.from({ length: cells.length / 7 }, (_, week) => cells.slice(week * 7, week * 7 + 7));
+}
+
+const element = (tag, className, text) => Object.assign(document.createElement(tag), { className, textContent: text ?? '' });
+
+function calendarSheet(year, month) {
+  const sheet = element('div', 'calendar');
+  const title = new Date(Date.UTC(year, month, 1)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+  sheet.append(element('div', 'calendar-month', title), element('div', 'calendar-year', String(year)));
+  const grid = element('div', 'calendar-grid');
+  for (const day of 'SMTWTFS') grid.append(element('span', 'calendar-weekday', day));
+  for (const week of monthWeeks(year, month)) for (const day of week) grid.append(element('span', 'calendar-day', day ?? ''));
+  sheet.append(grid);
+  return sheet;
+}
+
+function coverSheet() {
+  const cover = element('div', 'booklet-cover');
+  const label = element('span');
+  label.append('Century', document.createElement('br'), 'Arcade');
+  cover.append(label);
+  return cover;
+}
+
+// The article stays as the readable, focusable source; each page shows one of its
+// columns through a hidden copy, and focusing a source link turns to its page.
+export function setupPamphlet(root) {
+  const flow = root.querySelector(':scope > article');
+  const links = [...flow.querySelectorAll('a')];
+  const calendar = { key: 'calendar', spreadOnly: true, render: () => calendarSheet(1984, 11) };
+  const cover = { key: 'cover', render: coverSheet };
+  let width = 0;
+  let count = 0;
+  let focused = -1;
+  let focusedPage = -1;
+  const mirror = copy => {
+    if (Number(copy.dataset.page) === focusedPage) copy.querySelectorAll('a')[focused]?.classList.add('focus-mirror');
+  };
+  const textPage = index => ({ key: `text-${index}`, render: () => {
+    const copy = flow.cloneNode(true);
+    for (const node of [copy, ...copy.querySelectorAll('[id]')]) node.removeAttribute('id');
+    copy.removeAttribute('aria-labelledby');
+    copy.setAttribute('aria-hidden', 'true');
+    for (const link of copy.querySelectorAll('a')) link.tabIndex = -1;
+    copy.style.transform = `translateX(${-index * width}px)`;
+    copy.dataset.page = index;
+    mirror(copy);
+    return copy;
+  } });
+  const book = setupBook(root, pamphletSpreads(calendar, cover, []));
+  function paginate() {
+    const next = flow.getBoundingClientRect().width;
+    if (!next) return;
+    const pages = Math.max(1, Math.round(flow.scrollWidth / next));
+    if (next === width && pages === count) return;
+    width = next;
+    count = pages;
+    book.setSpreads(pamphletSpreads(calendar, cover, Array.from({ length: count }, (_, i) => textPage(i))));
   }
-  function show(page) {
-    article.scrollLeft = page * article.clientWidth;
-    mark();
-  }
-  previous.addEventListener('click', () => show(current - 1));
-  next.addEventListener('click', () => show(current + 1));
-  first.addEventListener('click', () => show(0));
-  final.addEventListener('click', () => show(last));
-  setupZoom(root, () => show(0));
-  onPageKey(root, key => {
-    const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: last }[key];
-    if (target === undefined) return false;
-    show(Math.max(0, Math.min(last, target)));
-    return true;
+  const unmirror = () => { for (const link of root.querySelectorAll('.focus-mirror')) link.classList.remove('focus-mirror'); };
+  flow.addEventListener('focusin', event => {
+    focused = links.indexOf(event.target);
+    if (focused < 0 || !width) return;
+    unmirror();
+    focusedPage = Math.floor(event.target.offsetLeft / width);
+    book.showPage({ key: `text-${focusedPage}` });
+    for (const copy of root.querySelectorAll('.sheet > article')) mirror(copy);
   });
-  article.addEventListener('scroll', mark, { passive: true });
-  new ResizeObserver(() => show(current)).observe(article);
+  flow.addEventListener('focusout', () => { focused = focusedPage = -1; unmirror(); });
+  new ResizeObserver(paginate).observe(flow);
+  document.fonts?.ready.then(paginate);
 }
 
 const scanPage = scan => scan - 2;

@@ -1,6 +1,6 @@
-"""A book page stays hidden until its image is decoded, so alt text never shows; clicking the left page turns back; first/last jump to the ends; zooming shows one page at a time and keeps the place."""
+"""A book page stays hidden until its image is decoded, so alt text never shows; clicking the left page turns back; first/last jump to the ends; zooming shows one page at a time and keeps the place; the foreword opens on its cover beside a December 1984 calendar, and focusing one of its links turns to that link's page."""
 import os
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
@@ -37,12 +37,20 @@ with sync_playwright() as p:
     page.click('#manual [data-book-zoom]')
     page.wait_for_function(f"{caption} === 'Pages 2–3 / 18'", polling=50)
     page.get_by_role('button', name='Foreword', exact=True).click()
+    sheets = page.locator('#note [data-book-image] > .sheet')
+    expect(sheets.nth(0)).to_contain_text('December')
+    expect(sheets.nth(1)).to_contain_text('Arcade')
+    page.locator('#note [data-book-next]').click()
+    expect(sheets.nth(0)).to_contain_text('Foreword')
     page.locator('#note [data-book-last]').click()
-    page.locator('#note .references').get_by_role('link', name='MOCAGH', exact=True).click(trial=True)
+    page.locator('#note .sheet a').last.click(trial=True)
     assert page.locator('#note [data-book-last]').is_disabled()
     page.locator('#note [data-book-first]').click()
     assert page.locator('#note [data-book-first]').is_disabled()
+    page.locator('#note > article a').last.focus()
+    expect(page.locator('#note .sheet .focus-mirror')).to_have_count(1)
+    expect(page.locator('#note [data-book-last]')).to_be_disabled()
     assert not errors, errors
     browser.close()
 
-print('browser_book_test: book pages stay hidden until decoded, the left page turns back, first/last jump to the ends, zoom keeps the place, and the foreword can turn to its final references passed')
+print('browser_book_test: book pages stay hidden until decoded, the left page turns back, first/last jump to the ends, zoom keeps the place, the foreword opens on its cover beside the calendar and turns to its final links, and focusing a link turns to its page passed')

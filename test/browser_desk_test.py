@@ -11,7 +11,7 @@ SCREENS = [
     ('tablet', {'width': 768, 'height': 1024}, PHONE),
     ('desktop', {'width': 1280, 'height': 720}, {}),
 ]
-BOOKS = [('Foreword', '#note', 'article'), ('Box', '#box', '[data-book-image]'), ('Manual', '#manual', '[data-book-image]')]
+BOOKS = [('Foreword', '#note', '[data-book-image]'), ('Box', '#box', '[data-book-image]'), ('Manual', '#manual', '[data-book-image]')]
 
 
 # Live clock: the desk lays out from resize observations, which a frozen clock withholds.
@@ -68,4 +68,10 @@ with sync_playwright() as p:
             page.locator('#manual [data-book-next]').click()
             expect(page.locator('#manual output')).to_have_text(after_next)
         print(f'browser_desk_test: the manual turns to {after_next.lower()} on {name} passed')
+
+    with desk_page(browser, {'width': 390, 'height': 844}, PHONE) as page:
+        page.get_by_role('button', name='Foreword', exact=True).click()
+        expect(page.locator('#note [data-book-image] > .sheet').first).to_contain_text('Arcade')
+        expect(page.locator('#note [data-book-previous]')).to_be_disabled()
+    print('browser_desk_test: on a phone the foreword opens on its cover alone passed')
     browser.close()
