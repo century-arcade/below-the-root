@@ -1,4 +1,4 @@
-"""A book page stays hidden until its image is decoded, so alt text never shows; clicking the left page turns back; first/last jump to the ends; zooming shows one page at a time and keeps the place; the foreword opens on its cover beside a December 1984 calendar, and focusing one of its links turns to that link's page."""
+"""A book page stays hidden until its image is decoded, so alt text never shows; clicking the left page turns back; first/last jump to the ends; zooming shows one page at a time and keeps the place; the foreword opens on its closed cover, and focusing one of its links turns to that link's page."""
 import os
 from playwright.sync_api import expect, sync_playwright
 
@@ -38,7 +38,7 @@ with sync_playwright() as p:
     page.wait_for_function(f"{caption} === 'Pages 2–3 / 18'", polling=50)
     page.get_by_role('button', name='Foreword', exact=True).click()
     sheets = page.locator('#note [data-book-image] > .sheet')
-    expect(sheets.nth(0)).to_contain_text('December')
+    expect(sheets.nth(0)).to_be_hidden()
     expect(sheets.nth(1)).to_contain_text('Arcade')
     page.locator('#note [data-book-next]').click()
     expect(sheets.nth(0)).to_contain_text('Foreword')
@@ -53,4 +53,4 @@ with sync_playwright() as p:
     assert not errors, errors
     browser.close()
 
-print('browser_book_test: book pages stay hidden until decoded, the left page turns back, first/last jump to the ends, zoom keeps the place, the foreword opens on its cover beside the calendar and turns to its final links, and focusing a link turns to its page passed')
+print('browser_book_test: book pages stay hidden until decoded, the left page turns back, first/last jump to the ends, zoom keeps the place, the foreword opens on its closed cover and turns to its final links, and focusing a link turns to its page passed')

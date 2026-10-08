@@ -7,9 +7,8 @@ export function pagesFor(width, height) {
   return available > 0 && width / available >= PAGE_ASPECT * 2 * .8 ? 2 : 1;
 }
 
-// A page is a scan ({ src, alt, className }) or markup ({ render }); spreadOnly
-// pages show beside a spread's other page but never alone.
-const singlesOf = spreads => spreads.flat().filter(page => page && !page.spreadOnly).map(page => [page, null]);
+// A page is a scan ({ src, alt, className }) or markup ({ render }).
+const singlesOf = spreads => spreads.flat().filter(Boolean).map(page => [page, null]);
 const face = page => {
   if (!page) return Object.assign(document.createElement('div'), { className: 'sheet blank' });
   if (page.src) return Object.assign(new Image(), { src: page.src, alt: '', decoding: 'sync', className: page.className ?? '' });
@@ -141,7 +140,7 @@ export function setupBook(root, spreads, caption = () => '') {
   };
   const same = (a, b) => a === b || (a?.key !== undefined && a.key === b?.key);
   const settle = wanted => {
-    const anchor = view[current].find(page => page && !page.spreadOnly);
+    const anchor = view[current].find(Boolean);
     view = wanted;
     last = view.length - 1;
     current = Math.max(0, view.findIndex(pages => pages.some(page => same(page, anchor))));
@@ -211,34 +210,14 @@ function onPageKey(root, handle) {
   }, true);
 }
 
-// The calendar lies beside the closed cover; text pages pair up after it.
-export function pamphletSpreads(calendar, cover, pages) {
-  const spreads = [[calendar, cover]];
+// The cover sits alone on the right, as a closed pamphlet; text pages pair up after it.
+export function pamphletSpreads(cover, pages) {
+  const spreads = [[null, cover]];
   for (let i = 0; i < pages.length; i += 2) spreads.push([pages[i], pages[i + 1] ?? null]);
   return spreads;
 }
 
-// Weeks run Sunday to Saturday; null pads the days outside the month.
-export function monthWeeks(year, month) {
-  const lead = new Date(Date.UTC(year, month, 1)).getUTCDay();
-  const days = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-  const cells = [...Array(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
-  while (cells.length % 7) cells.push(null);
-  return Array.from({ length: cells.length / 7 }, (_, week) => cells.slice(week * 7, week * 7 + 7));
-}
-
 const element = (tag, className, text) => Object.assign(document.createElement(tag), { className, textContent: text ?? '' });
-
-function calendarSheet(year, month) {
-  const sheet = element('div', 'calendar');
-  const title = new Date(Date.UTC(year, month, 1)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
-  sheet.append(element('div', 'calendar-month', title), element('div', 'calendar-year', String(year)));
-  const grid = element('div', 'calendar-grid');
-  for (const day of 'SMTWTFS') grid.append(element('span', 'calendar-weekday', day));
-  for (const week of monthWeeks(year, month)) for (const day of week) grid.append(element('span', 'calendar-day', day ?? ''));
-  sheet.append(grid);
-  return sheet;
-}
 
 function coverSheet() {
   const cover = element('div', 'booklet-cover');
@@ -253,7 +232,6 @@ function coverSheet() {
 export function setupPamphlet(root) {
   const flow = root.querySelector(':scope > article');
   const links = [...flow.querySelectorAll('a')];
-  const calendar = { key: 'calendar', spreadOnly: true, render: () => calendarSheet(1984, 11) };
   const cover = { key: 'cover', render: coverSheet };
   let width = 0;
   let count = 0;
@@ -273,7 +251,7 @@ export function setupPamphlet(root) {
     mirror(copy);
     return copy;
   } });
-  const book = setupBook(root, pamphletSpreads(calendar, cover, []));
+  const book = setupBook(root, pamphletSpreads(cover, []));
   function paginate() {
     const next = flow.getBoundingClientRect().width;
     if (!next) return;
@@ -281,7 +259,7 @@ export function setupPamphlet(root) {
     if (next === width && pages === count) return;
     width = next;
     count = pages;
-    book.setSpreads(pamphletSpreads(calendar, cover, Array.from({ length: count }, (_, i) => textPage(i))));
+    book.setSpreads(pamphletSpreads(cover, Array.from({ length: count }, (_, i) => textPage(i))));
   }
   const unmirror = () => { for (const link of root.querySelectorAll('.focus-mirror')) link.classList.remove('focus-mirror'); };
   flow.addEventListener('focusin', event => {
