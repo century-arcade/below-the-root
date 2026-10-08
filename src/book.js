@@ -1,5 +1,15 @@
+const PAGE_ASPECT = .755;
+const TURNS_HEIGHT = 56;
+
+// A spread wins while its pages are at least four fifths the size one page would be.
+export function pagesFor(width, height) {
+  const available = height - TURNS_HEIGHT;
+  return available > 0 && width / available >= PAGE_ASPECT * 2 * .8 ? 2 : 1;
+}
+
 // Two pages a spread; null leaves a page blank so single pages keep their side.
 export function setupBook(root, spreads, caption = () => '') {
+  const stage = root.closest('.bench-stage');
   const images = root.querySelectorAll('[data-book-image] img');
   const link = root.querySelector('[data-book-image]');
   const previous = root.querySelector('[data-book-previous]');
@@ -92,14 +102,19 @@ export function setupBook(root, spreads, caption = () => '') {
   previous.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
   first.addEventListener('click', () => show(0));
-  setupZoom(root, zoomed => {
+  const choose = () => {
+    const wanted = root.hasAttribute('data-zoom') || stage.dataset.pages === '1' ? singles : spreads;
+    if (wanted === view) return;
     const anchor = view[current].find(Boolean);
-    view = zoomed ? singles : spreads;
+    view = wanted;
     last = view.length - 1;
     current = view.findIndex(pages => pages.includes(anchor));
     if (visible) images.forEach((image, i) => place(i, view[current][i]));
     label(view[current]);
-  });
+  };
+  setupZoom(root, choose);
+  new MutationObserver(choose).observe(stage, { attributeFilter: ['data-pages'] });
+  choose();
   final.addEventListener('click', () => show(last));
   link.addEventListener('click', event => {
     if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

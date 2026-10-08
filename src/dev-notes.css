@@ -38,7 +38,6 @@
 .note-label { font-weight: normal; font-style: italic; }
 .greenbar-paper p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 899px) {
-  #desk[data-stage='dev-notes'] .bench-stage { flex: 1; }
   .greenbar-paper { font-size: 14px; }
   .greenbar-day, .greenbar-intro, .greenbar-title { padding-inline: 32px; }
   .greenbar-paper::before, .greenbar-paper::after { width: 20px; }

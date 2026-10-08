@@ -1,4 +1,5 @@
 import { setupDevNotes } from './dev-notes.js';
+import { pagesFor } from './book.js';
 
 const STAGES = ['outside', 'note', 'manual', 'map', 'dev-notes'];
 export function setupDesk(desk) {
@@ -6,6 +7,11 @@ export function setupDesk(desk) {
   const items = new Map(STAGES.map(stage => [stage, desk.querySelector(`[data-desk="${stage}"]`)]));
   const paper = setupDevNotes(items.get('dev-notes'));
   const table = desk.closest('#table');
+  const benchStage = desk.querySelector('.bench-stage');
+  new ResizeObserver(([entry]) => {
+    const { inlineSize: width, blockSize: height } = entry.contentBoxSize[0];
+    if (width && height) benchStage.dataset.pages = pagesFor(width, height);
+  }).observe(benchStage);
   let stage = 'outside';
   const api = { show, back: goBack, onChange: () => {}, get stage() { return stage; } };
   function show(next) {
