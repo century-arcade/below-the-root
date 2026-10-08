@@ -7,11 +7,18 @@ export function pagesFor(width, height) {
   return available > 0 && width / available >= PAGE_ASPECT * 2 * .8 ? 2 : 1;
 }
 
-// A page is a scan ({ src, alt, className }) or markup ({ render }).
+// A page is a scan ({ src, alt, className, stamp }) or markup ({ render }).
 const singlesOf = spreads => spreads.flat().filter(Boolean).map(page => [page, null]);
 const face = page => {
   if (!page) return Object.assign(document.createElement('div'), { className: 'sheet blank' });
-  if (page.src) return Object.assign(new Image(), { src: page.src, alt: '', decoding: 'sync', className: page.className ?? '' });
+  if (page.src) {
+    const image = Object.assign(new Image(), { src: page.src, alt: '', decoding: 'sync', className: page.className ?? '' });
+    if (!page.stamp) return image;
+    const stamped = Object.assign(document.createElement('div'), { className: 'stamped' });
+    stamped.dataset.stamp = page.stamp;
+    stamped.append(image);
+    return stamped;
+  }
   const sheet = document.createElement('div');
   sheet.className = 'sheet';
   sheet.append(page.render());
@@ -47,14 +54,19 @@ export function setupBook(root, spreads, caption = () => '') {
   // overwrite a page that a later turn has already placed there.
   const placed = [0, 0];
   // alt-flash: a page swaps only once decoded, or its alt text shows while loading
+  const mark = (side, page) => {
+    if (page?.stamp) link.dataset[`stamp${side}`] = page.stamp;
+    else delete link.dataset[`stamp${side}`];
+  };
   function place(side, page, stamp = ++placed[side]) {
     const image = images[side];
-    if (!page) { image.style.visibility = 'hidden'; return; }
+    if (!page) { image.style.visibility = 'hidden'; mark(side, null); return; }
     load(page).then(() => {
       if (placed[side] !== stamp) return;
       if (page.render) image.replaceChildren(page.render());
       else Object.assign(image, { src: page.src, alt: page.alt, className: page.className ?? '' });
       image.style.visibility = '';
+      mark(side, page);
     });
   }
   // A turn is a two-sided leaf over the departing page that swings across the
@@ -276,12 +288,13 @@ export function setupPamphlet(root) {
 }
 
 const scanPage = scan => scan - 2;
-const DEPRECATED_PAGES = new Set([3, 4, 5, 6]);
+// Loading, storage-disk and keyboard instructions the port replaces.
+const SUPERSEDED_PAGES = new Set([3, 4, 5, 6]);
 
 // Scans as printed: page 1 alone on the right, the back cover alone on the left.
 export const MANUAL = Array.from({ length: 10 }, (_, i) => [2 * i + 2, 2 * i + 3].map(scan => scan >= 3 && scan <= 20
   ? { src: `/assets/manual/${String(scan).padStart(2, '0')}.webp`, alt: `Original Below the Root manual, page ${scanPage(scan)}`,
-    page: scanPage(scan), className: DEPRECATED_PAGES.has(scanPage(scan)) ? 'deprecated' : '' }
+    page: scanPage(scan), stamp: SUPERSEDED_PAGES.has(scanPage(scan)) ? 'Superseded' : undefined }
   : null));
 
 export function manualCaption(pages) {

@@ -137,7 +137,16 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 #box, #note, #manual { margin-block: auto; }
 #box img { aspect-ratio: auto 454 / 599; filter: drop-shadow(calc(var(--page-height) * .03) calc(var(--page-height) * .04) 0 #00000059); }
 #manual img { aspect-ratio: 1400 / 1880; filter: drop-shadow(var(--paper)); }
-#manual img.deprecated { filter: contrast(.71) brightness(.49) drop-shadow(var(--paper)); }
+#manual [data-book-image][data-stamp0]::before, #manual [data-book-image][data-stamp1]::after, #manual .stamped::after {
+  position: absolute; z-index: 1; top: 42%; padding: .1em .45em; border: .12em solid; color: #c0262d; opacity: .85; mix-blend-mode: multiply; pointer-events: none;
+  font: 700 calc(var(--page-height) * .052)/1 'Cinzel', Georgia, serif; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+}
+#manual [data-book-image][data-stamp0]::before { content: attr(data-stamp0); left: 25%; transform: translateX(-50%) rotate(-14deg); }
+#manual [data-book-image][data-stamp1]::after { content: attr(data-stamp1); left: 75%; transform: translateX(-50%) rotate(-14deg); }
+.bench-stage[data-pages="1"] #manual [data-book-image][data-stamp0]::before, #manual[data-zoom] [data-book-image][data-stamp0]::before { left: 50%; }
+#manual .stamped::after { content: attr(data-stamp); left: 50%; transform: translateX(-50%) rotate(-14deg); }
+#manual .stamped img { width: 100%; height: 100%; }
+.book-leaf { z-index: 2; }
 .book-leaf { position: absolute; transform-style: preserve-3d; pointer-events: none; }
 .book-spread .book-leaf > * { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
 .book-spread .book-leaf > * + * { transform: rotateY(180deg); }
