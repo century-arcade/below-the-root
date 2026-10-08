@@ -69,7 +69,7 @@ function fit() {
   const full = computerMode && (fullscreenMode.matches || document.fullscreenElement !== null);
   document.documentElement.classList.toggle('game-fullscreen', full);
   document.getElementById('fullscreen').setAttribute('aria-pressed', String(document.fullscreenElement !== null));
-  const landscape = landscapeMode.matches;
+  const landscape = landscapeMode.matches && computerMode;
   document.documentElement.classList.toggle('landscape-play', landscape);
   const bare = full || landscape;
   const cabinetSurround = monitor.dataset.surround !== 'portable';
