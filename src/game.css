@@ -119,7 +119,8 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 #note .about-copy { max-width: none; }
 #note .about-copy p { margin: 0 0 .7em; text-indent: 0; }
 #note .about-copy p + p { text-indent: 1.4em; margin-top: -.7em; }
-#note .about-copy p:last-child { margin-top: 1.5em; text-indent: 0; text-align: right; }
+#note .about-copy :is(p:last-child, p:has(+ h2:last-of-type + ul)) { margin-top: 1.5em; text-indent: 0; text-align: right; }
+#note .about-copy h2:last-of-type:has(+ ul) { break-before: column; }
 #note a { color: inherit; text-underline-offset: 2px; text-decoration-thickness: 1px; }
 #note .references { margin: 1.4em 0 0; gap: .2em 1.2em; font-size: .85em; font-variant: small-caps; }
 .bench-stage { --pages: 2; }
