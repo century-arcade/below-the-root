@@ -42,11 +42,12 @@ If you enjoyed this journey down memory lane, I'd love if you [checked out my ot
 
 -- [Saul Pwanson](mailto:btr@saul.pw) (Curator, Century Arcade)
 
-</div>
-<ul class="references">
-<li><a href="https://www.mobygames.com/game/602/below-the-root/">MobyGames</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Below_the_Root_(video_game)">Wikipedia</a></li>
-<li><a href="https://www.lemon64.com/game/below-the-root">Lemon64</a></li>
-<li><a href="https://www.mocagh.org/loadpage.php?getgame=belowtheroot">MOCAGH</a></li>
-</ul>
+## External Articles
+
+- [Compute! Review](https://www.atarimagazines.com/compute/issue64/review_below.php) (1985, Nick Piazatta, Jr.)
+- [The Making Of Below The Root](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania) (2024, John Szczepaniak)
+- [Below the Root: A story, a computer game and my lifelong obsession](https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/) (2015, Justin Stahlman)
+- [Digital Future, Invisible Past : What Lives On When A Good Game Dies?](https://www.gamedeveloper.com/design/digital-future-invisible-past-what-lives-on-when-a-good-game-dies-) (2014, Darby McDevitt)
+- [Below The Root](https://altusmusic.bandcamp.com/album/below-the-root) digital album (2017, Altus)
+
 </article>
