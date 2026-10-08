@@ -137,7 +137,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 #box img { aspect-ratio: auto 454 / 599; filter: drop-shadow(calc(var(--page-height) * .03) calc(var(--page-height) * .04) 0 #00000059); }
 #manual img { aspect-ratio: 1400 / 1880; filter: drop-shadow(var(--paper)); }
 #manual [data-book-image][data-stamp0]::before, #manual [data-book-image][data-stamp1]::after, #manual .book-leaf > .leaf-stamp {
-  position: absolute; z-index: 1; top: 40%; color: #c0262dd9; pointer-events: none; white-space: nowrap;
+  position: absolute; z-index: 1; top: 40%; color: #c0262dd9; opacity: .5; pointer-events: none; white-space: nowrap;
   font: 700 calc(var(--page-height) * .09)/1 'Cinzel', Georgia, serif; letter-spacing: .04em; text-transform: uppercase; -webkit-text-stroke: .04em currentColor;
 }
 #manual [data-book-image][data-stamp0]::before { content: attr(data-stamp0); left: 25%; transform: translateX(-50%) rotate(-14deg); }
