@@ -43,7 +43,7 @@ with sync_playwright() as p:
     page.locator('#note [data-book-next]').click()
     expect(sheets.nth(0)).to_contain_text('Foreword')
     page.locator('#note [data-book-last]').click()
-    page.locator('#note .sheet a').last.click(trial=True)
+    page.locator('#note .sheet a:visible').last.click(trial=True)
     assert page.locator('#note [data-book-last]').is_disabled()
     page.locator('#note [data-book-first]').click()
     assert page.locator('#note [data-book-first]').is_disabled()
