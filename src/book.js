@@ -9,16 +9,16 @@ export function pagesFor(width, height) {
 
 // A page is a scan ({ src, alt, className, stamp }) or markup ({ render }).
 const singlesOf = spreads => spreads.flat().filter(Boolean).map(page => [page, null]);
+// Each part of a leaf hides its own back, so a stamp is a sibling of its page, not a child.
+const leafFace = (page, side) => {
+  const parts = [face(page)];
+  if (page?.stamp) parts.push(Object.assign(document.createElement('span'), { className: 'leaf-stamp', textContent: page.stamp }));
+  for (const part of parts) part.classList.add(side);
+  return parts;
+};
 const face = page => {
   if (!page) return Object.assign(document.createElement('div'), { className: 'sheet blank' });
-  if (page.src) {
-    const image = Object.assign(new Image(), { src: page.src, alt: '', decoding: 'sync', className: page.className ?? '' });
-    if (!page.stamp) return image;
-    const stamped = Object.assign(document.createElement('div'), { className: 'stamped' });
-    stamped.dataset.stamp = page.stamp;
-    stamped.append(image);
-    return stamped;
-  }
+  if (page.src) return Object.assign(new Image(), { src: page.src, alt: '', decoding: 'sync', className: page.className ?? '' });
   const sheet = document.createElement('div');
   sheet.className = 'sheet';
   sheet.append(page.render());
@@ -81,7 +81,7 @@ export function setupBook(root, spreads, caption = () => '') {
     Object.assign(leaf.style, { left: `${page.offsetLeft}px`, top: `${page.offsetTop}px`,
       width: `${page.offsetWidth}px`, height: `${page.offsetHeight}px`,
       transformOrigin: departing ? 'left' : 'right' });
-    leaf.append(face(front), face(back));
+    leaf.append(...leafFace(front, 'front'), ...leafFace(back, 'back'));
     link.append(leaf);
     const angle = departing ? -180 : 180;
     leaf.animate({ transform: ['perspective(2000px) rotateY(0deg)', `perspective(2000px) rotateY(${angle}deg)`] },
@@ -98,7 +98,7 @@ export function setupBook(root, spreads, caption = () => '') {
     leaf.className = 'book-leaf';
     Object.assign(leaf.style, { left: `${page.offsetLeft}px`, top: `${page.offsetTop}px`,
       width: `${page.offsetWidth}px`, height: `${page.offsetHeight}px`, transformOrigin: 'left' });
-    leaf.append(face(forward ? from : to), face(null));
+    leaf.append(...leafFace(forward ? from : to, 'front'), ...leafFace(null, 'back'));
     link.append(leaf);
     const stamp = forward ? ++placed[0] : placed[0];
     if (forward) place(0, to, stamp);
@@ -239,62 +239,79 @@ function coverSheet() {
   return cover;
 }
 
-// The article stays as the readable, focusable source; each page shows one of its
-// columns through a hidden copy, and focusing a source link turns to its page.
+// A closing heading and its list (the external articles) move into an article
+// of their own, so they start a fresh page in every browser.
+function splitClosing(main) {
+  const closing = [...main.querySelectorAll('.about-copy > h2')].at(-1);
+  if (!closing?.nextElementSibling?.matches('ul')) return [main];
+  const appendix = Object.assign(document.createElement('article'), { className: main.className });
+  const copy = Object.assign(document.createElement('div'), { className: 'about-copy' });
+  const moved = [closing];
+  for (let node = closing.nextElementSibling; node; node = node.nextElementSibling) moved.push(node);
+  copy.append(...moved);
+  appendix.append(copy);
+  main.after(appendix);
+  return [main, appendix];
+}
+
+// Each article stays as the readable, focusable source; each page shows one of
+// its columns through a hidden copy, and focusing a source link turns to its page.
 export function setupPamphlet(root) {
-  const flow = root.querySelector(':scope > article');
-  const links = [...flow.querySelectorAll('a')];
+  const flows = splitClosing(root.querySelector(':scope > article'));
   const cover = { key: 'cover', render: coverSheet };
-  let width = 0;
-  let count = 0;
-  let focused = -1;
-  let focusedPage = -1;
+  const laid = flows.map(() => ({ width: 0, count: 0 }));
+  let focus = null;
   const mirror = copy => {
-    if (Number(copy.dataset.page) === focusedPage) copy.querySelectorAll('a')[focused]?.classList.add('focus-mirror');
+    if (focus && Number(copy.dataset.flow) === focus.flow && Number(copy.dataset.page) === focus.page) {
+      copy.querySelectorAll('a')[focus.link]?.classList.add('focus-mirror');
+    }
   };
-  const textPage = index => ({ key: `text-${index}`, render: () => {
-    const copy = flow.cloneNode(true);
+  const textPage = (flow, index) => ({ key: `text-${flow}-${index}`, render: () => {
+    const copy = flows[flow].cloneNode(true);
     for (const node of [copy, ...copy.querySelectorAll('[id]')]) node.removeAttribute('id');
     copy.removeAttribute('aria-labelledby');
     copy.setAttribute('aria-hidden', 'true');
     for (const link of copy.querySelectorAll('a')) link.tabIndex = -1;
-    copy.style.transform = `translateX(${-index * width}px)`;
-    copy.dataset.page = index;
+    copy.style.transform = `translateX(${-index * laid[flow].width}px)`;
+    Object.assign(copy.dataset, { flow, page: index });
     mirror(copy);
     return copy;
   } });
   const book = setupBook(root, pamphletSpreads(cover, []));
   function paginate() {
-    const next = flow.getBoundingClientRect().width;
-    if (!next) return;
-    const pages = Math.max(1, Math.round(flow.scrollWidth / next));
-    if (next === width && pages === count) return;
-    width = next;
-    count = pages;
-    book.setSpreads(pamphletSpreads(cover, Array.from({ length: count }, (_, i) => textPage(i))));
+    const widths = flows.map(flow => flow.getBoundingClientRect().width);
+    if (widths.some(width => !width)) return;
+    const counts = flows.map((flow, i) => Math.max(1, Math.round(flow.scrollWidth / widths[i])));
+    if (laid.every((layout, i) => layout.width === widths[i] && layout.count === counts[i])) return;
+    laid.forEach((layout, i) => Object.assign(layout, { width: widths[i], count: counts[i] }));
+    const pages = laid.flatMap((layout, flow) => Array.from({ length: layout.count }, (_, i) => textPage(flow, i)));
+    book.setSpreads(pamphletSpreads(cover, pages));
   }
   const unmirror = () => { for (const link of root.querySelectorAll('.focus-mirror')) link.classList.remove('focus-mirror'); };
-  flow.addEventListener('focusin', event => {
-    focused = links.indexOf(event.target);
-    if (focused < 0 || !width) return;
-    unmirror();
-    focusedPage = Math.floor(event.target.offsetLeft / width);
-    book.showPage({ key: `text-${focusedPage}` });
-    for (const copy of root.querySelectorAll('.sheet > article')) mirror(copy);
+  flows.forEach((flow, index) => {
+    const links = [...flow.querySelectorAll('a')];
+    flow.addEventListener('focusin', event => {
+      const link = links.indexOf(event.target);
+      if (link < 0 || !laid[index].width) return;
+      unmirror();
+      focus = { flow: index, link, page: Math.floor(event.target.offsetLeft / laid[index].width) };
+      book.showPage({ key: `text-${index}-${focus.page}` });
+      for (const copy of root.querySelectorAll('.sheet > article')) mirror(copy);
+    });
+    flow.addEventListener('focusout', () => { focus = null; unmirror(); });
+    new ResizeObserver(paginate).observe(flow);
   });
-  flow.addEventListener('focusout', () => { focused = focusedPage = -1; unmirror(); });
-  new ResizeObserver(paginate).observe(flow);
   document.fonts?.ready.then(paginate);
 }
 
 const scanPage = scan => scan - 2;
 // Loading, storage-disk and keyboard instructions the port replaces.
-const SUPERSEDED_PAGES = new Set([3, 4, 5, 6]);
+const OBSOLETE_PAGES = new Set([3, 4, 5, 6]);
 
 // Scans as printed: page 1 alone on the right, the back cover alone on the left.
 export const MANUAL = Array.from({ length: 10 }, (_, i) => [2 * i + 2, 2 * i + 3].map(scan => scan >= 3 && scan <= 20
   ? { src: `/assets/manual/${String(scan).padStart(2, '0')}.webp`, alt: `Original Below the Root manual, page ${scanPage(scan)}`,
-    page: scanPage(scan), stamp: SUPERSEDED_PAGES.has(scanPage(scan)) ? 'Superseded' : undefined }
+    page: scanPage(scan), stamp: OBSOLETE_PAGES.has(scanPage(scan)) ? 'Obsolete' : undefined }
   : null));
 
 export function manualCaption(pages) {
