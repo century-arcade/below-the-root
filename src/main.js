@@ -608,6 +608,8 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     document.getElementById('developer-help').hidden = !on;
+    document.querySelector('.tray-dev-notes').hidden = !on;
+    if (!on && desk.stage === 'dev-notes') desk.back();
     if (desk.stage === 'map') paintMap();
     if (on && !debugReady) {
       debugReady = true;

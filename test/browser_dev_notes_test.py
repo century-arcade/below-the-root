@@ -1,6 +1,13 @@
-"""Dev notes navigate dated sections and share the desk's item-switching behaviour."""
+"""Dev notes appear only in developer mode, navigate dated sections and share the desk's item-switching behaviour."""
 from playwright.sync_api import expect
 from browser_helpers import browser_page
+
+
+def enable_developer_mode(page):
+    opener = page.get_by_role('button', name='Prompts', exact=True, include_hidden=True)
+    expect(opener).to_be_hidden()
+    page.get_by_role('button', name='Developer mode', exact=True).click()
+    expect(opener).to_be_visible()
 
 
 def paper_days(page):
@@ -9,6 +16,7 @@ def paper_days(page):
 
 for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]:
     with browser_page('/play.html', viewport=viewport) as page:
+        enable_developer_mode(page)
         opener = page.get_by_role('button', name='Prompts', exact=True)
         opener.click()
         expect(page.locator('#dev-notes')).to_be_visible()
@@ -47,6 +55,7 @@ for viewport in [{'width': 1440, 'height': 1000}, {'width': 390, 'height': 844}]
         expect(page.locator('#note')).to_be_visible()
 
 with browser_page('/play.html') as page:
+    enable_developer_mode(page)
     page.get_by_role('button', name='Prompts', exact=True).click()
     expect(page.locator('.greenbar-paper [aria-current="true"]')).to_have_count(1)
     assert page.evaluate('''async () => {
