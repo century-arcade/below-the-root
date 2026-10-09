@@ -18,12 +18,10 @@ import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
 import { setupDeveloper, GAME_TOOLS } from './header.js';
 import { setupBook, setupPamphlet, BOX, MANUAL, manualCaption } from './book.js';
-import { hangCalendar } from './calendar.js';
 import { setupDesk } from './desk.js';
 
 setupBook(document.getElementById('box'), BOX);
 setupPamphlet(document.getElementById('note'));
-hangCalendar(document.getElementById('wall-calendar'), 1984, 11);
 setupBook(document.getElementById('manual'), MANUAL, manualCaption);
 const desk = setupDesk(document.getElementById('desk'));
 const away = () => desk.stage !== 'play';
