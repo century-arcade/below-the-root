@@ -1,4 +1,4 @@
-"""Dev notes appear only in developer mode, navigate dated sections and share the desk's item-switching behaviour."""
+"""Dev notes stay off the desk, even in developer mode; their reader still navigates dated sections and shares the desk's item-switching behaviour."""
 from playwright.sync_api import expect
 from browser_helpers import browser_page
 
@@ -7,6 +7,8 @@ def enable_developer_mode(page):
     opener = page.get_by_role('button', name='Prompts', exact=True, include_hidden=True)
     expect(opener).to_be_hidden()
     page.get_by_role('button', name='Developer mode', exact=True).click()
+    expect(opener).to_be_hidden()
+    page.evaluate("document.querySelector('.tray-dev-notes').hidden = false")
     expect(opener).to_be_visible()
 
 

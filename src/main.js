@@ -23,6 +23,7 @@ import { setupDesk } from './desk.js';
 setupBook(document.getElementById('box'), BOX);
 setupPamphlet(document.getElementById('note'));
 setupBook(document.getElementById('manual'), MANUAL, manualCaption);
+const SHOW_DEV_NOTES = false;
 const desk = setupDesk(document.getElementById('desk'));
 const away = () => desk.stage !== 'play';
 const benchStrip = document.querySelector('.bench-strip');
@@ -614,7 +615,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     document.getElementById('developer-help').hidden = !on;
-    document.querySelector('.tray-dev-notes').hidden = !on;
+    document.querySelector('.tray-dev-notes').hidden = !(on && SHOW_DEV_NOTES);
     if (!on && desk.stage === 'dev-notes') desk.back();
     if (desk.stage === 'map') paintMap();
     if (on && !debugReady) {
