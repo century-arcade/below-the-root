@@ -234,11 +234,13 @@ const element = (tag, className, text) => Object.assign(document.createElement(t
 function coverSheet() {
   const cover = element('div', 'booklet-cover');
   const lead = element('span', 'booklet-lead');
-  lead.append('A high-quality restoration', document.createElement('br'), 'of', document.createElement('br'), 'the classic computer game');
+  lead.append('A high-quality restoration', document.createElement('br'), 'of');
+  const published = element('span', 'booklet-published', 'published by Windham Classics');
+  published.append(document.createElement('br'), '1984');
   const credit = element('p', 'booklet-credit', 'produced by ');
   credit.append(Object.assign(element('a', '', 'Saul Pwanson'), { href: 'https://saul.pw' }), document.createElement('br'), '2026');
-  cover.append(lead, element('span', 'booklet-rule'), element('span', 'booklet-title', 'Below The Root'), element('span', 'booklet-rule'),
-    element('span', 'booklet-by', 'by the'), element('span', 'booklet-arcade', 'Century Arcade'), credit);
+  cover.append(lead, element('span', 'booklet-rule'), element('span', 'booklet-title', 'Below The Root'), published,
+    element('span', 'booklet-rule'), element('span', 'booklet-by', 'from the'), element('span', 'booklet-arcade', 'Century Arcade'), credit);
   return cover;
 }
 

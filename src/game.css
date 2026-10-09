@@ -91,6 +91,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 .booklet-cover > * { display: block; margin: 0; }
 .booklet-rule { width: 40%; height: 2px; margin: 7% 0; background: #9b2f3a; }
 .booklet-title { font: 400 2em/1.2 'Cinzel', Georgia, serif; }
+.booklet-cover > .booklet-published { margin-top: .6em; font-style: normal; font-size: .85em; }
 .booklet-arcade { font: 400 1.4em/1.2 'Cinzel', Georgia, serif; }
 .booklet-cover > .booklet-credit { margin-top: auto; font-style: normal; font-size: .85em; }
 .tray-map { --tilt: 2deg; width: 420px; }
