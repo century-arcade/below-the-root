@@ -1,14 +1,14 @@
 <div class="booklet-cover">
-<span class="booklet-lead">A high-quality restoration<br>of</span>
+<span class="booklet-kicker">Foreword</span>
+<span class="booklet-lead">A high-quality restoration of</span>
+<span class="booklet-title">Below<br>The Root</span>
 <span class="booklet-rule"></span>
-<span class="booklet-title">Below The Root</span>
-<span class="booklet-published">originally published by</span>
-<span class="booklet-credit">Windham Classics (1984)</span>
-<span class="booklet-rule"></span>
+<span class="booklet-published">originally published by<br>Windham Classics, 1984</span>
+<span class="booklet-foot">
 <span class="booklet-by">from the</span>
 <span class="booklet-arcade">Century Arcade</span>
-<span class="booklet-credit">produced by</span>
-<span class="booklet-credit"><a href="https://saul.pw">Saul Pwanson</a> (2026)</span>
+<span class="booklet-credit">produced by <a href="https://saul.pw">Saul Pwanson</a>, 2026</span>
+</span>
 </div>
 
 <article class="about-article" aria-labelledby="about-title">

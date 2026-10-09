@@ -81,7 +81,7 @@ test('the desk booklet renders the labelled foreword and its thumb shows the sam
   const out = outputDirectory(t);
   buildSite(out);
   const foreword = marked.parse(readFileSync(new URL('../src/foreword.md', import.meta.url), 'utf8'));
-  const cover = text => text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const cover = text => text.replace(/<\/?a\b[^>]*>/g, '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   const source = cover(foreword.match(/<div class="booklet-cover">[\s\S]*?<\/div>/)[0]);
   for (const page of ['index', 'play', 'map']) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
