@@ -554,6 +554,15 @@ test("trigger presses are consumed once and menu confirmation cannot leak into p
   assert.equal(read().press, false);
 });
 
+test("a direction pressed just after the button and released in the air does not walk on landing", () => {
+  const keys = new Keyboard({ addEventListener() {} });
+  const key = (name, up = false) => keys.map({ key: name, code: name, repeat: false }, up);
+  key(' '); key('ArrowRight');
+  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: true }, 'the leap');
+  key('ArrowRight', true); key(' ', true);
+  assert.deepEqual(keys.read(), IDLE, 'the landing stands still');
+});
+
 test("Enter fires in gameplay and preserves native activation in controls", async () => {
   const { target, keys, read } = await keyboardFixture();
   for (const code of ['Enter', 'NumpadEnter']) {

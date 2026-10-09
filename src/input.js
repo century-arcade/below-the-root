@@ -191,9 +191,21 @@ export class Keyboard {
     if (flowing && !pressed.has('fire')
         && this.events.some(e => e.down && e.keys.includes('fire'))) movement.delete('fire');
     const fire = policy === 'steer' ? pressed.has('fire') : movement.has('fire');
-    if (flowing) this.deliveredFire = fire;
+    if (flowing) {
+      this.deliveredFire = fire;
+      this.dropDeliveredHolds(movement);
+    }
     return { ...axes(movement), fire, ...(policy === 'steer' ? { observed: true } : {}),
       ...(policy === 'steer' && pressed.has('cancel') ? { cancel: true } : {}) };
+  }
+
+  // held-press: left queued, a press already read as a hold replays as a tap after release
+  dropDeliveredHolds(movement) {
+    const holds = new Set();
+    for (const s of this.sources.values()) {
+      for (const [key, id] of s.down) if (key !== 'fire' && movement.has(key) && !s.blocked.has(key)) holds.add(id);
+    }
+    if (holds.size) this.events = this.events.filter(e => !holds.has(e.id));
   }
 }
 
