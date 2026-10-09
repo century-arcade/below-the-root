@@ -8,10 +8,16 @@ export function statusRows(state, { classic = false } = {}) {
   return rows.length ? Array(PANEL_ROWS - rows.length).fill('').concat(rows) : [];
 }
 
+export function statusPanelRows(state) {
+  return [...progressRows(state), ...permanentRows(state)];
+}
+
+function progressRows(state) {
+  return [`PLAY TIME ${playTime(state)}`, `${completion(state)}% GAME COMPLETE`];
+}
+
 function permanentRows(state) {
-  if (state.progress?.won && !state.title && !state.demo) {
-    return [`PLAY TIME ${playTime(state)}`, `${completion(state)}% GAME COMPLETE`];
-  }
+  if (state.progress?.won && !state.title && !state.demo) return progressRows(state);
   if (!state.quest || state.title || state.demo || !state.room) return [];
   const p = state.player;
   const top = place(place('', 0, `DAY ${state.clock.day}`), 8, timeOfDay(state));

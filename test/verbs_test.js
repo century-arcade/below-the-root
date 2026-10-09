@@ -4,15 +4,38 @@ import { J, talkFixture, questState, menuReads as menu, place, lines, give, stic
 import { MENU, menuChoiceAt, highlightMenuChoice, runMenu, paintStatus } from '../src/verbs.js';
 import { CLASS } from '../src/data.js';
 import { startVerb, tick } from '../src/game.js';
+import { shellFrame } from '../src/shell.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 
-test('the live command menu offers inventory but omits status and title navigation', () => {
-  assert.deepEqual(MENU.flat().sort(), [
-    'PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW',
-    'PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'OFFER', 'EAT', 'REST', 'KINIPORT',
+test('the live command menu offers inventory, status and the main menu', () => {
+  assert.deepEqual(MENU.flat().filter(Boolean).sort(), [
+    'PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS', 'SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW',
+    'PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'MENU', 'OFFER', 'EAT', 'REST', 'KINIPORT',
   ].sort());
+});
+
+test('STATUS shows play time and completion above the stats', async () => {
+  const { run, data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  s.simticks = 60 * 3725;
+  const shown = run(s, menu('STATUS'));
+  assert.match(shown[0], /PLAY TIME 01:02:05/);
+  assert.match(shown[1], /\d+% GAME COMPLETE/);
+  assert.match(shown[2], /DAY 1/);
+  assert.match(shown[3], /STAMINA/);
+});
+
+test('MENU leaves the quest for the main menu, which can continue it', async () => {
+  const { run, data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  run(s, menu('MENU'));
+  assert.equal(s.active, false);
+  assert.equal(s.ended, 'menu');
+  shellFrame(s);
+  assert.equal(s.title, true);
+  assert.ok(s.quest);
 });
 
 test('keyboard navigation continues from the pointer highlight', async () => {
@@ -29,16 +52,18 @@ test('keyboard navigation continues from the pointer highlight', async () => {
 
 test('blank menu cells refuse pointer and directional selection', async () => {
   const { data, pomma } = await talkFixture();
-  assert.equal(menuChoiceAt(32, 0), null);
-  assert.equal(menuChoiceAt(32, 2), null);
+  assert.deepEqual(menuChoiceAt(32, 0), { col: 4, row: 0 });
+  assert.deepEqual(menuChoiceAt(32, 2), { col: 4, row: 2 });
   assert.equal(menuChoiceAt(32, 3), null);
   assert.deepEqual(menuChoiceAt(32, 1), { col: 4, row: 1 });
   const walked = questState(data, pomma);
   const g = runMenu(walked);
   g.next();
-  for (const input of menu('RENEW').slice(0, -1)) g.next(input);
-  const current = g.next(J.up);
-  assert.equal(current.done, false);
+  for (const input of menu('MENU').slice(0, -1)) g.next(input);
+  g.next(J.down);
+  g.next(J.idle);
+  assert.deepEqual(walked.commandMenuSelection, { col: 4, row: 2 });
+  g.next(J.up);
   g.next(J.idle);
   g.next(J.left);
   g.next(J.idle);

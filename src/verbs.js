@@ -11,14 +11,9 @@ import { speak, pense, buy, sell, offer } from './dialog.js';
 import { advanceHour, loseDay, timeOfDay, kidnap, DREAM } from './clock.js';
 import { startTune, SFX, sfx } from './audio.js';
 import { acquired } from './progress.js';
+import { statusPanelRows } from './status.js';
 
 export const MENU = [
-  ['PAUSE', 'TAKE', 'DROP', 'EXAMINE'],
-  ['SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW'],
-  ['PENSE', 'USE', 'HEAL', 'GRUNSPREKE'],
-  ['OFFER', 'EAT', 'REST', 'KINIPORT'],
-];
-const DEMO_MENU = [
   ['PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS'],
   ['SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW'],
   ['PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'MENU'],
@@ -51,7 +46,7 @@ const NID_HOST = {
 
 function drawMenu(state, selCol, selRow) {
   clearPanel(state);
-  (state.demo ? DEMO_MENU : MENU).forEach((names, row) => names.forEach((name, col) => {
+  MENU.forEach((names, row) => names.forEach((name, col) => {
     const selected = col === selCol && row === selRow;
     print(state, PANEL_ROW + row, MENU_COLS[col], ` ${name}`.padEnd(MENU_WIDTHS[col]), selected);
   }));
@@ -66,7 +61,6 @@ export function highlightMenuChoice(state, choice) {
 // read-counts: original demos depend on the menu's joystick-read cadence
 export function* runMenu(state) {
   state.commandMenuOpen = true;
-  const choices = state.demo ? DEMO_MENU : MENU;
   const selection = state.commandMenuSelection = { col: 0, row: 0 };
   const moved = directionPress();
   let first = yield* fireUp();
@@ -78,15 +72,15 @@ export function* runMenu(state) {
     if (j.menuChoice) highlightMenuChoice(state, j.menuChoice);
     if (j.fire) break;
     const move = state.demo ? j : moved(j);
-    const nextCol = Math.max(0, Math.min(choices[selection.row].length - 1, selection.col + move.dx));
+    const nextCol = Math.max(0, Math.min(MENU[selection.row].length - 1, selection.col + move.dx));
     const nextRow = Math.max(0, Math.min(3, selection.row + move.dy));
-    if (state.demo || choices[nextRow][nextCol]) {
+    if (state.demo || MENU[nextRow][nextCol]) {
       selection.col = nextCol;
       selection.row = nextRow;
     }
     drawMenu(state, selection.col, selection.row);
   }
-  const verb = choices[selection.row][selection.col];
+  const verb = MENU[selection.row][selection.col];
   state.commandMenuOpen = false;
   sfx(state, SFX.confirm);
   clearPanel(state);
@@ -423,7 +417,9 @@ export function paintStatus(state) {
 }
 
 function* status(state) {
-  paintStatus(state);
+  if (state.classic || state.demo) return paintStatus(state);
+  clearPanel(state);
+  statusPanelRows(state).forEach((text, i) => print(state, PANEL_ROW + i, 0, text));
 }
 
 function* inventory(state) {

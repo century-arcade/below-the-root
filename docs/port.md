@@ -50,9 +50,8 @@ disk powers on if needed. The initial landing does not.
 it and holds gameplay while it is shown. This is separate from Markdown input
 help. The shell still has the title over T4, character selection, START GAME,
 CONTINUE, SAMPLE QUEST and cold-start attract flow. The port filters DISK STORAGE
-out of the original menu because autosave replaces disk slots. INVENTORY follows
-SELL; the live command menu omits STATUS and MENU. The demos retain their original
-command layout.
+out of the original menu because autosave replaces disk slots. The live command
+menu keeps the original layout.
 
 Routes are `/`, `/play`, `/map`, `/about` and `/resources`. `/map` loads Play with
 the desk map selected. `/links` and `/links.html` redirect to `/resources`.
