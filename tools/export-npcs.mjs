@@ -5,6 +5,7 @@ const load = name => JSON.parse(readFileSync(new URL(`${name}.json`, data), 'utf
 const { creatures } = load('creatures');
 const rooms = new Map(load('rooms').rooms.map(room => [room.room, room]));
 const messages = new Map(load('messages').messages.map(message => [message.id, message.text]));
+const titleArtRooms = new Set(['T3', 'U3', 'T4', 'U4']);
 const names = {
   J0: 'Wise Child',
   '91': 'Hermit',
@@ -23,6 +24,7 @@ function text(id) {
 
 for (const creature of creatures) {
   const room = rooms.get(creature.room);
+  if (titleArtRooms.has(room.code)) continue;
   const dialog = Object.fromEntries(Object.entries(creature.dialog).map(([gate, lines]) => [gate, {
     speak: lines.speak.filter(Boolean).map(text),
     pense: { emotion: text(lines.emotion), message: text(lines.message) },
