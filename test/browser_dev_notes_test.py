@@ -6,6 +6,7 @@ from browser_helpers import browser_page
 def enable_developer_mode(page):
     opener = page.get_by_role('button', name='Prompts', exact=True, include_hidden=True)
     expect(opener).to_be_hidden()
+    page.get_by_role('button', name='Game', exact=True).click()
     page.get_by_role('button', name='Developer mode', exact=True).click()
     expect(opener).to_be_hidden()
     page.evaluate("document.querySelector('.tray-dev-notes').hidden = false")

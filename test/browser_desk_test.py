@@ -1,4 +1,4 @@
-"""Every desk item keeps its controls usable on phones, tablets and desktops, including a phone turned sideways after opening it, and a spread gives way to single pages where it would be too small."""
+"""A new visitor lands on the foreword.  Every desk item keeps its controls usable on phones, tablets and desktops, including a phone turned sideways after opening it, and a spread gives way to single pages where it would be too small."""
 from contextlib import contextmanager
 import os
 from playwright.sync_api import expect, sync_playwright
@@ -74,4 +74,14 @@ with sync_playwright() as p:
         expect(page.locator('#note [data-book-image] > .sheet').first).to_contain_text('Arcade')
         expect(page.locator('#note [data-book-previous]')).to_be_disabled()
     print('browser_desk_test: on a phone the foreword opens on its cover alone passed')
+
+    with desk_page(browser, {'width': 1280, 'height': 720}, {}) as page:
+        expect(page.get_by_role('region', name="Curator's Note")).to_be_visible()
+        expect(page.locator('#screen')).to_be_hidden()
+        page.get_by_role('button', name='Game', exact=True).click()
+        expect(page.get_by_role('button', name='Monitor power')).to_have_attribute('aria-pressed', 'true')
+        page.reload()
+        expect(page.locator('#screen')).to_be_visible()
+        expect(page.get_by_role('region', name="Curator's Note")).to_be_hidden()
+    print('browser_desk_test: a new visitor lands on the foreword, and the game stays up once switched on passed')
     browser.close()

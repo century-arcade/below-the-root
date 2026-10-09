@@ -882,7 +882,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   else if (debug && GAME_TOOLS.includes(location.hash.slice(1))) {
     document.getElementById(location.hash.slice(1)).focus();
   }
-  else if (freshStart) { startupTitle = true; hold(); }
+  else if (freshStart) { startupTitle = true; hold(); if (!powered) desk.show('note'); }
   fit();
   draw();
   requestAnimationFrame(frame);
