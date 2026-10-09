@@ -233,9 +233,7 @@ const element = (tag, className, text) => Object.assign(document.createElement(t
 
 function coverSheet() {
   const cover = element('div', 'booklet-cover');
-  const label = element('span');
-  label.append('Century', document.createElement('br'), 'Arcade');
-  cover.append(label);
+  cover.append(element('span', '', 'Below The Root'), element('small', '', 'A Century Arcade restoration'));
   return cover;
 }
 
