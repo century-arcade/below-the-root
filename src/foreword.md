@@ -2,8 +2,8 @@
 <span class="booklet-kicker">Foreword</span>
 <span class="booklet-lead">A high-quality restoration of</span>
 <span class="booklet-title">Below<br>The Root</span>
-<span class="booklet-rule"></span>
 <span class="booklet-published">originally published by<br>Windham Classics, 1984</span>
+<span class="booklet-rule"></span>
 <span class="booklet-foot">
 <span class="booklet-by">from the</span>
 <span class="booklet-arcade">Century Arcade</span>
