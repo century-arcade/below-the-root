@@ -235,7 +235,10 @@ function coverSheet() {
   const cover = element('div', 'booklet-cover');
   const credit = element('p', 'booklet-credit', 'produced by ');
   credit.append(Object.assign(element('a', '', 'Saul Pwanson'), { href: 'https://saul.pw' }), document.createElement('br'), '2026');
-  cover.append(element('span', '', 'Below The Root'), element('small', '', 'A Century Arcade restoration'), credit);
+  const subtitle = element('small');
+  const lines = ['A restoration of', 'a classic ↑4 computer game', 'by the', 'Century Arcade'];
+  subtitle.append(...lines.flatMap((line, i) => i ? [document.createElement('br'), line] : [line]));
+  cover.append(element('span', '', 'Below The Root'), subtitle, credit);
   return cover;
 }
 
