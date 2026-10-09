@@ -96,7 +96,7 @@ with browser_page('/play?player=0', setup=setup, has_touch=True) as page:
     page.keyboard.press('p')
     running(True)
 
-    page.goto(BASE + '/about')
+    page.goto(BASE + '/resources')
     page.evaluate('localStorage.clear(); sessionStorage.clear()')
     page.goto(BASE + '/play')
     power_on(page)

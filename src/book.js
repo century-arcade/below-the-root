@@ -229,21 +229,6 @@ export function pamphletSpreads(cover, pages) {
   return spreads;
 }
 
-const element = (tag, className, text) => Object.assign(document.createElement(tag), { className, textContent: text ?? '' });
-
-function coverSheet() {
-  const cover = element('div', 'booklet-cover');
-  const lead = element('span', 'booklet-lead');
-  lead.append('A high-quality restoration', document.createElement('br'), 'of');
-  const published = element('span', 'booklet-published', 'published by Windham Classics');
-  published.append(document.createElement('br'), '1984');
-  const credit = element('p', 'booklet-credit', 'produced by ');
-  credit.append(Object.assign(element('a', '', 'Saul Pwanson'), { href: 'https://saul.pw' }), document.createElement('br'), '2026');
-  cover.append(lead, element('span', 'booklet-rule'), element('span', 'booklet-title', 'Below The Root'), published,
-    element('span', 'booklet-rule'), element('span', 'booklet-by', 'from the'), element('span', 'booklet-arcade', 'Century Arcade'), credit);
-  return cover;
-}
-
 // A closing heading and its list (the external articles) move into an article
 // of their own, so they start a fresh page in every browser.
 function splitClosing(main) {
@@ -263,7 +248,9 @@ function splitClosing(main) {
 // its columns through a hidden copy, and focusing a source link turns to its page.
 export function setupPamphlet(root) {
   const flows = splitClosing(root.querySelector(':scope > article'));
-  const cover = { key: 'cover', render: coverSheet };
+  const coverSource = root.querySelector(':scope > .booklet-cover');
+  coverSource.remove();
+  const cover = { key: 'cover', render: () => coverSource.cloneNode(true) };
   const laid = flows.map(() => ({ width: 0, count: 0 }));
   let focus = null;
   const mirror = copy => {

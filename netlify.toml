@@ -13,8 +13,9 @@ autoLaunch = false
 
 [[redirects]]
 from = "/about"
-to = "/about.html"
-status = 200
+to = "/"
+status = 301
+force = true
 
 [[redirects]]
 from = "/play"

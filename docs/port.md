@@ -53,9 +53,9 @@ CONTINUE, SAMPLE QUEST and cold-start attract flow. The port filters DISK STORAG
 out of the original menu because autosave replaces disk slots. The live command
 menu keeps the original layout.
 
-Routes are `/`, `/play`, `/map`, `/about` and `/resources`. `/map` loads Play with
-the desk map selected. `/links` and `/links.html` redirect to `/resources`.
-At the homepage, `#about`, `#resources` and `#links` redirect to reading pages,
+Routes are `/`, `/play`, `/map` and `/resources`. `/map` loads Play with
+the desk map selected. `/about` redirects to `/`; `/links` and `/links.html`
+redirect to `/resources`. At the homepage, `#resources` and `#links` redirect to `/resources`,
 preserving the query string; `#play` selects Play. These homepage redirects are
 handled by `src/site.js`, not the in-game view handler.
 

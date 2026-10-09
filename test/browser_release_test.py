@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='btr-offline-test-') as temporary:
                 'name': 'playthrough.json', 'mimeType': 'application/json', 'buffer': recording.encode()})
             until(page, 's => s.playback')
             assert observe(page)['quest']
-            page.goto(address + '/about')
+            page.goto(address + '/resources')
             before = page.evaluate("localStorage.getItem('btr.autosave.v3')")
             page.goto(address)
             expect(page).to_have_url(address + '/')

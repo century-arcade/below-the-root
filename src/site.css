@@ -52,31 +52,11 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 .reading-page::before { content: ""; position: absolute; inset: 12px; border: 6px double #202b42; pointer-events: none; }
 .reading-page a { color: inherit; text-underline-offset: 3px; }
 .reading-page a:focus-visible, #site-header a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
-.reading-page h1, .reading-page h2, #about .play-button { font-family: 'Cinzel', Georgia, serif; }
+.reading-page h1, .reading-page h2 { font-family: 'Cinzel', Georgia, serif; }
 .reading-page h1 { margin: 0; font-size: clamp(36px, 5.5vw, 66px); line-height: 1.1; font-weight: 400; letter-spacing: -.035em; }
-.about-heading { text-align: center; }
-.references { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; margin: 32px 0 0; padding: 0; list-style: none; }
-.computer-line { font: 12px/1.6 monospace; text-transform: uppercase; letter-spacing: .08em; }
-.about-images { display: grid; grid-template-columns: .85fr 1.3fr; gap: 50px; align-items: center; margin: 38px 0; }
-#about figure { margin: 0; }
-#about img { display: block; max-width: 100%; height: auto; }
-.box-front img { width: 300px; margin: auto; transform: rotate(-4deg); box-shadow: 5px 9px 0 #202b4240; }
 /* The box photographs have gently bowed edges as well as rounded corners. */
-.monitor, #canvas-box { clip-path: url(#screen-outline); }
-.monitor { padding: 3.5%; background: #000; }
-.monitor img { width: 100%; image-rendering: pixelated; }
-#about figcaption { margin-top: 14px; font-size: 14px; line-height: 1.35; font-variant: small-caps; }
-.about-copy { display: flow-root; max-width: 730px; margin: auto; }
-.about-copy p { margin: 0 0 16px; }
-.about-copy p:last-child { margin-top: 1.5em; text-align: right; }
-.about-action { text-align: center; margin: 26px 0; }
-#about .play-button { display: block; width: fit-content; margin: 0 auto 12px; padding: 10px 70px; background: #202b42; color: #f2ead8; font-size: 30px; font-weight: 700; letter-spacing: .12em; text-decoration: none; border: 4px double #f2ead8; outline: 2px solid #202b42; }
-.about-action > a:not(.play-button) { display: block; margin-top: 8px; font-size: 16px; }
-.archive-download[aria-disabled="true"] { opacity: .7; }
+#canvas-box { clip-path: url(#screen-outline); }
 .reading-page h2 { font-size: 25px; margin: 24px 0 12px; }
-.box-back { float: right; width: 150px; margin: 0 0 18px 24px !important; }
-.extras { list-style: none; padding: 0; }
-.extras li { margin: 5px 0; }
 #resources .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; list-style: none; margin: 0 0 12px; padding: 0; }
 #resources .cards li { position: relative; display: flex; flex-direction: column; overflow: hidden; padding: 16px 18px; background: #faf5e9; border: 2px solid #202b42; }
 #resources .cards li:hover { background: #fffdf6; }
@@ -94,8 +74,6 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid #d6f897; }
 #resources .caption a:not(:first-child) { position: relative; z-index: 1; }
 @media (max-width: 899px) {
   .reading-page { padding: 30px 26px; font-size: 17px; }
-  .about-images { grid-template-columns: 1fr; gap: 32px; margin: 32px 0; }
-  .box-front img { width: min(270px, 90%); }
   #site-header { padding: 8px 4px; column-gap: 4px; }
   #main-nav a { padding: 0 6px; }
   .box-back { width: 110px; margin-left: 16px !important; }

@@ -118,8 +118,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 #note .booklet-cover { height: 100%; aspect-ratio: auto; padding: 16% 10% 12%; font-size: 1.3em; }
 #note .about-heading { margin-bottom: 1.2em; text-align: center; }
 #note h1 { margin: 0; font: 400 2.1em/1.1 'Cinzel', Georgia, serif; letter-spacing: .02em; }
-#note .computer-line { display: none; }
-#note .about-copy { max-width: none; }
+#note .about-copy { display: flow-root; }
 #note .about-copy p { margin: 0 0 .7em; text-indent: 0; }
 #note .about-copy p + p { text-indent: 1.4em; margin-top: -.7em; }
 #note .about-copy p:last-child { margin-top: 1.5em; text-indent: 0; text-align: right; }

@@ -10,11 +10,6 @@ const pages = {
     description: 'Play Below the Root, the 1984 Commodore 64 adventure, in your browser with modern controls, autosave, and an in-game map.',
     canonical: `${origin}/`,
   },
-  about: {
-    title: 'About — Below the Root',
-    description: 'Learn about Below the Root, its Green-Sky setting, and the browser restoration of the 1984 Commodore 64 game.',
-    canonical: `${origin}/about`,
-  },
   resources: {
     title: 'Resources — Below the Root',
     description: 'Find original materials, creator interviews, reviews, playthroughs, and guides for Below the Root.',
@@ -26,6 +21,12 @@ const pages = {
     canonical: `${origin}/map`,
   },
 };
+
+// coverThumb: the desk thumb is inside a button, so it takes no block or link
+export function coverThumb(foreword) {
+  return foreword.match(/<div class="booklet-cover">[\s\S]*?\n<\/div>/)[0]
+    .replace(/^<div|div>$/g, tag => tag.replace('div', 'span')).replace(/<a\b[^>]*>(.*?)<\/a>/g, '$1').replaceAll('\n', '');
+}
 
 export function renderPage(template, metadata, fragments = {}) {
   const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -84,19 +85,20 @@ export function buildSite(out) {
     section => `<section id="replay-help" hidden>${section}</section>`).replace(
     /<h2>Developer mode<\/h2>[\s\S]*?(?=<h2>|$)/,
     section => `<section id="developer-help" hidden>${section}</section>`);
+  const foreword = read('foreword.md');
   const developer = read('developer.html').replaceAll('{{version}}', version);
   const devNotes = renderDevNotes(JSON.parse(readFileSync(new URL('../assets/dev-notes.json', import.meta.url), 'utf8')), marked.parse(read('dev-notes.md')));
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, 'dev-notes.html'), devNotes);
-  for (const output of ['index', 'play', 'about', 'resources', 'map']) {
+  for (const output of ['index', 'play', 'resources', 'map']) {
     const page = output === 'index' || output === 'map' ? 'play' : output;
     const values = {
       nav: read('nav.html').replace(`href="/${page === 'play' ? '' : page}"`, '$& aria-current="page"'),
       developer: page === 'play' ? '' : developer,
       helpButton: page === 'play' ? '<button id="help" aria-label="Help" aria-keyshortcuts="? h" title="Help (?)"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8"/><path d="M7.5 7a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M10 13v1" stroke-linecap="round"/></svg></button>' : '',
       styles: page === 'play' ? `<link rel="stylesheet" href="/game.css"><link rel="stylesheet" href="/dev-notes.css">\n${preloads(read)}` : '',
-      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(read('foreword.md')))
-        : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(page === 'about' ? 'foreword.md' : `${page}.md`)))}</main>`,
+      content: page === 'play' ? read('play.html').replace('{{help}}', () => help).replace('{{developer}}', () => developer).replace('{{note}}', () => marked.parse(foreword)).replace('{{cover}}', () => coverThumb(foreword))
+        : `<main id="${page}" class="reading-page">\n${(page === 'resources' ? cardList : String)(marked.parse(read(`${page}.md`)))}</main>`,
       scripts: `<script type="module" src="/${page === 'play' ? 'main' : 'reading'}.js"></script>
 <script type="module">import { startAnalytics } from "/analytics.js"; startAnalytics();</script>`,
     };

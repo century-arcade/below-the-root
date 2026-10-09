@@ -36,7 +36,7 @@ test('a fresh build gives every public page canonical metadata and bundled image
   const out = outputDirectory(t);
   execFileSync('make', ['build', `BUILD=${out}`], { cwd: root, stdio: 'pipe' });
   const heads = {};
-  for (const [page, canonical] of Object.entries({ index: '/', play: '/', about: '/about', resources: '/resources', map: '/map' })) {
+  for (const [page, canonical] of Object.entries({ index: '/', play: '/', resources: '/resources', map: '/map' })) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
     assert.doesNotMatch(html, /{{\w+}}/);
     const head = heads[page] = headValues(html);
@@ -61,29 +61,34 @@ test('a fresh build gives every public page canonical metadata and bundled image
     }
   }
   assert.deepEqual(heads.index, heads.play);
-  assert.equal(new Set(['play', 'about', 'resources', 'map'].map(page => heads[page].description)).size, 4);
+  assert.equal(new Set(['play', 'resources', 'map'].map(page => heads[page].description)).size, 3);
 });
 
 test('map retains the game markup and only index bootstraps legacy hash routes', t => {
   const out = outputDirectory(t);
   buildSite(out);
-  const pages = Object.fromEntries(['index', 'play', 'map', 'about', 'resources']
+  const pages = Object.fromEntries(['index', 'play', 'map', 'resources']
     .map(page => [page, readFileSync(join(out, `${page}.html`), 'utf8')]));
   assert.equal(pages.map.split('<body>')[1], pages.play.split('<body>')[1]);
   assert.match(pages.index, /if \(enterSite\(\)\) \{ import\("\/main.js"\); startAnalytics\(\); \}/);
-  for (const page of ['play', 'map', 'about', 'resources']) {
+  for (const page of ['play', 'map', 'resources']) {
     assert.doesNotMatch(pages[page], /enterSite/);
     assert.ok(pages[page].includes(`src="/${page === 'play' || page === 'map' ? 'main' : 'reading'}.js"`));
   }
 });
 
-test('the desk booklet and About page render the same labelled foreword', t => {
+test('the desk booklet renders the labelled foreword and its thumb shows the same cover without links', t => {
   const out = outputDirectory(t);
   buildSite(out);
   const foreword = marked.parse(readFileSync(new URL('../src/foreword.md', import.meta.url), 'utf8'));
-  for (const page of ['index', 'play', 'map', 'about']) {
+  const cover = text => text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  const source = cover(foreword.match(/<div class="booklet-cover">[\s\S]*?<\/div>/)[0]);
+  for (const page of ['index', 'play', 'map']) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
     assert.ok(html.includes(foreword), `${page} includes the foreword`);
+    const thumb = html.match(/<button[^>]*aria-label="Foreword">([\s\S]*?)<\/button>/)[1];
+    assert.equal(cover(thumb), source);
+    assert.doesNotMatch(thumb, /<a\b|<div\b/);
     assert.equal([...html.matchAll(/<h1 id="about-title">Foreword<\/h1>/g)].length, 1);
     assert.match(html, /<article class="about-article" aria-labelledby="about-title">/);
   }
@@ -92,7 +97,7 @@ test('the desk booklet and About page render the same labelled foreword', t => {
 test('every public page initializes the shared analytics loader once', t => {
   const out = outputDirectory(t);
   buildSite(out);
-  for (const page of ['index', 'play', 'map', 'about', 'resources']) {
+  for (const page of ['index', 'play', 'map', 'resources']) {
     const html = readFileSync(join(out, `${page}.html`), 'utf8');
     const scripts = [...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/g)].map(match => match[0]).join('\n');
     assert.equal(scripts.match(/from "\/analytics.js"/g)?.length, 1);
@@ -112,7 +117,7 @@ test('game pages hint every boot module and data file, all present in the build'
     }
     for (const href of hints) assert.ok(existsSync(join(out, href)), `${href} is built`);
   }
-  for (const page of ['about', 'resources']) assert.doesNotMatch(readFileSync(join(out, `${page}.html`), 'utf8'), /preload/);
+  for (const page of ['resources']) assert.doesNotMatch(readFileSync(join(out, `${page}.html`), 'utf8'), /preload/);
 });
 
 test('dev notes ship as their own fragment, not inside the game pages', t => {

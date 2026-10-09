@@ -1,7 +1,17 @@
+<div class="booklet-cover">
+<span class="booklet-lead">A high-quality restoration<br>of</span>
+<span class="booklet-rule"></span>
+<span class="booklet-title">Below The Root</span>
+<span class="booklet-published">published by Windham Classics<br>1984</span>
+<span class="booklet-rule"></span>
+<span class="booklet-by">from the</span>
+<span class="booklet-arcade">Century Arcade</span>
+<span class="booklet-credit">produced by <a href="https://saul.pw">Saul Pwanson</a><br>2026</span>
+</div>
+
 <article class="about-article" aria-labelledby="about-title">
 <div class="about-heading">
 <h1 id="about-title">Foreword</h1>
-<p class="computer-line">Commodore 64, © 1984 Windham Classics<br>Javascript port, 2026 <a href="https://saul.pw">Saul Pwanson</a></p>
 </div>
 <div class="about-copy">
 

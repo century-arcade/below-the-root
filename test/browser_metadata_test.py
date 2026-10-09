@@ -8,7 +8,7 @@ BASE = os.environ.get('BTR_URL', 'http://localhost:8000')
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     page = browser.new_page(java_script_enabled=False)
-    for path in ['/', '/play', '/about', '/resources', '/map']:
+    for path in ['/', '/play', '/resources', '/map']:
         response = page.goto(BASE + path)
         assert response.ok
         icon = page.locator('link[rel="icon"]')

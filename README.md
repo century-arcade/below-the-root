@@ -4,7 +4,6 @@ Play the 1984 C64 game *Below the Root* (Windham Classics) in your browser,
 based on Zilpha Keatley Snyder's Green-sky books.
 
 [Play](https://below-the-root.netlify.app/) ·
-[About](https://below-the-root.netlify.app/about) ·
 [Resources](https://below-the-root.netlify.app/resources)
 
 ## The monitor and desk

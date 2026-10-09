@@ -1,4 +1,4 @@
-const PAGES = ['about', 'play', 'help', 'resources'];
+const PAGES = ['play', 'help', 'resources'];
 
 export function startPage(hash) {
   const page = hash === '#links' ? 'resources' : hash.slice(1);
@@ -7,7 +7,7 @@ export function startPage(hash) {
 
 export function enterSite() {
   const page = startPage(location.hash);
-  if (page === 'about' || page === 'resources') {
+  if (page === 'resources') {
     location.replace(`/${page}${location.search}`);
     return false;
   }
