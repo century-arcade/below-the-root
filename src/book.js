@@ -233,7 +233,9 @@ const element = (tag, className, text) => Object.assign(document.createElement(t
 
 function coverSheet() {
   const cover = element('div', 'booklet-cover');
-  cover.append(element('span', '', 'Below The Root'), element('small', '', 'A Century Arcade restoration'));
+  const credit = element('p', 'booklet-credit', 'produced by ');
+  credit.append(Object.assign(element('a', '', 'Saul Pwanson'), { href: 'https://saul.pw' }), document.createElement('br'), '2026');
+  cover.append(element('span', '', 'Below The Root'), element('small', '', 'A Century Arcade restoration'), credit);
   return cover;
 }
 
