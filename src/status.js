@@ -9,7 +9,8 @@ export function statusRows(state, { classic = false } = {}) {
 }
 
 export function statusPanelRows(state) {
-  return [...progressRows(state), ...permanentRows(state)];
+  const [time, complete] = progressRows(state);
+  return [place(time, PANEL_COLS - complete.length, complete), '', ...permanentRows(state)];
 }
 
 function progressRows(state) {

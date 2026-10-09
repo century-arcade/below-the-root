@@ -21,8 +21,7 @@ test('STATUS shows play time and completion above the stats', async () => {
   const s = questState(data, pomma);
   s.simticks = 60 * 3725;
   const shown = run(s, menu('STATUS'));
-  assert.match(shown[0], /PLAY TIME 01:02:05/);
-  assert.match(shown[1], /\d+% GAME COMPLETE/);
+  assert.match(shown[0], /PLAY TIME 01:02:05 +\d+% GAME COMPLETE/);
   assert.match(shown[2], /DAY 1/);
   assert.match(shown[3], /STAMINA/);
 });
