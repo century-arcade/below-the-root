@@ -2,11 +2,13 @@
 <span class="booklet-lead">A high-quality restoration<br>of</span>
 <span class="booklet-rule"></span>
 <span class="booklet-title">Below The Root</span>
-<span class="booklet-published">published by Windham Classics<br>1984</span>
+<span class="booklet-published">originally published by</span>
+<span class="booklet-credit">Windham Classics (1984)</span>
 <span class="booklet-rule"></span>
 <span class="booklet-by">from the</span>
 <span class="booklet-arcade">Century Arcade</span>
-<span class="booklet-credit">produced by <a href="https://saul.pw">Saul Pwanson</a><br>2026</span>
+<span class="booklet-credit">produced by</span>
+<span class="booklet-credit"><a href="https://saul.pw">Saul Pwanson</a> (2026)</span>
 </div>
 
 <article class="about-article" aria-labelledby="about-title">
@@ -23,14 +25,14 @@ And yet, there were a few games that really expanded what a computer game could 
 Both Ultima III (1983) and King's Quest (1984) have an open world to explore, characters to interact with, and a story that the player participates in.
 Gamers loved these games, and they each grew into their own franchise and genre.
 
-There's another excellent game though, that very few gamers know about.
+There's another excellent game from that era that most gamers don't know about.
 Below The Root was developed in collaboration with the author of a fantasy/sci-fi trilogy over about 4 months, and published at the end of 1984 by Windham Classics as a children's adventure game.
 
 This game had a real impact on me as a kid.  I had played some interactive fiction like the Scott Adams' adventure games, but I could never make much progress in "real" adventure games like Zork or Hitchhiker's Guide.  But like those games, Below The Root had plot and puzzles and characters with feelings.
 
 In fact I remember learning the word "avarice" from it: some characters will kidnap you in certain circumstances, and if you 'pense' (sense the emotions/thoughts of) characters, they can clue you into whether they are going to be helpful or hurtful.  There are very few words in Below The Root, so they all carry more meaning.
 
-It was also a platformer, giving the world a visual flavor that kept my 10-year-old self engaged.  It rewarded patience, curiosity, and a bit of cleverness.  And it's fun to glide from screen to screen to explore the world!
+Below The Root has a warm and simple aesthetic that gives the world a visual flavor and kept me engaged.  It rewarded patience, curiosity, and a bit of cleverness.  And it's fun to glide from screen to screen to explore the world!
 
 I'd like to encourage you to take some time now to play the game and explore for yourself.  I've made it very easy here so you can take a trip back in time to a finished basement rec room that has the Commodore 64 in it.  Consider how you might have received this game in a sealed box, and opened the inside flap.  Maybe you leafed through the manual while you waited for the game to load.  Take your time, the game may be simple but it has depth.
 
@@ -54,10 +56,10 @@ If you enjoyed this journey down memory lane, I'd love if you [checked out my ot
 
 ## External Articles
 
-- [Compute! Review](https://www.atarimagazines.com/compute/issue64/review_below.php) (1985, Nick Piazatta, Jr.)
-- [The Making Of Below The Root](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania) (2024, John Szczepaniak)
-- [Below the Root: A story, a computer game and my lifelong obsession](https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/) (2015, Justin Stahlman)
+- [Compute! magazine review](https://www.atarimagazines.com/compute/issue64/review_below.php) (1985, Nick Piazatta Jr)
 - [Digital Future, Invisible Past : What Lives On When A Good Game Dies?](https://www.gamedeveloper.com/design/digital-future-invisible-past-what-lives-on-when-a-good-game-dies-) (2014, Darby McDevitt)
-- [Below The Root](https://altusmusic.bandcamp.com/album/below-the-root) digital album (2017, Altus)
+- [Below the Root: A story, a computer game and my lifelong obsession](https://blog.stahlmandesign.com/below-the-root-a-story-a-computer-game-and-my-lifelong-obsession/) (2015, Justin Stahlman)
+- [Below The Root digital album](https://altusmusic.bandcamp.com/album/below-the-root) (2017, Altus)
+- [The Making Of Below The Root](https://www.timeextension.com/features/the-making-of-below-the-root-the-1984-metroidvania-masterpiece-that-predates-metroid-and-castlevania) (2024, John Szczepaniak)
 
 </article>
