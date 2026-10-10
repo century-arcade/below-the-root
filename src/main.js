@@ -504,7 +504,6 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       frozen = true;
       monitor.classList.add('screen-dark');
       clearTimeout(screenTimer); screenTimer = setTimeout(() => { frozen = false; }, SCREEN_FADE_MS);
-      speaker.unlock(state); speaker.clip('power-off');
       try { clearAutosave(localStorage); }
       catch (err) { log(`Saved game could not be cleared: ${err.message}`); }
       draw();

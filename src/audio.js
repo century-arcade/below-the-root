@@ -13,7 +13,7 @@ export const SFX = {
 };
 
 // the monitor's own sounds, synthesized: assets/sound/sources.txt
-export const CLIPS = ['power-on', 'power-off'];
+export const CLIPS = ['power-on'];
 
 export async function loadClip(name) {
   const bytes = await (await fetch(`/assets/sound/${name}.mp3`)).arrayBuffer();

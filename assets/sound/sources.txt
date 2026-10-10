@@ -1,9 +1,3 @@
-power-on.mp3, power-off.mp3: the Commodore 1702 monitor's push-button power switch.
+power-on.mp3: the Commodore 1702 monitor's degauss at power-on.
 
-Both synthesized for this port; no recordings.
-
-Click: a short noise burst through two resonators (300 Hz body knock,
-2.2 kHz plastic tick), about 25 ms.
-
-power-off.mp3 is the click alone.  power-on.mp3 is the degauss alone:
-synthesized, modelled on real degauss recordings.
+Synthesized for this port, modelled on real degauss recordings.
