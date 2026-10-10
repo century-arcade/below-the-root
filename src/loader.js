@@ -24,7 +24,7 @@ const TOUCH_COMMANDS = [
 ];
 const COMMANDS_ROW = 9;
 const KEY_PROMPT = [21, 'HIT ANY KEY TO BOOT'];
-const TOUCH_PROMPT = [21, 'TAP TO BOOT'];
+const TOUCH_PROMPT = [23, 'TAP TO BOOT'];
 
 export function titleLines(touch = false) {
   const commands = touch ? TOUCH_COMMANDS : KEY_COMMANDS;

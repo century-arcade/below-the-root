@@ -5,7 +5,5 @@ Both synthesized for this port; no recordings.
 Click: a short noise burst through two resonators (300 Hz body knock,
 2.2 kHz plastic tick), about 25 ms.
 
-Degauss (power-on only), 15 ms after the click: synthesized, modelled on
-real degauss recordings.
-
-Same click for on and off: a push-push switch sounds alike both ways.
+power-off.mp3 is the click alone.  power-on.mp3 is the degauss alone:
+synthesized, modelled on real degauss recordings.
