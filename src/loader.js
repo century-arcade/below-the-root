@@ -15,13 +15,14 @@ const KEY_COMMANDS = [
   ['?', 'TOGGLE THIS SCREEN'],
 ];
 const TOUCH_COMMANDS = [
-  ['HOLD OR SWIPE', 'MOVE'],
-  ['HOLD + TAP', 'JUMP/RUN/ENTER'],
-  ['TAP', 'CHOOSE IN MENUS'],
-  ['TWO-FINGER HOLD', 'GAME MENU'],
+  ['SWIPE + HOLD', 'MOVE'],
+  ['HOLD + TAP OTHER', 'RUN + JUMP'],
+  ['TAP', 'ENTER/EXIT DOOR'],
+  ['HOLD + HOLD OTHER', 'OPEN MENU'],
+  ['TAP', 'MENU CHOOSE'],
 ];
 const COMMANDS_ROW = 9;
-const KEY_PROMPT = [21, 'PRESS ANY KEY OR TAP TO BOOT'];
+const KEY_PROMPT = [21, 'HIT ANY KEY TO BOOT'];
 const TOUCH_PROMPT = [21, 'TAP TO BOOT'];
 
 export function titleLines(touch = false) {
