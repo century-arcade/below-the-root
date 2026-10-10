@@ -6,7 +6,7 @@ const text = touch => titleLines(touch).map(([, line]) => line).join('\n');
 
 test('touch title lists gestures and no keys', () => {
   const touch = text(true);
-  assert.match(touch, /HOLD OTHER/);
+  assert.match(touch, /HOLD BOTH SIDES/);
   assert.match(touch, /TAP TO BOOT/);
   assert.doesNotMatch(touch, /WASD|ANY KEY|SPACE/);
 });

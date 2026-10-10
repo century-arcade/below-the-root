@@ -15,10 +15,11 @@ const KEY_COMMANDS = [
   ['?', 'TOGGLE THIS SCREEN'],
 ];
 const TOUCH_COMMANDS = [
-  ['SWIPE + HOLD', 'MOVE'],
+  ['HOLD ONE SIDE', 'MOVE'],
+  ['SWIPE', 'MOVE'],
   ['HOLD + TAP OTHER', 'RUN + JUMP'],
   ['TAP', 'ENTER/EXIT DOOR'],
-  ['HOLD + HOLD OTHER', 'OPEN MENU'],
+  ['HOLD BOTH SIDES', 'OPEN MENU'],
   ['TAP', 'MENU CHOOSE'],
 ];
 const COMMANDS_ROW = 9;
