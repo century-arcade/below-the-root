@@ -521,12 +521,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     document.documentElement.classList.toggle('monitor-away', !playing);
     fit();
     if (!playing) { if (powered) hold(); return; }
-    if (!powered && !landing) power.click();
     canvas.focus({ preventScroll: true });
   };
-  let landing = true;
   desk.show('play');
-  landing = false;
   const suspendFocus = () => { inactive = true; dropInput(); };
   const restoreFocus = () => {
     if (!inactive || document.hidden) return;

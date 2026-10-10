@@ -88,12 +88,12 @@ def browser_page(path, *, setup=None, base=None, **options):
 
 
 def power_on(page):
-    """Switch on a cold launch: a fresh visitor picks up the game disk from the foreword."""
+    """Switch on a cold launch: a fresh visitor picks up the game disk, then presses power."""
     power = page.locator('#monitor-power')
     expect(power).to_have_attribute('aria-pressed', 'false')
     expect(page.locator('#screen')).to_be_hidden()
     if page.evaluate("document.getElementById('desk').dataset.stage !== 'play'"):
         page.get_by_role('button', name='Game', exact=True).click()
-    else:
-        power.click()
+    expect(power).to_have_attribute('aria-pressed', 'false')
+    power.click()
     expect(power).to_have_attribute('aria-pressed', 'true')
