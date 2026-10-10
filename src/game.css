@@ -103,7 +103,7 @@ html[data-strip="none"]:not(.monitor-away) .bench-strip { display: none; }
 .tray-disk { --tilt: -5deg; width: 130px; }
 .tray-item:focus-visible { outline: 2px solid #f2e4c6; outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { .tray-item { transition: none; } }
-#manual { position: relative; }
+#box, #manual { position: relative; }
 .page-number { position: absolute; bottom: 12px; left: calc(50% + 200px); white-space: nowrap; color: #f2e4c6; font-size: 14px; }
 #note {
   --aspect: .755; --sheet-h: var(--page-height); --sheet-w: calc(var(--sheet-h) * var(--aspect)); --pad: calc(var(--sheet-h) * .07);

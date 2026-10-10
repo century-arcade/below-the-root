@@ -26,7 +26,7 @@ const face = page => {
 };
 
 // Two pages a spread; null leaves a page blank so single pages keep their side.
-export function setupBook(root, spreads, caption = () => '') {
+export function setupBook(root, spreads) {
   const stage = root.closest('.bench-stage');
   const link = root.querySelector('[data-book-image]');
   const images = link.querySelectorAll(':scope > img, :scope > .sheet');
@@ -141,7 +141,7 @@ export function setupBook(root, spreads, caption = () => '') {
     if (scan) link.href = scan.src;
     previous.disabled = first.disabled = current === 0;
     next.disabled = final.disabled = current === last;
-    if (status) status.textContent = caption(pages);
+    if (status) status.textContent = pageCaption(spreads, pages);
   }
   previous.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
@@ -306,9 +306,11 @@ export const MANUAL = Array.from({ length: 10 }, (_, i) => [2 * i + 2, 2 * i + 3
     page: scanPage(scan), stamp: OBSOLETE_PAGES.has(scanPage(scan)) ? 'Obsolete' : undefined }
   : null));
 
-export function manualCaption(pages) {
-  const printed = pages.filter(page => page?.page != null).map(page => page.page);
-  return printed.length > 1 ? `Pages ${printed[0]}–${printed[1]} / 18` : `Page ${printed[0]} / 18`;
+// Pages count from the first printed page; blanks are unnumbered.
+export function pageCaption(spreads, pages) {
+  const all = spreads.flat().filter(Boolean);
+  const shown = pages.filter(Boolean).map(page => all.indexOf(page) + 1);
+  return shown.length > 1 ? `Pages ${shown[0]}–${shown[1]} / ${all.length}` : `Page ${shown[0]} / ${all.length}`;
 }
 
 export const BOX = [

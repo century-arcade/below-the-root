@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pagesFor, pamphletSpreads } from '../src/book.js';
+import { pagesFor, pamphletSpreads, pageCaption, BOX, MANUAL } from '../src/book.js';
 
 test('a stage too narrow for a readable spread shows one page at a time', () => {
   assert.equal(pagesFor(358, 600), 1);
@@ -19,4 +19,14 @@ test('a stage with no room below the page turns falls back to one page', () => {
 test('the closed cover sits alone on the right and text pages pair up after it', () => {
   assert.deepEqual(pamphletSpreads('cover', ['a', 'b', 'c']), [[null, 'cover'], ['a', 'b'], ['c', null]]);
   assert.deepEqual(pamphletSpreads('cover', []), [[null, 'cover']]);
+});
+
+test('pages are numbered from the first printed page, skipping blanks, over the total', () => {
+  const spreads = pamphletSpreads('cover', ['a', 'b', 'c']);
+  assert.equal(pageCaption(spreads, [null, 'cover']), 'Page 1 / 4');
+  assert.equal(pageCaption(spreads, ['a', 'b']), 'Pages 2–3 / 4');
+  assert.equal(pageCaption(spreads, ['c', null]), 'Page 4 / 4');
+  assert.equal(pageCaption(BOX, BOX[1]), 'Pages 2–3 / 4');
+  assert.equal(pageCaption(MANUAL, MANUAL[1]), 'Pages 2–3 / 18');
+  assert.equal(pageCaption(MANUAL, MANUAL[0]), 'Page 1 / 18');
 });

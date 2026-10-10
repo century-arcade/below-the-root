@@ -17,12 +17,12 @@ import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
 import { setupDeveloper, GAME_TOOLS } from './header.js';
-import { setupBook, setupPamphlet, BOX, MANUAL, manualCaption } from './book.js';
+import { setupBook, setupPamphlet, BOX, MANUAL } from './book.js';
 import { setupDesk } from './desk.js';
 
 setupBook(document.getElementById('box'), BOX);
 setupPamphlet(document.getElementById('note'));
-setupBook(document.getElementById('manual'), MANUAL, manualCaption);
+setupBook(document.getElementById('manual'), MANUAL);
 const SHOW_DEV_NOTES = false;
 const desk = setupDesk(document.getElementById('desk'));
 const away = () => desk.stage !== 'play';
