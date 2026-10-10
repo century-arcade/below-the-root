@@ -7,28 +7,37 @@ const TITLE = [
   [4, 'COPYRIGHT (C) 1984'],
   [6, 'RESTORED BY SAUL PWANSON 2026'],
 ];
-const COMMANDS = [
+const KEY_COMMANDS = [
   ['ARROWS/WASD', 'MOVE'],
   ['SPACE/ENTER', 'JUMP/RUN/ENTER'],
   ['F', 'GAME MENU'],
   ['M', 'WORLD MAP'],
   ['?', 'TOGGLE THIS SCREEN'],
 ];
+const TOUCH_COMMANDS = [
+  ['HOLD OR SWIPE', 'MOVE'],
+  ['HOLD + TAP', 'JUMP/RUN/ENTER'],
+  ['TAP', 'CHOOSE IN MENUS'],
+  ['TWO-FINGER HOLD', 'GAME MENU'],
+];
 const COMMANDS_ROW = 9;
-const PROMPT = [21, 'PRESS ANY KEY OR TAP TO BOOT'];
+const KEY_PROMPT = [21, 'PRESS ANY KEY OR TAP TO BOOT'];
+const TOUCH_PROMPT = [21, 'TAP TO BOOT'];
 
-function lines() {
-  const key = Math.max(...COMMANDS.map(([k]) => k.length)) + 2;
-  const list = COMMANDS.map(([k, action]) => k.padEnd(key) + action);
+export function titleLines(touch = false) {
+  const commands = touch ? TOUCH_COMMANDS : KEY_COMMANDS;
+  const key = Math.max(...commands.map(([k]) => k.length)) + 2;
+  const list = commands.map(([k, action]) => k.padEnd(key) + action);
   const width = Math.max(...list.map(line => line.length));
-  return [...TITLE, ...list.map((line, i) => [COMMANDS_ROW + 2 * i, line.padEnd(width)]), PROMPT];
+  return [...TITLE, ...list.map((line, i) => [COMMANDS_ROW + 2 * i, line.padEnd(width)]),
+    touch ? TOUCH_PROMPT : KEY_PROMPT];
 }
 
 // Title screen, white on black; the commands are one left-aligned list.
-export function loaderScreen(data) {
+export function loaderScreen(data, touch = false) {
   const px = new Uint8Array(WIDTH * HEIGHT).fill(PAPER);
   const glyphs = data.charsets.text.glyphs;
-  for (const [row, text] of lines()) {
+  for (const [row, text] of titleLines(touch)) {
     const first = Math.floor((40 - text.length) / 2);
     for (let i = 0; i < text.length; i++) {
       const base = (text.charCodeAt(i) & 0x7f) * 8;

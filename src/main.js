@@ -41,6 +41,7 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const image = ctx.createImageData(WIDTH, HEIGHT);
 const CANVAS_PADDING = 3;
+const touchPrimary = matchMedia('(pointer: coarse)');
 const landscapeMode = matchMedia('(orientation: landscape) and (max-height: 500px) and (pointer: coarse)');
 const mainNav = document.getElementById('main-nav');
 
@@ -358,7 +359,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const menuButton = document.getElementById('command-menu');
   let startupHelp = false;
   let startupTitle = false;
-  let titleImage = null;
+  const titleImages = new Map();
+  const titleImage = touch => titleImages.get(touch)
+    ?? titleImages.set(touch, loaderScreen(data, touch)).get(touch);
   const helpButton = document.getElementById('help');
   const homeButton = document.getElementById('home');
   const rewindRoomButton = document.getElementById('rewind-room');
@@ -814,7 +817,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     rewindRoomButton.hidden = !debug || session.playback;
     rewindRoomButton.disabled = !session.canBackRoom;
     state.figures = figures(state);
-    image.data.set(startupTitle ? (titleImage ||= loaderScreen(data))
+    image.data.set(startupTitle ? titleImage(touchPrimary.matches)
       : render(state, statusRows(state, { classic: options.classic })));
     ctx.putImageData(image, 0, 0);
     paintPaperMap();
