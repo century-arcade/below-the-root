@@ -17,16 +17,17 @@
 </div>
 <div class="about-copy">
 
-Once upon a time, the computer experience was small, quiet, and straightforward, even though the computer itself was big, loud, and clunky.  There was no hard drive, it could only do one thing at a time, and there certainly wasn't any internet to be distracted by.  The computer lived in one particular room and was shared by your whole family.  You turned it on to do a particular task, you did that task, and you turned it off when you were done.  Both your software and your data were stored on floppy disks, which were known to be fragile.  Always store them in their sleeves, never touch their insides.  And for God's sake, keep them away from magnets!
+Once upon a time, the computer experience was small, quiet, and straightforward, even though the computer itself was big, loud, and clunky.  There was no hard drive, it could only do one thing at a time, and there certainly wasn't any internet to be distracted by.  The computer lived in one particular room and was shared by your whole family.  You turned it on to do a particular task, you did that task, and you turned it off when you were done.
 
-On these computers, games were also usually small and straightforward.  Boulder Dash, Summer Games, and Spy Hunter were quite popular on the Commodore 64 in 1984.  Small, self-contained games of reflex and repetition with levels that mostly fit on a single screen.
+On these computers, games were also usually small, self-contained, straightforward games of reflex and repetition, with levels that mostly fit on a single screen.
+Boulder Dash, Summer Games, and Spy Hunter were quite popular on the Commodore 64 in 1984.
 
 And yet, there were a few games that really expanded what a computer game could be.
-Both Ultima III (1983) and King's Quest (1984) have an open world to explore, characters to interact with, and a story that the player participates in.
-Gamers loved these games, and they each grew into their own franchise and genre.
+Both [Ultima III: Exodus](https://en.wikipedia.org/wiki/Ultima_III:_Exodus) (1983) and [King's Quest](https://en.wikipedia.org/wiki/King's_Quest) (1984) have an open world to explore, characters to interact with, and a story that the player participates in.
+Gamers loved these games, and they each became one of the most successful game series of the '80s and '90s.
 
-There's another excellent game from that era that most gamers don't know about.
-Below The Root was developed in collaboration with the author of a fantasy/sci-fi trilogy over about 4 months, and published at the end of 1984 by Windham Classics as a children's adventure game.
+But there's another excellent game from that era that most gamers don't know about.
+Below The Root was developed in collaboration with the author of a fantasy/sci-fi trilogy over about 4 months, and published at the end of 1984 by Windham Classics as a children's adventure game.  It's a sequel to the trilogy, in which you have to save the main character (who dies in the books, an ending the author regretted).
 
 This game had a real impact on me as a kid.  I had played some interactive fiction like the Scott Adams' adventure games, but I could never make much progress in "real" adventure games like Zork or Hitchhiker's Guide.  But like those games, Below The Root had plot and puzzles and characters with feelings.
 
