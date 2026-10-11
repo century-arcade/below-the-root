@@ -633,6 +633,21 @@ test("keyboard aliases and focus changes preserve independent input", async () =
   keys.reset();
 });
 
+test('modifier keys never fire or queue a trigger', async () => {
+  const { keys } = await keyboardFixture();
+  for (const key of ['Shift', 'Alt', 'Control']) {
+    for (const side of ['Left', 'Right']) {
+      const event = { key, code: `${key}${side}` };
+      assert.equal(keys.map(event), false);
+      assert.deepEqual(keys.read(), IDLE);
+      assert.equal(keys.map(event, true), false);
+      assert.equal(keys.read('trigger').fire, false);
+    }
+  }
+  assert.equal(keys.map({ key: ' ', code: 'Space' }), true);
+  assert.equal(keys.read('trigger').fire, true);
+});
+
 test('a self tap inside the padded figure opens the menu without firing', async t => {
   const f = await pointerFixture(t);
   f.tap(122, 130);

@@ -45,6 +45,7 @@ export class ReplayPresentation {
 
   ready(session) {
     return !session.playback || session.playbackDone || session.state.tuneWait != null
+      || (session.state.verb && session.state.verbCarryMovement)
       || !session.state.panel.some(Boolean) || this.elapsed >= this.messageDelay;
   }
 }

@@ -28,7 +28,7 @@ export function pressEdge(read, last = IDLE) {
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-  ' ': 'fire', Enter: 'fire', Shift: 'fire', Control: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
+  ' ': 'fire', Enter: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
   W: 'up', S: 'down', A: 'left', D: 'right', f: 'fire', F: 'fire',
 };
 
@@ -53,7 +53,7 @@ export class Keyboard {
   map(e, up = false) {
     const contextKey = this.contextKey(e.key);
     if (!up && !contextKey && e.key.toLowerCase() === 'f' && !this.selectWithF()) return false;
-    if (!up && (isEditing(e.target) || e.metaKey || e.altKey || (e.ctrlKey && e.key !== 'Control'))) return false;
+    if (!up && (isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey)) return false;
     if (!up && e.key === 'Enter' && e.target?.closest?.('a[href], button, [role="button"]')) return false;
     const source = e.code || e.key;
     const key = up ? this.sources.get(source)?.down.keys().next().value ?? KEYS[e.key]

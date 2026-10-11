@@ -24,6 +24,19 @@ test('successive messages each receive 750 ms of active presentation time', () =
   }
 });
 
+test('movement-continuing bell prompts do not hold replay for reading', () => {
+  const { session, timing } = fixture();
+  say(session.state, 'THE SPIRIT BELL RINGS');
+  session.state.verb = {};
+  session.state.verbCarryMovement = true;
+  timing.observe(session);
+  assert.equal(timing.ready(session), true);
+  session.state.verb = null;
+  say(session.state, 'NEXT MESSAGE');
+  timing.observe(session);
+  assert.equal(timing.ready(session), false);
+});
+
 test('message dwell never dismisses a song message or blocks its countdown', () => {
   const { session, timing } = fixture();
   timing.advance(session, 250);
