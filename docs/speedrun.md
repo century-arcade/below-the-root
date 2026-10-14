@@ -15,7 +15,7 @@ same effect on items, flags, visions and the lamp as in the input.
 
 ## Why a recording can't just be edited
 
-A recording ([playthrough.md](../docs/playthrough.md)) is a list of stick
+A recording ([playthrough.md](playthrough.md)) is a list of stick
 changes and commands, each anchored to the tick, screen and cell where it
 happened, and replay checks every anchor. Removing time breaks two things:
 

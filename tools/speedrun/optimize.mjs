@@ -1,4 +1,4 @@
-// Usage and design: dev/speedrun.md
+// Usage and design: docs/speedrun.md
 import { writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { Worker } from 'node:worker_threads';
