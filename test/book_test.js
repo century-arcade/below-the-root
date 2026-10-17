@@ -27,6 +27,6 @@ test('pages are numbered from the first printed page, skipping blanks, over the 
   assert.equal(pageCaption(spreads, ['a', 'b']), 'Pages 2–3 / 4');
   assert.equal(pageCaption(spreads, ['c', null]), 'Page 4 / 4');
   assert.equal(pageCaption(BOX, BOX[1]), 'Pages 2–3 / 4');
-  assert.equal(pageCaption(MANUAL, MANUAL[1]), 'Pages 2–3 / 18');
-  assert.equal(pageCaption(MANUAL, MANUAL[0]), 'Page 1 / 18');
+  assert.equal(pageCaption(MANUAL, MANUAL[1]), 'Pages 2–3 / 14');
+  assert.equal(pageCaption(MANUAL, MANUAL[0]), 'Page 1 / 14');
 });

@@ -1,7 +1,9 @@
 """Convert the Internet Archive manual JP2 ZIP to web-sized pages.
 
 Source: https://archive.org/details/below-the-root-game-manual-1984
-Scans 1-2 (the cover and blank inside cover) are skipped.
+Scans 1-2 (the cover and blank inside cover) are skipped, and scans 5-8
+(printed pages 3-6, on loading and keys this port replaces) are read only
+as a source of type for page 9.
 Usage: python3 tools/manual.py INPUT_JP2.zip [OUTPUT_DIRECTORY]
 Requires Pillow with JPEG 2000 and WebP support, and Liberation Sans Bold.
 
@@ -26,6 +28,7 @@ from manual_page9 import edit_page9
 
 WHITE_POINT = 0.88
 FIRST_SCAN = 3
+DROPPED_SCANS = range(5, 9)
 
 
 def paper(grey):
@@ -67,6 +70,8 @@ def main():
     scans[11] = edit_page9(images)
     total = 0
     for number, image in scans.items():
+        if number in DROPPED_SCANS:
+            continue
         output = args.output / f'{number:02}.webp'
         image.save(output, 'WEBP', quality=45, method=6)
         total += output.stat().st_size
