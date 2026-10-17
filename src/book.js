@@ -38,7 +38,6 @@ export function setupBook(root, spreads) {
   const next = root.querySelector('[data-book-next]');
   const first = root.querySelector('[data-book-first]');
   const final = root.querySelector('[data-book-last]');
-  const status = root.querySelector('output');
   let singles = singlesOf(spreads);
   let view = spreads;
   let last = view.length - 1;
@@ -147,7 +146,6 @@ export function setupBook(root, spreads) {
     if (scan) link.href = scan.src;
     previous.disabled = first.disabled = current === 0;
     next.disabled = final.disabled = current === last;
-    if (status) status.textContent = pageCaption(spreads, pages);
   }
   previous.addEventListener('click', () => show(current - 1));
   next.addEventListener('click', () => show(current + 1));
@@ -303,23 +301,16 @@ export function setupPamphlet(root) {
 }
 
 const scanPage = scan => scan - 2;
-// Printed pages 3-6 cover loading, storage disks and keys the port replaces.
+// Printed pages 3-6 cover loading, storage disks, keys and a main menu the port replaces.
 const SCANS = [3, 4, ...Array.from({ length: 12 }, (_, i) => i + 9)];
 const manualPage = scan => ({
   src: `/assets/manual/${String(scan).padStart(2, '0')}.webp`, alt: `Original Below the Root manual, page ${scanPage(scan)}`,
-  page: scanPage(scan), ...(scan === 4 && { stamp: 'Obsolete', stampTop: '14%' }),
+  page: scanPage(scan), ...(scan === 4 && { stamp: 'Removed', stampTop: '14.3%' }),
 });
 
 // Scans as printed: page 1 alone on the right, the back cover alone on the left.
 const manualPages = [null, ...SCANS.map(manualPage), null];
 export const MANUAL = Array.from({ length: manualPages.length / 2 }, (_, i) => manualPages.slice(2 * i, 2 * i + 2));
-
-// Pages count from the first printed page; blanks are unnumbered.
-export function pageCaption(spreads, pages) {
-  const all = spreads.flat().filter(Boolean);
-  const shown = pages.filter(Boolean).map(page => all.indexOf(page) + 1);
-  return shown.length > 1 ? `Pages ${shown[0]}–${shown[1]} / ${all.length}` : `Page ${shown[0]} / ${all.length}`;
-}
 
 export const BOX = [
   [null, { src: '/assets/box/front.jpg', alt: "The box front: William Groetzinger's painting of treetop houses above a hidden underground city." }],

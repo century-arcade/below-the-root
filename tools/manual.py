@@ -48,6 +48,14 @@ def clean(image):
     return Image.fromarray((np.clip(flat / WHITE_POINT, 0, 1) * 255).round().astype(np.uint8))
 
 
+def contents(image):
+    """Lift Main Menu up against the other removed pages' entries so one stamp covers them."""
+    line = image.crop((150, 418, 1250, 458))
+    image.paste(255, (150, 418, 1250, 458))
+    image.paste(line, (150, 384))
+    return image
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('archive', type=Path)
@@ -68,6 +76,7 @@ def main():
                 scans[number] = clean(image)
     images = {number: np.asarray(image) for number, image in scans.items()}
     scans[11] = edit_page9(images)
+    scans[4] = contents(scans[4])
     total = 0
     for number, image in scans.items():
         if number in DROPPED_SCANS:
