@@ -7,18 +7,25 @@ export function pagesFor(width, height) {
   return available > 0 && width / available >= PAGE_ASPECT * 2 * .8 ? 2 : 1;
 }
 
-// A page is a scan ({ src, alt, className, stamp, stampTop }) or markup ({ render }).
+// A page is a scan ({ src, alt, className, stamp, stampAt }) or markup ({ render }).
+// stampAt places the stamp's centre ({ x, y } fractions of the page) at a size and turn.
 const singlesOf = spreads => spreads.flat().filter(Boolean).map(page => [page, null]);
 // Each part of a leaf hides its own back, so a stamp is a sibling of its page, not a child.
 const leafFace = (page, side) => {
   const parts = [face(page)];
   if (page?.stamp) {
     const stamp = Object.assign(document.createElement('span'), { className: 'leaf-stamp', textContent: page.stamp });
-    if (page.stampTop) stamp.style.setProperty('--stamp-top', page.stampTop);
+    stampStyle(stamp.style, 'stamp', page.stampAt);
     parts.push(stamp);
   }
   for (const part of parts) part.classList.add(side);
   return parts;
+};
+const stampStyle = (style, prefix, at) => {
+  for (const key of ['x', 'y', 'size', 'turn']) {
+    if (at?.[key] !== undefined) style.setProperty(`--${prefix}-${key}`, String(at[key]));
+    else style.removeProperty(`--${prefix}-${key}`);
+  }
 };
 const face = page => {
   if (!page) return Object.assign(document.createElement('div'), { className: 'sheet blank' });
@@ -60,8 +67,7 @@ export function setupBook(root, spreads) {
   const mark = (side, page) => {
     if (page?.stamp) link.dataset[`stamp${side}`] = page.stamp;
     else delete link.dataset[`stamp${side}`];
-    if (page?.stampTop) link.style.setProperty(`--stamp${side}-top`, page.stampTop);
-    else link.style.removeProperty(`--stamp${side}-top`);
+    stampStyle(link.style, `stamp${side}`, page?.stamp && page.stampAt);
   };
   function place(side, page, stamp = ++placed[side]) {
     const image = images[side];
@@ -305,7 +311,7 @@ const scanPage = scan => scan - 2;
 const SCANS = [3, 4, ...Array.from({ length: 12 }, (_, i) => i + 9)];
 const manualPage = scan => ({
   src: `/assets/manual/${String(scan).padStart(2, '0')}.webp`, alt: `Original Below the Root manual, page ${scanPage(scan)}`,
-  page: scanPage(scan), ...(scan === 4 && { stamp: 'Removed', stampTop: '14.3%' }),
+  page: scanPage(scan), ...(scan === 4 && { stamp: 'Removed', stampAt: { x: .304, y: .17, size: .04, turn: '-27.5deg' } }),
 });
 
 // Scans as printed: page 1 alone on the right, the back cover alone on the left.
