@@ -66,6 +66,19 @@ def keyboard(page, use_page):
     page.paste(255, keys)
     left = 733 + (1343 - 733 - (1074 - 734)) // 2
     page.paste(group, (left - 4, 528))
+    return centre(page, (715, 220, 1400, 680))
+
+
+def centre(page, area):
+    """Move the ink inside area to sit midway between the ink above and below it."""
+    x0, y0, x1, y1 = area
+    rows = np.nonzero((np.asarray(page)[:, x0:x1] < INK).any(1))[0]
+    inside = rows[(rows >= y0) & (rows < y1)]
+    above, below = rows[rows < y0].max(), rows[rows >= y1].min()
+    top = (above + below - (inside.max() - inside.min())) // 2
+    block = page.crop((x0, int(inside.min()), x1, int(inside.max()) + 1))
+    page.paste(255, area)
+    page.paste(block, (x0, int(top)))
     return page
 
 
