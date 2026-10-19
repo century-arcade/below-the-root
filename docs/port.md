@@ -37,7 +37,7 @@ starts do not restore the existing autosave. `?debug` enables developer mode
 for that page without itself selecting a startup mode or persisting the flag.
 `?bench=grey` selects a flat grey desk; absent or other values use the green mat.
 
-A plain cold launch lands on the monitor, powered off unless sessionStorage
+A plain cold launch lands on the monitor, powered off unless localStorage
 remembers `btr.power=on`. A fresh questless launch holds at the text-only boot
 screen. A restored quest with remembered power on resumes without that screen.
 Turning power on always shows the boot screen; a keyboard gameplay key or canvas
@@ -101,7 +101,7 @@ Victory replaces it with completion and play time. Time uses simulation updates
 divided by 60, including REST; pauses, menu/dialogue waits, tunes and map browsing
 add no simulation time.
 
-sessionStorage holds `btr.power` (`on` or `off`, per tab, not a preference) and
+localStorage holds `btr.power` (`on` or `off`). sessionStorage holds
 `btr.issue-draft` (unsent issue text, cleared on successful submission).
 Startup selectively removes obsolete `btr.autosave.v1`/`v2` entries and their
 `.recovery`/numbered recovery variants. Main-page preference-read failures and

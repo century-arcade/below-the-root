@@ -12,7 +12,7 @@ import { CLIPS, loadClip, Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
 import { fitScale, fitCabinet, crtVars, ASPECTS } from './fit.js';
 import { loaderScreen } from './loader.js';
-import { drawMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelPixels, wheelZoom } from './map.js';
+import { drawMap, warmMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelPixels, wheelZoom } from './map.js';
 import { loadOptions, storeOption } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
@@ -23,7 +23,6 @@ import { setupDesk } from './desk.js';
 setupBook(document.getElementById('box'), BOX);
 setupPamphlet(document.getElementById('note'));
 setupBook(document.getElementById('manual'), MANUAL);
-const SHOW_DEV_NOTES = false;
 const desk = setupDesk(document.getElementById('desk'));
 const away = () => desk.stage !== 'play';
 const benchStrip = document.querySelector('.bench-strip');
@@ -329,7 +328,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   fullscreenButton.onclick = e => { toggleFullscreen(); e.currentTarget.blur(); };
   for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, () => { if (powered) speaker.unlock(state); });
   let wasOn = false;
-  try { wasOn = sessionStorage.getItem(POWER_KEY) === 'on'; } catch {}
+  try { wasOn = localStorage.getItem(POWER_KEY) === 'on'; } catch {}
   let powered = !coldLaunch || wasOn;
   // frozen: the last picture stays up while the power-off fade runs
   let frozen = false;
@@ -470,7 +469,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, keepAwake, true);
   function showPower() {
     keepAwake();
-    try { sessionStorage.setItem(POWER_KEY, powered ? 'on' : 'off'); } catch {}
+    try { localStorage.setItem(POWER_KEY, powered ? 'on' : 'off'); } catch {}
     monitor.classList.toggle('powered-off', !powered);
     canvas.parentElement.inert = !powered;
     power.setAttribute('aria-pressed', String(powered));
@@ -563,11 +562,15 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     if (startupHelp) { startupHelp = false; release(); }
     fit();
   }
-  function paintMap(grid = mapGrid) {
+  function mapView() {
     const path = state.quest ? session.path : [];
     const view = state.quest ? state : { ...state, room: null, objects: data.objects };
-    drawMap(view, visitedRooms(path, data),
-      state.quest ? mapLocation(data, path, state.room) : null, grid, visitedEmptyRooms(path), debug);
+    return [view, visitedRooms(path, data), state.quest ? mapLocation(data, path, state.room) : null,
+      visitedEmptyRooms(path)];
+  }
+  function paintMap(grid = mapGrid) {
+    const [view, visited, current, empty] = mapView();
+    drawMap(view, visited, current, grid, empty, debug);
   }
   function paintPaperMap() {
     if (desk.stage !== 'map') return;
@@ -614,7 +617,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     document.getElementById('developer-help').hidden = !on;
-    document.querySelector('.tray-dev-notes').hidden = !(on && SHOW_DEV_NOTES);
+    document.querySelector('.tray-dev-notes').hidden = !on;
     if (!on && desk.stage === 'dev-notes') desk.back();
     if (desk.stage === 'map') paintMap();
     if (on && !debugReady) {
@@ -885,6 +888,14 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   fit();
   draw();
   requestAnimationFrame(frame);
+  const mapParchment = new Image();
+  const prepareMap = () => {
+    mapParchment.src = '/assets/box/map.png';
+    mapParchment.decode().catch(() => {});
+    warmMap(...mapView(), debug);
+  };
+  if (window.requestIdleCallback) requestIdleCallback(prepareMap, { timeout: 2000 });
+  else setTimeout(prepareMap, 1000);
 }).catch((err) => {
   console.error(err);
 });

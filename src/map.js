@@ -26,6 +26,12 @@ function thumbnail(data, room) {
   return small;
 }
 
+export function warmMap(state, visited, current, empty = new Set(), all = false) {
+  for (const c of mapCells(state.data, visited, current, empty, all).flat()) {
+    if (c && !(c.empty || c.unseen || c.blank)) thumbnail(state.data, state.data.roomById.get(c.room));
+  }
+}
+
 export function drawMap(state, visited, current, grid, empty = new Set(), all = false) {
   const cells = mapCells(state.data, visited, current, empty, all);
   grid.style.gridTemplateColumns = `repeat(${cells[0].length}, minmax(0, 1fr))`;
