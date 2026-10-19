@@ -2623,5 +2623,305 @@
     "timestamp": "2026-10-06T06:49:29.309Z",
     "text": "don't bother invalidating anything, if we're not showing items!  only e/h",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T17:30:45.770Z",
+    "text": "c) not sure about that exact strategy, but yes we need some form of indication of how to play on mobile.  b) what does \"had to use a visual to clock it though\" mean?  a) discard  a1) lingering wart: game keeps dimming for me on mobile, can we file as an issue to investigate?  we've looked at it before, link to those.  d) fine, done.  e) yes this is our main remaining item. f) incorporate into note for e. g) all done except for e, capture anything we don't have already and add to e.  h) on mobile portrait the monitor obscures the foreword/box/manual thumbs.  and the desk is too tall (half of all height!) so the content is way too small.  we need a way to fullscreen the content (incl doing books/manual/foreword 1-up instead of 2-up).  pinchzoom works fine both orientations.  locks work.  i) ditch this or include in (h).  j) ditch not using anymore.  k) noted, in my list, l) we've changed these, this is stale, the new ones are working fine as long as we do (c).  m) is done.  n) fold into (h).  o) meta-task, that's what we're doing, ditch.  p) ditch.  q) keep.  r) clear blocked.  s) call it done, save for the record.",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-07T00:45:01.996Z",
+    "text": "can we try a 'year' party decoration above the main content, like hanging on the wall?  i'm imagining '1984' hanging down like from a xmas or nye party",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T00:47:51.159Z",
+    "text": "close but that's not in 1984 styling, i'm thinking bigger and hanging lower in the center.  a) let the tips hang down and be obscured, it's fine.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T01:31:27.121Z",
+    "text": "memphis is NOT 1984! wrong design style!  can you research what 80s things like this looked like?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T01:59:04.959Z",
+    "text": "let's try it your way here first",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T06:35:18.281Z",
+    "text": "ditch the whirls, try the streamers",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T06:36:12.095Z",
+    "text": "ditch them altogether",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T06:45:20.765Z",
+    "text": "okay add a \"+\" button between the < and > on the foreword, box, manual, which enlarges the content to be more readable in the space: the foreword/box/manual become 1-up.  make dev notes take up the same amount of space as the zoomed-in-map heightwise.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T06:56:28.797Z",
+    "text": "okay in enlarge mode they need to take up the whole visible screen height, not showing the desk nor year, and no scrollbar.  keeping the page turns and changing + to - to go back to 2-up",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-07T07:04:26.529Z",
+    "text": "move the foreword and manual and box to be centered vertically",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T05:42:20.211Z",
+    "text": "commit, then let's integrate it.  at medium and narrow widths (on mobile both orientations) the lines are too long; not sure how to fix it.  let's gate the devnotes on devtools being open.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T06:09:08.506Z",
+    "text": "on normal widths, we've lost the arrows and zoom button for the foreword.  on very narrow widths, the desk now takes up half the screen.  we need to lock this down and to it well",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-08T07:59:58.501Z",
+    "text": "foreword should act like a book/pamphlet and flip pages over, with first page being 'cover' (with century arcade label) and left of first page being a calendar of dec 1984.  swap game and map on bench",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T08:14:52.750Z",
+    "text": "good, except the calendar should not be part of the book, but 'hanging on the wall'.  the turning pages show up inverted on the top and regular beneath the pages (should be regular on top and nothing below).  the last page should have the 'external articles' only.  the signature should be one more line below.  let's also put red overlay text 'OUTDATED' on pages 3-6 in the manual, what would be a more appropriate term?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T08:28:03.829Z",
+    "text": "great except External Articles is not starting a new page.   and now the manual pp 3-6 show reverse when turning.  ditch red box around stamp, enlarge and thicken font, change text to OBSOLETE",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T15:52:24.460Z",
+    "text": "let's make the 'obsolete' stamp 50% opacity, it's too intense right now",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T15:53:09.242Z",
+    "text": "and \"center\" the calendar on the wall in the space of the left manual side, and make it 2x bigger",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T16:16:49.659Z",
+    "text": "hang the calendar straight!  move the tack ONTO the calendar top.  put boxes around the days",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T23:22:46.769Z",
+    "text": "for some reason there's a diagonal 'shadow' now through the game computer screen, it wasn't there before a day or two ago, what's up?  not there in fullscreen mode, probably something to do with the booklets that we've been changing up",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-08T23:27:21.611Z",
+    "text": "hm, now the shadow is on the bottom.  it doesn't seem stable.  it's related to crt mode ( goes away with crt off), and changes at different sizes.  but i've never seen it before this",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-08T23:58:16.030Z",
+    "text": "after jumping and landing, letting go of all keys on kb, character walks in same direction (falling off vine jumped to).  this feels new; maybe after mobile key changes?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-09T00:11:18.481Z",
+    "text": "so this was the vines between the temple grunds, both jumping between the platforms to get on them, and also jumping between them.  there's limited space to move so i have to be precise and press dir and then space quickly enough so the char doesn't start moving.  then release both in the air, and the char lands, but then starts moving. not just one step it seems, so it's not just one extra keypress, but seems like it latches.  this is on a keyboard, literal arrow keys and spacebar, that's it.  yes carrying the shuba.  this is on a different keyboard (keychron) than i'm used to, so potentially it's sending repeats without me knowing?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-09T01:30:49.611Z",
+    "text": "move the calendar to the upper left of the wall, leave only a bit of margin top and left.  swap year and month text. make it 30% smaller.  remove the hanging banner and tinsel.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T03:51:00.846Z",
+    "text": "let's add back the STATUS action, which should now show time spent and % complete.  (anything else that's not in the permanent status bar?)  also add back MENU to return to the menu screen.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T03:54:46.590Z",
+    "text": "where they were in the first place",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T04:02:14.301Z",
+    "text": "good as-is, except put \"% game complete\" on top row right justified",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T04:56:59.921Z",
+    "text": "put \"Below The Root\" then red line, then (smaller subtitle) \"A Century Arcade restoration\" on the thumb of the foreword.  remove the calendar from the wall.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T04:58:34.434Z",
+    "text": "put it on the front page of the foreword too",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:23:18.371Z",
+    "text": "move both title/subtitle up, put \"produced by [Saul Pwanson](saul.pw)\" and \"2026\" beneath.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:33:22.219Z",
+    "text": "change \"A Century Arcade restoration\" to \"A restoration of/a classic ↑4 computer game/by the/Century Arcade\"",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:40:54.292Z",
+    "text": "\"A high-quality restoration\" \"of\" \"the classic computer game\" --- \"from the\" (bigger text) Century Arcade",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:42:21.867Z",
+    "text": "the first 3 go before the title, then a red bar, then the title, then a red bar, then \"by the\" (larger text) \"Century Arcade\"",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:44:44.439Z",
+    "text": "remove \"the classic computer game\", and put \"published by Windham Classics\" \"1984\" below the title, and \"by the\" -> \"from the\"",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:48:24.957Z",
+    "text": "why isn't this in the foreword.md so i can adjust it?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T05:53:19.513Z",
+    "text": "ditch the about page, clean up the code so there's only one copy i can edit, yes 1/2/3/4",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T07:59:47.322Z",
+    "text": "remove dev notes",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T07:59:57.723Z",
+    "text": "hide dev notes.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T23:33:18.686Z",
+    "text": "change starting landing page to foreword, then let's look at the foreword front page design as a design, get both an astra and opus sub to review it, let's really clean it up and make it look like a tight front page (and also indicate that this specific document has more pages)",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T23:56:51.297Z",
+    "text": "okay, get rid of dogear, 'bind' them at the left edge (graphically extremely simply).  move the red line after Windham Classics line",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T00:00:06.222Z",
+    "text": "- computer should start 'off'\n- swap map and game thumbs",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T00:19:00.178Z",
+    "text": "foreword should have page numbers like manual does.  i mean box should just do the same",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T05:13:01.961Z",
+    "text": "can we differentiate mobile/touch vs computer/keyboard?  if so then we should replace the boot screen on touch.",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-10T05:23:49.651Z",
+    "text": "edit the touch boot screen",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T05:42:59.067Z",
+    "text": "i don't like \"FINGERS\", it doesn't appear anywhere else and isn't common lingo for this.  what do others say",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T05:53:34.612Z",
+    "text": "let's do HOLD ONE SIDE  /  MOVE   and   SWIPE  / MOVE  and HOLD BOTH SIDES  / OPEN MENU",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T06:03:24.261Z",
+    "text": "sure.  also remove the click from the front of the power-on/off sound",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-10T06:08:22.061Z",
+    "text": "yes let's remove power-off clip",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-14T02:05:47.155Z",
+    "text": "okay so i have a pomma speedrun here now (not checked in), there were some unnecessary moves, can you/we optimize the .json to be even faster?  how would that work, since timing matters?",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-14T02:23:49.855Z",
+    "text": "good.  there are plenty of other opportunities though, like just moving back and forth within a screen, without an action in-between.  can we make a note of every screen that has a bad monster in it, clean up all 'extra' movement, and then replay up to those bad monster screens, at which point you'll have to do all the waiting at once?  does that make sense?  rather than optimize each cut separately",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T05:20:12.139Z",
+    "text": "i see in the manual page 9, there are keys for moving, let's use the IBM section but remove \"On IBM\", and replace the right set of RDFC with WASD, and remove the second set IJKM.  remove the Apple section, leave blank for now, we'll put instructions for touchpad there.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T05:46:33.836Z",
+    "text": "can we analyze the text in the left column of that same page, and try to rewrite it (as little as possible ofc) to explain how our touchscreen interface works?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T05:55:06.407Z",
+    "text": "did you mean for the parentheticals to be in the text?  remove htem.  otherwise let's see it",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T06:14:52.982Z",
+    "text": "great, can we recenter the keyboard instructions we changed on the right, to be vertically between \"On Keyboard\" and the Walk below it?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T06:18:17.953Z",
+    "text": "let's also edit page two, to put \"obsolete\" in smaller font than we currently have, across the TOC for pp 3-5+, and then remove pp 3-6",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T06:24:26.480Z",
+    "text": "change OBSOLETE to REMOVED, move Main Menu 6 up so REMOVED covers that too.  i think it should be horiz not diag.  Let's hide our separate \"Pages 2-3/14\" etc. in all places.  box, manual, and foreword",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T06:28:43.788Z",
+    "text": "okay diag after all, touching 'Main Menu' and 'Quest' even if the REMOVED stamp is off horiz center",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T21:11:24.430Z",
+    "text": "i have a pomma speedrun under 7m, can you get a screenshot of the final \"finished the quest\" screen for me and send to saul.pw for the wiplog",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T21:55:45.210Z",
+    "text": "can you get a screenshot including the C64 mockup?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-17T21:59:39.518Z",
+    "text": "needs CRT effect on!!!",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-19T02:31:20.193Z",
+    "text": "a) the map should be loaded in the background so it doesn't take a moment to fold.  how big is the png?  \nb) the computer should only start 'off' on first load.  thereafter the power state should persist.\nc) let's put the devnotes back, gated by devtools again.",
+    "label": "design"
   }
 ]
