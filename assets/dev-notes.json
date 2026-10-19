@@ -5,9 +5,34 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-09-03T22:41:57.029Z",
+    "text": "d) let's keep notes in .meta for now, but make sure that docs in main repo ultimately include all useful real knowledge/information that's been figured out.  effectively meta is ideas/tactics/experiments whether failed or yet to be tried, and main is only successful/true/known facts (allowing for mistakes which may be inevitable in the short-term, but correct them as they are discovered without leaving the falsehood behind even as a negative).\ne) yes fine, install yourself for M0/M1 and i'll rebuild the cbox after M1",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-03T22:58:36.268Z",
+    "text": "sooner rather than later you should formalize these into reusable tools so you don't have to keep reinventing them with temp heredocs",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-03T23:07:44.991Z",
+    "text": "and i hope you're documenting all these things in main so that other collaborators don't make the same mistakes!",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-04T03:32:13.293Z",
     "text": "let's continue on with this mission; from end of last session:   Proposed next batch (M4 remainder, same pattern, four parallel agents):\n  - f) NPC/creature descriptors + $2300/$2380 per-character state + object table/placement ($0D00, $8CA0);\n  - g) verb handlers $AC00+ (TAKE/DROP/USE/EAT/REST/OFFER/BUY/SELL/KINIPORT/GRUNSPREKE/HEAL) and inventory;\n  - h) message-table semantics (which of the 187 strings fires when) + dialog/pense rules;\n  - i) demo script format (demolow), day/time accounting and quest end conditions.\n    After that, M5: docs/spec/ (JSON tables + rules) for the JS port.  Say go, or redirect.",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-09-04T04:09:21.773Z",
+    "text": "let's resume",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-04T04:11:16.761Z",
+    "text": "fold them in",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-04T04:35:34.377Z",
@@ -18,6 +43,16 @@
     "timestamp": "2026-09-04T04:36:16.767Z",
     "text": "yes NTSC, we don't know that about PAL so ditch the negative",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-04T04:40:22.520Z",
+    "text": "and this is trending towards a cleanroom spec, right? with the aim of providing reasonable fidelity to the intended game, while making it better than the typical emulation experience (both convenience and quality of experience)",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-09-04T04:47:27.055Z",
+    "text": "yes draft plan, then /close",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-04T04:52:44.675Z",
@@ -40,9 +75,49 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-09-04T05:43:01.883Z",
+    "text": "i'm curious if the text from opus is as reasonable as with fable.",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-04T05:47:54.216Z",
     "text": "all looks good except looks like you edited out the cap on leap distance?  that seems like important gameplay information, not implementation detail.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-04T06:00:43.473Z",
+    "text": "make a todo with next steps",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T06:08:05.197Z",
+    "text": "let's do @.meta/todo/next-steps.md",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T06:33:58.672Z",
+    "text": "install libnspr4",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-04T06:53:13.810Z",
+    "text": "where is the summary of where we're at, on disk? we should have it in the toplevel README and update it as we go",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T06:58:16.888Z",
+    "text": "whre is the writing annoying?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T06:59:51.440Z",
+    "text": "yes clean shell.md and /close",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-04T07:01:59.092Z",
+    "text": "okay and how do i start up the next steps in a fresh session?",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-04T07:02:33.555Z",
@@ -55,9 +130,39 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-04T07:05:02.225Z",
+    "text": "let's do @.meta/todo/m6-js-port.md",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T07:07:55.020Z",
+    "text": "what do you need that for specifically?  that feels too low-level unless you're directly working on movement",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T07:48:03.892Z",
+    "text": "let's do M6.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T07:48:06.251Z",
+    "text": "let's do M6.2",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-04T09:16:05.461Z",
     "text": "resume @.meta/todo/m6-js-port.md.  it works in the browser, timing is good, only issues noticed so far are selected menu item is like @speak@ instead of SPEAK, and i saw an npc fall off a ledge.  and of course it starts as charn instead of opening + char select.",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-04T15:43:57.029Z",
+    "text": "resume @.meta/todo/m6-js-port.md.  it works in the browser, timing is good.  do M6.3",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-04T16:04:28.347Z",
+    "text": "/close",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-04T16:09:15.165Z",
@@ -70,6 +175,11 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-04T16:25:47.045Z",
+    "text": "Loading failed for the module with source “https://below-the-root.netlify.app/text.js”. main.js",
+    "label": "bug"
+  },
+  {
     "timestamp": "2026-09-04T16:26:57.772Z",
     "text": "you're right, it works in chromium.  but it was working fine in firefox last night (a couple sessions ago)",
     "label": "bug"
@@ -78,6 +188,21 @@
     "timestamp": "2026-09-04T16:27:33.983Z",
     "text": "and you're right, localhost:8000 works too.  but https://below-the-root.netlify.app/  does not",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-04T16:30:09.857Z",
+    "text": "continue!  would love to have char select done when i come back",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-04T16:50:29.459Z",
+    "text": "/close",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-04T16:51:24.816Z",
+    "text": "continue with @.meta/todo/m6-js-port.md",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-04T23:20:30.897Z",
@@ -95,6 +220,11 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-05T01:13:37.466Z",
+    "text": "room 06 the bunny fell off both its branch and then through the below branch also!",
+    "label": "bug"
+  },
+  {
     "timestamp": "2026-09-05T02:14:09.519Z",
     "text": "okay we're going to ship this port as a pre-alpha and offer it as a project to the community, set up a loop against the issues list.  announce a development cycle with a release N days afterward.  encourage people who loved the game to play it, host a speedrun tournament.  improve the interface, give it the full treatment.",
     "label": "core"
@@ -103,6 +233,11 @@
     "timestamp": "2026-09-05T03:01:39.230Z",
     "text": "can we press to move joystick in that direction (relative to character), and tap or double-press to jump, on both tablet and browser?  (mouse pointer, with click)",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-05T03:04:19.013Z",
+    "text": "yes",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-05T03:10:14.310Z",
@@ -140,9 +275,39 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-09-05T06:07:15.414Z",
+    "text": "continue",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-05T06:47:23.013Z",
+    "text": "continue you have perms now",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-05T08:14:45.722Z",
+    "text": "give me cli to set in netlify",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-05T08:16:04.172Z",
+    "text": "okay set",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-05T17:35:43.179Z",
     "text": "and where do i get session secret from?  these are being set at netlify envvars, right?  I can't find \"Production / Functions\"",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-05T17:40:26.159Z",
+    "text": "ok saved.  really i jus tneed a random number for the session 'secret'?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-05T17:44:09.752Z",
+    "text": "okay so now what",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-05T17:46:38.966Z",
@@ -160,6 +325,16 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-05T19:27:09.014Z",
+    "text": "hm i need to run netlify myself, maybe the dir should be renamed, eh?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-06T18:39:46.177Z",
+    "text": "commit",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-06T23:34:59.856Z",
     "text": "okay so where is the github login button, i don't see it locally here, i want to file an issue",
     "label": "bug"
@@ -170,14 +345,34 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-07T00:11:39.380Z",
+    "text": "WHERE in github do i add the new oath app?",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-07T00:24:39.758Z",
     "text": "did we break WASD/arrows with clicking or debug file an issue buttons?  wasd/arrows aren't moving anymore",
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-07T00:33:36.662Z",
+    "text": "learn to commit proactively after fixing an issue",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-07T00:35:52.490Z",
     "text": "let's make the debug buttons and status stable so they don't change layout based on their length.  put buttons on top, status on bottom.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-07T03:16:36.344Z",
+    "text": "commit, how come you didn't do it automatically",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-07T03:18:08.317Z",
+    "text": "i understand but we should have a general rule about committing after fixing an issue or implementing a feature, is that not in your context?",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-07T04:47:33.225Z",
@@ -220,6 +415,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-07T17:52:15.970Z",
+    "text": "commit!",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-07T20:13:51.584Z",
     "text": "we need to clean up the issues posted on github, the json blob inline is way too much.  what other approaches can we try?  gist?",
     "label": "bug"
@@ -235,6 +435,21 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-07T21:49:04.442Z",
+    "text": "commit! learn this",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-07T21:49:50.019Z",
+    "text": "no, just learn that you need to commit after doing work i ask you to do",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-07T22:43:07.909Z",
+    "text": "okay so the automated loop fired to handle 2 github issues on this project.  the first filed a PR, which was fine and I merged it, but in the future on this project they should be committed to the master branch locally only.  the second diagnosed the issue and reported it in the todo but did not do the work nor make a commit, and it should. let's update the auto process to do these!",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-07T22:49:42.130Z",
     "text": "review the latest commits here by codex, all of them but primarily the changes to improve the auto dev 'loop'.  they seem like a lot of code and possibly way overblown and maybe incorrect.  how can we improve them?  write up a todo.  also how can we insert fable into the loop for the time being to do a review pass against these also",
     "label": "core"
@@ -243,6 +458,41 @@
     "timestamp": "2026-09-07T23:08:28.632Z",
     "text": "b) codex should be doing triage, not haiku.  c) wow that sounds terrible in multiple ways, agree we should go back to issue-loop.conf instead of sourcing it.  d) let's improve it.  e) let's remove that dead fork and its test.  i think these are already in that todo.\n\nfable is not already automatically in the loop afaik; we didn't ask it to be!  or if it is, that output should be to a todo earmarked for codex (agent-queue?) in a way that doesn't trigger infinite review loopage.  although we may have to revisit to figure out how to do multiple rounds when necessary.\n\ng) let's figure out how to minimze this without losing the entire replay effectively.  h) we need DRY!  i) ergh we should never be testing pixel positions, or having tests that don't test behavior.  j) yes trash bullshit comments.  k) probably but not sure about these.  \n\nupdate the todos if necessary",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-09-07T23:37:11.886Z",
+    "text": "look at @.meta/todo/issue-loop-slim.md, which was run through by codex and updated.  is it ready to implement or what?  fix the todo to be concrete instructions.  also let's fix the loop process to close an issue on github once it's been implemented.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-07T23:52:57.655Z",
+    "text": "okay from what i've seen so far, i'd like fable to triage and write up the todo, codex astra to implement from that todo, and fable to review, sending it to opus for fixing after review if necessary, and fable posting final review to the todo as summary when it's moved to done.  fable can close for now.  i'd like this system to be somewhat configurable so we can migrate stages to various models as we see fit in the near future, but not too complicated (our system may already be overcompliated and should be simplified, take opportunities to do so).  note that there is the main work on this particular repo, which is what i want to go through codex, and then there is the meta work on the \"loop\", which for now should be done by fable (you).  for now the meta work is only in this cbox, but ultimately will be migrated to workflow for all cboxes to take advantage of.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T00:03:53.387Z",
+    "text": "what is \"DELIVERY=local\" about?  you keep referring to it.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-08T00:05:19.702Z",
+    "text": "PUBLISH=pr|local.  then implement",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T00:11:32.006Z",
+    "text": "do we need to act on the workflow item first to test this loop or is that for later?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T00:12:39.454Z",
+    "text": "close 2/4.  5 seems fetched and done?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T00:13:57.856Z",
+    "text": "it may have run  before the changes?",
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-08T00:17:47.775Z",
@@ -265,9 +515,44 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-08T00:49:00.681Z",
+    "text": "okay can claude code drive codex per our loop, but 'manually' with me typing here or similar?  i tell codex to do something but i'm finding i want more of our stages of review and refixing",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T00:50:41.449Z",
+    "text": "fine but b) should be put in todo per our existing mechanism",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-08T00:55:05.338Z",
     "text": "let's start with an easy one, currnetly after a \"lost\" saved game it pops up a dialog which obscures the screen, and then restoring the \"lost\" save shows a \"Saved game recovered and paused...\" message which is a) overly verbose (it should just unpause automatically, we don't need the final senetence \"the original save is backed up\" either) and b) can't be dismissed.   also obscures the screen.  but get codex to do it and you review to test our mechanism",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-08T00:56:48.852Z",
+    "text": "let's try astra to diagnose this one, then you review the diagnosis",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T00:59:48.287Z",
+    "text": "yes go.  also though why does astra seem underpowered and missed these things?  can you diagnose that?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T01:04:42.510Z",
+    "text": "e) is overdone, we don't want to be telling it exactly how to fix it, just the general strategy.  would it have figured it out on its own, i wonder?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T01:06:49.154Z",
+    "text": "yes",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-08T01:10:13.868Z",
+    "text": "yes",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-08T01:30:03.064Z",
@@ -275,9 +560,29 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-09-08T06:02:48.990Z",
+    "text": "issue todos for all those cosmetic shortfalls, and another for the spec data.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T06:20:46.021Z",
+    "text": "um, those 'out of scope' items absolutely need a todo",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-08T06:28:33.522Z",
+    "text": "let's handle all open todos.  ones that are concretely specified can go straight to codex, and you can probably resolve most ambiguous todos for codex to implement.  after firing off the easier ones, ask me about the remaining, let's clear out the todo dir here (do or shelve).  btw can the codex subs work reasonably in parallel?  (do they have their own worktrees?  if so how do they get merged back?)",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-08T06:51:57.992Z",
     "text": "k2) deviate.  l1, i'm in process, we're going to make a speedrun playthrough for each character, move to soon/.  m) done.  n1) let's do it.  o) we need a \"WASD/Arrows to move \\n Space to skip/jump/select\" and maybe the other keys in a ? overlay.  p1.  q) maybe.  r) merging as we speak",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-08T06:52:13.565Z",
+    "text": "and track the session-archive",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-08T08:34:26.864Z",
@@ -288,6 +593,11 @@
     "timestamp": "2026-09-08T15:42:05.160Z",
     "text": "okay so blank out all indoor rooms, and all unvisited rooms.  make all rooms visible on the OG map 'visited' by default.  do not highlight an indoor room as the player's location (highlight the place the indoor room is visited from; i.e. the last outdoor space they were at).  do not show the current room on the bottom.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-08T20:00:24.487Z",
+    "text": "let's do @.meta/todo/0908-interface.md.  do what you can right now and then let's discuss the remainder.  suggest steps for the latter that might get us closer incrementally.",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-08T23:18:36.428Z",
@@ -305,6 +615,16 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-09T01:31:56.330Z",
+    "text": "p) we should do this anyway even in classic mode.  note that classic mode does not mean a simulated C64, it means that it does not deviate from the design intent of the game and interface.  mouse clicking is acceptable because it's additional and it's not like they were designing against mice, there just weren't mice at that time.   r) all music should be skippable, at least in modern mode if not in both.  i like n, s otherwise.",
+    "label": "dup"
+  },
+  {
+    "timestamp": "2026-09-09T01:34:44.705Z",
+    "text": "p) we should do this anyway even in classic mode.  note that classic mode does not mean a simulated C64, it means that it does not deviate from the design intent of the game and interface.  mouse clicking is acceptable because it's additional and it's not like they were designing against mice, there just weren't mice at that time.   r) all music should be skippable, at least in modern mode if not in both.  i like n, s otherwise.  also new volume works, default should be 50% tho now.  remove mute from options, that's just 0% volume (use this interface even  if internally they are actually different).  status looks good but i think should be on bottom instead of top.",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-09-09T01:35:20.909Z",
     "text": "in response to earlier questions: p) we should do this anyway even in classic mode.  note that classic mode does not mean a simulated C64, it means that it does not deviate from the design intent of the game and interface.  mouse clicking is acceptable because it's additional and it's not like they were designing against mice, there just weren't mice at that time.   r) all music should be skippable, at least in modern mode if not in both.  i like n, s otherwise.  also new volume works, default should be 50% tho now.  remove mute from options, that's just 0% volume (use this interface even  if internally they are actually different).  status looks good but i think should be on bottom instead of top.",
     "label": "design"
@@ -315,6 +635,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-09T01:42:33.209Z",
+    "text": "for the rest we need to learn that we are now ONLY making todos for codex to do, as per our process",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-09T02:02:56.330Z",
     "text": "let's postpone save-slots and just have the current save slot.  options should then have a 'reset game' which deletes the current save and returns to menu.  i don't understand journal and rewind questions, let's write simple descriptions as much as we know and put them in maybe/",
     "label": "design"
@@ -323,6 +648,21 @@
     "timestamp": "2026-09-09T02:03:35.911Z",
     "text": "we should also remove the dead space above the icons, and move 'map' to an icon up top for consistency.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-09T02:16:31.717Z",
+    "text": "hm the loop should be running, can you diagnose?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T02:18:43.827Z",
+    "text": "no, /learn",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T02:30:13.182Z",
+    "text": "a) the loop agents read AGENTS.md too so you'll have to find another way to do it.  e) ditch that lesson.  otherwise good.",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-09T02:33:44.010Z",
@@ -340,6 +680,26 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-09T03:22:17.869Z",
+    "text": "doesbt play for animal pensing either, this is a regression",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-09T03:41:54.521Z",
+    "text": "/learn",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-09T03:45:23.888Z",
+    "text": "c) is reasonable but the text is overwrought, just make it so the next instance knows that it might get consumed instantly, and so queue items shouldn't be committed.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T03:47:05.183Z",
+    "text": "include timestamp in game log; disappear messages after some 10 seconds.  b) how come i can click/select on the map, what does it do?",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-09-09T03:49:13.525Z",
     "text": "include timestamp in game log; disappear messages after some 10 seconds.  b) how come i can click/select on the map, what does it do?  provide a zoom center?  click-drag map should be sufficient when zoomed, how hard is this?  also the map should fill the entire canvas width, innit?   and should not show e.g. the hermit's building on top of grand grund, and several other secret locations.  consult the original map!",
     "label": "design"
@@ -353,6 +713,26 @@
     "timestamp": "2026-09-09T04:01:54.476Z",
     "text": "music still isn't playing, it seems to start for a very split second, i think it's the same debounce issue as with the doorway in/out flickering, we need to refactor this and handle it once and for all",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-09-09T04:08:28.782Z",
+    "text": "yes let's see how it does",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-09T04:48:25.796Z",
+    "text": "okay we need a way to see when the queue is finished so you can sum up",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T04:48:31.554Z",
+    "text": "okay we need a way to see when the queue is finished so you can sum up. without you polling",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T04:52:11.938Z",
+    "text": "yeah this should be a general mechanism, send watcher to workflow to make a script, then /learn",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-09T04:57:53.683Z",
@@ -370,9 +750,54 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-09T05:18:59.750Z",
+    "text": "astra is slow, eh",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T05:21:34.099Z",
+    "text": "okay can we analyze all the various runs to see if the diagnose stage is really not worth it?  we're trying to minimize fable usage while not reducing quality, where is fable not needed?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T05:31:50.027Z",
+    "text": "yes but let's move triage to opus 4.8 and diagnose to astra.  skip diagnose when task carries a plan",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-09T05:39:35.256Z",
     "text": "we need to look at github-12 and fix the upload process so it auto includes the json, we were talking about using a gist, we just need to get it working, and i'll get you the .json",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-09T05:46:48.637Z",
+    "text": "okay i put it in .meta/todo",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-09T05:48:34.386Z",
+    "text": "good catch, try that one",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-09T05:56:51.245Z",
+    "text": "/clear",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-09T06:05:17.059Z",
+    "text": "can we investigate the running tasks?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T06:10:39.995Z",
+    "text": "yes, do both, and then let's consider how to indicate the next stage in the todo items so we can inspect their state and manually modify the state and inject them back at various points in the process without having to rerun earlier stages.  frontmatter?  it' dlike to keep it very simple.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-09T06:27:17.411Z",
+    "text": "mostly okay, but \"land\"?  i think the stage is \"apply\" or \"merge\"?",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-09T06:39:26.693Z",
@@ -400,6 +825,11 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-09T16:51:25.088Z",
+    "text": "let's do a",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-09T21:50:51.187Z",
     "text": "let's look at the new front/landing/about page.  look at all the links listed, and see if you can find any more about this game.  where is the copy on our page taken from?  it doesn't sound fresh to me",
     "label": "core"
@@ -410,9 +840,19 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-09T22:31:43.200Z",
+    "text": "write a todo to rewrite the about page to be less technical and more inviting, holistic.  this is a beloved game from my childhood.  we're 'restoring' it, making it accessible.  point out the resources we found (is the text from those resources in a dir in .meta to be easily accessible for the doer of this todo?), and note the common issues people have with revisiting the game.",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-09T22:31:46.307Z",
     "text": "write a todo to rewrite the about page to be less technical and more inviting, holistic.  this is a beloved game from my childhood.  we're 'restoring' it, making it accessible.  point out the resources we found (is the text from those resources in a dir in .meta to be easily accessible for the doer of this todo?), and note the common issues people have with revisiting the game.",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-09-09T23:29:43.581Z",
+    "text": "let's fix the screenshot, the character is floating for some reason",
+    "label": "dup"
   },
   {
     "timestamp": "2026-09-09T23:43:24.681Z",
@@ -455,6 +895,16 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-11T03:16:00.584Z",
+    "text": "how many NPCs are in the game?  do we have a .md with all the dialogue in it?",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-11T03:16:10.634Z",
+    "text": "0continue",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-11T04:19:19.657Z",
     "text": "here's my context/rationale.  this seems like adequate About copy; what's missing? Below the Root is an underknown work of art.  A lot of love went into it, yet few people know about it.  King's Quest and Karateka were also released in 1984; Below the Root is similarly calm and thoughtful as a \"platform-adventure\", but in addition, it's thoroughly embedded in the Green-Sky world that the original trilogy built.\n\nThe world is remarkably open and huge for the time, with a hundred characters you can talk with and \"pense\".\nThere are platform challenges and thoughtful puzzles and an intricate plot to uncover within the world.\nSmall but essential details from the books, like sleeping nids, the shuba for \"flying\", and intoxicating wissenberries, are carried forward not just as world flavor, but also play key roles in the game to advance the plot.\n\nA lot of love went into this game, and it deserves to be remembered and carried forward.  Perhaps some people\nwill be inspired to enter the world of Green-Sky, to read the books, or wander around the game.\nThe original presentation is hard to approach today.  Perhaps a pixel artist or a chiptune musician will be inspired to remake the art or music to be more accessible for a modern player.",
     "label": "core"
@@ -468,6 +918,11 @@
     "timestamp": "2026-09-12T07:04:58.600Z",
     "text": "okay look at about.md, let's review the copy overall",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-12T07:10:37.258Z",
+    "text": "1 fine, 2: let's find the simplest way to contextualize pense; a hundred is fine because there are also 5 playable chars.  plus no one's counting.  3. i wanted to share it was done largely automatically with computer tools like AI without invoking AI.  4. fix it. 5. fix them.  use 'you' but not 'we'.",
+    "label": "dup"
   },
   {
     "timestamp": "2026-09-12T07:10:51.115Z",
@@ -750,6 +1205,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-13T05:43:58.488Z",
+    "text": "great, i made the initial, remove the editor and commit",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-13T05:56:24.584Z",
     "text": "there's a horizontal line through the navbar and help fonts, i think it's antialiasing that me and astra/openai discovered previously, but now it's back, a regression.  let's fix it once and for all",
     "label": "bug"
@@ -763,6 +1223,11 @@
     "timestamp": "2026-09-13T06:03:10.417Z",
     "text": "move the fullscreen/volume group to the middle between the navbar and the toolbar.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-13T06:03:39.388Z",
+    "text": "j",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-13T06:11:27.174Z",
@@ -815,9 +1280,19 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-13T22:05:32.506Z",
+    "text": "just do it bro",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-13T22:06:45.461Z",
     "text": "librewolf isn't showing the title and subtitle on the about page.  but works in chromium.  same address, same in private window.  ctrl+shift+r doesn't refresh it.",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-13T23:08:54.340Z",
+    "text": "just do it bro",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-13T23:09:52.543Z",
@@ -833,6 +1308,11 @@
     "timestamp": "2026-09-13T23:47:59.384Z",
     "text": "great, let's have 'bass' notes on the bottom and 'treble' on the top",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-13T23:48:59.057Z",
+    "text": "Implement the plan.",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-13T23:50:18.225Z",
@@ -950,6 +1430,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-14T22:17:15.447Z",
+    "text": "yes, add it, but also i meant .md files as part of a project, not the .md files in .meta or workflow (though those have to be sent via inbox anyway).",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-14T22:18:02.927Z",
     "text": "let's make the ? help box be narrower, like 1/3rd the width, and centered.  also the [?] should not be literally that string, but a ? icon for help",
     "label": "design"
@@ -1010,9 +1495,24 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-15T01:38:55.428Z",
+    "text": "let's do .meta/todo/simplify-quest-recordings-and-autosave.md",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-15T01:47:01.922Z",
     "text": "let's look through this codebase for opportunities to simplify and/or refactor reasonably.  not code golfing but making it mostly DRY.  simplicity and clarity paramount.",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-09-15T02:19:05.099Z",
+    "text": "let's look at the transcript for the most recent codex session (currently in progress), implementing a todo i've given it.  it's been 30m.  how is it faring?  where has it done something foolish, or a runaround, or just missed something?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-15T02:25:55.220Z",
+    "text": "let's look at the transcript for the most recent codex session, implementing a todo i've given it.  how did it fare?  where has it done something foolish, or a runaround, or just missed something?  @.meta/transcripts/codex-01a09e52-5f70-73b0-a911-e1f63e11700c.md",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-15T05:17:13.527Z",
@@ -1028,6 +1528,11 @@
     "timestamp": "2026-09-15T05:30:56.795Z",
     "text": "node is crushing my machine, 2 procs, what is it doing??",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-15T05:31:42.751Z",
+    "text": "okay cpu is better now, continue",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-15T05:35:46.719Z",
@@ -1060,6 +1565,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-15T06:18:58.395Z",
+    "text": "great, do it",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-15T07:39:32.879Z",
     "text": "debounce for menu is too long, i can double tap in like 200ms?",
     "label": "design"
@@ -1090,9 +1600,19 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-15T16:30:30.190Z",
+    "text": "review after some changes and make a todo with remaining items",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-15T16:41:18.047Z",
     "text": "- remove \"tune skipped\" message\n\n- \"nothing\" should not be part of inventory shown\n- show inventory in bottom above permanent status when action menu not shown\n- allow actions on menu to be selected with mouse click/touch",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-15T16:57:55.076Z",
+    "text": "let's do @.meta/todo/fix-session-test-hang.md",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-15T18:49:12.211Z",
@@ -1130,6 +1650,11 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-16T00:22:43.533Z",
+    "text": "- vine rope in inventory not deduped with number; all things should dedup like tokens.\n- inventory should not be shown when message shown.\n  - basically inventory, message, and menu occupy the same space, and only one is shown at a time.\n  - and in particular the status should be at its FIXED location (bottom) so it never jumps around going to the menu or message or inventory. and the screen is always the same size.  screen must stay fixed size is one of the retro rules we should be keeping, yeah?",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-09-16T00:26:57.807Z",
     "text": "regression: the tick-tock sound when resting is no longer played (sound nor waveform)",
     "label": "bug"
@@ -1138,6 +1663,16 @@
     "timestamp": "2026-09-16T00:31:33.380Z",
     "text": "...and what was the problem?",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-16T00:32:21.048Z",
+    "text": "that's weird, which model implemented the newer REST impl",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-16T00:34:01.088Z",
+    "text": "/model astra",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-16T00:34:22.033Z",
@@ -1245,6 +1780,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-16T04:54:57.819Z",
+    "text": "let's do @.meta/todo/unify-input-handling-and-audit-lost-discrete-actio.md",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-16T05:12:45.354Z",
     "text": "- let's make the music notes on the staff be a bit more compact and scroll slower.  the first note in a measure should be more to the right of the measure line.",
     "label": "design"
@@ -1325,6 +1865,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-16T08:00:18.673Z",
+    "text": "including all winning fixtures in release",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-16T08:01:23.877Z",
     "text": "on map, volume shows up briefly on top bar, even though it shouldn't show up at all",
     "label": "bug"
@@ -1370,6 +1915,11 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-09-17T01:25:58.427Z",
+    "text": "i'm also not super keen on on any test fixtures besides *-win.json for the replays, unless they are very important/useful (and i don't know if any of them are)",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-09-17T01:33:59.687Z",
     "text": "d-h) yes, all -win.json should be replayed, none should be hardcoded.  yes, do a), but then do the rest with astra, review the changes for each todo when done",
     "label": "core"
@@ -1390,6 +1940,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-18T22:18:48.000Z",
+    "text": "/clear",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-18T22:37:04.831Z",
     "text": "let's remove status and menu and inventory from the drop-down menu.  let's put the full screen button where the waveform is now, and disable the waveform.",
     "label": "design"
@@ -1405,9 +1960,19 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-18T22:54:29.517Z",
+    "text": "/clear",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-18T22:55:14.219Z",
     "text": "for a brief second on load, the monitor outline is tiny and the canvas is wrongly sized over it, and then something loads and layout happens and it's fine.  can we get rid of that little wart?",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-18T22:56:12.344Z",
+    "text": "learn to just do small one-off tasks",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-18T22:58:05.787Z",
@@ -1440,9 +2005,19 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-19T00:45:42.957Z",
+    "text": "okay let's look through all todos and figure out one last time what to do, we're nearing the finish line here",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-19T00:54:49.921Z",
     "text": "g) let's use a leaf for the favicon.  h) e.g. on win, it says on separate lines \" YOU HAVE FINISHED THE QUEST IN 1 DAYS.\" \"YOU ARE A\" \" MASTER QUESTER.\"   looks like the first two are one line that's wrapped, and \" MASTER QUESTER.\" is a second line.  but it should probably be stored as a full statement and we should do line-wrapping in code.  i don't know how it got screwed up tho.  j) already submitted, move draft to .meta/promo.  p) ditch it, room rewind is sufficient.  o) not now, but this one is legit for next round.  l) mobile is probably quite important, both for smoke check and for interface tweaks to make the game playable.  but not now.  rest of 'keep out' you're right about.  q) yes though it'll be a different venue like r/adventuregames.  r) yes, with caveats above. s) as above.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-19T00:58:21.967Z",
+    "text": "okay i removed interface.md, let's do everything remaining and wrap it!",
+    "label": "junk"
   },
   {
     "timestamp": "2026-09-19T00:59:30.654Z",
@@ -1455,9 +2030,29 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-19T01:02:38.189Z",
+    "text": "also send msg to saul.pw about goatcounter",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-19T08:00:39.828Z",
+    "text": "let's also send a task to saul.pw to link century-arcade project to this instead; and to make a root.saul.pw alias",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-19T08:00:43.138Z",
+    "text": "dns alias",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-19T21:21:44.377Z",
     "text": "let's use non-in-game-font arrows also",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-19T21:50:00.128Z",
+    "text": "let's do @.meta/todo/replay-navigation-arrows.md",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-19T22:14:09.309Z",
@@ -1470,9 +2065,24 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-19T22:37:24.706Z",
+    "text": "yes, jesus",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-19T23:11:13.031Z",
     "text": "okay.  i thought we had ditched herd-landing.json?!",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-09-19T23:12:05.981Z",
+    "text": "okay let's do it now",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-19T23:20:21.297Z",
+    "text": "this is so simple you didn't need to go through a whole loop.  learn that when i say 'do it now' i mean this session",
+    "label": "meta"
   },
   {
     "timestamp": "2026-09-20T00:00:03.513Z",
@@ -1505,6 +2115,26 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-25T06:35:54.614Z",
+    "text": "have sonnet check your work",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-25T06:37:28.524Z",
+    "text": "it works, my mistake, i used the wrong port.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-09-25T06:58:25.192Z",
+    "text": "yeah, it didn't notice that quote was attributed to the author of the book, huh",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-30T02:17:02.277Z",
+    "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate.",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-09-30T02:17:04.641Z",
     "text": "we need to polish this up and make it minimally mobile accessible.  i think on horizontal phone width, the game can take up virtually the entire width, leaving the computer image behind.  also looking at it now, i think the dimensions are wrong, we should find the real c64 monitor dimensions of the casing and screen and try to replicate the proportions of each.\n\non my android phone anyway, i want to use it in landscape mode, but the screen is centered vertically so the permanent inventory and status might be untenable on this form factor and we need to accommodate.",
     "label": "core"
@@ -1520,13 +2150,33 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-30T02:58:37.432Z",
+    "text": "agent-queue is wrong, it should be in ready",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-09-30T04:38:56.607Z",
+    "text": "yes queue the issue-loop doc fix too.  but just remove issue-loop in this repo, we're doing something else now.",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-09-30T06:55:59.641Z",
     "text": "fix the screenshots dammit!  mkdir -p",
     "label": "bug"
   },
   {
+    "timestamp": "2026-09-30T07:35:14.959Z",
+    "text": "did it fix it?",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-30T07:40:04.853Z",
     "text": "okay so i can't believe it's that thick around the screen, can you find me a public internet pic to verify?  also if the width <= 400px just show the screen, no monitor (or can you let the monitor edges be visible but some offscreen for anything between 320-400px?)",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-09-30T07:40:28.114Z",
+    "text": "oh and make crt the default!  i thought we'd done this already.",
     "label": "design"
   },
   {
@@ -1570,9 +2220,19 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-30T21:03:15.010Z",
+    "text": "and?",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-09-30T21:32:39.789Z",
     "text": "great, almost perfect, the font of the \"VIDEO MONITOR MOEL\" and the brand \"commodore\" are the only diffs.  can we get those right at least?  then yes replace it",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-30T21:44:25.886Z",
+    "text": "everything is looking really good but the COLOR is NOT TAN.  what is going on?!",
+    "label": "bug"
   },
   {
     "timestamp": "2026-09-30T22:01:53.433Z",
@@ -1600,14 +2260,34 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-09-30T22:27:31.719Z",
+    "text": "also the curve around the monitor now looks funny, it's tracing the exact glass dimensions from the photograph, but what we had before for that shape looked better even if it wasn't exact",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-09-30T22:37:11.012Z",
     "text": "great.  there's one 'bezel' on the left side that i guess i just asked you to remove, it should go up same as on the right side, with a little lighter shade than the bottom i guess.",
     "label": "design"
   },
   {
+    "timestamp": "2026-09-30T22:56:47.952Z",
+    "text": "great, slightly expand the right triangle shadow and darken it",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-09-30T22:56:51.028Z",
     "text": "great, slightly expand the right triangle shadow and darken it, just a bit",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-09-30T23:01:17.215Z",
+    "text": "great.  let's create a screenshot and bundle it with the OG jpg this was based off of, and send them both to saul.pw for a /blog entry: Wrangled Fable and Astra to make the framing look like the actual Commodore 1702 monitor.  Astra was much better at generating an svg likeness from the given image.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-01T05:21:48.734Z",
+    "text": "list a-f again",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-01T18:49:47.709Z",
@@ -1625,8 +2305,18 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-01T19:02:39.507Z",
+    "text": "let's review all tests.  some of them do not have a meaningful regression that they would prevent; let's suggest these for removal in a task.  get fable to review, and then i'll review the task before it gets implemented to remove those useless tests.",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-10-01T22:21:35.779Z",
     "text": "minor task: 1 line between the \"question\" and the inventory for actions that take an inventory item.  remove green border in fullscreen mode.  also when i go to the final area, the map still highlights the spirit door room, where is the final area on the actual map?",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-01T22:22:19.188Z",
+    "text": "also when devtools are open, the entire map should be visible, with the unseen rooms darker, like 50% opacity",
     "label": "design"
   },
   {
@@ -1650,6 +2340,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-02T00:51:42.251Z",
+    "text": "let's try it",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-02T00:58:41.338Z",
     "text": "let's play with a few things.  model 1702 -> model 2026, commodore logo -> 'saul.pw'.  replace video/audio connector area with audio slider realized as a volume knob labeled 'volume' from that era.  then put the play/map/about/resources buttons on the bottom panel.  move the fullscreen button to the panel above, and realize it as a copy of the power button but labeled 'fullscreen'.",
     "label": "design"
@@ -1657,6 +2352,11 @@
   {
     "timestamp": "2026-10-02T01:31:18.993Z",
     "text": "close; the volume should be a linear slider, not circular.  and the play/map/etc buttons should be better (2x?) and centered on that panel",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-02T01:31:56.413Z",
+    "text": "oh yeah and make the whole saul.pw banner (including colors) clickable to my website.",
     "label": "design"
   },
   {
@@ -1705,6 +2405,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-02T06:27:01.276Z",
+    "text": "let's try it",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-02T06:43:30.755Z",
     "text": "yes let's try that toggle, cycle through NTSC PAL and current.",
     "label": "design"
@@ -1713,6 +2418,11 @@
     "timestamp": "2026-10-02T06:50:08.620Z",
     "text": "let's make PAL the default.  also the unseen black squares are not gray/black when devtools is up, still.  should be.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-02T06:56:38.383Z",
+    "text": "okay better but they need to be the same visible color as the black in the unseen tiles that aren't blank.  and it wouldn't be a crime if the underlying map bled through as long as it's consistent across blank and non-blank tiles",
+    "label": "dup"
   },
   {
     "timestamp": "2026-10-02T06:56:49.911Z",
@@ -1735,6 +2445,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-02T07:09:31.010Z",
+    "text": "and the manual pages should take up the same size, there's a slight height diff, at least what's below shouldn't jump up and down while going through pages.",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-02T17:32:31.806Z",
     "text": "okay let's keep playing with the box opening sequence.  let's do box top -> box bottom -> open box with map and manual and \"disk\" (for now just a simple square with the word 'disk' inside it), click the map to see the map, manual to page through manual, and disk to go to computer.  you're right, there needs to be a way for us to go back, esp to map but also to the rest, what's a good setup?",
     "label": "core"
@@ -1743,6 +2458,11 @@
     "timestamp": "2026-10-02T17:45:39.528Z",
     "text": "good but the computer shouldn't be visible until the disk is clicked!",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-02T17:49:46.560Z",
+    "text": "let's ignore tests for the moment, i'm not sure how this all shakes out",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-02T17:50:02.493Z",
@@ -1820,6 +2540,11 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-10-02T21:31:04.661Z",
+    "text": "@.meta/todo/soon/site-framing-without-words.md",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-10-02T21:41:19.907Z",
     "text": "some good ideas but you're being too pushy about some of them.  i like the bench and accession tag and the donation box ideas and dropping the header buttons.  but i don't have a photograph of the physical things and i'm not sure how we can get the bench to subtly indicate this curation work without undue detail.  also the printout is clever but the actual work was only an evening so it shouldn't be oversold.  can we just use the tractor edges and greenbar paper somewhere to indicate the time period?  let's discuss and collect before doing",
     "label": "design"
@@ -1828,6 +2553,16 @@
     "timestamp": "2026-10-02T21:45:00.939Z",
     "text": "let's try h, also show me b and e to start.  and let's try i, putting my about note on the greenbar.  1. try BTR.1984.1 for now.  2. let's try on the bench from the start.  link to saul.pw for now.  4.  escape yes, back arrow on bench",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-02T21:56:57.857Z",
+    "text": "okay this shows promise but we need to fix a lot of things. let's start with this 'bench', it looks like shitty storage unit corrugated metal siding and not wood at all.  let's try your other options.\n\nalso i like the shadow to give the box depth (tho needs to be 'deeper' given that the box was ~1 inch thick) but showing two sides at the same time is kind of confusing.  how can we show that's there's a back side to see, before they click 'into' it?\n\nthen, the artifacts on the 'bench' should not go away when clicked and showing; they should be highlighted instead.",
+    "label": "dup"
+  },
+  {
+    "timestamp": "2026-10-02T21:56:59.165Z",
+    "text": "okay this shows promise but we need to fix a lot of things. let's start with this 'bench', it looks like shitty storage unit corrugated metal siding and not wood at all.  let's try your other options.\n\nalso i like the shadow to give the box depth (tho needs to be 'deeper' given that the box was ~1 inch thick) but showing two sides at the same time is kind of confusing.  how can we show that's there's a back side to see, before they click 'into' it?\n\nthen, the artifacts on the 'bench' should not go away when clicked and showing; they should be highlighted instead.",
+    "label": "dup"
   },
   {
     "timestamp": "2026-10-02T21:58:33.046Z",
@@ -1890,6 +2625,16 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T01:40:01.794Z",
+    "text": "let's close this session out and update the todo for next session.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T05:55:33.387Z",
+    "text": "we're working on .meta/todo/soon/site-framing-without-words.md.  let's take an intermediate screenshot now, and learn to do that anytime before undertaking an interface overhaul (this is a general rule, send to workflow), so we have a nice before/after spread for saul.pw/log.  then i'm thinking that the \"3D desk\" is trying too hard, and maybe it should just be upright and flat again, like the pictorial navbar i had mentioned in the previous session; but for now, just keep it at the bottom.  the green mat is fine for bg for now.\n\nalso bug: the zoomed in map can no longer be dragged to pan it.\n\nalso let's make the 'seen' screens on the map be halfway between the transparency of the devtools unseen screens and the current transparency (which i believe is 0%)",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-10-03T06:02:15.451Z",
     "text": "say, how come when i use the scroll-wheel on the map, each 'notch' doesn't go one level?  and in fact i think i have to do two notches in short succession to get it to zoom in/out from the deepest zoom",
     "label": "bug"
@@ -1910,6 +2655,16 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T06:13:09.822Z",
+    "text": "is there a way we can make this a single switch flip?  like in css alone",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T06:14:08.774Z",
+    "text": "even better if i could specify the angle in that one var",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-03T06:20:02.794Z",
     "text": "can we straighten out the monitor so that it's not 'looming'?  we disabled the top didn't fix the sloping sides so we're not quite looking at it straight on",
     "label": "design"
@@ -1920,6 +2675,11 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-03T06:34:11.859Z",
+    "text": "shouldn't we have some slight depth to the top though, even if we're looking at it from the eyes at the center of the screen or even lower at the monitor logo?",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-03T07:00:04.284Z",
     "text": "how can i adjust the desk angle?  i believe it's computed so i can't edit live",
     "label": "design"
@@ -1928,6 +2688,16 @@
     "timestamp": "2026-10-03T07:08:02.135Z",
     "text": "can we have the desk extend 'back' (like double)?  and then render whatever item on top of it.  i'm playing with 60deg and i want the desk under the monitor too",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T07:08:17.380Z",
+    "text": "and let's make the text 0deg always so it's readable",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T07:14:28.485Z",
+    "text": "let's do @.meta/todo/261002.md",
+    "label": "meta"
   },
   {
     "timestamp": "2026-10-03T07:22:37.723Z",
@@ -1985,6 +2755,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T08:06:46.797Z",
+    "text": "and the volume knob should be brown also",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-03T08:08:27.399Z",
     "text": "give it a little border so it looks like a thing.  also it should be square still",
     "label": "design"
@@ -2005,9 +2780,39 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T15:40:43.775Z",
+    "text": "/close",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T15:41:10.267Z",
+    "text": "let's rebase these commits into just a few, can you organize them by theme?  many we've just been going back-and-forht on",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T16:33:48.592Z",
+    "text": "delete the backup branch.",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-03T16:34:18.097Z",
     "text": "let's change the version number font to be the same as the \"video monitor\" font.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T16:35:20.399Z",
+    "text": "let's change 'saul.pw' on the monitor plate, back to the commodore logo/name",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T17:23:38.009Z",
+    "text": "let's close out and capture todos that i'll work on next",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T17:25:03.446Z",
+    "text": "/triage",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-03T17:54:22.168Z",
@@ -2015,9 +2820,84 @@
     "label": "core"
   },
   {
+    "timestamp": "2026-10-03T17:56:24.813Z",
+    "text": "3 they're all done except for the ones in other todos.  just delete.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T17:59:36.990Z",
+    "text": "workers do not need extra permissions to write requested materials into .meta, below say 20MB.  let's learn this so we don't have to keep granting fine-grained permissions like this to our own internal project meta.  much better for the results to be in a specific note/ref than disappear inside an agent-run finding, we need to always be moving at least the results of workers into more findable .md files, if not the extra assets.  so let's fix this at the source and move to ready",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T18:00:23.626Z",
+    "text": "(1)",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T18:04:08.807Z",
+    "text": "1",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T18:06:08.570Z",
+    "text": "1",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T18:07:21.584Z",
+    "text": "3, can't test on phone until deployed, let's do all non-mobile tasks first",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T18:08:39.709Z",
+    "text": "yes do both, but also let's fix it so that you don't create spurious human tasks for things like this",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T18:15:28.329Z",
+    "text": "a) keep it, that instruction was likely about changing other interface elements by changing the text.  this is simple wrapping with the text intact.\n\nfor l) let's combine them, but the gate is not correct.  we're close but there is no automatic gate for release, only my judgement.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T18:22:40.923Z",
+    "text": "1",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-03T18:39:19.703Z",
     "text": "last l) these are our 'next' things we need to do, outside of triage.  also: replace curator's note thumbnail with something better, move 'volume' label up so it's closer to the slider, and change the version plate to be in a more appropriate font (or size?).  move mobile pass from maybe to soon.  move palette and save-slots to a new task category outside the todo dir, alongside done, like 'nope' except it's more of a soft-nope.  like it's out but not forever against, just not now, not soon, not up for consideration in maybe.  maybe we should just delete but it seems like it's good to track it somewhere more findable in the case that we revisit later for some other reason.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T18:42:08.770Z",
+    "text": "i don't understand 'palette' at all, unless there's some more information, just delete it.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T18:59:14.090Z",
+    "text": "yes",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-03T19:00:14.555Z",
+    "text": "okay so now that everything's triaged, what do i do to start the next session to finish everything up?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T19:01:20.469Z",
+    "text": "our .meta/NEXT says that?  we've already done that, but it's in a separate cbox.  let's fix NEXT.  also i had a codemill serving btr so it looks like it worked on the ready tasks already?  some failed.  let's look at those before wrapping",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T19:01:50.660Z",
+    "text": "...why can't the runner write notes or ref??  it's in this cbox!",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-03T19:19:14.424Z",
+    "text": "/drain",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-03T20:58:40.026Z",
@@ -2025,14 +2905,29 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T21:42:15.470Z",
+    "text": "yup, do that!",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-03T21:46:41.344Z",
     "text": "re map, let's try removing the inner gridlines entirely",
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T22:00:06.294Z",
+    "text": "all good, mark that smoke test as done.",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-03T22:17:43.571Z",
     "text": "get astra to research and find C64 startup sounds.  from youtube, where else?  i'd like a variety to choose from.  let's download them all into rawblog",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T23:04:04.953Z",
+    "text": "────────────────────────────────────────────────────────────────────────────────────────────────────\n❯ okay we need to straight up fix the mobile interface now, it's not that playable.  first of all\n  don't display the version label when fullscreening.  then let's focus on input on the\n  fullscreen.  let's try it with input only happening on the 'sides' with touch, hold, tap, one     \n  finger or two.  for now let's disable all these on the game screen itself",
+    "label": "dup"
   },
   {
     "timestamp": "2026-10-03T23:04:08.288Z",
@@ -2048,6 +2943,11 @@
     "timestamp": "2026-10-03T23:10:39.756Z",
     "text": "d) what does 'button on its own' do, aside from doors and menus?  like when just standing?\n\ne) yes agreed.  f) okay let's try it.  and yes we should let the outher ~1/8th count.  1/2) sure.  3) touch only in fullscreen/landscape",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-03T23:11:41.283Z",
+    "text": "let's do it",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-03T23:27:27.711Z",
@@ -2075,6 +2975,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-03T23:38:27.059Z",
+    "text": "great, make it, simple change.",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-03T23:40:59.817Z",
     "text": "ah and i see the issue with gliding, i have to be precise in my letting go of both sides completely, and then pressing one side only.  but the rule should really be, when gliding, if ever only one side is being touched/held/tapped, the glide should turn that direction immediately.  afaik there is no other input that's reasonable when gliding anyway except direction change, right?",
     "label": "design"
@@ -2100,9 +3005,29 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-04T00:13:06.943Z",
+    "text": "are you sure?  btr codemill is busy..",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-10-04T00:23:51.378Z",
     "text": "allow pinch zoom on map on mobile.  tap on both sides should also get past a message; in fact i think that should auto menu, e.g. in the speak->pense->buy->take case",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-04T00:39:33.783Z",
+    "text": "how long does the review and merge take anyway??",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-04T00:48:54.779Z",
+    "text": "okay so?",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-04T00:50:40.189Z",
+    "text": "where can i find the og map",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-04T00:56:48.631Z",
@@ -2115,6 +3040,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-04T01:51:43.256Z",
+    "text": "good effort, save both of those to /blog",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-04T07:40:20.263Z",
     "text": "just tried pinch zoom (human todo) on mobile in fullscree/nlandscape and it didn't work.  i think on mobile it doesn't need to zoom in/out buttons, pinch zoom is well-known and expected, and the button clutters and takes up space",
     "label": "design"
@@ -2122,6 +3052,16 @@
   {
     "timestamp": "2026-10-04T07:43:39.580Z",
     "text": "okay so it keeps flipping from landcsape fullscreen to portrait fullscreen and that's annoying, it should be sticky.  it seems to have an easier time going from land->port than the other way around, i have to click or something?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-04T07:44:18.287Z",
+    "text": "oh and the screen turns dark as i'm playing",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-04T07:44:28.256Z",
+    "text": "not completely dark, just darkens.   lke power save?",
     "label": "bug"
   },
   {
@@ -2140,13 +3080,28 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-04T08:00:15.212Z",
+    "text": "well i think up and left should go left if not at ladder ,right?",
+    "label": "bug"
+  },
+  {
     "timestamp": "2026-10-04T08:15:29.666Z",
     "text": "nope, i go up a ladder holding down right, new screen, switch to left, nothing ever happens",
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-04T08:17:28.416Z",
+    "text": "also is crt mode off by default on mobile?  it was off for me and i don't think i ever turned it off",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-04T08:19:21.304Z",
     "text": "also why is it taking like 300-400ms between screens?  it doesn't feel like it used to be doing that, does it get clogged up with memory usage or something?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-04T08:19:42.601Z",
+    "text": "i think it's fine on desktop, it's on mobile that there's a delay now",
     "label": "bug"
   },
   {
@@ -2160,9 +3115,29 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-04T08:24:10.453Z",
+    "text": "i don't see why you think my phoine is running 1.15, i see 1.18",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-10-04T08:24:21.453Z",
     "text": "i don't see why you think my phoine is running 1.15, i see 1.18.",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-04T08:25:18.974Z",
+    "text": "they don't happen automatically, i push manually.  you can tell with git status",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-04T08:27:09.446Z",
+    "text": "i dunno, can you ask fable if it can figure it out?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-04T08:42:25.637Z",
+    "text": "that worked, let's wrap this up and clean up anything thta's vestigial and unnecessray",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-04T08:53:43.775Z",
@@ -2205,14 +3180,39 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-04T09:14:06.993Z",
+    "text": ".",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-04T09:15:42.479Z",
     "text": "looks a lot better, but blanks the dest page before the turn so it looks janky.  let's fix that and i bet it looks good",
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-04T09:17:03.184Z",
+    "text": "still an issue if i click before the page has finished turning.  ideally it would keep turning the one and start turning the next so they just flap on top each other",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-04T17:10:58.751Z",
+    "text": "clicking on manual left page should go back a page",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-10-04T17:11:03.438Z",
     "text": "clicking on manual/book left page should go back a page",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-04T20:14:18.147Z",
+    "text": "for all of the sounds we just got i need the source links.  i've put the filenames in audition-power-on-sound.md, please annotate with the source links.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-04T20:38:54.389Z",
+    "text": "learn to put all .md in .meta in the project, and not in attic.  attic is for media only",
+    "label": "meta"
   },
   {
     "timestamp": "2026-10-04T21:30:55.467Z",
@@ -2235,9 +3235,24 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-04T23:30:22.938Z",
+    "text": "also 4:42, a very short one but kinda clean",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-04T23:31:12.184Z",
+    "text": "and then the very last one at 5:00 is long but has the right tone",
+    "label": "design"
+  },
+  {
     "timestamp": "2026-10-04T23:36:20.245Z",
     "text": "so i WANT the thump, that's a key part for me.  is that just not a 1984-era monitor sound?",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-04T23:41:12.547Z",
+    "text": "better, but i remember a much lower hum, like a 30Hz deep undertone?  could that be a thing?  or 20 or 25GHz?",
+    "label": "dup"
   },
   {
     "timestamp": "2026-10-04T23:41:15.986Z",
@@ -2253,6 +3268,11 @@
     "timestamp": "2026-10-04T23:54:06.868Z",
     "text": "okay i'm liking it, let's add a synth'ed click like the luckydog one for on",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-04T23:57:45.457Z",
+    "text": "clicks are too fast, needs more drama.  also too tinny, where's the satisfying CLICL",
+    "label": "dup"
   },
   {
     "timestamp": "2026-10-04T23:57:48.510Z",
@@ -2295,6 +3315,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-05T00:45:05.774Z",
+    "text": "we don't need tests for this bro",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-05T01:10:07.426Z",
     "text": "great, let's display the screen after the sound finishes (ideally it would fade in for the last 200ms).  and fadeout after the click off too.  no tests",
     "label": "design"
@@ -2328,6 +3353,46 @@
     "timestamp": "2026-10-05T04:37:43.608Z",
     "text": "just impl'd a dev notes, let's clean it up.  stop the autoscroll, ditch that code.  move the table thumbnail 'back'/up on the desk so that it stands apart.  extend the desk surface out so the side edges of the desktop aren't visible.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T04:37:46.698Z",
+    "text": "another session is actively working on devnotes from this development process, can you find the .md that produced the .html, and tell me about that process?  ultimately we want to send the .md one message at a time through sonnet (? or haiku?), flagging messages a) that might not be desirable to share with the public, or b) that have no interesting content themselves, like \"yes draft plan, then /close\" \"fold them in\", c) are core messages, d) are smaller design decisions.  label a=nonpublic, b=junk c=core d=design.  save to jsonl, one row per turn: sessionfn, date, msg, label",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-05T04:40:00.192Z",
+    "text": "change UTC timestamps to PDT",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T04:42:07.789Z",
+    "text": "that one is actually a bug report continuation, which could be a different category if we wind up doing this again",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-05T04:42:52.007Z",
+    "text": "b) we should actually show the model all messages in the same session, marked as context only",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-05T04:45:11.377Z",
+    "text": "no need for a second script, track this script in .meta, commit the first, and overwrite it with the second.  we're only moving forward i think. i'll look at the labeled jsonl",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-05T04:49:39.028Z",
+    "text": "Let's explore it with Visidata.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-05T04:49:56.889Z",
+    "text": "And yes, move it into dot meta and save it.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-05T04:50:46.743Z",
+    "text": "There is a skill, VD Explorer, so you can launch it for me.",
+    "label": "meta"
   },
   {
     "timestamp": "2026-10-05T05:12:19.381Z",
@@ -2365,6 +3430,16 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-05T09:07:10.950Z",
+    "text": "from the dev notes jsonl, figure out which features have taken the largest amount of human attention",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-05T17:01:10.265Z",
+    "text": "move it to dev-notes.  save these stats in .meta. close out",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-10-05T17:02:52.496Z",
     "text": "dev notes top has no green bar backing, oddly.",
     "label": "bug"
@@ -2400,6 +3475,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-05T20:16:31.803Z",
+    "text": "also save that other jpg and link in our .meta references,",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-10-05T20:25:58.309Z",
     "text": "yes i want pinch to zoom, side shift+scroll is fine",
     "label": "design"
@@ -2423,6 +3503,16 @@
     "timestamp": "2026-10-05T22:08:52.314Z",
     "text": "okay let's do another pass on mobile movement controls that we've been working on.  consult previous sessions past few days about this.  now if i hold R and then hold L, it starts jumping continuously.  but it should work like this: hold R, press L, single jump; continue holding L, stop.  rule is, press/tap other side while holding to jump; further tap to jump more; two holds = no L/R movement.  while gliding/falling may be a special case.",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-05T22:10:18.784Z",
+    "text": "i also think coming off the top of a ladder (where up was 'latched') should not start moving on that side, without another press.  see if this contradicts something i've said earlier, or is in conflict with it, let's resolve that OAFA",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-05T22:26:38.033Z",
+    "text": "let's try those yes",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-05T23:11:40.472Z",
@@ -2470,6 +3560,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-06T00:57:38.684Z",
+    "text": "merge it",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-06T00:59:36.186Z",
     "text": "map: change red border into 50% opacity red thick stroke hollow circle diameter screen height around player.",
     "label": "design"
@@ -2478,6 +3573,21 @@
     "timestamp": "2026-10-06T01:10:31.524Z",
     "text": "let's make the diameter bigger by 50% and the and the stroke thicker by 100%  opacity to 75%.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T01:17:47.643Z",
+    "text": "okay they're working!  let's update all docs and commit everything.",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T01:18:33.154Z",
+    "text": "continue",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T01:23:41.295Z",
+    "text": "add todo item for mobile in-game boot intro touch help",
+    "label": "meta"
   },
   {
     "timestamp": "2026-10-06T01:26:58.133Z",
@@ -2555,6 +3665,21 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-06T05:09:05.718Z",
+    "text": "great, and update as we said",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T05:23:22.452Z",
+    "text": "yes put it in ready to remove",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-06T05:25:41.606Z",
+    "text": "yes. then close.",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-06T05:28:24.759Z",
     "text": "rename \"floppy disk\" to \"game\" and remove the notch in the sleeve.  text in attractor is not wrapped correctly.\nitem use \"more\" is in a funny place, if there are more than 2 rows, use the empty row after all.  more should be at the bottom right, just a >> though, not a word.  inventory same, doesn't need \"YOU HAVE\", use 4 lines.  also scroll doesn't seem to work with inventory.\n\nwhy are some people green now?  that feels like it's changed ~recently, since the PAL thing?  feels wrong, i thought all chars in the game were white",
     "label": "design"
@@ -2567,6 +3692,11 @@
   {
     "timestamp": "2026-10-06T05:45:26.683Z",
     "text": "yes let's do esc and two finger hold.",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-06T05:45:34.152Z",
+    "text": "doc in spec but not in game",
     "label": "design"
   },
   {
@@ -2595,9 +3725,29 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-06T06:16:53.241Z",
+    "text": "where is JF?",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T06:20:20.240Z",
+    "text": "commit fix, disable win tests, put human todo for rewinning with those chars and saving results.",
+    "label": "meta"
+  },
+  {
     "timestamp": "2026-10-06T06:22:53.350Z",
     "text": "i killed someone with wand of befal and it said \"the wand is useless here\", that's not right, what does the game itself do?",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-06T06:25:26.656Z",
+    "text": "RAM floor is my metric.  don't verify.  save list to trove tagged \"computers game mag4\" (or mag5 etc).  what's the best link to use for each of these?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-06T06:42:23.912Z",
+    "text": "yes",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-06T06:44:18.173Z",
@@ -2625,9 +3775,54 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-06T16:50:17.897Z",
+    "text": "submit as-is",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T17:06:51.038Z",
+    "text": "what's the shell still?",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T17:07:02.376Z",
+    "text": "✻ Brewed for 4s · done 10:06 AM · 1 shell still running",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T17:12:50.333Z",
+    "text": "/triage",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-06T17:30:45.770Z",
     "text": "c) not sure about that exact strategy, but yes we need some form of indication of how to play on mobile.  b) what does \"had to use a visual to clock it though\" mean?  a) discard  a1) lingering wart: game keeps dimming for me on mobile, can we file as an issue to investigate?  we've looked at it before, link to those.  d) fine, done.  e) yes this is our main remaining item. f) incorporate into note for e. g) all done except for e, capture anything we don't have already and add to e.  h) on mobile portrait the monitor obscures the foreword/box/manual thumbs.  and the desk is too tall (half of all height!) so the content is way too small.  we need a way to fullscreen the content (incl doing books/manual/foreword 1-up instead of 2-up).  pinchzoom works fine both orientations.  locks work.  i) ditch this or include in (h).  j) ditch not using anymore.  k) noted, in my list, l) we've changed these, this is stale, the new ones are working fine as long as we do (c).  m) is done.  n) fold into (h).  o) meta-task, that's what we're doing, ditch.  p) ditch.  q) keep.  r) clear blocked.  s) call it done, save for the record.",
     "label": "core"
+  },
+  {
+    "timestamp": "2026-10-06T17:39:29.070Z",
+    "text": "b) move to feedback.  r) reblocked, unblock again. e leftover) mark as completed with that commit.   re \"file as an issue\", no i meant locally.  soon/ is fine.  don't post.",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-06T18:08:35.507Z",
+    "text": "/triage",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T18:09:58.113Z",
+    "text": "a) should be ready! just do it",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T18:19:58.268Z",
+    "text": "let's do d",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-06T21:49:49.649Z",
+    "text": "don't write for me on this.  let's review everything, who am i talking to and what do i want to say?",
+    "label": "meta"
   },
   {
     "timestamp": "2026-10-07T00:45:01.996Z",
@@ -2665,6 +3860,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-07T06:56:03.414Z",
+    "text": "okay in enlarge mode they need to take up the whole visible screen height, not showing the desk nor year, and no scrollbar.",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-10-07T06:56:28.797Z",
     "text": "okay in enlarge mode they need to take up the whole visible screen height, not showing the desk nor year, and no scrollbar.  keeping the page turns and changing + to - to go back to 2-up",
     "label": "design"
@@ -2673,6 +3873,36 @@
     "timestamp": "2026-10-07T07:04:26.529Z",
     "text": "move the foreword and manual and box to be centered vertically",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T00:31:01.919Z",
+    "text": "/triage",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-08T00:34:56.314Z",
+    "text": "no let's actually look at the review notes here live and discuss them",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-08T00:38:19.393Z",
+    "text": "merge first, i'll edit",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-08T05:03:54.271Z",
+    "text": "recheck",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-08T05:28:41.563Z",
+    "text": "eh) shut up about that, i'll record those shortly.  re-review",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-08T05:31:39.014Z",
+    "text": "no, i did, now it looks good, verify?",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-08T05:42:20.211Z",
@@ -2685,9 +3915,19 @@
     "label": "bug"
   },
   {
+    "timestamp": "2026-10-08T07:33:31.280Z",
+    "text": "ba-bd all sound good",
+    "label": "junk"
+  },
+  {
     "timestamp": "2026-10-08T07:59:58.501Z",
     "text": "foreword should act like a book/pamphlet and flip pages over, with first page being 'cover' (with century arcade label) and left of first page being a calendar of dec 1984.  swap game and map on bench",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-08T08:14:39.144Z",
+    "text": "good, except the calendar it not part of the book, but 'hanging on the wall'.  the turning pages show up inverted on the top and regular beneath the pages (should be regular on top and nothing below).  the last page should have the 'external articles' only.  the signature should be one more line below.  let's also put red overlay text 'OUTDATED' on pages 3-6 in the manual, what would be a more appropriate term?",
+    "label": "dup"
   },
   {
     "timestamp": "2026-10-08T08:14:52.750Z",
@@ -2723,6 +3963,16 @@
     "timestamp": "2026-10-08T23:27:21.611Z",
     "text": "hm, now the shadow is on the bottom.  it doesn't seem stable.  it's related to crt mode ( goes away with crt off), and changes at different sizes.  but i've never seen it before this",
     "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-08T23:28:42.665Z",
+    "text": "and recording with the new screencast script seems to trigger it somehow?",
+    "label": "bug"
+  },
+  {
+    "timestamp": "2026-10-08T23:56:57.570Z",
+    "text": "make this a todo",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-08T23:58:16.030Z",
@@ -2770,6 +4020,11 @@
     "label": "design"
   },
   {
+    "timestamp": "2026-10-09T05:33:13.300Z",
+    "text": "change \"A Century Arcade restoration\" to \"A restoration of/a classic ↑4 game/by the/Century Arcade\"",
+    "label": "dup"
+  },
+  {
     "timestamp": "2026-10-09T05:33:22.219Z",
     "text": "change \"A Century Arcade restoration\" to \"A restoration of/a classic ↑4 computer game/by the/Century Arcade\"",
     "label": "design"
@@ -2808,6 +4063,11 @@
     "timestamp": "2026-10-09T07:59:57.723Z",
     "text": "hide dev notes.",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-09T16:38:04.423Z",
+    "text": "yes a)",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-09T23:33:18.686Z",
@@ -2868,6 +4128,46 @@
     "timestamp": "2026-10-14T02:23:49.855Z",
     "text": "good.  there are plenty of other opportunities though, like just moving back and forth within a screen, without an action in-between.  can we make a note of every screen that has a bad monster in it, clean up all 'extra' movement, and then replay up to those bad monster screens, at which point you'll have to do all the waiting at once?  does that make sense?  rather than optimize each cut separately",
     "label": "design"
+  },
+  {
+    "timestamp": "2026-10-14T02:24:34.228Z",
+    "text": "and removing all 'waiting' that doesn't involve waiting for a baddie to be in the right position",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-14T02:26:01.555Z",
+    "text": "(c) i don't understand this part, why?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-14T02:26:32.766Z",
+    "text": "oh yeah and i guess it can't be just baddies because we talk to regular folks and pense animals",
+    "label": "design"
+  },
+  {
+    "timestamp": "2026-10-14T05:55:33.783Z",
+    "text": "both!",
+    "label": "junk"
+  },
+  {
+    "timestamp": "2026-10-14T06:46:53.470Z",
+    "text": "overall this process seems quite slow though, if i wanted to optimize another one of those i would hope it would take a lot less time",
+    "label": "core"
+  },
+  {
+    "timestamp": "2026-10-14T07:33:50.476Z",
+    "text": "okay so move the opt.mjs etc into the main repo and doc how to use it in dev/speedrun.md.  how long would it take against a fresh .json?",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-14T13:45:42.768Z",
+    "text": "move to docs, remove dev.  commit the optimized json speedruns to test/fixtures.  add a .meta/notes/speedrun.md or something with all notes from this session to close it out, so we can resume making the opt process even more thorough",
+    "label": "meta"
+  },
+  {
+    "timestamp": "2026-10-14T13:48:09.597Z",
+    "text": "move to docs, remove dev.  commit the optimized json speedruns to test/fixtures.  close out this session with notes in .meta/notes/speedrun.md, so we can resume extending this optimization process",
+    "label": "junk"
   },
   {
     "timestamp": "2026-10-17T05:20:12.139Z",

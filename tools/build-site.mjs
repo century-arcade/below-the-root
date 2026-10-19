@@ -43,7 +43,7 @@ export function renderDevNotes(prompts, intro = '') {
     const { year, month, day: dayOfMonth, hour, minute, timeZoneName } = Object.fromEntries(pacific.formatToParts(date).map(part => [part.type, part.value]));
     const day = `${year}-${month}-${dayOfMonth}`;
     if (!days.has(day)) days.set(day, []);
-    const tag = ['core', 'bug', 'design'].includes(label) ? ` <em class="note-label">(${label})</em>` : '';
+    const tag = ['core', 'bug', 'design', 'meta', 'junk', 'nonpublic', 'dup'].includes(label) ? ` <em class="note-label">(${label})</em>` : '';
     days.get(day).push(`<article><time datetime="${date.toISOString()}">${hour}:${minute} ${timeZoneName}</time>${tag}<p>${escape(text)}</p></article>`);
   }
   const [cover = '', ...titles] = intro.split(/(?=<h1)/).filter(Boolean);

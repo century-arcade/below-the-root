@@ -18,6 +18,9 @@ export function extractPrompts(records, { allowPi = false } = {}) {
     else if (pi && row.type === 'message') message = row.message;
     else if (!metadata && !pi && row.type === 'user' && !row.isMeta && !row.isSidechain &&
       row.origin?.kind === 'human' && [undefined, 'typed', 'queued'].includes(row.promptSource)) message = row.message;
+    // A prompt typed while the agent is mid-turn arrives as a queued_command attachment, not a user row.
+    else if (!metadata && !pi && row.type === 'attachment' && !row.isSidechain && row.attachment?.type === 'queued_command' &&
+      row.attachment.commandMode === 'prompt' && row.attachment.origin?.kind === 'human') message = { role: 'user', content: row.attachment.prompt };
     if (message?.role !== 'user') continue;
     let text = textContent(message.content).trim();
     if (!text || generated.test(text)) continue;

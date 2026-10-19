@@ -23,6 +23,12 @@ test('only core, design and bug prompts are published; private, junk, meta and u
   ]);
 });
 
+test('publishing all keeps every prompt except nonpublic ones', () => {
+  const work = ['core', 'nonpublic', 'junk', 'meta', 'dup', null]
+    .map((label, i) => row(`2026-10-0${7 - i}T00:00:00.000Z`, String(label), label));
+  assert.deepEqual(publicNotes(work, { all: true }).map(note => note.label), [null, 'dup', 'meta', 'junk', 'core']);
+});
+
 test('a resubmitted prompt keeps only its latest version, marking earlier ones dup', () => {
   const ask = 'let us fix the screenshot, the character is floating for some reason';
   const work = [

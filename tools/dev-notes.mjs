@@ -39,8 +39,8 @@ export function markDuplicates(work) {
   return work.map(row => dups.has(row) ? { ...row, label: 'dup' } : row);
 }
 
-export function publicNotes(work) {
-  return work.filter(row => PUBLIC_LABELS.includes(row.label))
+export function publicNotes(work, { all = false } = {}) {
+  return work.filter(row => all ? row.label !== 'nonpublic' : PUBLIC_LABELS.includes(row.label))
     .sort((a, b) => a.date.localeCompare(b.date))
     .map(({ date, msg, label }) => ({ timestamp: date, text: msg, label }));
 }
@@ -51,7 +51,7 @@ const writeJsonl = (file, rows) => writeFileSync(file, rows.map(row => JSON.stri
 function extract(workFile, sources) {
   const meta = resolve('.meta');
   const work = readJsonl(workFile);
-  const piSessions = [...new Set(work.map(row => row.sessionfn).filter(name => name?.startsWith('session-archive/pi/')))].map(name => join(meta, name));
+  const piSessions = [...new Set(work.map(row => row.sessionfn).filter(name => name?.startsWith('sessions/pi/')))].map(name => join(meta, name));
   const prompts = [];
   for (const source of [...sources, ...piSessions]) {
     const directory = statSync(source).isDirectory();
@@ -74,16 +74,18 @@ function dedup(workFile) {
   console.error(`${marked.filter((row, i) => row !== work[i]).length} prompts marked dup in ${workFile}`);
 }
 
-function publish(workFile, output) {
-  const notes = publicNotes(readJsonl(workFile));
+function publish(workFile, output, all) {
+  const notes = publicNotes(readJsonl(workFile), { all });
   writeFileSync(output, JSON.stringify(notes, null, 2) + '\n');
   console.error(`Published ${notes.length} notes to ${output}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const [command, workFile, ...rest] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const all = args.includes('--all');
+  const [command, workFile, ...rest] = args.filter(arg => arg !== '--all');
   if (command === 'extract' && workFile && rest.length) extract(workFile, rest);
   else if (command === 'dedup' && workFile && !rest.length) dedup(workFile);
-  else if (command === 'publish' && workFile && rest.length === 1) publish(workFile, rest[0]);
-  else throw new Error('Usage: node tools/dev-notes.mjs extract WORK.jsonl SOURCE... | dedup WORK.jsonl | publish WORK.jsonl OUTPUT.json');
+  else if (command === 'publish' && workFile && rest.length === 1) publish(workFile, rest[0], all);
+  else throw new Error('Usage: node tools/dev-notes.mjs extract WORK.jsonl SOURCE... | dedup WORK.jsonl | publish [--all] WORK.jsonl OUTPUT.json');
 }

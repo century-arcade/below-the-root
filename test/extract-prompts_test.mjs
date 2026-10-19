@@ -21,6 +21,17 @@ test('Claude extraction accepts human prompts but not tools, assistants, workers
   ]), [{ timestamp, text: 'keep my spelling & <markup>' }]);
 });
 
+test('prompts typed while the agent is mid-turn are kept, but queued task notifications are not', () => {
+  const queued = (prompt, commandMode = 'prompt', kind = 'human') => ({ type: 'attachment', timestamp, attachment: { type: 'queued_command', prompt, commandMode, origin: { kind } } });
+  assert.deepEqual(extractPrompts([
+    queued('oh and the screen turns dark'),
+    queued([{ type: 'text', text: 'as content blocks' }]),
+    queued('<task-notification>done</task-notification>', 'task-notification'),
+    queued('from a worker', 'prompt', 'task-notification'),
+    { ...queued('in a subagent'), isSidechain: true },
+  ]).map(row => row.text), ['oh and the screen turns dark', 'as content blocks']);
+});
+
 test('command wrappers and paste markers retain the human input, not harness markup', () => {
   assert.deepEqual(extractPrompts([
     human('<command-message>blog</command-message><command-name>/blog</command-name><command-args>my subject</command-args>'),
