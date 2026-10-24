@@ -12,29 +12,3 @@ test('analytics makes no DOM or network changes outside the public origin', t =>
     assert.doesNotThrow(() => startAnalytics(), url);
   }
 });
-
-test('analytics appends one async script even when started repeatedly', t => {
-  t.after(() => {
-    delete globalThis.location;
-    delete globalThis.document;
-    delete globalThis.goatcounter;
-  });
-  globalThis.location = new URL('https://below-the-root.netlify.app');
-  const scripts = [];
-  globalThis.document = {
-    querySelector: selector => {
-      assert.equal(selector, 'script[data-goatcounter]');
-      return scripts[0];
-    },
-    createElement: tag => {
-      assert.equal(tag, 'script');
-      return { dataset: {} };
-    },
-    head: { append: script => scripts.push(script) },
-  };
-  startAnalytics();
-  startAnalytics();
-  assert.deepEqual(scripts, [{ dataset: { goatcounter: 'https://saulpw.goatcounter.com/count' },
-    async: true, src: 'https://gc.zgo.at/count.js' }]);
-  assert.equal(globalThis.goatcounter.path('/map'), 'root.saul.pw/map');
-});

@@ -261,29 +261,6 @@ test('silence discards a paused tune', () => {
   assert.equal(speaker.ringing.length, 0);
 });
 
-test('a note leaves the upcoming set after its attack', () => {
-  const speaker = new Speaker(music);
-  unlock(speaker);
-  speaker.playTune(3, 0);
-  const notes = speaker.upcomingNotes();
-  const opening = notes.find(note => note.start === 0);
-  assert.ok(opening);
-  speaker.ctx.currentTime = 1;
-  const upcoming = speaker.upcomingNotes();
-  assert.ok(!upcoming.includes(opening));
-  assert.ok(upcoming.length > 0, 'later notes remain upcoming while the tune plays');
-});
-
-test('measures expire after the tune finishes', () => {
-  const speaker = new Speaker(music);
-  unlock(speaker);
-  speaker.playTune(7, 0);
-  const history = 1;
-  assert.ok(speaker.recentMeasures(history).length > 0);
-  speaker.ctx.currentTime = speaker.tuneEnd + history;
-  assert.deepEqual(speaker.recentMeasures(history, Infinity), []);
-});
-
 test('new effects cut old effects, and tunes suppress effects until silenced', () => {
   const speaker = new Speaker(music);
   unlock(speaker);

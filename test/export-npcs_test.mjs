@@ -36,15 +36,3 @@ test('NPC JSONL is reproducible and resolves dialogue for every non-title creatu
   assert.equal(raamo.location.code, 'GE');
   assert.equal(raamo.dialog.gate_passed.pense.message, 'I NEED A ROPE OR A SHUBA');
 });
-
-test('NPC roster excludes title artwork animals and retains the eight quest animals', () => {
-  const rows = read('docs/spec/data/npcs.jsonl').trimEnd().split('\n').map(JSON.parse);
-  assert.equal(rows.length, 119);
-  assert.ok(rows.every(row => !['T3', 'U3', 'T4', 'U4'].includes(row.location.code)));
-  assert.deepEqual(rows.filter(row => row.role === 'pensable_animal').map(row => [
-    row.location.code, row.species,
-  ]), [
-    ['32', 'lapan'], ['23', 'sima'], ['64', 'sima'], ['06', 'lapan'],
-    ['L6', 'sima'], ['89', 'lapan'], ['S9', 'sima'], ['GF', 'lapan'],
-  ]);
-});

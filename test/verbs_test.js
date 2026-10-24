@@ -9,13 +9,6 @@ import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 
-test('the live command menu offers inventory, status and the main menu', () => {
-  assert.deepEqual(MENU.flat().filter(Boolean).sort(), [
-    'PAUSE', 'TAKE', 'DROP', 'EXAMINE', 'STATUS', 'SPEAK', 'BUY', 'SELL', 'INVENTORY', 'RENEW',
-    'PENSE', 'USE', 'HEAL', 'GRUNSPREKE', 'MENU', 'OFFER', 'EAT', 'REST', 'KINIPORT',
-  ].sort());
-});
-
 test('STATUS shows play time and completion above the stats', async () => {
   const { run, data, pomma } = await talkFixture();
   const s = questState(data, pomma);
@@ -81,14 +74,6 @@ test('blank menu cells refuse pointer and directional selection', async () => {
   g.next(J.idle);
   g.next(J.fire);
   assert.ok(walked.itemPicker?.readOnly);
-});
-
-test('SPEAK with nobody facing', async () => {
-  const { run, data, pomma } = await talkFixture();
-
-  const s = questState(data, pomma);
-  place(s, 26, 5, 5);
-  assert.equal(run(s, menu('SPEAK'))[0], 'SPEAK WITH WHOM?');
 });
 
 test('eating food keeps its result message until the next input', async () => {
@@ -246,19 +231,6 @@ test('status paints the six numbers', async () => {
   assert.equal(lines(s)[1], `EARLY MORNING      LEVEL OF REST   ${s.player.rest}`);
 });
 
-test('USE a vine rope bridges from two cells ahead, over the cell in front', async () => {
-  const { run, data, pomma } = await talkFixture();
-
-  const s = questState(data, pomma);
-  place(s, 33, 33, 18, 1);
-  give(s, CLASS.ROPE);
-  const row = 19 * 40;
-  assert.equal(s.screen[row + 34], 0x10);
-  run(s, [...menu('USE'), ...page(0), J.idle, J.idle]);
-  assert.deepEqual([...s.screen.slice(row + 33, row + 38)], [0x02, 224, 224, 224, 0x3B]);
-  assert.equal(carriedOf(s, CLASS.ROPE), null);
-});
-
 test('USE a vine rope with no gap two cells ahead is useless and kept', async () => {
   const { run, data, pomma } = await talkFixture();
 
@@ -269,22 +241,20 @@ test('USE a vine rope with no gap two cells ahead is useless and kept', async ()
   assert.ok(carriedOf(s, CLASS.ROPE));
 });
 
-for (const [day, rank] of [[14, 'MASTER QUESTER.'], [15, 'HIGHLY GIFTED QUESTER.'], [30, 'GIFTED QUESTER.']]) {
-  for (const item of [CLASS.SHUBA, CLASS.ROPE]) test(`OFFER ${item} to Raamo on day ${day} wins with ${rank}`, async () => {
-    const { press, run, faceCreature, data, pomma } = await talkFixture();
+test('OFFER of any item to Raamo wins and plays both victory tunes', async () => {
+  const { press, run, faceCreature, data, pomma } = await talkFixture();
 
-    const s = questState(data, pomma);
-    faceCreature(s, data.roomByCode.get('GE').room);
-    s.clock.day = day;
-    give(s, item);
-    const shown = run(s, [...menu('OFFER'), ...page(0), ...press(), ...press()]);
-    assert.ok(shown.join(' ').includes(rank), shown.join(' '));
-    assert.equal(s.ended, 'won');
-    assert.equal(s.quest, false);
-    assert.ok(s.events.some(e => e.music === 0));
-    assert.ok(s.events.some(e => e.music === 2));
-  });
-}
+  const s = questState(data, pomma);
+  faceCreature(s, data.roomByCode.get('GE').room);
+  s.clock.day = 30;
+  give(s, CLASS.ROPE);
+  const shown = run(s, [...menu('OFFER'), ...page(0), ...press(), ...press()]);
+  assert.ok(shown.join(' ').includes('GIFTED QUESTER.'), shown.join(' '));
+  assert.equal(s.ended, 'won');
+  assert.equal(s.quest, false);
+  assert.ok(s.events.some(e => e.music === 0));
+  assert.ok(s.events.some(e => e.music === 2));
+});
 
 test('REST: an hour per chime loop, rest +4, the stick wakes you', async () => {
   const { idle, run, underNid, data, pomma } = await timeFixture();

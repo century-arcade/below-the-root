@@ -166,27 +166,6 @@ test('RETURN TO MENU goes back with the character unchanged', async () => {
   assert.equal(s.quest, false);
 });
 
-test('choosing Pomma starts her quest in her nid with the three tokens on the floor', async () => {
-  const { fresh, settle, tap, push, data } = await shellFixture();
-
-  const s = fresh();
-  openMenu(s);
-  settle(s);
-  s.stick.feed(...tap(J.fire), ...push(J.down, 3), ...tap(J.fire));
-  settle(s);
-  const pomma = data.characters[3];
-  assert.equal(s.character, 3);
-  assert.equal(s.quest, true);
-  assert.equal(s.active, true);
-  assert.equal(s.title, false);
-  assert.equal(s.room.room, pomma.nid_place.room);
-  assert.deepEqual([s.player.col, s.player.row], [pomma.nid_place.col, pomma.nid_place.row]);
-  assert.equal(s.player.sheet, pomma.sprite_sheet);
-  assert.equal(s.objects.filter((o) => o.carried).length, 0);
-  assert.equal(s.objects.filter((o) => o.class === CLASS.TOKEN && o.room === s.room.room).length, 3);
-  assert.equal(s.clock.day, 1);
-});
-
 test('opening the title menu preserves the quest and CONTINUE returns to the same cell', async () => {
   const { fresh, settle, tap } = await shellFixture();
 

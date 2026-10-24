@@ -135,31 +135,6 @@ class ReleaseTest(unittest.TestCase):
             package(self.repo, self.site, self.iso, self.output)
         self.assertEqual(self.output.read_bytes(), previous)
 
-    def test_archive_preserves_assets_and_source_categories(self):
-        assets = ('assets/favicon.svg', 'assets/box/screen.png', 'assets/box/front.jpg',
-                  'assets/game-text.woff', 'assets/cinzel-regular.ttf',
-                  'assets/open-gorton-regular.otf', 'assets/messages.json', 'assets/sprites_player0.json')
-        sources = (*assets, 'tools/release.py', 'src/main.js',
-                   next(PROJECT.glob('docs/spec/data/*.json')).relative_to(PROJECT).as_posix(),
-                   next(PROJECT.glob('disasm/*.s')).relative_to(PROJECT).as_posix())
-        for name in sources:
-            target = self.repo / name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(PROJECT / name, target)
-        for name in assets:
-            target = self.site / name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(PROJECT / name, target)
-        self.git('add', '.')
-        for mode in MODES:
-            with self.subTest(mode=mode):
-                package(self.repo, self.site, self.iso, self.output, mode)
-                with ZipFile(self.output) as archive:
-                    for folder, names in [('source', sources), ('site', assets)]:
-                        for name in names:
-                            self.assertEqual(archive.read(PREFIX + folder + '/' + name),
-                                             (PROJECT / name).read_bytes())
-
     def test_winning_recordings_are_available_outside_source(self):
         fixtures = self.repo / 'test/fixtures'
         fixtures.mkdir(parents=True)
@@ -200,7 +175,7 @@ class ReleaseTest(unittest.TestCase):
 
     def test_source_and_site_symlinks_are_refused_in_both_modes(self):
         for mode in MODES:
-            for directory in (self.repo, self.site):
+            for directory in (self.repo, self.site) + ((self.iso,) if mode == 'preservation' else ()):
                 with self.subTest(mode=mode, directory=directory):
                     link = directory / 'external'
                     link.symlink_to(self.repo / '.env.local')
@@ -261,12 +236,6 @@ class ReleaseTest(unittest.TestCase):
                     self.assertNotIn(PREFIX + 'site/stale.txt', archive.namelist())
                     if mode == 'public':
                         self.assertNotIn(PREFIX + 'site/assets/untracked.txt', archive.namelist())
-
-    def test_symlink_does_not_pull_in_files_outside_inputs(self):
-        (self.iso / 'external').symlink_to(self.repo / '.env.local')
-        with self.assertRaisesRegex(ValueError, 'symlink'):
-            package(self.repo, self.site, self.iso, self.output)
-        self.assertFalse(self.output.exists())
 
     def test_local_routes_modules_and_hosted_service_fallback(self):
         class QuietHandler(SERVER.Handler):

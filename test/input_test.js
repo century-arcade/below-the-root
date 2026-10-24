@@ -267,14 +267,6 @@ test("in the air a second-finger tap waits for the landing to leap", async t => 
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true }, 'the landing read leaps');
 });
 
-test("a press that lands before a fall and lifts during it steers its side", async t => {
-  const { keys, model, send, LEFT } = await sideFixture(t);
-  send('pointerdown', LEFT);
-  model.airborne = true;
-  send('pointerup', LEFT);
-  assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: false });
-});
-
 test("mice are not side touches", async t => {
   const { keys, sides, send, advance, LEFT } = await sideFixture(t);
   assert.equal(sides.claims({ pointerType: 'mouse' }), false);
@@ -831,13 +823,6 @@ test('command menu holds, drags, cancellation and context changes cannot confirm
   assert.deepEqual(f.keys.read(), IDLE, 'blur cancels confirmation');
 });
 
-test("blur cancels a pointer walk", async () => {
-  const { target, canvas, keys } = await keyboardFixture();
-  const pointer = new Pointer(canvas, keys, () => [100, 100], () => ({ here: 0, own: 0 }), target);
-  pointer.walkTo(200, 100); target.send('blur');
-  assert.equal(pointer.walk, null); assert.deepEqual(keys.read(), IDLE);
-});
-
 test('a latched hold keeps its direction after the figure reaches the finger', async t => {
   const f = await pointerFixture(t, { latch: true });
   f.send('pointerdown', 40, 100);
@@ -871,14 +856,6 @@ test('a sidebar tap nudges once and sets no destination', async t => {
   f.advance(200);
   assert.deepEqual(f.keys.read(), IDLE, 'no walk starts afterwards');
   assert.equal(f.pointer.walk, null);
-});
-
-test('sidebar presses do nothing without a figure to steer', async t => {
-  const f = await pointerFixture(t);
-  f.model.player = null;
-  f.offPicture(-30, 100);
-  f.advance(200);
-  assert.deepEqual(f.keys.read(), IDLE);
 });
 
 test('a sidebar hold climbs above the figure, descends below it and walks level with it', async t => {

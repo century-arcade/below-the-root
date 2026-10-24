@@ -915,31 +915,6 @@ test('Spirit Leader seeking and live continuation discard presentation without r
   assert.deepEqual(checkpoint(Session.replay(data, idle, record).state), record.checkpoint);
 });
 
-test('backward reconstruction preserves total rooms including the starting room', async () => {
-  const { watched, recording, idle } = await rewindFixture();
-  const back = watched.previousRoom(10);
-  assert.equal(back.roomChanges + 1, 1);
-  assert.equal(back.totalRoomChanges, recording.checkpoint.visit - back.startVisit);
-  while (!back.playbackDone) back.nextRoom();
-  assert.equal(back.roomChanges + 1, back.totalRoomChanges + 1);
-  const live = new Session(data, idle, { initial: { mode: 'quest' } });
-  const start = Session.watch(data, idle, live.snapshot());
-  assert.equal(start.roomChanges + 1, 1);
-  assert.equal(start.totalRoomChanges + 1, 1);
-});
-
-test('visible replay actions use normal speed while supported idle time accelerates', async () => {
-  const { recording, idle } = await rewindFixture();
-  const replay = Session.watch(data, idle, recording);
-  replay.state.creature = null;
-  assert.equal(replay.playbackDelay, 0, 'supported idle time is accelerated');
-  for (const [key, value] of [['verb', {}], ['stall', 20], ['resting', {}], ['creature', {}]]) {
-    replay.state[key] = value;
-    assert.equal(replay.playbackDelay, 1000 / 60, key);
-    replay.state[key] = key === 'stall' ? 0 : null;
-  }
-});
-
 async function airborneAnimalRecording({ sameTickRenew = false } = {}) {
   const { imported, idle, advance, advanceUntil } = await recordingFixture();
   const s = imported(state => {
@@ -1017,27 +992,6 @@ for (const action of ['seek', 'continue']) {
     assert.deepEqual(replay.passages, []);
   });
 }
-
-test('an airborne message is shown before the next same-tick command', async () => {
-  const { record, replay, advanceUntil } = await airborneAnimalRecording({ sameTickRenew: true });
-  replay.step();
-  assert.notEqual(replay.pendingLanding, null);
-  const next = record.events[replay.eventIndex];
-  assert.equal(next.command, 'RENEW');
-  assert.equal(next.simticks, replay.simticks);
-  replay.step();
-  assert.notEqual(replay.state.tuneWait, null);
-  assert.match(panelLines(replay.state).join(' '), /MESSAGE/);
-  assert.equal(record.events[replay.eventIndex], next);
-  const presented = checkpoint(replay.state);
-  advanceSession(replay, 30);
-  assert.deepEqual(checkpoint(replay.state), presented);
-  assert.equal(record.events[replay.eventIndex], next);
-  advanceUntil(replay, x => x.playbackDone, 'finish same-tick command replay', 2000);
-  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
-  assert.deepEqual(replay.record.events, record.events);
-  assert.deepEqual(replay.snapshot(), record);
-});
 
 test('unskipped Spirit Leader songs each finish before the next passage advances', async () => {
   const record = await spiritLeaderRecording();

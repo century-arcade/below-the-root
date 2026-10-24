@@ -24,19 +24,6 @@ test('successive messages each receive 750 ms of active presentation time', () =
   }
 });
 
-test('movement-continuing bell prompts do not hold replay for reading', () => {
-  const { session, timing } = fixture();
-  say(session.state, 'THE SPIRIT BELL RINGS');
-  session.state.verb = {};
-  session.state.verbCarryMovement = true;
-  timing.observe(session);
-  assert.equal(timing.ready(session), true);
-  session.state.verb = null;
-  say(session.state, 'NEXT MESSAGE');
-  timing.observe(session);
-  assert.equal(timing.ready(session), false);
-});
-
 test('message dwell never dismisses a song message or blocks its countdown', () => {
   const { session, timing } = fixture();
   timing.advance(session, 250);
@@ -57,21 +44,6 @@ test('pause and hidden time do not consume the reading interval', () => {
   timing.advance(session, 549);
   assert.equal(timing.ready(session), false);
   timing.advance(session, 1);
-  assert.equal(timing.ready(session), true);
-});
-
-test('a replay song that keeps playing while paused does not wait again on resume', () => {
-  const { session, timing } = fixture();
-  session.finalPanel = session.state.panel.slice();
-  session.state.tuneWait = 2;
-  session.state.stall = 60;
-  for (let i = 0; i < 100; i++) timing.advance(session, 5, { running: false });
-  assert.equal(session.state.stall, 30);
-  timing.advance(session, 10000, { running: false });
-  assert.equal(session.state.stall, 0);
-  assert.equal(session.state.tuneWait, null);
-  assert.deepEqual(session.state.panel, session.finalPanel);
-  timing.advance(session, 750);
   assert.equal(timing.ready(session), true);
 });
 

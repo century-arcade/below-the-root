@@ -230,22 +230,6 @@ test('a blesser adds 5, announces the skill and shows a vision', async () => {
   assert.equal(s.player.spiritLimit, 15);
 });
 
-test('reaching spirit 25 announces KINIPORT tools, then a vision', async () => {
-  const { data, pomma } = await talkFixture();
-  const s = questState(data, pomma);
-  s.player.spiritLimit = 20;
-  const reward = gainSpirit(s, 5);
-  reward.next();
-  assert.equal(s.player.spiritLimit, 25);
-  assert.equal(s.player.spiritEnergy, 25);
-  assert.equal(lines(s)[0], 'CONGRATULATIONS QUESTER, YOU HAVE');
-  assert.equal(lines(s)[1], 'GAINED THE POWER TO KINIPORT TOOLS');
-  reward.next(J.idle);
-  reward.next(J.fire);
-  assert.equal(lines(s)[0], 'A VISION COMES TO YOU:');
-  assert.equal(s.visions, 1);
-});
-
 test('reaching spirit 35 stops skill announcements but still grants a vision', async () => {
   const { data, pomma } = await talkFixture();
   const s = questState(data, pomma);

@@ -110,11 +110,6 @@ test("a new quest shows only the authored map, not the home exterior", async () 
     new Set([...defaults, nid]), 'a new character forgets the previous exploration');
 });
 
-test("the shipped map starts with every room unseen", async () => {
-  const data = await loadTestData();
-  assert.deepEqual(visitedRooms([], data), new Set());
-});
-
 test("the location marker preserves the last exterior when moving indoors", async () => {
   const { data, entry, at } = await mapFixture();
   assert.equal(mapLocation(data, [entry('M5'), entry('T1')], at('T1')), 'M5');

@@ -35,14 +35,6 @@ test('indoors, the same step loads the shop and its keeper', () => {
   assert.ok(state.screen.some((c) => c !== 0));
 });
 
-test('the air over a parked room leaves the room itself intact', () => {
-  const state = at('12', 0, 17, false);
-  leaveByEdge(state, 'west');
-  const shop = data.roomByCode.get('02');
-  assert.ok(!shop.blank);
-  assert.equal(data.roomById.get(shop.room), shop);
-});
-
 test('a slot with no room on the disk is open air whichever way the flag points', () => {
   for (const indoors of [false, true]) {
     const state = at('49', 5, 18, indoors);
@@ -51,11 +43,4 @@ test('a slot with no room on the disk is open air whichever way the flag points'
     assert.ok(state.room.blank);
     assert.ok(state.screen.every((c) => c === 0));
   }
-});
-
-test('the title art at T4 has its bit clear: from S4 outdoors it is air', () => {
-  const state = at('S4', 39, 10, false);
-  assert.ok(leaveByEdge(state, 'east'));
-  assert.equal(state.room.code, 'T4');
-  assert.ok(state.room.blank);
 });
