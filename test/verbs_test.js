@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { J, talkFixture, questState, menuReads as menu, place, lines, give, stick as reader, page, timeFixture } from './helpers.js';
 import { MENU, menuChoiceAt, highlightMenuChoice, runMenu, paintStatus } from '../src/verbs.js';
 import { CLASS } from '../src/data.js';
-import { startVerb, tick } from '../src/game.js';
+import { startVerb, tick, openCommandMenu } from '../src/game.js';
 import { shellFrame } from '../src/shell.js';
 import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
@@ -32,6 +32,19 @@ test('MENU leaves the quest for the main menu, which can continue it', async () 
   run(s, menu('MENU'));
   assert.equal(s.active, false);
   assert.equal(s.ended, 'menu');
+  shellFrame(s);
+  assert.equal(s.title, true);
+  assert.ok(s.quest);
+});
+
+test('MENU chosen from the F-opened command menu reaches the main menu', async () => {
+  const { data, pomma } = await talkFixture();
+  const s = questState(data, pomma);
+  const script = [...menu('MENU')];
+  s.input = reader(() => script.shift() ?? J.idle);
+  s.active = true;
+  assert.ok(openCommandMenu(s));
+  for (let i = 0; s.verb && i < 1000; i++) tick(s);
   shellFrame(s);
   assert.equal(s.title, true);
   assert.ok(s.quest);

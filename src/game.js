@@ -209,7 +209,7 @@ function endVerb(state) {
   state.commands?.handoff({ movement: !state.verbCarryMovement, unread: state.verbUnread });
   if (state.timeUp && !state.stop && !state.ended) state.stop = { reason: 'timeout' };
   if (state.stop) return resolveStop(state);
-  if (!state.ended) state.active = true;
+  state.active = !state.ended;
 }
 
 export function canOpenCommandMenu(state) {
