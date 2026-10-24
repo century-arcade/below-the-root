@@ -843,57 +843,77 @@ async function spiritLeaderRecording() {
   return s.snapshot();
 }
 
-test('Spirit Leader replay presents two songs and held skip dismisses only one', async () => {
+test('Spirit Leader replay songs finish unskipped, and held or queued viewer presses each skip one', async () => {
   const record = await spiritLeaderRecording();
-  let fire = false;
-  let handoffs = 0;
-  const replay = Session.watch(data, { read: () => ({ ...IDLE, fire }), handoff: () => handoffs++ }, record);
-  replay.skippable = true;
-  replay.state.events.length = 0;
-  replay.step();
-  assert.match(panelLines(replay.state).join(' '), /CONGRATULATIONS/);
-  assert.equal(replay.state.events.filter(e => 'music' in e).length, 1);
-  assert.equal(replay.state.stall, data.music.tunes[replay.state.tuneWait].frames);
-  const afterCommand = checkpoint(replay.state);
-  replay.state.events.length = 0;
-  fire = true;
-  replay.step();
-  assert.equal(replay.state.tuneWait, null);
-  replay.step();
-  assert.match(panelLines(replay.state).join(' '), /A VISION COMES TO YOU/);
-  const song = replay.state.tuneWait;
-  const frames = replay.state.stall;
-  advanceSession(replay, 10);
-  assert.equal(replay.state.tuneWait, song);
-  assert.equal(replay.state.stall, frames - 10);
-  assert.deepEqual(checkpoint(replay.state), afterCommand);
-  fire = false;
-  replay.step();
-  fire = true;
-  replay.step();
-  assert.equal(replay.state.tuneWait, null);
-  assert.equal(handoffs, 0, 'viewer handoff must not erase separately queued presses');
-  while (!replay.playbackDone) advanceSession(replay);
-  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
-  assert.deepEqual(replay.record.events, record.events);
-  assert.deepEqual(replay.snapshot(), record);
-});
-
-test('separately queued viewer presses can skip each Spirit Leader song', async () => {
-  const record = await spiritLeaderRecording();
-  const keys = new Keyboard({ addEventListener() {} });
-  const replay = Session.watch(data, keys, record);
-  replay.skippable = true;
-  replay.step();
-  keys.tap('fire');
-  keys.tap('fire');
-  replay.step();
-  assert.equal(replay.state.tuneWait, null);
-  replay.step();
-  assert.notEqual(replay.state.tuneWait, null);
-  replay.step();
-  assert.equal(replay.state.tuneWait, null);
-  assert.equal(replay.simticks, 0);
+  {
+    const replay = Session.watch(data, { read: () => IDLE }, record);
+    replay.step();
+    for (const text of [/CONGRATULATIONS/, /A VISION COMES TO YOU/]) {
+      const panel = panelLines(replay.state);
+      assert.match(panel.join(' '), text);
+      const frames = replay.state.stall;
+      assert.ok(frames > 0);
+      advanceSession(replay, frames - 1);
+      assert.notEqual(replay.state.tuneWait, null);
+      assert.deepEqual(panelLines(replay.state), panel);
+      assert.equal(replay.simticks, 0);
+      replay.step();
+      assert.equal(replay.state.tuneWait, null);
+      assert.deepEqual(panelLines(replay.state), panel);
+      replay.step();
+    }
+    while (!replay.playbackDone) advanceSession(replay);
+    assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+  }
+  {
+    let fire = false;
+    let handoffs = 0;
+    const replay = Session.watch(data, { read: () => ({ ...IDLE, fire }), handoff: () => handoffs++ }, record);
+    replay.skippable = true;
+    replay.state.events.length = 0;
+    replay.step();
+    assert.match(panelLines(replay.state).join(' '), /CONGRATULATIONS/);
+    assert.equal(replay.state.events.filter(e => 'music' in e).length, 1);
+    assert.equal(replay.state.stall, data.music.tunes[replay.state.tuneWait].frames);
+    const afterCommand = checkpoint(replay.state);
+    replay.state.events.length = 0;
+    fire = true;
+    replay.step();
+    assert.equal(replay.state.tuneWait, null);
+    replay.step();
+    assert.match(panelLines(replay.state).join(' '), /A VISION COMES TO YOU/);
+    const song = replay.state.tuneWait;
+    const frames = replay.state.stall;
+    advanceSession(replay, 10);
+    assert.equal(replay.state.tuneWait, song);
+    assert.equal(replay.state.stall, frames - 10);
+    assert.deepEqual(checkpoint(replay.state), afterCommand);
+    fire = false;
+    replay.step();
+    fire = true;
+    replay.step();
+    assert.equal(replay.state.tuneWait, null);
+    assert.equal(handoffs, 0, 'viewer handoff must not erase separately queued presses');
+    while (!replay.playbackDone) advanceSession(replay);
+    assert.deepEqual(checkpoint(replay.state), record.checkpoint);
+    assert.deepEqual(replay.record.events, record.events);
+    assert.deepEqual(replay.snapshot(), record);
+  }
+  {
+    const keys = new Keyboard({ addEventListener() {} });
+    const replay = Session.watch(data, keys, record);
+    replay.skippable = true;
+    replay.step();
+    keys.tap('fire');
+    keys.tap('fire');
+    replay.step();
+    assert.equal(replay.state.tuneWait, null);
+    replay.step();
+    assert.notEqual(replay.state.tuneWait, null);
+    replay.step();
+    assert.equal(replay.state.tuneWait, null);
+    assert.equal(replay.simticks, 0);
+  }
 });
 
 test('Spirit Leader seeking and live continuation discard presentation without repeating effects', async () => {
@@ -993,24 +1013,3 @@ for (const action of ['seek', 'continue']) {
   });
 }
 
-test('unskipped Spirit Leader songs each finish before the next passage advances', async () => {
-  const record = await spiritLeaderRecording();
-  const replay = Session.watch(data, { read: () => IDLE }, record);
-  replay.step();
-  for (const text of [/CONGRATULATIONS/, /A VISION COMES TO YOU/]) {
-    const panel = panelLines(replay.state);
-    assert.match(panel.join(' '), text);
-    const frames = replay.state.stall;
-    assert.ok(frames > 0);
-    advanceSession(replay, frames - 1);
-    assert.notEqual(replay.state.tuneWait, null);
-    assert.deepEqual(panelLines(replay.state), panel);
-    assert.equal(replay.simticks, 0);
-    replay.step();
-    assert.equal(replay.state.tuneWait, null);
-    assert.deepEqual(panelLines(replay.state), panel);
-    replay.step();
-  }
-  while (!replay.playbackDone) advanceSession(replay);
-  assert.deepEqual(checkpoint(replay.state), record.checkpoint);
-});

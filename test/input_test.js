@@ -385,24 +385,7 @@ test('direct mouse choosers highlight on hover and select an unhighlighted click
   assert.equal(f.keys.read('press').fire, false);
 });
 
-for (const mouseDirect of [true, false]) test(`mouse long chooser press ${mouseDirect ? 'with direct selection confirms once' : 'on a command menu does not confirm'}`, async t => {
-  const f = await pointerFixture(t);
-  f.model.chooser = {
-    id: {}, mouseDirect, selected: { col: 0, row: 0 },
-    hit: () => ({ col: 0, row: 0 }),
-    highlight(choice) { this.selected = choice; },
-  };
-  const event = { button: 0, pointerId: 1, pointerType: 'mouse',
-    clientX: 100, clientY: 100, preventDefault() {} };
-  f.canvas.send('pointerdown', event);
-  f.advance(200);
-  assert.equal(f.keys.read('press').fire, false);
-  f.canvas.send('pointerup', event);
-  assert.equal(f.keys.read('press').fire, mouseDirect);
-  assert.equal(f.keys.read('press').fire, false);
-});
-
-test('mouse direct chooser drag cannot confirm even after returning to its first cell', async t => {
+test('a direct mouse chooser confirms a long press once but never a drag back to its first cell', async t => {
   const f = await pointerFixture(t);
   f.model.chooser = {
     id: {}, mouseDirect: true, selected: { col: 0, row: 0 },
@@ -413,6 +396,12 @@ test('mouse direct chooser drag cannot confirm even after returning to its first
     button: 0, pointerId: 1, pointerType: 'mouse',
     clientX: x, clientY: 100, preventDefault() {},
   });
+  send('pointerdown');
+  f.advance(200);
+  assert.equal(f.keys.read('press').fire, false);
+  send('pointerup');
+  assert.equal(f.keys.read('press').fire, true);
+  assert.equal(f.keys.read('press').fire, false);
   send('pointerdown');
   send('pointermove', 130);
   assert.equal(f.model.chooser.selected.col, 1);
@@ -667,30 +656,21 @@ test('a tap twenty pixels beyond the figure waits, then walks', async t => {
   assert.ok(f.pointer.walk);
 });
 
-for (const [offset, stamina, leap] of [[24, 15, true], [-24, 15, true], [80, 30, false],
-  [32, 15, true], [40, 15, false], [40, 20, true], [40, 30, true], [48, 30, true], [49, 30, false]]) {
-  test(`double tap at offset ${offset} with stamina ${stamina} ${leap ? 'leaps' : 'walks'}`, async t => {
+for (const [dx, dy, stamina, leap] of [[24, 0, 15, true], [-24, 0, 15, true], [80, 0, 30, false],
+  [32, 0, 15, true], [40, 0, 15, false], [40, 0, 20, true], [40, 0, 30, true], [48, 0, 30, true], [49, 0, 30, false],
+  [32, -16, 20, true], [32, 16, 20, true], [32, -17, 20, false], [32, 17, 20, false]]) {
+  test(`double tap at (${dx}, ${dy}) with stamina ${stamina} ${leap ? 'leaps' : 'walks'}`, async t => {
     const f = await pointerFixture(t);
     f.model.player.stamina = stamina;
-    f.tap(100 + offset, 100); f.tap(100 + offset, 100);
-    const dx = Math.sign(offset);
-    if (leap && dx < 0) assert.deepEqual(f.keys.read(), { ...IDLE, dx }, 'turn before leaping');
-    assert.deepEqual(f.keys.read(), { dx, dy: 0, fire: leap });
+    f.tap(100 + dx, 100 + dy); f.tap(100 + dx, 100 + dy);
+    if (leap && dx < 0) assert.deepEqual(f.keys.read(), { ...IDLE, dx: -1 }, 'turn before leaping');
+    assert.deepEqual(f.keys.read(), { dx: Math.sign(dx), dy: leap ? 0 : Math.sign(dy), fire: leap });
     if (leap) {
       assert.deepEqual(f.keys.read(), IDLE, 'exactly one leap gesture');
       assert.equal(f.pointer.walk, null);
       f.advance(250);
       assert.deepEqual(f.keys.read(), IDLE, 'no delayed first-tap walk');
     } else assert.ok(f.pointer.walk);
-  });
-}
-
-for (const [dy, leap] of [[-16, true], [16, true], [-17, false], [17, false]]) {
-  test(`double tap ${Math.abs(dy)} pixels ${dy < 0 ? 'above' : 'below'} ${leap ? 'leaps' : 'walks'}`, async t => {
-    const f = await pointerFixture(t);
-    f.tap(132, 100 + dy); f.tap(132, 100 + dy);
-    assert.equal(f.keys.read().fire, leap);
-    assert.equal(!!f.pointer.walk, !leap);
   });
 }
 
@@ -823,28 +803,22 @@ test('command menu holds, drags, cancellation and context changes cannot confirm
   assert.deepEqual(f.keys.read(), IDLE, 'blur cancels confirmation');
 });
 
-test('a latched hold keeps its direction after the figure reaches the finger', async t => {
-  const f = await pointerFixture(t, { latch: true });
+for (const latch of [true, false]) test(`${latch ? 'a latched hold keeps its direction' : 'an unlatched hold stops'} once the figure reaches the finger`, async t => {
+  const f = await pointerFixture(t, { latch });
   f.send('pointerdown', 40, 100);
   f.advance(150);
   assert.equal(f.keys.read().dx, -1);
   f.model.anchor = [40, 100];
   f.send('pointermove', 42, 101);
+  if (!latch) {
+    assert.equal(f.keys.read().dx, 0);
+    return;
+  }
   assert.equal(f.keys.read().dx, -1, 'still walking left at the finger');
   f.send('pointermove', 42, 80);
   assert.deepEqual([f.keys.read().dx, f.keys.read().dy], [0, -1], 'a clear drag up re-latches');
   f.send('pointerup', 42, 80);
   assert.deepEqual(f.keys.read(), IDLE);
-});
-
-test('an unlatched hold stops once the figure reaches the finger', async t => {
-  const f = await pointerFixture(t);
-  f.send('pointerdown', 40, 100);
-  f.advance(150);
-  assert.equal(f.keys.read().dx, -1);
-  f.model.anchor = [40, 100];
-  f.send('pointermove', 42, 101);
-  assert.equal(f.keys.read().dx, 0);
 });
 
 test('a sidebar tap nudges once and sets no destination', async t => {

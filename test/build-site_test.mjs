@@ -32,7 +32,7 @@ function headValues(html) {
   return values;
 }
 
-test('a fresh build gives every public page canonical metadata and bundled image targets', t => {
+test('a fresh build gives every public page canonical metadata, bundled image targets and built preload hints', t => {
   const out = outputDirectory(t);
   execFileSync('make', ['build', `BUILD=${out}`], { cwd: root, stdio: 'pipe' });
   const heads = {};
@@ -62,6 +62,15 @@ test('a fresh build gives every public page canonical metadata and bundled image
   }
   assert.deepEqual(heads.index, heads.play);
   assert.equal(new Set(['play', 'resources', 'map'].map(page => heads[page].description)).size, 3);
+  for (const page of ['index', 'play', 'map']) {
+    const html = readFileSync(join(out, `${page}.html`), 'utf8');
+    const hints = [...html.matchAll(/<link rel="(?:modulepreload|preload)" href="([^"]+)"/g)].map(([, href]) => href);
+    for (const href of ['/main.js', '/dev-notes.js', '/data/rooms.json', '/assets/charset_text.json', '/assets/sprites_extras.json']) {
+      assert.ok(hints.includes(href), `${page} hints ${href}`);
+    }
+    for (const href of hints) assert.ok(existsSync(join(out, href)), `${href} is built`);
+  }
+  assert.doesNotMatch(readFileSync(join(out, 'resources.html'), 'utf8'), /preload/);
 });
 
 test('map retains the game markup and only index bootstraps legacy hash routes', t => {
@@ -104,20 +113,6 @@ test('every public page initializes the shared analytics loader once', t => {
     assert.equal(scripts.match(/startAnalytics\(\)/g)?.length, 1);
     assert.doesNotMatch(scripts, /gc\.zgo\.at|goatcounter\.com/);
   }
-});
-
-test('game pages hint every boot module and data file, all present in the build', t => {
-  const out = outputDirectory(t);
-  execFileSync('make', ['build', `BUILD=${out}`], { cwd: root, stdio: 'pipe' });
-  for (const page of ['index', 'play', 'map']) {
-    const html = readFileSync(join(out, `${page}.html`), 'utf8');
-    const hints = [...html.matchAll(/<link rel="(?:modulepreload|preload)" href="([^"]+)"/g)].map(([, href]) => href);
-    for (const href of ['/main.js', '/dev-notes.js', '/data/rooms.json', '/assets/charset_text.json', '/assets/sprites_extras.json']) {
-      assert.ok(hints.includes(href), `${page} hints ${href}`);
-    }
-    for (const href of hints) assert.ok(existsSync(join(out, href)), `${href} is built`);
-  }
-  for (const page of ['resources']) assert.doesNotMatch(readFileSync(join(out, `${page}.html`), 'utf8'), /preload/);
 });
 
 test('dev notes ship as their own fragment, not inside the game pages', t => {

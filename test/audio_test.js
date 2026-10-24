@@ -221,44 +221,40 @@ test('suspend and resume preserve tune progress across repeated holds', () => {
   assert.deepEqual(speaker.paused, { tune: 0, offsetTicks: 180 });
 });
 
-test('suspend and resume do not start an idle or completed tune', () => {
-  const speaker = new Speaker(music);
-  speaker.suspend();
-  speaker.resume();
-  assert.equal(speaker.ctx, null);
-  unlock(speaker);
-  speaker.suspend();
-  speaker.resume();
-  assert.equal(speaker.ringing.length, 0);
-  speaker.playTune(0, 0);
-  speaker.ctx.currentTime = speaker.tuneEnd;
-  speaker.suspend();
-  speaker.resume();
-  assert.equal(speaker.paused, null);
-  assert.equal(speaker.ringing.length, 0);
-});
+test('suspend and resume start nothing for idle, completed, gesture-waiting or silenced tunes', () => {
+  const idle = new Speaker(music);
+  idle.suspend();
+  idle.resume();
+  assert.equal(idle.ctx, null);
+  unlock(idle);
+  idle.suspend();
+  idle.resume();
+  assert.equal(idle.ringing.length, 0);
+  idle.playTune(0, 0);
+  idle.ctx.currentTime = idle.tuneEnd;
+  idle.suspend();
+  idle.resume();
+  assert.equal(idle.paused, null);
+  assert.equal(idle.ringing.length, 0);
 
-test('suspend preserves a tune waiting for the first gesture', () => {
-  const speaker = new Speaker(music);
-  speaker.tune(0, 42);
-  speaker.suspend();
-  speaker.resume();
-  assert.deepEqual(speaker.pending, { tune: 0, tick: 42 });
-  unlock(speaker, 42);
-  assert.equal(speaker.pending, null);
-  assert.equal(speaker.ringing.length, planTune(music, 0).length);
-});
+  const waiting = new Speaker(music);
+  waiting.tune(0, 42);
+  waiting.suspend();
+  waiting.resume();
+  assert.deepEqual(waiting.pending, { tune: 0, tick: 42 });
+  unlock(waiting, 42);
+  assert.equal(waiting.pending, null);
+  assert.equal(waiting.ringing.length, planTune(music, 0).length);
 
-test('silence discards a paused tune', () => {
-  const speaker = new Speaker(music);
-  unlock(speaker);
-  speaker.playTune(0, 0);
-  speaker.ctx.currentTime = 2;
-  speaker.suspend();
-  speaker.silence();
-  assert.equal(speaker.paused, null);
-  speaker.resume();
-  assert.equal(speaker.ringing.length, 0);
+  const silenced = new Speaker(music);
+  unlock(silenced);
+  silenced.playTune(0, 0);
+  silenced.ctx.currentTime = 2;
+  silenced.suspend();
+  silenced.silence();
+  assert.equal(silenced.paused, null);
+  silenced.resume();
+  assert.equal(silenced.ringing.length, 0);
 });
 
 test('new effects cut old effects, and tunes suppress effects until silenced', () => {

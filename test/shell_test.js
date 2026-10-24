@@ -109,7 +109,7 @@ test('a remembered CONTINUE selection resets when no quest remains', async () =>
   assert.match(lines(s).join('\n'), /CHOOSE YOUR PLAYER:/);
 });
 
-test('character select opens on Neric, down cycles through RETURN TO MENU and back', async () => {
+test('character select opens on Neric and cycles through RETURN TO MENU both ways', async () => {
   const { fresh, settle, tap } = await shellFixture();
 
   const s = fresh();
@@ -119,34 +119,14 @@ test('character select opens on Neric, down cycles through RETURN TO MENU and ba
   settle(s);
   assert.match(lines(s)[0].trim(), /^CHOOSE YOUR PLAYER:\s+NERIC$/);
   assert.deepEqual(lines(s).slice(1).map(line => line.trim()), ['', 'A KINDAR-BORN YOUNG MAN', 'STRONG--IMPULSIVE--MODERATE SPIRIT']);
-  const names = ['NERIC'];
-  for (let i = 0; i < 6; i++) {
-    s.stick.feed(...tap(J.down));
+  const cycle = (direction, count) => Array.from({ length: count }, () => {
+    s.stick.feed(...tap(direction));
     settle(s);
-    names.push(lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim());
-  }
-  assert.deepEqual(names, ['NERIC', 'GENAA', 'HERD', 'POMMA', 'CHARN', 'RETURN TO MENU', 'NERIC']);
+    return lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim();
+  });
+  assert.deepEqual(cycle(J.down, 6), ['GENAA', 'HERD', 'POMMA', 'CHARN', 'RETURN TO MENU', 'NERIC']);
   assert.equal(s.active, false);
-});
-
-test('character select cycles backward and wraps', async () => {
-  const { fresh, settle, tap } = await shellFixture();
-
-  const s = fresh();
-  openMenu(s);
-  settle(s);
-  s.stick.feed(...tap(J.fire));
-  settle(s);
-  s.stick.feed(...tap(J.up));
-  settle(s);
-  assert.equal(lines(s)[0].trim(), 'RETURN TO MENU');
-  const names = [];
-  for (let i = 0; i < 5; i++) {
-    s.stick.feed(...tap(J.up));
-    settle(s);
-    names.push(lines(s)[0].trim().replace('CHOOSE YOUR PLAYER:', '').trim());
-  }
-  assert.deepEqual(names, ['CHARN', 'POMMA', 'HERD', 'GENAA', 'NERIC']);
+  assert.deepEqual(cycle(J.up, 6), ['RETURN TO MENU', 'CHARN', 'POMMA', 'HERD', 'GENAA', 'NERIC']);
   s.stick.feed(...tap(J.down), ...tap(J.fire));
   settle(s);
   assert.equal(s.character, 1, 'the trigger chooses Genaa after changing direction');
