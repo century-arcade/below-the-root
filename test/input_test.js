@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { IDLE, Gamepad, Keyboard, DemoInput, Pointer, SideTouch, pressEdge } from '../src/input.js';
+import { IDLE, Gamepad, Keyboard, DemoInput, Pointer, SideTouch, pressEdge, skipsTune } from '../src/input.js';
 
 async function keyboardFixture() {
   class Target {
@@ -366,6 +366,13 @@ test('context keys release their original action after the context changes', asy
   keys.contextKey = () => null;
   keys.map({ key: 'Escape', code: 'Escape' }, true);
   assert.deepEqual(keys.read(), IDLE);
+});
+
+test('any printable key skips a tune except movement and shortcut keys', () => {
+  for (const key of ['f', 'F', ' ', 'Enter', 'x', 'Q', '1', '.']) assert.equal(skipsTune(key), true, key);
+  for (const key of ['ArrowUp', 'w', 'A', 'm', 'H', 'p', 'r', '?', '-', '+', 'Escape', 'Tab', 'Shift', 'F5']) {
+    assert.equal(skipsTune(key), false, key);
+  }
 });
 
 test('direct mouse choosers highlight on hover and select an unhighlighted click', async t => {

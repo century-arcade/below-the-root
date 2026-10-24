@@ -4,7 +4,7 @@ import { figures, canOpenCommandMenu } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
 import { itemChoiceAt, highlightItemChoice } from './inventory.js';
-import { Keyboard, Pointer, SideTouch, Gamepad, isEditing } from './input.js';
+import { Keyboard, Pointer, SideTouch, Gamepad, isEditing, skipsTune } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
 import { setupDebug, downloadRecord } from './debug.js';
@@ -239,6 +239,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   stick.contextKey = key => {
     if (!powered || paused || away() || startupHelp || session.playback) return null;
     if (key === 'Escape' && (state.itemPicker || state.pointer)) return 'cancel';
+    if (state.tuneWait != null && !options.classic && skipsTune(key)) return 'fire';
     return state.itemPicker?.readOnly ? 'fire' : null;
   };
   stick.selectWithF = () => state.title || !!state.verb;

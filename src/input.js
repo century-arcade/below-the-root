@@ -31,6 +31,12 @@ const KEYS = {
   ' ': 'fire', Enter: 'fire', w: 'up', s: 'down', a: 'left', d: 'right',
   W: 'up', S: 'down', A: 'left', D: 'right', f: 'fire', F: 'fire',
 };
+const SHORTCUTS = new Set(['m', 'h', 'p', 'r', '?', '-', '_', '=', '+']);
+
+export function skipsTune(key) {
+  if (KEYS[key]) return KEYS[key] === 'fire';
+  return key.length === 1 && !SHORTCUTS.has(key.toLowerCase());
+}
 
 // Physical transitions and held state share one owner. Consumers choose a policy.
 export class Keyboard {
