@@ -28,7 +28,7 @@ recognition is a separate gesture delay, not keyboard debounce.
 | Jumping and gliding | Preserve the existing direction-plus-trigger and held-trigger mechanics. Door debouncing must not turn all gameplay fire into a single pulse. |
 | KINIPORT source and destination cursor | Continuous arrows/WASD until release or the cursor reaches its allowed boundary. Trigger confirms each selection once; source confirmation cannot also confirm the destination. Escape or a two-finger hold cancels at either stage, moving nothing and spending no spirit. |
 | Command menu, main menu, character and item choosers | Once per press. Both Up and Down work in every chooser; retain each chooser's existing ordering and bounds/wrapping. Command menus also use Left/Right. |
-| Confirming a choice | Once per press. Space, Enter (including numpad Enter), Shift and Control remain trigger aliases. F selects while a chooser/prompt is active. |
+| Confirming a choice | Once per press. Space and Enter (including numpad Enter) remain trigger aliases; modifier keys never trigger. F selects while a chooser/prompt is active. |
 | Command menu opening/closing | F opens it during play; a second fresh F can select. Escape closes it. Existing trigger-plus-Down and pointer menu activation remain available. |
 | Choosing NOTHING/cancelling an item choice | One confirmation finishes cancellation. No extra dismissal press. |
 | Door entry/exit | Once per trigger press; holding cannot shuttle between rooms. A subsequent release/repress allows another transit. |
