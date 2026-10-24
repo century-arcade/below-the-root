@@ -16,11 +16,8 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const data = await loadTestData();
-// stale-wins: these routes walked out of bramble and walls; re-record them
-const STALE_WINS = new Set(['charn-win.json', 'genaa-win.json', 'herd-win.json', 'neric-win.json']);
-const allWinningFixtures = readdirSync(new URL('./fixtures/', import.meta.url))
+const winningFixtures = readdirSync(new URL('./fixtures/', import.meta.url))
   .filter(name => name.endsWith('-win.json')).sort();
-const winningFixtures = allWinningFixtures.filter(name => !STALE_WINS.has(name));
 const fixtureURL = name => new URL(`./fixtures/${name}`, import.meta.url);
 const winningRecords = new Map(winningFixtures.map(name => [name, JSON.parse(readFileSync(fixtureURL(name)))]));
 const winningRecord = name => winningRecords.get(name);
@@ -780,9 +777,8 @@ test('Object KINIPORT records identity even when the right half is selected', as
   saveHere(s);
 });
 
-for (const name of allWinningFixtures) {
-  const skip = STALE_WINS.has(name) && 'stale recording; needs a new winning run';
-  test(`${name} wins, matches its checkpoint and round-trips its snapshot`, { skip }, async () => {
+for (const name of winningFixtures) {
+  test(`${name} wins, matches its checkpoint and round-trips its snapshot`, async () => {
     const record = winningRecord(name);
     const replay = Session.watch(data, { read: () => J.idle }, record);
     while (!replay.playbackDone) replay.nextRoom();
