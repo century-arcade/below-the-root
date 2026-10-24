@@ -13,10 +13,10 @@ import { createMusicTrail } from './music-trail.js';
 import { fitScale, fitCabinet, crtVars, ASPECTS } from './fit.js';
 import { loaderScreen } from './loader.js';
 import { drawMap, warmMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelPixels, wheelZoom } from './map.js';
-import { loadOptions, storeOption } from './options.js';
+import { loadOptions } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
-import { setupDeveloper, GAME_TOOLS } from './header.js';
+import { setupDeveloper, GAME_TOOLS, persistOption } from './header.js';
 import { setupBook, setupPamphlet, BOX, MANUAL } from './book.js';
 import { setupDesk } from './desk.js';
 
@@ -300,10 +300,9 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     volume.value = level;
     volume.setAttribute('aria-valuetext', `${level}%`);
   }
-  const persist = (name, value) => storeOption(localStorage, name, value);
   function setMuted(on) {
     speaker.mute(on);
-    persist('muted', speaker.muted);
+    persistOption('muted', speaker.muted);
     syncVolume();
   }
   const canFullscreen = !!(document.documentElement.requestFullscreen && document.exitFullscreen);
@@ -315,7 +314,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setVolume(level) {
     speaker.setVolume(Math.round(level * 1e10) / 1e10);
     if (speaker.muted) setMuted(false);
-    persist('volume', speaker.volume);
+    persistOption('volume', speaker.volume);
     syncVolume();
   }
   function stepVolume(delta) {
