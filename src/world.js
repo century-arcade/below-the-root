@@ -97,17 +97,32 @@ export function isLadderCentre(state, code) {
   return !!t && t.climbable && t.ladder === 'centre';
 }
 
+function isShown(state, o) {
+  return !state.room.blank && o.room === state.room.room && o.exists && !o.carried;
+}
+
+function paintObject(screen, o) {
+  for (let i = 0; i < o.chars.length && o.col + i < COLS; i++) {
+    screen[o.row * COLS + o.col + i] = o.chars[i];
+  }
+}
+
 export function paintScreen(state) {
   const screen = new Uint8Array(COLS * ROWS);
   const room = state.room;
   for (let row = 0; row < ROWS; row++) screen.set(room.tiles[row], row * COLS);
-  for (const o of state.objects) {
-    if (room.blank || o.room !== room.room || !o.exists || o.carried) continue;
-    for (let i = 0; i < o.chars.length && o.col + i < COLS; i++) {
-      screen[o.row * COLS + o.col + i] = o.chars[i];
-    }
-  }
+  for (const o of state.objects) if (isShown(state, o)) paintObject(screen, o);
   state.screen = screen;
+}
+
+// object-cells: the original re-decodes the room here, undoing cuts and ropes
+export function repaintObjectCells(state, col, row) {
+  if (state.classic || state.demo) return paintScreen(state);
+  const end = Math.min(col + 2, COLS);
+  for (let c = col; c < end; c++) state.screen[row * COLS + c] = state.room.tiles[row][c];
+  for (const o of state.objects) {
+    if (isShown(state, o) && o.row === row && o.col < end && o.col + o.chars.length > col) paintObject(state.screen, o);
+  }
 }
 
 export function enterRoom(state, room, col, row) {

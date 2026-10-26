@@ -1,7 +1,7 @@
 // docs/spec/player.md, The command menu and The verbs; every verb is a generator, one yield per read
 
 import { CLASS } from './data.js';
-import { cell, paintScreen, isSolid, isSupport, role, COLS, ROWS } from './world.js';
+import { cell, repaintObjectCells, isSolid, isSupport, role, COLS, ROWS } from './world.js';
 import { lieDown, idleFrame } from './player.js';
 import { fireUp, anyInput, isIdle, directionPress } from './input.js';
 import { say, sayWrapped, print, clearPanel, PANEL_ROW } from './panel.js';
@@ -133,7 +133,7 @@ function* take(state) {
   state.offered = null;
   say(state, 'YOU FIND');
   print(state, PANEL_ROW, 10, o.name);
-  paintScreen(state);
+  repaintObjectCells(state, o.col, o.row);
 }
 
 const BLOCKS_DROP = new Set(['object', 'wall', 'bramble']);
@@ -169,7 +169,7 @@ function* drop(state) {
   o.room = state.room.room;
   o.col = target.col;
   o.row = target.row;
-  paintScreen(state);
+  repaintObjectCells(state, o.col, o.row);
 }
 
 // the cutting tools: the column in front, then your own, five cells from your row upward
@@ -386,9 +386,11 @@ function* kiniport(state) {
         if (state.commandChoice?.applying) throw new Error('Invalid KINIPORT destination');
         continue;
       }
+      const from = { col: o.col, row: o.row };
       o.col = to.col;
       o.row = to.row;
-      paintScreen(state);
+      repaintObjectCells(state, from.col, from.row);
+      repaintObjectCells(state, o.col, o.row);
       p.spiritEnergy -= 5;
       return;
     }

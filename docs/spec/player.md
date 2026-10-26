@@ -517,6 +517,10 @@ permission, first match winning:
 
 Then the weight check, then the object is yours: "YOU FIND" and the
 item's name, the room repaints without it, and the offer is spent.
+The repaint decodes the whole room afresh, so every bramble or temple
+wall cut, rope laid and limb grown since you entered comes back; DROP
+does the same.  In the port this happens only in classic mode;
+otherwise TAKE, DROP and KINIPORT redraw just the object's two cells.
 
 **DROP** -- works out where the thing would land *before* asking what
 to drop:

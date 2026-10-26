@@ -156,6 +156,21 @@ for (const stamina of [4, 3]) test(`TAKE tokens with a full or overloaded pack (
   }
 });
 
+for (const classic of [false, true]) test(`TAKE ${classic ? 'restores' : 'keeps'} cut tiles in ${classic ? '' : 'non-'}classic mode`, async () => {
+  const { run, data, pomma } = await talkFixture();
+
+  const s = questState(data, pomma);
+  s.classic = classic;
+  const token = s.objects.find(o => o.exists && !o.carried && o.class === CLASS.TOKEN && o.room === s.nidPlace.room);
+  s.player.col = token.col;
+  s.player.row = token.row;
+  const cut = s.screen.findIndex((code, i) => code !== 0 && code === s.room.tiles[Math.floor(i / 40)][i % 40]);
+  s.screen[cut] = 0;
+  assert.equal(run(s, menu('TAKE'))[0], 'YOU FIND A TOKEN');
+  assert.equal(s.screen[cut], classic ? s.room.tiles[Math.floor(cut / 40)][cut % 40] : 0);
+  for (const c of [token.col, token.col + 1]) assert.equal(s.screen[token.row * 40 + c], s.room.tiles[token.row][c]);
+});
+
 test('SELL a shuba for a token', async () => {
   const { run, faceCreature, data, pomma } = await talkFixture();
 
