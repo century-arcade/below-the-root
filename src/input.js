@@ -537,8 +537,9 @@ const SIGN = { left: -1, right: 1 };
 // Touch: each half of the screen is a stick and a trigger; see "Touch" in docs/spec/input.md.
 export class SideTouch {
   constructor(surface, canvas, keys, { jog = () => false, chord = () => {},
-    airborne = () => false, facing = () => null } = {}) {
+    airborne = () => false, facing = () => null, log = () => {} } = {}) {
     this.canvas = canvas;
+    this.log = log;
     this.keys = keys;
     keys.attach(this);
     this.jog = jog;
@@ -573,6 +574,7 @@ export class SideTouch {
     if (!this.claims(e) || e.target?.closest?.(SIDE_IGNORE)) return;
     e.preventDefault();
     e.target?.setPointerCapture?.(e.pointerId);
+    if (e.isPrimary && this.fingers.size) this.purge();
     const f = { id: e.pointerId, side: this.side(e), x: e.clientX, y: e.clientY, at: performance.now() };
     const live = this.live();
     this.fingers.set(f.id, f);
@@ -599,6 +601,20 @@ export class SideTouch {
       f.role = 'pending';
       if (!this.jog()) f.timer = setTimeout(() => this.resolve(f), SIDE_TAP_MS);
     }
+    this.note('down', f);
+  }
+
+  note(event, f) {
+    const detail = event !== 'down' ? ` ${Math.round(performance.now() - f.at)}ms`
+      : `${this.jog() ? ' jog' : ''}${this.airborne() ? ' air' : ''}`;
+    this.log(`${event} #${f.id} ${f.side} ${f.role}${detail}`);
+  }
+
+  // purge: a primary press means no other touch is down, so these lifts were lost
+  purge() {
+    for (const f of this.fingers.values()) { clearTimeout(f.timer); this.note('stale', f); }
+    this.fingers.clear();
+    this.update();
   }
 
   move(e) {
@@ -628,6 +644,7 @@ export class SideTouch {
   up(e) {
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
+    this.note('up', f);
     this.fingers.delete(f.id);
     clearTimeout(f.timer);
     if (f.role === 'pending') {
@@ -646,6 +663,7 @@ export class SideTouch {
   lift(e) {
     const f = this.fingers.get(e.pointerId);
     if (!f) return;
+    this.note('cancel', f);
     if (f.role === 'pair') this.unpair(f);
     clearTimeout(f.timer);
     this.fingers.delete(f.id);
@@ -730,6 +748,7 @@ export class SideTouch {
     clearTimeout(this.poll);
     this.poll = null;
     this.unfired = false;
+    if (this.fingers.size) this.log(`reset ${this.fingers.size}`);
     for (const f of this.fingers.values()) { clearTimeout(f.timer); f.role = 'dead'; }
     this.held = new Set();
     this.keys.reset(SIDE_SOURCE);

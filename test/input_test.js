@@ -72,7 +72,7 @@ async function sideFixture(t) {
   const advance = ms => { now += ms; t.mock.timers.tick(ms); };
   const tap = (x, pointerId = 1) => { send('pointerdown', x, 100, pointerId); advance(60); send('pointerup', x, 100, pointerId); };
   const LEFT = 10, RIGHT = 310;
-  return { ...f, model, sides, send, tap, LEFT, RIGHT, advance };
+  return { ...f, model, sides, surface, send, tap, LEFT, RIGHT, advance };
 }
 
 test("holding either half walks that way until the finger lifts", async t => {
@@ -86,6 +86,18 @@ test("holding either half walks that way until the finger lifts", async t => {
     send('pointerup', x);
     assert.deepEqual(keys.read(), IDLE);
   }
+});
+
+test("a fresh touch after a lost lift walks instead of counting as a second finger", async t => {
+  const { keys, surface, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  send('pointerdown', LEFT, 100, 1);
+  advance(130);
+  keys.read();
+  const target = { closest: () => null, setPointerCapture() {} };
+  surface.send('pointerdown', { button: 0, pointerId: 7, pointerType: 'touch', isPrimary: true,
+    clientX: RIGHT, clientY: 100, target, preventDefault() {} });
+  advance(130);
+  assert.deepEqual(keys.read(), { dx: 1, dy: 0, fire: false });
 });
 
 test("a quick tap anywhere is the trigger alone", async t => {

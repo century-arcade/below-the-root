@@ -428,6 +428,8 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 .landscape-play #monitor-controls > :not(#fullscreen), .landscape-play #replay-controls, .landscape-play #fullscreen[hidden] { display: none; }
 .landscape-play #monitor-controls #fullscreen { position: fixed; top: 8px; right: 8px; z-index: 4; margin: 0; padding: 0; color: #b6e6a4; background: #142019; border-color: #567; border-radius: 0; box-shadow: none; }
 #touch-corner { display: none; }
+#touch-log { position: fixed; left: 0; bottom: 0; z-index: 4; max-width: 45vw; margin: 0; padding: 4px; overflow: hidden; color: #b6e6a4; background: #142019d9; font: 10px/1.3 monospace; white-space: pre; pointer-events: none; }
+#touch-log:empty { display: none; }
 @media (any-pointer: coarse) {
   :is(.game-fullscreen, .landscape-play) #touch-corner { display: flex; position: fixed; top: 8px; left: 8px; z-index: 4; }
 }

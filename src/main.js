@@ -196,6 +196,7 @@ monitor.classList.remove('unfitted');
 canvas.focus({ preventScroll: true });
 
 const POWER_KEY = 'btr.power';
+const TOUCH_LOG_LINES = 16;
 loadData((path) => fetch(`/${path}`).then((r) => {
   if (!r.ok) throw new Error(`${path}: ${r.status}`);
   return r.json();
@@ -249,7 +250,15 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let seekAmount = 1;
   let seekRepeatAt = 0;
   const playSurface = document.getElementById('play');
+  const touchLog = document.getElementById('touch-log');
+  const touchLines = [];
   const sideTouch = new SideTouch(playSurface, canvas, stick, {
+    log: line => {
+      if (!debug) return;
+      touchLines.push(`${(performance.now() / 1000).toFixed(2)} ${line}`);
+      if (touchLines.length > TOUCH_LOG_LINES) touchLines.shift();
+      touchLog.textContent = touchLines.join('\n');
+    },
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     airborne: () => !!(state.player?.gliding || state.player?.leaping || state.player?.fallen > 0) && !state.title && !state.demo,
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
@@ -617,6 +626,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   function setDebug(on) {
     debug = on;
     document.getElementById('developer-help').hidden = !on;
+    document.getElementById('touch-log').hidden = !on;
     document.querySelector('.tray-dev-notes').hidden = !on;
     if (!on && desk.stage === 'dev-notes') desk.back();
     if (desk.stage === 'map') paintMap();
