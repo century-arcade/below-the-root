@@ -146,7 +146,9 @@ with browser_page('/play?player=0', viewport={'width': 915, 'height': 350}, has_
     page.clock.run_for(100)
     assert page.locator('#desk').get_attribute('data-stage') == 'play'
 
-    assert page.locator('#developer-mode').is_hidden(), 'no version label in landscape play'
+    page.locator('#developer-mode').tap()
+    assert page.locator('#toggle-crt').is_visible(), 'the version label opens the developer tools in landscape play'
+    page.locator('#developer-mode').tap()
 
     page.evaluate('document.exitFullscreen?.().catch(() => {})')
     page.locator('#fullscreen').tap()
@@ -224,4 +226,4 @@ with browser_page('/play?player=0', viewport={'width': 412, 'height': 915}, has_
     page.clock.run_for(300)
     assert not session_eval(page, 's => s.state.commandMenuOpen'), 'a swipe down over the panel crouches without the menu'
 
-print('browser_landscape_test: portrait side touch and two-finger inventory, landscape side touches, turn-and-leap, one-handed status-panel touches, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, version label and fullscreen toggle passed')
+print('browser_landscape_test: portrait side touch and two-finger inventory, landscape side touches, turn-and-leap, one-handed status-panel touches, climb and stand at the top, plain hold mid-ladder, fullscreen panel crouch, picture taps outside play, map, developer tools and fullscreen toggle passed')

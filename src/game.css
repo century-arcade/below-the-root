@@ -435,6 +435,9 @@ textarea { display: block; box-sizing: border-box; width: 100%; min-height: 108p
 }
 #touch-corner button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; touch-action: manipulation; }
 #touch-corner svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.landscape-play #monitor #monitor-developer { --chin: 60px; --key: 32px; display: flex; position: fixed; top: 8px; right: 44px; bottom: auto; left: auto; z-index: 4; height: var(--key); }
+.landscape-play #monitor-developer :is(button, .github-link) { color: #b6e6a4; background: #142019; border-color: #567; box-shadow: none; }
+.landscape-play #monitor #monitor-developer #debug-tools { position: absolute; top: calc(100% + 4px); bottom: auto; right: 0; left: auto; height: var(--key); max-width: calc(100vw - 16px); padding: 0; background: none; }
 .landscape-play #help-screen { position: fixed; z-index: 2; inset: 64px 0 0 0; width: auto; overflow-y: auto; background: #101910; align-self: auto; }
 .landscape-play #screen-focus { display: none; }
 
