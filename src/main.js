@@ -526,7 +526,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   const resume = () => { dropInput(); paused = false; last = performance.now(); };
   const hold = () => { held = true; dropInput(); };
   desk.onChange = stage => {
-    if (stage === 'map') { paperKey = null; paintPaperMap(); centerMap(); }
+    if (stage === 'map') { paintPaperMap(); centerMap(); }
     const playing = stage === 'play';
     document.documentElement.classList.toggle('monitor-away', !playing);
     fit();
@@ -581,12 +581,20 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     const [view, visited, current, empty] = mapView();
     drawMap(view, visited, current, grid, empty, debug);
   }
+  const mapKey = () => [state.quest, session.path.length, state.room?.code, debug].join();
+  let mapQueued = false;
+  // closed map repaints in idle time so opening it shows the current grid at once
   function paintPaperMap() {
-    if (desk.stage !== 'map') return;
-    const key = [state.quest, session.path.length, state.room?.code, debug].join();
-    if (key === paperKey || seekRoom != null) return;
-    paperKey = key;
-    paintMap();
+    if (seekRoom != null || mapKey() === paperKey) return;
+    if (desk.stage === 'map') { paperKey = mapKey(); paintMap(); return; }
+    if (mapQueued) return;
+    mapQueued = true;
+    const repaint = () => {
+      mapQueued = false;
+      if (seekRoom == null && mapKey() !== paperKey) { paperKey = mapKey(); paintMap(); }
+    };
+    if (window.requestIdleCallback) requestIdleCallback(repaint, { timeout: 2000 });
+    else setTimeout(repaint, 200);
   }
   function showView(view) {
     if (paused) return;

@@ -109,8 +109,11 @@ with browser_page('/play?player=0', viewport={"width": 900, "height": 750}) as p
     page.locator('#screen').focus()
     page.keyboard.press('Enter')
     until(page, 's => s.state.room.code === "M5"')
-    page.clock.run_for(300)
-    assert page.evaluate('mapPaints') == 0, 'a room change leaves the hidden map alone'
+    page.clock.run_for(3000)
+    page.wait_for_function('mapPaints === 1')
+    assert page.locator('#paper-map').is_hidden()
+    assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·'), \
+        'the closed map repaints once in idle time after a room change'
     page.keyboard.press('m')
     expect(page.locator('#paper-map')).to_be_visible()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
