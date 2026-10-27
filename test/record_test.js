@@ -503,6 +503,7 @@ test('Bad files fail on a private quest with useful location diagnostics', async
   for (const alter of [
     r => r.checkpoint.player.food++,
     r => r.checkpoint.progress.spirit++,
+    r => r.checkpoint.progress.gates.push('gate_a'),
     r => r.checkpoint.rng++,
     r => (r.checkpoint.objects[0].exists = !r.checkpoint.objects[0].exists),
   ]) {
@@ -510,6 +511,12 @@ test('Bad files fail on a private quest with useful location diagnostics', async
     alter(drift);
     assert.throws(() => Session.replay(data, idle, drift), /Gameplay checkpoint mismatch/);
   }
+  const beforeGates = structuredClone(original);
+  delete beforeGates.checkpoint.progress.gates;
+  beforeGates.checkpoint.progress.tokenTotal = 39;
+  assert.doesNotThrow(() => Session.replay(data, idle, beforeGates), 'recordings from before gate scoring still verify');
+  beforeGates.checkpoint.progress.spirit++;
+  assert.throws(() => Session.replay(data, idle, beforeGates), /Gameplay checkpoint mismatch/);
   const unreachable = structuredClone(original);
   unreachable.endpoint.visit++;
   unreachable.checkpoint.visit++;
@@ -796,7 +803,7 @@ test('the playthrough tool reports a verified win, its day and completion', () =
     fileURLToPath(fixtureURL(name)), '--expect-win',
   ], { encoding: 'utf8' });
   assert.match(report, new RegExp(`day ${record.checkpoint.clock.day}\\b`));
-  assert.ok(report.includes(`${completion(record.checkpoint)}% complete; Raamo saved`));
+  assert.ok(report.includes(`${completion({ data, progress: record.checkpoint.progress })}% complete; Raamo saved`));
   assert.match(report, /Gameplay checkpoint verified/);
 });
 

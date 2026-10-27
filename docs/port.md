@@ -183,9 +183,9 @@ effective stick changes. C64 `.prg` imports retain standalone save compatibility
 but lack elapsed time and complete collection history. JSON replay reconstructs collection
 history.
 
-The world contains 62 currency tokens. The other four characters' nids bar 12,
-and the I2 resident never offers its two; other access limits determine each
-character's obtainable total. See `src/progress.js` and `test/progress_test.js`
+The world contains 62 currency tokens, 25 of them outdoors. The 25 outdoor tokens
+set the token goal; indoor tokens count toward it as well, so a collector can pass
+100%. See `src/progress.js` and `test/progress_test.js`
 for scoring and save-import recovery, and [playthrough](playthrough.md) for the
 recording schema and winning fixtures. Verify a recording with
 `node tools/playthrough.mjs run.json`.

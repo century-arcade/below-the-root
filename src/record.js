@@ -43,6 +43,16 @@ export function screenKey(s) {
     + Array.from(s.panel).join(',') + ':' + Array.from(s.screen || []).join(',');
 }
 
+// pre-gate checkpoints: scoring fields changed while gameplay stayed the same
+function sameGameplay(actual, expected) {
+  if (expected.progress && !Object.hasOwn(expected.progress, 'gates')) {
+    const progress = { ...expected.progress, gates: actual.progress.gates };
+    delete progress.tokenTotal;
+    expected = { ...expected, progress };
+  }
+  return equal(actual, expected);
+}
+
 export function checkpoint(s) {
   return copy({
     simticks: s.simticks, visit: s.visit, room: s.room?.code ?? null, blank: !!s.room?.blank,
@@ -355,7 +365,7 @@ export class Session {
       return;
     }
     if (this.eventIndex !== this.sourceRecord.events.length) throw new Error('Recording has events beyond its endpoint');
-    if (!equal(checkpoint(this.state), this.sourceRecord.checkpoint)) {
+    if (!sameGameplay(checkpoint(this.state), this.sourceRecord.checkpoint)) {
       throw new Error(`Gameplay checkpoint mismatch at tick ${this.simticks}, ${this.place().screen} ${this.place().pos}`);
     }
     this.playbackDone = true;

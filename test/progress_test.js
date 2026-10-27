@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { loadTestData, J, menuReads } from './helpers.js';
 import { newState, startQuest, startDemo } from '../src/game.js';
 import { CLASS } from '../src/data.js';
-import { acquired, completion, playTime } from '../src/progress.js';
+import { acquired, completion, passedGate, playTime } from '../src/progress.js';
 import { exportSave, importSave } from '../src/save.js';
 import { speak, gainSpirit } from '../src/dialog.js';
 import { carried, weightCarried, destroy, mintToken } from '../src/inventory.js';
-import { enterRoom } from '../src/world.js';
+import { enterRoom, useDoor } from '../src/world.js';
 import { runMenu } from '../src/verbs.js';
 import { Session } from '../src/record.js';
 
@@ -44,18 +44,27 @@ test("every character can collect their permitted tokens and reach full completi
       quest.clock.day = collected + 1; // Each gift-giver offers only one token per day.
     }
     assert.equal(collected, maxima[character.id], `${character.name}'s obtainable world tokens`);
-    assert.equal(quest.progress.tokenTotal, collected);
     assert.equal(carried(quest).length, collected, 'all obtainable tokens fit in the pack together');
     assert.equal(weightCarried(quest), 0, 'tokens do not count toward carrying capacity');
-    assert.equal(completion(quest), 4, 'all obtainable tokens earn the full token share');
-    quest.progress.spirit = 35;
-    quest.progress.elixirs = 5;
-    for (const cls of [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY, CLASS.WAND]) acquired(quest, { class: cls });
-    quest.progress.won = true;
-    assert.equal(completion(quest), 100, `${character.name} needs no forbidden tokens for 100%`);
-    importSave(quest, exportSave(quest));
-    assert.equal(quest.progress.tokenTotal, maxima[character.id], 'C64 imports restore the character maximum');
+    assert.ok(completion(quest) > 5, 'tokens beyond the outdoor goal keep scoring');
   }
+});
+
+test("outdoor tokens and every milestone make exactly 100%; extra tokens go beyond", async () => {
+  const data = await loadTestData();
+  const quest = newState(data, { read: () => J.idle });
+  startQuest(quest, data.characters[0]);
+  const tokens = data.objects.filter(o => o.class === CLASS.TOKEN);
+  for (const token of tokens.filter(o => data.roomById.get(o.room).outdoor_bit)) acquired(quest, token);
+  assert.equal(completion(quest), 5);
+  quest.progress.spirit = 35;
+  quest.progress.elixirs = 5;
+  for (const cls of [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY, CLASS.WAND]) acquired(quest, { class: cls });
+  for (const lock of ['gate_a', 'gate_b', 'gate_a']) passedGate(quest, lock);
+  quest.progress.won = true;
+  assert.equal(completion(quest), 100);
+  for (const token of tokens) acquired(quest, token);
+  assert.equal(completion(quest), 107);
 });
 
 test("earned milestones persist through spending and new quests reset progress", async () => {
@@ -86,12 +95,12 @@ test("earned milestones persist through spending and new quests reset progress",
   const tokens = s.objects.filter(o => o.class === CLASS.TOKEN && o.exists);
   assert.equal(tokens.length, 62);
   for (const token of tokens.slice(0, 13)) acquired(s, token);
-  assert.equal(completion(s), 11, 'token share is rounded down to whole percentage points');
+  assert.equal(completion(s), 12, 'token share is rounded down to whole percentage points');
   acquired(s, tokens[0]);
   tokens[0].carried = false;
   assert.equal(s.progress.tokens.length, 13, 'dropping and retaking a token counts once');
   destroy(tokens[0]);
-  assert.equal(completion(s), 11, 'spending or losing tokens preserves collection credit');
+  assert.equal(completion(s), 12, 'spending or losing tokens preserves collection credit');
   const recycled = mintToken(s);
   acquired(s, recycled);
   assert.equal(s.progress.tokens.length, 13, 'a sale reusing a spent token slot cannot score twice');
@@ -100,15 +109,13 @@ test("earned milestones persist through spending and new quests reset progress",
   assert.equal(s.progress.tokens.length, 13, 'tokens minted in extra slots are not world collectibles');
   const wand = s.objects.find(o => o.class === CLASS.WAND);
   acquired(s, wand); acquired(s, wand);
-  assert.equal(completion(s), 12, 'the wand earns exactly one percentage point');
+  assert.equal(completion(s), 17, 'the wand earns its milestone once');
   wand.carried = false;
-  assert.equal(completion(s), 12, 'dropping the wand preserves its milestone');
+  assert.equal(completion(s), 17, 'dropping the wand preserves its milestone');
   s.progress.spirit = 35;
   s.progress.elixirs = 5;
   for (const cls of [CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY]) acquired(s, { class: cls });
   s.progress.won = true;
-  for (const token of tokens) acquired(s, token);
-  assert.equal(completion(s), 100, 'all milestones total exactly 100%');
   session.step();
   assert.equal(s.simticks, beforePause, 'victory freezes the timer');
   for (const [simticks, display] of [[0, '00:00:00'], [109619, '00:30:26'],
@@ -134,11 +141,31 @@ test("C64 imports recover carried milestones and mark elapsed time as partial", 
   const carriedToken = loaded.objects.find(o => o.class === CLASS.TOKEN && o.exists);
   carriedToken.carried = true;
   loaded.objects.find(o => o.class === CLASS.WAND).carried = true;
+  loaded.flags[data.creatureByRoom.get(data.roomByCode.get('0B').room).state_id].banished = true;
   const spentToken = loaded.objects.find(o => o.class === CLASS.TOKEN && o.exists && !o.carried);
   destroy(spentToken);
   importSave(loaded, exportSave(loaded));
   assert.deepEqual(loaded.progress.tokens, [carriedToken.object], 'C64 saves recover carried tokens only');
   assert.equal(loaded.progress.wand, true, 'C64 saves recover a carried wand');
+  assert.deepEqual(loaded.progress.gates, ['gate_a'], 'C64 saves recover gates opened for good');
   assert.equal(loaded.progress.partialTime, true);
   assert.equal(playTime(loaded), '>=00:00:00');
+});
+
+test("passing a guarded gate scores it once; a refused door does not", async () => {
+  const data = await loadTestData();
+  const s = newState(data, { read: () => J.idle });
+  startQuest(s, data.characters[0]);
+  const gate = data.roomByCode.get('0B');
+  const door = gate.doors.findIndex(d => d?.lock) + 1;
+  enterRoom(s, gate, 20, 16);
+  useDoor(s, door);
+  assert.deepEqual(s.progress.gates, []);
+  s.paid = true;
+  useDoor(s, door);
+  assert.deepEqual(s.progress.gates, ['gate_a']);
+  enterRoom(s, gate, 20, 16);
+  s.paid = true;
+  useDoor(s, door);
+  assert.deepEqual(s.progress.gates, ['gate_a']);
 });

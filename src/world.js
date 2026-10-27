@@ -5,6 +5,7 @@ import { spawnCreature } from './creatures.js';
 import { clearPanel, sayWrapped } from './panel.js';
 import { DREAM } from './clock.js';
 import { startTune } from './audio.js';
+import { passedGate } from './progress.js';
 
 export const COLS = 40;
 export const ROWS = 20;
@@ -201,6 +202,7 @@ export function useDoor(state, n) {
     sayWrapped(state, state.data.fixed.door_is_locked.text);
     return true;
   }
+  if (door.lock) passedGate(state, door.lock);
   p.facing = -p.facing;
   p.indoors = !p.indoors;
   enterRoom(state, dest, door.arrive_x, door.arrive_y);

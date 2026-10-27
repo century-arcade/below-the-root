@@ -96,19 +96,22 @@ C64 saves have no elapsed-time history, so their partial timer is marked `>=`.
 
 | Milestone | Completion |
 |-----------|------------|
-| Save Raamo | 35% |
+| Save Raamo | 20% |
 | Acquire spirit bell, spirit lamp, temple key and D'ol Falla's key | 5% each, up to 20% |
 | Pense animals for spirit | 1% each, up to 10% |
 | Speak to spirit-giving leaders | 5% each, up to 25% |
 | Consume elixirs | 1% each, up to 5% |
-| Acquire the Wand of Befal | 1% |
-| Collect world tokens | Up to 4%, proportional to your character's obtainable tokens, rounded down |
+| Acquire the Wand of Befal | 5% |
+| Pass each cavern gate | 5% each, up to 10% |
+| Collect world tokens | 5% for 25, the number lying outdoors; every token counts, rounded down |
 
-Pomma can collect 48 tokens, Neric and Genaa 39, Herd and Charn 41.
+Tokens past 25 push completion over 100%: Pomma can collect 48, Neric and
+Genaa 39, Herd and Charn 41.
 Starting spirit and room exploration do not count. Earned points survive dropping
 items, spending spirit, and spending or losing tokens. Each world token counts
 once; selling items creates no extra collectible tokens. C64 imports recover
-spirit gifts, consumed elixirs and carried quest items and tokens, but cannot
+spirit gifts, consumed elixirs, carried quest items and tokens, and gates
+opened for good, but cannot
 recover earlier dropped-item or spent-token history.
 
 ## Offline play
