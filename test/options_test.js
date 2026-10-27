@@ -16,9 +16,12 @@ test("empty storage supplies defaults and stored options override them", () => {
   storage.setItem('btr.volume.v2', '0.8');
   storage.setItem('btr.muted', '1');
   storage.setItem('btr.crt', '0');
-  storage.setItem('btr.debug', 'nonsense');
+  storage.setItem('btr.debug', '1');
   assert.deepEqual(loadOptions(storage), { surround: 'commodore', volume: 0.8, muted: true, crt: false, classic: false, notes: false, latch: true, debug: false, aspect: 'pal' },
-    'stored values override the defaults; anything but 1 is off');
+    'stored values override the defaults; developer mode never comes back from storage');
+
+  storage.setItem('btr.crt', 'nonsense');
+  assert.equal(loadOptions(storage).crt, false, 'anything but 1 is off');
 
   for (const surround of ['commodore', 'portable', 'dark']) {
     storeOption(storage, 'surround', surround);

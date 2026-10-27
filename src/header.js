@@ -41,7 +41,6 @@ export function setupDeveloper({ options, onDebug = () => {}, canChangeDebug = (
   developer.onclick = () => {
     if (!canChangeDebug()) return;
     setDebug(!options.debug);
-    persistOption('debug', options.debug);
     developer.blur();
   };
   crt.onclick = () => {

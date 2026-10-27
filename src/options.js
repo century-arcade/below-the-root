@@ -1,6 +1,6 @@
 export const DEFAULTS = Object.freeze({ surround: 'commodore', volume: 0.5, muted: false, crt: true, classic: false, notes: false, latch: true, debug: false, aspect: 'pal' });
 
-const KEYS = { surround: 'btr.surround.v2', volume: 'btr.volume.v2', muted: 'btr.muted', crt: 'btr.crt', classic: 'btr.classic', notes: 'btr.notes', latch: 'btr.latch', debug: 'btr.debug', aspect: 'btr.aspect' };
+const KEYS = { surround: 'btr.surround.v2', volume: 'btr.volume.v2', muted: 'btr.muted', crt: 'btr.crt', classic: 'btr.classic', notes: 'btr.notes', latch: 'btr.latch', aspect: 'btr.aspect' };
 
 export function loadOptions(storage) {
   const out = { ...DEFAULTS };
