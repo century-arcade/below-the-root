@@ -237,10 +237,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   session ||= new Session(data, stick, { initial, seed });
   let state = session.state;
   state.classic = options.classic;
+  const tuneSkippable = () => powered && !paused && !away() && !startupHelp && !session.playback
+    && state.tuneWait != null && !options.classic;
   stick.contextKey = key => {
     if (!powered || paused || away() || startupHelp || session.playback) return null;
     if (key === 'Escape' && (state.itemPicker || state.pointer)) return 'cancel';
-    if (state.tuneWait != null && !options.classic && skipsTune(key)) return 'fire';
+    if (tuneSkippable() && skipsTune(key)) return 'fire';
     return state.itemPicker?.readOnly ? 'fire' : null;
   };
   stick.selectWithF = () => state.title || !!state.verb;
@@ -261,6 +263,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     },
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     airborne: () => !!(state.player?.gliding || state.player?.leaping || state.player?.fallen > 0) && !state.title && !state.demo,
+    skipping: tuneSkippable,
     facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');

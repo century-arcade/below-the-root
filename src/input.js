@@ -537,7 +537,7 @@ const SIGN = { left: -1, right: 1 };
 // Touch: each half of the screen is a stick and a trigger; see "Touch" in docs/spec/input.md.
 export class SideTouch {
   constructor(surface, canvas, keys, { jog = () => false, chord = () => {},
-    airborne = () => false, facing = () => null, log = () => {} } = {}) {
+    airborne = () => false, facing = () => null, skipping = () => false, log = () => {} } = {}) {
     this.canvas = canvas;
     this.log = log;
     this.keys = keys;
@@ -546,6 +546,7 @@ export class SideTouch {
     this.onChord = chord;
     this.airborne = airborne;
     this.facing = facing;
+    this.skipping = skipping;
     this.poll = null;
     this.fingers = new Map();
     this.turn = null;
@@ -594,7 +595,7 @@ export class SideTouch {
         f.role = 'button';
         this.trigger();
       }
-    } else if (this.airborne() && !this.jog()) {
+    } else if (this.airborne() && !this.jog() && !this.skipping()) {
       f.role = 'stick';
       this.update();
     } else {
@@ -648,7 +649,7 @@ export class SideTouch {
     this.fingers.delete(f.id);
     clearTimeout(f.timer);
     if (f.role === 'pending') {
-      if (this.airborne()) this.keys.tap(f.side, SIDE_SOURCE);
+      if (this.airborne() && !this.skipping()) this.keys.tap(f.side, SIDE_SOURCE);
       else this.trigger();
     } else if (f.role === 'pair') {
       f.lifted = true;
@@ -657,6 +658,8 @@ export class SideTouch {
       const heir = this.live().find(g => g.role === 'button');
       if (heir) this.settle(heir);
       this.update();
+      // slow-tap: a tune wait ignores the stick, so a lift that never swiped skips it
+      if (f.dir === undefined && this.skipping()) this.trigger();
     }
   }
 

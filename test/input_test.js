@@ -60,10 +60,10 @@ async function sideFixture(t) {
   t.mock.method(performance, 'now', () => now);
   const f = await keyboardFixture();
   const surface = new f.Target();
-  const model = { jog: false, chords: 0, airborne: false, facing: null };
+  const model = { jog: false, chords: 0, airborne: false, facing: null, skipping: false };
   const sides = new SideTouch(surface, f.canvas, f.keys, {
     jog: () => model.jog, chord: () => model.chords++,
-    airborne: () => model.airborne, facing: () => model.facing,
+    airborne: () => model.airborne, facing: () => model.facing, skipping: () => model.skipping,
   });
   const target = { closest: () => null, setPointerCapture() {} };
   const send = (name, x, y = 100, pointerId = 1, pointerType = 'touch') => surface.send(name, {
@@ -277,6 +277,31 @@ test("in the air a second-finger tap waits for the landing to leap", async t => 
   assert.deepEqual(keys.read('falling'), { dx: -1, dy: 0, fire: false }, 'the stick steers and the press waits');
   model.airborne = false;
   assert.deepEqual(keys.read(), { dx: -1, dy: 0, fire: true }, 'the landing read leaps');
+});
+
+test("during a tune wait a slow or airborne tap still triggers, and a swipe does not", async t => {
+  const { keys, model, send, advance, LEFT, RIGHT } = await sideFixture(t);
+  model.skipping = true;
+  send('pointerdown', RIGHT);
+  advance(250);
+  send('pointerup', RIGHT);
+  assert.equal(keys.read('trigger').fire, true, 'a tap held past 120 ms skips');
+  model.airborne = true;
+  send('pointerdown', LEFT);
+  advance(60);
+  send('pointerup', LEFT);
+  assert.deepEqual(keys.read('trigger'), { dx: 0, dy: 0, fire: true, move: { dx: 0, dy: 0 }, observed: true });
+  model.airborne = false;
+  send('pointerdown', LEFT);
+  send('pointermove', LEFT + 30);
+  advance(200);
+  send('pointerup', LEFT + 30);
+  assert.equal(keys.read('trigger').fire, false, 'a swipe steers and never skips');
+  model.skipping = false;
+  send('pointerdown', RIGHT);
+  advance(250);
+  send('pointerup', RIGHT);
+  assert.equal(keys.read('trigger').fire, false, 'outside a tune a slow tap stays a hold');
 });
 
 test("mice are not side touches", async t => {
