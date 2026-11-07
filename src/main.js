@@ -1,6 +1,6 @@
 import { loadData } from './data.js';
 import { render, figureOrigin, WIDTH, HEIGHT } from './video.js';
-import { figures, canOpenCommandMenu } from './game.js';
+import { figures, canOpenCommandMenu, inControl, figureBusy } from './game.js';
 import { PANEL_ROW, PANEL_ROWS } from './panel.js';
 import { menuChoiceAt, highlightMenuChoice } from './verbs.js';
 import { itemChoiceAt, highlightItemChoice } from './inventory.js';
@@ -264,11 +264,12 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     jog: () => !!(state.title || state.commandMenuOpen || state.itemPicker),
     airborne: () => !!(state.player?.gliding || state.player?.leaping || state.player?.fallen > 0) && !state.title && !state.demo,
     skipping: tuneSkippable,
-    facing: () => !session.playback && canOpenCommandMenu(state) ? state.player?.facing : null,
+    facing: () => !session.playback && inControl(state) ? state.player?.facing : null,
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
       else if (state.pointer && !session.playback) stick.gesture(['cancel'], 'touch');
       else if (state.commandMenuOpen || canOpenCommandMenu(state)) commandMenu(!!state.commandMenuOpen);
+      else if (inControl(state) && figureBusy(state.player)) return;
       else if (!session.playback && !state.demo && !state.title) stick.gesture(['fire', 'down'], 'touch');
     },
   });
@@ -277,7 +278,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     ignore: e => sideTouch.claims(e),
     surface: playSurface,
     latch: options.latch,
-    player: () => !session.playback && canOpenCommandMenu(state) ? state.player : null,
+    player: () => !session.playback && inControl(state) ? state.player : null,
     chooser: () => state.itemPicker && !session.playback ? {
       id: state.itemPicker,
       selected: state.itemPicker.selected,

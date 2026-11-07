@@ -212,10 +212,17 @@ function endVerb(state) {
   state.active = !state.ended;
 }
 
-export function canOpenCommandMenu(state) {
+export function inControl(state) {
   return state.quest && !state.title && !state.demo && state.active && !state.verb
-    && !state.stop && !state.stall && !state.ended && !state.resting
-    && !state.player?.knockdown;
+    && !state.stop && !state.stall && !state.ended && !state.resting;
+}
+
+export function figureBusy(p) {
+  return !!(p && (p.knockdown || p.leaping || p.gliding || p.fallen > 0));
+}
+
+export function canOpenCommandMenu(state) {
+  return inControl(state) && !figureBusy(state.player);
 }
 
 export function openCommandMenu(state) {

@@ -134,6 +134,24 @@ test('the command menu stays shut until a knock-down is over', async () => {
   assert.ok(openCommandMenu(state));
 });
 
+test('the command menu stays shut through a leap and the fall after it', async () => {
+  const { at, controls } = await playerFixture();
+  const state = at('86', 12, 11, -1);
+  const p = state.player;
+  controls.input = { dx: -1, dy: 0, fire: true };
+  step(state);
+  controls.input = { dx: 0, dy: 0, fire: false };
+  const seen = new Set();
+  for (let i = 0; i < 40; i += 1) {
+    if (p.leaping) seen.add('leap');
+    if (p.fallen > 0) seen.add('fall');
+    if (p.leaping || p.fallen > 0 || p.knockdown) assert.equal(openCommandMenu(state), false);
+    step(state);
+  }
+  assert.deepEqual([...seen].sort(), ['fall', 'leap']);
+  assert.ok(openCommandMenu(state), 'it opens once the figure stands');
+});
+
 test('standing in bramble, the first step or turn knocks you down where you stand', async () => {
   const { at, controls } = await playerFixture();
   for (const dx of [-1, 1]) {
