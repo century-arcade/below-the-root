@@ -214,7 +214,8 @@ function endVerb(state) {
 
 export function canOpenCommandMenu(state) {
   return state.quest && !state.title && !state.demo && state.active && !state.verb
-    && !state.stop && !state.stall && !state.ended && !state.resting;
+    && !state.stop && !state.stall && !state.ended && !state.resting
+    && !state.player?.knockdown;
 }
 
 export function openCommandMenu(state) {

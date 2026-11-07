@@ -1,5 +1,5 @@
 import { enterRoom } from '../src/world.js';
-import { newState, startQuest } from '../src/game.js';
+import { newState, startQuest, openCommandMenu } from '../src/game.js';
 import { IDLE, Keyboard } from '../src/input.js';
 import { loadTestData, stick } from './helpers.js';
 import { test } from 'node:test';
@@ -120,6 +120,18 @@ test('getting up from a knock-down drops taps made while down but keeps what is 
   step(state);
   assert.equal(p.leaping, false, 'the stale tap does not leap');
   assert.equal(p.stride, 1, 'the held side walks');
+});
+
+test('the command menu stays shut until a knock-down is over', async () => {
+  const { at } = await playerFixture();
+  const state = at('86', 12, 11, -1);
+  const p = state.player;
+  p.fallen = 6;
+  step(state);
+  assert.ok(p.knockdown);
+  assert.equal(openCommandMenu(state), false);
+  while (p.knockdown) step(state);
+  assert.ok(openCommandMenu(state));
 });
 
 test('standing in bramble, the first step or turn knocks you down where you stand', async () => {
