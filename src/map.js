@@ -75,21 +75,32 @@ function onParchment(px) {
 // Centred on the figure's body when it is on this screen; an interior keeps
 // the ring on the middle of the exterior it was entered from.
 function locationRing(state, code) {
-  let [x, y] = [WIDTH / 2, MAP_ROOM_HEIGHT / 2];
-  if (state.room?.code === code) {
-    const [left, top] = figureOrigin(state.player.col, state.player.row);
-    [x, y] = [left + 12, top + 21];
-  }
   const ring = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   ring.setAttribute('class', 'location-ring');
   ring.setAttribute('viewBox', '0 0 100 100');
   ring.setAttribute('aria-hidden', 'true');
-  ring.style.left = `${x / WIDTH * 100}%`;
-  ring.style.top = `${y / MAP_ROOM_HEIGHT * 100}%`;
+  ring.dataset.room = code;
+  placeRing(ring, state);
   const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   Object.entries({ cx: 50, cy: 50, r: 43.33 }).forEach(([k, v]) => circle.setAttribute(k, v));
   ring.append(circle);
   return ring;
+}
+
+function placeRing(ring, state) {
+  let [x, y] = [WIDTH / 2, MAP_ROOM_HEIGHT / 2];
+  if (state.room?.code === ring.dataset.room) {
+    const [left, top] = figureOrigin(state.player.col, state.player.row);
+    [x, y] = [left + 12, top + 21];
+  }
+  ring.style.left = `${x / WIDTH * 100}%`;
+  ring.style.top = `${y / MAP_ROOM_HEIGHT * 100}%`;
+}
+
+// followFigure: the map repaints on room changes, not on moves within one
+export function followFigure(state, grid) {
+  const ring = grid.querySelector('.location-ring');
+  if (ring) placeRing(ring, state);
 }
 
 // underground: cavern slots are walked into indoors, so the outdoor bit is moot

@@ -12,7 +12,7 @@ import { CLIPS, loadClip, Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
 import { fitScale, fitCabinet, crtVars, ASPECTS } from './fit.js';
 import { loaderScreen } from './loader.js';
-import { drawMap, warmMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelPixels, wheelZoom } from './map.js';
+import { drawMap, followFigure, warmMap, visitedRooms, visitedEmptyRooms, mapLocation, wheelPixels, wheelZoom } from './map.js';
 import { loadOptions } from './options.js';
 import { statusRows } from './status.js';
 import { ReplayPresentation } from './replay-presentation.js';
@@ -588,8 +588,13 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   let mapQueued = false;
   // closed map repaints in idle time so opening it shows the current grid at once
   function paintPaperMap() {
-    if (seekRoom != null || mapKey() === paperKey) return;
-    if (desk.stage === 'map') { paperKey = mapKey(); paintMap(); return; }
+    if (seekRoom != null) return;
+    if (desk.stage === 'map') {
+      if (mapKey() !== paperKey) { paperKey = mapKey(); paintMap(); }
+      else if (state.quest) followFigure(state, mapGrid);
+      return;
+    }
+    if (mapKey() === paperKey) return;
     if (mapQueued) return;
     mapQueued = true;
     const repaint = () => {

@@ -117,6 +117,14 @@ with browser_page('/play?player=0', viewport={"width": 900, "height": 750}) as p
     page.keyboard.press('m')
     expect(page.locator('#paper-map')).to_be_visible()
     assert page.locator('#map-grid [aria-current="location"]').get_attribute('aria-label').startswith('M5 ·')
+    ring = page.locator('#map-grid .location-ring')
+    before = ring.evaluate('r => r.style.left')
+    page.keyboard.press('m')
+    expect(page.locator('#paper-map')).to_be_hidden()
+    session_eval(page, 's => Object.assign(s.state.player, {col: 4})')
+    page.keyboard.press('m')
+    expect(page.locator('#paper-map')).to_be_visible()
+    assert ring.evaluate('r => r.style.left') != before, 'the ring follows the figure within a room'
 
 with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, has_touch=True, is_mobile=True) as page:
     expect(page.locator('#map-tools')).to_be_hidden()
@@ -137,4 +145,4 @@ with browser_page('/map', setup=setup, viewport={"width": 412, "height": 915}, h
     expect(page.locator('#map-zoom-out')).to_be_enabled()
     pinch(80, 10)
     expect(page.locator('#map-zoom-out')).to_be_disabled()
-    print('browser_map_test: keyboard dismissal, hold, control isolation, panning, location, hidden map and pinch zoom passed')
+    print('browser_map_test: keyboard dismissal, hold, control isolation, panning, location, ring tracking, hidden map and pinch zoom passed')
