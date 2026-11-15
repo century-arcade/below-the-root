@@ -7,7 +7,8 @@ from playwright.sync_api import sync_playwright, expect
 from browser_helpers import ready, observe, until
 
 BUILD = Path(__file__).resolve().parents[1] / '_build'
-ORIGIN = 'https://below-the-root.netlify.app'
+ORIGIN = 'https://root.saul.pw'
+NETLIFY = 'https://below-the-root.netlify.app'
 SCRIPT = 'https://gc.zgo.at/count.js'
 ENDPOINT = 'https://saulpw.goatcounter.com/count'
 MOCK = '''
@@ -71,13 +72,13 @@ def restart_analytics(page):
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
-    for path, canonical in [('/', '/'), ('/index.html', '/'), ('/play', '/'),
-                            ('/play.html', '/'), ('/map', '/map'), ('/map.html', '/map'),
-                            ('/resources', '/resources')]:
+    for origin, path, canonical in [(ORIGIN, '/', '/'), (ORIGIN, '/index.html', '/'), (ORIGIN, '/play', '/'),
+                                    (ORIGIN, '/play.html', '/'), (ORIGIN, '/map', '/map'), (ORIGIN, '/map.html', '/map'),
+                                    (ORIGIN, '/resources', '/resources'), (NETLIFY, '/', '/')]:
         page = browser.new_page()
-        scripts, counts, unexpected, pending, errors = intercept(page)
+        scripts, counts, unexpected, pending, errors = intercept(page, origin)
         with page.expect_request(ENDPOINT + '?*'):
-            page.goto(ORIGIN + path)
+            page.goto(origin + path)
         restart_analytics(page)
         assert page.evaluate('window.analyticsInitializations') == 1
         expect(page.locator('script[data-goatcounter]')).to_have_count(1)
