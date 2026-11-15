@@ -8,7 +8,7 @@ import { marked } from 'marked';
 import { buildSite, cardList, renderPage, renderDevNotes } from '../tools/build-site.mjs';
 
 const root = new URL('../', import.meta.url);
-const origin = 'https://below-the-root.netlify.app';
+const origin = 'https://root.saul.pw';
 
 function outputDirectory(t) {
   const out = mkdtempSync(join(tmpdir(), 'btr-metadata-'));
@@ -71,6 +71,16 @@ test('a fresh build gives every public page canonical metadata, bundled image ta
     for (const href of hints) assert.ok(existsSync(join(out, href)), `${href} is built`);
   }
   assert.doesNotMatch(readFileSync(join(out, 'resources.html'), 'utf8'), /preload/);
+  for (const page of ['index', 'play', 'resources', 'map']) {
+    const blocks = [...readFileSync(join(out, `${page}.html`), 'utf8').matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)];
+    if (page === 'index' || page === 'play') {
+      assert.equal(blocks.length, 1);
+      const schema = JSON.parse(blocks[0][1]);
+      assert.equal(schema['@type'], 'VideoGame');
+      assert.equal(schema.url, heads[page].canonical);
+      assert.equal(schema.image, heads[page]['og:image']);
+    } else assert.equal(blocks.length, 0);
+  }
 });
 
 test('map retains the game markup and only index bootstraps legacy hash routes', t => {
@@ -128,7 +138,7 @@ test('the renderer escapes metadata while preserving HTML fragments', () => {
   const escaped = 'A &quot;leaf&quot; &amp; &lt;root&gt; &#39;tree&#39;';
   const metadata = Object.fromEntries(['title', 'description', 'canonical', 'image'].map(key => [key, value]));
   const content = '<main><p>A &amp; B</p></main>';
-  const html = renderPage(template, metadata, { content, nav: '', developer: '', helpButton: '', styles: '', scripts: '' });
+  const html = renderPage(template, metadata, { content, nav: '', developer: '', helpButton: '', styles: '', scripts: '', jsonld: '' });
   const head = headValues(html);
   for (const key of ['title', 'description', 'canonical', 'og:title', 'og:description', 'og:image', 'og:url', 'twitter:title', 'twitter:description', 'twitter:image']) {
     assert.equal(head[key], escaped);

@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { marked } from 'marked';
 
-const origin = 'https://below-the-root.netlify.app';
+const origin = 'https://root.saul.pw';
 const pages = {
   play: {
     title: 'Play — Below the Root',
@@ -75,6 +75,13 @@ export function preloads(read) {
     .concat(data.map(path => `<link rel="preload" href="/${path}" as="fetch" crossorigin>`)).join('\n');
 }
 
+// schema.org markup for search engines; reuses the play page's existing copy
+export function gameSchema(metadata) {
+  const schema = { '@context': 'https://schema.org', '@type': 'VideoGame', name: 'Below the Root', url: metadata.canonical,
+    image: metadata.image, description: metadata.description, gamePlatform: 'Web browser', playMode: 'SinglePlayer' };
+  return `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>`;
+}
+
 export function buildSite(out) {
   const read = name => readFileSync(new URL(`../src/${name}`, import.meta.url), 'utf8');
   const template = read('page.html');
@@ -106,6 +113,7 @@ export function buildSite(out) {
       values.scripts = '<script type="module">import { enterSite } from "/site.js"; import { startAnalytics } from "/analytics.js"; if (enterSite()) { import("/main.js"); startAnalytics(); }</script>';
     }
     const metadata = { ...pages[output === 'index' ? 'play' : output], image: `${origin}/assets/box/screen.png` };
+    values.jsonld = page === 'play' && output !== 'map' ? gameSchema(metadata) : '';
     writeFileSync(join(out, `${output}.html`), renderPage(template, metadata, values));
   }
 }
