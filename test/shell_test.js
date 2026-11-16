@@ -32,11 +32,17 @@ async function shellFixture() {
 
   // run frames until the queue is drained and the shell is waiting on an idle stick
   function settle(state, max = 5000) {
+    let settled = false;
     for (let i = 0; i < max; i++) {
       shellFrame(state);
       tick(state);
-      if (!state.stick.queue.length && state.verb && state.verbWait === 0 && !state.stall) return;
       if (!state.verb && state.active) return;
+      if (!state.stick.queue.length && state.verb && state.verbWait === 0 && !state.stall && !state.diskBusy) {
+        if (settled) return;
+        settled = true;
+      } else {
+        settled = false;
+      }
     }
     assert.fail('did not settle');
   }
@@ -55,7 +61,7 @@ test('the main menu draws over T4 with START GAME selected', async () => {
   openMenu(s);
   settle(s);
   assert.equal(s.title, true);
-  assert.deepEqual(lines(s).map(line => line.trim()).filter(Boolean), ['START GAME', 'SAMPLE QUEST']);
+  assert.deepEqual(lines(s).map(line => line.trim()).filter(Boolean), ['START GAME', 'DISK STORAGE', 'SAMPLE QUEST']);
   assert.equal(s.menuSel, 0);
 });
 
@@ -67,6 +73,9 @@ test('the main menu cursor clamps at both ends', async () => {
   openMenu(s);
   settle(s);
   s.stick.feed(...push(J.down, 5));
+  settle(s);
+  assert.equal(s.menuSel, 3);
+  s.stick.feed(...push(J.up, 1));
   settle(s);
   assert.equal(s.menuSel, 2);
   s.stick.feed(...push(J.up, 1));
@@ -86,11 +95,14 @@ test('without a quest, navigation skips CONTINUE and selects SAMPLE QUEST', asyn
   settle(s);
   s.stick.feed(...push(J.down, 3));
   settle(s);
+  assert.equal(s.menuSel, 3);
+  s.stick.feed(...tap(J.up));
+  settle(s);
   assert.equal(s.menuSel, 2);
   s.stick.feed(...tap(J.up));
   settle(s);
   assert.equal(s.menuSel, 0);
-  s.stick.feed(...tap(J.down), ...tap(J.fire));
+  s.stick.feed(...push(J.down, 2), ...tap(J.fire));
   settle(s);
   assert.equal(s.demo.name, 'quest');
 });
@@ -236,7 +248,7 @@ test('SAMPLE QUEST ends the quest, runs the outdoor script first, and the button
   assert.equal(s.quest, true);
   openMenu(s);
   settle(s);
-  s.stick.feed(...push(J.down, 2), ...tap(J.fire));
+  s.stick.feed(...push(J.down, 3), ...tap(J.fire));
   settle(s);
   assert.equal(s.quest, false);
   assert.equal(s.demo.name, 'quest');
@@ -250,7 +262,7 @@ test('SAMPLE QUEST ends the quest, runs the outdoor script first, and the button
   assert.equal(s.title, true);
   assert.ok(lines(s).some(line => line.trim() === 'SAMPLE QUEST'));
   assert.ok(!lines(s).some(line => line.trim() === 'CONTINUE'));
-  s.stick.feed(...tap(J.up), ...tap(J.fire));
+  s.stick.feed(...push(J.up, 2), ...tap(J.fire));
   settle(s);
   assert.equal(s.menuSel, 0);
   assert.match(lines(s).join('\n'), /CHOOSE YOUR PLAYER:/);
@@ -320,4 +332,343 @@ test('opening the menu turns the music off', async () => {
   s.events.push({ music: 0 });
   openMenu(s);
   assert.deepEqual(s.events.filter((e) => 'music' in e).map((e) => e.music), [0, null]);
+});
+
+async function attachSaveSlots(state, storage = new Map()) {
+  const { SaveSlots, importSave } = await import('../src/save.js');
+  const slots = new SaveSlots({
+    getItem: (k) => (storage.has(k) ? storage.get(k) : null),
+    setItem: (k, v) => storage.set(k, String(v)),
+  });
+  state.saves = {
+    list: () => slots.list(),
+    save: (slot) => slots.write(slot, state),
+    load: (slot) => {
+      const entry = slots.read(slot);
+      if (!entry) throw new Error('Slot is empty');
+      const menuState = {
+        verb: state.verb, verbWait: state.verbWait, verbPolicy: state.verbPolicy,
+        verbCarryMovement: state.verbCarryMovement, verbUnread: state.verbUnread,
+        diskStorage: state.diskStorage, diskBusy: state.diskBusy,
+      };
+      importSave(state, entry.bytes);
+      Object.assign(state, menuState, {
+        quest: true, title: true, active: false, ended: null, menuSel: 1,
+      });
+      state.events.push({ music: null });
+    },
+  };
+  return { slots, storage };
+}
+
+test('DISK STORAGE mode navigation, questless SAVE GAME guard, and cancel controls', async () => {
+  const { fresh, settle, tap, push } = await shellFixture();
+
+  const s = fresh();
+  await attachSaveSlots(s);
+  openMenu(s);
+  settle(s);
+
+  s.stick.feed(...tap(J.down), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, true);
+  assert.match(lines(s).join('\n'), /SAVE GAME/);
+  assert.match(lines(s).join('\n'), /LOAD GAME/);
+  assert.match(lines(s).join('\n'), /RETURN/);
+
+  s.stick.feed(...tap(J.left), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, true);
+  assert.match(lines(s).join('\n'), /NO QUEST TO SAVE/);
+
+  s.stick.feed(...push(J.right, 2), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, false);
+  assert.equal(s.title, true);
+
+  s.stick.feed(...tap(J.fire), { ...J.idle, cancel: true }, J.idle);
+  settle(s);
+  assert.equal(s.diskStorage, false);
+
+  s.stick.feed(...tap(J.fire), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, true);
+  assert.match(lines(s).join('\n'), /QUEST\s+1/);
+
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  assert.match(lines(s).join('\n'), /SLOT IS EMPTY/);
+
+  s.stick.feed(...push(J.right, 5), ...tap(J.fire));
+  settle(s);
+  assert.match(lines(s).join('\n'), /LOAD GAME/);
+
+  s.stick.feed(...tap(J.fire), ...tap(J.up));
+  settle(s);
+  assert.match(lines(s).join('\n'), /LOAD GAME/);
+
+  s.stick.feed(...tap(J.fire), { ...J.idle, cancel: true }, J.idle);
+  settle(s);
+  assert.match(lines(s).join('\n'), /LOAD GAME/);
+
+  s.stick.feed({ ...J.idle, cancel: true }, J.idle);
+  settle(s);
+  assert.equal(s.diskStorage, false);
+});
+
+test('DISK STORAGE saves, confirms overwrites (NO vs YES), and loads into CONTINUE', async () => {
+  const { fresh, settle, tap, push, data } = await shellFixture();
+
+  const storage = new Map();
+  const genaa = data.characters[1];
+  const neric = data.characters[0];
+
+  const s = fresh();
+  startQuest(s, genaa);
+  const { slots } = await attachSaveSlots(s, storage);
+  openMenu(s);
+  settle(s);
+
+  s.stick.feed(...push(J.down, 2), ...tap(J.fire));
+  settle(s);
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  assert.match(lines(s).join('\n'), /EMPTY/);
+
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, false);
+  assert.equal(s.menuSel, 1);
+  assert.equal(slots.read(0).meta.character, genaa.id);
+
+  // Move to slot 2 so Genaa is saved on QUEST 2 as well
+  s.stick.feed(...tap(J.down), ...tap(J.fire));
+  settle(s);
+  s.stick.feed(...tap(J.fire), ...tap(J.right), ...tap(J.fire));
+  settle(s);
+  assert.equal(slots.read(1).meta.character, genaa.id);
+
+  // Switch active quest to Neric and test NO / cancel / YES on remembered QUEST 2
+  startQuest(s, neric);
+  openMenu(s);
+  settle(s);
+  s.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire));
+  settle(s);
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  assert.match(lines(s).join('\n'), /OVERWRITE QUEST 2\?/);
+
+  s.stick.feed(...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, true);
+  assert.equal(slots.read(1).meta.character, genaa.id);
+
+  s.stick.feed(...tap(J.fire), { ...J.idle, cancel: true }, J.idle);
+  settle(s);
+  assert.equal(slots.read(1).meta.character, genaa.id);
+
+  s.stick.feed(...tap(J.fire), ...tap(J.right), ...tap(J.fire));
+  settle(s);
+  assert.equal(s.diskStorage, false);
+  assert.equal(s.menuSel, 1);
+  assert.equal(slots.read(1).meta.character, neric.id);
+
+  // Load Genaa (QUEST 1) from a fresh questless menu and verify CONTINUE resumes her quest
+  const s2 = fresh();
+  await attachSaveSlots(s2, storage);
+  openMenu(s2);
+  settle(s2);
+  assert.equal(s2.quest, false);
+  assert.ok(!lines(s2).some(line => line.trim() === 'CONTINUE'));
+
+  s2.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire));
+  settle(s2);
+  assert.match(lines(s2).join('\n'), new RegExp(genaa.name.toUpperCase()));
+
+  s2.stick.feed(...tap(J.fire));
+  settle(s2);
+  assert.equal(s2.diskStorage, false);
+  assert.equal(s2.quest, true);
+  assert.equal(s2.character, genaa.id);
+  assert.equal(s2.menuSel, 1);
+  assert.ok(lines(s2).some(line => line.trim() === 'CONTINUE'));
+
+  s2.stick.feed(...tap(J.fire));
+  settle(s2);
+  assert.equal(s2.title, false);
+  assert.equal(s2.active, true);
+  assert.equal(s2.character, genaa.id);
+});
+
+test('DISK STORAGE shows SAVING/LOADING status, GAME SAVED/LOADED, and emits floppy clip', async () => {
+  const { fresh, settle, tap, push, data } = await shellFixture();
+
+  const storage = new Map();
+  const s = fresh();
+  startQuest(s, data.characters[0]);
+  await attachSaveSlots(s, storage);
+  openMenu(s);
+  settle(s);
+
+  s.events.length = 0;
+  s.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  let sawSaving = false;
+  let sawSaved = false;
+  let sawClip = false;
+  for (let i = 0; i < 600 && (s.stick.queue.length || s.diskStorage || s.verbWait > 0); i++) {
+    shellFrame(s);
+    tick(s);
+    if (s.events.some(e => e.clip === 'floppy')) sawClip = true;
+    const text = lines(s).join('\n');
+    if (text.includes('SAVING QUEST...')) sawSaving = true;
+    if (text.includes('GAME SAVED')) sawSaved = true;
+  }
+  settle(s);
+  assert.equal(sawSaving, true);
+  assert.equal(sawSaved, true);
+  assert.equal(sawClip, true);
+  assert.equal(s.diskStorage, false);
+  assert.equal(s.menuSel, 1);
+
+  const s2 = fresh();
+  await attachSaveSlots(s2, storage);
+  openMenu(s2);
+  settle(s2);
+  s2.events.length = 0;
+  s2.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  let sawLoading = false;
+  let sawLoaded = false;
+  let sawLoadClip = false;
+  for (let i = 0; i < 600 && (s2.stick.queue.length || s2.diskStorage || s2.verbWait > 0); i++) {
+    shellFrame(s2);
+    tick(s2);
+    if (s2.events.some(e => e.clip === 'floppy')) sawLoadClip = true;
+    const text = lines(s2).join('\n');
+    if (text.includes('LOADING QUEST...')) sawLoading = true;
+    if (text.includes('GAME LOADED')) sawLoaded = true;
+  }
+  settle(s2);
+  assert.equal(sawLoading, true);
+  assert.equal(sawLoaded, true);
+  assert.equal(sawLoadClip, true);
+  assert.equal(s2.diskStorage, false);
+  assert.equal(s2.quest, true);
+  assert.equal(s2.menuSel, 1);
+});
+
+test('DISK STORAGE reports INVALID SAVE DATA, SAVE FAILED, and STORAGE UNAVAILABLE', async () => {
+  const { fresh, settle, tap, push, data } = await shellFixture();
+  const { SAVE_SLOTS_KEY } = await import('../src/save.js');
+
+  const storage = new Map();
+  storage.set(SAVE_SLOTS_KEY, JSON.stringify({
+    version: 1,
+    slots: [{ c64: '!!!invalid-base64!!!', meta: { name: 'BAD' } }, null, null, null, null],
+  }));
+
+  const s1 = fresh();
+  await attachSaveSlots(s1, storage);
+  openMenu(s1);
+  settle(s1);
+  s1.events.length = 0;
+  s1.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  settle(s1);
+  assert.equal(s1.diskStorage, true);
+  assert.equal(s1.quest, false);
+  assert.match(lines(s1).join('\n'), /INVALID SAVE DATA/);
+  assert.equal(s1.events.some(e => 'clip' in e), false);
+
+  const s2 = fresh();
+  startQuest(s2, data.characters[0]);
+  s2.saves = {
+    list: () => Array(5).fill(null),
+    save: () => ({ ok: false, error: 'QuotaExceededError' }),
+    load: () => { throw new Error('unexpected'); },
+  };
+  openMenu(s2);
+  settle(s2);
+  s2.events.length = 0;
+  s2.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  settle(s2);
+  assert.equal(s2.diskStorage, true);
+  assert.match(lines(s2).join('\n'), /SAVE FAILED/);
+  assert.equal(s2.events.some(e => 'clip' in e), false);
+
+  const s3 = fresh();
+  s3.saves = null;
+  openMenu(s3);
+  settle(s3);
+  s3.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  settle(s3);
+  assert.equal(s3.diskStorage, true);
+  assert.match(lines(s3).join('\n'), /STORAGE UNAVAILABLE/);
+});
+
+test('Session integrates SaveSlots across save, menu restart, load, and CONTINUE', async () => {
+  const { data, tap, push } = await shellFixture();
+  const { Session } = await import('../src/record.js');
+  const { SaveSlots } = await import('../src/save.js');
+
+  const storage = new Map();
+  function makeSaves(getSession) {
+    const slots = new SaveSlots({
+      getItem: (k) => (storage.has(k) ? storage.get(k) : null),
+      setItem: (k, v) => storage.set(k, String(v)),
+    });
+    return {
+      list: () => slots.list(),
+      save: (slot) => slots.write(slot, getSession().state),
+      load: (slot) => {
+        const entry = slots.read(slot);
+        if (!entry) throw new Error('Slot is empty');
+        getSession().load(entry.bytes, { keepMenu: true });
+      },
+    };
+  }
+
+  let input1 = J.idle;
+  const feedInputs = (session, seq) => {
+    for (const j of seq) {
+      input1 = j;
+      for (let i = 0; i < 6; i++) session.step();
+    }
+    input1 = J.idle;
+    for (let i = 0; i < 6; i++) session.step();
+  };
+
+  let s1;
+  s1 = new Session(data, { read: () => input1 }, { initial: { mode: 'quest', character: 2 }, seed: 5, saves: makeSaves(() => s1) });
+  for (let i = 0; i < 12; i++) s1.step();
+  s1.menu();
+  for (let i = 0; i < 6; i++) s1.step();
+  feedInputs(s1, [
+    ...push(J.down, 2), ...tap(J.fire),
+    ...tap(J.fire),
+    ...tap(J.fire),
+  ]);
+  for (let i = 0; i < 300 && (s1.state.diskStorage || !lines(s1.state)[0].includes('START GAME')); i++) s1.step();
+  assert.equal(s1.state.diskStorage, false);
+  assert.equal(s1.state.menuSel, 1);
+
+  let input2 = J.idle;
+  let s2;
+  s2 = new Session(data, { read: () => input2 }, { initial: { mode: 'menu' }, seed: 9, saves: makeSaves(() => s2) });
+  for (let i = 0; i < 6; i++) s2.step();
+  for (const j of [...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire)]) {
+    input2 = j;
+    for (let i = 0; i < 6; i++) s2.step();
+  }
+  input2 = J.idle;
+  for (let i = 0; i < 300 && (s2.state.diskStorage || !lines(s2.state)[0].includes('START GAME')); i++) s2.step();
+  assert.ok(lines(s2.state).some(l => l.includes('CONTINUE')));
+  for (const j of tap(J.fire)) {
+    input2 = j;
+    for (let i = 0; i < 6; i++) s2.step();
+  }
+  input2 = J.idle;
+  for (let i = 0; i < 6; i++) s2.step();
+  assert.equal(s2.state.title, false);
+  assert.equal(s2.state.active, true);
+  assert.equal(s2.state.quest, true);
+  assert.equal(s2.state.character, 2);
 });

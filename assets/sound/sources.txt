@@ -1,3 +1,7 @@
 power-on.mp3: the Commodore 1702 monitor's degauss at power-on.
 
 Synthesized for this port, modelled on real degauss recordings.
+
+floppy.mp3: floppy drive read/write mechanical activity (~3.1s excerpt, normalized).
+
+Adapted from reading_floppy_disc_2.wav by KRAFTWERK2K1 (Freesound #39700 / Pixabay #35303).

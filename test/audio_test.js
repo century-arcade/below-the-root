@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { planTune, pickTune, startTune, Speaker } from '../src/audio.js';
+import { planTune, pickTune, startTune, clip, CLIPS, Speaker } from '../src/audio.js';
 import { QUARTER_FRAMES } from '../src/music-notation.js';
 
 class AudioContextStub {
@@ -279,3 +279,56 @@ test('new effects cut old effects, and tunes suppress effects until silenced', (
   assert.equal(speaker.effect, null);
   assert.ok(effect.src.stoppedAt < stop, 'silence cuts the active effect short');
 });
+
+test('routed clips follow master gain and silence while hardware clips bypass both', () => {
+  assert.ok(CLIPS.includes('power-on'));
+  assert.ok(CLIPS.includes('floppy'));
+
+  const state = { tick: 0, events: [] };
+  clip(state, 'floppy');
+  assert.deepEqual(state.events, [{ clip: 'floppy' }]);
+
+  const speaker = new Speaker(music);
+  unlock(speaker);
+  const sources = [];
+  speaker.ctx.createBufferSource = () => {
+    const src = {
+      playbackRate: {},
+      connectedTo: null,
+      startedAt: null,
+      stoppedAt: null,
+      connect(target) {
+        this.connectedTo = target;
+        return target;
+      },
+      start(at) {
+        this.startedAt = at;
+      },
+      stop(at) {
+        this.stoppedAt = at;
+      },
+    };
+    sources.push(src);
+    return src;
+  };
+  speaker.clips['power-on'] = {};
+  speaker.clips.floppy = {};
+
+  speaker.clip('power-on');
+  speaker.frame(state);
+  assert.equal(state.events.length, 0);
+  assert.equal(sources.length, 2);
+  assert.equal(sources[0].connectedTo, speaker.ctx.destination);
+  assert.equal(sources[1].connectedTo, speaker.master);
+
+  speaker.ctx.currentTime = 1.2;
+  speaker.silence();
+  assert.equal(sources[0].stoppedAt, null, 'hardware power-on clip keeps ringing');
+  assert.equal(sources[1].stoppedAt, 1.2, 'routed floppy clip stops on silence');
+
+  speaker.ctx.state = 'suspended';
+  clip(state, 'floppy');
+  speaker.frame(state);
+  assert.equal(sources.length, 2, 'routed clip skips when AudioContext is not running');
+});
+

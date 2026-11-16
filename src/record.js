@@ -66,8 +66,9 @@ export function checkpoint(s) {
 }
 
 export class Session {
-  constructor(data, live, { initial = { mode: 'cold' }, seed = 1, record = null } = {}) {
+  constructor(data, live, { initial = { mode: 'cold' }, seed = 1, record = null, saves = null } = {}) {
     this.live = live;
+    this.saves = saves;
     this.seed = seed = record?.seed ?? seed;
     this.playback = !!record;
     this.sourceRecord = record ? copy(record) : null;
@@ -88,6 +89,7 @@ export class Session {
     const stick = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.(), flush: () => !this.playback && this.live.flush?.() };
     this.state = newState(data, stick, { rng: random(seed) });
     this.state.stick = stick;
+    this.state.saves = saves;
     this.state.commands = {
       execute: (name, choices, options) => this.command(name, choices, options),
       handoff: options => this.handoff(options),
@@ -403,15 +405,25 @@ export class Session {
     this.onSkip?.(offset);
     return offset;
   }
-  load(bytes) {
+  load(bytes, { keepMenu = false } = {}) {
     const initial = { mode: 'import', state: toBase64(bytes) };
-    const imported = new Session(this.state.data, this.live, { seed: this.seed, initial });
+    const imported = new Session(this.state.data, this.live, { seed: this.seed, initial, saves: this.saves });
     const state = this.state;
+    const menuState = keepMenu ? {
+      verb: state.verb, verbWait: state.verbWait, verbPolicy: state.verbPolicy,
+      verbCarryMovement: state.verbCarryMovement, verbUnread: state.verbUnread,
+      diskStorage: state.diskStorage,
+    } : null;
     Object.assign(this, imported);
     Object.assign(state, imported.state);
     this.state = state;
     state.stick = state.input = { pace: 5, read: (kind, policy) => this.read(kind, policy), fresh: () => !this.playback && this.live.fresh?.(), flush: () => !this.playback && this.live.flush?.() };
     state.commands = { execute: (name, choices, options) => this.command(name, choices, options), handoff: options => this.handoff(options) };
+    state.saves = this.saves;
+    if (menuState) {
+      Object.assign(state, menuState, { title: true, active: false, ended: null, menuSel: 1 });
+      state.events.push({ music: null });
+    }
     this.handoff();
   }
 
@@ -469,7 +481,7 @@ export class Session {
     // Runtime day history may end inside a room. Rebuild against an internal
     // target, retaining the last real save boundary for downloads/autosave.
     const source = this.playback ? this.sourceRecord : { ...this.record, ...this.boundary, events: this.record.events };
-    const restored = new Session(this.state.data, this.live, { initial: source.initial, seed: source.seed });
+    const restored = new Session(this.state.data, this.live, { initial: source.initial, seed: source.seed, saves: this.saves });
     restored.playback = true;
     restored.sourceRecord = copy(source);
     restored.totalRoomChanges = source.checkpoint.visit - restored.startVisit;
@@ -482,12 +494,12 @@ export class Session {
     return restored;
   }
 
-  static watch(data, live, record) {
+  static watch(data, live, record, { saves = null } = {}) {
     validateRecord(record, data);
-    return new Session(data, live, { record });
+    return new Session(data, live, { record, saves });
   }
-  static replay(data, live, record) {
-    const session = Session.watch(data, live, record);
+  static replay(data, live, record, { saves = null } = {}) {
+    const session = Session.watch(data, live, record, { saves });
     while (!session.playbackDone) { session.step({ presentation: false }); session.state.events.length = 0; }
     session.continueLive();
     return session;

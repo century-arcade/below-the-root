@@ -4,7 +4,7 @@ export const CLASS = {
 };
 
 const SLOT_NAMES = ['sign', 'wall', 'structure', 'ground'];
-const PORT_MENU = ['START GAME', 'CONTINUE', 'SAMPLE QUEST'];
+const PORT_MENU = ['START GAME', 'CONTINUE', 'DISK STORAGE', 'SAMPLE QUEST'];
 
 export async function loadData(read) {
   const assetsFile = read('data/assets.json');

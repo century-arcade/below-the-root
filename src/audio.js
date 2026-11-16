@@ -12,8 +12,8 @@ export const SFX = {
   fall: 9, door: 10, glideTurn: 11, bell: 12, chime: 13,
 };
 
-// the monitor's own sounds, synthesized: assets/sound/sources.txt
-export const CLIPS = ['power-on'];
+// monitor & drive sounds documented in assets/sound/sources.txt
+export const CLIPS = ['power-on', 'floppy'];
 
 export async function loadClip(name) {
   const bytes = await (await fetch(`/assets/sound/${name}.mp3`)).arrayBuffer();
@@ -22,6 +22,10 @@ export async function loadClip(name) {
 
 export function sfx(state, id) {
   state.events.push({ sfx: id });
+}
+
+export function clip(state, name) {
+  state.events.push({ clip: name });
 }
 
 export const TUNE = { over: 0, rank: 2 };
@@ -85,6 +89,7 @@ export class Speaker {
     this.playing = null;
     this.paused = null;
     this.clips = {};
+    this.routedClips = new Set();
   }
 
   // squared slider: 10% on it is 1% of the gain
@@ -127,6 +132,7 @@ export class Speaker {
     for (const e of state.events) {
       if ('music' in e) { if (e.music === null) this.silence(); else this.tune(e.music, state.tick); }
       else if ('sfx' in e) this.sfx(e.sfx);
+      else if ('clip' in e) this.clip(e.clip, { routed: true });
     }
     state.events.length = 0;
   }
@@ -208,13 +214,17 @@ export class Speaker {
     this.effectEnd = now + (s.attack_ms + s.decay_ms) / 1000 + RELEASE_S;
   }
 
-  // hardware: full volume past the slider and mute; silence() leaves it ringing
-  clip(name) {
+  // hardware: full volume past the slider and mute by default; routed clips follow master and silence()
+  clip(name, { routed = false } = {}) {
     const buffer = this.clips[name];
-    if (!this.ctx || !buffer) return;
+    if (!this.ctx || !buffer || (routed && !this.ready)) return;
     const src = this.ctx.createBufferSource();
     src.buffer = buffer;
-    src.connect(this.ctx.destination);
+    src.connect(routed ? this.master : this.ctx.destination);
+    if (routed) {
+      this.routedClips.add(src);
+      src.onended = () => this.routedClips.delete(src);
+    }
     src.start(this.ctx.currentTime);
   }
 
@@ -290,6 +300,8 @@ export class Speaker {
     if (this.effect) this.cut(this.effect, when);
     this.effect = null;
     this.effectEnd = 0;
+    for (const c of this.routedClips) { try { c.stop(when); } catch {} }
+    this.routedClips.clear();
     for (const v of this.ringing) this.cut(v, when);
     this.ringing.length = 0;
     this.notes.length = 0;
