@@ -5,13 +5,15 @@ import { newObjects, startQuest, startDemo, startVerb, endDemo } from './game.js
 import { newFlags } from './creatures.js';
 import { fireUp, directionPress } from './input.js';
 import { print, clearPanel, PANEL_ROW } from './panel.js';
-import { SFX, sfx } from './audio.js';
+import { SFX, sfx, clip } from './audio.js';
 import { formatSlotSummary, SAVE_SLOT_COUNT } from './save.js';
 
 const RETURN_TO_MENU = 5;
 const MODE = { SAVE: 0, LOAD: 1, RETURN: 2 };
 const BACK_SLOT = SAVE_SLOT_COUNT;
 const BACK_UI = { col: 33, text: ' BACK ' };
+const DISK_IO_FRAMES = 180;
+const DISK_DONE_FRAMES = 60;
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
@@ -28,6 +30,7 @@ export function shellFrame(state) {
 export function openMenu(state) {
   state.title = true;
   state.diskStorage = false;
+  state.diskBusy = false;
   state.ended = null;
   state.events.push({ music: null });
   startVerb(state, mainMenu(state));
@@ -145,6 +148,29 @@ function* confirmOverwrite(state, slot, entry) {
   }
 }
 
+function drawDiskStatus(state, heading, slot, entry) {
+  const timeNames = state.data.quest.clock.time_of_day_names;
+  clearPanel(state);
+  print(state, PANEL_ROW, 1, heading);
+  print(state, PANEL_ROW + 1, 1, `QUEST ${slot + 1}`);
+  if (entry) print(state, PANEL_ROW + 3, 1, formatSlotSummary(entry, timeNames));
+}
+
+function* diskTransfer(state, heading, done, slot, entry) {
+  state.diskBusy = true;
+  try {
+    drawDiskStatus(state, heading, slot, entry);
+    clip(state, 'floppy');
+    yield DISK_IO_FRAMES;
+    drawDiskStatus(state, done, slot, entry);
+    sfx(state, SFX.confirm);
+    yield DISK_DONE_FRAMES;
+    state.input?.flush?.();
+  } finally {
+    state.diskBusy = false;
+  }
+}
+
 function* diskSlots(state, mode) {
   let slots = state.saves?.list() ?? Array(SAVE_SLOT_COUNT).fill(null);
   let slotSel = clamp(state.diskSlot ?? 0, 0, SAVE_SLOT_COUNT - 1);
@@ -173,13 +199,13 @@ function* diskSlots(state, mode) {
         }
         try {
           state.saves.load(slotSel);
-          sfx(state, SFX.confirm);
-          return true;
         } catch {
           notice = 'INVALID SAVE DATA';
           drawDiskSlots(state, mode, slotSel, slots, notice);
           continue;
         }
+        yield* diskTransfer(state, 'LOADING QUEST...', 'GAME LOADED', slotSel, slots[slotSel]);
+        return true;
       }
       if (!state.quest) {
         notice = 'NO QUEST TO SAVE';
@@ -196,8 +222,8 @@ function* diskSlots(state, mode) {
       }
       const res = state.saves.save(slotSel);
       if (res?.ok) {
-        sfx(state, SFX.confirm);
         state.menuSel = 1;
+        yield* diskTransfer(state, 'SAVING QUEST...', 'GAME SAVED', slotSel, res.entry);
         return true;
       }
       slots = state.saves.list();

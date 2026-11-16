@@ -52,7 +52,9 @@ with browser_page('/play?player=1') as page:
     tap_key(page, 'Enter')
     panel_has(page, 'EMPTY')
     tap_key(page, 'Enter')
-    until(page, 's => !s.state.diskStorage && s.state.menuSel === 1')
+    panel_has(page, 'SAVING QUEST...')
+    panel_has(page, 'GAME SAVED')
+    until(page, 's => !s.state.diskStorage && s.state.menuSel === 1 && s.state.verbWait === 0')
     panel_has(page, 'CONTINUE')
 
     raw = page.evaluate('localStorage.getItem(arguments[0])', SAVES_KEY)
@@ -84,7 +86,10 @@ with browser_page('/play?player=1') as page:
     panel_has(page, 'OVERWRITE QUEST 1?')
     tap_key(page, 'ArrowRight')
     tap_key(page, 'Enter')  # Confirm YES.
-    until(page, 's => !s.state.diskStorage && s.state.menuSel === 1')
+    panel_has(page, 'SAVING QUEST...')
+    panel_has(page, 'GAME SAVED')
+    until(page, 's => !s.state.diskStorage && s.state.menuSel === 1 && s.state.verbWait === 0')
+    panel_has(page, 'CONTINUE')
 
     # Power off monitor: autosave is cleared while manual DISK STORAGE slots survive.
     power = page.get_by_role('button', name='Monitor power', exact=True)
@@ -109,8 +114,11 @@ with browser_page('/play?player=1') as page:
     tap_key(page, 'Enter')
     panel_has(page, 'GENAA')
     tap_key(page, 'Enter')
+    panel_has(page, 'LOADING QUEST...')
+    panel_has(page, 'GAME LOADED')
 
-    until(page, 's => !s.state.diskStorage && s.state.quest && s.state.menuSel === 1')
+    until(page, 's => !s.state.diskStorage && s.state.quest && s.state.menuSel === 1 && s.state.verbWait === 0')
+    panel_has(page, 'CONTINUE')
     assert 'CONTINUE' in panel_text(page)
     tap_key(page, 'Enter')
     until(page, 's => !s.state.title && s.state.active && s.state.character === 1')

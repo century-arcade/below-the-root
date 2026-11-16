@@ -32,11 +32,17 @@ async function shellFixture() {
 
   // run frames until the queue is drained and the shell is waiting on an idle stick
   function settle(state, max = 5000) {
+    let settled = false;
     for (let i = 0; i < max; i++) {
       shellFrame(state);
       tick(state);
-      if (!state.stick.queue.length && state.verb && state.verbWait === 0 && !state.stall) return;
       if (!state.verb && state.active) return;
+      if (!state.stick.queue.length && state.verb && state.verbWait === 0 && !state.stall && !state.diskBusy) {
+        if (settled) return;
+        settled = true;
+      } else {
+        settled = false;
+      }
     }
     assert.fail('did not settle');
   }
@@ -340,12 +346,15 @@ async function attachSaveSlots(state, storage = new Map()) {
     load: (slot) => {
       const entry = slots.read(slot);
       if (!entry) throw new Error('Slot is empty');
+      const menuState = {
+        verb: state.verb, verbWait: state.verbWait, verbPolicy: state.verbPolicy,
+        verbCarryMovement: state.verbCarryMovement, verbUnread: state.verbUnread,
+        diskStorage: state.diskStorage, diskBusy: state.diskBusy,
+      };
       importSave(state, entry.bytes);
-      state.quest = true;
-      state.title = true;
-      state.active = false;
-      state.ended = null;
-      state.menuSel = 1;
+      Object.assign(state, menuState, {
+        quest: true, title: true, active: false, ended: null, menuSel: 1,
+      });
       state.events.push({ music: null });
     },
   };
@@ -491,6 +500,62 @@ test('DISK STORAGE saves, confirms overwrites (NO vs YES), and loads into CONTIN
   assert.equal(s2.character, genaa.id);
 });
 
+test('DISK STORAGE shows SAVING/LOADING status, GAME SAVED/LOADED, and emits floppy clip', async () => {
+  const { fresh, settle, tap, push, data } = await shellFixture();
+
+  const storage = new Map();
+  const s = fresh();
+  startQuest(s, data.characters[0]);
+  await attachSaveSlots(s, storage);
+  openMenu(s);
+  settle(s);
+
+  s.events.length = 0;
+  s.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  let sawSaving = false;
+  let sawSaved = false;
+  let sawClip = false;
+  for (let i = 0; i < 600 && (s.stick.queue.length || s.diskStorage || s.verbWait > 0); i++) {
+    shellFrame(s);
+    tick(s);
+    if (s.events.some(e => e.clip === 'floppy')) sawClip = true;
+    const text = lines(s).join('\n');
+    if (text.includes('SAVING QUEST...')) sawSaving = true;
+    if (text.includes('GAME SAVED')) sawSaved = true;
+  }
+  settle(s);
+  assert.equal(sawSaving, true);
+  assert.equal(sawSaved, true);
+  assert.equal(sawClip, true);
+  assert.equal(s.diskStorage, false);
+  assert.equal(s.menuSel, 1);
+
+  const s2 = fresh();
+  await attachSaveSlots(s2, storage);
+  openMenu(s2);
+  settle(s2);
+  s2.events.length = 0;
+  s2.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
+  let sawLoading = false;
+  let sawLoaded = false;
+  let sawLoadClip = false;
+  for (let i = 0; i < 600 && (s2.stick.queue.length || s2.diskStorage || s2.verbWait > 0); i++) {
+    shellFrame(s2);
+    tick(s2);
+    if (s2.events.some(e => e.clip === 'floppy')) sawLoadClip = true;
+    const text = lines(s2).join('\n');
+    if (text.includes('LOADING QUEST...')) sawLoading = true;
+    if (text.includes('GAME LOADED')) sawLoaded = true;
+  }
+  settle(s2);
+  assert.equal(sawLoading, true);
+  assert.equal(sawLoaded, true);
+  assert.equal(sawLoadClip, true);
+  assert.equal(s2.diskStorage, false);
+  assert.equal(s2.quest, true);
+  assert.equal(s2.menuSel, 1);
+});
+
 test('DISK STORAGE reports INVALID SAVE DATA, SAVE FAILED, and STORAGE UNAVAILABLE', async () => {
   const { fresh, settle, tap, push, data } = await shellFixture();
   const { SAVE_SLOTS_KEY } = await import('../src/save.js');
@@ -505,11 +570,13 @@ test('DISK STORAGE reports INVALID SAVE DATA, SAVE FAILED, and STORAGE UNAVAILAB
   await attachSaveSlots(s1, storage);
   openMenu(s1);
   settle(s1);
+  s1.events.length = 0;
   s1.stick.feed(...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
   settle(s1);
   assert.equal(s1.diskStorage, true);
   assert.equal(s1.quest, false);
   assert.match(lines(s1).join('\n'), /INVALID SAVE DATA/);
+  assert.equal(s1.events.some(e => 'clip' in e), false);
 
   const s2 = fresh();
   startQuest(s2, data.characters[0]);
@@ -520,10 +587,12 @@ test('DISK STORAGE reports INVALID SAVE DATA, SAVE FAILED, and STORAGE UNAVAILAB
   };
   openMenu(s2);
   settle(s2);
+  s2.events.length = 0;
   s2.stick.feed(...push(J.down, 2), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire));
   settle(s2);
   assert.equal(s2.diskStorage, true);
   assert.match(lines(s2).join('\n'), /SAVE FAILED/);
+  assert.equal(s2.events.some(e => 'clip' in e), false);
 
   const s3 = fresh();
   s3.saves = null;
@@ -577,6 +646,7 @@ test('Session integrates SaveSlots across save, menu restart, load, and CONTINUE
     ...tap(J.fire),
     ...tap(J.fire),
   ]);
+  for (let i = 0; i < 300 && (s1.state.diskStorage || !lines(s1.state)[0].includes('START GAME')); i++) s1.step();
   assert.equal(s1.state.diskStorage, false);
   assert.equal(s1.state.menuSel, 1);
 
@@ -584,7 +654,14 @@ test('Session integrates SaveSlots across save, menu restart, load, and CONTINUE
   let s2;
   s2 = new Session(data, { read: () => input2 }, { initial: { mode: 'menu' }, seed: 9, saves: makeSaves(() => s2) });
   for (let i = 0; i < 6; i++) s2.step();
-  for (const j of [...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire)]) {
+  for (const j of [...tap(J.down), ...tap(J.fire), ...tap(J.fire), ...tap(J.fire)]) {
+    input2 = j;
+    for (let i = 0; i < 6; i++) s2.step();
+  }
+  input2 = J.idle;
+  for (let i = 0; i < 300 && (s2.state.diskStorage || !lines(s2.state)[0].includes('START GAME')); i++) s2.step();
+  assert.ok(lines(s2.state).some(l => l.includes('CONTINUE')));
+  for (const j of tap(J.fire)) {
     input2 = j;
     for (let i = 0; i < 6; i++) s2.step();
   }
