@@ -1020,3 +1020,71 @@ for (const action of ['seek', 'continue']) {
   });
 }
 
+test('Session propagates saves through constructor, replay, watch, and seeking', () => {
+  const saves = {
+    list: () => Array(5).fill(null),
+    save: () => ({ ok: true }),
+    load: () => {},
+  };
+  const idle = { read: () => IDLE };
+  const live = new Session(data, idle, { initial: { mode: 'menu' }, seed: 1, saves });
+  assert.equal(live.saves, saves);
+  assert.equal(live.state.saves, saves);
+
+  const record = winningRecord(winningFixtures[0]);
+  const replayed = Session.replay(data, idle, record, { saves });
+  assert.equal(replayed.saves, saves);
+  assert.equal(replayed.state.saves, saves);
+
+  const watched = Session.watch(data, idle, record, { saves });
+  assert.equal(watched.saves, saves);
+  assert.equal(watched.state.saves, saves);
+  watched.nextRoom();
+  assert.equal(watched.state.saves, saves);
+  watched.previousRoom();
+  assert.equal(watched.state.saves, saves);
+});
+
+test('Session.load with keepMenu preserves saves and menu shell on CONTINUE', () => {
+  const saves = {
+    list: () => Array(5).fill(null),
+    save: () => ({ ok: true }),
+    load: () => {},
+  };
+  let nextInput = IDLE;
+  const stick = { read: () => nextInput };
+
+  const src = new Session(data, { read: () => IDLE }, { initial: { mode: 'quest', character: 2 }, seed: 9 });
+  advanceSession(src, 10);
+  const bytes = exportSave(src.state);
+
+  const s = new Session(data, stick, { initial: { mode: 'menu' }, seed: 7, saves });
+  advanceSession(s, 6);
+  assert.equal(s.state.title, true);
+
+  const stateRef = s.state;
+  s.load(bytes, { keepMenu: true });
+  assert.equal(s.state, stateRef);
+  assert.equal(s.state.saves, saves);
+  assert.equal(s.state.quest, true);
+  assert.equal(s.state.character, 2);
+  assert.equal(s.state.title, true);
+  assert.equal(s.state.active, false);
+  assert.equal(s.state.ended, null);
+  assert.equal(s.state.menuSel, 1);
+  assert.ok(s.state.events.some(e => e.music === null));
+  assert.ok(s.boundary);
+  assert.equal(s.snapshot().initial.mode, 'import');
+  assert.deepEqual(s.boundary.checkpoint, checkpoint(Session.replay(data, { read: () => IDLE }, s.snapshot()).state));
+
+  nextInput = J.fire;
+  advanceSession(s, 6);
+  nextInput = IDLE;
+  advanceSession(s, 6);
+  assert.equal(s.state.title, false);
+  assert.equal(s.state.active, true);
+  assert.equal(s.state.character, 2);
+  assert.equal(s.state.saves, saves);
+});
+
+

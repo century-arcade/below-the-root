@@ -188,3 +188,89 @@ export function toBase64(bytes) {
 export function fromBase64(text) {
   return Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
 }
+
+export const SAVE_SLOTS_KEY = 'btr.saves.v1';
+export const SAVE_SLOT_COUNT = 5;
+const SAVE_SLOTS_VERSION = 1;
+
+function normalizeSlot(entry) {
+  if (!entry || typeof entry !== 'object' || typeof entry.c64 !== 'string') return null;
+  const meta = entry.meta && typeof entry.meta === 'object' ? { ...entry.meta } : null;
+  return { c64: entry.c64, meta };
+}
+
+function emptySlots() {
+  return Array(SAVE_SLOT_COUNT).fill(null);
+}
+
+export function formatSlotSummary(entry, timeNames = null, maxWidth = 38) {
+  if (!entry) return 'EMPTY';
+  const m = entry.meta;
+  if (!m) return 'SAVED QUEST';
+  const parts = [];
+  if (typeof m.name === 'string' && m.name) parts.push(m.name.toUpperCase());
+  if (Number.isInteger(m.day)) parts.push(`DAY ${String(m.day).padStart(2, '0')}`);
+  if (typeof m.room === 'string' && m.room) parts.push(m.room);
+  const timeName = Number.isInteger(m.hour) && Array.isArray(timeNames) ? timeNames[m.hour] : null;
+  if (timeName) parts.push(timeName);
+  return (parts.join('  ') || 'SAVED QUEST').slice(0, maxWidth);
+}
+
+export class SaveSlots {
+  constructor(storage, { onError = () => {}, now = () => Date.now() } = {}) {
+    this.storage = storage;
+    this.onError = onError;
+    this.now = now;
+  }
+
+  list() {
+    let raw = null;
+    try { raw = this.storage?.getItem?.(SAVE_SLOTS_KEY) ?? null; }
+    catch (err) { this.onError(`Could not read saved games: ${err.message}`); return emptySlots(); }
+    if (!raw) return emptySlots();
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.version !== SAVE_SLOTS_VERSION || !Array.isArray(parsed.slots)) return emptySlots();
+      return Array.from({ length: SAVE_SLOT_COUNT }, (_, i) => normalizeSlot(parsed.slots[i]));
+    } catch (err) {
+      this.onError(`Saved games could not be parsed: ${err.message}`);
+      return emptySlots();
+    }
+  }
+
+  read(slot) {
+    if (!Number.isInteger(slot) || slot < 0 || slot >= SAVE_SLOT_COUNT) {
+      throw new RangeError(`Invalid save slot: ${slot}`);
+    }
+    const entry = this.list()[slot];
+    if (!entry) return null;
+    return { bytes: fromBase64(entry.c64), meta: entry.meta };
+  }
+
+  write(slot, state) {
+    if (!Number.isInteger(slot) || slot < 0 || slot >= SAVE_SLOT_COUNT) {
+      throw new RangeError(`Invalid save slot: ${slot}`);
+    }
+    const bytes = exportSave(state);
+    const entry = {
+      c64: toBase64(bytes),
+      meta: {
+        character: state.character,
+        name: state.player.name,
+        day: state.clock.day,
+        hour: state.clock.hour,
+        room: state.room.code,
+        savedAt: new Date(this.now()).toISOString(),
+      },
+    };
+    const slots = this.list();
+    slots[slot] = entry;
+    try {
+      this.storage.setItem(SAVE_SLOTS_KEY, JSON.stringify({ version: SAVE_SLOTS_VERSION, slots }));
+      return { ok: true, entry };
+    } catch (err) {
+      this.onError(`Save failed: ${err.message}`);
+      return { ok: false, error: err.message };
+    }
+  }
+}

@@ -7,6 +7,7 @@ import { itemChoiceAt, highlightItemChoice } from './inventory.js';
 import { Keyboard, Pointer, SideTouch, Gamepad, isEditing, skipsTune } from './input.js';
 import { cell, doorNumber } from './world.js';
 import { Session, Autosave, AUTOSAVE_KEY, discardObsoleteAutosaves, clearAutosave, screenKey } from './record.js';
+import { SaveSlots } from './save.js';
 import { setupDebug, downloadRecord } from './debug.js';
 import { CLIPS, loadClip, Speaker } from './audio.js';
 import { createMusicTrail } from './music-trail.js';
@@ -223,25 +224,38 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     discardObsoleteAutosaves(localStorage);
     existing = localStorage.getItem(AUTOSAVE_KEY);
   } catch {}
+  const saveSlots = new SaveSlots(
+    { getItem: k => localStorage.getItem(k), setItem: (k, v) => localStorage.setItem(k, v) },
+    { onError: log },
+  );
+  const saves = {
+    list: () => saveSlots.list(),
+    save: slot => saveSlots.write(slot, session.state),
+    load: slot => {
+      const entry = saveSlots.read(slot);
+      if (!entry) throw new Error('Slot is empty');
+      session.load(entry.bytes, { keepMenu: true });
+    },
+  };
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
   if (existing && initial.mode === 'cold') {
     let stored = null;
     try { stored = JSON.parse(existing); } catch {}
-    try { session = Session.replay(data, stick, stored); }
+    try { session = Session.replay(data, stick, stored, { saves }); }
     catch (err) {
       log(`Saved game could not be restored: ${err.message}`);
       initial = { mode: 'menu' };
     }
   }
   const freshStart = !session && initial.mode === 'cold';
-  session ||= new Session(data, stick, { initial, seed });
+  session ||= new Session(data, stick, { initial, seed, saves });
   let state = session.state;
   state.classic = options.classic;
   const tuneSkippable = () => powered && !paused && !away() && !startupHelp && !session.playback
     && state.tuneWait != null && !options.classic;
   stick.contextKey = key => {
     if (!powered || paused || away() || startupHelp || session.playback) return null;
-    if (key === 'Escape' && (state.itemPicker || state.pointer)) return 'cancel';
+    if (key === 'Escape' && (state.itemPicker || state.pointer || state.diskStorage)) return 'cancel';
     if (tuneSkippable() && skipsTune(key)) return 'fire';
     return state.itemPicker?.readOnly ? 'fire' : null;
   };
@@ -267,7 +281,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
     facing: () => !session.playback && inControl(state) ? state.player?.facing : null,
     chord: () => {
       if (state.itemPicker && !session.playback) stick.gesture([state.itemPicker.readOnly ? 'fire' : 'cancel'], 'touch');
-      else if (state.pointer && !session.playback) stick.gesture(['cancel'], 'touch');
+      else if ((state.pointer || state.diskStorage) && !session.playback) stick.gesture(['cancel'], 'touch');
       else if (state.commandMenuOpen || canOpenCommandMenu(state)) commandMenu(!!state.commandMenuOpen);
       else if (inControl(state) && figureBusy(state.player)) return;
       else if (!session.playback && !state.demo && !state.title) stick.gesture(['fire', 'down'], 'touch');
@@ -508,7 +522,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
       paused = false;
       returnSession = null; seekRoom = null;
       session = new Session(data, stick, {
-        initial: { mode: 'cold' }, seed: crypto.getRandomValues(new Uint32Array(1))[0],
+        initial: { mode: 'cold' }, seed: crypto.getRandomValues(new Uint32Array(1))[0], saves,
       });
       state = session.state;
       paperKey = null;
@@ -752,7 +766,7 @@ loadData((path) => fetch(`/${path}`).then((r) => {
   }, true);
   addEventListener('keydown', e => {
     if (!powered || paused || e.repeat || isEditing(e.target) || e.metaKey || e.altKey || e.ctrlKey) return;
-    if ((state.itemPicker || state.pointer) && !session.playback && !away()
+    if ((state.itemPicker || state.pointer || state.diskStorage) && !session.playback && !away()
         && (state.itemPicker?.readOnly || e.key === 'Escape')) return;
     if (debug && !session.playback && ['Backspace', 'Delete'].includes(e.key)
         && (e.target === canvas || e.target === document.body)) {
