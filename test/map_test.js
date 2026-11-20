@@ -1,7 +1,7 @@
 import { loadTestData, J } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mapCells, visitedRooms, defaultMapRooms, visitedEmptyRooms, mapLocation, mapRoom, wheelZoom } from '../src/map.js';
+import { axisLabels, mapCells, visitedRooms, defaultMapRooms, visitedEmptyRooms, mapLocation, mapRoom, wheelZoom } from '../src/map.js';
 import { Session } from '../src/record.js';
 import { enterRoom, leaveByEdge } from '../src/world.js';
 import { startQuest } from '../src/game.js';
@@ -69,6 +69,15 @@ test("developer mode reveals the whole map and marks unvisited rooms", async () 
   const rock = cells.filter(c => c.blank && data.map.bands[parseInt(c.code[1], 32)].underground);
   assert.ok(rock.length && rock.every(c => c.kind === 'rock'), 'underground blanks show as solid rock');
   assert.ok(!mapCells(data, defaults, 'M5').flat().some(c => c?.blank), 'blank air is shown only in developer mode');
+});
+
+test("developer map axes name each room code's column and row", async () => {
+  const { data, defaults } = await mapFixture();
+  const grid = mapCells(data, defaults, 'M5', new Set(), true);
+  const [cols, rows] = [axisLabels(grid[0].length), axisLabels(grid.length)];
+  for (const [y, row] of grid.entries()) for (const [x, cell] of row.entries()) {
+    assert.equal(cell.code, cols[x] + rows[y]);
+  }
 });
 
 test("exploration tracks empty sky and resets for each new quest", async () => {

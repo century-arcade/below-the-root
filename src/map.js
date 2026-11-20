@@ -62,6 +62,21 @@ export function drawMap(state, visited, current, grid, empty = new Set(), all = 
     element.append(copy);
     return element;
   }));
+  drawAxes(grid, all && cells[0].length, all && cells.length);
+}
+
+export const axisLabels = count => Array.from({ length: count }, (_, i) => i.toString(32).toUpperCase());
+
+function drawAxes(grid, cols, rows) {
+  grid.parentElement.querySelectorAll('.map-axis').forEach(axis => axis.remove());
+  if (!cols) return;
+  for (const [name, count] of [['cols', cols], ['rows', rows]]) {
+    const axis = document.createElement('div');
+    axis.className = `map-axis ${name}`;
+    axis.setAttribute('aria-hidden', 'true');
+    axis.append(...axisLabels(count).map(text => Object.assign(document.createElement('span'), { textContent: text })));
+    grid.parentElement.append(axis);
+  }
 }
 
 const PARCHMENT = [0xec, 0xe6, 0xd0];
