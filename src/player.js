@@ -350,6 +350,12 @@ function afterMove(state, clearFall) {
   const s = sample(state);
   const own = role(state, s.own);
   if (own === 'bramble' && p.fallen < 2 && !p.gliding) return knockBack(state, false);
+  // port: dropping head-first into a low tunnel ducks.  The original throws you
+  // back to the last good cell, which can be in mid-air, and you float forever.
+  if (own !== 'wall' && !p.crawling && p.row > p.lastGood.row && role(state, s.head) === 'wall') {
+    p.crawling = true;
+    p.frame = idleFrame(p);
+  }
   if (own === 'wall' || (!p.crawling && role(state, s.head) === 'wall')) return knockBack(state, true);
   if (own === 'water') {
     state.stop = { reason: 'drown' };

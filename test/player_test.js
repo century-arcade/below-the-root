@@ -164,3 +164,21 @@ test('standing in bramble, the first step or turn knocks you down where you stan
     assert.deepEqual([p.col, p.row], [13, 12]);
   }
 });
+
+test('a leap from a crawl in a low tunnel lands crouched on the tunnel floor', async () => {
+  const { at, controls } = await playerFixture();
+  const state = at('AE', 39, 12, -1);
+  const p = state.player;
+  p.crawling = true;
+  p.frame = idleFrame(p);
+  controls.input = { dx: -1, dy: 0, fire: true };
+  step(state);
+  assert.ok(p.leaping);
+  controls.input = { dx: 0, dy: 0, fire: false };
+  for (let i = 0; i < 12 && p.leaping; i += 1) step(state);
+  assert.equal(p.leaping, false);
+  assert.equal(p.row, 12);
+  assert.equal(p.crawling, true);
+  assert.equal(p.knockdown, 0);
+  assert.ok(openCommandMenu(state), 'standing on the tunnel floor, the menu opens');
+});
