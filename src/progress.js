@@ -2,7 +2,7 @@ import { CLASS } from './data.js';
 
 export const QUEST_ITEMS = [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY];
 
-const TOKEN_GOAL_SHARE = 5;
+const TOKENS_PER_POINT = 4;
 
 export function newProgress() {
   return { partialTime: false, spirit: 0, elixirs: 0, items: [], won: false, wand: false,
@@ -40,12 +40,11 @@ export function progressFromSave(state) {
   }
 }
 
-// outdoor tokens set the goal; any token counts, so collectors can pass 100%
+// spirit 33: U3 and U4 hold two of the 35 points but cannot be reached
 export function completion(state) {
   const p = state.progress;
-  const goal = state.data.objects.filter(o => o.class === CLASS.TOKEN && state.data.roomById.get(o.room).outdoor_bit).length;
-  return Math.min(35, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5
-    + Math.floor(TOKEN_GOAL_SHARE * p.tokens.length / goal) + (p.wand ? 5 : 0)
+  return Math.min(33, p.spirit) + Math.min(5, p.elixirs) + p.items.length * 5
+    + Math.floor(p.tokens.length / TOKENS_PER_POINT) + (p.wand ? 5 : 0)
     + p.gates.length * 5 + (p.won ? 20 : 0);
 }
 

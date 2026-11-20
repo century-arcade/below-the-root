@@ -50,21 +50,26 @@ test("every character can collect their permitted tokens and reach full completi
   }
 });
 
-test("outdoor tokens and every milestone make exactly 100%; extra tokens go beyond", async () => {
+test("28 tokens, 33 spirit and every milestone make exactly 100%; extra tokens go beyond", async () => {
   const data = await loadTestData();
   const quest = newState(data, { read: () => J.idle });
   startQuest(quest, data.characters[0]);
   const tokens = data.objects.filter(o => o.class === CLASS.TOKEN);
-  for (const token of tokens.filter(o => data.roomById.get(o.room).outdoor_bit)) acquired(quest, token);
-  assert.equal(completion(quest), 5);
+  for (const token of tokens.slice(0, 27)) acquired(quest, token);
+  assert.equal(completion(quest), 6, 'tokens score one point per four, rounded down');
+  acquired(quest, tokens[27]);
+  assert.equal(completion(quest), 7);
   quest.progress.spirit = 35;
   quest.progress.elixirs = 5;
   for (const cls of [CLASS.BELL, CLASS.SPIRIT_LAMP, CLASS.TEMPLE_KEY, CLASS.FALLA_KEY, CLASS.WAND]) acquired(quest, { class: cls });
   for (const lock of ['gate_a', 'gate_b', 'gate_a']) passedGate(quest, lock);
   quest.progress.won = true;
   assert.equal(completion(quest), 100);
+  quest.progress.spirit = 32;
+  assert.equal(completion(quest), 99, 'every reachable point of spirit counts');
+  quest.progress.spirit = 33;
   for (const token of tokens) acquired(quest, token);
-  assert.equal(completion(quest), 107);
+  assert.equal(completion(quest), 100 + Math.floor((tokens.length - 28) / 4));
 });
 
 test("earned milestones persist through spending and new quests reset progress", async () => {
@@ -94,19 +99,19 @@ test("earned milestones persist through spending and new quests reset progress",
   assert.equal(completion(s), 10, 'dropping a quest item keeps its milestone');
   const tokens = s.objects.filter(o => o.class === CLASS.TOKEN && o.exists);
   assert.equal(tokens.length, 62);
-  for (const token of tokens.slice(0, 13)) acquired(s, token);
+  for (const token of tokens.slice(0, 11)) acquired(s, token);
   assert.equal(completion(s), 12, 'token share is rounded down to whole percentage points');
   acquired(s, tokens[0]);
   tokens[0].carried = false;
-  assert.equal(s.progress.tokens.length, 13, 'dropping and retaking a token counts once');
+  assert.equal(s.progress.tokens.length, 11, 'dropping and retaking a token counts once');
   destroy(tokens[0]);
   assert.equal(completion(s), 12, 'spending or losing tokens preserves collection credit');
   const recycled = mintToken(s);
   acquired(s, recycled);
-  assert.equal(s.progress.tokens.length, 13, 'a sale reusing a spent token slot cannot score twice');
+  assert.equal(s.progress.tokens.length, 11, 'a sale reusing a spent token slot cannot score twice');
   const sale = mintToken(s);
   acquired(s, sale);
-  assert.equal(s.progress.tokens.length, 13, 'tokens minted in extra slots are not world collectibles');
+  assert.equal(s.progress.tokens.length, 11, 'tokens minted in extra slots are not world collectibles');
   const wand = s.objects.find(o => o.class === CLASS.WAND);
   acquired(s, wand); acquired(s, wand);
   assert.equal(completion(s), 17, 'the wand earns its milestone once');

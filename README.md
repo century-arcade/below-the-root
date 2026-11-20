@@ -98,14 +98,14 @@ C64 saves have no elapsed-time history, so their partial timer is marked `>=`.
 |-----------|------------|
 | Save Raamo | 20% |
 | Acquire spirit bell, spirit lamp, temple key and D'ol Falla's key | 5% each, up to 20% |
-| Pense animals for spirit | 1% each, up to 10% |
+| Pense animals for spirit | 1% each, up to 8% |
 | Speak to spirit-giving leaders | 5% each, up to 25% |
 | Consume elixirs | 1% each, up to 5% |
 | Acquire the Wand of Befal | 5% |
 | Pass each cavern gate | 5% each, up to 10% |
-| Collect world tokens | 5% for 25, the number lying outdoors; every token counts, rounded down |
+| Collect world tokens | 1% per 4, up to 7% for 28; every token counts, rounded down |
 
-Tokens past 25 push completion over 100%: Pomma can collect 48, Neric and
+Tokens past 28 push completion over 100%: Pomma can collect 48, Neric and
 Genaa 39, Herd and Charn 41.
 Starting spirit and room exploration do not count. Earned points survive dropping
 items, spending spirit, and spending or losing tokens. Each world token counts
