@@ -57,6 +57,12 @@ function sample(state) {
   };
 }
 
+// port: the top of a wall tile holds you up.  In the original a fall into one
+// throws you back into the air above it, where you hang forever.
+export function footing(state, code) {
+  return isSupport(state, code) || role(state, code) === 'wall';
+}
+
 export function idleFrame(p) {
   return p.crawling ? FRAME.crawlIdle(p.facing) : FRAME.idle(p.facing);
 }
@@ -84,7 +90,7 @@ export function step(state) {
     p.frame = idleFrame(p);
     return;
   }
-  if (isSupport(state, s.floor) && p.fallen > 0) {
+  if (footing(state, s.floor) && p.fallen > 0) {
     if (p.fallen >= KNOCKDOWN_FALL) return startKnockdown(state);
     sfx(state, SFX.footA);
     p.fallen = 0;
@@ -101,14 +107,14 @@ export function step(state) {
 // fall-tap: a press the fall would ignore waits for a landing that can leap
 function fallPolicy(state, s) {
   const p = state.player;
-  if (isSupport(state, s.floor) || p.fallen >= KNOCKDOWN_FALL - 1) return 'continuous';
+  if (footing(state, s.floor) || p.fallen >= KNOCKDOWN_FALL - 1) return 'continuous';
   const glides = p.fallen >= 2 && !p.glideInhibited && carriedOf(state, CLASS.SHUBA);
   return glides ? 'continuous' : 'falling';
 }
 
 function fireHeld(state, s, input) {
   const p = state.player;
-  const supported = isSupport(state, s.floor);
+  const supported = footing(state, s.floor);
   if (p.fallen >= 2 && !supported && !p.glideInhibited) {
     if (tryGlide(state, s)) return glideStep(state, s, state.demo ? undefined : input);
     return fireFree(state, s, input);
@@ -136,7 +142,7 @@ function fireHeld(state, s, input) {
 function fireFree(state, s, input) {
   const p = state.player;
   if (input.dx !== 0 && tryGlide(state, s)) return glideStep(state, s, state.demo ? undefined : input);
-  if (!isSupport(state, s.floor)) {
+  if (!footing(state, s.floor)) {
     p.row += 1;
     p.period = 4;
     p.fallen += 1;
@@ -244,7 +250,7 @@ function leapStep(state, s) {
 
 function tryGlide(state, s) {
   const p = state.player;
-  if (p.fallen < 2 || isSupport(state, s.floor) || p.glideInhibited || !carriedOf(state, CLASS.SHUBA)) return false;
+  if (p.fallen < 2 || footing(state, s.floor) || p.glideInhibited || !carriedOf(state, CLASS.SHUBA)) return false;
   p.gliding = true;
   p.fallen = 0;
   p.crawling = false;

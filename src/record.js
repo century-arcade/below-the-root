@@ -1,7 +1,8 @@
 // One quest: effective input changes, semantic commands, and a verified boundary.
 import { newState, startQuest, startDemo, endDemo, tick, canOpenCommandMenu, openCommandMenu, closeCommandMenu } from './game.js';
 import { shellFrame, coldStart, openMenu } from './shell.js';
-import { enterRoom, cell, isSupport } from './world.js';
+import { enterRoom, cell } from './world.js';
+import { footing } from './player.js';
 import { IDLE, isIdle } from './input.js';
 import { importSave, toBase64, fromBase64 } from './save.js';
 import { skipTune } from './audio.js';
@@ -430,7 +431,7 @@ export class Session {
   get airborne() {
     const p = this.state.player;
     return p.gliding || p.leaping || p.fallen > 0
-      || !isSupport(this.state, cell(this.state, p.col, p.row + 1));
+      || !footing(this.state, cell(this.state, p.col, p.row + 1));
   }
 
   get playbackDelay() {

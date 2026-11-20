@@ -182,3 +182,16 @@ test('a leap from a crawl in a low tunnel lands crouched on the tunnel floor', a
   assert.equal(p.knockdown, 0);
   assert.ok(openCommandMenu(state), 'standing on the tunnel floor, the menu opens');
 });
+
+test('a figure above a wall tile stands on it, opens the menu and walks', async () => {
+  const { at, controls } = await playerFixture();
+  const state = at('50', 8, 3, 1);
+  const p = state.player;
+  for (let i = 0; i < 4; i += 1) step(state);
+  assert.deepEqual([p.col, p.row, p.fallen], [8, 3, 0]);
+  assert.ok(openCommandMenu(state), 'standing on the wall, the menu opens');
+  const walker = at('50', 8, 3, 1);
+  controls.input = { dx: 1, dy: 0, fire: false };
+  for (let i = 0; i < 4; i += 1) step(walker);
+  assert.ok(walker.player.col > 8);
+});
