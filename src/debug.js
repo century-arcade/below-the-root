@@ -1,12 +1,15 @@
 import { ENGINE_VERSION } from './record.js';
 import { panelLines } from './panel.js';
 import { isEditing } from './input.js';
+import { completion } from './progress.js';
 
 const API = '/.netlify/functions/github';
 const DRAFT_KEY = 'btr.issue-draft';
 
 export function downloadRecord(session) {
-  downloadRecordingText(JSON.stringify(session.snapshot()), `btr-playthrough-${session.simticks}.json`);
+  const record = session.snapshot();
+  const state = record.checkpoint;
+  downloadRecordingText(JSON.stringify(record), `${state.player.name.toLowerCase()}-${completion(state)}pct.json`);
 }
 
 export function downloadRecordingText(text, filename) {
