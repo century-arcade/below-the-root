@@ -142,6 +142,7 @@ export function tick(state) {
   }
   if (state.demo) state.tick += 1;
   if (state.verb) return driveVerb(state);
+  if (state.noticePending) return startVerb(state, dismissNotice(state));
   if (!state.active || (!state.demo && (state.progress.won || state.timeUp))) return;
   if (!state.demo) state.tick += 1;
   // Events consumed in this update use its starting tick. Increment only after
@@ -187,6 +188,13 @@ export function startVerb(state, gen, carryMovement = false) {
   state.verb = gen;
   state.verbWait = 0;
   advanceVerb(state, gen.next());
+}
+
+function* dismissNotice(state) {
+  state.noticePending = false;
+  yield* anyInput();
+  state.verbUnread = !state.demo;
+  clearPanel(state);
 }
 
 function driveVerb(state) {

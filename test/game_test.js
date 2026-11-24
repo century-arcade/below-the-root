@@ -20,6 +20,14 @@ test('the outer gate: locked, then paid with a wissenberry', async () => {
   tick(s);
   assert.equal(lines(s)[0], 'THE DOOR IS LOCKED');
   assert.equal(s.room.room, 352);
+  tick(s);
+  tick(s);
+  assert.equal(lines(s)[0], 'THE DOOR IS LOCKED');
+  s.input = { read: () => J.right, pace: 0 };
+  tick(s);
+  assert.equal(s.verb, null);
+  assert.equal(s.verbUnread, true);
+  assert.ok(lines(s).every(line => !line));
   faceCreature(s, 352);
   give(s, CLASS.BERRIES);
   assert.equal(run(s, [...menu('OFFER'), ...page(0), J.idle, J.idle])[0], 'YOU MAY ENTER');

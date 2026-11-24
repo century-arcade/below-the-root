@@ -11,6 +11,7 @@ export function newPanel() {
 
 export function clearPanel(state) {
   state.panel.fill(0);
+  state.noticePending = false;
   state.statusVisible = false;
 }
 
@@ -42,6 +43,11 @@ export function sayWrapped(state, ...paragraphs) {
   });
   if (lines.length > PANEL_ROWS) throw new RangeError('Dialogue exceeds panel capacity');
   say(state, ...lines);
+}
+
+export function notice(state, ...paragraphs) {
+  sayWrapped(state, ...paragraphs);
+  state.noticePending = !state.demo;
 }
 
 export function panelText(state, row) {

@@ -4,7 +4,7 @@ import { CLASS } from './data.js';
 import {
   cell, isSolid, isClimbable, isSupport, role, doorNumber, ladderSnap, isLadderCentre, COLS, ROWS,
 } from './world.js';
-import { sayWrapped } from './panel.js';
+import { notice } from './panel.js';
 import { spend } from './clock.js';
 import { carriedOf, destroy } from './inventory.js';
 import { SFX, sfx } from './audio.js';
@@ -330,7 +330,7 @@ function tearShuba(state) {
   const shuba = carriedOf(state, CLASS.SHUBA);
   if (!shuba) return;
   destroy(shuba);
-  sayWrapped(state, 'YOUR SHUBA HAS TORN');
+  notice(state, 'YOUR SHUBA HAS TORN');
 }
 
 function knockdownStep(state) {

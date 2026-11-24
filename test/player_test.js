@@ -1,7 +1,7 @@
 import { enterRoom } from '../src/world.js';
-import { newState, startQuest, openCommandMenu } from '../src/game.js';
+import { newState, startQuest, openCommandMenu, tick } from '../src/game.js';
 import { IDLE, Keyboard } from '../src/input.js';
-import { loadTestData, stick } from './helpers.js';
+import { loadTestData, stick, lines } from './helpers.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { idleFrame, step } from '../src/player.js';
@@ -26,6 +26,26 @@ async function playerFixture() {
 
   return { at, controls };
 }
+
+test('a torn shuba notice clears on the next action', async () => {
+  const { at, controls } = await playerFixture();
+  const state = at('86', 7, 12, 1);
+  const shuba = state.objects.find(o => o.class === CLASS.SHUBA);
+  shuba.carried = true;
+  state.rng = () => 0;
+  state.player.fallen = 20;
+  step(state);
+  assert.equal(shuba.exists, false);
+  assert.equal(lines(state)[0], 'YOUR SHUBA HAS TORN');
+  tick(state);
+  tick(state);
+  assert.equal(lines(state)[0], 'YOUR SHUBA HAS TORN');
+  controls.input = { dx: 1, dy: 0, fire: false };
+  tick(state);
+  assert.equal(state.verb, null);
+  assert.equal(state.verbUnread, true);
+  assert.ok(lines(state).every(line => !line));
+});
 
 test('a leap onto a ledge ends in the idle pose with no further input', async () => {
   const { at, controls } = await playerFixture();

@@ -9,6 +9,32 @@ import { carriedOf, carryLimit, weightCarried } from '../src/inventory.js';
 import { paintScreen, leaveByEdge } from '../src/world.js';
 import { TICKS_PER_HOUR, DREAM, spend } from '../src/clock.js';
 
+for (const lamp of [false, true]) {
+  test(`${lamp ? 'dropping a lit lamp' : 'dropping where forbidden'} clears its result on the next action`, async () => {
+    const { data, pomma } = await talkFixture();
+    const s = questState(data, lamp ? data.characters[0] : pomma);
+    if (lamp) {
+      s.player.col = 23;
+      const o = give(s, CLASS.HONEYLAMP);
+      s.lamp = { object: o.object, fuel: 10 };
+    } else {
+      place(s, 26, 5, 5);
+      s.player.indoors = false;
+    }
+    const inputs = [...menu('DROP'), ...(lamp ? page(0) : [])];
+    s.input = reader(() => inputs.shift() || J.idle);
+    startVerb(s, runMenu(s));
+    for (let i = 0; i < 100; i++) tick(s);
+    assert.equal(lines(s)[0], lamp ? 'YOUR LAMP VANISHES' : 'NOT HERE');
+    assert.ok(s.verb);
+    inputs.push(J.right);
+    tick(s);
+    assert.equal(s.verb, null);
+    assert.equal(s.verbUnread, true);
+    assert.ok(lines(s).every(line => !line));
+  });
+}
+
 test('STATUS shows play time and completion above the stats', async () => {
   const { run, data, pomma } = await talkFixture();
   const s = questState(data, pomma);

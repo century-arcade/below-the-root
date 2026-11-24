@@ -89,7 +89,9 @@ export function* runMenu(state) {
     ? yield* chooseCommand(state, verb) : fn ? yield* fn(state) : undefined;
   if (result === WOKE) return;
   if (result === CANCELLED) return clearPanel(state);
-  if (NO_TRAILING_READ.has(verb) || state.ended) return;
+  if (state.ended) return;
+  if (NO_TRAILING_READ.has(verb)
+      && (verb !== 'DROP' || state.demo || !state.panel.some(Boolean))) return;
   yield* anyInput();
   // A result message closes on the next action; gameplay still owns that action.
   state.verbUnread = !state.demo;
